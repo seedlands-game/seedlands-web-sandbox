@@ -93,6 +93,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'updateStarterEcologyVersion',
   'simulationMetrics',
   'restoredGameplayVersion',
+  'restoredSnapshotMigrationReports',
 ] as const satisfies readonly (keyof GameServerGameplayHost)[];
 
 export type GameServerGameplayApi = Pick<GameServerGameplayHost, (typeof GAME_SERVER_GAMEPLAY_API)[number]>;

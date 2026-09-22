@@ -54,6 +54,7 @@ export type HarnessApi = {
   setWaterTransitionHold?: (held: boolean) => void;
   getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
   getChunkRevision?: (cx: number, cy: number, cz: number) => number | null;
+  getRenderedChunkRevision?: (cx: number, cy: number, cz: number) => number | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
   blockLogicWorker: (ms: number) => Promise<void>;
@@ -347,6 +348,9 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     breakingOverlay: context.presentation?.breakingOverlay ?? null,
     viewmodel: context.presentation?.viewmodel ?? { isolatedLayer: false },
     visualEffects: context.visualEffects?.snapshot ?? {
+      blockLightReady: false,
+      blockLightSourceRevision: null,
+      blockLightRebuildCount: 0,
       activeLocalLights: 0,
       shadowedLocalLights: 0,
       localLightLimit: 0,
@@ -422,6 +426,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     setWaterTransitionHold: (held) => bindings.world()?.setWaterTransitionHoldForHarness(held),
     getFluidCell: (x, y, z) => bindings.world()?.getFluidCell(x, y, z) ?? null,
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,
+    getRenderedChunkRevision: (cx, cy, cz) => bindings.world()?.getRenderedChunkRevision(cx, cy, cz) ?? null,
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {
       const environment = bindings.environment();

@@ -1,0 +1,1269 @@
+{
+  "schemaVersion": 1,
+  "recipeVersion": 1,
+  "license": "Apache-2.0",
+  "provenance": "Original Seedlands geometry, UV pixels and clips; no third-party source assets",
+  "blenderVersion": "5.2.1 LTS",
+  "recipeSha256": "a5b5726b3535a3a40c6752bcb3ced76c9d84cf619a21e479acc95b258f7516a4",
+  "models": [
+    {
+      "kind": "pig",
+      "byteLength": 21024,
+      "nodeCount": 17,
+      "triangleCount": 96,
+      "height": 0.875,
+      "sha256": "691268ae93bd0257d5dcaac4c2b8bc9a79607f89ea10965e2fe5dae4c8e8587b",
+      "textureSha256": "c465115a37580921e1ca51ca62686218e189fe6c5988e9af33555ab5a959b6d9",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 9, 0],
+          "size": [10, 8, 15],
+          "tile": 0,
+          "pivot": [0, 9, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 10, 9],
+          "size": [8, 8, 7],
+          "tile": 1,
+          "pivot": [0, 10, 7],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "muzzle",
+          "center": [0, 8, 13.5],
+          "size": [4, 3, 2],
+          "tile": 3,
+          "pivot": [0, 8, 13.5],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-3.0, 3.0, -5],
+          "size": [3, 6, 3],
+          "tile": 2,
+          "pivot": [-3.0, 6, -5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-1",
+          "center": [-3.0, 3.0, 5],
+          "size": [3, 6, 3],
+          "tile": 2,
+          "pivot": [-3.0, 6, 5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [3.0, 3.0, -5],
+          "size": [3, 6, 3],
+          "tile": 2,
+          "pivot": [3.0, 6, -5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-1",
+          "center": [3.0, 3.0, 5],
+          "size": [3, 6, 3],
+          "tile": 2,
+          "pivot": [3.0, 6, 5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "tail",
+          "center": [0, 10, -8],
+          "size": [2, 2, 2],
+          "tile": 3,
+          "pivot": [0, 10, -7],
+          "motion": ["tail", 1],
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "cow",
+      "byteLength": 22980,
+      "nodeCount": 21,
+      "triangleCount": 120,
+      "height": 1.5,
+      "sha256": "b46cfe628e78f93619e7a63ab12401e58f4c7cd90d279895ead1ca3b18b40c50",
+      "textureSha256": "f38ccaf3d2e598c0f4c9adef2378cbcc5dbb191aa4f85ebf43485241488d3cb5",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 14, 0],
+          "size": [10, 12, 16],
+          "tile": 0,
+          "pivot": [0, 14, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 17, 10],
+          "size": [8, 9, 7],
+          "tile": 1,
+          "pivot": [0, 17, 8],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "muzzle",
+          "center": [0, 15, 14.5],
+          "size": [4, 3, 2],
+          "tile": 3,
+          "pivot": [0, 15, 14.5],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-3.0, 5.0, -5],
+          "size": [3, 10, 3],
+          "tile": 2,
+          "pivot": [-3.0, 10, -5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-1",
+          "center": [-3.0, 5.0, 5],
+          "size": [3, 10, 3],
+          "tile": 2,
+          "pivot": [-3.0, 10, 5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [3.0, 5.0, -5],
+          "size": [3, 10, 3],
+          "tile": 2,
+          "pivot": [3.0, 10, -5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-1",
+          "center": [3.0, 5.0, 5],
+          "size": [3, 10, 3],
+          "tile": 2,
+          "pivot": [3.0, 10, 5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "horn",
+          "center": [-3, 22.5, 9],
+          "size": [2, 3, 2],
+          "tile": 4,
+          "pivot": [-3, 22.5, 9],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "horn-right",
+          "center": [3, 22.5, 9],
+          "size": [2, 3, 2],
+          "tile": 4,
+          "pivot": [3, 22.5, 9],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "udder",
+          "center": [0, 8, -3],
+          "size": [5, 3, 5],
+          "tile": 3,
+          "pivot": [0, 8, -3],
+          "motion": null,
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "sheep",
+      "byteLength": 16992,
+      "nodeCount": 13,
+      "triangleCount": 72,
+      "height": 1.09375,
+      "sha256": "b43345dd4fdc5b32aa7b7ae437c5d25dec49aa6a13ff66194ab91dff6172c95f",
+      "textureSha256": "af5a0c080a2b5c71b4f3a6d577513365edf56554a9e5992a821e9a1d9b02cd5d",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 12, 0],
+          "size": [12, 11, 17],
+          "tile": 0,
+          "pivot": [0, 12, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 13, 11],
+          "size": [7, 7, 7],
+          "tile": 1,
+          "pivot": [0, 13, 9],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-4.0, 4.0, -5],
+          "size": [3, 8, 3],
+          "tile": 2,
+          "pivot": [-4.0, 8, -5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-1",
+          "center": [-4.0, 4.0, 5],
+          "size": [3, 8, 3],
+          "tile": 2,
+          "pivot": [-4.0, 8, 5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [4.0, 4.0, -5],
+          "size": [3, 8, 3],
+          "tile": 2,
+          "pivot": [4.0, 8, -5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-1",
+          "center": [4.0, 4.0, 5],
+          "size": [3, 8, 3],
+          "tile": 2,
+          "pivot": [4.0, 8, 5],
+          "motion": ["leg", -1],
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "chicken",
+      "byteLength": 22656,
+      "nodeCount": 21,
+      "triangleCount": 120,
+      "height": 0.9375,
+      "sha256": "e11d85638b6f0d5c527bf6c71bd69ced76b0535fc9b8d18b01843d56e7e4fe52",
+      "textureSha256": "a7c9fe54320da7dd157481c320b65b9e67ff031d6d5965cbba1c65866b6d9c12",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 7, 0],
+          "size": [6, 6, 8],
+          "tile": 0,
+          "pivot": [0, 7, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 12, 5],
+          "size": [5, 6, 5],
+          "tile": 1,
+          "pivot": [0, 10, 4],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "beak",
+          "center": [0, 11, 8],
+          "size": [4, 2, 3],
+          "tile": 3,
+          "pivot": [0, 11, 8],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "wattle",
+          "center": [0, 9, 7],
+          "size": [2, 3, 1],
+          "tile": 4,
+          "pivot": [0, 9, 7],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-2, 2.0, 0],
+          "size": [1, 4, 1],
+          "tile": 2,
+          "pivot": [-2, 4, 0],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [2, 2.0, 0],
+          "size": [1, 4, 1],
+          "tile": 2,
+          "pivot": [2, 4, 0],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "wing--1",
+          "center": [-4, 7, 0],
+          "size": [2, 5, 6],
+          "tile": 0,
+          "pivot": [-3, 10, 0],
+          "motion": ["wing", -1],
+          "parent": null
+        },
+        {
+          "name": "foot--1",
+          "center": [-2, 0.5, 1],
+          "size": [3, 1, 3],
+          "tile": 3,
+          "pivot": [-2, 0.5, 1],
+          "motion": null,
+          "parent": "leg-0-0"
+        },
+        {
+          "name": "wing-1",
+          "center": [4, 7, 0],
+          "size": [2, 5, 6],
+          "tile": 0,
+          "pivot": [3, 10, 0],
+          "motion": ["wing", 1],
+          "parent": null
+        },
+        {
+          "name": "foot-1",
+          "center": [2, 0.5, 1],
+          "size": [3, 1, 3],
+          "tile": 3,
+          "pivot": [2, 0.5, 1],
+          "motion": null,
+          "parent": "leg-1-0"
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "squid",
+      "byteLength": 27052,
+      "nodeCount": 19,
+      "triangleCount": 108,
+      "height": 1.1875,
+      "sha256": "b931a87164adc9d506b20ad58c541791e725a879f7e03ea4aa2717fe4b5fc5eb",
+      "textureSha256": "49942dad9f3e0620c5b13d78e6531c06404ef8d54656bfb0f79801e56803103c",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 13, 0],
+          "size": [10, 12, 10],
+          "tile": 1,
+          "pivot": [0, 13, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "tentacle-0",
+          "center": [5.4, 3.5, 0.0],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [4.0, 7, 0.0],
+          "motion": ["tentacle", 0],
+          "parent": null,
+          "longAxis": [2.8, -7, 0.0],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-1",
+          "center": [3.818376618407357, 3.5, 3.8183766184073566],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [2.8284271247461903, 7, 2.82842712474619],
+          "motion": ["tentacle", 1],
+          "parent": null,
+          "longAxis": [1.9798989873223332, -7, 1.9798989873223327],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-2",
+          "center": [3.3065463576978537e-16, 3.5, 5.4],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [2.4492935982947064e-16, 7, 4.0],
+          "motion": ["tentacle", 2],
+          "parent": null,
+          "longAxis": [1.7145055188062944e-16, -7, 2.8],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-3",
+          "center": [-3.8183766184073566, 3.5, 3.818376618407357],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [-2.82842712474619, 7, 2.8284271247461903],
+          "motion": ["tentacle", 3],
+          "parent": null,
+          "longAxis": [-1.9798989873223327, -7, 1.9798989873223332],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-4",
+          "center": [-5.4, 3.5, 6.613092715395707e-16],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [-4.0, 7, 4.898587196589413e-16],
+          "motion": ["tentacle", 4],
+          "parent": null,
+          "longAxis": [-2.8, -7, 3.429011037612589e-16],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-5",
+          "center": [-3.8183766184073575, 3.5, -3.8183766184073566],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [-2.8284271247461907, 7, -2.82842712474619],
+          "motion": ["tentacle", 5],
+          "parent": null,
+          "longAxis": [-1.9798989873223334, -7, -1.9798989873223327],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-6",
+          "center": [-9.919639073093561e-16, 3.5, -5.4],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [-7.347880794884119e-16, 7, -4.0],
+          "motion": ["tentacle", 6],
+          "parent": null,
+          "longAxis": [-5.143516556418883e-16, -7, -2.8],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "tentacle-7",
+          "center": [3.8183766184073558, 3.5, -3.8183766184073575],
+          "size": [2, 8, 2],
+          "tile": 0,
+          "pivot": [2.8284271247461894, 7, -2.8284271247461907],
+          "motion": ["tentacle", 7],
+          "parent": null,
+          "longAxis": [1.9798989873223325, -7, -1.9798989873223334],
+          "alignAxis": [0, 1, 0]
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "wolf",
+      "byteLength": 23936,
+      "nodeCount": 21,
+      "triangleCount": 120,
+      "height": 1.03125,
+      "sha256": "941627a10375606b803996dd1ec34a8f529355a3c08c7cb58a93d3aae38b63e3",
+      "textureSha256": "231fbfd32798685f15b1c5fe83c7e31cecc43f80cb5760b8de3f1ad7a7308db1",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 9, 0],
+          "size": [7, 7, 13],
+          "tile": 0,
+          "pivot": [0, 9, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 11, 9],
+          "size": [6, 6, 6],
+          "tile": 1,
+          "pivot": [0, 11, 7],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "muzzle",
+          "center": [0, 9, 13.0],
+          "size": [4, 3, 4],
+          "tile": 3,
+          "pivot": [0, 9, 13.0],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-1.5, 3.5, -5],
+          "size": [3, 7, 3],
+          "tile": 2,
+          "pivot": [-1.5, 7, -5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-1",
+          "center": [-1.5, 3.5, 5],
+          "size": [3, 7, 3],
+          "tile": 2,
+          "pivot": [-1.5, 7, 5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [1.5, 3.5, -5],
+          "size": [3, 7, 3],
+          "tile": 2,
+          "pivot": [1.5, 7, -5],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-1",
+          "center": [1.5, 3.5, 5],
+          "size": [3, 7, 3],
+          "tile": 2,
+          "pivot": [1.5, 7, 5],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "horn",
+          "center": [-3, 15.0, 8],
+          "size": [2, 3, 2],
+          "tile": 4,
+          "pivot": [-3, 15.0, 8],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "horn-right",
+          "center": [3, 15.0, 8],
+          "size": [2, 3, 2],
+          "tile": 4,
+          "pivot": [3, 15.0, 8],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "tail",
+          "center": [0, 10, -9],
+          "size": [2, 2, 7],
+          "tile": 0,
+          "pivot": [0, 10, -6],
+          "motion": ["tail", 1],
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "zombie",
+      "byteLength": 16812,
+      "nodeCount": 13,
+      "triangleCount": 72,
+      "height": 2.0,
+      "sha256": "df3ac5b3a8c0df440e0600799e64247f246379605c3aae4fe4ee5ec23c62a32b",
+      "textureSha256": "9a2ab70cd20c4680886c096067aa9135524ec77992956e7ede4a267238138f2d",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 18, 0],
+          "size": [8, 12, 4],
+          "tile": 4,
+          "pivot": [0, 18, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 28, 0],
+          "size": [8, 8, 8],
+          "tile": 1,
+          "pivot": [0, 24, 0],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg--1",
+          "center": [-2, 6, 0],
+          "size": [4, 12, 4],
+          "tile": 2,
+          "pivot": [-2, 12, 0],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "arm--1",
+          "center": [-6, 23, 5],
+          "size": [4, 4, 12],
+          "tile": 0,
+          "pivot": [-6, 24, 0],
+          "motion": ["arm", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-1",
+          "center": [2, 6, 0],
+          "size": [4, 12, 4],
+          "tile": 2,
+          "pivot": [2, 12, 0],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "arm-1",
+          "center": [6, 23, 5],
+          "size": [4, 4, 12],
+          "tile": 0,
+          "pivot": [6, 24, 0],
+          "motion": ["arm", 1],
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "skeleton",
+      "byteLength": 35092,
+      "nodeCount": 35,
+      "triangleCount": 204,
+      "height": 2.0,
+      "sha256": "8028e5d4d3317744455a3331b00b022cc5c3c99303abb3058a897010c229a3e0",
+      "textureSha256": "3b61bd3383ccd53ac8a57b45b309f76a160c8a7cad5382fc9a9839c937a50e59",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 18, 0],
+          "size": [2, 10, 2],
+          "tile": 0,
+          "pivot": [0, 18, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 28, 0],
+          "size": [8, 8, 8],
+          "tile": 1,
+          "pivot": [0, 24, 0],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg--1",
+          "center": [-2, 6, 0],
+          "size": [2, 12, 2],
+          "tile": 2,
+          "pivot": [-2, 12, 0],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "arm--1",
+          "center": [-6, 18.5, 2],
+          "size": [2, 11.704699910719626, 2],
+          "tile": 0,
+          "pivot": [-6, 24, 0],
+          "motion": ["arm", -1],
+          "parent": null,
+          "longAxis": [0, -11, 4],
+          "alignAxis": [0, 1, 0]
+        },
+        {
+          "name": "leg-1",
+          "center": [2, 6, 0],
+          "size": [2, 12, 2],
+          "tile": 2,
+          "pivot": [2, 12, 0],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "arm-1",
+          "center": [6, 19, 0],
+          "size": [2, 12, 2],
+          "tile": 0,
+          "pivot": [6, 24, 0],
+          "motion": ["arm", 1],
+          "parent": null
+        },
+        {
+          "name": "rib-15",
+          "center": [0, 15, 2],
+          "size": [8, 1, 1],
+          "tile": 0,
+          "pivot": [0, 15, 2],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "rib-18",
+          "center": [0, 18, 2],
+          "size": [8, 1, 1],
+          "tile": 0,
+          "pivot": [0, 18, 2],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "rib-21",
+          "center": [0, 21, 2],
+          "size": [8, 1, 1],
+          "tile": 0,
+          "pivot": [0, 21, 2],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "spine",
+          "center": [0, 17, -1],
+          "size": [2, 12, 2],
+          "tile": 0,
+          "pivot": [0, 17, -1],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "hand-bow",
+          "center": [-6, 13, 4],
+          "size": [2.4, 2, 2.4],
+          "tile": 0,
+          "pivot": [-6, 13, 4],
+          "motion": null,
+          "parent": "arm--1"
+        },
+        {
+          "name": "bow-grip",
+          "center": [-6, 13, 4],
+          "size": [1, 3, 1],
+          "tile": 3,
+          "pivot": [-6, 13, 4],
+          "motion": ["bow", -1],
+          "parent": "arm--1"
+        },
+        {
+          "name": "bow-upper-inner",
+          "center": [-6.0, 15.25, 3.75],
+          "size": [1.2, 4.527692569068709, 1.2],
+          "tile": 3,
+          "pivot": [-6.0, 15.25, 3.75],
+          "motion": null,
+          "parent": "bow-grip",
+          "longAxis": [0, 4.5, -0.5],
+          "alignAxis": [0, 1, 0],
+          "ends": [
+            [-6, 13, 4],
+            [-6, 17.5, 3.5]
+          ]
+        },
+        {
+          "name": "bow-upper-outer",
+          "center": [-6.0, 18.75, 2.75],
+          "size": [1.2, 2.9154759474226504, 1.2],
+          "tile": 3,
+          "pivot": [-6.0, 18.75, 2.75],
+          "motion": null,
+          "parent": "bow-grip",
+          "longAxis": [0, 2.5, -1.5],
+          "alignAxis": [0, 1, 0],
+          "ends": [
+            [-6, 17.5, 3.5],
+            [-6, 20, 2]
+          ]
+        },
+        {
+          "name": "bow-lower-inner",
+          "center": [-6.0, 10.75, 3.75],
+          "size": [1.2, 4.527692569068709, 1.2],
+          "tile": 3,
+          "pivot": [-6.0, 10.75, 3.75],
+          "motion": null,
+          "parent": "bow-grip",
+          "longAxis": [0, -4.5, -0.5],
+          "alignAxis": [0, 1, 0],
+          "ends": [
+            [-6, 13, 4],
+            [-6, 8.5, 3.5]
+          ]
+        },
+        {
+          "name": "bow-lower-outer",
+          "center": [-6.0, 7.25, 2.75],
+          "size": [1.2, 2.9154759474226504, 1.2],
+          "tile": 3,
+          "pivot": [-6.0, 7.25, 2.75],
+          "motion": null,
+          "parent": "bow-grip",
+          "longAxis": [0, -2.5, -1.5],
+          "alignAxis": [0, 1, 0],
+          "ends": [
+            [-6, 8.5, 3.5],
+            [-6, 6, 2]
+          ]
+        },
+        {
+          "name": "bow-string",
+          "center": [-6.0, 13.0, 2.0],
+          "size": [0.25, 14.0, 0.25],
+          "tile": 0,
+          "pivot": [-6.0, 13.0, 2.0],
+          "motion": null,
+          "parent": "bow-grip",
+          "longAxis": [0, 14, 0],
+          "alignAxis": [0, 1, 0],
+          "ends": [
+            [-6, 6, 2],
+            [-6, 20, 2]
+          ]
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "spider",
+      "byteLength": 43548,
+      "nodeCount": 39,
+      "triangleCount": 228,
+      "height": 0.625,
+      "sha256": "e714e2d904b5224ec50d43558500526add0ed62e4a28e916355e8e472ff322a3",
+      "textureSha256": "c1193b9d247e8c631627f194dae94a0d56ca417b32bd9eb34307799c0a20ee9b",
+      "parts": [
+        {
+          "name": "abdomen",
+          "center": [0, 6, -5],
+          "size": [11, 8, 12],
+          "tile": 0,
+          "pivot": [0, 6, -5],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "thorax",
+          "center": [0, 5, 3],
+          "size": [7, 6, 6],
+          "tile": 0,
+          "pivot": [0, 5, 3],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 5, 8],
+          "size": [8, 6, 6],
+          "tile": 1,
+          "pivot": [0, 5, 5],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg--1-0",
+          "center": [-6.0, 5.25, -5.725],
+          "size": [6.939200242102832, 2, 2],
+          "tile": 0,
+          "pivot": [-3, 5, -4],
+          "motion": ["spider", -1],
+          "parent": null,
+          "longAxis": [-6, 0.5, -3.4499999999999993],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip--1-0",
+          "center": [-11.5, 3.25, -8.657499999999999],
+          "size": [7.147183011508799, 2, 2],
+          "tile": 0,
+          "pivot": [-9, 5.5, -7.449999999999999],
+          "motion": null,
+          "parent": "leg--1-0",
+          "longAxis": [-5, -4.5, -2.414999999999999],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg--1-1",
+          "center": [-6.0, 5.25, -1.575],
+          "size": [6.129641098792, 2, 2],
+          "tile": 0,
+          "pivot": [-3, 5, -1],
+          "motion": ["spider", -2],
+          "parent": null,
+          "longAxis": [-6, 0.5, -1.15],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip--1-1",
+          "center": [-11.5, 3.25, -2.5525],
+          "size": [6.774808115363858, 2, 2],
+          "tile": 0,
+          "pivot": [-9, 5.5, -2.15],
+          "motion": null,
+          "parent": "leg--1-1",
+          "longAxis": [-5, -4.5, -0.8050000000000002],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg--1-2",
+          "center": [-6.0, 5.25, 2.575],
+          "size": [6.129641098792, 2, 2],
+          "tile": 0,
+          "pivot": [-3, 5, 2],
+          "motion": ["spider", -3],
+          "parent": null,
+          "longAxis": [-6, 0.5, 1.15],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip--1-2",
+          "center": [-11.5, 3.25, 3.5525],
+          "size": [6.774808115363858, 2, 2],
+          "tile": 0,
+          "pivot": [-9, 5.5, 3.15],
+          "motion": null,
+          "parent": "leg--1-2",
+          "longAxis": [-5, -4.5, 0.8050000000000002],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg--1-3",
+          "center": [-6.0, 5.25, 6.725],
+          "size": [6.939200242102832, 2, 2],
+          "tile": 0,
+          "pivot": [-3, 5, 5],
+          "motion": ["spider", -4],
+          "parent": null,
+          "longAxis": [-6, 0.5, 3.4499999999999993],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip--1-3",
+          "center": [-11.5, 3.25, 9.657499999999999],
+          "size": [7.147183011508799, 2, 2],
+          "tile": 0,
+          "pivot": [-9, 5.5, 8.45],
+          "motion": null,
+          "parent": "leg--1-3",
+          "longAxis": [-5, -4.5, 2.414999999999999],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-1-0",
+          "center": [6.0, 5.25, -5.725],
+          "size": [6.939200242102832, 2, 2],
+          "tile": 0,
+          "pivot": [3, 5, -4],
+          "motion": ["spider", 1],
+          "parent": null,
+          "longAxis": [6, 0.5, -3.4499999999999993],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip-1-0",
+          "center": [11.5, 3.25, -8.657499999999999],
+          "size": [7.147183011508799, 2, 2],
+          "tile": 0,
+          "pivot": [9, 5.5, -7.449999999999999],
+          "motion": null,
+          "parent": "leg-1-0",
+          "longAxis": [5, -4.5, -2.414999999999999],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-1-1",
+          "center": [6.0, 5.25, -1.575],
+          "size": [6.129641098792, 2, 2],
+          "tile": 0,
+          "pivot": [3, 5, -1],
+          "motion": ["spider", 2],
+          "parent": null,
+          "longAxis": [6, 0.5, -1.15],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip-1-1",
+          "center": [11.5, 3.25, -2.5525],
+          "size": [6.774808115363858, 2, 2],
+          "tile": 0,
+          "pivot": [9, 5.5, -2.15],
+          "motion": null,
+          "parent": "leg-1-1",
+          "longAxis": [5, -4.5, -0.8050000000000002],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-1-2",
+          "center": [6.0, 5.25, 2.575],
+          "size": [6.129641098792, 2, 2],
+          "tile": 0,
+          "pivot": [3, 5, 2],
+          "motion": ["spider", 3],
+          "parent": null,
+          "longAxis": [6, 0.5, 1.15],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip-1-2",
+          "center": [11.5, 3.25, 3.5525],
+          "size": [6.774808115363858, 2, 2],
+          "tile": 0,
+          "pivot": [9, 5.5, 3.15],
+          "motion": null,
+          "parent": "leg-1-2",
+          "longAxis": [5, -4.5, 0.8050000000000002],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-1-3",
+          "center": [6.0, 5.25, 6.725],
+          "size": [6.939200242102832, 2, 2],
+          "tile": 0,
+          "pivot": [3, 5, 5],
+          "motion": ["spider", 4],
+          "parent": null,
+          "longAxis": [6, 0.5, 3.4499999999999993],
+          "alignAxis": [1, 0, 0]
+        },
+        {
+          "name": "leg-tip-1-3",
+          "center": [11.5, 3.25, 9.657499999999999],
+          "size": [7.147183011508799, 2, 2],
+          "tile": 0,
+          "pivot": [9, 5.5, 8.45],
+          "motion": null,
+          "parent": "leg-1-3",
+          "longAxis": [5, -4.5, 2.414999999999999],
+          "alignAxis": [1, 0, 0]
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "creeper",
+      "byteLength": 17928,
+      "nodeCount": 13,
+      "triangleCount": 72,
+      "height": 1.75,
+      "sha256": "0c8057ed1ab6848a9cbc8fd460feadcd19b7d56e28af6c64f1fb365d228eebe5",
+      "textureSha256": "fcccf14265c33c1759b467f2c2330eb987647934a130657af8268b843e8cc52f",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 14, 0],
+          "size": [8, 12, 5],
+          "tile": 0,
+          "pivot": [0, 14, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 24, 0],
+          "size": [8, 8, 8],
+          "tile": 1,
+          "pivot": [0, 20, 0],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-0",
+          "center": [-3, 4.0, -3],
+          "size": [4, 8, 4],
+          "tile": 2,
+          "pivot": [-3, 8, -3],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-0-1",
+          "center": [-3, 4.0, 3],
+          "size": [4, 8, 4],
+          "tile": 2,
+          "pivot": [-3, 8, 3],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-0",
+          "center": [3, 4.0, -3],
+          "size": [4, 8, 4],
+          "tile": 2,
+          "pivot": [3, 8, -3],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "leg-1-1",
+          "center": [3, 4.0, 3],
+          "size": [4, 8, 4],
+          "tile": 2,
+          "pivot": [3, 8, 3],
+          "motion": ["leg", -1],
+          "parent": null
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "slime",
+      "byteLength": 11848,
+      "nodeCount": 11,
+      "triangleCount": 60,
+      "height": 1.0,
+      "sha256": "9e07699ba8c2a44c76d2eda46bef3379f2ac461d7931374350552f5d42b287c0",
+      "textureSha256": "2a8d38fe09a150d40e34a758c6b84962c95f6b9c7bde764ce12b9b4210370b5b",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 8, 0],
+          "size": [16, 16, 16],
+          "tile": 6,
+          "pivot": [0, 0, 0],
+          "motion": ["gel", 1],
+          "parent": null
+        },
+        {
+          "name": "core",
+          "center": [0, 7, 0],
+          "size": [11, 11, 11],
+          "tile": 1,
+          "pivot": [0, 0, 0],
+          "motion": ["gel", 1],
+          "parent": null
+        },
+        {
+          "name": "eye--1",
+          "center": [-3, 9, 6],
+          "size": [2, 3, 1],
+          "tile": 2,
+          "pivot": [-3, 9, 6],
+          "motion": null,
+          "parent": "core"
+        },
+        {
+          "name": "eye-1",
+          "center": [3, 9, 6],
+          "size": [2, 3, 1],
+          "tile": 2,
+          "pivot": [3, 9, 6],
+          "motion": null,
+          "parent": "core"
+        },
+        {
+          "name": "mouth",
+          "center": [0, 5, 6],
+          "size": [2, 1, 1],
+          "tile": 2,
+          "pivot": [0, 5, 6],
+          "motion": null,
+          "parent": "core"
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    },
+    {
+      "kind": "pig-zombie",
+      "byteLength": 21392,
+      "nodeCount": 19,
+      "triangleCount": 108,
+      "height": 2.0,
+      "sha256": "19d9143ab5152b4164338bfcdb291fcc0f87a75366d69629d4bba605e52a1033",
+      "textureSha256": "e744c4f8cd45ac9e25a0a35b637bece6f879e21d62b23443fbf9239516f1c76d",
+      "parts": [
+        {
+          "name": "body",
+          "center": [0, 18, 0],
+          "size": [8, 12, 4],
+          "tile": 4,
+          "pivot": [0, 18, 0],
+          "motion": null,
+          "parent": null
+        },
+        {
+          "name": "head",
+          "center": [0, 28, 0],
+          "size": [8, 8, 8],
+          "tile": 1,
+          "pivot": [0, 24, 0],
+          "motion": ["head", 1],
+          "parent": null
+        },
+        {
+          "name": "leg--1",
+          "center": [-2, 6, 0],
+          "size": [4, 12, 4],
+          "tile": 2,
+          "pivot": [-2, 12, 0],
+          "motion": ["leg", -1],
+          "parent": null
+        },
+        {
+          "name": "arm--1",
+          "center": [-6, 19, 0],
+          "size": [4, 12, 4],
+          "tile": 0,
+          "pivot": [-6, 24, 0],
+          "motion": ["arm", -1],
+          "parent": null
+        },
+        {
+          "name": "leg-1",
+          "center": [2, 6, 0],
+          "size": [4, 12, 4],
+          "tile": 2,
+          "pivot": [2, 12, 0],
+          "motion": ["leg", 1],
+          "parent": null
+        },
+        {
+          "name": "arm-1",
+          "center": [6, 19, 0],
+          "size": [4, 12, 4],
+          "tile": 0,
+          "pivot": [6, 24, 0],
+          "motion": ["arm", 1],
+          "parent": null
+        },
+        {
+          "name": "snout",
+          "center": [0, 26, 5],
+          "size": [4, 3, 2],
+          "tile": 3,
+          "pivot": [0, 26, 5],
+          "motion": null,
+          "parent": "head"
+        },
+        {
+          "name": "gold-sword",
+          "center": [-6, 23, 5],
+          "size": [2, 12, 1],
+          "tile": 5,
+          "pivot": [-6, 23, 5],
+          "motion": null,
+          "parent": "arm--1"
+        },
+        {
+          "name": "sword-guard",
+          "center": [-6, 18, 5],
+          "size": [5, 1, 2],
+          "tile": 5,
+          "pivot": [-6, 18, 5],
+          "motion": null,
+          "parent": "arm--1"
+        }
+      ],
+      "clips": ["idle", "move", "attack", "hurt"]
+    }
+  ]
+}

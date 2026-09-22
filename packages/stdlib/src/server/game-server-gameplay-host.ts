@@ -54,12 +54,15 @@ export type GameServerGameplayWorldPort = Readonly<{
 export type PreparedGameplayRestore = Readonly<{
   gameplay: GameplayRuntime;
   restoredVersion: 1 | 2 | 3 | 4 | null;
+  snapshotMigrationReports: readonly import('./gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
 }>;
 
 export class GameServerGameplayHost {
   private activeGameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
   private restoredVersion: 1 | 2 | 3 | 4 | null = null;
+  private snapshotMigrationReports: readonly import('./gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[] =
+    [];
 
   constructor(
     private readonly gameplayPersistence: Persistence | undefined,
@@ -428,6 +431,9 @@ export class GameServerGameplayHost {
   get restoredGameplayVersion() {
     return this.restoredVersion;
   }
+  get restoredSnapshotMigrationReports() {
+    return this.snapshotMigrationReports;
+  }
 
   async prepareRestore(): Promise<PreparedGameplayRestore | null> {
     const snapshot = await this.gameplayPersistence?.loadGameplaySnapshot?.();
@@ -436,7 +442,11 @@ export class GameServerGameplayHost {
       try {
         const restored = gameplay.restoreSnapshot(snapshot);
         gameplay.kernelState.setWorldTime(gameplay.kernelState.epoch, restored.worldTime ?? this.world.worldTime());
-        return { gameplay, restoredVersion: restored.version };
+        return {
+          gameplay,
+          restoredVersion: restored.version,
+          snapshotMigrationReports: gameplay.snapshotMigrationReports,
+        };
       } catch (error) {
         try {
           gameplay.dispose();
@@ -452,7 +462,7 @@ export class GameServerGameplayHost {
     try {
       gameplay.kernelState.setWorldTime(gameplay.kernelState.epoch, this.world.worldTime());
       gameplay.spawnPlayer({ id: 'player-1', position: legacyPlayerPositionToFeet(legacyPosition) });
-      return { gameplay, restoredVersion: null };
+      return { gameplay, restoredVersion: null, snapshotMigrationReports: [] };
     } catch (error) {
       try {
         gameplay.dispose();
@@ -467,6 +477,7 @@ export class GameServerGameplayHost {
     const retired = this.activeGameplay;
     this.activeGameplay = prepared.gameplay;
     this.restoredVersion = prepared.restoredVersion;
+    this.snapshotMigrationReports = prepared.snapshotMigrationReports;
     this.legacyEntityIds.clear();
     try {
       retired.dispose();

@@ -1,0 +1,271 @@
+{
+  "metadata": {
+    "actualWorkers": 1
+  },
+  "startTime": 1790066944347,
+  "duration": 20358.674,
+  "files": [
+    {
+      "fileId": "11cc3b97c787507062ad",
+      "fileName": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "tests": [
+        {
+          "testId": "11cc3b97c787507062ad-678e4b727b3674f8fea7",
+          "title": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+          "projectName": "chromium",
+          "location": {
+            "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+            "line": 518,
+            "column": 1
+          },
+          "duration": 13945,
+          "annotations": [],
+          "tags": [],
+          "outcome": "expected",
+          "path": [],
+          "ok": true,
+          "results": [
+            {
+              "attachments": [
+                {
+                  "name": "day-gallery",
+                  "contentType": "image/png",
+                  "path": "data/5f5f1e941307f6c7f8b5e1a741ef441cf5d472e1.png"
+                },
+                {
+                  "name": "day-gallery-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "pig-front-closeup",
+                  "contentType": "image/png",
+                  "path": "data/c510066bcd2db923802d113a8dfd3eb713119796.png"
+                },
+                {
+                  "name": "pig-front-closeup-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "skeleton-bow-front-closeup",
+                  "contentType": "image/png",
+                  "path": "data/dba6f6ac3af053e214f753510b7b5aa2308f0ddf.png"
+                },
+                {
+                  "name": "skeleton-bow-front-closeup-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "skeleton-bow-side-closeup",
+                  "contentType": "image/png",
+                  "path": "data/34d754c8554973227767e8d722ae75d4ce35a58b.png"
+                },
+                {
+                  "name": "skeleton-bow-side-closeup-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "plants-closeup",
+                  "contentType": "image/png",
+                  "path": "data/b82adf38857d0675cf2fcc06e1b22b3a5e1a01a1.png"
+                },
+                {
+                  "name": "plants-closeup-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "animated-gallery-early",
+                  "contentType": "image/png",
+                  "path": "data/ee995d5b01b89c638c9552a4ba7cd7f37a59a575.png"
+                },
+                {
+                  "name": "animated-gallery-early-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "animated-gallery-later",
+                  "contentType": "image/png",
+                  "path": "data/de8ae74278370aeaae3248eaa63b8da1f0b80d49.png"
+                },
+                {
+                  "name": "animated-gallery-later-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-eight-light-types",
+                  "contentType": "image/png",
+                  "path": "data/84ea70ac56db2577eb092d08fc8e0cb37dc2b07f.png"
+                },
+                {
+                  "name": "night-eight-light-types-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-sources-removed",
+                  "contentType": "image/png",
+                  "path": "data/3fc8c44c627ae6ee04959cead92a77897074e94d.png"
+                },
+                {
+                  "name": "night-sources-removed-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-torch",
+                  "contentType": "image/png",
+                  "path": "data/ddde34609fa71de99f7659f81bb2c57fef1bbfc0.png"
+                },
+                {
+                  "name": "night-isolated-torch-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-glowstone",
+                  "contentType": "image/png",
+                  "path": "data/56d7505f2d927ef4a4fab615e8cd97fe237c7295.png"
+                },
+                {
+                  "name": "night-isolated-glowstone-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-lava",
+                  "contentType": "image/png",
+                  "path": "data/2b98ba80ab3ab896d18f0afc5607210d8a02dec3.png"
+                },
+                {
+                  "name": "night-isolated-lava-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-fire",
+                  "contentType": "image/png",
+                  "path": "data/9a634f2ff29e193d7a790bc190f9ef8c034aaef5.png"
+                },
+                {
+                  "name": "night-isolated-fire-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-jack-o-lantern",
+                  "contentType": "image/png",
+                  "path": "data/7258c9ba1f8a8c772951a643f4e9730591dfd06a.png"
+                },
+                {
+                  "name": "night-isolated-jack-o-lantern-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-lit-furnace",
+                  "contentType": "image/png",
+                  "path": "data/56153bc6e5153deb4a58dc8a622fc9036c7fda7c.png"
+                },
+                {
+                  "name": "night-isolated-lit-furnace-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-lit-redstone-ore",
+                  "contentType": "image/png",
+                  "path": "data/88f8caee421c2cefe8db7109f6ea4f2fd4a0d7b3.png"
+                },
+                {
+                  "name": "night-isolated-lit-redstone-ore-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "night-isolated-lantern",
+                  "contentType": "image/png",
+                  "path": "data/c6c11fed46ac3c9cda6c73511669d4064635eb87.png"
+                },
+                {
+                  "name": "night-isolated-lantern-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "plant-real-input-selection-and-walk-through",
+                  "contentType": "image/png",
+                  "path": "data/eb7f0d37a97a092689f48042b43b544bee3218ac.png"
+                },
+                {
+                  "name": "plant-real-input-selection-and-walk-through-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "creative-one-click-one-block",
+                  "contentType": "image/png",
+                  "path": "data/7c971c0b457ba192c1ac86407e85cd0a13468d18.png"
+                },
+                {
+                  "name": "creative-one-click-one-block-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "creative-catalog-icons",
+                  "contentType": "image/png",
+                  "path": "data/2162d64fe6ea29b046d99ee118595525f63d8ee3.png"
+                },
+                {
+                  "name": "creative-stair-icons",
+                  "contentType": "image/png",
+                  "path": "data/2a8650c2ed63e46bdd59bd3bacdf8cc4b6eb4b6b.png"
+                },
+                {
+                  "name": "sealed-room-unlit",
+                  "contentType": "image/png",
+                  "path": "data/0e6029c2066c78f055a73654c9bb208bb6188d8a.png"
+                },
+                {
+                  "name": "sealed-room-unlit-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "sealed-room-glowstone",
+                  "contentType": "image/png",
+                  "path": "data/1b46f3859ed9c691191f35301032a934968cb506.png"
+                },
+                {
+                  "name": "sealed-room-glowstone-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "sealed-room-occluding-wall",
+                  "contentType": "image/png",
+                  "path": "data/5f6659f0c4ce637597c69744dec504de6410118a.png"
+                },
+                {
+                  "name": "sealed-room-occluding-wall-camera",
+                  "contentType": "application/json"
+                },
+                {
+                  "name": "visual-identity-and-observations",
+                  "contentType": "application/json"
+                }
+              ],
+              "startTime": "2026-09-22T08:49:05.593Z",
+              "workerIndex": 0
+            }
+          ]
+        }
+      ],
+      "stats": {
+        "total": 1,
+        "expected": 1,
+        "unexpected": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "ok": true
+      }
+    }
+  ],
+  "projectNames": ["chromium"],
+  "stats": {
+    "total": 1,
+    "expected": 1,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "ok": true
+  },
+  "errors": [],
+  "options": {},
+  "machines": []
+}

@@ -38,6 +38,6 @@
       <strong>{interaction.target.label}</strong>
       <small>{interaction.breaking ? '采集中' : 'Seedlands'}</small>
     </div>
-    <img class="target-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
+    <img class="target-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/classic-crest.png')} alt="" />
   </div>
 {/if}

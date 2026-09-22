@@ -1,7 +1,7 @@
 import { emitMeshDescriptors, MESH_KERNEL_WINDOW_SIZE, meshKernelWindowIndex } from './mesh-kernel';
 import type { MeshData } from '@seedlands/stdlib/world/mesh';
 import { Voxel, faceMaterialFor } from '@seedlands/stdlib/world/voxel';
-import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
 
 const CHUNK_SIZE = 32;
 const RECORD_BYTES = 16;
@@ -23,13 +23,13 @@ type MaskCell = { material: number; back: boolean; ao: readonly number[]; high: 
 const sample = (voxelWindow: Uint16Array, x: number, y: number, z: number) =>
   voxelWindow[meshKernelWindowIndex(x, y, z)];
 const sampleFluid = (fluid: Uint8Array, x: number, y: number, z: number) => fluid[meshKernelWindowIndex(x, y, z)];
-const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && modelBoxesForVoxel(voxel).length === 0;
+const isGreedyVoxel = (voxel: number) => voxel !== Voxel.Air && !hasVoxelModelGeometry(voxel);
 const occludes = (voxel: number) =>
   voxel !== Voxel.Air &&
   voxel !== Voxel.Water &&
   voxel !== Voxel.Glass &&
   voxel !== Voxel.Ice &&
-  modelBoxesForVoxel(voxel).length === 0;
+  !hasVoxelModelGeometry(voxel);
 const visible = (source: number, target: number) =>
   isGreedyVoxel(source) &&
   ((source === Voxel.Glass && target === Voxel.Glass) || (source === Voxel.Ice && target === Voxel.Ice)
@@ -157,7 +157,7 @@ export function describeMeshInTypeScript(voxelWindow: Uint16Array, fluid: Uint8A
   for (let y = 0; y < CHUNK_SIZE; y += 1)
     for (let z = 0; z < CHUNK_SIZE; z += 1)
       for (let x = 0; x < CHUNK_SIZE; x += 1)
-        if (modelBoxesForVoxel(sample(voxelWindow, x, y, z)).length > 0)
+        if (hasVoxelModelGeometry(sample(voxelWindow, x, y, z)))
           bytes.push(1, x, y, z, sample(voxelWindow, x, y, z), ...new Array(RECORD_BYTES - 5).fill(0));
   return Uint8Array.from(bytes);
 }

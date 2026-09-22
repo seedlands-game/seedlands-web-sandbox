@@ -1,5 +1,7 @@
 use world_kernels::{
-    fluid::{fluid_candidate, FluidChunkLayout, FluidError, FluidPosition, FluidScratch, FluidWrite},
+    fluid::{
+        fluid_candidate, FluidChunkLayout, FluidError, FluidPosition, FluidScratch, FluidWrite,
+    },
     mesh::{mesh_describe, MeshError, HALO_CELLS, MASK_BYTES},
 };
 
@@ -56,8 +58,15 @@ fn fluid_source_spreads_with_reference_order_and_caller_scratch() {
         .iter()
         .map(|write| write.position)
     {
-        let target = index(position.x as usize, position.y as usize, position.z as usize);
-        assert_eq!(u16::from_le_bytes([arena[target * 2], arena[target * 2 + 1]]), 8);
+        let target = index(
+            position.x as usize,
+            position.y as usize,
+            position.z as usize,
+        );
+        assert_eq!(
+            u16::from_le_bytes([arena[target * 2], arena[target * 2 + 1]]),
+            8
+        );
         assert_eq!(arena[fluid_offset + target], 7);
     }
 }
@@ -83,17 +92,57 @@ fn mesh_descriptor_matches_single_cube_record_shape_and_capacity_rule() {
     }
 
     let mut short = vec![0; length - 1];
-    assert_eq!(mesh_describe(&halo, &fluid, &mut mask, &mut short), Err(MeshError::Capacity));
+    assert_eq!(
+        mesh_describe(&halo, &fluid, &mut mask, &mut short),
+        Err(MeshError::Capacity)
+    );
+}
+
+#[test]
+fn crossed_plants_are_model_descriptors_and_never_greedy_cubes() {
+    let fluid = vec![0u8; HALO_CELLS];
+    let halo_index = |x: usize, y: usize, z: usize| x + 2 + 36 * (z + 2 + 36 * (y + 2));
+    for voxel in [31u16, 32, 33, 34, 35, 59, 61, 62] {
+        let mut halo = vec![0u16; HALO_CELLS];
+        halo[halo_index(16, 8, 16)] = voxel;
+        let mut mask = vec![0; MASK_BYTES];
+        let mut descriptors = vec![0; 16];
+
+        let length = mesh_describe(&halo, &fluid, &mut mask, &mut descriptors).unwrap();
+
+        assert_eq!(length, 16);
+        assert_eq!(&descriptors[..5], &[1, 16, 8, 16, voxel as u8]);
+        assert!(descriptors[5..length].iter().all(|byte| *byte == 0));
+    }
 }
 
 #[test]
 fn malformed_fluid_inputs_are_rejected_before_access() {
-    let chunks=[FluidChunkLayout {cx:0,cy:0,cz:0,voxel_offset:0,fluid_offset:0}];
-    let mut writes=[FluidWrite::EMPTY;2];let mut next=[FluidPosition::ZERO;8];
-    let mut scratch=FluidScratch::new(&mut writes,&mut next);
-    assert!(fluid_candidate(&mut [0;8],&chunks,&[FluidPosition::new(10,10,10)],&mut scratch).is_err());
-    let mut arena=vec![0;CHUNK_CELLS*3];
-    assert!(fluid_candidate(&mut arena,&chunks,&[FluidPosition::new(i32::MIN,0,0)],&mut scratch).is_err());
+    let chunks = [FluidChunkLayout {
+        cx: 0,
+        cy: 0,
+        cz: 0,
+        voxel_offset: 0,
+        fluid_offset: 0,
+    }];
+    let mut writes = [FluidWrite::EMPTY; 2];
+    let mut next = [FluidPosition::ZERO; 8];
+    let mut scratch = FluidScratch::new(&mut writes, &mut next);
+    assert!(fluid_candidate(
+        &mut [0; 8],
+        &chunks,
+        &[FluidPosition::new(10, 10, 10)],
+        &mut scratch
+    )
+    .is_err());
+    let mut arena = vec![0; CHUNK_CELLS * 3];
+    assert!(fluid_candidate(
+        &mut arena,
+        &chunks,
+        &[FluidPosition::new(i32::MIN, 0, 0)],
+        &mut scratch
+    )
+    .is_err());
 }
 
 fn expect_invalid_fluid_layout(arena_bytes: usize, chunks: &[FluidChunkLayout]) {

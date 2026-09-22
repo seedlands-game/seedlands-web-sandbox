@@ -173,6 +173,13 @@ export class Game {
       throw new Error('World start was superseded.');
     }
     this.app = scene.application;
+    this.app.on('seedlands:asset-error', (message: string) => {
+      this.uiSession?.publishFeedback(++this.interactionSequence, {
+        message,
+        tone: 'error',
+        durationMs: 6_000,
+      });
+    });
     this.experimentState.acceptRenderer(scene);
     this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = sceneBootstrap.createSun(this.app, lightingBudget);
@@ -271,7 +278,7 @@ export class Game {
     await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
-    this.companion.start();
+    runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
     return { seed: ready.seedText };
   }
 
@@ -284,6 +291,7 @@ export class Game {
       playerId,
       bridge: this.uiBridge,
       session: this.uiSession,
+      sampleBlockLight: (position) => this.visualEffects?.sampleBlockLight(position) ?? 0,
       nextHudSequence: () => ++this.hudSequence,
       nextInteractionSequence: () => ++this.interactionSequence,
       getVoxel: (x, y, z) => this.world?.getVoxel(x, y, z) ?? 0,
@@ -305,6 +313,7 @@ export class Game {
     // prettier-ignore
     const restored = restoreBrowserPresentation(ready, { authority, world: this.world, camera: this.camera, environment: this.environment, audio: this.audio, controller: this.controller, gameplay: this.gameplayClient, worldAudio: this.worldAudio, authoritySync: this.authoritySync, commandSource: this.commandSource, createGameplay: (playerId) => this.createGameplay(authority, playerId), createController: () => this.createController(this.camera!) });
     Object.assign(this, { serverPlayerId: ready.playerId, seedText: ready.seedText, ...restored });
+    runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
   }
 
   private createController(camera: pc.Entity) {

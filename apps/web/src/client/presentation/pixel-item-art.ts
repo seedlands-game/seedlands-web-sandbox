@@ -1,8 +1,9 @@
 import type { NativeAsset } from './asset-types';
-import { palette, Sprite } from './pixel-sprite';
+import { Sprite } from './pixel-sprite';
 import { foodSprite, type FoodSpriteKind } from './food-sprite';
 import { armorSprite, type ArmorSpriteKind } from './armor-sprite';
 import { isUtilitySpriteKind, utilitySprite, type UtilitySpriteKind } from './utility-sprite';
+import { paletteForItem } from './item-semantic-palette';
 
 function handle(sprite: Sprite) {
   sprite.rect(13, 7, 5, 23, 1);
@@ -467,7 +468,7 @@ export function pixelItemAssets(
       payload: {
         width: 32,
         height: 32,
-        palette: palette.map((color) => [...color]),
+        palette: paletteForItem(kind),
         pixels:
           kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel' || kind === 'hoe'
             ? tool(kind, material)

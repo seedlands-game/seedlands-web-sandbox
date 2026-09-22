@@ -12,7 +12,9 @@ import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel
 import { faceMaterialNames } from '@seedlands/stdlib/world/face-material-names';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
+import { encodeBlockLightLevelForR8 } from './block-light-volume';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';
+import { voxelEmissionRedDominance, voxelEmissionThreshold } from './voxel-emission-profile';
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
@@ -46,6 +48,7 @@ export type VoxelMaterials = {
   resolve: (part: MeshPart) => pc.StandardMaterial;
   water: readonly pc.StandardMaterial[];
   waterLayer: pc.Layer;
+  setBlockLightVolume: (levels: Uint8Array, origin: readonly [number, number, number], size: number) => void;
   destroy: () => void;
 };
 
@@ -58,6 +61,8 @@ export async function createVoxelMaterials(
   const textures = sources ?? resolveTerrainTextures(await loadTerrainPack());
   const surface: number[] = [];
   const emission: number[] = [];
+  const emissionThreshold: number[] = [];
+  const emissionRedDominance: number[] = [];
   const tiles = new Map<FaceMaterialId, pc.Texture>();
   const tileCanvases = new Map<FaceMaterialId, HTMLCanvasElement>();
   for (const definition of terrainMaterials) {
@@ -77,6 +82,8 @@ export async function createVoxelMaterials(
       linearEmission.b,
       parameters?.emissiveIntensity ?? definition.emissiveIntensity,
     );
+    emissionThreshold.push(voxelEmissionThreshold(definition.faceMaterial));
+    emissionRedDominance.push(voxelEmissionRedDominance(definition.faceMaterial));
     tileCanvases.set(definition.faceMaterial, canvas);
     if (
       [
@@ -100,6 +107,21 @@ export async function createVoxelMaterials(
   fallbackContext.fillStyle = '#17364a';
   fallbackContext.fillRect(0, 0, 2, 2);
   const reflectionFallback = textureFromCanvas(app.graphicsDevice, 'reflection-fallback', reflectionFallbackCanvas);
+  const blockLightTexture = new pc.Texture(app.graphicsDevice, {
+    name: 'voxel-block-light-volume',
+    width: 64,
+    height: 64,
+    depth: 64,
+    volume: true,
+    format: pc.PIXELFORMAT_R8,
+    mipmaps: false,
+    minFilter: pc.FILTER_NEAREST,
+    magFilter: pc.FILTER_NEAREST,
+    addressU: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressV: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressW: pc.ADDRESS_CLAMP_TO_EDGE,
+    levels: [new Uint8Array(64 ** 3)],
+  });
   const waterLayer = new pc.Layer({ name: 'Voxel Water' });
   // UI 是相机后处理截点；水体须保留主场景深度并一起调色。
   const uiLayer = app.scene.layers.getLayerById(pc.LAYERID_UI);
@@ -160,11 +182,16 @@ export async function createVoxelMaterials(
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('glossPS', voxelAppearanceGlossGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('metalnessPS', voxelAppearanceMetalnessGlsl);
     material.setParameter('uVoxelSurface[0]', new Float32Array(surface));
+    material.setParameter('texture_blockLight', blockLightTexture);
+    material.setParameter('uBlockLightOrigin', new Float32Array([0, 0, 0]));
+    material.setParameter('uBlockLightSize', 64);
     if (category !== 'transparent') {
       material.emissive = new pc.Color(1, 0.48, 0.1);
       material.emissiveIntensity = category === 'emissive' ? 1.4 : 1.15;
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelAppearanceEmissionGlsl);
       material.setParameter('uVoxelEmission[0]', new Float32Array(emission));
+      material.setParameter('uVoxelEmissionThreshold[0]', new Float32Array(emissionThreshold));
+      material.setParameter('uVoxelEmissionRedDominance[0]', new Float32Array(emissionRedDominance));
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
     }
     if (category === 'cutout' || category === 'transparent') {
@@ -212,10 +239,21 @@ export async function createVoxelMaterials(
     resolve: (part) => categoryMaterials.get(part.renderCategory)!,
     water: [categoryMaterials.get('transparent')!],
     waterLayer,
+    setBlockLightVolume: (levels, origin, size) => {
+      if (size !== 64 || levels.byteLength !== 64 ** 3) throw new RangeError('Invalid block light texture volume.');
+      const pixels = blockLightTexture.lock() as Uint8Array;
+      for (let index = 0; index < levels.length; index += 1) pixels[index] = encodeBlockLightLevelForR8(levels[index]);
+      blockLightTexture.unlock();
+      categoryMaterials.forEach((material) => {
+        material.setParameter('uBlockLightOrigin', new Float32Array(origin));
+        material.setParameter('uBlockLightSize', size);
+      });
+    },
     destroy: () => {
       categoryMaterials.forEach((material) => material.destroy());
       tiles.forEach((texture) => texture.destroy());
       reflectionFallback.destroy();
+      blockLightTexture.destroy();
       textureArray.destroy();
       app.scene.layers.removeTransparent(waterLayer);
     },

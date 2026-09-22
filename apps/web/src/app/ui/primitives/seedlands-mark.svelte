@@ -4,4 +4,4 @@
   let { assetBase = import.meta.env.BASE_URL }: { assetBase?: string } = $props();
 </script>
 
-<img class="seedlands-mark" src={publicAssetUrl(assetBase, 'assets/ui/arcane-crest.png')} alt="" />
+<img class="seedlands-mark" src={publicAssetUrl(assetBase, 'assets/ui/classic-crest.png')} alt="" />

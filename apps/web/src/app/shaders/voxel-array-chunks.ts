@@ -1,3 +1,5 @@
+import { voxelBlockLightGlsl } from './voxel-block-light-chunk';
+
 export const voxelArrayDiffuseGlsl = /* glsl */ `
 uniform highp sampler2DArray texture_voxelArray;
 uniform vec3 material_diffuse;
@@ -53,6 +55,7 @@ uniform sampler2D texture_planarReflection;
 uniform mat4 uReflectionTextureMatrix;
 uniform float uReflectionStrength;
 uniform float uReflectionWaterPlaneY;
+${voxelBlockLightGlsl}
 
 void getEmission() {
     vec4 reflectionClip = uReflectionTextureMatrix * vec4(vPositionW, 1.0);
@@ -65,7 +68,7 @@ void getEmission() {
     float fresnel = pow(1.0 - clamp(dot(max(dNormalW, vec3(0.0)), viewDirection), 0.0, 1.0), 3.0);
     float selectedWaterPlane = 1.0 - smoothstep(0.006, 0.02, abs(vPositionW.y - uReflectionWaterPlaneY));
     float reflectionMix = upwardSurface * selectedWaterPlane * mix(0.22, 1.0, fresnel);
-    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection;
+    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection + dAlbedo * blockLightAtSurface() * 0.78;
 }
 `;
 

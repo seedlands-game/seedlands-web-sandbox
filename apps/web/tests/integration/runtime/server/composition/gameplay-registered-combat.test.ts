@@ -54,8 +54,8 @@ function setup(
   });
   world.spawnPlayer({ id: 'alice', position: [0, 0, 0] });
   world.spawnAutonomous(
-    { id: 'wolf', type: 'creature', archetype: 'night-stalker', position: [0, 0, 1] },
-    { archetype: 'night-stalker' },
+    { id: 'wolf', type: 'creature', archetype: 'zombie', position: [0, 0, 1] },
+    { archetype: 'zombie' },
   );
   return world;
 }
@@ -75,12 +75,12 @@ describe('registered Combat is the actual composed consumer', () => {
   it('advances an NPC windup through the registered world system and settles damage once', () => {
     const world = setup(true);
     const before = world.entities.get('alice')!.health!;
-    expect(world.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw').success).toBe(true);
+    expect(world.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw').success).toBe(true);
     expect(world.entities.get('alice')!.health).toBe(before);
     world.advanceRules(0.3);
-    expect(world.entities.get('alice')!.health).toBe(before - 2);
+    expect(world.entities.get('alice')!.health).toBe(before - 3);
     world.createSnapshot();
-    expect(world.entities.get('alice')!.health).toBe(before - 2);
+    expect(world.entities.get('alice')!.health).toBe(before - 3);
   });
 
   it('rejects an after-rule candidate without consuming Actions, Combat, ECS or revision', () => {
@@ -128,13 +128,13 @@ describe('registered Combat is the actual composed consumer', () => {
   });
   it('restores an NPC windup under a different host alias and damages exactly once', () => {
     const source = setup(true);
-    expect(source.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw').success).toBe(true);
+    expect(source.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw').success).toBe(true);
     source.advanceRules(0.1);
     const target = setup(true, [], 'other-host-player');
     target.restoreSnapshot(source.createSnapshot());
     const before = target.entities.get('alice')!.health!;
     target.advanceRules(0.2);
-    expect(target.entities.get('alice')!.health).toBe(before - 2);
+    expect(target.entities.get('alice')!.health).toBe(before - 3);
     expect(target.simulation.combat.peekPendingHits()).toEqual([]);
   });
   it('cancels a restored player action if its durable subject is no longer authorized', () => {
@@ -167,8 +167,8 @@ describe('registered Combat is the actual composed consumer', () => {
       source.entities.update('wolf', { health: 5 });
       const originalTarget = source.entities.createReference('wolf')!;
       source.spawnAutonomous(
-        { id: 'wolf-two', type: 'creature', archetype: 'night-stalker', position: [1, 0, 0] },
-        { archetype: 'night-stalker' },
+        { id: 'wolf-two', type: 'creature', archetype: 'zombie', position: [1, 0, 0] },
+        { archetype: 'zombie' },
       );
       source.giveItem('alice', { itemId: 'wood-sword', count: 1 });
       const attack = source.attackEntity('alice', 'wolf');
@@ -439,7 +439,7 @@ describe('registered Combat is the actual composed consumer', () => {
     const world = setup();
     const before = world.createSnapshot();
     expect(world.attackEntity('alice', 'wolf')).toEqual({ success: false, reason: 'combat-unavailable' });
-    expect(world.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw')).toEqual({
+    expect(world.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw')).toEqual({
       success: false,
       reason: 'combat-unavailable',
     });

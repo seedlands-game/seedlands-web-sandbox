@@ -123,6 +123,36 @@ describe('greedy chunk meshing', () => {
     expect(adjacent[FaceMaterial.Stone].indices).toHaveLength(36);
   });
 
+  it.each([
+    [Voxel.Sapling, FaceMaterial.Sapling],
+    [Voxel.TallGrass, FaceMaterial.TallGrass],
+    [Voxel.Flower, FaceMaterial.Flower],
+    [Voxel.Mushroom, FaceMaterial.Mushroom],
+    [Voxel.SugarCane, FaceMaterial.SugarCane],
+    [Voxel.DeadBush, FaceMaterial.DeadBush],
+    [Voxel.RedFlower, FaceMaterial.RedFlower],
+    [Voxel.RedMushroom, FaceMaterial.RedMushroom],
+  ] as const)('renders plant voxel %i as two double-sided cutout crossed planes', (voxel, material) => {
+    const plant = meshSynthetic([[4, 4, 4, voxel]])[material];
+    expect(plant.renderCategory).toBe('cutout');
+    expect(plant.indices).toHaveLength(24);
+    expect(new Set(plant.normals)).not.toEqual(new Set([0]));
+    expect(new Set(plant.positions.filter((_value, index) => index % 3 === 1))).toEqual(new Set([4, 5]));
+    // PixelTexture row 0 is its visual top. Plant cards therefore map it to the
+    // upper world vertices, while repeating block sides retain their world-Y UVs.
+    for (let vertex = 0; vertex < plant.positions.length / 3; vertex += 1) {
+      const worldY = plant.positions[vertex * 3 + 1];
+      const textureV = plant.uvs[vertex * 2 + 1];
+      expect(textureV).toBe(5 - worldY);
+    }
+
+    const adjacent = meshSynthetic([
+      [4, 4, 4, voxel],
+      [5, 4, 4, Voxel.Stone],
+    ]);
+    expect(adjacent[FaceMaterial.Stone].indices).toHaveLength(36);
+  });
+
   it('keeps every vertical block side texture upright', () => {
     const wood = meshSynthetic([[4, 4, 4, Voxel.Wood]])[FaceMaterial.WoodSide];
 

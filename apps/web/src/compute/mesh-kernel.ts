@@ -1,7 +1,8 @@
 import { KernelMemory } from './kernel-memory';
 import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/stdlib/world/mesh';
 import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
-import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { forEachVoxelGeometryFace, voxelModelFaceUvs } from '@seedlands/stdlib/world/voxel-model-mesh';
+import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
 import { shapeWaterFace } from '@seedlands/stdlib/world/water-mesh-height';
 import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
@@ -104,6 +105,7 @@ function append(
   ao: readonly number[],
   waterSurfaceCode: number,
   waterFloorCode: number,
+  uvs?: number[],
 ): void {
   const quad = (result[material] ??= { p: [], n: [], uv: [], c: [], i: [] });
   const start = quad.p.length / 3;
@@ -117,7 +119,8 @@ function append(
   );
   quad.p.push(...vertices);
   quad.n.push(...normal, ...normal, ...normal, ...normal);
-  if (normalAxis === 0)
+  if (uvs) quad.uv.push(...uvs);
+  else if (normalAxis === 0)
     quad.uv.push(...(back ? [0, 0, height, 0, height, width, 0, width] : [0, 0, 0, width, height, width, height, 0]));
   else
     quad.uv.push(...(back ? [0, 0, 0, height, width, height, width, 0] : [0, 0, width, 0, width, height, 0, height]));
@@ -130,39 +133,22 @@ function append(
 }
 
 function appendModel(result: Record<number, RawMesh>, voxel: number, x: number, y: number, z: number): void {
-  for (const box of modelBoxesForVoxel(voxel)) {
-    for (let dimension = 0; dimension < 3; dimension += 1) {
-      const u = (dimension + 1) % 3;
-      const v = (dimension + 2) % 3;
-      const width = box.max[u] - box.min[u];
-      const height = box.max[v] - box.min[v];
-      for (const back of [true, false]) {
-        const origin = [x + box.min[0], y + box.min[1], z + box.min[2]];
-        origin[dimension] = (back ? box.min[dimension] : box.max[dimension]) + [x, y, z][dimension];
-        const p1 = [...origin];
-        p1[u] += width;
-        const p2 = [...p1];
-        p2[v] += height;
-        const p3 = [...origin];
-        p3[v] += height;
-        const normal = [0, 0, 0];
-        normal[dimension] = back ? -1 : 1;
-        append(
-          result,
-          box.material,
-          back ? [...origin, ...p3, ...p2, ...p1] : [...origin, ...p1, ...p2, ...p3],
-          normal,
-          dimension,
-          width,
-          height,
-          back,
-          [0, 0, 0, 0],
-          0,
-          0,
-        );
-      }
-    }
-  }
+  forEachVoxelGeometryFace(voxel, [x, y, z], (face) =>
+    append(
+      result,
+      face.material,
+      face.positions,
+      face.normal,
+      face.dimension,
+      face.width,
+      face.height,
+      face.back,
+      [0, 0, 0, 0],
+      0,
+      0,
+      voxelModelFaceUvs(face),
+    ),
+  );
 }
 
 /** 将已校验的描述符按既有五数组布局发射；不扫描体素。 */
@@ -227,7 +213,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       descriptors[offset + 1] < 32 &&
       descriptors[offset + 2] < 32 &&
       descriptors[offset + 3] < 32 &&
-      modelBoxesForVoxel(descriptors[offset + 4]).length > 0 &&
+      hasVoxelModelGeometry(descriptors[offset + 4]) &&
       descriptors.slice(offset + 5, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
     )
       appendModel(

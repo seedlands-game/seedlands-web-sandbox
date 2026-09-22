@@ -28,7 +28,13 @@ fn greedy(id: u32) -> bool {
 }
 
 fn is_model(id: u32) -> bool {
-    id == 10 || (39..=41).contains(&id) || (49..=58).contains(&id)
+    is_crossed_plant(id) || id == 10 || (39..=41).contains(&id) || (49..=58).contains(&id)
+}
+
+/// Must remain in lockstep with `crossedPlantMaterialForVoxel`: these voxels are emitted as
+/// model descriptors and expanded to two double-sided cutout planes by the shared TS geometry.
+fn is_crossed_plant(id: u32) -> bool {
+    (31..=35).contains(&id) || matches!(id, 59 | 61 | 62)
 }
 
 fn occludes(id: u32) -> bool {

@@ -6,6 +6,7 @@ import { createGameplayContent, type GameplayContent } from '../gameplay-content
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 import type { MeleeDefinition } from '../combat-runtime';
 import type { ActorProfileInput, StarterEcologyConfigurationInput } from '../actor-profile';
+import { GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, type GameplaySnapshotMigration } from '../gameplay-snapshot-migration';
 import {
   ACTOR_PROFILES_CAPABILITY,
   CONTENT_CRAFTING_CAPABILITY,
@@ -27,6 +28,7 @@ export function defineContentModule(
     actorProfiles?: readonly ActorProfileInput[];
     defaultPlayerMeleeDefinitionId?: string;
     starterEcology?: StarterEcologyConfigurationInput;
+    snapshotMigration?: GameplaySnapshotMigration;
   }>,
 ): ModModule {
   return Object.freeze({
@@ -34,7 +36,10 @@ export function defineContentModule(
       id: input.moduleId,
       version: '1.0.0',
       requires: input.craftingProvider ? [{ id: CRAFTING_CAPABILITY, version: '1.0.0' }] : [],
-      provides: [...contentCapabilityContracts()],
+      provides: [
+        ...contentCapabilityContracts(),
+        ...(input.snapshotMigration ? [{ id: GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, version: '1.0.0' }] : []),
+      ],
     },
     register(api) {
       const crafting = input.craftingProvider
@@ -186,6 +191,8 @@ export function defineContentModule(
           match: (request: Parameters<CraftingProviderV1['match']>[0]) => resolve().crafting?.match(request) ?? null,
         }),
       );
+      if (input.snapshotMigration)
+        api.provideCapability(GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, input.snapshotMigration);
       api.onDefinitionsReady(() => {
         meleeDefinitions.push(...resolve().meleeDefinitions);
         Object.freeze(meleeDefinitions);

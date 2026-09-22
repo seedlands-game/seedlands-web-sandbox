@@ -87,6 +87,9 @@ export type ClassicSnapshot = Readonly<{
     presentedEntityCount: number;
   }>;
   visualEffects: Readonly<{
+    blockLightReady: boolean;
+    blockLightSourceRevision: number | null;
+    blockLightRebuildCount: number;
     shadowUpdateCount: number;
     shadowStableFrameCount: number;
   }>;
@@ -120,6 +123,8 @@ export type HarnessApi = {
   fillWorld(command: { from: Point; to: Point; voxel: number }): Promise<unknown>;
   setVoxelAt(x: number, y: number, z: number, voxel: number): Promise<void>;
   getVoxelAt?(x: number, y: number, z: number): number | null;
+  getChunkRevision?(cx: number, cy: number, cz: number): number | null;
+  getRenderedChunkRevision?(cx: number, cy: number, cz: number): number | null;
   flushSave(): Promise<void>;
   beginPerformanceScenario(name: string): string;
   exportPerformanceTrace(): ChromeTrace;

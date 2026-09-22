@@ -3,7 +3,7 @@ import * as pc from 'playcanvas';
 import type { GameplayEntityView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
 import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
-import { addBuiltinActorModel } from './builtin-actor-models';
+import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { getAppearanceAnimationBindings, getAppearanceModelBlob } from './appearance-runtime';
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from './gameplay-model-assets';
 import { addGlbModel, type GlbModelLease } from './glb-model-resource';
@@ -29,6 +29,8 @@ export type GameplayShadowCaster = Readonly<{
   position: readonly [number, number, number];
 }>;
 
+export type GameplayBlockLightSampler = (position: readonly [number, number, number]) => number;
+
 export class GameplayEntityPresenter {
   private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
@@ -37,7 +39,10 @@ export class GameplayEntityPresenter {
   private readonly hurtUntil = new Map<string, number>();
   private readonly originalMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
   private readonly damageMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
+  private readonly originalEmissionIntensity = new WeakMap<pc.Entity, number>();
+  private readonly damageEmissionIntensity = new WeakMap<pc.Entity, number>();
   private readonly damageMaterialResources = new Set<pc.StandardMaterial>();
+  private readonly clonedMaterialResources = new Set<pc.StandardMaterial>();
   private readonly animated = new Map<string, AnimatedEntity>();
   private readonly movingShadowCasters = new Map<string, boolean>();
   private readonly shadowCasterRevisions = new Map<string, number>();
@@ -47,6 +52,7 @@ export class GameplayEntityPresenter {
   constructor(
     private readonly app: pc.Application,
     private readonly resolveItem?: (id: string) => ItemDefinition | null,
+    private readonly sampleBlockLight?: GameplayBlockLightSampler,
   ) {
     this.assetsLease = acquireGameplayModelAssets(app);
     this.bindings = getAppearanceAnimationBindings(app);
@@ -58,6 +64,7 @@ export class GameplayEntityPresenter {
     const current = new Set(entities.map((entity) => entity.id));
     this.presented.forEach((node, id) => {
       if (current.has(id)) return;
+      this.releaseDamageMaterials(node);
       node.destroy();
       this.presented.delete(id);
       this.previousPositions.delete(id);
@@ -74,7 +81,10 @@ export class GameplayEntityPresenter {
   }
 
   dispose(): void {
-    this.presented.forEach((entity) => entity.destroy());
+    this.presented.forEach((entity) => {
+      this.releaseDamageMaterials(entity);
+      entity.destroy();
+    });
     this.presented.clear();
     this.previousPositions.clear();
     this.health.clear();
@@ -84,6 +94,8 @@ export class GameplayEntityPresenter {
     for (const id of this.animated.keys()) this.releaseAnimated(id);
     this.damageMaterialResources.forEach((material) => material.destroy());
     this.damageMaterialResources.clear();
+    this.clonedMaterialResources.forEach((material) => material.destroy());
+    this.clonedMaterialResources.clear();
     this.assetsLease.release();
     this.presentationTime = 0;
   }
@@ -133,15 +145,18 @@ export class GameplayEntityPresenter {
     const scale = 1 + flash * 0.05;
     node.setLocalScale(scale, scale, scale);
     if (entity.type === 'world-item') node.setEulerAngles(0, time * 24, 0);
-    node.setPosition(position[0], position[1] + (entity.type === 'world-item' ? 0.1 : pose.bob), position[2]);
-    for (const side of ['left', 'right'] as const)
-      node.findByName(`arm-${side}-pivot`)?.setLocalEulerAngles(pose.stride * (side === 'left' ? 1 : -1), 0, 0);
+    node.setPosition(position[0], position[1] + (entity.type === 'world-item' ? 0.1 : 0), position[2]);
+    const blockLight = Math.max(
+      0,
+      Math.min(1, this.sampleBlockLight?.([position[0], position[1] + 0.7, position[2]]) ?? 0),
+    );
     this.forEachRender(node, (part) => {
       const material = this.originalMaterials.get(part);
       const damageMaterial = this.damageMaterials.get(part);
+      if (material) material.emissiveIntensity = (this.originalEmissionIntensity.get(part) ?? 0) + blockLight * 0.72;
+      if (damageMaterial)
+        damageMaterial.emissiveIntensity = (this.damageEmissionIntensity.get(part) ?? 0) + blockLight * 0.72;
       if (part.render && material) part.render.material = flash > 0 && damageMaterial ? damageMaterial : material;
-      if (/leg-|front-|back-/.test(part.name))
-        part.setLocalEulerAngles(pose.stride * (part.name.includes('left') ? 1 : -1), 0, 0);
     });
     this.previousPositions.set(entity.id, position);
     const moving =
@@ -178,10 +193,6 @@ export class GameplayEntityPresenter {
         undefined,
         this.resolveItem?.(entity.stack?.itemId ?? ''),
       );
-    else if (entity.archetype === 'grazer') addBuiltinActorModel(this.assets, visual, 'grazer');
-    else if (entity.archetype === 'night-stalker') addBuiltinActorModel(this.assets, visual, 'stalker');
-    else if (entity.archetype === 'settler') addBuiltinActorModel(this.assets, visual, 'settler');
-    else this.assets.addBox(visual, 'fallback-body', 'charcoal', { x: 0, y: 0.75, z: 0 }, { x: 0.7, y: 1.1, z: 0.7 });
     this.registerDamageMaterials(node);
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
@@ -205,11 +216,21 @@ export class GameplayEntityPresenter {
     state: AnimatedEntity,
   ): Promise<void> {
     try {
-      const binding = (this.bindings as Partial<Record<string, AppearanceAnimationBinding>>)[target];
-      if (!binding || state.abort.signal.aborted) return;
-      const blob = getAppearanceModelBlob(this.app, binding.modelId);
-      if (!blob) return;
-      const lease = await addGlbModel(this.app, visual, binding.modelId, state.abort.signal, blob, 'feet');
+      const builtin = classicCreatureDefinition(target);
+      const override = (this.bindings as Partial<Record<string, AppearanceAnimationBinding>>)[target];
+      const binding = override ?? builtin;
+      if (state.abort.signal.aborted) return;
+      if (!binding) throw new Error(`未登记物种模型：${target}`);
+      const blob = override ? getAppearanceModelBlob(this.app, binding.modelId) : undefined;
+      if (override && !blob) throw new Error(`外观模型快照缺失：${binding.modelId}`);
+      const lease = await addGlbModel(
+        this.app,
+        visual,
+        binding.modelId,
+        state.abort.signal,
+        blob,
+        override ? 'feet' : 'authored',
+      );
       if (state.abort.signal.aborted || this.animated.get(entityId) !== state) {
         lease.release();
         return;
@@ -217,15 +238,26 @@ export class GameplayEntityPresenter {
       const clips = this.availableClips(binding, lease.animationClips);
       if (!lease.playback || !Object.keys(clips).length) {
         lease.release();
-        return;
+        throw new Error(`物种模型缺少可播放动作：${binding.modelId}`);
       }
       for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
       this.registerDamageMaterials(lease.entity);
       state.lease = lease;
       state.controller = createModelAnimationController(clips, lease.playback);
       this.shadowCasterRevisions.set(entityId, (this.shadowCasterRevisions.get(entityId) ?? 0) + 1);
-    } catch {
-      // A missing or newly replaced local model keeps the existing built-in actor presentation.
+    } catch (error) {
+      if (state.abort.signal.aborted || this.animated.get(entityId) !== state) return;
+      const message = `生物外观加载失败（${target}）：${error instanceof Error ? error.message : String(error)}`;
+      console.error(message);
+      this.app.fire('seedlands:asset-error', message);
+      this.assets.addBox(
+        visual,
+        `asset-error:${target}`,
+        'glow-eye',
+        { x: 0, y: 0.65, z: 0 },
+        { x: 0.12, y: 0.6, z: 0.12 },
+      );
+      this.assets.addBox(visual, 'asset-error-dot', 'glow-eye', { x: 0, y: 0.2, z: 0 }, { x: 0.12, y: 0.12, z: 0.12 });
     }
   }
 
@@ -241,11 +273,34 @@ export class GameplayEntityPresenter {
   private registerDamageMaterials(root: pc.Entity): void {
     this.forEachRender(root, (part) => {
       if (!(part.render?.material instanceof pc.StandardMaterial) || this.originalMaterials.has(part)) return;
-      const original = part.render.material;
+      const original = part.render.material.clone() as pc.StandardMaterial;
+      part.render.material = original;
       const damage = createDamageTintMaterial(original);
       this.originalMaterials.set(part, original);
       this.damageMaterials.set(part, damage);
+      this.originalEmissionIntensity.set(part, original.emissiveIntensity);
+      this.damageEmissionIntensity.set(part, damage.emissiveIntensity);
       this.damageMaterialResources.add(damage);
+      this.clonedMaterialResources.add(original);
+    });
+  }
+
+  private releaseDamageMaterials(root: pc.Entity): void {
+    this.forEachRender(root, (part) => {
+      const damage = this.damageMaterials.get(part);
+      const original = this.originalMaterials.get(part);
+      if (damage) {
+        damage.destroy();
+        this.damageMaterialResources.delete(damage);
+      }
+      if (original) {
+        original.destroy();
+        this.clonedMaterialResources.delete(original);
+      }
+      this.damageMaterials.delete(part);
+      this.originalMaterials.delete(part);
+      this.originalEmissionIntensity.delete(part);
+      this.damageEmissionIntensity.delete(part);
     });
   }
 

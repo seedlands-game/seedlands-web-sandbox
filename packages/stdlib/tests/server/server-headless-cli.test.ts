@@ -142,19 +142,25 @@ describe('headless server command CLI', () => {
     expect(output[5]).toMatchObject({ success: true, data: { seedText: 'command-cli-test' } });
   }, 15_000);
 
-  it('drives all starter actor archetypes through the headless observation and action surface', async () => {
+  it('drives current Classic passive, neutral and hostile actors through the headless observation and action surface', async () => {
     const { output, actorId } = await withInteractiveCli('actor-cli-test', async (send) => {
-      const grazer = await send('/summon grazer 1 34 1');
-      const nightStalker = await send('/summon night-stalker 2 34 1');
-      const settler = await send('/summon settler 3 34 1');
-      const actorId = String((grazer.data?.entity as { id?: unknown } | undefined)?.id ?? '');
+      const chicken = await send('/summon chicken 1 34 1');
+      const wolf = await send('/summon wolf 2 34 1');
+      const zombie = await send('/summon zombie 3 34 1');
+      const retired = await Promise.all([
+        send('/summon grazer 4 34 1'),
+        send('/summon night-stalker 5 34 1'),
+        send('/summon settler 6 34 1'),
+      ]);
+      expect(retired.every((result) => !result.success)).toBe(true);
+      const actorId = String((chicken.data?.entity as { id?: unknown } | undefined)?.id ?? '');
       expect(actorId).not.toBe('');
       return {
         actorId,
         output: [
-          grazer,
-          nightStalker,
-          settler,
+          chicken,
+          wolf,
+          zombie,
           await send(`/observe ${actorId}`),
           await send(`/entity move ${actorId} 4 34 1`),
           await send(`/entity action ${actorId}`),
@@ -166,9 +172,9 @@ describe('headless server command CLI', () => {
     });
     expect(output).toHaveLength(9);
     expect(output.every((result) => result.success)).toBe(true);
-    expect(output[0]).toMatchObject({ data: { entity: { archetype: 'grazer' } } });
-    expect(output[1]).toMatchObject({ data: { entity: { archetype: 'night-stalker' } } });
-    expect(output[2]).toMatchObject({ data: { entity: { archetype: 'settler', type: 'npc' } } });
+    expect(output[0]).toMatchObject({ data: { entity: { archetype: 'chicken', type: 'creature' } } });
+    expect(output[1]).toMatchObject({ data: { entity: { archetype: 'wolf', type: 'creature' } } });
+    expect(output[2]).toMatchObject({ data: { entity: { archetype: 'zombie', type: 'creature' } } });
     expect(output[5]).toMatchObject({ data: { action: { actorId, status: 'pending' } } });
   }, 15_000);
 
@@ -192,11 +198,11 @@ describe('headless server command CLI', () => {
     });
   }, 15_000);
 
-  it('keeps a plain legacy creature command valid through the next authority tick', () => {
+  it('keeps a current Classic creature command valid through the next authority tick', () => {
     const run = spawnSync('pnpm', ['--silent', 'server:headless', '--', '--seed', 'plain-creature-test', '--json'], {
       cwd: new URL('../../../../', import.meta.url),
       encoding: 'utf8',
-      input: ['/spawn creature 1 34 1', '/tick 0.1', ''].join('\n'),
+      input: ['/summon chicken 1 34 1', '/tick 0.1', ''].join('\n'),
       env: { ...process.env, CI: 'true' },
     });
 
@@ -206,7 +212,7 @@ describe('headless server command CLI', () => {
       .filter(Boolean)
       .map((line) => JSON.parse(line) as JsonCommandResult);
     expect(output).toHaveLength(2);
-    expect(output[0]).toMatchObject({ success: true, data: { entity: { archetype: 'grazer' } } });
+    expect(output[0]).toMatchObject({ success: true, data: { entity: { archetype: 'chicken' } } });
     expect(output[1]).toMatchObject({ success: true, data: { lanes: { physicsSteps: 6 } } });
   }, 15_000);
 });

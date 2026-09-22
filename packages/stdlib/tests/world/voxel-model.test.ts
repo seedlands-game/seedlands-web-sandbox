@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { FaceMaterial, Voxel, voxelNames } from '../../src/world/voxel';
-import { collisionBoxesForVoxel, modelBoxesForVoxel, voxelOccludesFullFace } from '../../src/world/voxel-model';
+import {
+  collisionBoxesForVoxel,
+  crossedPlantMaterialForVoxel,
+  hasVoxelModelGeometry,
+  modelBoxesForVoxel,
+  voxelOccludesFullFace,
+} from '../../src/world/voxel-model';
 
 describe('模型方块注册与形状', () => {
   it('保留旧数值 9 为辉光石并新增数值 10 灯笼', () => {
@@ -31,10 +37,24 @@ describe('模型方块注册与形状', () => {
   });
 
   it('植物可渲染但不产生角色碰撞，仙人掌保持实体碰撞', () => {
-    for (const voxel of [Voxel.Sapling, Voxel.TallGrass, Voxel.Flower, Voxel.Mushroom, Voxel.SugarCane]) {
+    for (const voxel of [
+      Voxel.Sapling,
+      Voxel.TallGrass,
+      Voxel.Flower,
+      Voxel.Mushroom,
+      Voxel.SugarCane,
+      Voxel.DeadBush,
+      Voxel.RedFlower,
+      Voxel.RedMushroom,
+    ]) {
       expect(collisionBoxesForVoxel(voxel)).toEqual([]);
       expect(voxelOccludesFullFace(voxel)).toBe(false);
+      expect(modelBoxesForVoxel(voxel)).toEqual([]);
+      expect(crossedPlantMaterialForVoxel(voxel)).toBeDefined();
+      expect(hasVoxelModelGeometry(voxel)).toBe(true);
     }
     expect(collisionBoxesForVoxel(Voxel.Cactus)).toEqual([{ min: [0, 0, 0], max: [1, 1, 1] }]);
+    expect(crossedPlantMaterialForVoxel(Voxel.Cactus)).toBeUndefined();
+    expect(hasVoxelModelGeometry(Voxel.Cactus)).toBe(false);
   });
 });
