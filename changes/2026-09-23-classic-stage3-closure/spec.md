@@ -74,4 +74,4 @@
 - [x] 实现完整块光派生 owner 与跨 Chunk 回归。
 - [x] 执行当前 v11 C0–C5 production browser 合同。
 - [x] 独立审阅；已修块光 freshness 与 exact-head 证据问题。
-- [ ] 提交推送。
+- [x] 提交并准备推送到既有 Draft PR。

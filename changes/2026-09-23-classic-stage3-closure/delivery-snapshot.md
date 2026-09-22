@@ -20,7 +20,7 @@
 - 外观回滚：恢复上一个应用版本后 revision 4，draft/applied override 均为空、previous 保留蓝色版本；重进后世界和图标恢复默认棕色。page error 与 failed response 均为空。
 - agent-browser 的 `record start` 在本版本会新建 tab，短录屏未包含游戏操作，不作为验收证据；有效证据为稳定 tab 的截图与 Harness/IndexedDB JSON readback。
 
-正式 production contract 的最终 runId 为 `3165d99f-2dc7-441b-bbde-0168af40d262`：
+正式 production contract 的最终 runId 为 `3165d99f-2dc7-441b-bbde-0168af40d262`，绑定最后一个生产源码提交 `e4751cb`；其后的 `159a362` 只更新本 Delivery Snapshot 与 spec checklist，不改变 artifact 输入：
 
 - C0–C5 全部 PASS，视觉/连续帧/单击破坏合同 PASS，合计 2/2。
 - artifact：source SHA `e4751cbe606b7a956cb07b94704fa15ea7622980`，source digest `af5ea1bfdcdf7690e4b9aaa7ffbbf7289436f284ce8f38d93bb1c1753ed1e554`，lock digest `44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifact digest `ec447bc09102dbf7e07d61591fdff9a8d85566235dc1e1da0ae64eae20c40ee1`，274 files。
@@ -46,6 +46,10 @@ Medium 实机诊断观察到 50 个 active chunk brick、13,107,200 bytes（12.5
 - 用户外观已经恢复默认，蓝色泥土只存在于 previous 快照；手工旅程使用隔离浏览器 profile，不影响用户浏览器。
 - C0–C5 不再覆盖已退出 Classic 的自定义 NPC 或外部模型/PG/WebSocket；这些属于通用协议或未来其他 Playbook，不应通过恢复 settler 伪造 Classic 覆盖。
 - 未覆盖实体 GPU、多浏览器、移动端、音频主观质量、三日 soak 和块光性能 A/B。
+
+## 独立审阅
+
+以 `71ae24ef4822c5df90e0d87236eadb23f50f8eb9...159a362ef6a1c681257c98c5174fb70fbbcf5cf2` 冻结 Stage 3 范围，按 Seedlands code review 规则逐项检查 voxel/FaceMaterial/Rust mapping、checkpoint identity、Appearance 原子性、块光新鲜度与资源生命周期，以及 C0–C5 覆盖。审阅确认的两项问题均已关闭：块光 ready/source revision 假阳性由 `e4751cb` 修复；最终生产回执已替换为绑定该实现提交的 run `3165d99f-2dc7-441b-bbde-0168af40d262`。复核后无剩余 P0/P1/P2。
 
 ## 长期文档与实际预算
 
