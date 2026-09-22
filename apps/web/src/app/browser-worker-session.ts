@@ -105,6 +105,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,
     onFatal: options.onFatal,
+    requestTimeoutMs: options.harnessEnabled ? 30_000 : undefined,
     onWorldEpochChanged: (nextEpoch, ready) => {
       authorityGeneration += 1;
       authorityReady = ready;

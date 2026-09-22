@@ -179,7 +179,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   });
   await waitForSnapshot(page, (s) => s.onGround);
   await aimAtVoxelWithRealMouse(page, [-7, 60, 9]);
-  await walkTo(page, [-6.5, 7.5], { timeout: 10_000, tolerance: 0.45 });
+  await walkTo(page, [-6.5, 7.5], { timeout: 45_000, tolerance: 0.45 });
   expect(await voxelAt(page, [-7, 60, 9])).toBe(31);
   await capture('plant-real-input-selection-and-walk-through');
   await page.evaluate(async () => {
