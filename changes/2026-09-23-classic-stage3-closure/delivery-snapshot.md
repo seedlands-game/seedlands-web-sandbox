@@ -7,7 +7,7 @@
 - 羊毛：保留白羊毛 `Voxel.Wool=60`，新增 15 个颜色 voxel 74–88 与 FaceMaterial 78–92；16 个颜色物品均可放置、采集、掉落、存档和恢复。基础 `wool`、`wool-block` 与 `white-wool` 继续映射 60，白羊掉落 `wool`，染色羊掉落 `<color>-wool`。
 - Checkpoint：从 Git blob `51989b626cc8f5624ad755f279dfa7dc3ca99016` 恢复 `base-checkpoint.json.gz`；SHA-256 为 `f8ef2fbdad68a16fdcd2e5bea59b0fd96cdcc76ee697daf7f0dea6bff86329cc`。只接受显式提供且精确匹配的历史 composition identity。
 - 外观：用户资产上限仍为 128；派生缩略图容量独立为当前 `builtinItemBindings.length`。真实浏览器应用生成 194 张缩略图，提示改为读取实际数量；基础白羊毛也进入受限 pixel-item 准入。
-- 块光：浏览器 World 持有按已渲染 Chunk 建立的可重建 64³ R8 brick（32³ core + 16-cell halo）；world commit 事件使 3×3×3 邻域失效，每帧最多重建一个，MeshInstance 使用自己的采样参数，水面过渡继承当前 brick，销毁 Chunk 时释放纹理。
+- 块光：浏览器 World 持有按已渲染 Chunk 建立的可重建 64³ R8 brick（32³ core + 16-cell halo）；world commit 事件使 3×3×3 邻域失效，每帧最多重建一个，MeshInstance 使用自己的采样参数，水面过渡继承当前 brick，销毁 Chunk 时释放纹理。Harness 只有在 active brick 的 dirty 队列清空时才报告 ready/current world revision，避免视觉验收在部分 brick 仍陈旧时提前通过。
 - C0–C5：v11 canonical 删除已经退出 Classic 的 settler 夹具。C0 明确要求 `npcCount=0`；C4 继续验证跨四个 Chunk center 的 Worker → mesh commit → postrender；C5 继续验证新 epoch、authority/checkpoint/derived 方块、库存、工作台和真实输入。
 
 ## 浏览器证据
@@ -36,7 +36,7 @@
 
 ## 块光证据边界
 
-Medium 实机诊断观察到 50 个 brick、13,107,200 bytes（12.5 MiB），stream center 从 `[-1,0]` 移到 `[5,0]` 后仍保持同一上界；远处光源放置/移除使 rebuild count 前进。单元测试覆盖跨 Chunk、遮挡、移除、未知邻接 fail-closed、水面过渡绑定和销毁。
+Medium 实机诊断观察到 50 个 active chunk brick、13,107,200 bytes（12.5 MiB），stream center 从 `[-1,0]` 移到 `[5,0]` 后仍保持同一上界；远处光源放置/移除使 rebuild count 前进。该 bytes 字段只估算 active chunk brick，不包含 replacement/water-transition 窗口内短暂并存的旧/新纹理。单元测试覆盖跨 Chunk、遮挡、移除、未知邻接 fail-closed、水面过渡绑定、dirty/ready 状态和销毁。
 
 本次只证明正确性、生命周期与资源上界。没有取得与旧单相机体积 A 的同身份 A/A + A/B 样本，因此不宣称帧率、延迟或资源性能改善；正式 C0–C5 回执也标记 `NOT_MEASURED`。
 

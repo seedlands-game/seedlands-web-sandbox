@@ -92,14 +92,18 @@ describe('浏览器方块光体积', () => {
       brickCount: 2,
       allocatedBrickCount: 2,
       allocatedBytes: 2 * BLOCK_LIGHT_CHUNK_BRICK_BYTES,
+      pendingBrickCount: 1,
+      ready: false,
       rebuildCount: 1,
     });
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(applies).toEqual(['near', 'far']);
     expect(cache.rebuildNearest([0, 0, 0])).toBe(false);
+    expect(cache.snapshot).toMatchObject({ pendingBrickCount: 0, ready: true });
 
     revision = 'edited-neighbor';
     cache.invalidateAround(0, 0, 0);
+    expect(cache.snapshot).toMatchObject({ pendingBrickCount: 1, ready: false });
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(applies).toEqual(['near', 'far', 'near']);
     const releaseNear = cache.register('near', 0, 0, 0, { apply: () => applies.push('replacement') });
@@ -110,6 +114,8 @@ describe('浏览器方块光体积', () => {
       brickCount: 1,
       allocatedBrickCount: 1,
       allocatedBytes: BLOCK_LIGHT_CHUNK_BRICK_BYTES,
+      pendingBrickCount: 0,
+      ready: true,
     });
   });
 });

@@ -171,6 +171,7 @@ export class AdvancedVisualEffects {
   }
 
   get snapshot(): VisualEffectsSnapshot {
+    const blockLight = this.world.blockLightSnapshot;
     return {
       activeLocalLights: 0,
       shadowedLocalLights: 0,
@@ -187,9 +188,9 @@ export class AdvancedVisualEffects {
       postProcessing: this.postProcessing !== null,
       shadowUpdateCount: 0,
       shadowStableFrameCount: this.shadowStableFrameCount,
-      blockLightReady: this.world.blockLightSnapshot.allocatedBrickCount > 0,
-      blockLightSourceRevision: this.world.transactionDiagnostics.worldRevision,
-      blockLightRebuildCount: this.world.blockLightSnapshot.rebuildCount,
+      blockLightReady: blockLight.ready,
+      blockLightSourceRevision: blockLight.ready ? this.world.transactionDiagnostics.worldRevision : null,
+      blockLightRebuildCount: blockLight.rebuildCount,
     };
   }
 

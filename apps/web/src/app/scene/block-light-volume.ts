@@ -129,6 +129,8 @@ export type ChunkBlockLightCacheSnapshot = Readonly<{
   brickCount: number;
   allocatedBrickCount: number;
   allocatedBytes: number;
+  pendingBrickCount: number;
+  ready: boolean;
   rebuildCount: number;
 }>;
 
@@ -208,10 +210,13 @@ export class ChunkBlockLightCache {
 
   get snapshot(): ChunkBlockLightCacheSnapshot {
     const allocatedBrickCount = this.entries.size;
+    const pendingBrickCount = this.dirty.size;
     return {
       brickCount: this.entries.size,
       allocatedBrickCount,
       allocatedBytes: this.entries.size * BLOCK_LIGHT_CHUNK_BRICK_BYTES,
+      pendingBrickCount,
+      ready: allocatedBrickCount > 0 && pendingBrickCount === 0,
       rebuildCount: this.rebuildCount,
     };
   }
