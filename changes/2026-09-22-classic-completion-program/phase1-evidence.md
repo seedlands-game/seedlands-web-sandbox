@@ -40,6 +40,13 @@
 ## 尚待阶段 1 复核
 
 - 首轮 Sol/xhigh 审阅冻结 `27249bd...bcc30c3`：0 P0、2 P1、1 P2。已为旧 terrain pack 与 AppearanceProject 增加火炬→火头兼容继承；TargetCard 改为一次方块名 + “采集中”并补 SSR 测试；exact-head 生产 identity 与浏览器读回已补齐。对应定向测试 13/13 通过，等待 reviewer 关闭性复核。
+
+## 审阅修复后的 exact-head 复验
+
+- 代码提交 `8004ff7df97a4cf4bf6406397c123c692098e831`：旧 terrain pack 与 AppearanceProject 火炬覆盖兼容继承；显式火头覆盖优先；TargetCard 使用动作语义。定向测试 13/13、全仓 typecheck、lint 与确定性 Kernel 28 / stdlib 590 通过。
+- `8004ff7` 生产构建 identity 如上；同一 dist 的 `exact-head-matrix.webm`（VP8 1280×720，244.6 秒）和 `exact-head-*` 截图重新覆盖森林、背包、目录三态与结构 gallery。
+- 最后兼容提交 `4d9da2ca27458e070d1be3db2efe03f93009ba8f` 保留隐藏 `#target-card[data-target]`，避免正式瞄准辅助回归。exact-head 构建：sourceDigest `9c2904b141e35c0f70efe552da040215ed5aa3137365f31378d5d4a0e7d51264`、artifactDigest `3ca34e8440da570aee38d55a2a2d7c9005ae08dd0d012acc9176a8a7e040e2d2`、274 files。生产页读回 `class=sr-only`、`data-target=-4,10,-7`、`data-voxel=32`，截图为 `exact-final-hidden-target.png`，页面 errors 为空。
+- 原始结构化摘要见 `reports/2026-09-22-classic-completion/phase1-browser/exact-head-readback.json`。失败输入材料保留并明确不计通过。
 - 完成后更新 `progress.md`、提交、push，并读回远端 SHA/PR。
 
 ## 后续阶段边界

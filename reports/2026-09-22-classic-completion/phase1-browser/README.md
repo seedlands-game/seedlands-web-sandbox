@@ -16,3 +16,8 @@
 - `final-fence-world.png`、`final-fence-safe-placed.png`：真实右键栅栏目标与玩家碰撞，权威返回 `player-collision`，未作为放置通过。
 - `melee-input.webm`：一次画布低层输入后返回菜单，未作为攻击通过。
 - `recommended-seed.png` 是加载态；实际世界结论使用后续帧。
+
+Exact-head 复验：
+
+- `exact-head-matrix.webm` 与 `exact-head-*.png` 绑定 `8004ff7` 生产 artifact，覆盖森林、背包、目录全/单/空和结构画面。
+- `exact-final-hidden-target.png` 与 `exact-head-readback.json` 绑定最终代码 head `4d9da2c`，证明待机目标视觉隐藏但 `#target-card[data-target]` 仍供正式瞄准辅助读取，页面错误为空。
