@@ -4,7 +4,8 @@ import { createInventoryCandidate } from './inventory-api';
 import type { InventorySlot } from '../inventory';
 import type { GameplayContent } from '../gameplay-content';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
-import { applyCraftingMatch, shapelessCraftingProvider } from './crafting-provider';
+import { applyCraftingMatch, isCraftingMatchEligible, shapelessCraftingProvider } from './crafting-provider';
+import type { Recipe } from '../recipe-registry';
 import { validateInventoryCursor, type InventoryCursorV1 } from './inventory-pointer-contract';
 
 export const INVENTORY_ACTIONS_CAPABILITY = 'seedlands:inventory-actions';
@@ -499,4 +500,20 @@ export function buildInventoryActionCandidate(
       });
     }
   }
+}
+
+/** Lists recipes whose complete crafting transaction is eligible for this current detached actor projection. */
+export function listCraftableInventoryRecipes(content: InventoryActionContent, rawActor: unknown): readonly Recipe[] {
+  assertContent(content);
+  const actor = validateInventoryActorProjection(rawActor, content.items);
+  if (actor.lifecycle !== 'alive') return [];
+  const provider = content.crafting === undefined ? shapelessCraftingProvider : content.crafting;
+  return content.recipes.list().filter((recipe) => {
+    if (!identity(recipe.id)) return false;
+    try {
+      return isCraftingMatchEligible(actor.slots, recipe.id, content.recipes, provider, actor.equipment.selectedSlot);
+    } catch {
+      return false;
+    }
+  });
 }

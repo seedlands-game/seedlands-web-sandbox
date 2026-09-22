@@ -1,0 +1,98 @@
+{
+  "status": "PASS",
+  "runs": 11,
+  "sameEnvironment": true,
+  "actualOrderMatchesPreregistration": true,
+  "reservationIntervalsNonoverlapping": true,
+  "lockDirectory": "/tmp/seedlands-benchmark-reservation",
+  "windows": [
+    {
+      "run": "hotpath-opt-aa1",
+      "acquiredAt": "2026-09-22T07:29:34.942Z",
+      "endedAt": "2026-09-22T07:32:04.499Z",
+      "waitedMs": 2,
+      "sampleStartedAt": "2026-09-22T07:29:56.997Z",
+      "sampleCompletedAt": "2026-09-22T07:31:54.825Z"
+    },
+    {
+      "run": "hotpath-opt-aa2",
+      "acquiredAt": "2026-09-22T07:32:46.817Z",
+      "endedAt": "2026-09-22T07:35:08.969Z",
+      "waitedMs": 1,
+      "sampleStartedAt": "2026-09-22T07:33:03.132Z",
+      "sampleCompletedAt": "2026-09-22T07:34:58.856Z"
+    },
+    {
+      "run": "hotpath-opt-aa3",
+      "acquiredAt": "2026-09-22T07:35:11.692Z",
+      "endedAt": "2026-09-22T07:37:34.558Z",
+      "waitedMs": 1483,
+      "sampleStartedAt": "2026-09-22T07:35:27.193Z",
+      "sampleCompletedAt": "2026-09-22T07:37:24.542Z"
+    },
+    {
+      "run": "hotpath-opt-c-a1",
+      "acquiredAt": "2026-09-22T07:39:45.403Z",
+      "endedAt": "2026-09-22T07:42:14.838Z",
+      "waitedMs": 1,
+      "sampleStartedAt": "2026-09-22T07:40:07.647Z",
+      "sampleCompletedAt": "2026-09-22T07:42:05.448Z"
+    },
+    {
+      "run": "hotpath-opt-c-b1",
+      "acquiredAt": "2026-09-22T07:43:12.438Z",
+      "endedAt": "2026-09-22T07:45:37.863Z",
+      "waitedMs": 1,
+      "sampleStartedAt": "2026-09-22T07:43:30.004Z",
+      "sampleCompletedAt": "2026-09-22T07:45:27.831Z"
+    },
+    {
+      "run": "hotpath-opt-c-b2",
+      "acquiredAt": "2026-09-22T07:45:39.151Z",
+      "endedAt": "2026-09-22T07:48:01.003Z",
+      "waitedMs": 1,
+      "sampleStartedAt": "2026-09-22T07:45:53.843Z",
+      "sampleCompletedAt": "2026-09-22T07:47:51.131Z"
+    },
+    {
+      "run": "hotpath-opt-c-a2",
+      "acquiredAt": "2026-09-22T07:48:02.441Z",
+      "endedAt": "2026-09-22T07:50:25.645Z",
+      "waitedMs": 155,
+      "sampleStartedAt": "2026-09-22T07:48:17.279Z",
+      "sampleCompletedAt": "2026-09-22T07:50:15.714Z"
+    },
+    {
+      "run": "hotpath-opt-u-a1",
+      "acquiredAt": "2026-09-22T07:57:00.474Z",
+      "endedAt": "2026-09-22T07:59:25.056Z",
+      "waitedMs": 50241,
+      "sampleStartedAt": "2026-09-22T07:57:17.335Z",
+      "sampleCompletedAt": "2026-09-22T07:59:14.935Z"
+    },
+    {
+      "run": "hotpath-opt-u-b1",
+      "acquiredAt": "2026-09-22T07:59:26.766Z",
+      "endedAt": "2026-09-22T08:02:11.062Z",
+      "waitedMs": 412,
+      "sampleStartedAt": "2026-09-22T07:59:42.776Z",
+      "sampleCompletedAt": "2026-09-22T08:02:00.387Z"
+    },
+    {
+      "run": "hotpath-opt-u-b2",
+      "acquiredAt": "2026-09-22T08:02:12.864Z",
+      "endedAt": "2026-09-22T08:04:33.142Z",
+      "waitedMs": 716,
+      "sampleStartedAt": "2026-09-22T08:02:27.747Z",
+      "sampleCompletedAt": "2026-09-22T08:04:23.226Z"
+    },
+    {
+      "run": "hotpath-opt-u-a2",
+      "acquiredAt": "2026-09-22T08:04:34.358Z",
+      "endedAt": "2026-09-22T08:06:56.574Z",
+      "waitedMs": 1,
+      "sampleStartedAt": "2026-09-22T08:04:49.389Z",
+      "sampleCompletedAt": "2026-09-22T08:06:46.989Z"
+    }
+  ]
+}

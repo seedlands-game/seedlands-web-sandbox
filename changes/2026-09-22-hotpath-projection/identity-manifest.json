@@ -1,0 +1,66 @@
+{
+  "A": {
+    "sourceSha": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+    "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+    "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "files": {
+      "apps/web/vite.config.ts": "82cf05da773f67c2cb875ab03062cd9fb2ac15d175105e1625624eb239032d3a",
+      "playwright.config.ts": "ef607ffcccbc8959b4b1adfcc5e125a4ba97de0245bab9499ab5538e17e67f2c",
+      "pnpm-lock.yaml": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+      "apps/web/tests/e2e/classic-runtime.spec.ts": "2741d16f7fec5c3c36c446c7fbd625effa789c72814c754796a882304aecab2b",
+      "apps/web/src/app/ui/gameplay-ui-projector.ts": "2cafd69432a46374e49889ffb388ccf9bacec00f1806e1410e61349856c6e432",
+      "packages/stdlib/src/server/gameplay/modules/crafting-provider.ts": "de268eea6ad4d092820c431380705d8ab6e5ea017a647071d4c3b90a6aa9184f",
+      "packages/stdlib/src/server/gameplay/modules/inventory-action-model.ts": "fce6478dd087ad935f9d3aaa0370c9be0dd90a2a1e33783371688ab5cff2f0ea",
+      "packages/stdlib/src/server/gameplay/modules/registered-inventory-runtime.ts": "4fb1333220a8ad0f0e7c60fcc0faa50b2c15619f3fc68477b6d065dd49ff0425"
+    }
+  },
+  "C": {
+    "sourceSha": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+    "sourceDigest": "9b3718375f35473a69dc8e41a436d60f5debb2202c859ed32d44babf4694c59d",
+    "artifactDigest": "78663f07943711df54e4247fc73fa19d1ca7cdba1d7c12ca041d1c54eff62358",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "files": {
+      "apps/web/vite.config.ts": "82cf05da773f67c2cb875ab03062cd9fb2ac15d175105e1625624eb239032d3a",
+      "playwright.config.ts": "ef607ffcccbc8959b4b1adfcc5e125a4ba97de0245bab9499ab5538e17e67f2c",
+      "pnpm-lock.yaml": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+      "apps/web/tests/e2e/classic-runtime.spec.ts": "2741d16f7fec5c3c36c446c7fbd625effa789c72814c754796a882304aecab2b",
+      "apps/web/src/app/ui/gameplay-ui-projector.ts": "2cafd69432a46374e49889ffb388ccf9bacec00f1806e1410e61349856c6e432",
+      "packages/stdlib/src/server/gameplay/modules/crafting-provider.ts": "1a2a51dd48043d29663278079bcc85fbebbe54c79f22d1597d364b5b7b2c2d42",
+      "packages/stdlib/src/server/gameplay/modules/inventory-action-model.ts": "a936cf1e68d4e5e131f6a0335951ea4bd633aa744c69eec3b11108efe8033972",
+      "packages/stdlib/src/server/gameplay/modules/registered-inventory-runtime.ts": "07aa1633fe867c6fcc26232794d1622722a1378986b1647379f9472233e3110e"
+    }
+  },
+  "U": {
+    "sourceSha": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+    "sourceDigest": "23bf3ea6e83a694b05b493d9ee571fb0d7b7e31bde8913e45915fae8ffb8a0bc",
+    "artifactDigest": "2e55d481205180ef7359d8a48807cd3ab27660b75639ebc6c5b298ca81ba44d3",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "files": {
+      "apps/web/vite.config.ts": "82cf05da773f67c2cb875ab03062cd9fb2ac15d175105e1625624eb239032d3a",
+      "playwright.config.ts": "ef607ffcccbc8959b4b1adfcc5e125a4ba97de0245bab9499ab5538e17e67f2c",
+      "pnpm-lock.yaml": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+      "apps/web/tests/e2e/classic-runtime.spec.ts": "2741d16f7fec5c3c36c446c7fbd625effa789c72814c754796a882304aecab2b",
+      "apps/web/src/app/ui/gameplay-ui-projector.ts": "f7681899472907cec131157207b8141e4198963ce983deed931882085a86fffc",
+      "packages/stdlib/src/server/gameplay/modules/crafting-provider.ts": "de268eea6ad4d092820c431380705d8ab6e5ea017a647071d4c3b90a6aa9184f",
+      "packages/stdlib/src/server/gameplay/modules/inventory-action-model.ts": "fce6478dd087ad935f9d3aaa0370c9be0dd90a2a1e33783371688ab5cff2f0ea",
+      "packages/stdlib/src/server/gameplay/modules/registered-inventory-runtime.ts": "4fb1333220a8ad0f0e7c60fcc0faa50b2c15619f3fc68477b6d065dd49ff0425"
+    }
+  },
+  "CU": {
+    "sourceSha": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+    "sourceDigest": "606b3d1d6cae2b84c36dc2badf5979cabfc046b3015ca838ed4d43b032f62e80",
+    "artifactDigest": "080f802e2949552dc5001d2f10b5e14ebca87f05c8eb87245cbefe8722e23227",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "files": {
+      "apps/web/vite.config.ts": "82cf05da773f67c2cb875ab03062cd9fb2ac15d175105e1625624eb239032d3a",
+      "playwright.config.ts": "ef607ffcccbc8959b4b1adfcc5e125a4ba97de0245bab9499ab5538e17e67f2c",
+      "pnpm-lock.yaml": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+      "apps/web/tests/e2e/classic-runtime.spec.ts": "2741d16f7fec5c3c36c446c7fbd625effa789c72814c754796a882304aecab2b",
+      "apps/web/src/app/ui/gameplay-ui-projector.ts": "f7681899472907cec131157207b8141e4198963ce983deed931882085a86fffc",
+      "packages/stdlib/src/server/gameplay/modules/crafting-provider.ts": "1a2a51dd48043d29663278079bcc85fbebbe54c79f22d1597d364b5b7b2c2d42",
+      "packages/stdlib/src/server/gameplay/modules/inventory-action-model.ts": "a936cf1e68d4e5e131f6a0335951ea4bd633aa744c69eec3b11108efe8033972",
+      "packages/stdlib/src/server/gameplay/modules/registered-inventory-runtime.ts": "07aa1633fe867c6fcc26232794d1622722a1378986b1647379f9472233e3110e"
+    }
+  }
+}

@@ -1,0 +1,2676 @@
+{
+  "runs": [
+    {
+      "name": "hotpath-opt-aa1",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 174.17768209610892,
+          "gcMsPerSecond": 8.277857376610784,
+          "allocatedMiBPerSecond": 124.21906641167072,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1778.2480000000035
+            },
+            {
+              "name": "chunkClient",
+              "value": 1233.124999999999
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1209.056999999999
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1198.9109999999996
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 765.4969999999997
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 7.422
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.10370476802270294,
+          "gcMsPerSecond": 0.10370476802280404,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 137.0879208250765,
+          "gcMsPerSecond": 3.401184812769841,
+          "allocatedMiBPerSecond": 90.68935240308444,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3271.1840000000034
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 3066.8860000000063
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2188.9560000000024
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2146.6960000000017
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1936.5310000000004
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1082.279999999999
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 754.5899999999996
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 597.1010000000001
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 337.21600000000007
+            },
+            {
+              "name": "platformClone",
+              "value": 300.3999999999999
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 81.37400000000001
+            },
+            {
+              "name": "collisionQuery",
+              "value": 74.829
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.6985547796918314,
+          "gcMsPerSecond": 0.14053177004643658,
+          "allocatedMiBPerSecond": 0.1984880202346378,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.1618804299724588,
+          "gcMsPerSecond": 0.06829880171978484,
+          "allocatedMiBPerSecond": 0.38591317004627657,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 24.39343744967669,
+          "gcMsPerSecond": 1.018910085063808,
+          "allocatedMiBPerSecond": 30.187667657931648,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1518.5970000000002
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1370.9619999999998
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "mainCpu": 174.17768209610892,
+        "authorityCpu": 137.0879208250765,
+        "totalCpu": 311.2656029211854,
+        "frameP95": 17.600000023841858,
+        "frameP99": 19.30000001192093,
+        "chunkP95": 517.8000000119209
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.600000023841858,
+          "p99Ms": 19.30000001192093,
+          "maxMs": 81.60000002384186,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 78.10000002384186
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 117.40000003576279,
+            "p95Ms": 517.8000000119209,
+            "p99Ms": 701.2000000476837,
+            "maxMs": 701.2000000476837
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49741824,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 1,
+          "presentedEntityCount": 2
+        },
+        "storage": {
+          "bytes": 22515718
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-aa2",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 170.20009189604392,
+          "gcMsPerSecond": 8.23894385010232,
+          "allocatedMiBPerSecond": 119.3610756675684,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1713.9240000000011
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1074.7509999999995
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1052.2549999999999
+            },
+            {
+              "name": "chunkClient",
+              "value": 1006.5089999999994
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 640.8480000000001
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.512
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.03736067936096196,
+          "gcMsPerSecond": 0.03736067936095091,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 23.712093767549234,
+          "gcMsPerSecond": 0.6615510930783235,
+          "allocatedMiBPerSecond": 29.392617482417876,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1485.5990000000006
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1326.7240000000008
+            }
+          ]
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 132.9563082507006,
+          "gcMsPerSecond": 3.641757717286712,
+          "allocatedMiBPerSecond": 90.35563881108789,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3009.668000000006
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 2859.5740000000055
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 1967.9209999999996
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 1940.2039999999997
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1927.7690000000005
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 908.4829999999988
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 770.905
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 551.2049999999999
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 371.5339999999999
+            },
+            {
+              "name": "platformClone",
+              "value": 309.975
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 78.656
+            },
+            {
+              "name": "collisionQuery",
+              "value": 57.05499999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.6783405532115647,
+          "gcMsPerSecond": 0.30662812833149067,
+          "allocatedMiBPerSecond": 0.19588140201197482,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.2119241009412063,
+          "gcMsPerSecond": 0.16500515249250186,
+          "allocatedMiBPerSecond": 0.38642436922597867,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 170.20009189604392,
+        "authorityCpu": 132.9563082507006,
+        "totalCpu": 303.15640014674455,
+        "frameP95": 17.69999998807907,
+        "frameP99": 19.5,
+        "chunkP95": 550.1000000238419
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.69999998807907,
+          "p99Ms": 19.5,
+          "maxMs": 83.60000002384186,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 83.60000002384186
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 117.39999997615814,
+            "p95Ms": 550.1000000238419,
+            "p99Ms": 732.6000000238419,
+            "maxMs": 732.6000000238419
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 140,
+          "completedTasks": 140,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 50823168,
+          "kernel": {
+            "calls": 2003,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22198397
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-aa3",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 175.82689513755125,
+          "gcMsPerSecond": 7.9481438780938864,
+          "allocatedMiBPerSecond": 124.86362410633346,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1846.6739999999988
+            },
+            {
+              "name": "chunkClient",
+              "value": 1216.6389999999983
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1208.8819999999992
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1121.5960000000002
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 717.6209999999996
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.506
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.07034102251989911,
+          "gcMsPerSecond": 0.07034102252005738,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 25.70294172984486,
+          "gcMsPerSecond": 0.8849713918431371,
+          "allocatedMiBPerSecond": 32.169711912420695,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1593.0690000000006
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1456.5700000000002
+            }
+          ]
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 140.78501895794162,
+          "gcMsPerSecond": 3.3807074932762586,
+          "allocatedMiBPerSecond": 91.97886831513462,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3424.740000000001
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 3271.3170000000036
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2338.470000000003
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2305.3550000000037
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1946.5860000000034
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1081.1120000000005
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 832.6509999999997
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 617.5859999999999
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 454.05899999999974
+            },
+            {
+              "name": "platformClone",
+              "value": 367.264
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 97.908
+            },
+            {
+              "name": "collisionQuery",
+              "value": 40.41199999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.4501363978178459,
+          "gcMsPerSecond": 0.24072642144384476,
+          "allocatedMiBPerSecond": 0.37507636297647473,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.706932932013641,
+          "gcMsPerSecond": 0.24217890303563827,
+          "allocatedMiBPerSecond": 0.1801251053287009,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 175.82689513755125,
+        "authorityCpu": 140.78501895794162,
+        "totalCpu": 316.61191409549286,
+        "frameP95": 17.69999998807907,
+        "frameP99": 19.899999976158142,
+        "chunkP95": 517.5
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.69999998807907,
+          "p99Ms": 19.899999976158142,
+          "maxMs": 89,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 89
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 118.10000002384186,
+            "p95Ms": 517.5,
+            "p99Ms": 682.8000000119209,
+            "maxMs": 682.8000000119209
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49741824,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22833042
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-c-a1",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 148.64356666259698,
+          "gcMsPerSecond": 8.019901261067853,
+          "allocatedMiBPerSecond": 74.30254389253061,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1823.812000000001
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1342.2510000000009
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 809.7529999999998
+            },
+            {
+              "name": "chunkClient",
+              "value": 196.13199999999995
+            },
+            {
+              "name": "collisionQuery",
+              "value": 127.33200000000001
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.515
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 24.101273817415237,
+          "gcMsPerSecond": 0.8240565101202322,
+          "allocatedMiBPerSecond": 29.505731403664825,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1502.8590000000002
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1349.929000000001
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 2.155091115477057,
+          "gcMsPerSecond": 0.14811497203066334,
+          "allocatedMiBPerSecond": 0.22332406275530786,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.0997149911328854,
+          "gcMsPerSecond": 0.09971499113281447,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.131010068041638,
+          "gcMsPerSecond": 0.20635973171284877,
+          "allocatedMiBPerSecond": 0.3438807858468624,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 148.4362463450192,
+          "gcMsPerSecond": 3.8513094175538494,
+          "allocatedMiBPerSecond": 90.06270424327812,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3387.6200000000026
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 3171.876999999999
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2273.6230000000005
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2255.0480000000007
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 2022.5090000000014
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1306.2599999999998
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 734.2560000000002
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 571.5810000000001
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 400.00399999999996
+            },
+            {
+              "name": "platformClone",
+              "value": 394.30699999999996
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 82.13
+            },
+            {
+              "name": "collisionQuery",
+              "value": 57.486999999999995
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "mainCpu": 148.64356666259698,
+        "authorityCpu": 148.4362463450192,
+        "totalCpu": 297.07981300761617,
+        "frameP95": 17.600000023841858,
+        "frameP99": 19.69999998807907,
+        "chunkP95": 515.8999999761581
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.600000023841858,
+          "p99Ms": 19.69999998807907,
+          "maxMs": 75.30000001192093,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 75.30000001192093
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 134,
+            "p95Ms": 515.8999999761581,
+            "p99Ms": 699.4000000357628,
+            "maxMs": 699.4000000357628
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 135,
+          "completedTasks": 135,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49348608,
+          "kernel": {
+            "calls": 1913,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 1,
+          "presentedEntityCount": 2
+        },
+        "storage": {
+          "bytes": 22198397
+        }
+      },
+      "delta": {
+        "submittedTasks": 85,
+        "completedTasks": 86,
+        "submittedBytes": 42467328,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-c-a2",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 174.52004119406334,
+          "gcMsPerSecond": 8.167552614822956,
+          "allocatedMiBPerSecond": 120.72572231583695,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1892.503999999999
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1196.1300000000006
+            },
+            {
+              "name": "chunkClient",
+              "value": 1083.9439999999997
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1032.3360000000002
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 636.5109999999994
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.507
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 25.562303644689116,
+          "gcMsPerSecond": 0.7898518355418048,
+          "allocatedMiBPerSecond": 33.725953300942145,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1572.5310000000006
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1376.4099999999983
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.167792713571162,
+          "gcMsPerSecond": 0.07165146588709939,
+          "allocatedMiBPerSecond": 0.3611220190974282,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 125.14124854212454,
+          "gcMsPerSecond": 3.5136845776778,
+          "allocatedMiBPerSecond": 91.0540548225396,
+          "groups": [
+            {
+              "name": "fullGameplayView",
+              "value": 2928.5020000000036
+            },
+            {
+              "name": "moduleStatePorts",
+              "value": 2902.0200000000004
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2124.412000000002
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2095.449000000002
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1678.3980000000015
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 678.7719999999999
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 628.4129999999994
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 555.0439999999999
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 350.11999999999983
+            },
+            {
+              "name": "platformClone",
+              "value": 349.59399999999977
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 85.71300000000001
+            },
+            {
+              "name": "collisionQuery",
+              "value": 60.24699999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.10943441634103869,
+          "gcMsPerSecond": 0.10943441634100709,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.8134846914935512,
+          "gcMsPerSecond": 0.30784370198977296,
+          "allocatedMiBPerSecond": 0.212852244733091,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 174.52004119406334,
+        "authorityCpu": 125.14124854212454,
+        "totalCpu": 299.6612897361879,
+        "frameP95": 17.69999998807907,
+        "frameP99": 19.69999998807907,
+        "chunkP95": 483.39999997615814
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.69999998807907,
+          "p95Ms": 17.69999998807907,
+          "p99Ms": 19.69999998807907,
+          "maxMs": 75.69999998807907,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 75.69999998807907
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 116.40000003576279,
+            "p95Ms": 483.39999997615814,
+            "p99Ms": 667.1999999880791,
+            "maxMs": 667.1999999880791
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 137,
+          "completedTasks": 137,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49741824,
+          "kernel": {
+            "calls": 1958,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 1,
+          "presentedEntityCount": 2
+        },
+        "storage": {
+          "bytes": 22833042
+        }
+      },
+      "delta": {
+        "submittedTasks": 85,
+        "completedTasks": 86,
+        "submittedBytes": 42467328,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-c-b1",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "9b3718375f35473a69dc8e41a436d60f5debb2202c859ed32d44babf4694c59d",
+        "artifactDigest": "78663f07943711df54e4247fc73fa19d1ca7cdba1d7c12ca041d1c54eff62358",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 189.59433098094865,
+          "gcMsPerSecond": 9.519325632772897,
+          "allocatedMiBPerSecond": 132.22473658872454,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1874.0679999999986
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1698.250999999999
+            },
+            {
+              "name": "chunkClient",
+              "value": 1641.386
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1112.2900000000004
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 685.637
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 5.085
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.07018124486180766,
+          "gcMsPerSecond": 0.07018124486176819,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 107.06258231812818,
+          "gcMsPerSecond": 3.2850552345134285,
+          "allocatedMiBPerSecond": 59.10274310022876,
+          "groups": [
+            {
+              "name": "moduleBoundary",
+              "value": 1831.143000000001
+            },
+            {
+              "name": "moduleStatePorts",
+              "value": 1243.2349999999994
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 895.3989999999998
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 866.5399999999988
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 575.1339999999997
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 530.349
+            },
+            {
+              "name": "platformClone",
+              "value": 311.612
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 232.4579999999999
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 229.53399999999993
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 220.09899999999996
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 101.99300000000002
+            },
+            {
+              "name": "collisionQuery",
+              "value": 58.61
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 29.960730462423868,
+          "gcMsPerSecond": 2.0619284762676204,
+          "allocatedMiBPerSecond": 29.345218885268217,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1769.0819999999994
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1594.318999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 2.172118838378533,
+          "gcMsPerSecond": 0.463009312278363,
+          "allocatedMiBPerSecond": 0.23223311943004252,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.6031810010691105,
+          "gcMsPerSecond": 0.32435026920761256,
+          "allocatedMiBPerSecond": 0.32758369590052083,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 189.59433098094865,
+        "authorityCpu": 107.06258231812818,
+        "totalCpu": 296.65691329907685,
+        "frameP95": 17.80000001192093,
+        "frameP99": 20,
+        "chunkP95": 533.1000000238419
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.69999998807907,
+          "p95Ms": 17.80000001192093,
+          "p99Ms": 20,
+          "maxMs": 95.70000004768372,
+          "longFrameCount": 5,
+          "lastLongFrameMs": 95.70000004768372
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 150.5,
+            "p95Ms": 533.1000000238419,
+            "p99Ms": 699.8000000119209,
+            "maxMs": 699.8000000119209
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 138,
+          "completedTasks": 138,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49840128,
+          "kernel": {
+            "calls": 1965,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 1,
+          "presentedEntityCount": 2
+        },
+        "storage": {
+          "bytes": 22515329
+        }
+      },
+      "delta": {
+        "submittedTasks": 85,
+        "completedTasks": 86,
+        "submittedBytes": 42467328,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-c-b2",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "9b3718375f35473a69dc8e41a436d60f5debb2202c859ed32d44babf4694c59d",
+        "artifactDigest": "78663f07943711df54e4247fc73fa19d1ca7cdba1d7c12ca041d1c54eff62358",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 181.92619172882584,
+          "gcMsPerSecond": 9.624786372370316,
+          "allocatedMiBPerSecond": 120.62208549925144,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1832.4109999999994
+            },
+            {
+              "name": "chunkClient",
+              "value": 1394.1549999999997
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1369.249000000001
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1197.5619999999985
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 774.7109999999992
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 8.263
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 32.68229370467167,
+          "gcMsPerSecond": 1.2068957990550053,
+          "allocatedMiBPerSecond": 32.77172182728552,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 2019.0470000000012
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1827.0770000000016
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 2.5205357479969455,
+          "gcMsPerSecond": 0.13164832526814677,
+          "allocatedMiBPerSecond": 0.35317060327393573,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 133.59686955607157,
+          "gcMsPerSecond": 3.21221165434831,
+          "allocatedMiBPerSecond": 57.99149359706031,
+          "groups": [
+            {
+              "name": "moduleBoundary",
+              "value": 2696.3339999999976
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1890.9489999999983
+            },
+            {
+              "name": "moduleStatePorts",
+              "value": 1847.5630000000006
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 908.4590000000001
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 632.736
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 549.1560000000003
+            },
+            {
+              "name": "platformClone",
+              "value": 410.9480000000002
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 267.10699999999997
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 210.012
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 199.838
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 76.29899999999999
+            },
+            {
+              "name": "collisionQuery",
+              "value": 73.29499999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.06888798446327715,
+          "gcMsPerSecond": 0.0688879844632384,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.6015576672663794,
+          "gcMsPerSecond": 0.11915163027454392,
+          "allocatedMiBPerSecond": 0.19792634432476328,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 181.92619172882584,
+        "authorityCpu": 133.59686955607157,
+        "totalCpu": 315.5230612848974,
+        "frameP95": 17.80000001192093,
+        "frameP99": 19.599999964237213,
+        "chunkP95": 601.3000000119209
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.80000001192093,
+          "p99Ms": 19.599999964237213,
+          "maxMs": 82,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 82
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 133.9000000357628,
+            "p95Ms": 601.3000000119209,
+            "p99Ms": 733.6000000238419,
+            "maxMs": 733.6000000238419
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49152000,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22198397
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-u-a1",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 168.31658284115045,
+          "gcMsPerSecond": 8.563834087072348,
+          "allocatedMiBPerSecond": 120.717032060275,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1780.1589999999985
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1227.0889999999995
+            },
+            {
+              "name": "chunkClient",
+              "value": 1127.94
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1027.8109999999992
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 613.7110000000001
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 7.225
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.2142793478681213,
+          "gcMsPerSecond": 0.2197707519721705,
+          "allocatedMiBPerSecond": 0.37611115439763776,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.06937115272950042,
+          "gcMsPerSecond": 0.06937115272957119,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 139.92346961201508,
+          "gcMsPerSecond": 3.6924681509948436,
+          "allocatedMiBPerSecond": 90.91628099986663,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3423.6019999999958
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 3316.2830000000004
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2316.686000000003
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2293.451000000003
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1955.9360000000024
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1102.5519999999995
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 869.0449999999988
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 579.2650000000001
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 395.9809999999998
+            },
+            {
+              "name": "platformClone",
+              "value": 285.19999999999993
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 93.86300000000003
+            },
+            {
+              "name": "collisionQuery",
+              "value": 73.55300000000001
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 26.68221160029377,
+          "gcMsPerSecond": 0.7997808601795087,
+          "allocatedMiBPerSecond": 33.11550027480984,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1670.7240000000018
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1470.0720000000017
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.8736251956495211,
+          "gcMsPerSecond": 0.13806669485038675,
+          "allocatedMiBPerSecond": 0.19250255685923576,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 168.31658284115045,
+        "authorityCpu": 139.92346961201508,
+        "totalCpu": 308.2400524531655,
+        "frameP95": 17.600000023841858,
+        "frameP99": 20.100000023841858,
+        "chunkP95": 483.30000001192093
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.69999998807907,
+          "p95Ms": 17.600000023841858,
+          "p99Ms": 20.100000023841858,
+          "maxMs": 92.19999998807907,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 92.19999998807907
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 120,
+            "p95Ms": 483.30000001192093,
+            "p99Ms": 648.8000000119209,
+            "maxMs": 648.8000000119209
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49152000,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22515718
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-u-a2",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "bc5837782c3dee24b7fb119af91eb650b78de2c0f1e0708f8ff0cc7c01fbf775",
+        "artifactDigest": "446e7c47699db8f93b5a316bf60377a2941cd3988fcc1473be7133a7c689c7df",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 174.2160888374536,
+          "gcMsPerSecond": 8.111758588125994,
+          "allocatedMiBPerSecond": 127.57149412612284,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1878.669000000001
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1305.1360000000004
+            },
+            {
+              "name": "chunkClient",
+              "value": 1273.4449999999995
+            },
+            {
+              "name": "gameplayUI",
+              "value": 1205.9009999999992
+            },
+            {
+              "name": "uiDeepEquality",
+              "value": 724.5630000000003
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.506
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0,
+          "gcMsPerSecond": 0,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.7718510020758573,
+          "gcMsPerSecond": 0.20124099474769447,
+          "allocatedMiBPerSecond": 0.18276318927182483,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 22.81818488240949,
+          "gcMsPerSecond": 0.5736358581010188,
+          "allocatedMiBPerSecond": 29.565280185880326,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1429.5399999999988
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1224.8749999999986
+            }
+          ]
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 132.8449225306909,
+          "gcMsPerSecond": 3.8475931689711667,
+          "allocatedMiBPerSecond": 91.76713490081694,
+          "groups": [
+            {
+              "name": "fullGameplayView",
+              "value": 3154.738000000001
+            },
+            {
+              "name": "moduleStatePorts",
+              "value": 3035.3819999999987
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2258.870000000003
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2238.341000000004
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1748.1750000000022
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 789.0629999999993
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 688.7219999999999
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 652.6350000000004
+            },
+            {
+              "name": "platformClone",
+              "value": 316.0979999999999
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 297.52699999999993
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 128.966
+            },
+            {
+              "name": "collisionQuery",
+              "value": 64.42899999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.1170579886183734,
+          "gcMsPerSecond": 0.1741415509208997,
+          "allocatedMiBPerSecond": 0.36276294232037026,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 174.2160888374536,
+        "authorityCpu": 132.8449225306909,
+        "totalCpu": 307.0610113681445,
+        "frameP95": 17.600000023841858,
+        "frameP99": 19.899999976158142,
+        "chunkP95": 517.3000000119209
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.69999998807907,
+          "p95Ms": 17.600000023841858,
+          "p99Ms": 19.899999976158142,
+          "maxMs": 87.19999998807907,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 87.19999998807907
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 116.89999997615814,
+            "p95Ms": 517.3000000119209,
+            "p99Ms": 684.1000000238419,
+            "maxMs": 684.1000000238419
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 138,
+          "completedTasks": 138,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 50331648,
+          "kernel": {
+            "calls": 1995,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22515718
+        }
+      },
+      "delta": {
+        "submittedTasks": 86,
+        "completedTasks": 87,
+        "submittedBytes": 43253760,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-u-b1",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "23bf3ea6e83a694b05b493d9ee571fb0d7b7e31bde8913e45915fae8ffb8a0bc",
+        "artifactDigest": "2e55d481205180ef7359d8a48807cd3ab27660b75639ebc6c5b298ca81ba44d3",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 9,
+          "cpuMsPerSecond": 130.17695893586102,
+          "gcMsPerSecond": 6.731361467797478,
+          "allocatedMiBPerSecond": 62.19678259635351,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1970.8919999999996
+            },
+            {
+              "name": "gameplayUI",
+              "value": 587.7649999999999
+            },
+            {
+              "name": "collisionQuery",
+              "value": 195.77
+            },
+            {
+              "name": "chunkClient",
+              "value": 183.96
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 5.183999999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 9,
+          "cpuMsPerSecond": 0.05339868707642691,
+          "gcMsPerSecond": 0.053398687076409705,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 9,
+          "cpuMsPerSecond": 1.021212143706101,
+          "gcMsPerSecond": 0.15200713457882561,
+          "allocatedMiBPerSecond": 0.34298897292596625,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 9,
+          "cpuMsPerSecond": 2.2403689967353353,
+          "gcMsPerSecond": 0.4906228905430652,
+          "allocatedMiBPerSecond": 0.1959513830141815,
+          "groups": []
+        },
+        {
+          "role": "authority",
+          "segments": 9,
+          "cpuMsPerSecond": 146.03705766834628,
+          "gcMsPerSecond": 3.8069415217834455,
+          "allocatedMiBPerSecond": 94.6784809109611,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 4319.697000000003
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 4279.7570000000005
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 3102.905999999997
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 3071.9969999999976
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 2377.737
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 1290.4790000000007
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 784.8349999999998
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 559.3989999999999
+            },
+            {
+              "name": "platformClone",
+              "value": 270.94399999999996
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 136.53799999999998
+            },
+            {
+              "name": "collisionQuery",
+              "value": 99.65299999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 9,
+          "cpuMsPerSecond": 19.738514573261867,
+          "gcMsPerSecond": 0.9701537403741527,
+          "allocatedMiBPerSecond": 22.9587827585366,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1542.3189999999995
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1278.6109999999999
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "mainCpu": 130.17695893586102,
+        "authorityCpu": 146.03705766834628,
+        "totalCpu": 276.2140166042073,
+        "frameP95": 17.600000023841858,
+        "frameP99": 19.600000023841858,
+        "chunkP95": 666.5
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.600000023841858,
+          "p95Ms": 17.600000023841858,
+          "p99Ms": 19.600000023841858,
+          "maxMs": 83.5,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 63.89999997615814
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 133.60000002384186,
+            "p95Ms": 666.5,
+            "p99Ms": 849.4000000357628,
+            "maxMs": 849.4000000357628
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49152000,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22833042
+        }
+      },
+      "delta": {
+        "submittedTasks": 84,
+        "completedTasks": 85,
+        "submittedBytes": 41877504,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    },
+    {
+      "name": "hotpath-opt-u-b2",
+      "valid": true,
+      "identity": {
+        "source": "0759202cd0efbd6cc23dca4f96f657f70f8879d0",
+        "sourceDigest": "23bf3ea6e83a694b05b493d9ee571fb0d7b7e31bde8913e45915fae8ffb8a0bc",
+        "artifactDigest": "2e55d481205180ef7359d8a48807cd3ab27660b75639ebc6c5b298ca81ba44d3",
+        "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+      },
+      "scenario": "classic-canonical-runtime-v1",
+      "environment": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+        "platform": "MacIntel",
+        "hardwareConcurrency": 12,
+        "viewport": {
+          "width": 960,
+          "height": 540
+        },
+        "devicePixelRatio": 1,
+        "webgl2": {
+          "renderer": "WebKit WebGL",
+          "vendor": "WebKit",
+          "version": "WebGL 2.0 (OpenGL ES 3.0 Chromium)"
+        }
+      },
+      "targets": [
+        {
+          "role": "main",
+          "segments": 7,
+          "cpuMsPerSecond": 172.50116204331525,
+          "gcMsPerSecond": 7.652945747150429,
+          "allocatedMiBPerSecond": 118.33976558858697,
+          "groups": [
+            {
+              "name": "observerVisitNode",
+              "value": 1797.3130000000021
+            },
+            {
+              "name": "collisionQuery",
+              "value": 1300.7929999999983
+            },
+            {
+              "name": "chunkClient",
+              "value": 1199.4750000000001
+            },
+            {
+              "name": "gameplayUI",
+              "value": 511.125
+            },
+            {
+              "name": "prepareWorkerInput",
+              "value": 2.532
+            }
+          ]
+        },
+        {
+          "role": "authority",
+          "segments": 7,
+          "cpuMsPerSecond": 131.05814121150476,
+          "gcMsPerSecond": 3.628757475121979,
+          "allocatedMiBPerSecond": 91.5207007864987,
+          "groups": [
+            {
+              "name": "moduleStatePorts",
+              "value": 3199.569
+            },
+            {
+              "name": "fullGameplayView",
+              "value": 3142.5930000000017
+            },
+            {
+              "name": "craftableEnumeration",
+              "value": 2222.5990000000024
+            },
+            {
+              "name": "inventoryActionModel",
+              "value": 2193.936000000003
+            },
+            {
+              "name": "moduleBoundary",
+              "value": 1770.761000000003
+            },
+            {
+              "name": "snapshotMetrics",
+              "value": 782.968999999999
+            },
+            {
+              "name": "preparedEntityMutation",
+              "value": 630.8299999999996
+            },
+            {
+              "name": "authorityCapacity",
+              "value": 604.6809999999996
+            },
+            {
+              "name": "snapshotCheckpoint",
+              "value": 435.45200000000045
+            },
+            {
+              "name": "platformClone",
+              "value": 309.941
+            },
+            {
+              "name": "schedulerPreview",
+              "value": 99.397
+            },
+            {
+              "name": "collisionQuery",
+              "value": 50.49999999999999
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.143077447837783,
+          "gcMsPerSecond": 0.10103558294448223,
+          "allocatedMiBPerSecond": 0.38029344316539826,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 26.911963233113596,
+          "gcMsPerSecond": 1.1161338275681172,
+          "allocatedMiBPerSecond": 32.34221821647489,
+          "groups": [
+            {
+              "name": "providerHalo",
+              "value": 1660.5670000000007
+            },
+            {
+              "name": "worldgenCache",
+              "value": 1485.368000000001
+            }
+          ]
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 1.5819818379524186,
+          "gcMsPerSecond": 0.20534573847742602,
+          "allocatedMiBPerSecond": 0.20117395306285774,
+          "groups": []
+        },
+        {
+          "role": "other",
+          "segments": 7,
+          "cpuMsPerSecond": 0.03723850047594529,
+          "gcMsPerSecond": 0.037238500475789395,
+          "allocatedMiBPerSecond": 0,
+          "groups": []
+        }
+      ],
+      "metrics": {
+        "mainCpu": 172.50116204331525,
+        "authorityCpu": 131.05814121150476,
+        "totalCpu": 303.55930325482,
+        "frameP95": 17.599999964237213,
+        "frameP99": 19.900000035762787,
+        "chunkP95": 599.5
+      },
+      "c4": {
+        "stage": "C4",
+        "frame": {
+          "count": 1200,
+          "p50Ms": 16.69999998807907,
+          "p95Ms": 17.599999964237213,
+          "p99Ms": 19.900000035762787,
+          "maxMs": 80.09999996423721,
+          "longFrameCount": 4,
+          "lastLongFrameMs": 72.90000003576279
+        },
+        "streaming": {
+          "chunkVisible": {
+            "count": 88,
+            "p50Ms": 133.4000000357628,
+            "p95Ms": 599.5,
+            "p99Ms": 749.5,
+            "maxMs": 749.5
+          },
+          "completedChunkTraces": 88,
+          "traceEventCount": 914
+        },
+        "workers": {
+          "counts": {
+            "total": 5,
+            "authority": 1,
+            "logic": 1,
+            "persistence": 1,
+            "fluid": 1,
+            "general": 1
+          },
+          "submittedTasks": 136,
+          "completedTasks": 136,
+          "failedTasks": 0,
+          "staleResults": 0,
+          "submittedBytes": 49152000,
+          "kernel": {
+            "calls": 1916,
+            "failures": 0,
+            "memoryBytes": 18874368
+          }
+        },
+        "resources": {
+          "loadedChunks": 24,
+          "renderedChunks": 20,
+          "uploadQueueDepth": 0,
+          "estimatedMeshBytes": 6116460,
+          "residency": {
+            "residentCount": 72,
+            "target": 256,
+            "hardLimit": 2048,
+            "pinnedCount": 18,
+            "dirtyCount": 0,
+            "evictableCleanCount": 54,
+            "evictionCount": 0,
+            "rejectedAdmissionCount": 0,
+            "oversubscribed": false,
+            "autoSaveInFlight": false,
+            "autoSaveFailureCount": 0,
+            "nextRetryActiveTimeMs": 0,
+            "lastSaveError": null
+          },
+          "npcCount": 1,
+          "worldItemCount": 0,
+          "presentedEntityCount": 1
+        },
+        "storage": {
+          "bytes": 22833042
+        }
+      },
+      "delta": {
+        "submittedTasks": 84,
+        "completedTasks": 85,
+        "submittedBytes": 41877504,
+        "failedTasks": 0,
+        "staleResults": 0
+      }
+    }
+  ]
+}
