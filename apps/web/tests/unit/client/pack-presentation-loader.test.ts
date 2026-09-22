@@ -12,6 +12,37 @@ const response = (text: string, status = 200) =>
 afterEach(() => vi.unstubAllGlobals());
 
 describe('browser Pack presentation loader', () => {
+  it('cancels a streamed response as soon as it exceeds the byte limit', async () => {
+    vi.stubGlobal('location', { origin: 'http://localhost' });
+    const cancel = vi.fn(async () => undefined);
+    let reads = 0;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          ({
+            ok: true,
+            status: 200,
+            headers: new Headers(),
+            body: {
+              getReader: () => ({
+                read: async () =>
+                  reads++ === 0
+                    ? { done: false as const, value: new Uint8Array(1_048_577) }
+                    : { done: true as const, value: undefined },
+                cancel,
+                releaseLock: vi.fn(),
+              }),
+            },
+          }) as unknown as Response,
+      ),
+    );
+
+    await expect(loadBrowserPackPresentationCatalog(new URL('http://localhost/packs/'))).rejects.toThrow(/byte limit/i);
+    expect(cancel).toHaveBeenCalledOnce();
+    expect(reads).toBe(1);
+  });
+
   it('accepts an exact locked same-origin JSON resource and exposes generic voxel, item and actor bindings', async () => {
     vi.stubGlobal('location', { origin: 'http://localhost' });
     vi.stubGlobal(

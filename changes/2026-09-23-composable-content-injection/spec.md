@@ -38,7 +38,7 @@
 
 ### 1. 冻结的内容注册表
 
-在既有 content module/registration 增加 namespace-qualified voxel definition：稳定字符串 id、旧存档 numeric storageId、物理标志、0–15 emission、1–16 propagationCost、表现引用。assembly 验证 ID/数值唯一、引用闭合并冻结为 capability。Classic 可继续使用 0–88，但语义由 Pack 注册。
+在既有 content module/registration 增加 namespace-qualified voxel definition：稳定字符串 id、V1 有界 numeric storageId（0–4095）、物理标志、0–15 emission、1–16 propagationCost、表现引用。assembly 验证 ID/数值唯一、引用闭合并冻结为 capability。Classic 可继续使用 0–88，但语义由 Pack 注册。
 
 ### 2. 生产消费者只读 registry
 
@@ -91,5 +91,6 @@ archetype 改为有界 namespace-qualified ID；旧 Classic 非命名空间 ID �
 ## V1 显式边界
 
 - WebGL2 texture array 保持既有 92 个 material slot；Pack 可重绑 slot，但本期不动态扩容 atlas。
+- V1 mesh semantics lookup 最多 4096 条，因此 Pack storageId 限制为 0–4095；世界缓冲仍保留 `Uint16` ABI。
 - 外部 voxel topology 支持 `cube/water/glass/ice`；Classic 的 0–88 可继续使用既有 `model` geometry。未注册的外部 model geometry 在 assembly 前 fail closed。
 - `host-admissions.json` 是宿主批准真值，Playbook/extension 均须匹配 exact id、version、integrity 与权限后才可执行。

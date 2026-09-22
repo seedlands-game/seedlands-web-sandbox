@@ -26,6 +26,7 @@
 
 - 第二 Playbook smoke 是启动/worldgen/mesh/presentation/persistence 的有界证明，不宣称其具备 Classic 完整内容旅程。
 - 当前 material slot 固定为 1–92；外部 voxel topology 支持 cube/water/glass/ice。Pack 自定义 model geometry 尚未纳入本期，装配时显式拒绝。
+- V1 注册 storageId 为 0–4095，与有界 mesh semantics lookup 一致；底层 Chunk 存储继续使用 Uint16，不重解释 Classic bytes。
 - 未宣称性能提升，因此没有新增性能 A/B。远端 CI 与 PR gate 在推送后读回。
 
 ## 文档与预算

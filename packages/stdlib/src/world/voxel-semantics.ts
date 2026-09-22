@@ -1,7 +1,8 @@
 import { isSolid, type FaceMaterialId } from './voxel';
 import type { RenderCategory } from './mesh-render-category';
 
-export const MAX_VOXEL_STORAGE_ID = 65_535;
+/** V1 render lookup capacity; storage remains Uint16 but registration must be meshable. */
+export const MAX_VOXEL_STORAGE_ID = 4_095;
 export const MAX_VOXEL_FACE_MATERIAL_ID = 92;
 export type VoxelMeshKind = 'cube' | 'model' | 'water' | 'glass' | 'ice';
 
@@ -45,7 +46,7 @@ const freezeDefinition = (definition: VoxelSemanticsDefinition): VoxelSemanticsD
     definition.storageId < 0 ||
     definition.storageId > MAX_VOXEL_STORAGE_ID
   )
-    throw new RangeError(`Voxel storage ID is outside Uint16 range: ${String(definition.storageId)}`);
+    throw new RangeError(`Voxel storage ID is outside the supported 0..4095 range: ${String(definition.storageId)}`);
   if (
     typeof definition.solid !== 'boolean' ||
     typeof definition.targetable !== 'boolean' ||

@@ -45,7 +45,8 @@ describe('composed voxel semantics', () => {
       materialCategories: [[4, 'opaque']] as const,
     };
     expect(() => createVoxelSemanticsRegistry([base, { ...base, id: 'sample:other' }])).toThrow(/storage/i);
-    expect(() => createVoxelSemanticsRegistry([{ ...base, storageId: 65_536 }])).toThrow(/storage/i);
+    expect(createVoxelSemanticsRegistry([{ ...base, storageId: 4_095 }]).require(4_095).storageId).toBe(4_095);
+    expect(() => createVoxelSemanticsRegistry([{ ...base, storageId: 4_096 }])).toThrow(/storage/i);
   });
 
   it('registers every legacy Classic storage value without changing its light semantics', () => {
