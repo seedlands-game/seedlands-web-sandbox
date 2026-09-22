@@ -1,6 +1,6 @@
 # 可组合内容注入闭环
 
-状态：Delivered。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
+状态：Active。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
 
 ## 用户结果、长期愿景与硬约束
 
@@ -86,7 +86,7 @@ archetype 改为有界 namespace-qualified ID；旧 Classic 非命名空间 ID �
 - [x] actor archetype registry 去固定名单。
 - [x] Pack presentation manifest 与 Web 通用消费。
 - [x] 第二 Playbook 无特权证明。
-- [x] 静态、确定性、production、C0–C5 与独立审阅；PR 已更新，远端 CI 状态以 GitHub 回执为准。
+- [ ] 本地静态、确定性、production、C0–C5 与独立审阅已完成；待推送、更新 PR 并读取远端 CI。
 
 ## V1 显式边界
 
