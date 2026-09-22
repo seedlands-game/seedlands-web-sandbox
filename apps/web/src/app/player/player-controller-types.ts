@@ -26,7 +26,8 @@ export type PlayerControllerOptions = {
     direction: [number, number, number],
     maxDistance: number,
   ) => boolean;
-  onBeginBreak: (position: [number, number, number]) => void;
+  isCreativeMode?: () => boolean;
+  onBeginBreak: (position: [number, number, number]) => void | Promise<void>;
   onCancelBreak: () => void;
   onPlace: (position: [number, number, number]) => void;
   onUseTarget: (position: [number, number, number]) => boolean;

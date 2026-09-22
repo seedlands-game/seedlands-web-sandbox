@@ -3,8 +3,8 @@ import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
-import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
+import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
@@ -22,7 +22,11 @@ import type {
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 import type { CommandResult, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import { createMeleeShowcaseIds, meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
-import { executeBrowserModeCommand, type BrowserModeCommandExecutor } from './browser-gameplay-actions';
+import {
+  executeBrowserModeCommand,
+  rejectOutOfBoundsBrowserBreak,
+  type BrowserModeCommandExecutor,
+} from './browser-gameplay-actions';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
 
@@ -90,11 +94,8 @@ export class BrowserGameplay {
   setSuspended(suspended: boolean): void {
     this.viewmodel.setVisible(!suspended && !this.blocksInput);
   }
-
-  setAimTarget(target: VoxelTarget | null): void {
-    this.aimTarget = target?.inRange ? target : null;
-  }
-
+  // prettier-ignore
+  setAimTarget(target: VoxelTarget | null): void { this.aimTarget = target?.inRange ? target : null; }
   prepareMeleeShowcase(): Promise<void> {
     return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
       .catch((error: unknown) => {
@@ -383,18 +384,14 @@ export class BrowserGameplay {
     return true;
   }
 
-  beginBreak(position: [number, number, number]): void {
-    if (position[1] <= BROWSER_MIN_BUILD_Y) return this.feedback('已到达浏览器世界底层；保留基底石层', 'error');
-    if (position[1] > BROWSER_MAX_BUILD_Y) return this.feedback(`采集高度限 1–${BROWSER_MAX_BUILD_Y} 层`, 'error');
-    void this.action({ type: 'begin-break', position }, (result) => {
-      if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
-    });
+  beginBreak(position: [number, number, number]): Promise<void> {
+    if (rejectOutOfBoundsBrowserBreak(position, this.feedback.bind(this))) return Promise.resolve();
+    // prettier-ignore
+    return this.action({ type: 'begin-break', position }, (result) => { if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error'); });
   }
-
   cancelBreak(): void {
     void this.action({ type: 'cancel-break' });
   }
-
   place(position: [number, number, number]): void {
     if (position[1] < BROWSER_MIN_BUILD_Y || position[1] > BROWSER_MAX_BUILD_Y)
       return this.feedback(`建造高度限 ${BROWSER_MIN_BUILD_Y}–${BROWSER_MAX_BUILD_Y} 层；物品已保留`, 'error');

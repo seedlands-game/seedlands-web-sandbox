@@ -1,8 +1,24 @@
 import type { CommandResult, CommandSource } from '@seedlands/stdlib/server/commands/command-contract';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { BrowserGameplayAuthorityPort } from './browser-gameplay';
+import { BROWSER_MAX_BUILD_Y, BROWSER_MIN_BUILD_Y } from '../world/browser-world-limits';
 
 export type BrowserModeCommandExecutor = (source: CommandSource, command: ModeCommand) => Promise<CommandResult>;
+
+export function rejectOutOfBoundsBrowserBreak(
+  position: [number, number, number],
+  feedback: (message: string, tone: 'error') => void,
+): boolean {
+  if (position[1] <= BROWSER_MIN_BUILD_Y) {
+    feedback('已到达浏览器世界底层；保留基底石层', 'error');
+    return true;
+  }
+  if (position[1] > BROWSER_MAX_BUILD_Y) {
+    feedback(`采集高度限 1–${BROWSER_MAX_BUILD_Y} 层`, 'error');
+    return true;
+  }
+  return false;
+}
 
 export async function executeBrowserModeCommand(
   execute: BrowserModeCommandExecutor,
