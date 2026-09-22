@@ -57,7 +57,7 @@ it('全透明模型明确拒绝取景，不能将 NaN 写入相机或场景', ()
   expect([camera.getPosition().x, camera.getPosition().y, camera.getPosition().z].every(Number.isFinite)).toBe(true);
 });
 
-it('新增物品图标使用已注册像素，不请求不存在的静态PNG', () => {
+it('新增物品图标使用已注册像素或已派生的静态 PNG', () => {
   setAppearanceImages(createEmptyAppearanceProject());
   for (const id of [
     'stick',
@@ -92,6 +92,6 @@ it('新增物品图标使用已注册像素，不请求不存在的静态PNG', (
     'gold-hoe',
     'diamond-hoe',
   ]) {
-    expect(itemIconUrl(id, '/')).toMatch(/^data:image\/svg\+xml,/);
+    expect(itemIconUrl(id, '/')).toMatch(/^(data:image\/svg\+xml,|\/assets\/item-thumbnails\/[^/]+\.png$)/);
   }
 });

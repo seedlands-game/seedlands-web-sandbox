@@ -6,6 +6,7 @@ import { dungeonFor, dungeonVoxel } from './dungeon-generation';
 import { geologyVoxel } from './geology';
 import { remainingVoxelColors, remainingVoxelNames } from './remaining-voxel-presentation';
 import { isTreeOriginContext, treeVoxelAtOffset } from './tree-generation';
+import { coloredWoolFaceMaterials, coloredWoolVoxels, woolFaceMaterialForVoxel, woolVoxelColors } from './wool-colors';
 
 export const CHUNK_SIZE = 32;
 export const GENERATOR_VERSION = 11;
@@ -90,10 +91,11 @@ export const Voxel = {
   LitFurnace: 71,
   RedstoneOre: 72,
   LitRedstoneOre: 73,
+  ...coloredWoolVoxels,
 } as const;
 
 export type VoxelId = (typeof Voxel)[keyof typeof Voxel];
-export const MAX_VOXEL_ID = Voxel.LitRedstoneOre;
+export const MAX_VOXEL_ID = Voxel.BlackWool;
 
 export const FaceMaterial = {
   GrassTop: 1,
@@ -173,6 +175,7 @@ export const FaceMaterial = {
   RedstoneOre: 75,
   LitRedstoneOre: 76,
   TorchFlame: 77,
+  ...coloredWoolFaceMaterials,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];
@@ -238,6 +241,7 @@ export const voxelNames: Record<number, string> = {
   [Voxel.Fence]: '栅栏',
   [Voxel.Cake]: '蛋糕',
 };
+for (const [, name, voxel] of woolVoxelColors) voxelNames[voxel] = name + '羊毛块';
 
 export const voxelColors: Record<number, [number, number, number]> = {
   ...remainingVoxelColors,
@@ -300,6 +304,12 @@ export const voxelColors: Record<number, [number, number, number]> = {
   [Voxel.Fence]: [0.55, 0.35, 0.17],
   [Voxel.Cake]: [0.9, 0.82, 0.72],
 };
+for (const [, , voxel, , hex] of woolVoxelColors)
+  voxelColors[voxel] = [0, 2, 4].map((offset) => parseInt(hex.slice(offset + 1, offset + 3), 16) / 255) as [
+    number,
+    number,
+    number,
+  ];
 
 const nonSolid = new Set<number>([
   Voxel.Air,
@@ -335,6 +345,8 @@ export function faceMaterialFor(id: number, axis: number, positive: boolean): Fa
   if (id === Voxel.Grass)
     return axis === 1 ? (positive ? FaceMaterial.GrassTop : FaceMaterial.Dirt) : FaceMaterial.GrassSide;
   if (id === Voxel.Wood) return axis === 1 ? FaceMaterial.WoodEnd : FaceMaterial.WoodSide;
+  const woolMaterial = woolFaceMaterialForVoxel[id];
+  if (woolMaterial !== undefined) return woolMaterial as FaceMaterialId;
   return (
     {
       [Voxel.Dirt]: FaceMaterial.Dirt,

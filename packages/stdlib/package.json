@@ -99,7 +99,8 @@
     "./world/voxel-model-mesh": "./src/world/voxel-model-mesh.ts",
     "./world/water-flow-direction": "./src/world/water-flow-direction.ts",
     "./world/water-immersion": "./src/world/water-immersion.ts",
-    "./world/water-mesh-height": "./src/world/water-mesh-height.ts"
+    "./world/water-mesh-height": "./src/world/water-mesh-height.ts",
+    "./world/wool-colors": "./src/world/wool-colors.ts"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",

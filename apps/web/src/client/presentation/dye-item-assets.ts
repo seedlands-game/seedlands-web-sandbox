@@ -1,25 +1,10 @@
 import type { NativeAsset, Rgb } from './asset-types';
+import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
 
-export const woolColors = [
-  ['white', '白色', '#e8e8df'],
-  ['orange', '橙色', '#d97819'],
-  ['magenta', '品红色', '#b24aac'],
-  ['light-blue', '淡蓝色', '#6699d8'],
-  ['yellow', '黄色', '#c9b51a'],
-  ['lime', '黄绿色', '#74a82d'],
-  ['pink', '粉红色', '#d98199'],
-  ['gray', '灰色', '#4c5355'],
-  ['light-gray', '淡灰色', '#9aa1a1'],
-  ['cyan', '青色', '#2f8b8d'],
-  ['purple', '紫色', '#7043a3'],
-  ['blue', '蓝色', '#334f9b'],
-  ['brown', '棕色', '#70462a'],
-  ['green', '绿色', '#446b25'],
-  ['red', '红色', '#a83232'],
-  ['black', '黑色', '#202428'],
-] as const;
+export const woolColors = woolVoxelColors.map(([id, name, , , color]) => [id, name, color] as const);
 const rgb = (hex: string): Rgb => [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16)) as Rgb;
 export const dyeItemNames = woolColors.map(([id, name]) => [`${id}-dye`, `${name}染料`] as const);
+export const woolItemNames = woolColors.map(([id, name]) => [`${id}-wool`, `${name}羊毛`] as const);
 export const dyeItemAssets: NativeAsset[] = woolColors.flatMap(([id, name, color]) => {
   const itemId = `${id}-dye`,
     textureId = `builtin:texture:${itemId}:detail`;

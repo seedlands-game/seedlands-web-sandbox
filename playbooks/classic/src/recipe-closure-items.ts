@@ -1,23 +1,7 @@
 import type { ItemDefinitionInput } from '@seedlands/stdlib/mod-api';
+import { woolVoxelColors, woolVoxelForColor } from '@seedlands/stdlib/world/wool-colors';
 
-export const woolColors = [
-  ['white', '白色'],
-  ['orange', '橙色'],
-  ['magenta', '品红色'],
-  ['light-blue', '淡蓝色'],
-  ['yellow', '黄色'],
-  ['lime', '黄绿色'],
-  ['pink', '粉红色'],
-  ['gray', '灰色'],
-  ['light-gray', '淡灰色'],
-  ['cyan', '青色'],
-  ['purple', '紫色'],
-  ['blue', '蓝色'],
-  ['brown', '棕色'],
-  ['green', '绿色'],
-  ['red', '红色'],
-  ['black', '黑色'],
-] as const;
+export const woolColors = woolVoxelColors.map(([id, name]) => [id, name] as const);
 
 export const recipeClosureItems: readonly ItemDefinitionInput[] = [
   ...(
@@ -47,8 +31,8 @@ export const recipeClosureItems: readonly ItemDefinitionInput[] = [
   ...woolColors.map(([id, name]) => ({
     id: `${id}-wool`,
     name: `${name}羊毛`,
-    itemType: 'resource' as const,
+    itemType: 'block' as const,
     stackLimit: 64,
-    capabilities: [],
+    capabilities: [{ type: 'place' as const, voxel: woolVoxelForColor[id] }],
   })),
 ];

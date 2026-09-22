@@ -4,7 +4,7 @@ import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
 import { requireClassicItemDefinition } from './classic-item-registry';
-import { dyeItemNames } from './dye-item-assets';
+import { dyeItemNames, woolItemNames } from './dye-item-assets';
 
 const nativeItemAssets = [...nativeToolAssets, ...progressionItemAssets];
 
@@ -105,26 +105,7 @@ const items = [
   ['lit-redstone-ore', '发光红石矿'],
   ['sandstone-slab', '砂岩半砖'],
   ['wood-slab', '木半砖'],
-  ...(
-    [
-      'white',
-      'orange',
-      'magenta',
-      'light-blue',
-      'yellow',
-      'lime',
-      'pink',
-      'gray',
-      'light-gray',
-      'cyan',
-      'purple',
-      'blue',
-      'brown',
-      'green',
-      'red',
-      'black',
-    ] as const
-  ).map((color) => [`${color}-wool`, `${color} wool`] as const),
+  ...woolItemNames,
   ['cookie', '曲奇'],
   ['cocoa-beans', '可可豆'],
   ['record-13', '唱片 13'],
@@ -263,7 +244,9 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
   const modelId = `builtin:model:${itemId}`;
   const definition = requireClassicItemDefinition(itemId);
   const model =
-    definition.placesVoxel === undefined ? nativeItemAssets.find((asset) => asset.id === modelId) : undefined;
+    definition.placesVoxel === undefined || itemId.endsWith('-wool')
+      ? nativeItemAssets.find((asset) => asset.id === modelId)
+      : undefined;
   return {
     itemId,
     name,

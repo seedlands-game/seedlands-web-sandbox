@@ -26,7 +26,7 @@ it('剪羊毛原子消耗耐久、发放羊毛并保存已剪状态', () => {
   expect(world.createSnapshot().entityStore).toEqual(before.entityStore);
   world.giveItem('player', { itemId: 'shears', count: 1, instance: { durability: 2 } });
   expect(world.speciesInteractions.shear('player', 'sheep')).toEqual({ success: true, count: 2, color: 'white' });
-  expect(world.getInventory('player').slots).toContainEqual({ itemId: 'wool', count: 2 });
+  expect(world.getInventory('player').slots).toContainEqual({ itemId: 'white-wool', count: 2 });
   expect(world.getInventory('player').slots[0]?.instance?.durability).toBe(1);
   expect(world.speciesInteractions.shear('player', 'sheep')).toEqual({ success: false, reason: 'already-sheared' });
   const restored = createWorld();

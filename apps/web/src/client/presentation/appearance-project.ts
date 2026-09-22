@@ -1,4 +1,4 @@
-import { builtinAssets } from './asset-catalog';
+import { builtinAssets, builtinItemBindings } from './asset-catalog';
 import { legacyItemAssets } from './legacy-item-assets';
 import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-types';
 import { validateNativeAssets } from './asset-package';
@@ -28,6 +28,7 @@ export type AppearanceProject = {
 };
 
 const MAX_PROJECT_ASSETS = 128;
+export const MAX_APPEARANCE_THUMBNAILS = builtinItemBindings.length;
 const MAX_RESOLVED_ASSETS = builtinAssets.length + MAX_PROJECT_ASSETS;
 const MAX_DATA_URL_BYTES = 2 * 1024 * 1024;
 const id = (value: unknown, label = '资产标识'): string => {
@@ -268,7 +269,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
 
   const rawThumbnails = object(project.thumbnails, '缩略图');
   const thumbnails: Record<string, string> = {};
-  if (Object.keys(rawThumbnails).length > MAX_PROJECT_ASSETS) throw new Error('缩略图数量超限');
+  if (Object.keys(rawThumbnails).length > MAX_APPEARANCE_THUMBNAILS) throw new Error('缩略图数量超限');
   for (const [assetId, thumbnail] of Object.entries(rawThumbnails)) {
     if (retiredActorModels.has(assetId)) continue;
     if (!byId.has(id(assetId))) throw new Error('缩略图引用不存在的资产');

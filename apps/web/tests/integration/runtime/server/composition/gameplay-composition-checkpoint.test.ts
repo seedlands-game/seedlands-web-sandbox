@@ -123,7 +123,7 @@ describe('gameplay composition checkpoint', () => {
     };
     delete legacyActor.inventoryRevision;
     delete legacyActor.inventoryCursor;
-    const target = create('c');
+    const target = create('c', 'b'.repeat(64), legacySaved.composition);
 
     expect(target.restoreSnapshot(legacySaved)).toEqual({ version: 4, worldTime: 12 });
     expect(target.getInventory('saved').slots[0]).toEqual({ itemId: 'plank', count: 9 });

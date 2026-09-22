@@ -95,6 +95,7 @@ export function createCompositionCheckpointGuard(
     definitionMap: composition.definitionMap,
   };
   const expected = canonicalData(identity);
+  const explicitLegacy = legacySourceIdentity ? canonicalData(legacySourceIdentity) : null;
   const inventoryPointerPredecessor =
     composition.playbookId === 'seedlands:overworld' &&
     identity.packLock.length === 1 &&
@@ -205,7 +206,8 @@ export function createCompositionCheckpointGuard(
         actual !== expected &&
         actual !== inventoryPointerPredecessor &&
         actual !== npcComposablePredecessor &&
-        actual !== kernelMigrationPredecessor
+        actual !== kernelMigrationPredecessor &&
+        actual !== explicitLegacy
       )
         throw new TypeError('Gameplay composition identity is missing or incompatible.');
     },

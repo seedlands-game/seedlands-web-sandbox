@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { classicContent } from '../../../../fixtures/classic/content';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
 
 it('剩余主世界方块均有内容、掉落与可放置物闭包', () => {
   const ids = [
@@ -23,6 +24,15 @@ it('剩余主世界方块均有内容、掉落与可放置物闭包', () => {
   }
   for (const id of ['bricks', 'bookshelf', 'note-block', 'jukebox', 'jack-o-lantern', 'trapdoor'])
     expect(classicContent.recipes.get(id)?.id).toBe(id);
+});
+
+it('十六色羊毛均可放置并按颜色规范掉落', () => {
+  for (const [color, , voxel] of woolVoxelColors) {
+    const itemId = `${color}-wool`;
+    expect(classicContent.items.require(itemId).placesVoxel).toBe(voxel);
+    expect(classicContent.voxelGameplay.require(voxel).drop).toEqual({ itemId, count: 1 });
+  }
+  expect(classicContent.items.require('wool-block').placesVoxel).toBe(Voxel.Wool);
 });
 
 it('红石矿与燃烧熔炉有独立体素和明确掉落规则', () => {

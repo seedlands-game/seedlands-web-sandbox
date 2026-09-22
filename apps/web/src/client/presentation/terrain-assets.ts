@@ -1,4 +1,5 @@
 import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
 import { faceMaterialNames } from '@seedlands/stdlib/world/face-material-names';
 import type { PixelTexture, Rgb } from './asset-types';
 
@@ -14,6 +15,15 @@ const palette = (colors: string[]): Rgb[] => [
   [0, 0, 0],
   ...colors.map((hex) => [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)) as Rgb),
 ];
+const woolPalette = (hex: string) => {
+  const base = [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16));
+  const encode = (factor: number, add = 0) =>
+    base
+      .map((channel) => Math.min(255, Math.round(channel * factor + add)))
+      .map((channel) => channel.toString(16).padStart(2, '0'))
+      .join('');
+  return [hex.slice(1), encode(0.58), encode(1.18, 7)];
+};
 const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.GrassTop, '草顶', ['58764f', '628258', '6d8c62', '506e49']],
   [FaceMaterial.GrassSide, '草侧', ['735740', '805f45', '624936', '5b754b', '678357']],
@@ -92,6 +102,12 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.RedstoneOre, '红石矿', ['687170', '858d8a', '8d1d25', 'd74343']],
   [FaceMaterial.LitRedstoneOre, '发光红石矿', ['687170', '858d8a', 'd51c27', 'ff746d']],
   [FaceMaterial.TorchFlame, '火把火头', ['d87318', 'f59c32', 'ffd266', 'fff0a3']],
+  ...woolVoxelColors
+    .slice(1)
+    .map(
+      ([, name, , faceMaterial, hex]) =>
+        [faceMaterial, name + '羊毛', woolPalette(hex)] as [FaceMaterialId, string, string[]],
+    ),
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,

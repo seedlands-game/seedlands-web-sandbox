@@ -60,7 +60,8 @@ export function shearSheep(context: Context, playerId: string, sheepId: string) 
   next[actor.state.selectedSlot] =
     held.instance!.durability === 1 ? null : { ...held, instance: { durability: held.instance!.durability - 1 } };
   inventory.replace(next);
-  if (!inventory.add({ itemId: 'wool', count: 2 })) return { success: false as const, reason: 'inventory-full' };
+  if (!inventory.add({ itemId: `${current.woolColor}-wool`, count: 2 }))
+    return { success: false as const, reason: 'inventory-full' };
   commit(context, playerId, inventory, sheepId, { ...current, sheared: true });
   return { success: true as const, count: 2, color: current.woolColor };
 }

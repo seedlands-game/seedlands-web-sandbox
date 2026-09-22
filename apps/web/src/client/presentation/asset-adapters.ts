@@ -11,6 +11,15 @@ const adapters = {
   'builtin-arm-model': { label: '第一人称手臂', editable: false, preview: 'model', held: false },
   'glb-model': { label: '导入 GLB', editable: false, preview: 'model', held: false },
 } as const;
+const pixelBlockItems = new Set([
+  'sapling',
+  'flower',
+  'mushroom',
+  'sugar-cane',
+  'dead-bush',
+  'red-flower',
+  'red-mushroom',
+]);
 export const assetAdapter = (type: Asset['type']) => adapters[type];
 export const isNativeAsset = (asset: Asset): asset is NativeAsset =>
   asset.type === 'pixel-texture' || asset.type === 'extruded-pixel-model';
@@ -21,4 +30,7 @@ export const assetDependencies = (asset: Asset): string[] =>
       ? asset.payload.materialIds
       : [];
 export const acceptsPixelItem = (item: { id: string; itemType: string; placesVoxel?: number }) =>
-  ['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined;
+  (['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined) ||
+  (item.itemType === 'block' &&
+    item.placesVoxel !== undefined &&
+    (item.id.endsWith('-wool') || pixelBlockItems.has(item.id)));

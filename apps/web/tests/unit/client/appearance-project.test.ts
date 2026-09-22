@@ -4,10 +4,12 @@ import { builtinAssets } from '../../../src/client/presentation/asset-catalog';
 import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
 import { terrainMaterial } from '../../../src/client/presentation/terrain-assets';
 import {
+  MAX_APPEARANCE_THUMBNAILS,
   createEmptyAppearanceProject,
   resolveAppearanceAssets,
   validateAppearanceProject,
 } from '../../../src/client/presentation/appearance-project';
+import { builtinItemBindings } from '../../../src/client/presentation/asset-catalog';
 import {
   decodeAppearancePackage,
   encodeAppearancePackage,
@@ -57,6 +59,17 @@ function staticTriangleGlb(): Blob {
 }
 
 describe('外观项目', () => {
+  it('当前完整物品目录的派生缩略图不受用户资产上限阻断', () => {
+    expect(builtinItemBindings.length).toBeGreaterThan(128);
+    expect(builtinItemBindings.length).toBeLessThanOrEqual(MAX_APPEARANCE_THUMBNAILS);
+    const thumbnail = 'data:image/png;base64,AA==';
+    const project = validateAppearanceProject({
+      ...createEmptyAppearanceProject(),
+      thumbnails: Object.fromEntries(builtinItemBindings.map(({ modelId }) => [modelId, thumbnail])),
+    });
+    expect(Object.keys(project.thumbnails)).toHaveLength(builtinItemBindings.length);
+  });
+
   it('旧火炬纹理覆盖在没有显式火头覆盖时兼容继承到火头', () => {
     const handleId = terrainMaterial(FaceMaterial.Torch)!.textureId;
     const flameId = terrainMaterial(FaceMaterial.TorchFlame)!.textureId;

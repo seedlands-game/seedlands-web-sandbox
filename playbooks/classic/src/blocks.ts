@@ -1,4 +1,5 @@
 import type { VoxelGameplayDefinition } from '@seedlands/stdlib/mod-api';
+import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
 
 /** Version 1 content preserves the supported numeric voxel palette. */
 const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.freeze({
@@ -306,7 +307,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     (
       [
         [59, 'dead-bush', 0.05, null],
-        [60, 'wool-block', 0.8, null],
+        [60, 'white-wool', 0.8, null],
         [61, 'red-flower', 0.05, null],
         [62, 'red-mushroom', 0.05, null],
         [63, 'bricks', 2, 'pickaxe'],
@@ -329,6 +330,18 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
         preferredTool,
         drop: { itemId, count: voxel >= 72 ? 4 : 1 },
         replaceable: voxel === 59 || voxel === 61 || voxel === 62,
+      },
+    ]),
+  ),
+  ...Object.fromEntries(
+    woolVoxelColors.slice(1).map(([id, , voxel]) => [
+      voxel,
+      {
+        voxel,
+        hardnessSeconds: 0.8,
+        preferredTool: null,
+        drop: { itemId: `${id}-wool`, count: 1 },
+        replaceable: false,
       },
     ]),
   ),
