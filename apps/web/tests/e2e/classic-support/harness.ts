@@ -179,7 +179,6 @@ export async function prepareInitialState(
   page: Page,
   scenario: ClassicScenario,
 ): Promise<{
-  npcId: string;
   hostileId: string;
   identity: Record<string, unknown>;
 }> {
@@ -227,28 +226,13 @@ export async function prepareInitialState(
       }),
       'hostile setup',
     ) as { data?: { entity?: { id?: string } } };
-    unwrap(
-      await harness.world.command({ type: 'spawn-world-item', ...scenario.initialState.npc.food }),
-      'NPC food setup',
-    );
-    const npc = unwrap(
-      await harness.world.character({
-        kind: 'create',
-        creationRequestId: scenario.initialState.npc.creationRequestId,
-        profile: { name: scenario.initialState.npc.name, personality: scenario.initialState.npc.personality },
-        position: scenario.initialState.npc.position,
-        homePosition: scenario.initialState.npc.homePosition,
-      }),
-      'NPC setup',
-    ) as { kind?: string; character?: { entityId?: string } };
-    if (npc.kind !== 'created' || !npc.character?.entityId) throw new Error('Classic NPC setup returned no character.');
     const hostileId = hostile.data?.entity?.id;
     if (!hostileId) throw new Error('Classic hostile setup returned no entity.');
     harness.setView(scenario.initialState.view.yaw, scenario.initialState.view.pitch);
     await harness.flushSave();
     unwrap(await harness.world.clock({ kind: 'run' }), 'run');
     const identity = unwrap(await harness.world.identity(), 'identity');
-    return { npcId: npc.character.entityId, hostileId, identity };
+    return { hostileId, identity };
   }, scenario);
 }
 
@@ -257,10 +241,16 @@ export async function lockPointer(page: Page): Promise<Locator> {
     await page.keyboard.press('F3');
     await expect(page.locator('#debug')).toBeHidden();
   }
+  const resume = page.getByRole('button', { name: '继续游戏', exact: true });
+  if (await resume.isVisible()) {
+    await resume.click();
+    await expect(resume).toBeHidden();
+  }
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Classic canvas is not visible.');
-  await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } });
+  const alreadyLocked = await page.evaluate(() => document.pointerLockElement?.id === 'game');
+  if (!alreadyLocked) await canvas.click({ position: { x: box.width / 2, y: box.height / 2 } });
   await page.waitForFunction(() => document.pointerLockElement?.id === 'game');
   mousePositions.set(page, { x: box.x + box.width / 2, y: box.y + box.height / 2 });
   return canvas;
@@ -285,8 +275,6 @@ export async function moveMouseBy(page: Page, dx: number, dy: number): Promise<v
     // Chromium throttles rapid unlock/relock. This is browser input cooldown,
     // not a substitute for world readiness or a performance acceptance threshold.
     await page.waitForTimeout(1500);
-    const resume = page.getByRole('button', { name: '继续游戏', exact: true });
-    if (await resume.isVisible()) await resume.click();
     await lockPointer(page);
     current = mousePositions.get(page)!;
   }

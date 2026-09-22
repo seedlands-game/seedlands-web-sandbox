@@ -1,0 +1,7 @@
+[
+  "apps/web/tests/e2e/classic-runtime.spec.ts",
+  "apps/web/tests/e2e/classic-support/harness.ts",
+  "apps/web/tests/e2e/classic-support/scenario.ts",
+  "apps/web/tests/e2e/classic-support/evidence.ts",
+  "playbooks/classic/scenarios/canonical-runtime-v2.json"
+]

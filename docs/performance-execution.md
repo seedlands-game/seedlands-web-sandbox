@@ -2,6 +2,10 @@
 
 本页定义浏览器 benchmark 和 Harness 性能采样的独占窗口。当前 Classic 真实路径入口为 `pnpm bench:runtime`，由 `scripts/benchmark-window.mjs` 持有机器级锁并调用唯一生产 C0–C5 旅程；旧样本不得用作当前收益证据。固定职责标识为 `seedlands-performance-validator`，跨请求反复复用时才考虑经用户授权建立独立任务。
 
+## 当前场景身份
+
+Classic 视觉改版退出 settler 后，当前性能旅程采用 `classic-canonical-runtime-v2`（`playbooks/classic/scenarios/canonical-runtime-v2.json`）。保留固定 seed、采集、制作、战斗、建造、四个 Chunk 中心往返、资源界限和存档恢复后真实交互；不创建或验收已退出的 NPC。v1 保留为历史合同，v1 与 v2 样本不能直接构成性能 A/B。每轮候选须在同一 v2 场景与观测器下重新取得 A/A 和对照。
+
 ## 调用
 
 兼容入口：
