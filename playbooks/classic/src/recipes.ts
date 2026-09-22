@@ -31,7 +31,7 @@ const mixedDyes: readonly Recipe[] = mixes.map(([color, left, right]) => ({
   ],
   outputs: [{ itemId: `${color}-dye`, count: 2 }],
 }));
-const coloredWool: readonly Recipe[] = woolColors.map((color) => ({
+const coloredWool: readonly Recipe[] = woolColors.map(([color]) => ({
   id: `${color}-wool`,
   inputs: [
     { itemId: 'wool', count: 1 },

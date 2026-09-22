@@ -175,6 +175,28 @@ export function createUiBridge(options: BridgeOptions = {}) {
     debug: debug.channel,
     publishShell: (patch: Partial<ShellState>) => publishPatch(shell, patch),
     publishDebug: (patch: Partial<DebugState>) => publishPatch(debug, patch),
+    resetWorldPresentation() {
+      activeToken += 1;
+      clearFeedback();
+      const freshShell = initialShell();
+      publishPatch(shell, {
+        mapOpen: false,
+        mapLayer: freshShell.mapLayer,
+        mapSeed: freshShell.mapSeed,
+        mapCenter: freshShell.mapCenter,
+        mapRevision: freshShell.mapRevision,
+        commandOpen: false,
+        commandRunning: false,
+        commandEntries: freshShell.commandEntries,
+        commandStatus: freshShell.commandStatus,
+        commandStatusState: freshShell.commandStatusState,
+        experience: null,
+        gameplay: freshShell.gameplay,
+      });
+      publishPatch(hud, initialHud());
+      publishPatch(interaction, initialInteraction());
+      publishPatch(debug, initialDebug());
+    },
     beginMeasurementWindow() {
       rateStartedAt = now();
       ratePublishBaseline =

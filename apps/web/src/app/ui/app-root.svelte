@@ -74,6 +74,16 @@
   });
 </script>
 
+<svelte:head>
+  {#if shell.phase !== 'playing'}
+    <style>
+      #game {
+        visibility: hidden;
+      }
+    </style>
+  {/if}
+</svelte:head>
+
 <StartScreen
   {shell}
   {application}

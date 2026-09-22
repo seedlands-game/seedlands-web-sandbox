@@ -51,6 +51,9 @@ describe('gameplay retained UI projection', () => {
       progress: { statistics: { 'blocks-mined': 3 }, achievements: ['first-block'] },
     });
     expect(projected.shell.gameplay.inventory).toHaveLength(24);
+    expect(projected.shell.gameplay.creativeCatalog).toContainEqual(
+      expect.objectContaining({ itemId: 'white-wool', name: '白色羊毛' }),
+    );
     expect(projected.shell.gameplay.recipes).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ id: 'planks', name: '木板', craftable: true }),

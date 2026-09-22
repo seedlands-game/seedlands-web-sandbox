@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { renderCategoryForMaterial } from '../../src/world/mesh-render-category';
 import { FaceMaterial, Voxel } from '../../src/world/voxel';
 import { collisionBoxesForVoxel, modelBoxesForVoxel, voxelOccludesFullFace } from '../../src/world/voxel-model';
 
@@ -37,4 +38,5 @@ it('结构方块使用有界非整格模型及明确碰撞形状', () => {
     expect(collisionBoxesForVoxel(voxel)).toEqual(modelBoxesForVoxel(voxel).map(({ min, max }) => ({ min, max })));
   expect(modelBoxesForVoxel(Voxel.Slab)).toEqual([{ min: [0, 0, 0], max: [1, 0.5, 1], material: FaceMaterial.Slab }]);
   expect(modelBoxesForVoxel(Voxel.WoodStairs)).toHaveLength(2);
+  expect(renderCategoryForMaterial(FaceMaterial.Ladder)).toBe('cutout');
 });

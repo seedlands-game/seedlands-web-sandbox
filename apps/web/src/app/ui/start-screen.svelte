@@ -8,7 +8,7 @@
   import GameTextField from './primitives/game-text-field.svelte';
   import SeedlandsMark from './primitives/seedlands-mark.svelte';
   import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
-  import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
+  import { selectWorldGeneratorVersion, type WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
   import type { WorkerSupport } from '../client-capability-preflight';
   import WorldLoading from './world-loading.svelte';
 
@@ -29,6 +29,8 @@
   let error = $state('');
   let worldManagementError = $state('');
   let worlds = $state<ApplicationShell['worlds']>([]);
+  const RECOMMENDED_SEED = 'mosslight-68';
+  const recommendedWorlds = $derived(worlds.filter((world) => world.seedText === RECOMMENDED_SEED));
   let workerSupport = $state<WorkerSupport>('checking');
   onMount(() =>
     application?.subscribe(() => {
@@ -43,6 +45,19 @@
   let quality = $state<QualityLevel>(untrack(() => shell.quality));
   let openMode = $state<WorldOpenMode>('continue');
   let actorMode = $state<ActorMode>('survival');
+  const selectedRecommendedVersion = $derived.by(() => {
+    if (seed.trim() !== RECOMMENDED_SEED) return null;
+    try {
+      return selectWorldGeneratorVersion(worlds, RECOMMENDED_SEED, GENERATOR_VERSION, openMode);
+    } catch {
+      return null;
+    }
+  });
+  const selectedRecommendedWorld = $derived(
+    selectedRecommendedVersion === null
+      ? undefined
+      : recommendedWorlds.find((world) => world.generatorVersion === selectedRecommendedVersion),
+  );
   let previousPhase: ShellState['phase'] = untrack(() => shell.phase);
   let seedTouched = $state(untrack(() => Boolean(shell.seed)));
   let qualityTouched = $state(untrack(() => shell.quality !== 'medium'));
@@ -149,9 +164,18 @@
         disabled={shell.phase === 'boot' || workerSupport !== 'supported'}
         onclick={() => {
           seedTouched = true;
-          seed = 'mosslight-68';
+          seed = RECOMMENDED_SEED;
         }}>推荐起点：林间河岸 <small>森林 · 河水 · 营地</small></GameButton
       >
+      {#if seed.trim() === RECOMMENDED_SEED && recommendedWorlds.length && selectedRecommendedVersion !== null}
+        <p role="status">
+          {#if selectedRecommendedWorld}
+            将继续已保存的 v{selectedRecommendedVersion} 世界。
+          {:else}
+            将新建 v{selectedRecommendedVersion} 世界；已有的推荐 Seed 旧版本存档会保留。
+          {/if}
+        </p>
+      {/if}
       <GameButton
         id="enter"
         label={shell.enterLabel}

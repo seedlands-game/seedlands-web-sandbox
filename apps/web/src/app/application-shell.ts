@@ -116,7 +116,7 @@ export class ApplicationShell {
         } catch (error) {
           if (generation === this.startGeneration) {
             game.abortStart();
-            bridge.publishShell({ phase: 'error', enterLabel: '重试进入' });
+            bridge.publishShell({ phase: 'menu', enterLabel: '重试进入', experience: null });
           }
           throw error;
         }
@@ -136,7 +136,7 @@ export class ApplicationShell {
       this.startGeneration += 1;
       game.releaseInput();
       this.controller.fail(error);
-      bridge.publishShell({ phase: 'error', enterLabel: '重新进入世界' });
+      bridge.publishShell({ phase: 'menu', enterLabel: '重新进入世界', experience: null });
       this.publish();
       game.abortStart();
     };

@@ -39,6 +39,18 @@ describe('体素表面发光阈值', () => {
     }
   });
 
+  it('火把的木柄不发光，火头在细柱实际采样的上半段发光', () => {
+    const texture = textureFor(FaceMaterial.Torch);
+    const canEmit = (x: number, y: number) =>
+      voxelEmissionPixelCanEmit(
+        FaceMaterial.Torch,
+        texture.payload.palette[texture.payload.pixels[y * 16 + x]].map(linear) as [number, number, number],
+      );
+    for (let y = 0; y < 8; y += 1)
+      for (let x = 0; x < 3; x += 1) expect(canEmit(x, y), `torch handle ${x},${y}`).toBe(false);
+    expect([8, 9, 10, 11].some((y) => [0, 1, 2].some((x) => canEmit(x, y)))).toBe(true);
+  });
+
   it('发光红石矿的灰色石底不满足红色优势条件', () => {
     const texture = textureFor(FaceMaterial.LitRedstoneOre);
     const profile = voxelEmissionProfile(FaceMaterial.LitRedstoneOre);

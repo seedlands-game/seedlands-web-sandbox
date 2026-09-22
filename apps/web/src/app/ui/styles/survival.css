@@ -14,18 +14,6 @@
     2px 2px 0 #000;
   transform: none;
 }
-#hotbar .slot-swatch {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  background: none;
-  border: 0;
-}
-#hotbar .slot-count {
-  color: #fff;
-  text-shadow: 2px 2px 0 #000;
-}
 #ui #pause-toggle {
   width: auto;
   max-width: 180px;

@@ -244,4 +244,58 @@ describe('ApplicationShell experiment and capability gates', () => {
     expect(game.prepareMeleeShowcase).toHaveBeenCalledOnce();
     application.dispose();
   });
+
+  it('体验场后置布置失败时回到可重试菜单并终止已启动运行时', async () => {
+    const game = createGame();
+    const bridge = createUiBridge();
+    game.prepareMeleeShowcase.mockRejectedValueOnce(new Error('Unknown actor profile: night-stalker'));
+    const application = new ApplicationShell(game, bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+
+    await application.startMeleeShowcase('medium');
+
+    expect(game.abortStart).toHaveBeenCalledOnce();
+    expect(application.controller.state).toMatchObject({
+      phase: 'menu',
+      error: 'Unknown actor profile: night-stalker',
+    });
+    expect(bridge.shell.get()).toMatchObject({ phase: 'menu', enterLabel: '重试进入', experience: null });
+    application.dispose();
+  });
+
+  it('普通启动失败时回到可重试菜单并终止运行时', async () => {
+    const game = createGame();
+    const bridge = createUiBridge();
+    game.start.mockRejectedValueOnce(new Error('worker startup failed'));
+    const application = new ApplicationShell(game, bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+
+    await application.start('broken-world', 'medium');
+
+    expect(game.abortStart).toHaveBeenCalledOnce();
+    expect(application.controller.state).toMatchObject({ phase: 'menu', error: 'worker startup failed' });
+    expect(bridge.shell.get()).toMatchObject({ phase: 'menu', enterLabel: '重试进入', experience: null });
+    application.dispose();
+  });
+
+  it('运行时 fatal 时回到可重试菜单并终止运行时', async () => {
+    const game = createGame();
+    const bridge = createUiBridge();
+    const application = new ApplicationShell(game, bridge, createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+
+    game.onRuntimeFailure?.(new Error('authority fatal'));
+
+    expect(game.releaseInput).toHaveBeenCalledOnce();
+    expect(game.abortStart).toHaveBeenCalledOnce();
+    expect(application.controller.state).toMatchObject({ phase: 'menu', error: 'authority fatal' });
+    expect(bridge.shell.get()).toMatchObject({ phase: 'menu', enterLabel: '重新进入世界', experience: null });
+    application.dispose();
+  });
 });

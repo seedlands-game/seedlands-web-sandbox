@@ -1,6 +1,7 @@
 <script lang="ts">
   import GameButton from './primitives/game-button.svelte';
   import GameTextField from './primitives/game-text-field.svelte';
+  import { orderPersonalRecipes } from './personal-recipe-order';
   import type { ShellState, UiActionPort } from './ui-contracts';
   let {
     recipes,
@@ -13,7 +14,7 @@
   } = $props();
   let filter = $state('');
   const visibleRecipes = $derived(
-    recipes.filter((recipe) => recipe.name.toLowerCase().includes(filter.trim().toLowerCase())),
+    orderPersonalRecipes(recipes.filter((recipe) => recipe.name.toLowerCase().includes(filter.trim().toLowerCase()))),
   );
 </script>
 
