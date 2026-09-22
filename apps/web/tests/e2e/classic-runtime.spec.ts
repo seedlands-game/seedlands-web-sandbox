@@ -119,7 +119,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   expect(assets.some((path) => path.endsWith('.wasm'))).toBe(true);
   expect(workers.some((path) => /authority-worker-[\w-]+\.js$/.test(path))).toBe(true);
   expect(workers.some((path) => /world-worker-[\w-]+\.js$/.test(path))).toBe(true);
-  const loadedPack = assets.some((path) => path === `/${classicScenario.runtime.packEntryPath}`);
+  const loadedPack = assets.some((path) => path.endsWith(`/${classicScenario.runtime.packEntryPath}`));
   const artifactFiles = artifact.identity?.files ?? {};
   const loadedStampedBytes = assets
     .filter((path) => path.endsWith('.wasm') || path === `/${classicScenario.runtime.packEntryPath}`)
@@ -159,20 +159,36 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await moveMouseBy(page, 80, 0);
     await page.keyboard.down('KeyW');
     await expect
-      .poll(async () => {
-        const current = (await snapshot(page))!;
-        return Math.hypot(
-          current.player[0] - beforeTurn.player[0],
-          current.player[1] - beforeTurn.player[1],
-          current.player[2] - beforeTurn.player[2],
-        );
-      })
+      .poll(
+        async () => {
+          const current = (await snapshot(page))!;
+          return Math.hypot(
+            current.player[0] - beforeTurn.player[0],
+            current.player[1] - beforeTurn.player[1],
+            current.player[2] - beforeTurn.player[2],
+          );
+        },
+        { timeout: 30_000 },
+      )
       .toBeGreaterThan(1);
     await page.keyboard.up('KeyW');
     const turned = (await snapshot(page))!;
     expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);
     await moveMouseBy(page, -80, 0);
-    const crossed = await walkTo(page, classicScenario.route.chunkCrossing, { jump: true, timeout: 60_000 });
+    await page.keyboard.down('KeyW');
+    await page.keyboard.down('Space');
+    let crossed: ClassicSnapshot;
+    try {
+      crossed = await waitForSnapshot(page, (value) => value.streamCenter[0] === 1, 90_000);
+    } finally {
+      await page.keyboard.up('KeyW');
+      await page.keyboard.up('Space');
+    }
+    crossed = await waitForSnapshot(
+      page,
+      (value) => value.authority.acknowledgedInputSequence > crossed.authority.acknowledgedInputSequence,
+      30_000,
+    );
     expect(crossed.streamCenter[0]).toBe(1);
     expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);
     expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);

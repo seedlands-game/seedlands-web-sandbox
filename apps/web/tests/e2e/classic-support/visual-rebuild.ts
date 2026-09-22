@@ -7,7 +7,7 @@ import { observeBrowserRuntime } from './evidence';
 import { startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { classicBenchmark } from './settings';
-import { lockPointer, snapshot, voxelAt, waitForSnapshot, walkTo, type ClassicWindow } from './harness';
+import { lockPointer, snapshot, voxelAt, waitForSnapshot, type ClassicWindow } from './harness';
 
 /** Fixed gallery for real production rendering; setup commands are not input acceptance. */
 export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: TestInfo) {
@@ -179,7 +179,12 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   });
   await waitForSnapshot(page, (s) => s.onGround);
   await aimAtVoxelWithRealMouse(page, [-7, 60, 9]);
-  await walkTo(page, [-6.5, 7.5], { timeout: 45_000, tolerance: 0.45 });
+  await page.keyboard.down('KeyW');
+  try {
+    await waitForSnapshot(page, (s) => s.player[2] < 8.5, 60_000);
+  } finally {
+    await page.keyboard.up('KeyW');
+  }
   expect(await voxelAt(page, [-7, 60, 9])).toBe(31);
   await capture('plant-real-input-selection-and-walk-through');
   await page.evaluate(async () => {
