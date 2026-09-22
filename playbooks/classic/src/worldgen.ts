@@ -1,6 +1,7 @@
 import type { StandardWorldgenProvider } from '@seedlands/stdlib/host';
 import { makeChunk, type WorldChange } from '@seedlands/stdlib/world/chunk-generation';
 import { macroAt } from '@seedlands/stdlib/world/macro-world';
+import type { MacroContext } from '@seedlands/stdlib/world/macro-world';
 import { baseVoxel } from '@seedlands/stdlib/world/voxel';
 
 export const classicWorldgenIdentity = Object.freeze({
@@ -20,7 +21,22 @@ type GenerateChunk = (
   generatorVersion: number,
 ) => Uint16Array;
 
-export function createClassicWorldgenProvider(generateChunk: GenerateChunk = makeChunk): StandardWorldgenProvider {
+type SampleMacro = (seed: number, x: number, z: number, generatorVersion: number) => MacroContext;
+
+export function createClassicWorldgenProvider(
+  generateChunk: GenerateChunk = makeChunk,
+  sampleMacro: SampleMacro = macroAt,
+): StandardWorldgenProvider {
+  const macroColumns = new Map<string, MacroContext>();
+  const queryMacro = (seed: number, generatorVersion: number, x: number, z: number): MacroContext => {
+    const key = [seed, generatorVersion, x, z].join(':');
+    const cached = macroColumns.get(key);
+    if (cached) return cached;
+    const context = sampleMacro(seed, x, z, generatorVersion);
+    if (macroColumns.size >= 4096) macroColumns.clear();
+    macroColumns.set(key, context);
+    return context;
+  };
   return Object.freeze({
     identity: classicWorldgenIdentity,
     generate(input) {
@@ -35,8 +51,8 @@ export function createClassicWorldgenProvider(generateChunk: GenerateChunk = mak
       };
     },
     sampleVoxel({ seed, generatorVersion, x, y, z }) {
-      const queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz, generatorVersion);
-      return baseVoxel(seed, x, y, z, queryMacro(x, z), queryMacro, generatorVersion);
+      const sampleColumn = (qx: number, qz: number) => queryMacro(seed, generatorVersion, qx, qz);
+      return baseVoxel(seed, x, y, z, sampleColumn(x, z), sampleColumn, generatorVersion);
     },
   });
 }

@@ -1,5 +1,15 @@
 import { expect, type Page } from '@playwright/test';
 
+export const classicBenchmark = {
+  enabled: process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1',
+  generalWorkers:
+    process.env.SEEDLANDS_CLASSIC_GENERAL_WORKERS === '1'
+      ? 1
+      : process.env.SEEDLANDS_CLASSIC_GENERAL_WORKERS === '2'
+        ? 2
+        : undefined,
+} as const;
+
 export function requireHeadlessClassic(headless: boolean, launchOptions: Readonly<{ headless?: boolean }>): void {
   if (!headless || launchOptions.headless === false)
     throw new Error(

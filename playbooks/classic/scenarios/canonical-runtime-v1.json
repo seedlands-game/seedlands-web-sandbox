@@ -14,8 +14,8 @@
     "packEntryPath": "packs/overworld.mjs"
   },
   "initialState": {
-    "floor": { "from": [-4, 59, -3], "to": [198, 59, 3], "voxel": 3 },
-    "air": { "from": [-4, 60, -3], "to": [198, 66, 3], "voxel": 0 },
+    "floor": { "from": [-4, 59, -3], "to": [224, 59, 3], "voxel": 3 },
+    "air": { "from": [-4, 60, -3], "to": [224, 66, 3], "voxel": 0 },
     "player": [0.5, 61.6, 0.5],
     "view": { "yaw": -90, "pitch": -16 },
     "worldTime": 12,
@@ -43,7 +43,7 @@
     "stationTarget": [75, 60, 0],
     "hostileApproach": [54, 0.5],
     "stationApproach": [72.5, 0.5],
-    "farTurnaround": [192.5, 0.5],
+    "farTurnaround": [208.5, 0.5],
     "returnPoint": [72.5, 0.5]
   },
   "faultDesign": {

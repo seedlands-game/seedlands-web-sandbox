@@ -20,7 +20,6 @@ import {
   playerState,
   prepareInitialState,
   snapshot,
-  startClassicWorld,
   voxelAt,
   waitForSnapshot,
   walkTo,
@@ -29,7 +28,9 @@ import {
   type ClassicWindow,
   type ClassicSnapshot,
 } from './classic-support/harness';
-import { configureClassicSettings, deleteClassicWorld, requireHeadlessClassic } from './classic-support/settings';
+import * as settings from './classic-support/settings';
+import { clearNaturalFixtureEntities } from './classic-support/fixture-entities';
+import { startClassicWorld } from './classic-support/start';
 import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
 import { aimAtVoxelWithRealMouse } from './classic-support/aim';
 import {
@@ -57,13 +58,13 @@ import {
 const stageResults: Partial<Record<Stage, StageResult>> = {};
 const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};
 // prettier-ignore
-const benchmarkMode = process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1';
+const benchmarkMode = settings.classicBenchmark.enabled;
 let evidenceWritten = false;
 let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
 const logicEvidence: ClassicLogicObservationEvidence[] = [];
 
 test.beforeAll(async ({ headless, launchOptions }) => {
-  requireHeadlessClassic(headless, launchOptions);
+  settings.requireHeadlessClassic(headless, launchOptions);
 });
 
 test.afterEach(async ({ page }, testInfo) => {
@@ -83,7 +84,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
 
   const { pageErrors, failedResponses, assets, workers } = observeBrowserRuntime(page);
   await test.step('C0 启动固定 Classic 生产世界并冻结初态', async () => {
-    await startClassicWorld(page, classicScenario);
+    await startClassicWorld(page, classicScenario, settings.classicBenchmark.generalWorkers);
   });
   // prettier-ignore
   const prepared = await prepareInitialState(page, classicScenario);
@@ -158,7 +159,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   };
   stageSamples.C0 = baseline;
 
-  await configureClassicSettings(page);
+  await settings.configureClassicSettings(page);
   await test.step('C1 Pointer Lock、真实转向/移动/跳跃并跨越 Chunk', async () => {
     await lockPointer(page);
     const beforeTurn = (await snapshot(page))!;
@@ -194,6 +195,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
 
   let minedMeshEvidence!: ClassicSnapshot;
   await test.step('C2 真实采集、掉落拾取、背包与配方', async () => {
+    await clearNaturalFixtureEntities(page);
     for (const resource of classicScenario.initialState.resourceVoxels) {
       const countBefore = itemCount(await playerState(page), resource.itemId);
       await mineVoxel(page, resource.position);
@@ -488,7 +490,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   await test.step('V5金钻资源目录与真实钻石块建造', () => replaceGlassWithDiamondBlock(page, testInfo));
 
   const final = (await snapshot(page))!;
-  await deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
+  await settings.deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
   await attachClassicEvidence(testInfo, {
     scenario: classicScenario,
     stages: stageResults,
