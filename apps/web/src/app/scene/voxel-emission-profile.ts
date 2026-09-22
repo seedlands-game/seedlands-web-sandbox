@@ -18,7 +18,7 @@ export function voxelEmissionProfile(material: FaceMaterialId): VoxelEmissionPro
     case FaceMaterial.Lava:
     case FaceMaterial.Fire:
       return { threshold: 0, redDominance: 0 };
-    case FaceMaterial.Torch:
+    case FaceMaterial.TorchFlame:
     case FaceMaterial.JackOLantern:
       return { threshold: 0.28, redDominance: 0 };
     case FaceMaterial.LitFurnace:

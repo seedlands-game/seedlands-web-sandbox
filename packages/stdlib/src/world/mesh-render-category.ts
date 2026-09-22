@@ -24,6 +24,6 @@ export const renderCategoryForMaterial = (material: FaceMaterialId): RenderCateg
     ? 'transparent'
     : cutoutMaterials.has(material)
       ? 'cutout'
-      : material === FaceMaterial.LanternGlow || material === FaceMaterial.Lava
+      : material === FaceMaterial.LanternGlow || material === FaceMaterial.Lava || material === FaceMaterial.TorchFlame
         ? 'emissive'
         : 'opaque';

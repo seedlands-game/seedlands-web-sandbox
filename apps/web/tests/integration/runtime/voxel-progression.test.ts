@@ -100,9 +100,9 @@ describe('S4 voxel progression palette', () => {
       FaceMaterial.Ice,
       FaceMaterial.SnowBlock,
     ]).toEqual([45, 46, 47, 48, 49, 50]);
-    expect(MATERIAL_LAYER_COUNT).toBe(76);
-    expect(terrainMaterials).toHaveLength(76);
-    expect(builtinTerrainTextures).toHaveLength(76);
+    expect(MATERIAL_LAYER_COUNT).toBe(77);
+    expect(terrainMaterials).toHaveLength(77);
+    expect(builtinTerrainTextures).toHaveLength(77);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],

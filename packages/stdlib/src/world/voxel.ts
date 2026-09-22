@@ -171,6 +171,7 @@ export const FaceMaterial = {
   LitFurnace: 74,
   RedstoneOre: 75,
   LitRedstoneOre: 76,
+  TorchFlame: 77,
 } as const;
 
 export type FaceMaterialId = (typeof FaceMaterial)[keyof typeof FaceMaterial];

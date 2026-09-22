@@ -91,6 +91,7 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.LitFurnace, '燃烧熔炉', ['5a6263', '838b88', 'd95b1d', 'ffbc48']],
   [FaceMaterial.RedstoneOre, '红石矿', ['687170', '858d8a', '8d1d25', 'd74343']],
   [FaceMaterial.LitRedstoneOre, '发光红石矿', ['687170', '858d8a', 'd51c27', 'ff746d']],
+  [FaceMaterial.TorchFlame, '火把火头', ['d87318', 'f59c32', 'ffd266', 'fff0a3']],
 ];
 const plantMaterials = new Set<number>([
   FaceMaterial.Sapling,
@@ -258,8 +259,11 @@ function structurePixel(face: FaceMaterialId, x: number, y: number): number | un
     return y === 2 || y === 6 || y === 10 || y === 14 ? 2 : 0;
   }
   if (face === FaceMaterial.Torch) {
-    if (y >= 8) return x % 4 === 1 ? 3 : 2;
-    return x % 3 === 0 || y === 0 ? 4 : 1;
+    return x % 3 === 0 || y === 0 ? 3 : 1;
+  }
+  if (face === FaceMaterial.TorchFlame) {
+    if (x === 0 || y === 0 || x === 15 || y === 15) return 1;
+    return (x + y) % 4 === 0 ? 4 : x % 3 === 1 ? 3 : 2;
   }
   if (face === FaceMaterial.Fence) {
     if (x === 0 || x === 3 || x === 7 || x === 11 || x === 15) return 3;
@@ -434,11 +438,11 @@ export const terrainMaterials: TerrainMaterial[] = sources.map(([faceMaterial, n
         : [
               FaceMaterial.Lava,
               FaceMaterial.Fire,
-              FaceMaterial.Torch,
+              FaceMaterial.TorchFlame,
               FaceMaterial.JackOLantern,
               FaceMaterial.LitFurnace,
               FaceMaterial.LitRedstoneOre,
-            ].includes(faceMaterial as 30 | 32 | 57 | 72 | 74 | 76)
+            ].includes(faceMaterial as 30 | 32 | 72 | 74 | 76 | 77)
           ? 1.05
           : 0,
 }));

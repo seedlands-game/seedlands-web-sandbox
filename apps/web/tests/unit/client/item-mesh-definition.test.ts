@@ -44,7 +44,6 @@ describe('物品静态网格定义', () => {
   it.each([
     [Voxel.WoodenDoor, FaceMaterial.WoodenDoor],
     [Voxel.Ladder, FaceMaterial.Ladder],
-    [Voxel.Torch, FaceMaterial.Torch],
     [Voxel.Fence, FaceMaterial.Fence],
   ] as const)('结构物品 %i 复用世界模型的材质和 UV 采样范围', (voxel, material) => {
     const data = new Uint16Array(CHUNK_SIZE ** 3);
@@ -58,17 +57,35 @@ describe('物品静态网格定义', () => {
     expect(item[0].uvs).toEqual([...world.uvs]);
   });
 
-  it('火把两组竖面采样 y 行，顶底面仅采样窄横截面', () => {
-    const torch = itemMeshDefinition(Voxel.Torch).groups[0]!;
-    const xSideRows = torch.uvs.slice(0, 16).filter((_value, index) => index % 2 === 1);
-    const caps = torch.uvs.slice(16, 32);
-    const zSideRows = torch.uvs.slice(32, 48).filter((_value, index) => index % 2 === 1);
+  it('火把物品复用世界模型的分材质木柄和火头', () => {
+    const data = new Uint16Array(CHUNK_SIZE ** 3);
+    data[voxelIndex(0, 0, 0)] = Voxel.Torch;
+    const world = meshChunk({ seed: 1, cx: 0, cy: 0, cz: 0, data, changes: [], outside: () => Voxel.Air });
+    const torch = itemMeshDefinition(Voxel.Torch).groups;
 
-    expect(Math.min(...xSideRows)).toBe(0);
-    expect(Math.max(...xSideRows)).toBeCloseTo(0.72);
-    expect(Math.min(...zSideRows)).toBe(0);
-    expect(Math.max(...zSideRows)).toBeCloseTo(0.72);
-    expect(Math.max(...caps)).toBeCloseTo(0.14);
+    expect(torch.map((group) => group.material).sort((a, b) => a - b)).toEqual([
+      FaceMaterial.Torch,
+      FaceMaterial.TorchFlame,
+    ]);
+    for (const group of torch) {
+      const mesh = world[group.material]!;
+      expect(group.boxCount).toBe(1);
+      expect(new Float32Array(group.positions)).toEqual(mesh.positions);
+      expect(group.uvs).toEqual([...mesh.uvs]);
+    }
+  });
+
+  it('火把木柄和火头各自以自身模型高度采样纹理', () => {
+    const groups = itemMeshDefinition(Voxel.Torch).groups;
+    const handle = groups.find((group) => group.material === FaceMaterial.Torch)!;
+    const flame = groups.find((group) => group.material === FaceMaterial.TorchFlame)!;
+    const handleSideRows = handle.uvs.slice(0, 16).filter((_value, index) => index % 2 === 1);
+    const flameSideRows = flame.uvs.slice(0, 16).filter((_value, index) => index % 2 === 1);
+
+    expect(Math.min(...handleSideRows)).toBe(0);
+    expect(Math.max(...handleSideRows)).toBeCloseTo(0.56);
+    expect(Math.min(...flameSideRows)).toBe(0);
+    expect(Math.max(...flameSideRows)).toBeCloseTo(0.26);
   });
 
   it.each([

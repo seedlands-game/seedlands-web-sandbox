@@ -17,7 +17,7 @@
   };
 </script>
 
-{#if interaction.target}
+{#if interaction.target && interaction.breaking}
   <div
     id="target-card"
     class="game-panel"
@@ -36,8 +36,15 @@
     {/if}
     <div class="target-details">
       <strong>{interaction.target.label}</strong>
-      <small>{interaction.breaking ? '采集中' : 'Seedlands'}</small>
+      <small>{interaction.breaking.label}</small>
+      <progress
+        id="break-progress"
+        max="1"
+        value={interaction.breaking.progress}
+        aria-label={interaction.breaking.label}
+      ></progress>
     </div>
-    <img class="target-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/classic-crest.png')} alt="" />
   </div>
+{:else if interaction.target}
+  <span class="sr-only" role="status">目标方块 {interaction.target.label}</span>
 {/if}

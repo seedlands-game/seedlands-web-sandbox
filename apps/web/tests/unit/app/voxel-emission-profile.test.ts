@@ -21,7 +21,8 @@ describe('体素表面发光阈值', () => {
   it('让热像素发光而保留火把木柄、炉体、矿石与南瓜结构', () => {
     expect(voxelEmissionThreshold(FaceMaterial.Lava)).toBe(0);
     expect(voxelEmissionThreshold(FaceMaterial.Fire)).toBe(0);
-    expect(voxelEmissionThreshold(FaceMaterial.Torch)).toBeGreaterThan(0);
+    expect(voxelEmissionThreshold(FaceMaterial.Torch)).toBe(1);
+    expect(voxelEmissionThreshold(FaceMaterial.TorchFlame)).toBeGreaterThan(0);
     expect(voxelEmissionThreshold(FaceMaterial.LitFurnace)).toBeGreaterThan(0);
     expect(voxelEmissionThreshold(FaceMaterial.LitRedstoneOre)).toBeGreaterThan(0);
     expect(voxelEmissionThreshold(FaceMaterial.JackOLantern)).toBeGreaterThan(0);
@@ -40,15 +41,23 @@ describe('体素表面发光阈值', () => {
   });
 
   it('火把的木柄不发光，火头在细柱实际采样的上半段发光', () => {
-    const texture = textureFor(FaceMaterial.Torch);
+    const handle = textureFor(FaceMaterial.Torch);
+    expect(
+      handle.payload.pixels.every(
+        (index) =>
+          !voxelEmissionPixelCanEmit(
+            FaceMaterial.Torch,
+            handle.payload.palette[index].map(linear) as [number, number, number],
+          ),
+      ),
+    ).toBe(true);
+    const texture = textureFor(FaceMaterial.TorchFlame);
     const canEmit = (x: number, y: number) =>
       voxelEmissionPixelCanEmit(
-        FaceMaterial.Torch,
+        FaceMaterial.TorchFlame,
         texture.payload.palette[texture.payload.pixels[y * 16 + x]].map(linear) as [number, number, number],
       );
-    for (let y = 0; y < 8; y += 1)
-      for (let x = 0; x < 3; x += 1) expect(canEmit(x, y), `torch handle ${x},${y}`).toBe(false);
-    expect([8, 9, 10, 11].some((y) => [0, 1, 2].some((x) => canEmit(x, y)))).toBe(true);
+    expect(Array.from({ length: 16 }, (_, y) => y).some((y) => [0, 1, 2].some((x) => canEmit(x, y)))).toBe(true);
   });
 
   it('发光红石矿的灰色石底不满足红色优势条件', () => {

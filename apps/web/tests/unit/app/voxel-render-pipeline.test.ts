@@ -15,7 +15,9 @@ describe('voxel render pipeline policy', () => {
     expect(renderCategoryForFaceMaterial(FaceMaterial.Glowstone)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.LanternFrame)).toBe('opaque');
     expect(renderCategoryForFaceMaterial(FaceMaterial.LanternGlow)).toBe('emissive');
-    expect(MATERIAL_LAYER_COUNT).toBe(76);
+    expect(renderCategoryForFaceMaterial(FaceMaterial.Torch)).toBe('opaque');
+    expect(renderCategoryForFaceMaterial(FaceMaterial.TorchFlame)).toBe('emissive');
+    expect(MATERIAL_LAYER_COUNT).toBe(77);
   });
 
   it('declares matching GLSL and WGSL chunks for every custom shader responsibility', () => {

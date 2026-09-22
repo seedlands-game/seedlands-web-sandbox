@@ -9,6 +9,7 @@ export type VoxelModelBox = LocalBox & Readonly<{ material: FaceMaterialId }>;
 
 const FULL_BOX: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
 const LANTERN_COLLISION: LocalBox = { min: [0.25, 0, 0.25], max: [0.75, 0.94, 0.75] };
+const FENCE_COLLISION: LocalBox = { min: [0.38, 0, 0.38], max: [0.62, 1, 0.62] };
 const box = (min: LocalBox['min'], max: LocalBox['max'], material: FaceMaterialId): VoxelModelBox => ({
   min,
   max,
@@ -42,7 +43,13 @@ const models = new Map<number, readonly VoxelModelBox[]>([
   ],
   [Voxel.WoodenDoor, [box([0, 0, 0.44], [1, 1, 0.56], FaceMaterial.WoodenDoor)]],
   [Voxel.Ladder, [box([0, 0, 0.88], [1, 1, 1], FaceMaterial.Ladder)]],
-  [Voxel.Torch, [box([0.43, 0, 0.43], [0.57, 0.72, 0.57], FaceMaterial.Torch)]],
+  [
+    Voxel.Torch,
+    [
+      box([0.43, 0, 0.43], [0.57, 0.56, 0.57], FaceMaterial.Torch),
+      box([0.36, 0.56, 0.36], [0.64, 0.82, 0.64], FaceMaterial.TorchFlame),
+    ],
+  ],
   [Voxel.Bed, [box([0, 0, 0], [1, 0.56, 1], FaceMaterial.Bed)]],
   [
     Voxel.Sign,
@@ -51,7 +58,16 @@ const models = new Map<number, readonly VoxelModelBox[]>([
       box([0.46, 0, 0.46], [0.54, 0.5, 0.54], FaceMaterial.Sign),
     ],
   ],
-  [Voxel.Fence, [box([0.38, 0, 0.38], [0.62, 1, 0.62], FaceMaterial.Fence)]],
+  [
+    Voxel.Fence,
+    [
+      box(FENCE_COLLISION.min, FENCE_COLLISION.max, FaceMaterial.Fence),
+      box([0, 0.38, 0.44], [1, 0.5, 0.56], FaceMaterial.Fence),
+      box([0, 0.68, 0.44], [1, 0.8, 0.56], FaceMaterial.Fence),
+      box([0.44, 0.38, 0], [0.56, 0.5, 1], FaceMaterial.Fence),
+      box([0.44, 0.68, 0], [0.56, 0.8, 1], FaceMaterial.Fence),
+    ],
+  ],
   [Voxel.Cake, [box([0.06, 0, 0.06], [0.94, 0.5, 0.94], FaceMaterial.Cake)]],
 ]);
 
@@ -87,6 +103,7 @@ export function hasVoxelModelGeometry(voxel: number): boolean {
 export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
   if (!isSolid(voxel)) return [];
   if (voxel === Voxel.Ladder || voxel === Voxel.Torch || voxel === Voxel.Sign) return [];
+  if (voxel === Voxel.Fence) return [FENCE_COLLISION];
   return voxel === Voxel.Lantern
     ? [LANTERN_COLLISION]
     : (models.get(voxel)?.map(({ min, max }) => ({ min, max })) ?? [FULL_BOX]);

@@ -37,7 +37,7 @@ describe('纹理源与编译合同', () => {
       FaceMaterial.LanternGlow,
       FaceMaterial.Lava,
       FaceMaterial.Fire,
-      FaceMaterial.Torch,
+      FaceMaterial.TorchFlame,
       FaceMaterial.JackOLantern,
       FaceMaterial.LitFurnace,
       FaceMaterial.LitRedstoneOre,
