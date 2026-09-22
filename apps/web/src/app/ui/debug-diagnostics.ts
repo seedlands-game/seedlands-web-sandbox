@@ -57,6 +57,9 @@ export type DebugPanelInput = Readonly<{
     deferredRemeshes: number;
     triangles: number;
     drawCalls: number;
+    blockLightBricks: number;
+    blockLightAllocatedBytes: number;
+    blockLightRebuildCount: number;
   }>;
   runtime?: DebugRuntimeInput;
   heap?: Readonly<{ usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number }> | null;
@@ -116,6 +119,9 @@ export function projectDebugPanel(input: DebugPanelInput): DebugPanel {
         metric('物理 tick', authority?.physicsTick, 'Authority snapshot'),
         metric('提交序列', authority?.commitSequence, 'Authority snapshot'),
         metric('驻留 / 可见 Chunk', `${chunks.loadedChunks} / ${chunks.renderedChunks}`, '客户端派生世界'),
+        metric('块光 brick', chunks.blockLightBricks, '客户端可重建派生缓存'),
+        metric('块光重建', chunks.blockLightRebuildCount, '客户端累计重建次数'),
+        metric('块光纹理', mib(chunks.blockLightAllocatedBytes), 'GPU R8 估算', ' MiB', 'estimated'),
         metric(
           '计算忙碌 / 槽位',
           compute ? `${compute.running} / ${compute.workerCount}` : null,

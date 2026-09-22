@@ -100,7 +100,8 @@ export class GameFrameLoop {
     gameplay?.advance(dt);
     this.bindings.visualEffects()?.update(dt, gameplay?.shadowCasters ?? []);
     world.updateStreaming(camera.getPosition());
-    world.drainCommits();
+    const cameraPosition = camera.getPosition();
+    world.drainCommits([cameraPosition.x, cameraPosition.y, cameraPosition.z]);
     const session = this.bindings.session();
     if (session) {
       this.bindings.uiProjection.publish({

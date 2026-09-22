@@ -232,6 +232,9 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     quality: context.qualityLevel,
     triangles: telemetry?.triangles ?? 0,
     drawCalls: telemetry?.drawCalls ?? 0,
+    blockLightBricks: telemetry?.blockLightBricks ?? 0,
+    blockLightAllocatedBytes: telemetry?.blockLightAllocatedBytes ?? 0,
+    blockLightRebuildCount: telemetry?.blockLightRebuildCount ?? 0,
     collisionDebug: context.collisionDebug?.diagnostics ?? {
       enabled: false,
       entityCount: 0,

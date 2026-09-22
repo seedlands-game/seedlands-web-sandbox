@@ -10,6 +10,13 @@ import {
 } from '../scene/playcanvas-water-transition';
 import { buildWaterSurfaceTransition } from '../scene/water-surface-transition';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
+import {
+  BLOCK_LIGHT_VOLUME_SIZE,
+  encodeBlockLightLevelForR8,
+  blockLightOriginForChunk,
+  type ChunkBlockLightSink,
+} from '../scene/block-light-volume';
+import type { BlockLightVolume } from '@seedlands/stdlib/world/voxel-light';
 
 export const WATER_MESH_TRANSITION_MS = 180;
 export const MAX_ACTIVE_WATER_TRANSITIONS = 8;
@@ -24,6 +31,51 @@ export type PlayCanvasChunkResource = {
   waterTransition: PlayCanvasWaterTransition | null;
   waterTransitionLayer?: pc.Layer;
   transitionCancel: (() => void) | null;
+  blockLightTexture?: pc.Texture;
+  blockLightOrigin?: Float32Array;
+  blockLightSize?: number;
+  blockLightRelease?: (() => void) | null;
+};
+
+export type ChunkBlockLightResourceHooks = Readonly<{
+  attached: (task: PendingMeshTask, sink: ChunkBlockLightSink) => () => void;
+}>;
+
+const createChunkBlockLightTexture = (device: pc.GraphicsDevice, key: string) =>
+  new pc.Texture(device, {
+    name: `voxel-block-light-${key}`,
+    width: BLOCK_LIGHT_VOLUME_SIZE,
+    height: BLOCK_LIGHT_VOLUME_SIZE,
+    depth: BLOCK_LIGHT_VOLUME_SIZE,
+    volume: true,
+    format: pc.PIXELFORMAT_R8,
+    mipmaps: false,
+    minFilter: pc.FILTER_NEAREST,
+    magFilter: pc.FILTER_NEAREST,
+    addressU: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressV: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressW: pc.ADDRESS_CLAMP_TO_EDGE,
+    // A newly visible chunk must not borrow light from another chunk before its
+    // own derived brick has been rebuilt.
+    levels: [new Uint8Array(BLOCK_LIGHT_VOLUME_SIZE ** 3)],
+  });
+
+export const applyChunkBlockLightVolume = (resource: PlayCanvasChunkResource, volume: BlockLightVolume) => {
+  if (volume.size !== BLOCK_LIGHT_VOLUME_SIZE || volume.levels.byteLength !== BLOCK_LIGHT_VOLUME_SIZE ** 3)
+    throw new RangeError('Invalid chunk block light volume.');
+  if (!resource.blockLightTexture) throw new Error('Chunk block light texture is unavailable.');
+  const pixels = resource.blockLightTexture.lock() as Uint8Array;
+  for (let index = 0; index < volume.levels.length; index += 1)
+    pixels[index] = encodeBlockLightLevelForR8(volume.levels[index]);
+  resource.blockLightTexture.unlock();
+  resource.blockLightOrigin = new Float32Array(volume.origin);
+  resource.blockLightSize = volume.size;
+  for (const instance of resource.instances) {
+    instance.setParameter('texture_blockLight', resource.blockLightTexture);
+    instance.setParameter('uBlockLightOrigin', resource.blockLightOrigin);
+    instance.setParameter('uBlockLightSize', resource.blockLightSize);
+  }
+  if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
 };
 
 const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) => {
@@ -37,6 +89,13 @@ const clearWaterTransition = (resource: PlayCanvasChunkResource) => {
   resource.waterTransitionLayer?.removeMeshInstances([transition.instance]);
   resource.waterTransitionLayer = undefined;
   transition.destroy();
+};
+
+const bindBlockLight = (instance: pc.MeshInstance, resource: PlayCanvasChunkResource) => {
+  if (typeof instance.setParameter !== 'function' || !resource.blockLightTexture) return;
+  instance.setParameter('texture_blockLight', resource.blockLightTexture);
+  instance.setParameter('uBlockLightOrigin', resource.blockLightOrigin!);
+  instance.setParameter('uBlockLightSize', resource.blockLightSize!);
 };
 
 export const summarizeMeshParts = (parts: MeshPart[]): ChunkSummary => ({
@@ -61,17 +120,24 @@ export const createPlayCanvasChunkAdapter = (
   waterLayerId?: number,
   transitions = new WaterMeshTransitionTracker(),
   createWaterTransition: PlayCanvasWaterTransitionFactory = createPlayCanvasWaterTransition,
+  blockLightHooks?: ChunkBlockLightResourceHooks,
 ): ChunkResourceAdapter<PendingMeshTask, MeshPart, PlayCanvasChunkResource> => ({
-  create: (task) => ({
-    entity: new pc.Entity(`Chunk ${task.chunkKey}`),
-    categoryEntities: new Map(),
-    meshes: [],
-    instances: [],
-    waterInstances: [],
-    waterParts: [],
-    waterTransition: null,
-    transitionCancel: null,
-  }),
+  create: (task) => {
+    const origin = blockLightOriginForChunk(task.cx, task.cy, task.cz);
+    const resource: PlayCanvasChunkResource = {
+      entity: new pc.Entity(`Chunk ${task.chunkKey}`),
+      categoryEntities: new Map(),
+      meshes: [],
+      instances: [],
+      waterInstances: [],
+      waterParts: [],
+      waterTransition: null,
+      transitionCancel: null,
+      blockLightOrigin: new Float32Array(origin),
+      blockLightSize: BLOCK_LIGHT_VOLUME_SIZE,
+    };
+    return resource;
+  },
   commitPart: (resource, task, part) => {
     const span = telemetry.beginSpan('render', 'MeshCommit', 'main', task.traceId);
     const mesh = new pc.Mesh(app.graphicsDevice);
@@ -94,6 +160,7 @@ export const createPlayCanvasChunkAdapter = (
       resource.entity.addChild(categoryEntity);
     }
     const instance = new pc.MeshInstance(mesh, resolveMaterial(part), categoryEntity);
+    bindBlockLight(instance, resource);
     if (part.renderCategory === 'emissive') instance.castShadow = false;
     if (part.renderCategory === 'transparent') {
       instance.drawOrder = 1000;
@@ -108,6 +175,9 @@ export const createPlayCanvasChunkAdapter = (
   },
   attach: (resource, task, onPostrender) => {
     const span = telemetry.beginSpan('render', 'SceneAttach', 'main', task.traceId);
+    resource.blockLightTexture = createChunkBlockLightTexture(app.graphicsDevice, task.chunkKey);
+    for (const instance of resource.instances) bindBlockLight(instance, resource);
+    if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
     for (const [category, entity] of resource.categoryEntities) {
       entity.addComponent('render');
       entity.render!.meshInstances = resource.instances.filter((instance) => instance.node === entity);
@@ -124,6 +194,10 @@ export const createPlayCanvasChunkAdapter = (
     }
     resource.entity.setPosition(task.cx * CHUNK_SIZE, task.cy * CHUNK_SIZE, task.cz * CHUNK_SIZE);
     app.root.addChild(resource.entity);
+    resource.blockLightRelease =
+      blockLightHooks?.attached(task, {
+        apply: (volume) => applyChunkBlockLightVolume(resource, volume),
+      }) ?? null;
     telemetry.endSpan(span);
     telemetry.markTrace(task.traceId, 'scene-attached', 'main');
     app.once('postrender', onPostrender);
@@ -151,6 +225,7 @@ export const createPlayCanvasChunkAdapter = (
     if (!material) return false;
     try {
       current.waterTransition = createWaterTransition(app, plan.geometry, material, transparent);
+      if (current.blockLightTexture) bindBlockLight(current.waterTransition.instance, current);
     } catch {
       clearWaterTransition(current);
       telemetry.markTrace(task.traceId, 'water-transition-skipped-renderer', 'main');
@@ -269,7 +344,10 @@ export const createPlayCanvasChunkAdapter = (
   destroy: (resource) => {
     resource.transitionCancel?.();
     clearWaterTransition(resource);
+    resource.blockLightRelease?.();
+    resource.blockLightRelease = null;
     resource.meshes.forEach((mesh) => mesh.destroy());
+    resource.blockLightTexture?.destroy();
     resource.entity.destroy();
   },
 });

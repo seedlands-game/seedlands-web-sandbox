@@ -21,6 +21,7 @@ import {
 import type { QualityProfile } from '../scene/quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from '../gameplay/fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
+import { ChunkBlockLightCache } from '../scene/block-light-volume';
 import {
   acceptStreamingCanonical,
   prepareStreamingNeighborhood,
@@ -39,6 +40,9 @@ type WorldTelemetry = {
   triangles: number;
   drawCalls: number;
   meshBytes: number;
+  blockLightBricks: number;
+  blockLightAllocatedBytes: number;
+  blockLightRebuildCount: number;
 };
 
 export type WorldAuthorityPort = Readonly<{
@@ -101,6 +105,7 @@ export class World {
   private readonly fluidFeedback = new FluidFeedbackTracker();
   private readonly waterTransitions = new WaterMeshTransitionTracker();
   private readonly streamingAdmissionRetry = new StreamingAdmissionRetry();
+  private readonly blockLightCache: ChunkBlockLightCache;
   private lastCenter = '';
   private disposed = false;
 
@@ -116,6 +121,10 @@ export class World {
     onStaleVisibleCommit: () => void = () => undefined,
     waterLayerId?: number,
   ) {
+    this.blockLightCache = new ChunkBlockLightCache({
+      getVoxelIfLoaded: (x, y, z) => this.getVoxelIfLoaded(x, y, z),
+      blockLightRevision: (origin, size) => this.blockLightRevision(origin, size),
+    });
     const source: MeshTaskSource = {
       get seed() {
         return authority.seed;
@@ -151,6 +160,12 @@ export class World {
         telemetryRecorder,
         waterLayerId,
         this.waterTransitions,
+        undefined,
+        {
+          attached: (task, sink) => {
+            return this.blockLightCache.register(task.chunkKey, task.cx, task.cy, task.cz, sink);
+          },
+        },
       ),
       isCurrent: (task) => this.scheduler.isCurrent(task),
       profile,
@@ -232,12 +247,16 @@ export class World {
   get telemetry(): WorldTelemetry {
     const chunks = [...this.repository.chunks.values()];
     const meshBytes = chunks.reduce((sum, chunk) => sum + chunk.meshBytes, 0);
+    const blockLight = this.blockLightCache.snapshot;
     this.telemetryRecorder.gauge('loaded_chunks', chunks.length);
     this.telemetryRecorder.gauge('visible_chunks', chunks.length);
     this.telemetryRecorder.gauge('generation_queue_depth', this.scheduler.generationQueueSize);
     this.telemetryRecorder.gauge('meshing_queue_depth', this.scheduler.meshingQueueSize);
     this.telemetryRecorder.gauge('upload_queue_depth', this.repository.queueSize);
     this.telemetryRecorder.gauge('mesh_cpu_bytes', meshBytes);
+    this.telemetryRecorder.gauge('block_light_bricks', blockLight.brickCount);
+    this.telemetryRecorder.gauge('block_light_allocated_bytes', blockLight.allocatedBytes);
+    this.telemetryRecorder.gauge('block_light_rebuild_count', blockLight.rebuildCount);
     return {
       loadedChunks: chunks.length,
       renderedChunks: chunks.filter((chunk) => chunk.triangles > 0).length,
@@ -248,6 +267,9 @@ export class World {
       triangles: chunks.reduce((sum, chunk) => sum + chunk.triangles, 0),
       drawCalls: chunks.reduce((sum, chunk) => sum + chunk.drawCalls, 0),
       meshBytes,
+      blockLightBricks: blockLight.brickCount,
+      blockLightAllocatedBytes: blockLight.allocatedBytes,
+      blockLightRebuildCount: blockLight.rebuildCount,
     };
   }
 
@@ -276,14 +298,16 @@ export class World {
   get fluidFeedbackSummary() {
     return this.fluidFeedback.summary();
   }
-
   get waterTransitionSnapshot() {
     return this.waterTransitions.snapshot();
   }
-
-  waitForInitialVisibleChunk() {
-    return this.repository.waitForFirstVisible();
+  get blockLightSnapshot() {
+    return this.blockLightCache.snapshot;
   }
+
+  sampleBlockLight = (position: readonly [number, number, number]) => this.blockLightCache.sample(position);
+
+  waitForInitialVisibleChunk = () => this.repository.waitForFirstVisible();
 
   getRenderedChunkRevision(cx: number, cy: number, cz: number): number | null {
     return this.repository.chunks.get(chunkKey(cx, cy, cz))?.task.chunkRevision ?? null;
@@ -320,6 +344,7 @@ export class World {
     this.scenarioId = `${name}-${++this.scenarioSequence}`;
     this.scheduler.beginScenario();
     this.repository.clear();
+    this.blockLightCache.clear();
     this.fluidFeedback.reset();
     this.waterTransitions.reset();
     this.lastCenter = '';
@@ -351,6 +376,7 @@ export class World {
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.scheduler.dispose();
     this.repository.dispose();
+    this.blockLightCache.clear();
     this.dirtyChunks.clear();
     this.fluidDirtyChunks.clear();
     this.remeshTimer = null;
@@ -454,6 +480,10 @@ export class World {
     this.latestCommitMeshChunkCount = change.meshChunks.length;
     let hasPresentationWork = false;
     const revisions = new Map(change.chunkRevisions.map(({ key, revision }) => [key, revision] as const));
+    for (const key of new Set([...change.meshChunks, ...revisions.keys()])) {
+      const [cx, cy, cz] = key.split(',').map(Number);
+      this.blockLightCache.invalidateAround(cx!, cy!, cz!);
+    }
     const authorityKeys = new Set(revisions.keys());
     const presentationKeys = [...change.meshChunks].sort(
       (left, right) => Number(authorityKeys.has(right)) - Number(authorityKeys.has(left)),
@@ -480,8 +510,9 @@ export class World {
     this.scheduleRemesh(fluidPriority ? 0 : 48);
   }
 
-  drainCommits() {
+  drainCommits(cameraPosition?: readonly [number, number, number]) {
     this.repository.drain();
+    if (cameraPosition) this.blockLightCache.rebuildNearest(cameraPosition);
   }
 
   private request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {

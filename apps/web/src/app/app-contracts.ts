@@ -94,6 +94,9 @@ export type HarnessSnapshot = {
   quality: 'low' | 'medium' | 'high';
   triangles: number;
   drawCalls: number;
+  blockLightBricks: number;
+  blockLightAllocatedBytes: number;
+  blockLightRebuildCount: number;
   collisionDebug: CollisionDebugRendererDiagnostics & { authorityRequestCount: 0 };
   runtime: 'authority-worker';
   workers: {

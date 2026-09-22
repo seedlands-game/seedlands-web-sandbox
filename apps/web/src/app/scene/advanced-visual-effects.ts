@@ -7,12 +7,6 @@ import type { LocalShadowCaster } from './advanced-lighting-budget';
 import { StylizedPostProcessing } from './stylized-post-effect';
 import { clipReflectionProjection, reflectionTextureMatrix, setReflectedCameraPose } from './reflection-projection';
 import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from './water-reflection-plane';
-import {
-  buildCameraBlockLightVolume,
-  cameraBlockLightNeedsRefresh,
-  sampleCameraBlockLight,
-  type CameraBlockLightVolume,
-} from './block-light-volume';
 
 export type VisualEffectsSnapshot = {
   activeLocalLights: number;
@@ -141,16 +135,13 @@ export class AdvancedVisualEffects {
   private scanElapsed = Number.POSITIVE_INFINITY;
   private waterPlaneY: number | null = null;
   private shadowStableFrameCount = 0;
-  private blockLight: CameraBlockLightVolume | null = null;
-  private blockLightRebuildCount = 0;
-  private blockLightSourceRevision: number | null = null;
 
   constructor(
     app: pc.Application,
     private readonly camera: pc.Entity,
     private readonly world: World,
     private readonly budget: LightingQualityBudget,
-    private readonly materials: VoxelMaterials,
+    materials: VoxelMaterials,
   ) {
     this.reflection =
       budget.reflectionResolution > 0
@@ -170,7 +161,6 @@ export class AdvancedVisualEffects {
   }
 
   update(dt: number, _shadowCasters: readonly LocalShadowCaster[] = []) {
-    this.updateBlockLight();
     this.scanElapsed += dt;
     if (this.scanElapsed >= this.budget.scanIntervalSeconds) {
       this.scanElapsed = 0;
@@ -197,9 +187,9 @@ export class AdvancedVisualEffects {
       postProcessing: this.postProcessing !== null,
       shadowUpdateCount: 0,
       shadowStableFrameCount: this.shadowStableFrameCount,
-      blockLightReady: this.blockLight !== null,
-      blockLightSourceRevision: this.blockLightSourceRevision,
-      blockLightRebuildCount: this.blockLightRebuildCount,
+      blockLightReady: this.world.blockLightSnapshot.allocatedBrickCount > 0,
+      blockLightSourceRevision: this.world.transactionDiagnostics.worldRevision,
+      blockLightRebuildCount: this.world.blockLightSnapshot.rebuildCount,
     };
   }
 
@@ -210,26 +200,7 @@ export class AdvancedVisualEffects {
 
   /** 0..1 block light for presentation consumers such as animated actors. */
   sampleBlockLight(position: readonly [number, number, number]): number {
-    return sampleCameraBlockLight(this.blockLight, position) / 15;
-  }
-
-  private updateBlockLight(): void {
-    const position = this.camera.getPosition();
-    const reader = {
-      getVoxelIfLoaded: (x: number, y: number, z: number) => this.world.getVoxelIfLoaded(x, y, z),
-      blockLightRevision: (origin: readonly [number, number, number], size: number) =>
-        this.world.blockLightRevision(origin, size),
-    };
-    // The revision checked this frame; edits outside the covered chunks need no rebuild.
-    this.blockLightSourceRevision = this.world.transactionDiagnostics.worldRevision;
-    if (!cameraBlockLightNeedsRefresh(this.blockLight, reader, [position.x, position.y, position.z])) return;
-    this.blockLight = buildCameraBlockLightVolume(reader, [position.x, position.y, position.z]);
-    this.blockLightRebuildCount += 1;
-    this.materials.setBlockLightVolume(
-      this.blockLight.volume.levels,
-      this.blockLight.volume.origin,
-      this.blockLight.volume.size,
-    );
+    return this.world.sampleBlockLight(position) / 15;
   }
 
   private scanNearbyVoxels(): void {
