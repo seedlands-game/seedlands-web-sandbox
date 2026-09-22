@@ -3,7 +3,6 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { ChromeTrace, ClassicSnapshot } from './harness';
 import type { ArtifactReadback, CompositionIdentity, PackLockReadback, RuntimeEnvironment } from './identity';
-import type { ClassicLogicObservationEvidence } from './logic';
 import type { ClassicScenario } from './scenario';
 
 export type ClassicStage = `C${0 | 1 | 2 | 3 | 4 | 5}`;
@@ -214,7 +213,6 @@ export async function attachClassicFailure(
   current: ClassicSnapshot | null,
   benchmarkMode: boolean,
   restoreEvidence?: Readonly<Record<string, unknown>>,
-  logicEvidence: readonly ClassicLogicObservationEvidence[] = [],
 ): Promise<void> {
   const evidence = {
     schemaVersion: 1,
@@ -227,7 +225,6 @@ export async function attachClassicFailure(
     errors: testInfo.errors.map(({ message }) => message),
     current,
     restoreEvidence,
-    logicEvidence,
   };
   await testInfo.attach('classic-runtime-failure.json', {
     body: JSON.stringify(evidence, null, 2),

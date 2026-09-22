@@ -1,0 +1,74 @@
+diff --git a/packages/stdlib/src/server/authority/voxel-collision-world.ts b/packages/stdlib/src/server/authority/voxel-collision-world.ts
+index b28f458d..6281540c 100644
+--- a/packages/stdlib/src/server/authority/voxel-collision-world.ts
++++ b/packages/stdlib/src/server/authority/voxel-collision-world.ts
+@@ -1,6 +1,6 @@
+ import type { Collider, FluidVolume, PhysicsWorld, WorldAabb } from '../../physics';
+-import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
+-import { collisionBoxesForVoxel } from '../../world/voxel-model';
++import { CHUNK_SIZE, MAX_VOXEL_ID, Voxel, chunkKey, floorDiv } from '../../world/voxel';
++import { collisionBoxesForVoxel, type LocalBox } from '../../world/voxel-model';
+ import { waterSurfaceHeight } from '../../world/water-mesh-height';
+
+ export type LoadedVoxel = Readonly<{
+@@ -21,6 +21,20 @@ const queryRange = (minimum: number, maximum: number) => {
+   return { from, to };
+ };
+
++// Collision shape definitions are static for the bounded voxel registry. This
++// cache never contains query output, so retained and nested query results stay
++// independent snapshots.
++const collisionBoxesByVoxel: Array<readonly LocalBox[] | undefined> = [];
++
++const collisionBoxesForLoadedVoxel = (voxel: number): readonly LocalBox[] => {
++  if (!Number.isInteger(voxel) || voxel < Voxel.Air || voxel > MAX_VOXEL_ID) return collisionBoxesForVoxel(voxel);
++  const cached = collisionBoxesByVoxel[voxel];
++  if (cached !== undefined) return cached;
++  const boxes = collisionBoxesForVoxel(voxel);
++  collisionBoxesByVoxel[voxel] = boxes;
++  return boxes;
++};
++
+ export class VoxelCollisionWorld implements PhysicsWorld {
+   private readonly revisions = new Map<string, number>();
+   private readonly touchedChunkKeys = new Set<string>();
+@@ -41,7 +55,7 @@ export class VoxelCollisionWorld implements PhysicsWorld {
+
+   querySolids(bounds: WorldAabb): readonly Collider[] {
+     const colliders: Collider[] = [];
+-    const requested = new Set<string>();
++    let requested: Set<string> | undefined;
+     const xRange = queryRange(bounds.min.x, bounds.max.x);
+     const yRange = queryRange(bounds.min.y, bounds.max.y);
+     const zRange = queryRange(bounds.min.z, bounds.max.z);
+@@ -52,8 +66,8 @@ export class VoxelCollisionWorld implements PhysicsWorld {
+           const loaded = this.source.getLoadedVoxel(x, y, z);
+           if (!loaded) {
+             const key = chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
+-            if (!requested.has(key)) {
+-              requested.add(key);
++            if (!requested?.has(key)) {
++              (requested ??= new Set()).add(key);
+               this.requestUnknownChunk(key);
+             }
+             colliders.push({
+@@ -63,7 +77,9 @@ export class VoxelCollisionWorld implements PhysicsWorld {
+             continue;
+           }
+           this.revisions.set(loaded.chunkKey, loaded.revision);
+-          collisionBoxesForVoxel(loaded.voxel).forEach((box, index) => {
++          const boxes = collisionBoxesForLoadedVoxel(loaded.voxel);
++          for (let index = 0; index < boxes.length; index += 1) {
++            const box = boxes[index]!;
+             colliders.push({
+               id: `voxel:${x},${y},${z}:${index}`,
+               aabb: {
+@@ -71,7 +87,7 @@ export class VoxelCollisionWorld implements PhysicsWorld {
+                 max: { x: x + box.max[0], y: y + box.max[1], z: z + box.max[2] },
+               },
+             });
+-          });
++          }
+         }
+     return colliders;
+   }

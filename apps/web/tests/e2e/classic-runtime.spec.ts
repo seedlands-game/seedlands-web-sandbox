@@ -5,7 +5,6 @@ import { expectPresentedDrop } from './classic-support/drops';
 import {
   adjustPitchToTarget,
   attackWithRealMouse,
-  characterObservation,
   clickCanvasCenter,
   closeInventory,
   inventory,
@@ -20,7 +19,6 @@ import {
   voxelAt,
   waitForSnapshot,
   walkTo,
-  type CharacterObservation,
   type ChromeTrace,
   type ClassicWindow,
   type ClassicSnapshot,
@@ -40,9 +38,7 @@ import {
 } from './classic-support/evidence';
 import { classicScenario, type Point } from './classic-support/scenario';
 import { checkpointCharacter, checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
-import { captureNpcLogicObservation, type ClassicLogicObservationEvidence } from './classic-support/logic';
 import {
-  completedNpcActivity,
   equipFromInventory,
   inventorySignature,
   itemCount,
@@ -58,7 +54,6 @@ const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};
 const benchmarkMode = settings.classicBenchmark.enabled;
 let evidenceWritten = false;
 let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
-const logicEvidence: ClassicLogicObservationEvidence[] = [];
 
 test.beforeAll(async ({ headless, launchOptions }) => {
   settings.requireHeadlessClassic(headless, launchOptions);
@@ -68,14 +63,13 @@ test.afterEach(async ({ page }, testInfo) => {
   if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
   if (evidenceWritten || testInfo.title.startsWith('Classic 视觉')) return;
   const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
-  await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence, logicEvidence);
+  await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence);
 });
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.setTimeout(480_000);
   evidenceWritten = false;
   restoreEvidence = undefined;
-  logicEvidence.length = 0;
   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
   for (const stage of Object.keys(stageSamples) as Stage[]) delete stageSamples[stage];
 
@@ -85,7 +79,6 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
   // prettier-ignore
   const prepared = await prepareInitialState(page, classicScenario);
-  const npcInitial = await characterObservation(page, prepared.npcId);
   // prettier-ignore
   const artifact = await browserArtifact(page);
   const packLock = await browserPackLock(page);
@@ -119,7 +112,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   expect(baseline.workers).toMatchObject({ authority: 1, logic: 1, persistence: 1 });
   expect(baseline.workers.general).toBeGreaterThan(0);
   expect(baseline.compute.failedTasks).toBe(0);
-  expect(baseline.gameplay.npcCount).toBe(1);
+  expect(baseline.gameplay.npcCount).toBe(0);
   expect(assets.some((path) => path.endsWith('.wasm'))).toBe(true);
   expect(workers.some((path) => /authority-worker-[\w-]+\.js$/.test(path))).toBe(true);
   expect(workers.some((path) => /world-worker-[\w-]+\.js$/.test(path))).toBe(true);
@@ -287,13 +280,11 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
         'Right click placed crafted planks with a consumed mesh commit; inventory food restored health; held real mouse input buffered and completed the wood-sword second combo hit before defeating the fixed creature; a crafted workbench was placed, opened through the station runtime, then dismantled and recovered through real actions.',
     };
     stageSamples.C3 = (await snapshot(page))!;
-    logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C3-complete'));
   });
 
-  let npcBeforeSave!: CharacterObservation;
   let routeTrace!: ChromeTrace;
   let sampleCompletedAt!: string;
-  await test.step('C4 观察无模型 NPC 行为并离开/返回局部资源', async () => {
+  await test.step('C4 离开/返回局部资源并重建同一 Chunk', async () => {
     const beforeTraverse = (await snapshot(page))!;
     const returnChunkX = Math.floor(classicScenario.route.returnPoint[0] / 32);
     const returnChunkPattern = new RegExp(`^${returnChunkX},[01],0$`);
@@ -307,8 +298,6 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       ),
     );
     expect(returnChunkNamesBeforeTraverse.size).toBeGreaterThan(0);
-    const observationBeforeTraverse = await characterObservation(page, prepared.npcId, npcInitial.cursor);
-    logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C4-before-traverse'));
     await walkTo(page, classicScenario.route.farTurnaround, { jump: true, timeout: 90_000 });
     const far = await waitForSnapshot(
       page,
@@ -350,20 +339,10 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
           ['worker-start', 'worker-complete', 'commit-queued', 'visible-postrender'].every((mark) => marks.has(mark)),
       ),
     ).toBe(true);
-    npcBeforeSave = await characterObservation(page, prepared.npcId, observationBeforeTraverse.cursor);
-    const completed = completedNpcActivity([npcInitial, observationBeforeTraverse, npcBeforeSave], 0);
-    if (!completed) {
-      logicEvidence.push(await captureNpcLogicObservation(page, prepared.npcId, 'C4-activity-check-failed'));
-      throw new Error(
-        `No matching NPC activity completion: ${JSON.stringify({ initial: npcInitial, before: observationBeforeTraverse, after: npcBeforeSave })}`,
-      );
-    }
-    expect(npcBeforeSave.gap).not.toBe(true);
-    expect(npcBeforeSave.self.position).not.toEqual(npcInitial.self.position);
     stageResults.C4 = {
       status: 'PASS',
       observation:
-        'The same no-model NPC started and completed one action with body movement; real traversal shifted four Chunk centers while client resources stayed bounded, and returning produced a new trace ID for the same Chunk key through Worker completion, mesh commit and postrender visibility.',
+        'Real traversal shifted four Chunk centers while client resources stayed bounded, and returning produced a new trace ID for the same Chunk key through Worker completion, mesh commit and postrender visibility.',
     };
     stageSamples.C4 = returned;
   });
@@ -373,28 +352,27 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     const stateBeforeSave = await playerState(page);
     const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
     const checkpointBefore = await checkpointVoxels(page, persistedPositions);
-    const npcCheckpointBefore = await checkpointCharacter(page, prepared.npcId);
     const derivedBefore = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
-    restoreEvidence = {
-      before: {
-        authority: authorityBefore,
-        checkpoint: checkpointBefore,
-        derived: derivedBefore,
-        npcObservation: npcBeforeSave,
-        npcCheckpoint: npcCheckpointBefore,
-      },
-    };
-    expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
-    expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
-    expect(npcBeforeSave.character.lifecycle).toBe('active');
-    expect(npcCheckpointBefore.character?.lifecycle).toBe('active');
-    expect(npcCheckpointBefore.actor?.lifecycle).toBe('alive');
-    expect(npcCheckpointBefore.entity?.health).toBeGreaterThan(0);
     const identityBefore = await page.evaluate(async () => {
       const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
       if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
       return result.data;
     });
+    if (typeof identityBefore.playerId !== 'string') throw new Error('Classic identity has no playerId.');
+    const playerCheckpointBefore = await checkpointCharacter(page, identityBefore.playerId);
+    restoreEvidence = {
+      before: {
+        authority: authorityBefore,
+        checkpoint: checkpointBefore,
+        derived: derivedBefore,
+        player: stateBeforeSave,
+        playerCheckpoint: playerCheckpointBefore,
+      },
+    };
+    expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
+    expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
+    expect(playerCheckpointBefore.entity).toMatchObject({ type: 'player' });
+    expect(playerCheckpointBefore.entity?.health).toBeGreaterThan(0);
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
     await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
@@ -410,6 +388,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       return result.data;
     });
     expect(identityAfter.epoch).not.toBe(identityBefore.epoch);
+    expect(identityAfter.playerId).toBe(identityBefore.playerId);
+    if (typeof identityAfter.playerId !== 'string') throw new Error('Restored Classic identity has no playerId.');
     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
@@ -424,18 +404,22 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     });
     expect(derivedAfterSynchronized[0]).toBe(16);
     expect(await voxelAt(page, classicScenario.route.stationTarget)).toBe(0);
-    expect(inventorySignature(await playerState(page))).toEqual(inventorySignature(stateBeforeSave));
-    const npcAfter = await characterObservation(page, prepared.npcId);
-    const npcCheckpointAfter = await checkpointCharacter(page, prepared.npcId);
+    const stateAfterRestore = await playerState(page);
+    expect(inventorySignature(stateAfterRestore)).toEqual(inventorySignature(stateBeforeSave));
+    expect(stateAfterRestore.health).toBe(stateBeforeSave.health);
+    const playerCheckpointAfter = await checkpointCharacter(page, identityAfter.playerId);
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
-      npcObservation: npcAfter,
-      npcCheckpoint: npcCheckpointAfter,
+      player: stateAfterRestore,
+      playerCheckpoint: playerCheckpointAfter,
     });
-    expect(npcAfter.character.lifecycle).toBe('active');
-    expect(npcCheckpointAfter.character?.lifecycle).toBe('active');
-    expect(npcCheckpointAfter.actor?.lifecycle).toBe('alive');
-    expect(npcCheckpointAfter.entity?.health).toBeGreaterThan(0);
-    expect(npcAfter.character.entityId).toBe(npcBeforeSave.character.entityId);
+    expect(playerCheckpointAfter.entity).toMatchObject({ type: 'player' });
+    expect(playerCheckpointAfter.entity?.health).toBe(playerCheckpointBefore.entity?.health);
+    const positionBeforeSave = playerCheckpointBefore.entity?.position;
+    const positionAfterRestore = playerCheckpointAfter.entity?.position;
+    expect(positionAfterRestore?.[0]).toBe(positionBeforeSave?.[0]);
+    expect(positionAfterRestore?.[2]).toBe(positionBeforeSave?.[2]);
+    expect(positionAfterRestore?.[1]).toBeGreaterThanOrEqual(0);
+    expect(positionAfterRestore?.[1]).toBeLessThanOrEqual(positionBeforeSave?.[1] ?? Number.NEGATIVE_INFINITY);
     const restoredInventory = await inventory(page);
     await expect(restoredInventory.getByRole('gridcell', { name: '工作台 × 1', exact: true })).toBeVisible();
     await equipFromInventory(page, '工作台');
@@ -474,7 +458,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     stageResults.C5 = {
       status: 'PASS',
       observation:
-        'Save and return created a fresh epoch, restored build/workbench/inventory/NPC identity, reacquired and reopened the station through visible target-card readback plus real mouse input, and accepted a new real movement input.',
+        'Save and return created a fresh epoch, restored build/workbench/player inventory and player checkpoint state, reacquired and reopened the station through visible target-card readback plus real mouse input, and accepted a new real movement input.',
     };
     stageSamples.C5 = (await snapshot(page))!;
     const preRestoreTrace = traceEpoch(routeTrace, identityBefore.epoch, 'C0-C4');

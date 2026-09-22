@@ -1,0 +1,205 @@
+diff --git a/packages/stdlib/src/server/authority/authority-advance-capacity.ts b/packages/stdlib/src/server/authority/authority-advance-capacity.ts
+index 16095b4c..13ed40ed 100644
+--- a/packages/stdlib/src/server/authority/authority-advance-capacity.ts
++++ b/packages/stdlib/src/server/authority/authority-advance-capacity.ts
+@@ -40,10 +40,13 @@ export function assertAuthorityAdvanceCapacity(
+   activeTimeChanged: boolean,
+ ): void {
+   const due = scheduler.previewAdvanceTo(activeTimeMs);
+-  const entities = server.queryEntities();
+-  const physicsCommits = due.physicsSteps.length * Math.max(1, entities.length);
++  const counts = server.authorityCapacityCounts?.();
++  const entities = counts ? undefined : server.queryEntities();
++  const entityCount = counts?.entityCount ?? entities!.length;
++  const worldItemCount = counts?.worldItemCount ?? entities!.filter(({ type }) => type === 'world-item').length;
++  const physicsCommits = due.physicsSteps.length * Math.max(1, entityCount);
+   const recoveryCommits = Math.min(recoveryQueueSize, due.physicsSteps.length * maxRecoveriesPerStep);
+-  const pickupCommits = entities.filter(({ type }) => type === 'world-item').length;
++  const pickupCommits = worldItemCount;
+   const gameplayCommits = due.gameplay.due
+     ? (server.gameplayAdvanceCommitUpperBound?.(due.gameplay.elapsedPeriods / gameplayHz) ?? 1)
+     : 0;
+diff --git a/packages/stdlib/src/server/authority/authority-runtime.ts b/packages/stdlib/src/server/authority/authority-runtime.ts
+index ce2b9f5a..40f5d07e 100644
+--- a/packages/stdlib/src/server/authority/authority-runtime.ts
++++ b/packages/stdlib/src/server/authority/authority-runtime.ts
+@@ -112,6 +112,7 @@ export class AuthorityRuntime {
+         server
+           .queryEntities()
+           .flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
++      authorityCapacityCounts: () => server.authorityCapacityCounts(),
+       updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
+         server.updateEntityWithoutSnapshot(id, update),
+       updateEntities: (updates: Parameters<GameServer['updateEntitiesWithoutSnapshot']>[0]) =>
+diff --git a/packages/stdlib/src/server/authority/authority-session-types.ts b/packages/stdlib/src/server/authority/authority-session-types.ts
+index 7c5ab3a0..9af16a7f 100644
+--- a/packages/stdlib/src/server/authority/authority-session-types.ts
++++ b/packages/stdlib/src/server/authority/authority-session-types.ts
+@@ -18,6 +18,12 @@ export type AuthorityPickupTarget = Readonly<{
+   position: [number, number, number];
+ }>;
+
++/** Exact active dynamic-entity totals used only to reserve Authority commits. */
++export type AuthorityCapacityCounts = Readonly<{
++  entityCount: number;
++  worldItemCount: number;
++}>;
++
+ export type AuthorityActorModeState = Readonly<{
+   mode: 'survival' | 'creative';
+   modeRevision?: number;
+@@ -34,6 +40,7 @@ export type AuthorityServerPort = {
+   createEntityReference?: (id: string) => EntityLifetimeReference | null;
+   resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
+   queryEntities: () => AuthorityEntity[];
++  authorityCapacityCounts?: () => AuthorityCapacityCounts;
+   updateEntity: (
+     id: string,
+     update: { position: [number, number, number]; physicsVelocity: [number, number, number] },
+diff --git a/packages/stdlib/src/server/game-server-gameplay-api.ts b/packages/stdlib/src/server/game-server-gameplay-api.ts
+index bfc43591..1ec46752 100644
+--- a/packages/stdlib/src/server/game-server-gameplay-api.ts
++++ b/packages/stdlib/src/server/game-server-gameplay-api.ts
+@@ -15,6 +15,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
+   'updateEntitiesWithoutSnapshot',
+   'despawnEntity',
+   'queryEntities',
++  'authorityCapacityCounts',
+   'queryNearbyEntities',
+   'getActorModeState',
+   'acknowledgeBlockCommit',
+diff --git a/packages/stdlib/src/server/game-server-gameplay-host.ts b/packages/stdlib/src/server/game-server-gameplay-host.ts
+index 5e6b7202..c1212c8f 100644
+--- a/packages/stdlib/src/server/game-server-gameplay-host.ts
++++ b/packages/stdlib/src/server/game-server-gameplay-host.ts
+@@ -169,6 +169,9 @@ export class GameServerGameplayHost {
+   queryEntities(filter: EntityQuery = {}): GameplayEntity[] {
+     return this.gameplay.queryEntities(filter);
+   }
++  authorityCapacityCounts() {
++    return this.gameplay.entities.authorityCapacityCounts();
++  }
+   queryNearbyEntities(position: [number, number, number], radius: number, filter: EntityQuery = {}): GameplayEntity[] {
+     return this.gameplay.queryNearbyEntities(position, radius, filter);
+   }
+diff --git a/packages/stdlib/src/server/gameplay/ecs-entity-components.ts b/packages/stdlib/src/server/gameplay/ecs-entity-components.ts
+index 0a42a7a9..fee4d15b 100644
+--- a/packages/stdlib/src/server/gameplay/ecs-entity-components.ts
++++ b/packages/stdlib/src/server/gameplay/ecs-entity-components.ts
+@@ -1,7 +1,7 @@
+-import { hasComponent, type EntityId, type World } from 'bitecs';
++import { hasComponent, query, type EntityId, type World } from 'bitecs';
+ import type { ItemStack } from './item-registry';
+ import { cloneItemStack } from './item-instance';
+-import type { EcsActorArchetype, EcsEntityType, EcsOwnedEntity, EcsPosition } from './ecs-entity-owner';
++import type { EcsActorArchetype, EcsEntityQuery, EcsEntityType, EcsOwnedEntity, EcsPosition } from './ecs-entity-owner';
+
+ type SlotArray<Value> = Array<Value | undefined>;
+ export const createEntityComponents = () => ({
+@@ -50,6 +50,43 @@ export function ecsEntityTypeComponent(components: EntityComponents, type: EcsEn
+   return components.painting;
+ }
+
++/** Counts active dynamic entities from ECS membership without producing entity projections. */
++export function authorityCapacityCounts(
++  world: World,
++  components: EntityComponents,
++  assertAvailable: () => void,
++  isCurrent: (eid: EntityId) => boolean,
++): Readonly<{ entityCount: number; worldItemCount: number }> {
++  assertAvailable();
++  let entityCount = 0;
++  let worldItemCount = 0;
++  for (const eid of query(world, [components.identity, components.lifecycle, components.transform])) {
++    if (!isCurrent(eid)) continue;
++    const type = ecsEntityType(world, components, eid);
++    if (type === 'station') continue;
++    entityCount += 1;
++    if (type === 'world-item') worldItemCount += 1;
++  }
++  return { entityCount, worldItemCount };
++}
++
++export function queryCurrentEntityIds(
++  world: World,
++  components: EntityComponents,
++  filter: EcsEntityQuery,
++  isCurrent: (eid: EntityId) => boolean,
++): EntityId[] {
++  const terms: object[] = [components.identity, components.lifecycle, components.transform];
++  if (filter.type) terms.push(ecsEntityTypeComponent(components, filter.type));
++  return Array.from(query(world, terms))
++    .filter(isCurrent)
++    .sort(
++      (left, right) =>
++        (components.identity.order[left] ?? Number.MAX_SAFE_INTEGER) -
++        (components.identity.order[right] ?? Number.MAX_SAFE_INTEGER),
++    );
++}
++
+ const readPosition = (
+   component: EntityComponents['transform'] | EntityComponents['velocity'],
+   eid: EntityId,
+diff --git a/packages/stdlib/src/server/gameplay/ecs-entity-owner.ts b/packages/stdlib/src/server/gameplay/ecs-entity-owner.ts
+index d7f066ba..2d61261c 100644
+--- a/packages/stdlib/src/server/gameplay/ecs-entity-owner.ts
++++ b/packages/stdlib/src/server/gameplay/ecs-entity-owner.ts
+@@ -7,7 +7,6 @@ import {
+   deleteWorld,
+   entityExists,
+   hasComponent,
+-  query,
+   registerComponents,
+   removeEntity,
+   type EntityId,
+@@ -41,10 +40,12 @@ import {
+ import { clearComponentSlot } from './ecs-component-storage';
+ import { defaultSpeciesState } from './species-state';
+ import {
++  authorityCapacityCounts,
+   createEntityComponents,
+   ecsEntityType,
+   ecsEntityTypeComponent,
+   projectEcsEntity,
++  queryCurrentEntityIds,
+   type EntityComponents,
+ } from './ecs-entity-components';
+
+@@ -238,18 +239,14 @@ export class EcsEntityOwner {
+
+   queryStations = (): EcsOwnedEntity[] => this.queryAll({ type: 'station' });
+
++  authorityCapacityCounts = () =>
++    authorityCapacityCounts(this.world, this.components, this.assertAvailable, (eid) => this.isCurrent(eid));
++
+   queryAll(filter: EcsEntityQuery = {}): EcsOwnedEntity[] {
+     this.assertAvailable();
+-    const terms: object[] = [this.components.identity, this.components.lifecycle, this.components.transform];
+-    if (filter.type) terms.push(this.typeComponent(filter.type));
+-    return Array.from(query(this.world, terms))
+-      .filter((eid) => this.isCurrent(eid))
+-      .sort(
+-        (left, right) =>
+-          (this.components.identity.order[left] ?? Number.MAX_SAFE_INTEGER) -
+-          (this.components.identity.order[right] ?? Number.MAX_SAFE_INTEGER),
+-      )
+-      .map((eid) => this.project(eid));
++    return queryCurrentEntityIds(this.world, this.components, filter, (eid) => this.isCurrent(eid)).map((eid) =>
++      this.project(eid),
++    );
+   }
+
+   stationAt(position: readonly [number, number, number]): EcsOwnedEntity | null {
+diff --git a/packages/stdlib/src/server/gameplay/entity-store.ts b/packages/stdlib/src/server/gameplay/entity-store.ts
+index ff8e9a12..34154446 100644
+--- a/packages/stdlib/src/server/gameplay/entity-store.ts
++++ b/packages/stdlib/src/server/gameplay/entity-store.ts
+@@ -168,6 +168,8 @@ export class EntityStore {
+     return this.owner.query(filter);
+   }
+
++  authorityCapacityCounts = () => this.owner.authorityCapacityCounts();
++
+   queryStations = (): GameplayEntity[] => this.owner.queryStations();
+
+   stationAt = (position: readonly [number, number, number]): GameplayEntity | null => this.owner.stationAt(position);
