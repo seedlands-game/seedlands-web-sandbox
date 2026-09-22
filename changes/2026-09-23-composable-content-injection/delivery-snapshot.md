@@ -1,6 +1,6 @@
 # 交付快照
 
-日期：2026-09-23。状态：代码与本地验收完成，等待 exact-head 独立审阅、推送及远端 CI。
+日期：2026-09-23。状态：代码、本地验收与独立审阅完成；等待推送并读取远端 CI。
 
 ## 已实现
 
@@ -21,6 +21,10 @@
 - 第二 Playbook production smoke：唯一 `classic-runtime.spec.ts`，production WebGL2 artifact 启动、storageId 500 可见、保存移除并重开仍为 0、无 page/network error，PASS。
 - Classic production：同一 artifact 的 C0–C5 与视觉回归 2/2 PASS；run `d26e60e3-3313-4388-9229-e947b431e2bb`，`sourceDigest=ad9a32c9c0443c86fb571293427c7d93b35043409f8fdb17675e18e35888539a`，`artifactDigest=17beb0c47357a03c42daf21d3a3c25574b690abb38a4601c2e5f54412b76d349`，279 files。
 - 第二 Playbook production smoke：`SEEDLANDS_PLAYBOOK=modular-world` 的 artifact 使用同一 `sourceDigest=ad9a32c9…`，`artifactDigest=977b79af9d0623056fc4fcd06b0cc55a6e259d7d3505471b1bf7578359d631a1`；唯一 Playwright spec 的定向 smoke 1/1 PASS，包含保存、reload 与同一 storageId 读回。
+
+## 独立审阅
+
+审阅 `830e26f7..cb5d3ef` 发现两个 P1：voxel 注册上限高于 mesh lookup，以及 presentation 资源在完整分配后才校验大小。修复提交 `312119b` 将注册上限统一为 0–4095，并改为流式 1 MiB 限额读取；精确复审 `cb5d3ef..312119b` 确认两项关闭，未发现新 P0/P1/P2。初次大 diff 审阅覆盖关键高风险切片而非 150 个文件逐行穷尽；修复范围复审完整。
 
 ## 证据边界
 
