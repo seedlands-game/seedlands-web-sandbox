@@ -39,7 +39,7 @@
 
 ### 阶段 3：Classic 玩法与验收债务
 
-状态：IN_PROGRESS。阶段 2 已准出，开始冻结十六色羊毛、C0–C5、checkpoint、用户外观和完整块光的独立合同。
+状态：COMPLETE。十六色羊毛、checkpoint、用户外观、Chunk 块光与 v11 C0–C5 已实现并通过 Stage 3 Delivery Snapshot 所列门禁；块光只作正确性与资源上界结论，不宣称性能提升。
 
 范围：十六色羊毛世界方块、C0–C5 新合同、缺失 checkpoint fixture、用户外观旅程、超出相机附近 64³ 的完整块光范围。每项先冻结独立验收与兼容边界。
 

@@ -27,15 +27,7 @@
       { "position": [45, 60, 0], "voxel": 4, "itemId": "wood-block" },
       { "position": [49, 60, 0], "voxel": 5, "itemId": "berry" }
     ],
-    "hostile": { "id": "classic-route-creature", "position": [56, 60, 0.5] },
-    "npc": {
-      "creationRequestId": "classic-route-npc-v1",
-      "name": "阿岚",
-      "personality": "按固定生活策略巡逻，不连接模型服务。",
-      "position": [96.5, 60, 0.5],
-      "homePosition": [96.5, 60, 0.5],
-      "food": { "position": [96.5, 60, 3], "itemId": "berry", "count": 64 }
-    }
+    "hostile": { "id": "classic-route-creature", "position": [56, 60, 0.5] }
   },
   "route": {
     "chunkCrossing": [33, 0.5],
@@ -51,8 +43,8 @@
     "inputBypass": "C1 requires Pointer Lock plus acknowledged keyboard input and an authority trajectory crossing a Chunk boundary.",
     "mutationWithoutPresentation": "C2/C3 require both the authoritative voxel result and a consumed mesh commit on WebGL2.",
     "counterWithoutCausality": "Worker and Wasm counters are baselined after fixture setup and must advance with the route's own streaming work; a four-center stream shift must also keep client Chunk resources bounded before the return rebuild.",
-    "npcWithoutConsequence": "C4 requires one model-free NPC action to start and finish with a changed body position.",
-    "reloadWithoutFreshness": "C5 requires a new runtime epoch, restored world/inventory/NPC state, and another acknowledged real input."
+    "retiredActorLeak": "C0 requires the retired Classic settler to remain unavailable and the canonical fixture to run without custom NPCs.",
+    "reloadWithoutFreshness": "C5 requires a new runtime epoch, restored world/inventory state, and another acknowledged real input."
   },
   "coverage": {
     "included": [
@@ -61,7 +53,6 @@
       "Pointer Lock movement turn jump and Chunk crossing",
       "mining drop pickup inventory and personal crafting",
       "placement food existing combat and workbench runtime",
-      "model-free NPC action",
       "streaming resource release and rebuild",
       "save return continue and post-restore interaction",
       "Worker Wasm WebGL2 mesh and telemetry correlation"
@@ -86,11 +77,6 @@
         "source": "changes/2026-09-10-creative-containers-visual-cohesion/e2e/creative-container-interaction.spec.ts",
         "stages": ["C3", "C5"],
         "observation": "A crafted workbench is placed and opened, then dismantled and picked back into inventory; after restore that inventory item is placed and opened again."
-      },
-      {
-        "source": "changes/2026-09-10-npc-composable-baseline/e2e/production-smoke.spec.ts and resident-browser.spec.ts",
-        "stages": ["C4", "C5"],
-        "observation": "One model-free NPC action has matching start/success events and body movement, and the same character identity remains active after restore."
       },
       {
         "source": "tests/e2e/benchmark/initial-world.spec.ts",
@@ -121,8 +107,8 @@
       },
       {
         "source": "changes/2026-09-10-npc-composable-baseline/e2e/real-three-residents.spec.ts",
-        "reason": "The canonical browser route is deliberately model-free and does not use provider credentials, PG, WebSocket, or three resident roles.",
-        "requiredDisposition": "Keep protocol/host integration tests; run opt-in external evidence separately and never count a skipped run as PASS."
+        "reason": "Classic retired its custom settler and does not use provider credentials, PG, WebSocket, or resident roles.",
+        "requiredDisposition": "Keep generic protocol/host integration tests outside the Classic product contract; never count a skipped external run as PASS."
       }
     ],
     "notCovered": [

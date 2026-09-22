@@ -1,0 +1,157 @@
+{
+  "positions": [
+    {
+      "id": 60,
+      "position": [-7, 13, 9]
+    },
+    {
+      "id": 74,
+      "position": [-5, 13, 9]
+    },
+    {
+      "id": 75,
+      "position": [-3, 13, 9]
+    },
+    {
+      "id": 76,
+      "position": [-1, 13, 9]
+    },
+    {
+      "id": 77,
+      "position": [1, 13, 9]
+    },
+    {
+      "id": 78,
+      "position": [3, 13, 9]
+    },
+    {
+      "id": 79,
+      "position": [5, 13, 9]
+    },
+    {
+      "id": 80,
+      "position": [7, 13, 9]
+    },
+    {
+      "id": 81,
+      "position": [-7, 15, 9]
+    },
+    {
+      "id": 82,
+      "position": [-5, 15, 9]
+    },
+    {
+      "id": 83,
+      "position": [-3, 15, 9]
+    },
+    {
+      "id": 84,
+      "position": [-1, 15, 9]
+    },
+    {
+      "id": 85,
+      "position": [1, 15, 9]
+    },
+    {
+      "id": 86,
+      "position": [3, 15, 9]
+    },
+    {
+      "id": 87,
+      "position": [5, 15, 9]
+    },
+    {
+      "id": 88,
+      "position": [7, 15, 9]
+    }
+  ],
+  "readback": [
+    {
+      "actual": 60,
+      "expected": 60,
+      "position": [-7, 13, 9]
+    },
+    {
+      "actual": 74,
+      "expected": 74,
+      "position": [-5, 13, 9]
+    },
+    {
+      "actual": 75,
+      "expected": 75,
+      "position": [-3, 13, 9]
+    },
+    {
+      "actual": 76,
+      "expected": 76,
+      "position": [-1, 13, 9]
+    },
+    {
+      "actual": 77,
+      "expected": 77,
+      "position": [1, 13, 9]
+    },
+    {
+      "actual": 78,
+      "expected": 78,
+      "position": [3, 13, 9]
+    },
+    {
+      "actual": 79,
+      "expected": 79,
+      "position": [5, 13, 9]
+    },
+    {
+      "actual": 80,
+      "expected": 80,
+      "position": [7, 13, 9]
+    },
+    {
+      "actual": 81,
+      "expected": 81,
+      "position": [-7, 15, 9]
+    },
+    {
+      "actual": 82,
+      "expected": 82,
+      "position": [-5, 15, 9]
+    },
+    {
+      "actual": 83,
+      "expected": 83,
+      "position": [-3, 15, 9]
+    },
+    {
+      "actual": 84,
+      "expected": 84,
+      "position": [-1, 15, 9]
+    },
+    {
+      "actual": 85,
+      "expected": 85,
+      "position": [1, 15, 9]
+    },
+    {
+      "actual": 86,
+      "expected": 86,
+      "position": [3, 15, 9]
+    },
+    {
+      "actual": 87,
+      "expected": 87,
+      "position": [5, 15, 9]
+    },
+    {
+      "actual": 88,
+      "expected": 88,
+      "position": [7, 15, 9]
+    }
+  ],
+  "snapshot": {
+    "blockLightBricks": 50,
+    "generatorVersion": 11,
+    "renderedChunks": 25,
+    "storageBytes": 2537527,
+    "worldRevision": 17
+  }
+}

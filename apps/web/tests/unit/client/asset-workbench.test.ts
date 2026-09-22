@@ -32,7 +32,8 @@ describe('统一资产目录与有界适配', () => {
         (['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined) ||
           (item.itemType === 'block' &&
             item.placesVoxel !== undefined &&
-            (item.id.endsWith('-wool') ||
+            (item.id === 'wool' ||
+              item.id.endsWith('-wool') ||
               ['sapling', 'flower', 'mushroom', 'sugar-cane', 'dead-bush', 'red-flower', 'red-mushroom'].includes(
                 item.id,
               ))),
@@ -41,6 +42,7 @@ describe('统一资产目录与有界适配', () => {
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'tool', placesVoxel: 1 })).toBe(false);
     expect(acceptsPixelItem({ id: 'custom-tool', itemType: 'tool' })).toBe(true);
     expect(acceptsPixelItem({ id: 'red-wool', itemType: 'block', placesVoxel: 87 })).toBe(true);
+    expect(acceptsPixelItem({ id: 'wool', itemType: 'block', placesVoxel: 60 })).toBe(true);
     for (const color of [
       'white',
       'orange',

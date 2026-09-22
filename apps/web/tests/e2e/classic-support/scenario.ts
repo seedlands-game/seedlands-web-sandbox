@@ -22,14 +22,6 @@ export type ClassicScenario = Readonly<{
     hungerAdvanceMs: number;
     resourceVoxels: readonly Readonly<{ position: Point; voxel: number; itemId: string }>[];
     hostile: Readonly<{ id: string; position: Point }>;
-    npc: Readonly<{
-      creationRequestId: string;
-      name: string;
-      personality: string;
-      position: Point;
-      homePosition: Point;
-      food: Readonly<{ position: Point; itemId: 'berry'; count: number }>;
-    }>;
   }>;
   route: Readonly<{
     chunkCrossing: RoutePoint;

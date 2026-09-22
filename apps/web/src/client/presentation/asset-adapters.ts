@@ -12,6 +12,7 @@ const adapters = {
   'glb-model': { label: '导入 GLB', editable: false, preview: 'model', held: false },
 } as const;
 const pixelBlockItems = new Set([
+  'wool',
   'sapling',
   'flower',
   'mushroom',
