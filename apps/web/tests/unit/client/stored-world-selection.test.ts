@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { selectStoredWorldVersion } from '../../../src/client/persistence/stored-world-selection';
-import { classicWorldgenIdentity, isCompatibleClassicWorldgenIdentity } from '@seedlands/playbook-classic/worldgen';
+import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
+const { identity: classicWorldgenIdentity } = classicWorldgenProvider;
 import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
 const record = {
   worldId: 'seedlands:g4:same',
@@ -47,7 +48,7 @@ it('只允许精确的历史 Classic provider 身份继续原版本世界', () =
       'same',
       classicWorldgenIdentity,
       'continue',
-      isCompatibleClassicWorldgenIdentity,
+      classicWorldgenProvider.acceptsStoredIdentity,
     ),
   ).toBe(4);
   for (const provider of [
@@ -62,7 +63,7 @@ it('只允许精确的历史 Classic provider 身份继续原版本世界', () =
         'same',
         classicWorldgenIdentity,
         'continue',
-        isCompatibleClassicWorldgenIdentity,
+        classicWorldgenProvider.acceptsStoredIdentity,
       ),
     ).toThrow(/不兼容/);
 });

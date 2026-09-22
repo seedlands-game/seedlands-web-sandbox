@@ -14,6 +14,7 @@ export function createGameplayCombatCallbacks(
     simulation(): AutonomyRuntime;
     vitals: ActorVitalsRuntime;
     getVoxel(position: [number, number, number]): number | undefined;
+    isVoxelSolid?: (voxel: number) => boolean;
     assertCanChange(): void;
     changed(): void;
   }>,
@@ -25,7 +26,12 @@ export function createGameplayCombatCallbacks(
     actorAvailable: available,
     targetAvailable: available,
     validateHit: (actorId, targetId, definition) =>
-      validateCombatHit({ entities, getVoxel: options.getVoxel, isPlayerAlive }, actorId, targetId, definition),
+      validateCombatHit(
+        { entities, getVoxel: options.getVoxel, isPlayerAlive, isVoxelSolid: options.isVoxelSolid },
+        actorId,
+        targetId,
+        definition,
+      ),
     applyDamage(actorId, targetId, amount) {
       const target = entities.get(targetId);
       if (target && isActorEntityType(target.type) && entities.actorStateAccess(targetId).mode === 'creative') return 0;

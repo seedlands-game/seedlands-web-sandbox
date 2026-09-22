@@ -17,6 +17,7 @@ import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-regi
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { acceptsPixelItem } from '../../client/presentation/asset-adapters';
 import { getAppearanceResources, hasAppearanceBinding } from './appearance-runtime';
+import { getVoxelPresentationSemantics } from './appearance-runtime';
 
 export { builtinModelTextures, modelMaterialDefinitions } from '../../client/presentation/model-material-definitions';
 
@@ -237,7 +238,8 @@ export class GameplayModelAssets {
     scale: number,
     resolvedAssets: readonly Asset[] | undefined,
   ): void {
-    const definition = itemMeshDefinition(voxel);
+    const semantics = getVoxelPresentationSemantics(this.app, voxel);
+    const definition = itemMeshDefinition(voxel, semantics?.faceMaterials);
     const meshes = this.voxelMeshes.get(voxel) ?? this.createVoxelMeshes(voxel, definition.groups);
     const modelId = `builtin:model:${itemId}`;
     const variant = this.materialVariant(this.materialAssets(modelId, resolvedAssets));

@@ -75,12 +75,30 @@ export async function buildCampPackFixture(options: { failingCondition?: boolean
     ];
     await writeFile(
       join(directory, 'host-admissions.json'),
-      JSON.stringify({ schemaVersion: 1, extensions: approvedExtensions }),
+      JSON.stringify({
+        schemaVersion: 1,
+        playbook: {
+          id: artifacts[0].manifest.id,
+          version: artifacts[0].manifest.version,
+          integrity: artifacts[0].integrity,
+          permissions: [],
+        },
+        extensions: approvedExtensions,
+      }),
     );
     return {
       artifacts,
       approvedExtensions,
-      createComposition: () => assembleProductPacks(artifacts, { approvedExtensions }),
+      createComposition: () =>
+        assembleProductPacks(artifacts, {
+          approvedPlaybook: {
+            id: artifacts[0].manifest.id,
+            version: artifacts[0].manifest.version,
+            integrity: artifacts[0].integrity,
+            permissions: [],
+          },
+          approvedExtensions,
+        }),
       async route(page: Page) {
         const names = [
           'packs.lock.json',

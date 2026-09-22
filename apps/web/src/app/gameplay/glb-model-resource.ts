@@ -186,10 +186,14 @@ export async function addGlbModel(
   signal?: AbortSignal,
   suppliedBlob?: Blob,
   verticalAnchor: 'center' | 'feet' | 'authored' = 'center',
+  suppliedUrl?: string,
 ): Promise<GlbModelLease> {
-  const blob = suppliedBlob ?? (await (loadClassicCreatureBlob(app, id) ?? loadGlbBlob(id)));
+  const blob = suppliedUrl
+    ? undefined
+    : (suppliedBlob ?? (await (loadClassicCreatureBlob(app, id) ?? loadGlbBlob(id))));
   if (signal?.aborted) throw abortError();
-  const url = URL.createObjectURL(blob);
+  const url = suppliedUrl ?? URL.createObjectURL(blob!);
+  const ownsUrl = suppliedUrl === undefined;
   let asset: pc.Asset | null = null;
   let wrapper: pc.Entity | null = null;
   let source: pc.Entity | null = null;
@@ -215,7 +219,7 @@ export async function addGlbModel(
     source?.destroy();
     animation.dispose();
     if (asset) releaseContainer(app, asset);
-    URL.revokeObjectURL(url);
+    if (ownsUrl) URL.revokeObjectURL(url);
     throw error;
   }
   let released = false;
@@ -229,7 +233,7 @@ export async function addGlbModel(
       animation.dispose();
       wrapper?.destroy();
       releaseContainer(app, asset!);
-      URL.revokeObjectURL(url);
+      if (ownsUrl) URL.revokeObjectURL(url);
     },
   };
 }

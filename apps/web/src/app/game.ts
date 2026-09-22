@@ -37,6 +37,7 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
+import { setVoxelPresentationSemantics } from './gameplay/appearance-runtime';
 import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
@@ -237,6 +238,7 @@ export class Game {
       throw new Error('World start was superseded.');
     }
     Object.assign(this, { authority, computeRuntime, logicClient });
+    setVoxelPresentationSemantics(this.app, ready.voxelSemantics ?? []);
     this.environment.setTime(ready.worldTime);
     if (this.audio) this.worldAudio = new WorldAudio(this.audio, ready.seed);
     this.world = new World(

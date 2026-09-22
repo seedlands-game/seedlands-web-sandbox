@@ -22,6 +22,7 @@ type WorldEditRuntimeOptions = Readonly<{
   fluidWindow: FluidActiveWindow;
   fluidRuntime: FluidTransactionRuntime<WorldCommitResult>;
   priorityForBatch(batch: WorldEditBatch): FluidActivationPriority;
+  isVoxelRegistered?: (value: number) => boolean;
 }>;
 
 export function commitServerWorldEdit(options: WorldEditRuntimeOptions, batch: WorldEditBatch): WorldCommitResult {
@@ -55,6 +56,7 @@ export function prepareServerWorldEdit(
       getRevision: options.getRevision,
       setWorldRevision: options.setRevision,
       addMutationCount: options.addMutationCount,
+      isVoxelRegistered: options.isVoxelRegistered,
     },
     { actorId, x, y, z, value },
   );

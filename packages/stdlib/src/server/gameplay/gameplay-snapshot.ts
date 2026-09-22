@@ -330,7 +330,7 @@ export function validateGameplaySnapshot(
 
   const sourceVersion = source.version;
   const items = options.items ?? defaultItemDefinitionRegistry;
-  const entities = new EntityStore(items, options.stationCodec, options.playerLayout);
+  const entities = new EntityStore(items, options.stationCodec, options.playerLayout, options.actorProfiles);
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {

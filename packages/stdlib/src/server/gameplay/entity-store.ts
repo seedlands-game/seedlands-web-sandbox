@@ -1,7 +1,7 @@
 import { freezePlayerInventoryLayout, type PlayerInventoryLayout } from './inventory-layout';
 import {
   EcsEntityOwner,
-  ACTOR_ARCHETYPES,
+  isActorArchetype,
   type EcsActorArchetype,
   type EcsEntityLifecycle,
   type EcsEntityType,
@@ -10,6 +10,7 @@ import {
   type EntityLifetimeSnapshot,
   type EntityLifetimeReference,
 } from './ecs-entity-owner';
+import type { ActorProfileRegistry } from './actor-profile';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
 import { isActorEntityType } from './ecs-actor-state';
@@ -84,6 +85,7 @@ export class EntityStore {
     readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
     readonly stationCodec?: StationStateCodec,
     playerLayout?: PlayerInventoryLayout,
+    private readonly actorProfiles?: ActorProfileRegistry,
   ) {
     this.playerLayout = freezePlayerInventoryLayout(playerLayout);
     if (stationCodec && stationCodec.items !== items)
@@ -500,12 +502,12 @@ export class EntityStore {
         throw new TypeError('Creature health must be finite and within its maximum.');
       entity.health = health;
       entity.maxHealth = maxHealth;
-      const archetype = input.archetype ?? (type === 'creature' ? 'grazer' : undefined);
+      const archetype = input.archetype ?? (type === 'creature' && !this.actorProfiles ? 'grazer' : undefined);
       if (archetype) {
-        if (!ACTOR_ARCHETYPES.includes(archetype))
-          throw new TypeError(`Unsupported actor archetype: ${String(archetype)}`);
-        if ((type === 'npc') !== (archetype === 'settler'))
-          throw new TypeError('Settlers must be NPC entities and creature archetypes must be creatures.');
+        if (!isActorArchetype(archetype)) throw new TypeError(`Unsupported actor archetype: ${String(archetype)}`);
+        const profile = this.actorProfiles?.require(archetype);
+        if (profile && type !== profile.entityType)
+          throw new TypeError('Actor entity type does not match its world actor profile.');
         entity.archetype = archetype;
         entity.persistent = input.persistent ?? true;
       }

@@ -127,6 +127,8 @@ export type AuthorityReady = Readonly<{
   frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   snapshot: AuthoritySnapshot;
   gameplay: AuthorityGameplayView;
+  /** Bounded read-only projection of the composed voxel semantics. */
+  voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
   snapshotMigrationReports?: readonly import('../gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
   campPosition?: [number, number, number];
 }>;
@@ -139,6 +141,8 @@ export type AuthorityMeshPayload = Readonly<{
   chunkRevision: number;
   generatorVersion: number;
   provider?: KernelWorldgenProviderIdentity;
+  /** Same frozen composition semantics as AuthorityReady, copied into each worker task. */
+  voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
   preparationDiagnostics?: Readonly<{
     authorityPrepareMs: number;
     persistenceWaitMs: number;
@@ -420,6 +424,7 @@ export type AuthorityResponse =
       generatorVersion: number;
       provider: KernelWorldgenProviderIdentity;
       starterEcology: StarterEcologyConfiguration | null;
+      voxelSemantics: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
     }>
   | Readonly<{
       kind: 'authority-ready';

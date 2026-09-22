@@ -4,7 +4,7 @@ import type { GameplayEntityView } from '@seedlands/stdlib/server/protocol/autho
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
 import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
 import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
-import { getAppearanceAnimationBindings, getAppearanceModelBlob } from './appearance-runtime';
+import { getAppearanceAnimationBindings, getAppearanceModelBlob, getPackActorPresentation } from './appearance-runtime';
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from './gameplay-model-assets';
 import { addGlbModel, type GlbModelLease } from './glb-model-resource';
 import {
@@ -217,8 +217,9 @@ export class GameplayEntityPresenter {
   ): Promise<void> {
     try {
       const builtin = classicCreatureDefinition(target);
+      const pack = getPackActorPresentation(this.app, target);
       const override = (this.bindings as Partial<Record<string, AppearanceAnimationBinding>>)[target];
-      const binding = override ?? builtin;
+      const binding = override ?? builtin ?? (pack ? { modelId: `pack:${target}`, clips: {} } : undefined);
       if (state.abort.signal.aborted) return;
       if (!binding) throw new Error(`未登记物种模型：${target}`);
       const blob = override ? getAppearanceModelBlob(this.app, binding.modelId) : undefined;
@@ -230,20 +231,21 @@ export class GameplayEntityPresenter {
         state.abort.signal,
         blob,
         override ? 'feet' : 'authored',
+        pack?.url,
       );
       if (state.abort.signal.aborted || this.animated.get(entityId) !== state) {
         lease.release();
         return;
       }
       const clips = this.availableClips(binding, lease.animationClips);
-      if (!lease.playback || !Object.keys(clips).length) {
+      if ((!lease.playback || !Object.keys(clips).length) && !pack) {
         lease.release();
         throw new Error(`物种模型缺少可播放动作：${binding.modelId}`);
       }
       for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
       this.registerDamageMaterials(lease.entity);
       state.lease = lease;
-      state.controller = createModelAnimationController(clips, lease.playback);
+      state.controller = lease.playback ? createModelAnimationController(clips, lease.playback) : null;
       this.shadowCasterRevisions.set(entityId, (this.shadowCasterRevisions.get(entityId) ?? 0) + 1);
     } catch (error) {
       if (state.abort.signal.aborted || this.animated.get(entityId) !== state) return;

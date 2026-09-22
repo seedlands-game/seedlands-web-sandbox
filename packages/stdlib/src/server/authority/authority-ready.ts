@@ -30,6 +30,7 @@ export function projectAuthorityReady(input: Input): AuthorityReady {
     frequencies: input.frequencies,
     snapshot: withAuthorityResidencyDiagnostics(input.snapshot, input.residency),
     gameplay: input.gameplay,
+    voxelSemantics: input.server.voxelSemantics.list(),
     ...(input.server.restoredSnapshotMigrationReports.length
       ? { snapshotMigrationReports: input.server.restoredSnapshotMigrationReports }
       : {}),

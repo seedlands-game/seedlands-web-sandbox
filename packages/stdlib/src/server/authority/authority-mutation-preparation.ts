@@ -14,6 +14,8 @@ type PreparationServer = Readonly<{
   worldRevision: number;
   prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean>;
   getEntity(id: string): EntityPosition | null;
+  hasGameplayComposition?: boolean;
+  voxelSemantics?: { get(value: number): unknown };
 }>;
 type PendingPreparation = {
   promise: Promise<boolean>;
@@ -70,7 +72,12 @@ export class AuthorityMutationPreparation {
       assertMutationCoordinate(x);
       assertMutationCoordinate(y);
       assertMutationCoordinate(z);
-      assertVoxelValue(value);
+      assertVoxelValue(
+        value,
+        this.server.hasGameplayComposition && this.server.voxelSemantics
+          ? (voxel) => this.server.voxelSemantics!.get(voxel) !== undefined
+          : undefined,
+      );
       keys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
     });
     return this.prepareKeys(keys);

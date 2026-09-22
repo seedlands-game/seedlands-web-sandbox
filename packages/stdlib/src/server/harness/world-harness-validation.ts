@@ -1,5 +1,6 @@
 import { CHUNK_SIZE, chunkKey, Voxel, MAX_VOXEL_ID } from '../../world/voxel';
 import { GAME_SAVE_SCHEMA_VERSION, type FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 import {
   WORLD_HARNESS_MAX_CHECKPOINT_BYTES,
   type WorldFrontier,
@@ -24,7 +25,7 @@ export const checkpointBytes = (snapshot: FrozenGameSaveSnapshot): number => {
   return chunkBytes + metadata.length * 3;
 };
 
-export function validatePortableCheckpoint(value: unknown): FrozenGameSaveSnapshot {
+export function validatePortableCheckpoint(value: unknown, semantics?: VoxelSemanticsResolver): FrozenGameSaveSnapshot {
   if (!value || typeof value !== 'object') throw new TypeError('Checkpoint must be an object.');
   const snapshot = value as Partial<FrozenGameSaveSnapshot>;
   if (snapshot.version !== GAME_SAVE_SCHEMA_VERSION) throw new TypeError('Unsupported checkpoint version.');
@@ -53,7 +54,10 @@ export function validatePortableCheckpoint(value: unknown): FrozenGameSaveSnapsh
       chunk.revision < 0 ||
       !(chunk.voxels instanceof Uint16Array) ||
       chunk.voxels.length !== CHUNK_SIZE ** 3 ||
-      !chunk.voxels.every((voxel: number) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID) ||
+      !chunk.voxels.every(
+        (voxel: number) =>
+          voxel >= Voxel.Air && (semantics ? semantics.get(voxel) !== undefined : voxel <= MAX_VOXEL_ID),
+      ) ||
       (chunk.fluid !== undefined && (!(chunk.fluid instanceof Uint8Array) || chunk.fluid.length !== CHUNK_SIZE ** 3))
     )
       throw new TypeError(`Checkpoint chunk is invalid: ${String(chunk?.key)}`);

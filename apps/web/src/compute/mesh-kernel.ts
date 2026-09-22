@@ -1,8 +1,8 @@
 import { KernelMemory } from './kernel-memory';
 import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/stdlib/world/mesh';
-import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import { forEachVoxelGeometryFace, voxelModelFaceUvs } from '@seedlands/stdlib/world/voxel-model-mesh';
 import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
+import { classicMeshSemantics, type MeshSemanticsLookup } from '@seedlands/stdlib/world/mesh-semantics';
 import { shapeWaterFace } from '@seedlands/stdlib/world/water-mesh-height';
 import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
@@ -10,7 +10,9 @@ const MATERIAL_IDS = new Set<number>(Object.values(FaceMaterial));
 const ARENA_START = 64;
 export const MESH_KERNEL_WINDOW_SIZE = CHUNK_SIZE + 4;
 const WINDOW_CELL_COUNT = MESH_KERNEL_WINDOW_SIZE ** 3;
-const WINDOW_OFFSET = ARENA_START;
+const SEMANTICS_OFFSET = ARENA_START;
+const SEMANTICS_BYTES = 4096 * 8;
+const WINDOW_OFFSET = SEMANTICS_OFFSET + SEMANTICS_BYTES;
 const FLUID_WINDOW_OFFSET = WINDOW_OFFSET + WINDOW_CELL_COUNT * Uint16Array.BYTES_PER_ELEMENT;
 const OUTPUT_OFFSET = FLUID_WINDOW_OFFSET + WINDOW_CELL_COUNT;
 const MASK_BYTES = 32 ** 2 * 6;
@@ -152,7 +154,10 @@ function appendModel(result: Record<number, RawMesh>, voxel: number, x: number, 
 }
 
 /** 将已校验的描述符按既有五数组布局发射；不扫描体素。 */
-export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, MeshData> {
+export function emitMeshDescriptors(
+  descriptors: Uint8Array,
+  semantics: MeshSemanticsLookup = classicMeshSemantics,
+): Record<number, MeshData> {
   if (descriptors.length % DESCRIPTOR_BYTES !== 0 || descriptors.length > MAX_DESCRIPTOR_BYTES)
     throw new Error('Mesh descriptors have an invalid byte length.');
   const result: Record<number, RawMesh> = {};
@@ -213,6 +218,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       descriptors[offset + 1] < 32 &&
       descriptors[offset + 2] < 32 &&
       descriptors[offset + 3] < 32 &&
+      semantics.isModel(descriptors[offset + 4]) &&
       hasVoxelModelGeometry(descriptors[offset + 4]) &&
       descriptors.slice(offset + 5, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
     )
@@ -232,7 +238,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
         materialId,
         {
           material: materialId,
-          renderCategory: renderCategoryForMaterial(materialId),
+          renderCategory: semantics.renderCategory(materialId),
           layout: 'float32' as const,
           positions: new Float32Array(value.p),
           normals: new Float32Array(value.n),
@@ -250,14 +256,20 @@ export function runMeshDescriptorKernel(
   kernel: KernelMemory,
   voxelWindow: Uint16Array,
   fluidWindow: Uint8Array,
+  semantics: MeshSemanticsLookup = classicMeshSemantics,
 ): Record<number, MeshData> {
   assertInput(voxelWindow, fluidWindow);
+  if (semantics.bytes.length > SEMANTICS_BYTES)
+    throw new RangeError('Mesh semantics lookup exceeds the bounded Wasm arena allocation.');
+  kernel.bytes(SEMANTICS_OFFSET, semantics.bytes.length).set(semantics.bytes);
   kernel.u16(WINDOW_OFFSET, voxelWindow.length).set(voxelWindow);
   kernel.bytes(FLUID_WINDOW_OFFSET, fluidWindow.length).set(fluidWindow);
   const length = kernel.invoke(
-    'mesh_describe',
+    'mesh_describe_with_lookup',
     WINDOW_OFFSET,
     FLUID_WINDOW_OFFSET,
+    SEMANTICS_OFFSET,
+    semantics.bytes.length,
     OUTPUT_OFFSET,
     MAX_DESCRIPTOR_BYTES,
   );

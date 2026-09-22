@@ -1,5 +1,5 @@
 import type { ActorBehavior } from '../simulation/actor-state';
-import { ACTOR_ARCHETYPES } from './ecs-entity-owner';
+import { isActorArchetype } from './ecs-entity-owner';
 import type { ActorArchetype, EntityType } from './entity-store';
 import type { ItemDefinitionRegistry, ItemStack } from './item-registry';
 import type { MeleeDefinition } from './melee-definition-registry';
@@ -75,7 +75,7 @@ export function createActorProfileRegistry(
   const melee = new Set(meleeDefinitions.map(({ id }) => id));
   const profiles = new Map<ActorArchetype, ActorProfile>();
   for (const input of inputs) {
-    if (!ACTOR_ARCHETYPES.includes(input.archetype) || profiles.has(input.archetype))
+    if (!isActorArchetype(input.archetype) || profiles.has(input.archetype))
       throw new TypeError(`Duplicate or invalid actor profile: ${String(input.archetype)}`);
     if (input.entityType !== 'creature' && input.entityType !== 'npc')
       throw new TypeError(`Actor profile entity type is invalid: ${input.archetype}`);

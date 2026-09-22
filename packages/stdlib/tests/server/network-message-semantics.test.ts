@@ -93,6 +93,40 @@ describe('public network message semantics', () => {
     ).toBe(true);
     expect(
       isPublicOutboundMessage({
+        kind: 'entity-pose',
+        ref,
+        poseSequence: 5,
+        physicsTick: 21,
+        entities: [
+          {
+            id: 'sentinel-1',
+            type: 'creature',
+            archetype: 'sample:sentinel',
+            position: [1, 2, 3],
+            velocity: [0, 0, 0],
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(
+      isPublicOutboundMessage({
+        kind: 'entity-pose',
+        ref,
+        poseSequence: 6,
+        physicsTick: 22,
+        entities: [
+          {
+            id: 'invalid-1',
+            type: 'creature',
+            archetype: 'invalid archetype',
+            position: [1, 2, 3],
+            velocity: [0, 0, 0],
+          },
+        ],
+      }),
+    ).toBe(false);
+    expect(
+      isPublicOutboundMessage({
         kind: 'snapshot',
         ref,
         player: { contacts: [] },

@@ -15,6 +15,7 @@ import {
 import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool';
 import { wasmExperimentWorkerName } from './wasm-experiment-selection';
 import type { WasmWorkerSelection } from '../../compute/wasm-kernel-contract';
+import type { VoxelSemanticsDefinition } from '@seedlands/stdlib/world/voxel-semantics';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -151,6 +152,7 @@ export class BrowserComputeRuntime {
     generatorVersion: number,
     provider: KernelWorldgenProviderIdentity,
     starterEcology: StarterEcologyConfiguration | null,
+    voxelSemantics?: readonly VoxelSemanticsDefinition[],
   ): Promise<InitialWorldBootstrap> {
     if (this.disposed) return Promise.reject(new Error('Compute runtime is disposed.'));
     const providerKey = worldgenProviderIdentityKey(provider);
@@ -169,7 +171,7 @@ export class BrowserComputeRuntime {
       revision: `${seed}:${generatorVersion}:${providerKey}`,
       dependencies: [],
       estimatedBytes: 0,
-      payload: { kind: 'find-safe-spawn', seed, generatorVersion, provider, starterEcology },
+      payload: { kind: 'find-safe-spawn', seed, generatorVersion, provider, starterEcology, voxelSemantics },
     });
     if (result.status === 'queued' || result.status === 'merged') return promise;
     this.spawnRequests.delete(taskId);

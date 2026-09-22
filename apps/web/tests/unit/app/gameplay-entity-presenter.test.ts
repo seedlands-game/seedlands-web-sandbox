@@ -12,6 +12,7 @@ const animationState = vi.hoisted(() => ({
 vi.mock('../../../src/app/gameplay/appearance-runtime', () => ({
   getAppearanceAnimationBindings: () => animationState.bindings,
   getAppearanceModelBlob: () => animationState.blob,
+  getPackActorPresentation: () => null,
 }));
 
 vi.mock('../../../src/app/gameplay/glb-model-resource', () => ({
@@ -188,6 +189,7 @@ describe('玩法实体的独立表现时钟', () => {
       expect.any(AbortSignal),
       undefined,
       'authored',
+      undefined,
     );
     expect(root.findByName('fallback-body')).toBeNull();
     presenter.dispose();
@@ -265,6 +267,7 @@ describe('玩法实体的独立表现时钟', () => {
       expect.any(AbortSignal),
       blob,
       'feet',
+      undefined,
     );
     presenter.dispose();
   });

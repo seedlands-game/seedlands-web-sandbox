@@ -19,6 +19,7 @@ export function createGameplayProjectileEnvironment(
   options: Readonly<{
     entities: EntityStore;
     getVoxel(position: [number, number, number]): number | undefined;
+    isVoxelSolid?: (voxel: number) => boolean;
     applyDamage(ownerId: string, targetId: string, damage: number): void;
   }>,
 ): ProjectileEnvironment {
@@ -30,7 +31,7 @@ export function createGameplayProjectileEnvironment(
         const fraction = index / steps,
           point = pointAt(from, to, fraction);
         const voxel = options.getVoxel([Math.floor(point.x), Math.floor(point.y), Math.floor(point.z)]);
-        if (voxel === undefined || isSolid(voxel)) return { fraction };
+        if (voxel === undefined || (options.isVoxelSolid ?? isSolid)(voxel)) return { fraction };
       }
       return null;
     },
@@ -69,6 +70,7 @@ export function createGameplayProjectileOwner(
     vitals: ActorVitalsRuntime;
     content: GameplayContent;
     getVoxel(position: [number, number, number]): number | undefined;
+    isVoxelSolid?: (voxel: number) => boolean;
     assertCanChange(): void;
     changed(): void;
   }>,
@@ -78,6 +80,7 @@ export function createGameplayProjectileOwner(
     createGameplayProjectileEnvironment({
       entities: options.entities,
       getVoxel: options.getVoxel,
+      isVoxelSolid: options.isVoxelSolid,
       applyDamage: (ownerId, targetId, damage) => {
         combat.applyDamage(ownerId, targetId, damage);
       },

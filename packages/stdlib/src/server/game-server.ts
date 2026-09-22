@@ -1,10 +1,6 @@
 import { restoreServerChunk } from './server-chunk-restore';
 import { StationWorldResidency } from './station-world-residency';
-import {
-  assertNoRawStationEdits,
-  assertStationCheckpointIntegrity,
-  assertStationChunkIntegrity,
-} from './station-world-integrity';
+import { assertNoRawStationEdits, assertStationChunkIntegrity } from './station-world-integrity';
 import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, biome, chunkKey, normalizeSeed } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
@@ -21,7 +17,7 @@ import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
-import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
+import { validateServerStationCheckpoint, validServerChunkSnapshot } from './game-server-restore';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
 import { readGameSaveCheckpoint } from './persistence/game-save-checkpoint';
@@ -34,7 +30,7 @@ import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from '.
 import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
 import { ServerWorldCommitHost } from './server-world-commit-host';
 import { generateGameServerChunk, prepareGameServerRestoreChunks } from './game-server-restore-candidate';
-import { prepareWorkerCanonicalAdmission } from './game-server-worker-canonical';
+import { acceptServerWorkerCanonical } from './game-server-canonical-admission';
 import { readLoadedCollisionBaseline } from './loaded-collision-baseline';
 import {
   canonicalChunkNeighborhoodKeys,
@@ -142,6 +138,7 @@ class GameServerWorld {
       fluidWindow: this.fluidWindow,
       fluidRuntime: () => this.fluidRuntime,
       priorityForBatch: (batch) => this.gameplayHost.fluidPriorityForBatch(batch),
+      isVoxelRegistered: options.composition ? (value) => this.voxelSemantics.get(value) !== undefined : undefined,
     });
   }
 
@@ -149,21 +146,18 @@ class GameServerWorld {
     return this.kernelState.worldTime;
   }
 
-  get executableWorldgenProvider(): KernelWorldgenProvider | undefined {
-    return this.worldgenRuntime;
-  }
-
-  private get gameplay() {
-    return this.gameplayHost.gameplay;
-  }
-
-  private get kernelState() {
-    return this.gameplayHost.kernelState;
-  }
-
-  get authorityExecution() {
-    return this.gameplay.authorityExecution;
-  }
+  // prettier-ignore
+  get executableWorldgenProvider(): KernelWorldgenProvider | undefined { return this.worldgenRuntime; }
+  // prettier-ignore
+  private get gameplay() { return this.gameplayHost.gameplay; }
+  // prettier-ignore
+  private get kernelState() { return this.gameplayHost.kernelState; }
+  // prettier-ignore
+  get authorityExecution() { return this.gameplay.authorityExecution; }
+  // prettier-ignore
+  get voxelSemantics() { return this.gameplay.content.voxelSemantics; }
+  // prettier-ignore
+  get hasGameplayComposition() { return this.gameplayHost.hasGameplayComposition; }
 
   async restore(): Promise<void> {
     const checkpoint = readGameSaveCheckpoint(await this.persistence?.loadGameCheckpoint?.());
@@ -191,6 +185,7 @@ class GameServerWorld {
         currentEntities: this.gameplay.entities,
         candidateEntities: prepared.gameplay.entities,
         stationCodec: prepared.gameplay.content.stations?.codec,
+        ...(this.options.composition ? { voxelSemantics: prepared.gameplay.content.voxelSemantics } : {}),
       });
       this.chunks.clear();
       for (const [key, chunk] of chunks) this.chunks.set(key, chunk);
@@ -209,7 +204,7 @@ class GameServerWorld {
   }
 
   validateStationCheckpoint(snapshot: FrozenGameSaveSnapshot): void {
-    assertStationCheckpointIntegrity(snapshot, this.gameplay.content.stations?.codec);
+    validateServerStationCheckpoint(snapshot, this.gameplay.content.stations?.codec);
   }
 
   get restoredCommitSequence(): number {
@@ -348,28 +343,29 @@ class GameServerWorld {
   }
 
   acceptWorkerCanonical(result: WorkerCanonicalResult): boolean {
-    const prepared = prepareWorkerCanonicalAdmission({
+    return acceptServerWorkerCanonical({
       result,
       generatorVersion: this.generatorVersion,
       provider: this.worldgenProvider,
-      current: this.chunks.get(result.key),
+      chunks: this.chunks,
       stationCodec: this.gameplay.content.stations?.codec,
       entities: this.gameplay.entities,
+      ...(this.options.composition ? { voxelSemantics: this.voxelSemantics } : {}),
+      prepareAdmission: (key) => this.prepareCanonicalAdmission(key),
+      nextAccessEpoch: () => ++this.accessSequence,
+      persistence: this.persistence,
+      fluidAllows: (key) => this.fluidWindow.allowsKey(key),
+      fluidActivations: this.fluidChunkActivations,
+      maintainResidency: () => this.maintainCanonicalResidency(),
     });
-    if (prepared.kind === 'reject') return false;
-    if (prepared.kind === 'existing') return prepared.accepted;
-    if (!this.prepareCanonicalAdmission(result.key)) return false;
-    const accepted: ServerChunk = { ...prepared.chunk, accessEpoch: ++this.accessSequence };
-    this.chunks.set(result.key, accepted);
-    this.persistence?.evictSnapshot?.(result.key);
-    if (this.fluidWindow.allowsKey(result.key)) this.fluidChunkActivations.schedule(accepted);
-    this.maintainCanonicalResidency();
-    return true;
   }
 
   edit(x: number, y: number, z: number, value: number, actorId = 'system'): WorldCommitResult {
     [x, y, z].forEach(assertMutationCoordinate);
-    assertVoxelValue(value);
+    assertVoxelValue(
+      value,
+      this.options.composition ? (voxel) => this.voxelSemantics.get(voxel) !== undefined : undefined,
+    );
     assertNoRawStationEdits(
       { actorId, edits: [{ x, y, z, value }] },
       this.gameplay.content.stations?.codec,
@@ -433,7 +429,10 @@ class GameServerWorld {
   }
 
   editBatch(batch: WorldEditBatch): WorldCommitResult {
-    assertWorldMutationBatch(batch);
+    assertWorldMutationBatch(
+      batch,
+      this.options.composition ? (voxel) => this.voxelSemantics.get(voxel) !== undefined : undefined,
+    );
     assertNoRawStationEdits(batch, this.gameplay.content.stations?.codec, this.gameplay.entities, this.getVoxel);
     return this.worldCommits.editBatch(batch);
   }
@@ -501,14 +500,18 @@ class GameServerWorld {
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
-    return isValidChunkSnapshot(snapshot, {
-      seedText: this.options.seedText,
-      generatorVersion: this.generatorVersion,
-      key,
-      cx,
-      cy,
-      cz,
-    });
+    return validServerChunkSnapshot(
+      snapshot,
+      {
+        seedText: this.options.seedText,
+        generatorVersion: this.generatorVersion,
+        key,
+        cx,
+        cy,
+        cz,
+      },
+      this.options.composition ? this.voxelSemantics : undefined,
+    );
   }
 
   private readAuthoritativeChunk(

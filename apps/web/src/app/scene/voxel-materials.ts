@@ -12,6 +12,7 @@ import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel
 import { faceMaterialNames } from '@seedlands/stdlib/world/face-material-names';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
+import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';
 import { voxelEmissionRedDominance, voxelEmissionThreshold } from './voxel-emission-profile';
 import {
@@ -55,6 +56,7 @@ export async function createVoxelMaterials(
   quality: QualityProfile,
   sources?: PixelTexture[],
   assets?: readonly Asset[],
+  presentation?: PackPresentationCatalog,
 ): Promise<VoxelMaterials> {
   const textures = sources ?? resolveTerrainTextures(await loadTerrainPack());
   const surface: number[] = [];
@@ -63,12 +65,37 @@ export async function createVoxelMaterials(
   const emissionRedDominance: number[] = [];
   const tiles = new Map<FaceMaterialId, pc.Texture>();
   const tileCanvases = new Map<FaceMaterialId, HTMLCanvasElement>();
+  const packMaterialByFace = new Map(
+    Object.values(presentation?.materials ?? {}).map((material) => [material.faceMaterial, material]),
+  );
   for (const definition of terrainMaterials) {
     const material = assets?.find((asset) => asset.id === definition.id && asset.type === 'material');
     const parameters = material?.type === 'material' ? material.payload : undefined;
-    const source = textures.find((texture) => texture.id === (parameters?.textureId ?? definition.textureId));
+    const packMaterial = packMaterialByFace.get(definition.faceMaterial);
+    if (packMaterial && packMaterial.renderMode !== definition.renderMode)
+      throw new Error(`Pack 材质渲染模式与槽位不匹配：${packMaterial.id}`);
+    const builtinPackTexture = packMaterial?.texture.startsWith('builtin:')
+      ? packMaterial.texture.slice('builtin:'.length)
+      : undefined;
+    const source = textures.find(
+      (texture) => texture.id === (builtinPackTexture ?? parameters?.textureId ?? definition.textureId),
+    );
     if (!source) throw new Error(`缺少地形贴图：${definition.textureId}`);
-    const canvas = pixelCanvas(source);
+    let canvas: HTMLCanvasElement;
+    const packTextureUrl = packMaterial
+      ? packMaterial.texture.startsWith('builtin:')
+        ? undefined
+        : presentation?.assetUrls[packMaterial.texture]
+      : undefined;
+    if (packTextureUrl) {
+      const image = new Image();
+      image.src = packTextureUrl;
+      await image.decode();
+      canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      canvas.getContext('2d')!.drawImage(image, 0, 0);
+    } else canvas = pixelCanvas(source);
     surface.push(
       1 - (parameters?.roughness ?? (definition.renderMode === 'transparent' ? 0.18 : 0.92)),
       parameters?.metalness ?? 0,

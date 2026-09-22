@@ -2,12 +2,12 @@ import type { ActorProfileRegistry } from '../gameplay/actor-profile';
 import type { EntityStore } from '../gameplay/entity-store';
 import { prepareCombatActionSnapshot } from './combat-action-snapshot';
 import { MAX_RETAINED_ACTORS, cloneActor, type ActorState, type SimulationSnapshot } from './actor-state';
-import { ACTOR_ARCHETYPES } from '../gameplay/ecs-entity-owner';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
 
 const validateActor = (actor: ActorState): void => {
   if (
     !actor.entityId?.trim() ||
-    !ACTOR_ARCHETYPES.includes(actor.archetype) ||
+    !isActorArchetype(actor.archetype) ||
     (actor.disposition !== undefined && !['passive', 'neutral', 'hostile'].includes(actor.disposition)) ||
     !Number.isFinite(actor.hunger) ||
     actor.hunger < 0 ||

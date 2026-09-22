@@ -11,7 +11,12 @@ export function attemptNaturalSpawn(
   position: Position,
   tick: number,
 ) {
-  const light = sampleLight(position, callbacks.getWorldTime(), callbacks.getLoadedVoxel ?? callbacks.getVoxel);
+  const light = sampleLight(
+    position,
+    callbacks.getWorldTime(),
+    callbacks.getLoadedVoxel ?? callbacks.getVoxel,
+    runtime.content.voxelSemantics,
+  );
   if (!light || !callbacks.biomeAt) return { success: false as const, reason: 'environment-unavailable' };
   const players = runtime.queryEntities({ type: 'player' });
   const nearest = players.reduce(

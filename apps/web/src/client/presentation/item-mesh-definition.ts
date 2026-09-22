@@ -86,7 +86,17 @@ function groupFor(groups: Map<FaceMaterialId, MutableGroup>, material: FaceMater
  * Compiles item geometry from the authoritative voxel representation. It remains CPU-only so
  * PlayCanvas mesh allocation, cache ownership, and GPU lifetime stay at the application edge.
  */
-export function itemMeshDefinition(voxel: number): ItemMeshDefinition {
+export function itemMeshDefinition(
+  voxel: number,
+  faceMaterials?: readonly [
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+  ],
+): ItemMeshDefinition {
   const groups = new Map<FaceMaterialId, MutableGroup>();
   const modelBoxes = modelBoxesForVoxel(voxel);
   if (modelBoxes.length) {
@@ -106,7 +116,7 @@ export function itemMeshDefinition(voxel: number): ItemMeshDefinition {
     const box: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
     for (let dimension = 0; dimension < 3; dimension += 1)
       for (const back of [true, false]) {
-        const material = faceMaterialFor(voxel, dimension, !back);
+        const material = faceMaterials?.[dimension * 2 + Number(!back)] ?? faceMaterialFor(voxel, dimension, !back);
         if (material === undefined) throw new RangeError(`物品体素没有面材质：${voxel}`);
         const group = groupFor(groups, material);
         group.boxCount += 1;

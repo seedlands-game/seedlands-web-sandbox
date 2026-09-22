@@ -31,7 +31,10 @@ const SHARED_ENTITY_STORE = 'seedlands:entity-store';
 const asKernelValue = (value: unknown): KernelValue => value as KernelValue;
 
 const storeFor = (port: KernelStorageAllocationPort, content: GameplayContent, layout?: PlayerInventoryLayout) =>
-  port.shared(SHARED_ENTITY_STORE, () => new EntityStore(content.items, content.stations?.codec, layout));
+  port.shared(
+    SHARED_ENTITY_STORE,
+    () => new EntityStore(content.items, content.stations?.codec, layout, content.actorProfiles),
+  );
 
 const entityProjectionStorage = (
   port: KernelStorageAllocationPort,
@@ -144,7 +147,7 @@ export function createGameplayKernelRuntime(
             version: 2,
             encode: (store: EntityStore) => asKernelValue(store.exportComponentSnapshot()),
             decode: (value) => {
-              const store = new EntityStore(content.items, content.stations?.codec, layout);
+              const store = new EntityStore(content.items, content.stations?.codec, layout, content.actorProfiles);
               store.restoreComponentSnapshot(value);
               return store;
             },

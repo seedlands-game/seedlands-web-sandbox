@@ -44,6 +44,7 @@ type TransactionState = {
   setRevision: (revision: number) => void;
   addMutationCount: (count: number) => void;
   commitSingleEdit: (actorId: string, x: number, y: number, z: number, value: number) => WorldCommitResult;
+  isVoxelRegistered?: (value: number) => boolean;
 };
 
 type CommitResultInput = {
@@ -142,7 +143,7 @@ export function commitWorldEditBatch(
       assertMutationCoordinate(edit.x);
       assertMutationCoordinate(edit.y);
       assertMutationCoordinate(edit.z);
-      assertVoxelValue(edit.value);
+      assertVoxelValue(edit.value, state.isVoxelRegistered);
     }
     inputMutationCount = batch.edits.length;
     mutationPayloadBytes = inputMutationCount * 14;

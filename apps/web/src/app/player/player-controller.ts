@@ -117,8 +117,11 @@ export class PlayerController {
     if (!world) return null;
     const position = this.options.camera.getPosition();
     const direction = this.options.camera.forward;
-    return traceVoxelTarget([position.x, position.y, position.z], [direction.x, direction.y, direction.z], (x, y, z) =>
-      world.getVoxel(x, y, z),
+    return traceVoxelTarget(
+      [position.x, position.y, position.z],
+      [direction.x, direction.y, direction.z],
+      (x, y, z) => world.getVoxel(x, y, z),
+      (voxel) => world.authority.voxelSemantics.get(voxel)?.targetable ?? false,
     );
   }
 
@@ -438,26 +441,30 @@ export class PlayerController {
   }
 
   private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {
-    return new VoxelCollisionWorld({
-      getChunkRevision: (key) => {
-        const [cx, cy, cz] = key.split(',').map(Number);
-        return world.getChunkRevision(cx!, cy!, cz!);
+    return new VoxelCollisionWorld(
+      {
+        getChunkRevision: (key) => {
+          const [cx, cy, cz] = key.split(',').map(Number);
+          return world.getChunkRevision(cx!, cy!, cz!);
+        },
+        getLoadedVoxel: (x, y, z) => {
+          const cx = floorDiv(x, CHUNK_SIZE);
+          const cy = floorDiv(y, CHUNK_SIZE);
+          const cz = floorDiv(z, CHUNK_SIZE);
+          const revision = world.getChunkRevision(cx, cy, cz);
+          if (revision === null) return null;
+          const fluid = world.getFluidCell(x, y, z);
+          return {
+            voxel: world.getVoxel(x, y, z),
+            chunkKey: chunkKey(cx, cy, cz),
+            revision,
+            ...(fluid ? { fluid: { level: fluid.level } } : {}),
+          };
+        },
       },
-      getLoadedVoxel: (x, y, z) => {
-        const cx = floorDiv(x, CHUNK_SIZE);
-        const cy = floorDiv(y, CHUNK_SIZE);
-        const cz = floorDiv(z, CHUNK_SIZE);
-        const revision = world.getChunkRevision(cx, cy, cz);
-        if (revision === null) return null;
-        const fluid = world.getFluidCell(x, y, z);
-        return {
-          voxel: world.getVoxel(x, y, z),
-          chunkKey: chunkKey(cx, cy, cz),
-          revision,
-          ...(fluid ? { fluid: { level: fluid.level } } : {}),
-        };
-      },
-    });
+      () => undefined,
+      world.authority.voxelSemantics,
+    );
   }
 
   private interact(place: boolean, bypassTarget = false) {

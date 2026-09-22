@@ -3,6 +3,7 @@ import { FakeAuthorityWorker, frequencies, ready } from './fixtures/browser-auth
 import { testWorldgenProvider } from './fixtures/worldgen-provider';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import type { AuthorityResponse } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/blocks';
 
 describe('BrowserAuthorityClient', () => {
   it('把迟到/非法输入与重同步要求显式反馈预测层', () => {
@@ -72,6 +73,7 @@ describe('BrowserAuthorityClient', () => {
       generatorVersion: 3,
       provider: testWorldgenProvider,
       starterEcology: null,
+      voxelSemantics: overworldVoxelSemantics,
     } as const;
     worker.emit(needed);
     worker.emit(needed);
@@ -81,6 +83,7 @@ describe('BrowserAuthorityClient', () => {
         generatorVersion: 3,
         provider: testWorldgenProvider,
         starterEcology: null,
+        voxelSemantics: overworldVoxelSemantics,
       }),
     );
     expect(bootstrap).toHaveBeenCalledTimes(1);

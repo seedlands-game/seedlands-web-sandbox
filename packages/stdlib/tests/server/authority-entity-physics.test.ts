@@ -1,6 +1,6 @@
 import { createTestAuthorityExecution } from '../support/authority-execution';
 import { describe, expect, it } from 'vitest';
-import { CollisionLayer, bodyConfigFor, type BodyConfig } from '../../src/physics';
+import { CollisionLayer, bodyConfigFor, bodyKindForEntity, type BodyConfig } from '../../src/physics';
 import {
   AuthoritySession,
   type AuthorityEntity,
@@ -105,7 +105,7 @@ const createSession = (
           ? bodyConfigFor('player')
           : candidate.type === 'world-item'
             ? bodyConfigFor('world-item')
-            : bodyConfigFor(candidate.archetype ?? 'grazer')),
+            : bodyConfigFor(bodyKindForEntity(candidate))),
     voxelSource: {
       getLoadedVoxel: (x, y, z) => {
         const selected = options.voxelAt?.(x, y, z);

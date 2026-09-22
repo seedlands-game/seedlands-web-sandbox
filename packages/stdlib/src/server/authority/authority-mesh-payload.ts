@@ -25,6 +25,7 @@ export async function prepareAuthorityMeshPayload(
       cz,
       chunkRevision: prepared.chunkRevision,
       generatorVersion: server.generatorVersion,
+      voxelSemantics: server.voxelSemantics.list(),
       ...(server.worldgenProvider ? { provider: server.worldgenProvider } : {}),
       preparationDiagnostics: {
         authorityPrepareMs: now() - startedAt,

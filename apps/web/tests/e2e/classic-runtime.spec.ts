@@ -38,6 +38,7 @@ import {
 } from './classic-support/evidence';
 import { classicScenario, type Point } from './classic-support/scenario';
 import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
+import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
 import {
   equipFromInventory,
   inventorySignature,
@@ -61,12 +62,14 @@ test.beforeAll(async ({ headless, launchOptions }) => {
 
 test.afterEach(async ({ page }, testInfo) => {
   if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
+  if (modularPackSmokeEnabled) return;
   if (evidenceWritten || testInfo.title.startsWith('Classic 视觉')) return;
   const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
   await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence);
 });
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
+  test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
   test.setTimeout(480_000);
   evidenceWritten = false;
   restoreEvidence = undefined;
@@ -476,4 +479,12 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   expect(failedResponses).toEqual([]);
 });
 
-test('Classic 视觉 v3 生产素材、连续帧与单击破坏回归', verifyVisualRebuild);
+test('Classic 视觉 v3 生产素材、连续帧与单击破坏回归', async ({ page }, testInfo) => {
+  test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
+  await verifyVisualRebuild({ page }, testInfo);
+});
+
+test(
+  '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
+  verifyModularPackSmoke,
+);

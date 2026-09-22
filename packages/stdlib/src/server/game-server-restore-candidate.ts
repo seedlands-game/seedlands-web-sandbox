@@ -5,6 +5,7 @@ import type { EntityStore } from './gameplay/entity-store';
 import type { StationStateCodec } from './gameplay/ecs-station-state';
 import type { ServerChunk } from './game-server-types';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
+import type { VoxelSemanticsResolver } from '../world/voxel-semantics';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import { restoreServerChunk } from './server-chunk-restore';
 import { assertStationChunkIntegrity, stationChunkKeys } from './station-world-integrity';
@@ -21,6 +22,7 @@ type Input = Readonly<{
   currentEntities: EntityStore;
   candidateEntities: EntityStore;
   stationCodec?: StationStateCodec;
+  voxelSemantics?: VoxelSemanticsResolver;
 }>;
 
 export function generateGameServerChunk(
@@ -81,14 +83,18 @@ export async function prepareGameServerRestoreChunks(input: Input): Promise<Map<
     let chunk: ServerChunk;
     if (snapshot) {
       if (
-        !isValidChunkSnapshot(snapshot, {
-          seedText: input.seedText,
-          generatorVersion: input.generatorVersion,
-          key,
-          cx,
-          cy,
-          cz,
-        })
+        !isValidChunkSnapshot(
+          snapshot,
+          {
+            seedText: input.seedText,
+            generatorVersion: input.generatorVersion,
+            key,
+            cx,
+            cy,
+            cz,
+          },
+          input.voxelSemantics,
+        )
       )
         throw new Error(`Persisted canonical Chunk is invalid for ${key}.`);
       chunk = restoreServerChunk(snapshot, input.accessEpoch + prepared.size + 1);

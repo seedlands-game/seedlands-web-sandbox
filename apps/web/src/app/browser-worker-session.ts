@@ -99,8 +99,8 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     },
     onCommit: options.onCommit,
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
-    onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology }) =>
-      compute.findSafeSpawn(seed, generatorVersion, provider, starterEcology),
+    onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology, voxelSemantics }) =>
+      compute.findSafeSpawn(seed, generatorVersion, provider, starterEcology, voxelSemantics),
     onAuthorityChunkNeeded: generateAuthorityChunk,
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,

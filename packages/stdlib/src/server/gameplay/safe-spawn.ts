@@ -1,5 +1,7 @@
 import { isSolid, Voxel } from '../../world/voxel';
 import { bodyConfigFor } from '../../physics/body-registry';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
+import { voxelIsPassable, voxelIsSolid } from '../../world/voxel-semantics';
 
 const ground = new Set<number>([Voxel.Grass, Voxel.Dirt, Voxel.Stone, Voxel.Sand, Voxel.Snow]);
 const MAX_HEIGHT = 128;
@@ -51,15 +53,19 @@ const safeColumn = (
   x: number,
   z: number,
   passThroughDecoration = false,
+  semantics?: VoxelSemanticsResolver,
 ): SpawnCandidate | null => {
   let headroom = 0;
   for (let y = MAX_HEIGHT; y >= 0; y--) {
     const voxel = getVoxel(x, y, z);
-    if (voxel === Voxel.Air || (passThroughDecoration && passableSpawnDecoration.has(voxel))) {
+    if (
+      (semantics ? voxelIsPassable(voxel, semantics) : voxel === Voxel.Air) ||
+      (!semantics && passThroughDecoration && passableSpawnDecoration.has(voxel))
+    ) {
       headroom++;
       continue;
     }
-    if (ground.has(voxel) && headroom >= requiredHeadroom)
+    if ((semantics ? voxelIsSolid(voxel, semantics) : ground.has(voxel)) && headroom >= requiredHeadroom)
       return { x, groundY: y, z, position: [x + 0.5, y + 1 - playerBody.min.y, z + 0.5] };
     // 第一处非空气是水/树/顶壁时，该列不可作为可靠地面。
     return null;
@@ -67,13 +73,27 @@ const safeColumn = (
   return null;
 };
 
-const walkableGroundY = (getVoxel: VoxelReader, x: number, previousGroundY: number, z: number): number | null => {
+const walkableGroundY = (
+  getVoxel: VoxelReader,
+  x: number,
+  previousGroundY: number,
+  z: number,
+  semantics?: VoxelSemanticsResolver,
+): number | null => {
   for (const candidateGroundY of [previousGroundY + 1, previousGroundY, previousGroundY - 1]) {
-    if (!ground.has(getVoxel(x, candidateGroundY, z))) continue;
+    if (
+      semantics
+        ? !voxelIsSolid(getVoxel(x, candidateGroundY, z), semantics)
+        : !ground.has(getVoxel(x, candidateGroundY, z))
+    )
+      continue;
     let clear = true;
     for (let height = 1; height <= requiredHeadroom; height += 1) {
       const voxel = getVoxel(x, candidateGroundY + height, z);
-      if (voxel !== Voxel.Air && !passableSpawnDecoration.has(voxel)) {
+      if (
+        !(semantics ? voxelIsPassable(voxel, semantics) : voxel === Voxel.Air) &&
+        !(!semantics && passableSpawnDecoration.has(voxel))
+      ) {
         clear = false;
         break;
       }
@@ -83,7 +103,7 @@ const walkableGroundY = (getVoxel: VoxelReader, x: number, previousGroundY: numb
   return null;
 };
 
-const routeScore = (getVoxel: VoxelReader, candidate: SpawnCandidate) => {
+const routeScore = (getVoxel: VoxelReader, candidate: SpawnCandidate, semantics?: VoxelSemanticsResolver) => {
   let openDirections = 0;
   let openSteps = 0;
   for (const [dx, dz] of [
@@ -104,6 +124,7 @@ const routeScore = (getVoxel: VoxelReader, candidate: SpawnCandidate) => {
         candidate.x + dx * (steps + 1),
         groundY,
         candidate.z + dz * (steps + 1),
+        semantics,
       );
       if (nextGroundY === null) break;
       groundY = nextGroundY;
@@ -134,7 +155,7 @@ const nearbyTreeDistanceSquared = (getVoxel: VoxelReader, candidate: SpawnCandid
   return nearest;
 };
 
-const lowCeilingBlocks = (getVoxel: VoxelReader, candidate: SpawnCandidate) => {
+const lowCeilingBlocks = (getVoxel: VoxelReader, candidate: SpawnCandidate, semantics?: VoxelSemanticsResolver) => {
   let blocks = 0;
   for (let dx = -LOW_CEILING_RADIUS; dx <= LOW_CEILING_RADIUS; dx += 1)
     for (let dz = -LOW_CEILING_RADIUS; dz <= LOW_CEILING_RADIUS; dz += 1)
@@ -143,15 +164,24 @@ const lowCeilingBlocks = (getVoxel: VoxelReader, candidate: SpawnCandidate) => {
         y < candidate.groundY + requiredHeadroom + LOW_CEILING_HEIGHT + 1;
         y += 1
       )
-        if (isSolid(getVoxel(candidate.x + dx, y, candidate.z + dz))) blocks++;
+        if (
+          semantics
+            ? voxelIsSolid(getVoxel(candidate.x + dx, y, candidate.z + dz), semantics)
+            : isSolid(getVoxel(candidate.x + dx, y, candidate.z + dz))
+        )
+          blocks++;
   return blocks;
 };
 
-const scoreCandidate = (getVoxel: VoxelReader, candidate: SpawnCandidate): ScoredSpawnCandidate => ({
+const scoreCandidate = (
+  getVoxel: VoxelReader,
+  candidate: SpawnCandidate,
+  semantics?: VoxelSemanticsResolver,
+): ScoredSpawnCandidate => ({
   ...candidate,
-  ...routeScore(getVoxel, candidate),
+  ...routeScore(getVoxel, candidate, semantics),
   nearestTreeDistanceSquared: nearbyTreeDistanceSquared(getVoxel, candidate),
-  lowCeilingBlocks: lowCeilingBlocks(getVoxel, candidate),
+  lowCeilingBlocks: lowCeilingBlocks(getVoxel, candidate, semantics),
   distanceSquared: candidate.x * candidate.x + candidate.z * candidate.z,
 });
 
@@ -166,10 +196,14 @@ const compareScoredCandidates = (left: ScoredSpawnCandidate, right: ScoredSpawnC
   left.groundY - right.groundY;
 
 /** 只读取世界，固定遍历次序；失败显式返回 null，不能清空地形制造出生点。 */
-export function findSafePlayerSpawn(getVoxel: VoxelReader, generatorVersion: number): [number, number, number] | null {
+export function findSafePlayerSpawn(
+  getVoxel: VoxelReader,
+  generatorVersion: number,
+  semantics?: VoxelSemanticsResolver,
+): [number, number, number] | null {
   if (generatorVersion < 11) {
     for (const [x, z] of candidateCoordinates()) {
-      const candidate = safeColumn(getVoxel, x, z);
+      const candidate = safeColumn(getVoxel, x, z, false, semantics);
       if (candidate) return candidate.position;
     }
     return null;
@@ -177,16 +211,16 @@ export function findSafePlayerSpawn(getVoxel: VoxelReader, generatorVersion: num
   let best: ScoredSpawnCandidate | null = null;
   for (const [x, z] of candidateCoordinates()) {
     if (Math.max(Math.abs(x), Math.abs(z)) > SCORED_RADIUS) break;
-    const candidate = safeColumn(getVoxel, x, z, true);
+    const candidate = safeColumn(getVoxel, x, z, true, semantics);
     if (!candidate) continue;
-    const scored = scoreCandidate(getVoxel, candidate);
+    const scored = scoreCandidate(getVoxel, candidate, semantics);
     if (!best || compareScoredCandidates(scored, best) < 0) best = scored;
   }
   if (best) return best.position;
   // 极端地形仍保留旧的半径 64 确定性兜底，但不为远处每个候选执行高成本景观评分。
   for (const [x, z] of candidateCoordinates()) {
     if (Math.max(Math.abs(x), Math.abs(z)) <= SCORED_RADIUS) continue;
-    const candidate = safeColumn(getVoxel, x, z, true);
+    const candidate = safeColumn(getVoxel, x, z, true, semantics);
     if (candidate) return candidate.position;
   }
   return null;

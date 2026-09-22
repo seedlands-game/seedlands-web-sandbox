@@ -137,6 +137,7 @@ export class AuthorityRuntime {
       server: serverPort,
       bodyConfigFor: (entity) => bodyConfigFor(bodyKindForEntity(entity)),
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
+      voxelSemantics: server.voxelSemantics,
       frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
       execution: server.authorityExecution,

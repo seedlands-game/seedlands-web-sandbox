@@ -1,11 +1,10 @@
 import type { AuthoritySnapshot } from '../authority/authority-session-types';
 import { NETWORK_REFERENCE_PROJECTION_VERSION, type ReferenceVector3 } from './network-reference-projection-types';
 import { canonicalReferenceInteger } from './network-reference-integer';
-import { ACTOR_ARCHETYPES } from '../gameplay/ecs-entity-owner';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
 
 const MAX_ENTITY_POSES = 256;
 const ENTITY_TYPES = new Set(['player', 'world-item', 'creature', 'npc', 'falling-block', 'painting']);
-const ACTOR_ARCHETYPE_SET = new Set<string>(ACTOR_ARCHETYPES);
 
 type EntityPoseType = AuthoritySnapshot['entities'][number]['type'];
 type EntityPoseArchetype = NonNullable<AuthoritySnapshot['entities'][number]['archetype']>;
@@ -64,9 +63,7 @@ const entityType = (value: unknown): EntityPoseType => {
 
 const entityArchetype = (type: EntityPoseType, value: unknown): EntityPoseArchetype | undefined => {
   if (value === undefined) return undefined;
-  if (typeof value !== 'string' || !ACTOR_ARCHETYPE_SET.has(value)) throw new TypeError('entity.archetype is invalid.');
-  if (type === 'npc' && value !== 'settler') throw new TypeError('NPC entity archetype must be settler.');
-  if (type === 'creature' && value === 'settler') throw new TypeError('Creature entity archetype cannot be settler.');
+  if (!isActorArchetype(value)) throw new TypeError('entity.archetype is invalid.');
   if (type !== 'npc' && type !== 'creature') throw new TypeError(`${type} entity cannot have an archetype.`);
   return value as EntityPoseArchetype;
 };

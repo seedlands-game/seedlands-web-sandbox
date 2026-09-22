@@ -144,8 +144,10 @@ export function bodyKindForEntity(entity: { type: string; archetype?: string }):
     entity.type === 'painting'
   )
     return entity.type;
-  if (entity.type === 'creature' && entity.archetype !== 'settler' && Object.hasOwn(configs, entity.archetype ?? ''))
-    return entity.archetype as BodyKind;
-  if (entity.type === 'npc' && entity.archetype === 'settler') return 'settler';
+  if (entity.type === 'creature')
+    return entity.archetype !== 'settler' && Object.hasOwn(configs, entity.archetype ?? '')
+      ? (entity.archetype as BodyKind)
+      : 'grazer';
+  if (entity.type === 'npc') return 'settler';
   throw new RangeError(`Entity has no registered body: ${entity.type}:${String(entity.archetype)}`);
 }

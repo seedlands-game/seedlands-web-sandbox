@@ -209,6 +209,13 @@ const validateManifest = (manifest, lock) => {
     throw new TypeError('Pack manifest resources must be an array.');
   for (const path of manifest.resources ?? []) assertRelativePath(path, 'Pack manifest resource');
   assertUnique(manifest.resources ?? [], `${manifest.id} resource`);
+  if (manifest.presentation !== undefined) {
+    if (!isObject(manifest.presentation) || Object.keys(manifest.presentation).length !== 1)
+      throw new TypeError('Pack presentation reference is invalid.');
+    assertRelativePath(manifest.presentation.path, 'Pack presentation path');
+    if (!(manifest.resources ?? []).includes(manifest.presentation.path))
+      throw new TypeError('Pack presentation resource must be declared.');
+  }
   if (manifest.providerSelections !== undefined) {
     if (!Array.isArray(manifest.providerSelections)) throw new TypeError('Pack providerSelections must be an array.');
     assertUnique(

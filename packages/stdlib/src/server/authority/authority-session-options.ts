@@ -2,6 +2,7 @@ import type { BodyConfig } from '../../physics';
 import type { LoadedVoxelSource } from './voxel-collision-world';
 import type * as SessionContract from './authority-session-types';
 import type { AuthorityKernelExecutionPort } from './authority-kernel-state';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 
 export type AuthoritySessionOptions = Readonly<{
   epoch: string;
@@ -9,6 +10,7 @@ export type AuthoritySessionOptions = Readonly<{
   server: SessionContract.AuthorityServerPort;
   bodyConfigFor: (entity: SessionContract.AuthorityEntity) => BodyConfig;
   voxelSource: LoadedVoxelSource;
+  voxelSemantics?: VoxelSemanticsResolver;
   frequencies: Readonly<{ physicsHz: number; gameplayHz: number; fluidHz: number }>;
   startTimeMs: number;
   requestUnknownChunk?: (chunkKey: string) => void;

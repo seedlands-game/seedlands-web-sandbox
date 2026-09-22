@@ -40,6 +40,7 @@ export function createGameplayWorldSystems(
     vitals: options.vitals,
     content: options.content,
     getVoxel: options.callbacks.getLoadedVoxel ?? options.callbacks.getVoxel,
+    isVoxelSolid: (voxel) => options.content.voxelSemantics.get(voxel)?.solid ?? false,
     assertCanChange: options.assertCanChange,
     changed: options.changed,
   });

@@ -18,7 +18,7 @@ import {
   defineBehaviorRegistryModule,
   defineStandardWorldgenModule,
 } from '@seedlands/stdlib/mod-api';
-import { overworldBlocks } from './blocks';
+import { overworldBlocks, overworldVoxelSemantics } from './blocks';
 import { overworldItems } from './items';
 import { overworldRecipes } from './recipes';
 import { overworldMeleeDefinitions } from './combat';
@@ -37,6 +37,8 @@ export const pack = definePack({
   version: '1.0.0',
   kind: 'playbook',
   entry: 'overworld.mjs',
+  resources: ['playbooks/classic/presentation.json'],
+  presentation: { path: 'playbooks/classic/presentation.json' },
   modules: [
     defineStandardWorldgenModule({
       moduleId: 'seedlands:overworld-worldgen',
@@ -46,6 +48,7 @@ export const pack = definePack({
       moduleId: 'seedlands:overworld-content',
       craftingProvider: true,
       items: overworldItems.map((item) => ({ ...item, id: namespaceId(item.id), storageId: item.id })),
+      voxels: overworldVoxelSemantics,
       recipes: overworldRecipes.map((recipe) => ({
         ...recipe,
         id: namespaceId(recipe.id),

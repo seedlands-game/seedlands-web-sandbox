@@ -9,6 +9,7 @@ type WorldEditPorts = Readonly<{
   getRevision(): number;
   setWorldRevision(revision: number): void;
   addMutationCount(count: number): void;
+  isVoxelRegistered?: (value: number) => boolean;
 }>;
 export type PreparedWorldEdit = Readonly<{
   committed: boolean;
@@ -25,7 +26,7 @@ export function prepareSingleWorldEdit(
   const { actorId, x, y, z, value } = input;
   if (typeof actorId !== 'string' || !actorId.trim()) throw new TypeError('World edit actor is invalid.');
   for (const coordinate of [x, y, z]) assertMutationCoordinate(coordinate);
-  assertVoxelValue(value);
+  assertVoxelValue(value, ports.isVoxelRegistered);
   const { getLoadedChunk, getRevision, setWorldRevision, addMutationCount } = ports;
   const cx = floorDiv(x, CHUNK_SIZE),
     cy = floorDiv(y, CHUNK_SIZE),

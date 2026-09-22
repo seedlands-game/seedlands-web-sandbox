@@ -1,4 +1,5 @@
 import { buildBlockLightVolume, sampleBlockLight, type BlockLightVolume } from '@seedlands/stdlib/world/voxel-light';
+import type { VoxelSemanticsResolver } from '@seedlands/stdlib/world/voxel-semantics';
 import { chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 
 /**
@@ -26,6 +27,7 @@ export const encodeBlockLightLevelForR8 = (level: number) => {
 export type BlockLightVoxelReader = Readonly<{
   getVoxelIfLoaded(x: number, y: number, z: number): number | undefined;
   blockLightRevision(origin: readonly [number, number, number], size: number): string;
+  voxelSemantics?: VoxelSemanticsResolver;
 }>;
 
 export type CameraBlockLightVolume = Readonly<{
@@ -53,7 +55,12 @@ export function buildCameraBlockLightVolume(
   const anchor = blockLightAnchorForCamera(position);
   const origin = blockLightOriginForAnchor(anchor);
   return {
-    volume: buildBlockLightVolume(BLOCK_LIGHT_VOLUME_SIZE, origin, (x, y, z) => reader.getVoxelIfLoaded(x, y, z)),
+    volume: buildBlockLightVolume(
+      BLOCK_LIGHT_VOLUME_SIZE,
+      origin,
+      (x, y, z) => reader.getVoxelIfLoaded(x, y, z),
+      reader.voxelSemantics,
+    ),
     revision: reader.blockLightRevision(origin, BLOCK_LIGHT_VOLUME_SIZE),
     anchor,
   };
@@ -95,7 +102,12 @@ export function buildChunkBlockLightVolume(
 ): ChunkBlockLightVolume {
   const origin = blockLightOriginForChunk(cx, cy, cz);
   return {
-    volume: buildBlockLightVolume(BLOCK_LIGHT_VOLUME_SIZE, origin, (x, y, z) => reader.getVoxelIfLoaded(x, y, z)),
+    volume: buildBlockLightVolume(
+      BLOCK_LIGHT_VOLUME_SIZE,
+      origin,
+      (x, y, z) => reader.getVoxelIfLoaded(x, y, z),
+      reader.voxelSemantics,
+    ),
     revision: reader.blockLightRevision(origin, BLOCK_LIGHT_VOLUME_SIZE),
     chunk: [cx, cy, cz],
   };

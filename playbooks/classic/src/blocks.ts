@@ -1,4 +1,15 @@
-import type { VoxelGameplayDefinition } from '@seedlands/stdlib/mod-api';
+import type { VoxelGameplayDefinition, VoxelSemanticsDefinition } from '@seedlands/stdlib/mod-api';
+import {
+  FaceMaterial,
+  Voxel,
+  faceMaterialFor,
+  isRenderable,
+  isSolid,
+  isTargetable,
+} from '@seedlands/stdlib/world/voxel';
+import { voxelEmission, voxelLightCost } from '@seedlands/stdlib/world/voxel-light';
+import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
+import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
 
 /** Version 1 content preserves the supported numeric voxel palette. */
@@ -367,4 +378,60 @@ export const overworldBlocks: readonly VoxelGameplayDefinition[] = Object.freeze
   Object.values(definitions).map((definition) =>
     Object.freeze({ ...definition, drop: definition.drop ? Object.freeze({ ...definition.drop }) : null }),
   ),
+);
+
+const classicVoxelName = new Map<number, string>(
+  Object.entries(Voxel).map(([name, storageId]) => [storageId as number, name]),
+);
+const materialForFace = (storageId: number, axis: number, positive: boolean) =>
+  faceMaterialFor(storageId, axis, positive) ?? FaceMaterial.Stone;
+
+/**
+ * Compatibility registration for the complete v11 compact palette. The legacy
+ * helpers are only used to snapshot unchanged Classic semantics into the Pack;
+ * composed consumers use the frozen registry rather than their switches.
+ */
+export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Object.freeze(
+  Array.from({ length: 89 }, (_, storageId) => {
+    const name = classicVoxelName.get(storageId);
+    if (!name) throw new Error(`Classic voxel ID is missing: ${storageId}`);
+    return Object.freeze({
+      id: `seedlands:classic/${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '')}`,
+      storageId,
+      solid: isSolid(storageId),
+      targetable: isTargetable(storageId),
+      renderable: isRenderable(storageId),
+      meshKind: hasVoxelModelGeometry(storageId)
+        ? 'model'
+        : storageId === Voxel.Water
+          ? 'water'
+          : storageId === Voxel.Glass
+            ? 'glass'
+            : storageId === Voxel.Ice
+              ? 'ice'
+              : 'cube',
+      emission: voxelEmission(storageId),
+      lightCost: voxelLightCost(storageId),
+      faceMaterials: [
+        materialForFace(storageId, 0, false),
+        materialForFace(storageId, 0, true),
+        materialForFace(storageId, 1, false),
+        materialForFace(storageId, 1, true),
+        materialForFace(storageId, 2, false),
+        materialForFace(storageId, 2, true),
+      ] as VoxelSemanticsDefinition['faceMaterials'],
+      materialCategories: Object.freeze(
+        [
+          ...new Set([
+            materialForFace(storageId, 0, false),
+            materialForFace(storageId, 0, true),
+            materialForFace(storageId, 1, false),
+            materialForFace(storageId, 1, true),
+            materialForFace(storageId, 2, false),
+            materialForFace(storageId, 2, true),
+          ]),
+        ].map((material) => [material, renderCategoryForMaterial(material)] as const),
+      ),
+    });
+  }),
 );

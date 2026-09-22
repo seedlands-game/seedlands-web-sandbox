@@ -20,6 +20,7 @@ type Options = Readonly<{
   fluidWindow: FluidActiveWindow;
   fluidRuntime(): FluidTransactionRuntime<WorldCommitResult>;
   priorityForBatch(batch: WorldEditBatch): FluidActivationPriority;
+  isVoxelRegistered?: (value: number) => boolean;
 }>;
 
 export class ServerWorldCommitHost {
@@ -72,6 +73,7 @@ export class ServerWorldCommitHost {
       fluidWindow: this.options.fluidWindow,
       fluidRuntime: this.options.fluidRuntime(),
       priorityForBatch: this.options.priorityForBatch,
+      isVoxelRegistered: this.options.isVoxelRegistered,
     };
   }
 }

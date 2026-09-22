@@ -62,6 +62,7 @@ export function createClassicWorldgenProvider(
   };
   return Object.freeze({
     identity: classicWorldgenIdentity,
+    acceptsStoredIdentity: isCompatibleClassicWorldgenIdentity,
     generate(input) {
       const { seed, generatorVersion, coordinate, epoch, revision } = input;
       return {

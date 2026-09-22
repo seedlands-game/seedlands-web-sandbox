@@ -183,6 +183,12 @@ Classic 产品收口新增 [gameplay-progress-runtime.ts](../packages/stdlib/src
 - `packages/eslint-plugin/src/pack-api-boundary-rule.mjs` 与 `packages/eslint-plugin/tests/pack-api-boundary.test.ts`：第一方 Playbook 到内部实现的导入负例门禁。
 - `apps/web/tests/integration/runtime/server/composition/`、`apps/web/tests/integration/engineering/pack-integrity.test.ts`：装配、授权和真实产物加载合同。当前仍未把整个现有 GameplayRuntime 迁成标准模块；ECS、完整玩法与浏览器旅程状态以[本期合同](https://github.com/seedlands-game/seedlands-web-sandbox/blob/5a5f0a5ea7e4a8e59597cb9c575b37997f4a933d/changes/2026-09-09-composable-overworld-playbook/spec.md)为准。
 
+2026-09-23 起，`world/voxel-semantics.ts` 是每世界体素 ID、solid/targetable/renderable、光与面材质的冻结注册合同，`world/mesh-semantics.ts` 将其投影为 TS/Rust/Wasm 共用的有界 numeric lookup。`server/gameplay/actor-archetype.ts` 只校验有界 namespaced ID 与显式 legacy alias；实际准入由 Pack 的 actor profile registry 决定。
+
+Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 host-owned Playbook/extension admission；`worker/pack-worldgen-provider.ts` 让 Authority、compute 和 persistence Worker 从同一锁定 Pack 取得可执行 worldgen provider。`client/presentation/pack-presentation-loader.ts` 校验并持有 Pack 的 voxel/item/actor/material 资源，Object URL 随 Application 生命周期释放。当前 WebGL2 v1 合同只允许复用 1–92 的固定 material slot；外部 Pack voxel topology 支持 cube/water/glass/ice，未注册的自定义 model geometry 在装配期拒绝。
+
+`apps/web/tests/fixtures/packs/modular-world/` 是无 Classic 内容依赖的第二 Playbook 证明：storageId 500、发光/碰撞/瞄准、namespaced actor、worldgen、persistence 与 presentation 均只走公开合同。唯一 `classic-runtime.spec.ts` 可在明确环境选择下对该 production artifact 运行有界 smoke；默认仍只执行完整 Classic C0–C5 与视觉回归。
+
 ## 可组合玩法内容与执行
 
 `server/gameplay/playbooks/overworld/` 保存默认 Playbook 的物品、配方、方块定义与版本化旧 ID 映射；只经 `mod-api` 消费标准机制。`server/gameplay/modules/` 保存可复用机制；`server/composition/` 的注册操作、状态提交与逻辑生命周期由宿主绑定权限后执行。旧自由函数在迁移期读取同一份第一方定义，不能另维护内容副本。
@@ -211,7 +217,7 @@ Classic 产品收口新增 [gameplay-progress-runtime.ts](../packages/stdlib/src
 
 `server/composition/secondary-resource-authorization.ts` 检查跨资源操作对原始角色资源的调用者及模块 execute 授权；Inventory、Block、Combat 即时提交及延迟来源重绑定共享该检查，不把主目标执行授权扩展为角色写入权。
 
-`server/gameplay/modules/crafting-provider.ts` 定义冻结的匹配输入、槽位扣料计划与共享库存事务；`recipe-crafting-module.ts` 通过同一 capability 分别准入标准和自定义匹配器。`server/composition/product-playbooks.ts` 对三个仓库内产品示例施加独立宿主权限；当前替代 Pack 源在 `apps/web/tests/fixtures/packs/builder/`，仅消费公开 mod-api。`scripts/build-gameplay-packs.mjs` 按明确示例名构建锁定 ESM，Browser 和 Headless 读取同一产物合同。
+`server/gameplay/modules/crafting-provider.ts` 定义冻结的匹配输入、槽位扣料计划与共享库存事务；`recipe-crafting-module.ts` 通过同一 capability 分别准入标准和自定义匹配器。`server/composition/product-playbooks.ts` 只消费 host admission，不认识替代 Playbook ID；仓库内产品权限由 `scripts/product-pack-admissions.mjs` 写入独立 `host-admissions.json`。当前替代 Pack 源在 `apps/web/tests/fixtures/packs/builder/` 与 `modular-world/`，仅消费公开 mod-api。`scripts/build-gameplay-packs.mjs` 按明确示例名构建锁定 ESM，Browser 和 Headless 读取同一产物合同。
 
 `server/gameplay/actor-profile.ts` 校验并冻结每世界角色档案、玩家默认近战及可选初始生态；第一方数值归 `playbooks/overworld/actors.ts`。`server/starter-ecology-bootstrap.ts` 仅在装配声明生态时准备已有营地/角色/食物布局，组合世界缺失该配置不会隐式生成默认内容。角色生命、掉落、感知食物和模型表现分别沿权威档案与当前世界物品定义解析。
 

@@ -3,6 +3,7 @@ import {
   createGameplayActorAuthority,
   createGameplaySystemAuthority,
   type ProductExtensionAdmission,
+  type ProductPackAdmission,
   type VerifiedPackArtifact,
 } from '@seedlands/stdlib/server/composition/host-api';
 import {
@@ -11,10 +12,11 @@ import {
 } from '@seedlands/stdlib/server/harness/world-authorization';
 export function createBrowserAuthorityComposition(
   artifacts: readonly VerifiedPackArtifact[],
+  approvedPlaybook: ProductPackAdmission,
   approvedExtensions: readonly ProductExtensionAdmission[],
   developerPolicy?: WorldAuthorizationPolicy,
 ) {
-  const composition = assembleProductPacks(artifacts, { approvedExtensions });
+  const composition = assembleProductPacks(artifacts, { approvedPlaybook, approvedExtensions });
   return {
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),

@@ -2,6 +2,8 @@ import type { snapshotPackLock, snapshotOperationIdentity } from './composition-
 import type { ModLifecycleDefinition, ModSystemDefinition, LifecycleRegistrations } from './lifecycle-contracts';
 import type { ItemCapability } from '../gameplay/item-registry';
 import type { ItemInstanceState } from '../gameplay/item-instance';
+import type { ActorProfileInput } from '../gameplay/actor-profile';
+import type { VoxelSemanticsDefinition } from '../../world/voxel-semantics';
 import type {
   ModStateDefinition,
   ModOperationDefinition,
@@ -56,6 +58,8 @@ export type ModRecipeDefinition = Readonly<{
   outputs: readonly ModItemAmount[];
 }>;
 
+export type ModVoxelDefinition = VoxelSemanticsDefinition;
+
 /** Frozen assembly identity for the module currently receiving the facade. */
 export type ModRegistrationIdentity = Readonly<{
   moduleId: string;
@@ -72,7 +76,12 @@ export type ModDefinitionCatalog = Readonly<{
 
 export type ModRegistrationFacade = Readonly<{
   readonly identity: ModRegistrationIdentity;
-  readContentDefinitions(): Readonly<{ items: readonly ModItemDefinition[]; recipes: readonly ModRecipeDefinition[] }>;
+  readContentDefinitions(): Readonly<{
+    items: readonly ModItemDefinition[];
+    recipes: readonly ModRecipeDefinition[];
+    voxels: readonly ModVoxelDefinition[];
+    actorProfiles: readonly ActorProfileInput[];
+  }>;
   onDefinitionsReady(finalize: (definitions: ModDefinitionCatalog) => void): void;
   registerLifecycle(definition: ModLifecycleDefinition): void;
   registerSystem(definition: ModSystemDefinition): void;
@@ -81,6 +90,8 @@ export type ModRegistrationFacade = Readonly<{
   registerRule(definition: ModRuleDefinition): void;
   registerItem(definition: ModItemDefinition): void;
   registerRecipe(definition: ModRecipeDefinition): void;
+  registerVoxel(definition: ModVoxelDefinition): void;
+  registerActorProfile(definition: ActorProfileInput): void;
   provideCapability<Value>(id: string, value: Value): void;
   requireCapability<Value>(id: string): Value;
 }>;
@@ -91,6 +102,7 @@ export type ModModule = Readonly<{
 }>;
 
 export type ProviderSelection = Readonly<{ capability: string; moduleId: string }>;
+export type PackPresentationReference = Readonly<{ path: string }>;
 
 export type PackManifest = Readonly<{
   schemaVersion: 1;
@@ -101,6 +113,7 @@ export type PackManifest = Readonly<{
   modules: readonly ModModuleDescriptor[];
   dependencies?: readonly PackDependency[];
   resources?: readonly string[];
+  presentation?: PackPresentationReference;
   providerSelections?: readonly ProviderSelection[];
 }>;
 
@@ -127,6 +140,7 @@ export type PackDefinitionInput = Readonly<{
   modules?: readonly ModModule[];
   dependencies?: readonly PackDependency[];
   resources?: readonly string[];
+  presentation?: PackPresentationReference;
   providerSelections?: readonly ProviderSelection[];
 }>;
 
@@ -149,6 +163,7 @@ export type WorldDefinitionMap = ReturnType<typeof snapshotOperationIdentity> &
     resources: readonly WorldResourceRegistration[];
     items: readonly Readonly<{ id: string; storageId: string }>[];
     recipes: readonly Readonly<{ id: string; storageId: string }>[];
+    voxels: readonly Readonly<{ id: string; storageId: number }>[];
     systems: LifecycleRegistrations['systems'];
     lifecycles: LifecycleRegistrations['lifecycles'];
   }>;
@@ -166,6 +181,7 @@ export type WorldComposition = Readonly<{
     Readonly<{
       items: readonly ModItemDefinition[];
       recipes: readonly ModRecipeDefinition[];
+      voxels: readonly ModVoxelDefinition[];
     }>;
   moduleBindings: Readonly<
     Record<

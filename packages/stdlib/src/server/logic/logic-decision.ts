@@ -143,7 +143,7 @@ function chooseGoal(
   if (!state.active) return { kind: 'hold' };
   const activeMovement = activeMovementGoal(entry.activeAction);
   if (entry.controlSource === 'behavior') return activeMovement ?? { kind: 'hold' };
-  const perceptionRange = rangeByArchetype[state.archetype];
+  const perceptionRange = rangeByArchetype[state.archetype] ?? 10;
   const recordedAttacker =
     state.behavior === 'flee' && state.targetEntityId
       ? observation.entities.find((candidate) => candidate.id === state.targetEntityId)

@@ -20,6 +20,7 @@ export type {
   ModModule,
   ModModuleDescriptor,
   ModRecipeDefinition,
+  ModVoxelDefinition,
   ModRegistrationFacade,
   ModDefinitionCatalog,
   ModuleInvocation,
@@ -29,6 +30,7 @@ export type {
   PackDependency,
   PackKind,
   PackManifest,
+  PackPresentationReference,
   PackDefinition,
   ProviderSelection,
   ModRegistrationIdentity,
@@ -123,6 +125,7 @@ export {
   buildBlockAdvanceUpdates,
 } from '../gameplay/modules/block-actions-module';
 export type { VoxelGameplayDefinition } from '../gameplay/voxel-gameplay';
+export type { VoxelSemanticsDefinition, VoxelSemanticsRegistry } from '../../world/voxel-semantics';
 export type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 export { defineBlockRulesModule } from '../gameplay/modules/block-rules-module';
 export * from '../gameplay/modules/block-action-model';

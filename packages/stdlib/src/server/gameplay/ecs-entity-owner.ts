@@ -47,28 +47,10 @@ import {
   projectEcsEntity,
   type EntityComponents,
 } from './ecs-entity-components';
+import type { EcsActorArchetype } from './actor-archetype';
+export { LEGACY_ACTOR_ARCHETYPES, isActorArchetype, type EcsActorArchetype } from './actor-archetype';
 
 export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station' | 'falling-block' | 'painting';
-export const ACTOR_ARCHETYPES = [
-  'grazer',
-  'night-stalker',
-  'settler',
-  'chicken',
-  'cow',
-  'pig',
-  'pig-zombie',
-  'sheep',
-  'squid',
-  'wolf',
-  'zombie',
-  'skeleton',
-  'spider',
-  'creeper',
-  'slime',
-] as const;
-export type EcsActorArchetype = (typeof ACTOR_ARCHETYPES)[number];
-export const isActorArchetype = (value: unknown): value is EcsActorArchetype =>
-  typeof value === 'string' && (ACTOR_ARCHETYPES as readonly string[]).includes(value);
 export type EcsEntityLifecycle = 'active' | 'despawned';
 export type EcsPosition = [number, number, number];
 

@@ -2,6 +2,16 @@ pub const HALO_SIZE: usize = 36;
 pub const HALO_CELLS: usize = HALO_SIZE * HALO_SIZE * HALO_SIZE;
 pub const MASK_BYTES: usize = 6_144;
 pub const RECORD_BYTES: usize = 16;
+pub const SEMANTICS_RECORD_BYTES: usize = 8;
+pub const SEMANTICS_MAX_RECORDS: usize = 4_096;
+pub const SEMANTICS_MAX_BYTES: usize = SEMANTICS_MAX_RECORDS * SEMANTICS_RECORD_BYTES;
+const SEMANTICS_DEFINED: u8 = 1;
+const SEMANTICS_RENDERABLE: u8 = 2;
+const SEMANTICS_OCCLUDES: u8 = 4;
+const SEMANTICS_MODEL: u8 = 8;
+const SEMANTICS_WATER: u8 = 16;
+const SEMANTICS_GLASS: u8 = 32;
+const SEMANTICS_ICE: u8 = 64;
 pub const MAX_DESCRIPTOR_RECORDS: usize = 3 * 33 * 32 * 32 + 32 * 32 * 32;
 pub const MAX_DESCRIPTOR_BYTES: usize = MAX_DESCRIPTOR_RECORDS * RECORD_BYTES;
 
@@ -23,54 +33,47 @@ fn sample_fluid(fluid: &[u8], x: i32, y: i32, z: i32) -> u32 {
     fluid[halo_index(x, y, z)] as u32
 }
 
-fn greedy(id: u32) -> bool {
-    id != 0 && !is_model(id)
+fn semantics_record<'a>(lookup: &'a [u8], id: u32) -> Option<&'a [u8]> {
+    let offset = id as usize * SEMANTICS_RECORD_BYTES;
+    let record = lookup.get(offset..offset + SEMANTICS_RECORD_BYTES)?;
+    (record[0] & SEMANTICS_DEFINED != 0).then_some(record)
 }
 
-fn is_model(id: u32) -> bool {
-    is_crossed_plant(id) || id == 10 || (39..=41).contains(&id) || (49..=58).contains(&id)
+fn flag(lookup: &[u8], id: u32, value: u8) -> bool {
+    semantics_record(lookup, id).is_some_and(|record| record[0] & value != 0)
 }
 
-/// Must remain in lockstep with `crossedPlantMaterialForVoxel`: these voxels are emitted as
-/// model descriptors and expanded to two double-sided cutout planes by the shared TS geometry.
-fn is_crossed_plant(id: u32) -> bool {
-    (31..=35).contains(&id) || matches!(id, 59 | 61 | 62)
+fn greedy(lookup: &[u8], id: u32) -> bool {
+    flag(lookup, id, SEMANTICS_RENDERABLE) && !flag(lookup, id, SEMANTICS_MODEL)
 }
 
-fn occludes(id: u32) -> bool {
-    !matches!(id, 0 | 8 | 18 | 27 | 29 | 31 | 32 | 33 | 34 | 35 | 46) && !is_model(id)
+fn occludes(lookup: &[u8], id: u32) -> bool {
+    flag(lookup, id, SEMANTICS_OCCLUDES)
 }
 
-fn visible(source: u32, target: u32) -> bool {
-    if !greedy(source) {
+fn visible(lookup: &[u8], source: u32, target: u32) -> bool {
+    if !greedy(lookup, source) {
         return false;
     }
-    if (source == 18 && target == 18) || (source == 46 && target == 46) {
+    if (flag(lookup, source, SEMANTICS_GLASS) && flag(lookup, target, SEMANTICS_GLASS))
+        || (flag(lookup, source, SEMANTICS_ICE) && flag(lookup, target, SEMANTICS_ICE))
+    {
         return false;
     }
-    if source == 8 {
-        target == 0 || (target != 8 && !occludes(target))
+    if flag(lookup, source, SEMANTICS_WATER) {
+        target == 0 || (target != 0 && !flag(lookup, target, SEMANTICS_WATER) && !occludes(lookup, target))
     } else {
-        target == 0 || target == 8 || !occludes(target)
+        target == 0
+            || flag(lookup, target, SEMANTICS_WATER)
+            || flag(lookup, target, SEMANTICS_ICE)
+            || !occludes(lookup, target)
     }
 }
 
-fn material(id: u32, axis: i32, positive: bool) -> u32 {
-    if id == 1 {
-        return if axis == 1 {
-            if positive {
-                1
-            } else {
-                3
-            }
-        } else {
-            2
-        };
-    }
-    if id == 4 {
-        return if axis == 1 { 7 } else { 6 };
-    }
+fn legacy_material(id: u32, axis: i32, positive: bool) -> u32 {
     match id {
+        1 => if axis == 1 { if positive { 1 } else { 3 } } else { 2 },
+        4 => if axis == 1 { 7 } else { 6 },
         2 => 3,
         3 => 4,
         5 => 8,
@@ -161,6 +164,13 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
     }
 }
 
+fn lookup_material(lookup: &[u8], id: u32, axis: i32, positive: bool) -> Option<u32> {
+    let record = semantics_record(lookup, id)?;
+    let face = axis as usize * 2 + usize::from(positive);
+    let material = record[1 + face];
+    (material != 0 && material != 255).then_some(material as u32)
+}
+
 fn water_height_code(halo: &[u16], fluid: &[u8], x: i32, y: i32, z: i32) -> u32 {
     if sample(halo, x, y + 1, z) == 8 {
         return 9;
@@ -173,7 +183,15 @@ fn water_height_code(halo: &[u16], fluid: &[u8], x: i32, y: i32, z: i32) -> u32 
     }
 }
 
-fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> u32 {
+fn packed_ao(
+    halo: &[u16],
+    lookup: &[u8],
+    bx: i32,
+    by: i32,
+    bz: i32,
+    axis: i32,
+    back: bool,
+) -> u32 {
     let normal = if back { -1 } else { 1 };
     let mut packed = 0;
     for corner in 0..4 {
@@ -224,14 +242,14 @@ fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> 
         } else {
             oz
         };
-        let occupied_u = occludes(sample(halo, ux, uy, uz));
-        let occupied_v = occludes(sample(halo, vx, vy, vz));
+        let occupied_u = occludes(lookup, sample(halo, ux, uy, uz));
+        let occupied_v = occludes(lookup, sample(halo, vx, vy, vz));
         let level = if occupied_u && occupied_v {
             3
         } else {
             u32::from(occupied_u)
                 + u32::from(occupied_v)
-                + u32::from(occludes(sample(halo, cx, cy, cz)))
+                + u32::from(occludes(lookup, sample(halo, cx, cy, cz)))
         };
         packed |= level << (corner * 2);
     }
@@ -321,6 +339,7 @@ fn coordinates(axis: i32, slice: i32, i: i32, j: i32) -> (i32, i32, i32) {
 fn descriptor_pass(
     halo: &[u16],
     fluid: &[u8],
+    lookup: &[u8],
     mask: &mut [u8],
     output: &mut [u8],
     write: bool,
@@ -346,11 +365,11 @@ fn descriptor_pass(
                         0
                     };
                     let stepped = axis != 1 && a == 8 && b == 8 && ah != bh;
-                    let forward = if stepped { ah > bh } else { visible(a, b) };
+                    let forward = if stepped { ah > bh } else { visible(lookup, a, b) };
                     let back = if stepped {
                         bh > ah
                     } else {
-                        !forward && visible(b, a)
+                        !forward && visible(lookup, b, a)
                     };
                     if !forward && !back {
                         clear_mask(mask, m);
@@ -364,7 +383,7 @@ fn descriptor_pass(
                         let ao = if id == 8 {
                             0
                         } else {
-                            packed_ao(halo, bx, by, bz, axis, back)
+                            packed_ao(halo, lookup, bx, by, bz, axis, back)
                         };
                         let high = if id == 8 {
                             if stepped {
@@ -390,7 +409,12 @@ fn descriptor_pass(
                         } else {
                             0
                         };
-                        write_mask(mask, m, material(id, axis, !back), back, ao, high, low);
+                        let Some(material) = lookup_material(lookup, id, axis, !back) else {
+                            clear_mask(mask, m);
+                            m += 1;
+                            continue;
+                        };
+                        write_mask(mask, m, material, back, ao, high, low);
                     }
                     m += 1;
                 }
@@ -458,7 +482,7 @@ fn descriptor_pass(
         for z in 0..32 {
             for x in 0..32 {
                 let voxel = sample(halo, x, y, z);
-                if is_model(voxel) {
+                if flag(lookup, voxel, SEMANTICS_MODEL) {
                     if write {
                         write_model(output, count, x, y, z, voxel);
                     }
@@ -470,36 +494,85 @@ fn descriptor_pass(
     count as usize
 }
 
+pub fn mesh_describe_with_lookup(
+    halo: &[u16],
+    fluid: &[u8],
+    lookup: &[u8],
+    mask: &mut [u8],
+    output: &mut [u8],
+) -> Result<usize, MeshError> {
+    if halo.len() != HALO_CELLS
+        || fluid.len() != HALO_CELLS
+        || lookup.is_empty()
+        || lookup.len() > SEMANTICS_MAX_BYTES
+        || lookup.len() % SEMANTICS_RECORD_BYTES != 0
+        || mask.len() < MASK_BYTES
+    {
+        return Err(MeshError::InvalidInput);
+    }
+    if halo.iter().any(|&id| semantics_record(lookup, id as u32).is_none()) {
+        return Err(MeshError::InvalidInput);
+    }
+    if output.len() >= MAX_DESCRIPTOR_BYTES {
+        return Ok(descriptor_pass(halo, fluid, lookup, mask, output, true) * RECORD_BYTES);
+    }
+    let count = descriptor_pass(halo, fluid, lookup, mask, output, false);
+    if count > output.len() / RECORD_BYTES {
+        return Err(MeshError::Capacity);
+    }
+    Ok(descriptor_pass(halo, fluid, lookup, mask, output, true) * RECORD_BYTES)
+}
+
+fn classic_lookup() -> [u8; 89 * SEMANTICS_RECORD_BYTES] {
+    let mut lookup = [0u8; 89 * SEMANTICS_RECORD_BYTES];
+    for id in 0..89u32 {
+        let offset = id as usize * SEMANTICS_RECORD_BYTES;
+        let model = (31..=35).contains(&id)
+            || matches!(id, 10 | 39..=41 | 49..=58 | 59 | 61 | 62);
+        let water = id == 8;
+        let glass = id == 18;
+        let ice = id == 46;
+        let occludes = id != 0
+            && !matches!(id, 8 | 18 | 27 | 29 | 31..=35 | 46)
+            && !model;
+        lookup[offset] = SEMANTICS_DEFINED
+            | if id != 0 { SEMANTICS_RENDERABLE } else { 0 }
+            | if occludes { SEMANTICS_OCCLUDES } else { 0 }
+            | if model { SEMANTICS_MODEL } else { 0 }
+            | if water { SEMANTICS_WATER } else { 0 }
+            | if glass { SEMANTICS_GLASS } else { 0 }
+            | if ice { SEMANTICS_ICE } else { 0 };
+        for axis in 0..3 {
+            for positive in [false, true] {
+                lookup[offset + 1 + axis * 2 + usize::from(positive)] =
+                    legacy_material(id, axis as i32, positive) as u8;
+            }
+        }
+    }
+    lookup
+}
+
 pub fn mesh_describe(
     halo: &[u16],
     fluid: &[u8],
     mask: &mut [u8],
     output: &mut [u8],
 ) -> Result<usize, MeshError> {
-    if halo.len() != HALO_CELLS || fluid.len() != HALO_CELLS || mask.len() < MASK_BYTES {
-        return Err(MeshError::InvalidInput);
-    }
-    if output.len() >= MAX_DESCRIPTOR_BYTES {
-        return Ok(descriptor_pass(halo, fluid, mask, output, true) * RECORD_BYTES);
-    }
-    let count = descriptor_pass(halo, fluid, mask, output, false);
-    if count > output.len() / RECORD_BYTES {
-        return Err(MeshError::Capacity);
-    }
-    Ok(descriptor_pass(halo, fluid, mask, output, true) * RECORD_BYTES)
+    let lookup = classic_lookup();
+    mesh_describe_with_lookup(halo, fluid, &lookup, mask, output)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::material;
+    use super::legacy_material;
 
     #[test]
     fn progression_voxels_keep_their_frozen_material_ids() {
-        assert_eq!(material(11, 0, true), 14);
-        assert_eq!(material(12, 1, false), 15);
-        assert_eq!(material(13, 2, true), 16);
-        assert_eq!(material(14, 0, false), 17);
-        assert_eq!(material(15, 1, true), 18);
-        assert_eq!(material(16, 2, false), 19);
+        assert_eq!(legacy_material(11, 0, true), 14);
+        assert_eq!(legacy_material(12, 1, false), 15);
+        assert_eq!(legacy_material(13, 2, true), 16);
+        assert_eq!(legacy_material(14, 0, false), 17);
+        assert_eq!(legacy_material(15, 1, true), 18);
+        assert_eq!(legacy_material(16, 2, false), 19);
     }
 }

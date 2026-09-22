@@ -99,6 +99,7 @@ export class BrowserAuthorityChunkClient {
       chunkRevision: cached.payload.chunkRevision,
       generatorVersion: cached.payload.generatorVersion,
       provider: cached.payload.provider,
+      ...(cached.payload.voxelSemantics ? { voxelSemantics: cached.payload.voxelSemantics } : {}),
       ...(cached.payload.preparationDiagnostics
         ? { preparationDiagnostics: cached.payload.preparationDiagnostics }
         : {}),

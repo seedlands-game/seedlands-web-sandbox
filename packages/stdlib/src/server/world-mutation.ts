@@ -24,8 +24,13 @@ export function assertMutationCoordinate(value: number): void {
     throw new RangeError(`Mutation coordinate must be an int32, received ${String(value)}.`);
 }
 
-export function assertVoxelValue(value: number): void {
-  if (!Number.isInteger(value) || value < Voxel.Air || value > MAX_VOXEL_ID)
+export function assertVoxelValue(value: number, isRegistered?: (value: number) => boolean): void {
+  if (
+    !Number.isInteger(value) ||
+    value < Voxel.Air ||
+    value > 65_535 ||
+    (isRegistered ? !isRegistered(value) : value > MAX_VOXEL_ID)
+  )
     throw new RangeError(`Mutation voxel must be a registered voxel id, received ${String(value)}.`);
 }
 
@@ -34,10 +39,11 @@ export function assertWorldMutationBatch(
     edits?: readonly VoxelEdit[];
     buffers?: readonly WorldMutationBuffer[];
   }>,
+  isRegistered?: (value: number) => boolean,
 ): void {
   const validate = (x: number, y: number, z: number, value: number) => {
     [x, y, z].forEach(assertMutationCoordinate);
-    assertVoxelValue(value);
+    assertVoxelValue(value, isRegistered);
   };
   batch.edits?.forEach(({ x, y, z, value }) => validate(x, y, z, value));
   batch.buffers?.forEach((buffer) => buffer.forEach(validate));

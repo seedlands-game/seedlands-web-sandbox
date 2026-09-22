@@ -1,7 +1,10 @@
 import { isSolid, Voxel } from './voxel';
+import type { VoxelSemanticsResolver } from './voxel-semantics';
 
 /** Classic block light levels, shared by gameplay and the WebGL light volume. */
-export function voxelEmission(voxel: number): number {
+export function voxelEmission(voxel: number, semantics?: VoxelSemanticsResolver): number {
+  const composed = semantics?.get(voxel);
+  if (composed) return composed.emission;
   switch (voxel) {
     case Voxel.Glowstone:
     case Voxel.Lava:
@@ -21,7 +24,9 @@ export function voxelEmission(voxel: number): number {
 }
 
 /** A closed full block stops propagation. Small models let light around their shape. */
-export function voxelLightCost(voxel: number): number {
+export function voxelLightCost(voxel: number, semantics?: VoxelSemanticsResolver): number {
+  const composed = semantics?.get(voxel);
+  if (composed) return composed.lightCost;
   if (voxel === Voxel.Water || voxel === Voxel.Leaves || voxel === Voxel.Ice) return 2;
   if (
     !isSolid(voxel) ||
@@ -53,6 +58,7 @@ export function buildBlockLightVolume(
   size: number,
   origin: readonly [number, number, number],
   getVoxel: (x: number, y: number, z: number) => number | undefined,
+  semantics?: VoxelSemanticsResolver,
 ): BlockLightVolume {
   if (!Number.isInteger(size) || size < 1 || size > 96) throw new RangeError('Invalid light volume size.');
   const count = size ** 3;
@@ -65,8 +71,8 @@ export function buildBlockLightVolume(
     for (let y = 0; y < size; y++)
       for (let x = 0; x < size; x++, index++) {
         const voxel = getVoxel(x + origin[0], y + origin[1], z + origin[2]);
-        costs[index] = voxel === undefined ? 16 : voxelLightCost(voxel);
-        const level = voxel === undefined ? 0 : voxelEmission(voxel);
+        costs[index] = voxel === undefined ? 16 : voxelLightCost(voxel, semantics);
+        const level = voxel === undefined ? 0 : voxelEmission(voxel, semantics);
         levels[index] = level;
         if (level) buckets[level].push(index);
       }

@@ -65,7 +65,7 @@ export type SimulationSnapshot = {
 export const MAX_RETAINED_ACTORS = 512;
 export const ACTIVE_RADIUS_SQUARED = 48 ** 2;
 export const STEP_SECONDS = 0.1;
-export const speedByArchetype: Readonly<Record<ActorArchetype, number>> = {
+export const speedByArchetype: Readonly<Partial<Record<ActorArchetype, number>>> = {
   grazer: 1.6,
   'night-stalker': 2.2,
   settler: 1.4,
@@ -82,7 +82,7 @@ export const speedByArchetype: Readonly<Record<ActorArchetype, number>> = {
   creeper: 2.3,
   slime: 2,
 };
-export const rangeByArchetype: Readonly<Record<ActorArchetype, number>> = {
+export const rangeByArchetype: Readonly<Partial<Record<ActorArchetype, number>>> = {
   grazer: 10,
   'night-stalker': 12,
   settler: 10,

@@ -2,6 +2,7 @@ import type { Collider, FluidVolume, PhysicsWorld, WorldAabb } from '../../physi
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
 import { waterSurfaceHeight } from '../../world/water-mesh-height';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 
 export type LoadedVoxel = Readonly<{
   voxel: number;
@@ -28,6 +29,7 @@ export class VoxelCollisionWorld implements PhysicsWorld {
   constructor(
     private readonly source: LoadedVoxelSource,
     private readonly requestUnknownChunk: (chunkKey: string) => void = () => undefined,
+    private readonly semantics?: VoxelSemanticsResolver,
   ) {}
 
   beginStep(): void {
@@ -63,7 +65,15 @@ export class VoxelCollisionWorld implements PhysicsWorld {
             continue;
           }
           this.revisions.set(loaded.chunkKey, loaded.revision);
-          collisionBoxesForVoxel(loaded.voxel).forEach((box, index) => {
+          const semantics = this.semantics?.get(loaded.voxel);
+          const boxes = semantics
+            ? !semantics.solid
+              ? []
+              : semantics.meshKind === 'model'
+                ? collisionBoxesForVoxel(loaded.voxel)
+                : [{ min: [0, 0, 0] as const, max: [1, 1, 1] as const }]
+            : collisionBoxesForVoxel(loaded.voxel);
+          boxes.forEach((box, index) => {
             colliders.push({
               id: `voxel:${x},${y},${z}:${index}`,
               aabb: {

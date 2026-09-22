@@ -2,7 +2,7 @@
 
 import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
 import { loadBrowserProductAssembly } from './pack-loader';
-import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api';
+import type { ProductExtensionAdmission, ProductPackAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api'; // prettier-ignore
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
@@ -12,19 +12,14 @@ import { commitFluidCandidateAndPublish } from './authority-commit-publisher';
 import { browserCorePlatform } from '../platform/core-platform';
 import { MemoryGamePersistence } from '@seedlands/stdlib/server/persistence/memory-game-persistence';
 import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
-import {
-  AuthorityWorldHarness,
-  type AuthorityWorldOwner,
-} from '@seedlands/stdlib/server/harness/authority-world-harness';
-import {
-  WorldResourceAuthorizer,
-  developmentWorldAuthorizationPolicy,
-} from '@seedlands/stdlib/server/harness/world-authorization';
+import { AuthorityWorldHarness, type AuthorityWorldOwner } from '@seedlands/stdlib/server/harness/authority-world-harness'; // prettier-ignore
+import { WorldResourceAuthorizer, developmentWorldAuthorizationPolicy } from '@seedlands/stdlib/server/harness/world-authorization'; // prettier-ignore
 import { dispatchWorldHarnessRpc } from '@seedlands/stdlib/server/harness/world-harness-jsonl';
 import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authority-worker-ingress';
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
+import { postAuthorityFatal } from './authority-worker-fatal';
 import { BrowserCharacterAuthority } from './authority-worker-character-control';
 import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
 import { AuthorityWorkerDirectLogicOwner } from './authority-worker-direct-logic-owner';
@@ -35,6 +30,7 @@ import { createBrowserAuthorityRuntime, prepareBrowserAuthorityWorldgen } from '
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
 let packArtifacts: readonly VerifiedPackArtifact[] = [];
+let approvedPlaybook: ProductPackAdmission | null = null;
 let approvedExtensions: readonly ProductExtensionAdmission[] = [];
 let developerPolicy: ReturnType<typeof developmentWorldAuthorizationPolicy> | undefined;
 let persistence: BrowserChunkPersistence | null = null;
@@ -114,7 +110,12 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   const nextRestoreSequence = worldRestoreSequence + 1;
   const nextRuntimeEpoch = `${epoch}:runtime:${nextRestoreSequence}`;
   const nextFluidEpoch = fluidEpoch + 1;
-  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  const prepared = prepareBrowserAuthorityWorldgen(
+    packArtifacts,
+    approvedPlaybook!,
+    approvedExtensions,
+    developerPolicy,
+  );
   const candidate = await createBrowserAuthorityRuntime(prepared, {
     epoch: nextRuntimeEpoch,
     seedText: snapshot.seedText,
@@ -124,7 +125,14 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
     frequencies: runtime?.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
     fluidEpoch: nextFluidEpoch,
     findInitialWorldBootstrap: (seed, generatorVersion) =>
-      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
+      bootstrap.request(
+        epoch,
+        seed,
+        generatorVersion,
+        prepared.worldgenProvider.identity,
+        prepared.starterEcology,
+        prepared.voxelSemantics,
+      ),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
@@ -159,6 +167,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   if (runtime || persistence) throw new Error('Authority Worker already owns a running session.');
   const productPacks = await loadBrowserProductAssembly(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin));
   packArtifacts = productPacks.artifacts;
+  approvedPlaybook = productPacks.approvedPlaybook;
   approvedExtensions = productPacks.approvedExtensions;
   epoch = message.epoch;
   runtimeEpoch = epoch;
@@ -166,11 +175,17 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   developerPolicy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy('browser-developer')
     : undefined;
-  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  const prepared = prepareBrowserAuthorityWorldgen(
+    packArtifacts,
+    approvedPlaybook,
+    approvedExtensions,
+    developerPolicy,
+  );
   persistence = await BrowserChunkPersistence.open(message.seedText, {
     legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
     openMode: message.openMode,
     provider: prepared.worldgenProvider.identity,
+    voxelSemantics: prepared.voxelSemantics,
   });
   runtime = await createBrowserAuthorityRuntime(prepared, {
     epoch,
@@ -181,7 +196,14 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     frequencies: message.frequencies,
     fluidEpoch,
     findInitialWorldBootstrap: (seed, generatorVersion) =>
-      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
+      bootstrap.request(
+        epoch,
+        seed,
+        generatorVersion,
+        prepared.worldgenProvider.identity,
+        prepared.starterEcology,
+        prepared.voxelSemantics,
+      ),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
@@ -482,12 +504,6 @@ scope.onmessage = (event: MessageEvent<AuthorityRequest | DirectLogicAttachReque
   const requestId = 'requestId' in event.data ? event.data.requestId : undefined;
   void handle(event.data).catch((error) => {
     if (typeof requestId === 'number') fail(requestId, error);
-    else
-      post({
-        kind: 'authority-fatal',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch: event.data.epoch,
-        error: errorText(error),
-      });
+    else postAuthorityFatal(post, event.data.epoch, error);
   });
 };

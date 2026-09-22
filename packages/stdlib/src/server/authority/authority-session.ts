@@ -82,7 +82,11 @@ export class AuthoritySession {
     );
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
     this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
-    this.collisionWorld = new VoxelCollisionWorld(options.voxelSource, options.requestUnknownChunk);
+    this.collisionWorld = new VoxelCollisionWorld(
+      options.voxelSource,
+      options.requestUnknownChunk,
+      options.voxelSemantics,
+    );
     this.refreshBodies();
     for (const id of this.bodies.keys()) this.requestBodyRecovery(id, 'initialization', 2);
     if (restoredPaused) this.options.execution.commit();

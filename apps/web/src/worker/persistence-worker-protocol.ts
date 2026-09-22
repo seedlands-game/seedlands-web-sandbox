@@ -9,6 +9,7 @@ export type PersistenceWorkerConfig = {
   seedText: string;
   generatorVersion: number;
   provider: KernelWorldgenProviderIdentity;
+  voxelStorageIds: readonly number[];
 };
 export type PersistenceInitTask = {
   kind: 'init';

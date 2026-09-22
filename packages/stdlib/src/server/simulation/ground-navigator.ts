@@ -16,7 +16,10 @@ const key = (x: number, y: number, z: number) => `${x},${y},${z}`;
 const position = (node: Pick<Node, 'x' | 'y' | 'z'>): NavigationPosition => [node.x + 0.5, node.y, node.z + 0.5];
 
 export class GroundNavigator {
-  constructor(private readonly getVoxel: (x: number, y: number, z: number) => number) {}
+  constructor(
+    private readonly getVoxel: (x: number, y: number, z: number) => number,
+    private readonly solid: (voxel: number) => boolean = isSolid,
+  ) {}
 
   plan(
     startPosition: readonly [number, number, number],
@@ -101,7 +104,9 @@ export class GroundNavigator {
 
   private walkable(x: number, y: number, z: number): boolean {
     return (
-      isSolid(this.getVoxel(x, y - 1, z)) && !isSolid(this.getVoxel(x, y, z)) && !isSolid(this.getVoxel(x, y + 1, z))
+      this.solid(this.getVoxel(x, y - 1, z)) &&
+      !this.solid(this.getVoxel(x, y, z)) &&
+      !this.solid(this.getVoxel(x, y + 1, z))
     );
   }
 

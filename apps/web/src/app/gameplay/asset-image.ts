@@ -3,6 +3,7 @@ import type { PixelTexture } from '../../client/presentation/asset-types';
 import { builtinAssets, builtinBinding, builtinItemBindings } from '../../client/presentation/asset-catalog';
 import { publicAssetUrl, setPublicAssetOverrides } from '../../client/presentation/public-asset-url';
 import type { AppearanceProject } from '../../client/presentation/appearance-project';
+import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 
 export function pixelCanvas(asset: PixelTexture): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
@@ -21,6 +22,15 @@ export function pixelCanvas(asset: PixelTexture): HTMLCanvasElement {
 }
 export const pixelImageUrl = (asset: PixelTexture) => pixelCanvas(asset).toDataURL('image/png');
 let thumbnails: Record<string, string> = {};
+let packIcons: Readonly<Record<string, string>> = {};
+export function setPackPresentationCatalog(catalog: PackPresentationCatalog) {
+  packIcons = Object.fromEntries(
+    Object.values(catalog.items).flatMap((entry) => {
+      if (!entry.icon.startsWith('builtin:')) return [[entry.id, catalog.assetUrls[entry.icon]]];
+      return [];
+    }),
+  );
+}
 export function setAppearanceImages(project: AppearanceProject) {
   thumbnails = { ...project.thumbnails };
   const overrides: Record<string, string> = {};
@@ -77,6 +87,8 @@ function builtinPixelIcon(textureId: string): string | null {
 }
 
 export function itemIconUrl(itemId: string, base: string): string {
+  if (packIcons[itemId])
+    return packIcons[itemId].startsWith('blob:') ? packIcons[itemId] : publicAssetUrl(base, packIcons[itemId]);
   const binding = builtinBinding(itemId);
   if (binding && thumbnails[binding.modelId]) return thumbnails[binding.modelId];
   const pixel = binding ? builtinPixelIcon(binding.iconId) : null;

@@ -14,6 +14,8 @@ import {
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../world/voxel';
 import { validateAuthorityCompleteMeshInput } from '../../compute/authority-complete-mesh-input';
 import { prepareProviderMeshInput, type ProviderMeshInput } from '../../world/provider-mesh-input';
+import { createMeshSemanticsLookup } from '../../world/mesh-semantics';
+import { createVoxelSemanticsRegistry, type VoxelSemanticsDefinition } from '../../world/voxel-semantics';
 
 export { prepareProviderMeshInput } from '../../world/provider-mesh-input';
 export type { ProviderMeshInput } from '../../world/provider-mesh-input';
@@ -35,6 +37,7 @@ export type MeshTaskPayload = Readonly<{
   halo: ArrayBuffer;
   fluid: ArrayBuffer;
   fluidHalo: ArrayBuffer;
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
 }>;
 
 export type GenerateMeshTaskPayload = Readonly<{
@@ -54,6 +57,7 @@ export type GenerateMeshTaskPayload = Readonly<{
   canonical?: ArrayBuffer;
   fluid?: ArrayBuffer;
   overlays: readonly { cx: number; cy: number; cz: number; voxels: ArrayBuffer; fluid?: ArrayBuffer }[];
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
 }>;
 
 export type FindSafeSpawnTaskPayload = Readonly<{
@@ -62,6 +66,7 @@ export type FindSafeSpawnTaskPayload = Readonly<{
   generatorVersion: number;
   provider: KernelWorldgenProviderIdentity;
   starterEcology: StarterEcologyConfiguration | null;
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
 }>;
 
 export type GenerateCanonicalTaskPayload = Readonly<{
@@ -214,10 +219,12 @@ export async function runWorldComputeTask(
   await checkpoint(isCancelled, yieldTurn);
   if (task.kind === 'find-safe-spawn') {
     const provider = resolveProvider(kernels.providers, task.provider, task.generatorVersion);
+    const voxelSemantics = task.voxelSemantics ? createVoxelSemanticsRegistry(task.voxelSemantics) : undefined;
     const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
     const playerBodyPosition = findSafePlayerSpawn(
       proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks, provider),
       task.generatorVersion,
+      voxelSemantics,
     );
     await checkpoint(isCancelled, yieldTurn);
     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
@@ -229,7 +236,8 @@ export async function runWorldComputeTask(
       const starter = createStarterEcology(
         task.seed,
         playerBodyPosition,
-        (x, z, _nearY) => findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel),
+        (x, z, _nearY) =>
+          findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel, voxelSemantics),
         task.starterEcology,
       );
       for (const edit of [...starter.campEdits, ...starter.naturalEdits]) readStarterVoxel(edit.x, edit.y, edit.z);
@@ -296,6 +304,7 @@ export async function runWorldComputeTask(
       generatorVersion: task.generatorVersion,
       outside: (x, y, z) =>
         sampleWorldgenVoxel(provider, { seed: task.seed, generatorVersion: task.generatorVersion, x, y, z }),
+      ...(task.voxelSemantics ? { semantics: createMeshSemanticsLookup(task.voxelSemantics) } : {}),
     });
     const workerMeshingMs = now() - meshingStartedAt;
     await checkpoint(isCancelled, yieldTurn);
@@ -382,6 +391,7 @@ export async function runWorldComputeTask(
     fluidHalo: generated.fluidHalo,
     outside,
     generatorVersion: task.generatorVersion,
+    ...(task.voxelSemantics ? { semantics: createMeshSemanticsLookup(task.voxelSemantics) } : {}),
   });
   const workerMeshingMs = now() - meshingStartedAt;
   await checkpoint(isCancelled, yieldTurn);

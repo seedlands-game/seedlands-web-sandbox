@@ -4,6 +4,7 @@ import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/autho
 import type { FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 import type {
   AuthorityAction,
@@ -172,6 +173,10 @@ export class BrowserAuthorityClient {
 
   get generatorVersion(): number {
     return this.requireReady().generatorVersion;
+  }
+
+  get voxelSemantics() {
+    return createVoxelSemanticsRegistry(this.requireReady().voxelSemantics ?? []);
   }
 
   get worldgenProvider(): NonNullable<AuthorityReady['worldgenProvider']> {

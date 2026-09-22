@@ -83,7 +83,7 @@ export class AutonomyRuntime {
       },
     };
     this.actions = new ActionRuntime(options.clone, identity, () => this.characters?.retainedActionIds() ?? []);
-    this.navigator = new GroundNavigator(options.getVoxel);
+    this.navigator = new GroundNavigator(options.getVoxel, options.isVoxelSolid);
     this.perception = new PerceptionRuntime({
       entities: options.entities,
       pois: this.pois,
@@ -92,6 +92,7 @@ export class AutonomyRuntime {
       dispositionFor: (archetype) =>
         this.actorProfiles.require(archetype).disposition ??
         (archetype === 'night-stalker' ? 'hostile' : archetype === 'settler' ? 'neutral' : 'passive'),
+      isVoxelSolid: options.isVoxelSolid,
     });
     this.combat = new CombatRuntime(
       options.combat ?? {

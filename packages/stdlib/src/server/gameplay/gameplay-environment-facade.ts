@@ -7,7 +7,6 @@ import { saplingGrowthEdits } from '../../world/vegetation';
 import { dungeonLoot } from '../../world/dungeon-generation';
 import { Voxel } from '../../world/voxel';
 import type { EcsActorArchetype } from './ecs-entity-owner';
-import { isSolid } from '../../world/voxel';
 
 type Position = [number, number, number];
 export class GameplayEnvironmentFacade {
@@ -20,6 +19,7 @@ export class GameplayEnvironmentFacade {
       position,
       this.callbacks.getWorldTime(),
       this.callbacks.getLoadedVoxel ?? this.callbacks.getVoxel,
+      this.runtime.content.voxelSemantics,
     );
   }
   attemptNaturalSpawn(candidates: readonly SpawnCandidate[], position: Position, tick: number) {
@@ -102,7 +102,11 @@ export class GameplayEnvironmentFacade {
           const feet = this.callbacks.getLoadedVoxel([x, y, z]);
           const head = this.callbacks.getLoadedVoxel([x, y + 1, z]);
           if (below === undefined || feet === undefined || head === undefined) break;
-          if (isSolid(below) && feet === Voxel.Air && head === Voxel.Air) {
+          if (
+            this.runtime.content.voxelSemantics.get(below)?.solid &&
+            this.runtime.content.voxelSemantics.get(feet)?.solid === false &&
+            this.runtime.content.voxelSemantics.get(head)?.solid === false
+          ) {
             position = [x, y, z];
             break;
           }

@@ -15,13 +15,12 @@ import {
   type WorldCommitReference,
 } from './network-reference-projection-types';
 import { canonicalReferenceInteger } from './network-reference-integer';
-import { ACTOR_ARCHETYPES } from '../gameplay/ecs-entity-owner';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
 
 export { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 export type * from './network-reference-projection-types';
 
 const MAX_COLLISION_CELL_INDEX = CHUNK_SIZE ** 3;
-const allowedArchetypes = new Set<string>(ACTOR_ARCHETYPES);
 const isPresentationEntityType = (value: string): value is GameplayEntityReference['type'] =>
   value === 'world-item' ||
   value === 'creature' ||
@@ -181,12 +180,10 @@ const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerRe
 const projectEntity = (value: AuthorityGameplayView['entities'][number]): GameplayEntityReference => {
   if (!isPresentationEntityType(value.type))
     throw new TypeError(`Entity type ${value.type} is not a presentation entity.`);
-  if (value.archetype && !allowedArchetypes.has(value.archetype))
+  if (value.archetype && !isActorArchetype(value.archetype))
     throw new TypeError(`Unsupported entity archetype ${value.archetype}.`);
-  if (value.type === 'npc' && value.archetype && value.archetype !== 'settler')
-    throw new TypeError('NPC presentation archetype must be settler.');
-  if (value.type === 'creature' && value.archetype === 'settler')
-    throw new TypeError('Creature presentation archetype cannot be settler.');
+  if (value.archetype && value.type !== 'npc' && value.type !== 'creature')
+    throw new TypeError(`${value.type} presentation entity cannot have an archetype.`);
   const combat = projectCombatReference(value.combat);
   const projected: GameplayEntityReference = {
     id: assertText(value.id, 'entity.id'),

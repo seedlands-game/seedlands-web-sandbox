@@ -27,7 +27,7 @@ function descriptorKernelReturning(length: number): KernelMemory {
     memory: new WebAssembly.Memory({ initial: 256, maximum: 256 }),
     abi_version: () => 1,
     arena_bytes: () => WASM_ARENA_BYTES,
-    mesh_describe: () => length,
+    mesh_describe_with_lookup: () => length,
   } as WebAssembly.Exports);
 }
 

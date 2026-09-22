@@ -5,8 +5,7 @@ import {
   type StoredChunkRecord,
   validateStoredFluid,
 } from '@seedlands/stdlib/world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, isSupportedGeneratorVersion, Voxel, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
-import { selectStoredWorldVersion } from '../client/persistence/stored-world-selection';
+import { isSupportedGeneratorVersion, Voxel } from '@seedlands/stdlib/world/voxel';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
@@ -32,15 +31,16 @@ import type {
   PersistenceWorldRecord as WorldRecord,
 } from './persistence-worker-protocol';
 import { describePersistenceMailboxEncoding, type PersistenceWorkerEncoding } from './persistence-worker-timing';
-import { assertWorldgenProviderIdentity, worldgenProviderIdentityKey } from '@seedlands/kernel/spatial';
+import { worldgenProviderIdentityKey, type KernelWorldgenProvider } from '@seedlands/kernel/spatial';
 import {
   openPersistenceDatabase as openDatabase,
   persistenceTransactionDone as transactionDone,
   requestPersistenceResult as requestResult,
 } from './persistence-indexeddb';
-import { createPersistenceWorldgenCache, persistenceWorldgenProviders } from './persistence-worldgen-cache';
+import { createPersistenceWorldgenCache } from './persistence-worldgen-cache';
 import { deleteStoredWorld, listStoredWorlds, worldChunkRange } from './persistence-world-directory';
-import { isCompatibleClassicWorldgenIdentity } from '@seedlands/playbook-classic/worldgen';
+import { loadBrowserPackWorldgenProvider } from './pack-worldgen-provider';
+import { preparePersistenceWorldgen } from './persistence-worldgen-initialize';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
@@ -51,7 +51,11 @@ type ActivePersistenceWorkerTask = {
   encoding?: PersistenceWorkerEncoding;
 };
 let activeTask: ActivePersistenceWorkerTask | undefined;
-const proceduralBaseCache = createPersistenceWorldgenCache(() => config, persistenceWorldgenProviders);
+let worldgenProvider: KernelWorldgenProvider | null = null;
+const proceduralBaseCache = createPersistenceWorldgenCache(
+  () => config,
+  () => worldgenProvider,
+);
 
 const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
   task.encoding = {
@@ -101,55 +105,30 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
 
 const initialize = async (task: InitTask) => {
   proceduralBaseCache.clear();
+  const loadedProvider = await loadBrowserPackWorldgenProvider();
   databasePromise = openDatabase(task.databaseName);
   const opened = await databasePromise;
   const transaction = opened.transaction('worlds', 'readwrite');
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
-  const generatorVersion = selectStoredWorldVersion(
-    records,
-    task.seedText,
-    task.provider,
-    task.openMode,
-    isCompatibleClassicWorldgenIdentity,
-  );
-  const provider = persistenceWorldgenProviders.resolve(task.provider, generatorVersion);
-  const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
-  config = {
-    databaseName: task.databaseName,
-    worldId,
-    seedText: task.seedText,
-    generatorVersion,
-    provider: provider.identity,
-  };
-  const existing = records.find((record) => record.worldId === worldId);
-  if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
-    throw new Error('这个 Seed 没有可继续的旧版世界。');
-  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
-    throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
-  if (existing) {
-    const storedProvider = (existing as Partial<WorldRecord>).provider;
-    if (!storedProvider) throw new Error('Stored world has no world-generation provider identity.');
-    try {
-      assertWorldgenProviderIdentity(provider.identity, storedProvider, generatorVersion);
-    } catch (error) {
-      if (!isCompatibleClassicWorldgenIdentity(storedProvider, generatorVersion)) throw error;
-    }
-  }
+  const prepared = preparePersistenceWorldgen(task, records, loadedProvider);
+  config = prepared.config;
+  const { provider, existing } = prepared;
   if (!existing)
     store.put({
-      worldId,
+      worldId: config.worldId,
       seedText: task.seedText,
-      generatorVersion,
+      generatorVersion: config.generatorVersion,
       provider: provider.identity,
       player: null,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
   await done;
+  worldgenProvider = provider;
   return {
-    worldId,
-    generatorVersion,
+    worldId: config.worldId,
+    generatorVersion: config.generatorVersion,
     provider: provider.identity,
     player: existing?.player ?? null,
     gameplaySnapshot: existing?.gameplaySnapshot ?? null,
@@ -181,7 +160,8 @@ const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
     proceduralVoxels,
   });
   const fluid = validateStoredFluid(record);
-  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID))
+  const allowed = new Set(config.voxelStorageIds);
+  if (!voxels.every((voxel) => voxel >= Voxel.Air && allowed.has(voxel)))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
     status: 'found' as const,

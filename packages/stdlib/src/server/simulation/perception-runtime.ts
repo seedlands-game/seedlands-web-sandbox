@@ -39,6 +39,7 @@ type Options = {
   getVoxel: (x: number, y: number, z: number) => number;
   isPlayerAlive: (id: string) => boolean;
   dispositionFor?: (archetype: ActorArchetype) => 'passive' | 'neutral' | 'hostile';
+  isVoxelSolid?: (voxel: number) => boolean;
 };
 
 const distance = (left: readonly number[], right: readonly number[]) =>
@@ -183,7 +184,7 @@ export class PerceptionRuntime {
       const x = Math.floor(from[0] + (to[0] - from[0]) * ratio);
       const y = Math.floor(from[1] + (to[1] - from[1]) * ratio);
       const z = Math.floor(from[2] + (to[2] - from[2]) * ratio);
-      if (isSolid(this.options.getVoxel(x, y, z))) return false;
+      if ((this.options.isVoxelSolid ?? isSolid)(this.options.getVoxel(x, y, z))) return false;
     }
     return true;
   }
