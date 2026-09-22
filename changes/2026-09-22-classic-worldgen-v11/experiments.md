@@ -1,6 +1,15 @@
 # v11 worldgen A/B 实验合同
 
-状态：Pre-registered，尚未读取候选 B 结果。
+状态：COMPLETE。门槛在读取候选 B 前冻结；原始 72 行 A/B 记录见 metrics.json。
+
+## 实验裁决
+
+- A/A：24 个 v10 seed 正序/逆序重复，全部指标与 chunk hash 完全一致。
+- B1+B2（v11 地形，v10 出生策略）：森林 leafCanopyR8 中位数约 0.2194 → 0.0803，下降 63.4%；森林最近树干中位距离 6 → 7.53；森林/平原 vegetationR8 分别 47.5 → 34、50 → 30.5，下降 28.4% 与 39%。dry 装饰中位数保持 3。
+- B3（同一 v11 地形，仅切换出生策略）：24/24 安全，24/24 至少一条连续六格通路；最近树干中位数不下降。A 按最终“植物可穿行、逐格一级台阶”生产口径也已达到 24/24，因此不再宣称主指标百分点改善；B3 依据安全率、确定性和次指标接受。
+- 组合 B：v10 代表 chunk hash 冻结；v11 同 seed 重复、标准 TS、staged、scalar Wasm 与 SIMD Wasm 逐字节一致；接受。
+
+样本限制：24 个 seed 的实际出生生境覆盖 forest/plains/dry/mountain，没有 wet/cold。v11 未改变 wet/cold 装饰阈值，但本实验不能量化声明这两类出生画面的分布变化。
 
 ## Seed corpus
 

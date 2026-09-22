@@ -33,13 +33,13 @@
 
 ### 阶段 2：版本化世界生成与出生体验
 
-状态：IN_PROGRESS。Breaking spec 与 A/B 实验合同已建立，尚未修改生产 worldgen。
+状态：COMPLETE。v11 实现、A/A 与分项 A/B、v10 兼容、TS/staged/Rust/Wasm 等价、生产构建和 agent-browser 实机证据均完成；实现提交为 932eb13。
 
 范围：树冠层次、森林植被密度、出生通路与初始朝向。必须新增 generator version、保留 v10 结果、用多 seed 固定 A/B 与确定性证据；不得修改旧世界。
 
 ### 阶段 3：Classic 玩法与验收债务
 
-状态：PENDING。仅在阶段 2 完成后开始。
+状态：IN_PROGRESS。阶段 2 已准出，开始冻结十六色羊毛、C0–C5、checkpoint、用户外观和完整块光的独立合同。
 
 范围：十六色羊毛世界方块、C0–C5 新合同、缺失 checkpoint fixture、用户外观旅程、超出相机附近 64³ 的完整块光范围。每项先冻结独立验收与兼容边界。
 
