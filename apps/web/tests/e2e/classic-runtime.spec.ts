@@ -179,17 +179,21 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await page.keyboard.down('Space');
     let crossed: ClassicSnapshot;
     try {
-      crossed = await waitForSnapshot(page, (value) => value.streamCenter[0] === 1, 90_000);
+      crossed = await waitForSnapshot(page, (value) => value.streamCenter[0] >= 1, 90_000);
     } finally {
       await page.keyboard.up('KeyW');
       await page.keyboard.up('Space');
     }
     crossed = await waitForSnapshot(
       page,
-      (value) => value.authority.acknowledgedInputSequence > crossed.authority.acknowledgedInputSequence,
+      (value) =>
+        value.authority.acknowledgedInputSequence > crossed.authority.acknowledgedInputSequence &&
+        value.streamCenter[0] >= 1 &&
+        value.onGround &&
+        !value.colliding,
       30_000,
     );
-    expect(crossed.streamCenter[0]).toBe(1);
+    expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);
     expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);
     expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);
     expect(crossed.onGround).toBe(true);

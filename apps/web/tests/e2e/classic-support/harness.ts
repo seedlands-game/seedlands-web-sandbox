@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from '@playwright/test';
+import { reachedRouteTarget } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
@@ -302,11 +303,11 @@ export async function walkTo(
       .poll(
         async () => {
           const current = await snapshot(page);
-          return current ? Math.hypot(current.player[0] - target[0], current.player[2] - target[1]) : Infinity;
+          return current ? reachedRouteTarget(current.player, target, key, options.tolerance ?? 0.65) : false;
         },
         { timeout: options.timeout ?? 45_000, intervals: [100] },
       )
-      .toBeLessThan(options.tolerance ?? 0.65);
+      .toBe(true);
     sequenceBeforeRelease = (await snapshot(page))?.authority.acknowledgedInputSequence ?? 0;
   } finally {
     await page.keyboard.up(key);
