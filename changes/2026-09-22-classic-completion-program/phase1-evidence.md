@@ -1,6 +1,6 @@
 # 阶段 1 证据
 
-状态：实现、生产构建与主要实机矩阵完成；首轮独立复核的 2 个 P1 / 1 个 P2 已修复，等待关闭性复核。输入提交 `27249bd80e4388e2a36f61e84424b793b0f9c80a`；实现提交 `bcc30c3db2f9665c0be44e0a5ffc14bbd2436343`，审阅修复提交 `8004ff7df97a4cf4bf6406397c123c692098e831`。
+状态：COMPLETE。实现、生产构建与主要实机矩阵完成；首轮独立复核的 2 个 P1 / 1 个 P2 已修复，关闭性复核确认 0 个残留 P0/P1/P2。输入提交 `27249bd80e4388e2a36f61e84424b793b0f9c80a`；实现提交 `bcc30c3db2f9665c0be44e0a5ffc14bbd2436343`，审阅修复提交 `8004ff7df97a4cf4bf6406397c123c692098e831`，目标读回兼容提交 `4d9da2ca27458e070d1be3db2efe03f93009ba8f`，exact-head 矩阵证据提交 `8868ea0620c1abc3a3645e587f774eb6831fa115`。
 
 ## 缩略图与结构模型
 
@@ -39,7 +39,8 @@
 
 ## 尚待阶段 1 复核
 
-- 首轮 Sol/xhigh 审阅冻结 `27249bd...bcc30c3`：0 P0、2 P1、1 P2。已为旧 terrain pack 与 AppearanceProject 增加火炬→火头兼容继承；TargetCard 改为一次方块名 + “采集中”并补 SSR 测试；exact-head 生产 identity 与浏览器读回已补齐。对应定向测试 13/13 通过，等待 reviewer 关闭性复核。
+- 首轮 Sol/xhigh 审阅冻结 `27249bd...bcc30c3`：0 P0、2 P1、1 P2。已为旧 terrain pack 与 AppearanceProject 增加火炬→火头兼容继承；TargetCard 改为一次方块名 + “采集中”并补 SSR 测试；exact-head 生产 identity 与浏览器读回已补齐。对应定向测试 13/13 通过。
+- 关闭性复核绑定 `8004ff7`、`4d9da2c`、`8868ea0`，三项均 CLOSED；最终 0 个残留 P0/P1/P2。
 
 ## 审阅修复后的 exact-head 复验
 

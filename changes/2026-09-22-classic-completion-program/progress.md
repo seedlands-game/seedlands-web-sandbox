@@ -15,7 +15,7 @@
 
 ### 阶段 1：当前视觉改动闭环
 
-状态：REVIEW_FIX_VERIFY。实现、缩略图、生产构建和 agent-browser 实机矩阵完成；首轮独立审阅 0 P0 / 2 P1 / 1 P2，均已修复并取得 exact-head 证据，等待关闭性复核。
+状态：COMPLETE。实现、缩略图、生产构建和 agent-browser 实机矩阵完成；首轮独立审阅 0 P0 / 2 P1 / 1 P2，全部修复。关闭性复核确认 0 个残留 P0/P1/P2。
 
 完成条件：
 
@@ -33,7 +33,7 @@
 
 ### 阶段 2：版本化世界生成与出生体验
 
-状态：PENDING。仅在阶段 1 完成后开始。
+状态：IN_PROGRESS。Breaking spec 与 A/B 实验合同已建立，尚未修改生产 worldgen。
 
 范围：树冠层次、森林植被密度、出生通路与初始朝向。必须新增 generator version、保留 v10 结果、用多 seed 固定 A/B 与确定性证据；不得修改旧世界。
 
