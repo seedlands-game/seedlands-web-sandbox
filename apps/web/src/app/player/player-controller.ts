@@ -18,6 +18,7 @@ import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
 import { performSecondaryInteraction } from './secondary-interaction';
+import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -31,7 +32,7 @@ export class PlayerController {
   private attempts = 0;
   private spectator = false;
   private miningHeld = false;
-  private activeMiningTarget: string | null = null;
+  private readonly mining = new PlayerMiningState();
   // prettier-ignore
   private attackCooldownSeconds = 0;
   private attackBlocking = false;
@@ -184,7 +185,10 @@ export class PlayerController {
     window.onblur = () => this.releaseInput();
     document.onvisibilitychange = this.handleVisibilityChange;
     document.onmousedown = (event) => {
-      if (this.interactionBlocked) return;
+      if (this.interactionBlocked) {
+        this.stopMining();
+        return;
+      }
       if (document.pointerLockElement !== canvas) {
         if (event.target !== canvas || event.button !== 2) return;
         void canvas.requestPointerLock();
@@ -279,7 +283,8 @@ export class PlayerController {
     this.publishAimTarget(target);
     if (this.miningHeld) {
       if (this.interactionBlocked) this.stopMining();
-      else this.continueMining(target);
+      else if (!this.mining.matchesMode(this.options.isCreativeMode)) this.stopMining();
+      else this.continueMining(target, elapsedSeconds);
     }
     const damageOffset = this.damageFeedback;
     camera.setEulerAngles(this.pitch + damageOffset.pitch, this.yaw + damageOffset.yaw, damageOffset.roll);
@@ -474,12 +479,14 @@ export class PlayerController {
 
   private startMining() {
     this.attempts += 1;
+    if (this.miningHeld) this.stopMining();
     this.miningHeld = true;
+    this.mining.start(this.options.isCreativeMode?.() ? 'creative' : 'survival');
     this.attackCooldownSeconds = 0;
-    this.continueMining(this.aimTarget);
+    this.continueMining(this.aimTarget, 0, true);
   }
 
-  private continueMining(target: VoxelTarget | null) {
+  private continueMining(target: VoxelTarget | null, elapsedSeconds: number, initial = false) {
     const position = this.options.camera.getPosition();
     const direction = this.options.camera.forward;
     if (this.attackCooldownSeconds === 0) {
@@ -501,43 +508,23 @@ export class PlayerController {
       this.cancelActiveMining();
       return;
     }
-    if (targetKey === this.activeMiningTarget) return;
+    if (!this.mining.shouldBegin(targetKey, elapsedSeconds, initial)) return;
     this.cancelActiveMining();
-    this.options.onBeginBreak(target.position);
-    this.activeMiningTarget = targetKey;
+    const request = this.options.onBeginBreak(target.position);
+    this.mining.recordBegin(targetKey, request);
   }
 
   private cancelActiveMining() {
-    if (!this.activeMiningTarget) return;
-    this.options.onCancelBreak();
-    this.activeMiningTarget = null;
+    if (this.mining.cancelActive()) this.options.onCancelBreak();
   }
 
   private stopMining() {
     this.miningHeld = false;
-    this.cancelActiveMining();
+    if (this.mining.stop()) this.options.onCancelBreak();
   }
 
   private publishAimTarget(target: VoxelTarget | null) {
-    const previous = this.publishedAimTarget;
-    const adjacentEqual =
-      previous?.adjacent === target?.adjacent ||
-      Boolean(
-        previous?.adjacent &&
-        target?.adjacent &&
-        previous.adjacent.every((value, index) => value === target.adjacent![index]),
-      );
-    const equal =
-      previous === target ||
-      Boolean(
-        previous &&
-        target &&
-        previous.voxel === target.voxel &&
-        previous.inRange === target.inRange &&
-        previous.position.every((value, index) => value === target.position[index]) &&
-        adjacentEqual,
-      );
-    if (equal) return;
+    if (sameVoxelTarget(this.publishedAimTarget, target)) return;
     this.publishedAimTarget = target;
     this.options.onAimTarget?.(target);
   }
