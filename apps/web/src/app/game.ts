@@ -448,6 +448,7 @@ export class Game {
   abortStart = () => {
     this.pendingStartAbort?.abort();
     this.pendingStartAbort = null;
+    this.uiBridge.resetWorldPresentation();
     this.disposeRuntime();
   };
 

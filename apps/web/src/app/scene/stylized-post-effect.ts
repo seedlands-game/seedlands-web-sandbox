@@ -8,8 +8,7 @@ varying vec2 vUv0;
 void main() {
     vec4 source = texture2D(uColorBuffer, vUv0);
     float luminance = dot(source.rgb, vec3(0.2126, 0.7152, 0.0722));
-    vec3 saturated = mix(vec3(luminance), source.rgb, 1.0 + uStrength * 0.22);
-    vec3 contrasted = (saturated - 0.5) * (1.0 + uStrength * 0.16) + 0.5;
+    vec3 contrasted = (source.rgb - 0.5) * (1.0 + uStrength * 0.16) + 0.5;
     vec3 warmHighlights = vec3(0.025, 0.009, -0.012) * smoothstep(0.45, 1.0, luminance);
     vec2 centered = vUv0 - vec2(0.5);
     float vignette = 1.0 - dot(centered, centered) * uStrength * 0.32;

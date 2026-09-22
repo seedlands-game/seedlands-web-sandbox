@@ -13,6 +13,7 @@ const cutoutMaterials = new Set<number>([
   FaceMaterial.RedFlower,
   FaceMaterial.RedMushroom,
   FaceMaterial.Fire,
+  FaceMaterial.Ladder,
   FaceMaterial.Rail,
   FaceMaterial.PoweredRail,
   FaceMaterial.DetectorRail,

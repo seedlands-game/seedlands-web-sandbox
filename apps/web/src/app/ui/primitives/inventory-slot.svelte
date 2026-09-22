@@ -65,31 +65,29 @@
   .item-slot {
     position: relative;
     width: 100%;
-    height: 58px;
+    height: var(--classic-slot-size);
     min-width: 0;
-    padding: 5px;
+    padding: 0;
     display: grid;
     place-items: center;
     color: #f0e5ce;
-    background: #151e20;
-    border: 1px solid #6b604a;
-    border-radius: 3px;
-    box-shadow:
-      inset 2px 2px 0 #0007,
-      inset -1px -1px 0 #c2ab7230;
+    background: var(--classic-slot-surface);
+    border: var(--classic-slot-border);
+    border-radius: 0;
+    box-shadow: inset 1px 1px 0 #626262;
     cursor: pointer;
     touch-action: none;
     user-select: none;
   }
   .item-slot:hover,
   .item-slot:focus-visible {
-    background: #354340;
-    border-color: #d6c393;
-    outline: 1px solid #d6c393;
-    outline-offset: -3px;
+    background: var(--classic-slot-hover-surface);
+    border-color: #c8c8c8;
+    outline: 0;
   }
   .item-slot.active {
-    border-color: #c3a462;
+    outline: 2px solid var(--classic-slot-selected);
+    outline-offset: -2px;
   }
   .item-slot.previewing {
     background: #264a42;
@@ -97,11 +95,10 @@
   }
   .item-slot :global(.item-icon) {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 46px;
-    height: 46px;
+    inset: var(--classic-slot-icon-inset);
+    width: auto;
+    height: auto;
+    transform: none;
     image-rendering: pixelated;
     pointer-events: none;
     -webkit-user-drag: none;
@@ -135,15 +132,5 @@
     display: block;
     height: 100%;
     background: #89c37e;
-  }
-  @media (max-width: 720px) {
-    .item-slot {
-      height: 48px;
-      padding: 3px;
-    }
-    .item-slot :global(.item-icon) {
-      width: 38px;
-      height: 38px;
-    }
   }
 </style>

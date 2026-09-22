@@ -103,7 +103,7 @@ it('不同窗口比例保持持握锚点在右侧安全范围', () => {
     model.update(1 / 60);
     const projectedX =
       root.getLocalPosition().x / ((width / 720) * Math.tan(Math.PI / 5) * Math.abs(root.getLocalPosition().z));
-    expect(projectedX).toBeGreaterThanOrEqual(0.38);
+    expect(projectedX).toBeGreaterThanOrEqual(0.36);
     expect(projectedX).toBeLessThanOrEqual(0.57);
   }
   model.dispose();

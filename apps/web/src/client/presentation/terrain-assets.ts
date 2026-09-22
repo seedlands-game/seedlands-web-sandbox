@@ -15,8 +15,8 @@ const palette = (colors: string[]): Rgb[] => [
   ...colors.map((hex) => [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)) as Rgb),
 ];
 const sources: [FaceMaterialId, string, string[]][] = [
-  [FaceMaterial.GrassTop, '草顶', ['537c3e', '639449', '789f50', '456b35']],
-  [FaceMaterial.GrassSide, '草侧', ['795239', '996848', '65432f', '639449', '789f50']],
+  [FaceMaterial.GrassTop, '草顶', ['58764f', '628258', '6d8c62', '506e49']],
+  [FaceMaterial.GrassSide, '草侧', ['735740', '805f45', '624936', '5b754b', '678357']],
   [FaceMaterial.Dirt, '泥土', ['795239', '996848', '65432f', 'b17c50']],
   [FaceMaterial.Stone, '石头', ['737c7b', '8a9290', '5d6667', 'a0a59a']],
   [FaceMaterial.Sand, '沙砾', ['c6ac73', 'deca8e', 'b49663', 'e8d9a6']],
@@ -48,11 +48,11 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.Obsidian, '黑曜石', ['171121', '292039', '0b0810', '49305c']],
   [FaceMaterial.Fire, '火焰', ['9e250b', 'e94b12', 'ff8b1a', 'ffd34e']],
   [FaceMaterial.Tnt, 'TNT', ['9c1717', 'd22b22', 'eee1c0', '292929']],
-  [FaceMaterial.Sapling, '树苗', ['255c28', '3e8140', '6eaa4c', '9b6d3b']],
-  [FaceMaterial.TallGrass, '高草', ['2d672d', '4c8d3b', '76aa51', '1f5025']],
+  [FaceMaterial.Sapling, '树苗', ['315632', '477842', '66965a', '73563a']],
+  [FaceMaterial.TallGrass, '高草', ['315b34', '467b43', '63945a', '27462a']],
   [FaceMaterial.Flower, '花', ['c32935', 'f05a65', 'f1d35c', '3e7b34']],
-  [FaceMaterial.Mushroom, '蘑菇', ['7e302a', 'b94f3f', 'e2d2ad', '594032']],
-  [FaceMaterial.SugarCane, '甘蔗', ['477d39', '71a950', 'a0cc6d', '335f31']],
+  [FaceMaterial.Mushroom, '蘑菇', ['553722', '795135', 'c9b78f', '392419']],
+  [FaceMaterial.SugarCane, '甘蔗', ['416f3c', '60934f', '8fba72', '30542e']],
   [FaceMaterial.Cactus, '仙人掌', ['286a38', '3e8a49', '6aac59', '174e2c']],
   [FaceMaterial.Spawner, '刷怪笼', ['202629', '384348', '0d1113', '5b676c', '7b2c36']],
   [FaceMaterial.DungeonChest, '地牢战利品箱', ['61401f', '93612c', '302214', 'd29a45', 'b7c3c5']],
@@ -79,7 +79,7 @@ const sources: [FaceMaterialId, string, string[]][] = [
   [FaceMaterial.DeadBush, '枯灌木', ['5b3a20', '80562d', '3b2618', 'a47942']],
   [FaceMaterial.Wool, '羊毛', ['c9c9c3', 'eeeeea', '9e9e99', 'ffffff']],
   [FaceMaterial.RedFlower, '红花', ['9e1722', 'e43d48', 'f18a45', '39722f']],
-  [FaceMaterial.RedMushroom, '红蘑菇', ['8d1515', 'd32f2f', 'f4e2c0', '553325']],
+  [FaceMaterial.RedMushroom, '红蘑菇', ['791d18', 'b94535', 'eedeb8', '4d1f1a']],
   [FaceMaterial.Bricks, '砖块', ['7e3226', 'a94c38', 'd8896b', '3e2520']],
   [FaceMaterial.Bookshelf, '书架', ['734824', 'a7783f', '3f2b1c', '315784']],
   [FaceMaterial.MossyCobblestone, '苔石', ['59615a', '788172', '344f35', '93a288']],
@@ -99,6 +99,41 @@ const plantMaterials = new Set<number>([
   FaceMaterial.Mushroom,
   FaceMaterial.SugarCane,
 ]);
+const tallGrassPixels: readonly (readonly [number, number, number])[] = [
+  [4, 5, 3],
+  [4, 6, 1],
+  [5, 7, 1],
+  [5, 8, 3],
+  [6, 9, 1],
+  [6, 10, 1],
+  [7, 11, 1],
+  [7, 12, 1],
+  [7, 13, 1],
+  [7, 14, 1],
+  [7, 15, 1],
+  [9, 3, 3],
+  [9, 4, 1],
+  [8, 5, 1],
+  [8, 6, 1],
+  [8, 7, 1],
+  [8, 8, 3],
+  [8, 9, 1],
+  [8, 10, 1],
+  [8, 11, 1],
+  [8, 12, 1],
+  [8, 13, 1],
+  [8, 14, 1],
+  [8, 15, 1],
+  [11, 7, 3],
+  [11, 8, 1],
+  [10, 9, 1],
+  [10, 10, 1],
+  [9, 11, 1],
+  [9, 12, 1],
+  [9, 13, 1],
+  [9, 14, 1],
+  [9, 15, 1],
+];
 
 /**
  * Plants are cutout cards. Keep their zero pixels as a deliberate silhouette:
@@ -106,35 +141,53 @@ const plantMaterials = new Set<number>([
  * readable 16px outline. They must not degrade into a full tile with holes.
  */
 function plantPixel(face: FaceMaterialId, x: number, y: number): number {
-  const stem = (color = 1) => ((x === 7 || x === 8) && y >= 7 ? color : 0);
+  const stem = (color = 1, start = 7) => ((x === 7 || x === 8) && y >= start ? color : 0);
   if (face === FaceMaterial.TallGrass)
-    return (x >= 6 && x <= 9 && y >= 7) || (x === 5 && y >= 10) || (x === 10 && y >= 8)
-      ? (x + y) % 5 === 0
+    return tallGrassPixels.find(([pixelX, pixelY]) => pixelX === x && pixelY === y)?.[2] ?? 0;
+  if (face === FaceMaterial.Sapling)
+    return stem(2, 9) || (y >= 4 && y <= 10 && Math.abs(x - 7.5) <= 4 - Math.abs(y - 7))
+      ? x === 5 || (x === 9 && y === 6)
         ? 3
         : 1
       : 0;
-  if (face === FaceMaterial.Sapling)
-    return stem(2) || (y >= 4 && y <= 10 && Math.abs(x - 7.5) <= 5 - Math.abs(y - 7)) ? ((x + y) % 4 === 0 ? 3 : 1) : 0;
   if (face === FaceMaterial.SugarCane)
-    return (x >= 5 && x <= 7) || (x >= 9 && x <= 11) || (x >= 7 && x <= 9 && y >= 3) ? (x % 3 === 0 ? 3 : 1) : 0;
+    return (x >= 5 && x <= 6 && y >= 5) || (x >= 8 && x <= 9 && y >= 3) || (x >= 10 && x <= 11 && y >= 7)
+      ? x === 5 || x === 8 || (x === 11 && y === 8)
+        ? 3
+        : 1
+      : 0;
   if (face === FaceMaterial.DeadBush)
     return (y >= 10 && x >= 7 && x <= 8) || (y >= 7 && y <= 12 && (x === y - 2 || x === 17 - y || x === 6 || x === 9))
-      ? (x + y) % 4 === 0
+      ? x === 6 || x === 9 || y === 7
         ? 4
         : 1
       : 0;
   const red = face === FaceMaterial.Flower || face === FaceMaterial.RedFlower;
   if (red) {
-    if (stem(4) || ((x === 5 || x === 10) && y >= 11)) return 4;
-    const petal = y >= 3 && y <= 10 && Math.abs(x - 7.5) <= (y < 7 ? 3 : 5);
-    return petal ? ((x + y) % 5 === 0 ? 3 : y >= 6 && x >= 7 && x <= 8 ? 2 : 1) : 0;
+    if (stem(4, 9) || ((x === 5 || x === 10) && y >= 11)) return 4;
+    const petal =
+      (y === 3 && x >= 6 && x <= 9) ||
+      (y === 4 && x >= 5 && x <= 10) ||
+      ((y === 5 || y === 6) && x >= 4 && x <= 11) ||
+      (y === 7 && x >= 5 && x <= 10) ||
+      (y === 8 && x >= 6 && x <= 9);
+    if (!petal) return 0;
+    if ((x === 7 || x === 8) && (y === 5 || y === 6)) return 3;
+    return (x === 5 || x === 10) && y === 4 ? 2 : 1;
   }
   const redCap = face === FaceMaterial.RedMushroom;
   if (y >= 10 && y <= 15 && x >= 7 && x <= 8) return 3;
-  const cap = y >= 3 && y <= 11 && Math.abs(x - 7.5) <= 6 - Math.max(0, 6 - y);
+  const cap =
+    (y === 5 && x >= 6 && x <= 9) ||
+    (y === 6 && x >= 5 && x <= 10) ||
+    ((y === 7 || y === 8) && x >= 4 && x <= 11) ||
+    (y === 9 && x >= 5 && x <= 10);
   if (!cap) return 0;
-  if (redCap && ((x === 6 && y === 7) || (x === 9 && y === 5) || (x === 8 && y === 9))) return 3;
-  return (x + y) % 5 === 0 ? 3 : 1;
+  if (redCap) {
+    if ((x === 6 && y === 7) || (x === 9 && y === 6) || (x === 8 && y === 8)) return 3;
+    return x === 4 || x === 11 || y === 9 ? 4 : x === 7 && y === 5 ? 2 : 1;
+  }
+  return x === 4 || x === 11 || y === 9 ? 4 : x === 7 && y === 5 ? 2 : 1;
 }
 
 function structuralBase(face: FaceMaterialId, x: number, y: number): number {
@@ -162,6 +215,59 @@ function structuralBase(face: FaceMaterialId, x: number, y: number): number {
   return grain < 3 ? 2 : grain > 10 ? 3 : 1;
 }
 
+function grassTopPixel(x: number, y: number): number {
+  if (
+    (x >= 2 && x <= 3 && y >= 2 && y <= 3) ||
+    (x >= 10 && x <= 11 && y >= 1 && y <= 2) ||
+    (x >= 6 && x <= 7 && y >= 9 && y <= 10) ||
+    (x >= 12 && x <= 13 && y >= 12 && y <= 13)
+  )
+    return 2;
+  if (
+    (x >= 8 && x <= 9 && y >= 4 && y <= 5) ||
+    (x >= 0 && x <= 1 && y >= 9 && y <= 10) ||
+    (x >= 12 && x <= 14 && y >= 7 && y <= 8)
+  )
+    return 4;
+  return (x === 4 && y === 12) || (x === 14 && y === 3) ? 3 : 1;
+}
+
+function grassSidePixel(x: number, y: number): number | undefined {
+  const turfHeight = [3, 3, 4, 4, 3, 3, 4, 3, 4, 4, 3, 3, 4, 3, 3, 4][x]!;
+  if (y >= turfHeight) return undefined;
+  if ((x >= 2 && x <= 4 && y === 1) || (x >= 8 && x <= 10 && y === 0) || (x >= 13 && x <= 15 && y === 2)) return 5;
+  return 4;
+}
+
+/**
+ * These models all reuse one face material. Their front faces cover a whole
+ * tile, while their thin sides sample only its lower-left UV range, so keep
+ * identifying marks stable there instead of relying on noise.
+ */
+function structurePixel(face: FaceMaterialId, x: number, y: number): number | undefined {
+  if (face === FaceMaterial.WoodenDoor) {
+    if (x === 0 || x === 15 || y === 0 || y === 15) return 3;
+    if (x === 1 || x === 14 || y === 1 || y === 14) return 4;
+    if (x === 7 || x === 8 || y === 7) return 3;
+    if ((x === 11 || x === 12) && (y === 8 || y === 9)) return 4;
+    return x % 4 === 0 ? 2 : 1;
+  }
+  if (face === FaceMaterial.Ladder) {
+    if (x >= 1 && x <= 3) return x === 1 ? 3 : 1;
+    if (x >= 12 && x <= 14) return x === 14 ? 3 : 1;
+    return y === 2 || y === 6 || y === 10 || y === 14 ? 2 : 0;
+  }
+  if (face === FaceMaterial.Torch) {
+    if (y >= 8) return x % 4 === 1 ? 3 : 2;
+    return x % 3 === 0 || y === 0 ? 4 : 1;
+  }
+  if (face === FaceMaterial.Fence) {
+    if (x === 0 || x === 3 || x === 7 || x === 11 || x === 15) return 3;
+    return (x + y) % 7 === 0 ? 2 : 1;
+  }
+  return undefined;
+}
+
 // First-party pixel sources are deterministic and independent of atlas layout.
 export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, colors]) => {
   const pixels = Array.from({ length: 256 }, (_, i) => {
@@ -169,7 +275,10 @@ export const builtinTerrainTextures: PixelTexture[] = sources.map(([face, name, 
       y = Math.floor(i / 16);
     const noise = (x * 73 + y * 137 + x * y * 19 + face * 29) % 37;
     let index = structuralBase(face, x, y);
-    if (face === FaceMaterial.GrassSide) index = y < 3 + ((x * 7) % 3) ? (x % 3 === 0 ? 5 : 4) : Math.min(index, 3);
+    const structure = structurePixel(face, x, y);
+    if (structure !== undefined) index = structure;
+    if (face === FaceMaterial.GrassTop) index = grassTopPixel(x, y);
+    if (face === FaceMaterial.GrassSide) index = grassSidePixel(x, y) ?? Math.min(index, 3);
     if (face === FaceMaterial.WoodSide) index = x % 5 === 0 || (x + (y % 4)) % 11 === 0 ? 3 : x % 5 === 1 ? 2 : 1;
     if (face === FaceMaterial.WoodEnd) index = Math.max(Math.abs(x - 7.5), Math.abs(y - 7.5)) % 3 < 1 ? 3 : 2;
     if (face === FaceMaterial.Planks) {
@@ -308,10 +417,11 @@ export const terrainMaterials: TerrainMaterial[] = sources.map(([faceMaterial, n
       FaceMaterial.RedFlower,
       FaceMaterial.RedMushroom,
       FaceMaterial.Fire,
+      FaceMaterial.Ladder,
       FaceMaterial.Rail,
       FaceMaterial.PoweredRail,
       FaceMaterial.DetectorRail,
-    ].includes(faceMaterial as 32 | 34 | 35 | 36 | 37 | 38 | 42 | 43 | 44 | 62 | 64 | 65)
+    ].includes(faceMaterial as 32 | 34 | 35 | 36 | 37 | 38 | 42 | 43 | 44 | 56 | 62 | 64 | 65)
       ? 'cutout'
       : faceMaterial === FaceMaterial.Water || faceMaterial === FaceMaterial.Ice
         ? 'transparent'

@@ -6,7 +6,7 @@ export const MELEE_SHOWCASE_DUMMY_IDS = Object.freeze([
   'showcase-dummy-center',
   'showcase-dummy-right',
 ] as const);
-export const MELEE_SHOWCASE_HOSTILE_ID = 'showcase-night-stalker';
+export const MELEE_SHOWCASE_HOSTILE_ID = 'showcase-zombie';
 export const MELEE_SHOWCASE_ENTITY_IDS = Object.freeze([
   ...MELEE_SHOWCASE_DUMMY_IDS,
   MELEE_SHOWCASE_HOSTILE_ID,
@@ -54,7 +54,7 @@ export function meleeShowcaseCommands(
     {
       type: 'spawn-actor',
       id: ids.hostile,
-      archetype: 'night-stalker',
+      archetype: 'zombie',
       position: [1.7, 57, -0.45],
     },
   ];

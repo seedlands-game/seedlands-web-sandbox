@@ -42,6 +42,36 @@ describe('物品静态网格定义', () => {
   });
 
   it.each([
+    [Voxel.WoodenDoor, FaceMaterial.WoodenDoor],
+    [Voxel.Ladder, FaceMaterial.Ladder],
+    [Voxel.Torch, FaceMaterial.Torch],
+    [Voxel.Fence, FaceMaterial.Fence],
+  ] as const)('结构物品 %i 复用世界模型的材质和 UV 采样范围', (voxel, material) => {
+    const data = new Uint16Array(CHUNK_SIZE ** 3);
+    data[voxelIndex(0, 0, 0)] = voxel;
+    const world = meshChunk({ seed: 1, cx: 0, cy: 0, cz: 0, data, changes: [], outside: () => Voxel.Air })[material]!;
+    const item = itemMeshDefinition(voxel).groups;
+
+    expect(item).toHaveLength(1);
+    expect(item[0].material).toBe(material);
+    expect(new Float32Array(item[0].positions)).toEqual(world.positions);
+    expect(item[0].uvs).toEqual([...world.uvs]);
+  });
+
+  it('火把两组竖面采样 y 行，顶底面仅采样窄横截面', () => {
+    const torch = itemMeshDefinition(Voxel.Torch).groups[0]!;
+    const xSideRows = torch.uvs.slice(0, 16).filter((_value, index) => index % 2 === 1);
+    const caps = torch.uvs.slice(16, 32);
+    const zSideRows = torch.uvs.slice(32, 48).filter((_value, index) => index % 2 === 1);
+
+    expect(Math.min(...xSideRows)).toBe(0);
+    expect(Math.max(...xSideRows)).toBeCloseTo(0.72);
+    expect(Math.min(...zSideRows)).toBe(0);
+    expect(Math.max(...zSideRows)).toBeCloseTo(0.72);
+    expect(Math.max(...caps)).toBeCloseTo(0.14);
+  });
+
+  it.each([
     [Voxel.Sapling, FaceMaterial.Sapling],
     [Voxel.TallGrass, FaceMaterial.TallGrass],
     [Voxel.Flower, FaceMaterial.Flower],

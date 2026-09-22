@@ -34,7 +34,6 @@
         >
           <ItemIcon itemId={item.itemId} />
           <strong>{item.name}</strong>
-          <small>{item.itemId}</small>
         </button>
       </div>
     {:else}
@@ -46,7 +45,7 @@
 <style>
   .creative-catalog {
     display: grid;
-    gap: 14px;
+    gap: 12px;
   }
   .catalog-heading {
     display: flex;
@@ -62,43 +61,54 @@
   p {
     margin: 0;
   }
-  p,
-  small {
+  p {
     color: var(--ui-color-content-muted);
   }
   .catalog-grid {
     display: grid;
-    grid-template-columns: repeat(6, minmax(90px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(var(--classic-slot-size), 1fr));
+    height: clamp(216px, 38dvh, 320px);
+    align-content: start;
+    gap: 5px;
+    overflow-y: auto;
+    padding: 2px;
+    scrollbar-gutter: stable;
   }
   .catalog-grid button {
     display: grid;
     width: 100%;
-    min-height: 86px;
+    min-height: calc(var(--classic-slot-size) + 14px);
     place-items: center;
-    gap: 4px;
-    border: 1px solid #62533d;
-    border-radius: 3px;
-    background: #121819;
+    gap: 2px;
+    border: var(--classic-slot-border);
+    border-radius: 0;
+    background: var(--classic-slot-surface);
+    box-shadow: inset 1px 1px 0 #626262;
     color: #e9dfca;
   }
   .catalog-grid button:hover {
-    border-color: #d1aa60;
-    background: #233b3b;
+    border-color: #c8c8c8;
+    background: var(--classic-slot-hover-surface);
   }
   .catalog-grid :global(.item-icon) {
-    width: 46px;
-    height: 46px;
+    width: min(34px, calc(var(--classic-slot-size) - 14px));
+    height: min(34px, calc(var(--classic-slot-size) - 14px));
     image-rendering: pixelated;
   }
-  .catalog-grid small {
+  .catalog-grid strong {
     max-width: 100%;
-    overflow-wrap: anywhere;
-    font-size: 9px;
+    overflow: hidden;
+    color: #e9dfca;
+    font-size: 10px;
+    line-height: 1.1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   @media (max-width: 720px) {
     .catalog-grid {
-      grid-template-columns: repeat(3, minmax(80px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(var(--classic-slot-size), 1fr));
+      height: clamp(192px, 36dvh, 260px);
     }
     .catalog-heading {
       align-items: stretch;
