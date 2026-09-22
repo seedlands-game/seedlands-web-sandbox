@@ -292,7 +292,13 @@ export async function clickCanvasCenter(page: Page, button: 'left' | 'right'): P
 export async function walkTo(
   page: Page,
   target: RoutePoint,
-  options: Readonly<{ key?: 'KeyW' | 'KeyS'; jump?: boolean; tolerance?: number; timeout?: number }> = {},
+  options: Readonly<{
+    key?: 'KeyW' | 'KeyS';
+    jump?: boolean;
+    tolerance?: number;
+    corridorTolerance?: number;
+    timeout?: number;
+  }> = {},
 ): Promise<ClassicSnapshot> {
   const key = options.key ?? 'KeyW';
   let sequenceBeforeRelease = 0;
@@ -303,7 +309,15 @@ export async function walkTo(
       .poll(
         async () => {
           const current = await snapshot(page);
-          return current ? reachedRouteTarget(current.player, target, key, options.tolerance ?? 0.65) : false;
+          return current
+            ? reachedRouteTarget(
+                current.player,
+                target,
+                key,
+                options.tolerance ?? 0.65,
+                options.corridorTolerance ?? 1.5,
+              )
+            : false;
         },
         { timeout: options.timeout ?? 45_000, intervals: [100] },
       )

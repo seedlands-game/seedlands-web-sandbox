@@ -5,10 +5,11 @@ export function reachedRouteTarget(
   target: readonly [number, number],
   direction: RouteDirection,
   tolerance: number,
+  corridorTolerance: number,
 ): boolean {
   const xDelta = position[0] - target[0];
   const zDelta = position[2] - target[1];
   if (Math.hypot(xDelta, zDelta) < tolerance) return true;
-  if (Math.abs(zDelta) >= tolerance) return false;
+  if (Math.abs(zDelta) >= corridorTolerance) return false;
   return direction === 'KeyW' ? xDelta >= 0 : xDelta <= 0;
 }

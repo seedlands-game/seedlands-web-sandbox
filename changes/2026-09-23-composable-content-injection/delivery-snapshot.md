@@ -23,6 +23,7 @@
 - 第二 Playbook production smoke：`SEEDLANDS_PLAYBOOK=modular-world` 的 artifact 使用同一 `sourceDigest=ad9a32c9…`，`artifactDigest=977b79af9d0623056fc4fcd06b0cc55a6e259d7d3505471b1bf7578359d631a1`；唯一 Playwright spec 的定向 smoke 1/1 PASS，包含保存、reload 与同一 storageId 读回。
 - 远端首轮 `Classic headless contracts` 因两个测试 fixture 未同步新增 presentation resource receipt 而失败；生产路径无同类问题。fixture 已修，完整 `pnpm test:classic:headless` 23 files / 62 tests PASS，等待新 head 的远端重跑。
 - exact-head `204c116f` 的 run `35796243829` 中静态、确定性、Classic headless、production build 与视觉回归通过；C0–C5 在 hosted SwiftShader 低采样率下暴露 Harness 固定方向越过精确坐标仍持续按键、以及只接受瞬时 `streamCenter === 1` 的验收缺陷。修复保留真实键盘输入，以“进入容差或沿路线越过且未横向偏离”释放按键，并把跨 Chunk 完成边界绑定到 `streamCenter >= 1`、Authority 新 ack、落地且无碰撞。纯逻辑反例 2/2 PASS；当前工作树重新生产构建后，唯一 Classic spec 为 C0–C5 与视觉 2 passed、第二 Playbook 按 Classic artifact 预期 skipped。
+- exact-head `0c774fb` 的 run `35798257813` 再次通过五个非浏览器门禁与视觉回归；C1 两次通过，C2 trace 显示真实转向留下 0.934 格横向偏移，测试把 0.65 格到点半径误作越界后的走廊宽度，持续后退至离开加载碰撞。到点半径保持 0.65，只有已沿 x 越过目标时使用 1.5 格路线走廊；超出走廊仍失败。
 
 ## 独立审阅
 
