@@ -46,5 +46,11 @@
     </div>
   </div>
 {:else if interaction.target}
-  <span class="sr-only" role="status">目标方块 {interaction.target.label}</span>
+  <span
+    id="target-card"
+    class="sr-only"
+    role="status"
+    data-target={interaction.target.id}
+    data-voxel={interaction.target.voxel}>目标方块 {interaction.target.label}</span
+  >
 {/if}

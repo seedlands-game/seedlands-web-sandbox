@@ -14,7 +14,9 @@ const interaction = (breaking: InteractionState['breaking']): InteractionState =
 describe('目标方块卡片', () => {
   it('待机只保留无障碍目标，不遮挡普通探索画面', () => {
     const { body } = render(TargetCard, { props: { interaction: interaction(null) } });
-    expect(body).not.toContain('id="target-card"');
+    expect(body).toContain('id="target-card"');
+    expect(body).toContain('class="sr-only"');
+    expect(body).toContain('data-target="1,2,3"');
     expect(body).toContain('目标方块 原木');
   });
 
