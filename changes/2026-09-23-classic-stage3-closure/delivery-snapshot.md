@@ -20,12 +20,12 @@
 - 外观回滚：恢复上一个应用版本后 revision 4，draft/applied override 均为空、previous 保留蓝色版本；重进后世界和图标恢复默认棕色。page error 与 failed response 均为空。
 - agent-browser 的 `record start` 在本版本会新建 tab，短录屏未包含游戏操作，不作为验收证据；有效证据为稳定 tab 的截图与 Harness/IndexedDB JSON readback。
 
-正式 production contract 的最终 runId 为 `ccc1380f-34aa-46d1-8988-cbd2520ba59a`：
+正式 production contract 的最终 runId 为 `3165d99f-2dc7-441b-bbde-0168af40d262`：
 
 - C0–C5 全部 PASS，视觉/连续帧/单击破坏合同 PASS，合计 2/2。
-- artifact：source SHA `d4b6c396ed52a92d9f1b8b8d743ae0ff32389432`，source digest `012ca44ffeac69a2889481e3002788367f08a6c26ae5fbd84db2a57c438a05d4`，lock digest `44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifact digest `7e8a533072abd7ec689ef69de5a5e8fd05fd0caeabfd6dad036638e955948b55`，274 files。
+- artifact：source SHA `e4751cbe606b7a956cb07b94704fa15ea7622980`，source digest `af5ea1bfdcdf7690e4b9aaa7ffbbf7289436f284ce8f38d93bb1c1753ed1e554`，lock digest `44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifact digest `ec447bc09102dbf7e07d61591fdff9a8d85566235dc1e1da0ae64eae20c40ee1`，274 files。
 - 运行使用实际 Headless Chromium WebGL2、Authority/logic/persistence/fluid/general Workers 与 SIMD Wasm；pageErrors / failedResponses 为空。
-- 首次 RED runId `16ab9dcf-6eeb-44cb-a76d-603226a9a935` 因 canonical 仍创建 retired settler 而失败；迁移合同后连续两次 production 运行通过。
+- 首次 RED runId `16ab9dcf-6eeb-44cb-a76d-603226a9a935` 因 canonical 仍创建 retired settler 而失败；迁移合同后连续运行通过。独立审阅随后发现 ready/source revision 会在部分 brick 尚未重建时提前报告新鲜；`e4751cb` 修复后由上述 exact-head run 再次通过。
 
 ## 自动验证
 
