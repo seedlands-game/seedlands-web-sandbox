@@ -7,6 +7,7 @@ describe('浏览器会话频率与受控传输配置', () => {
       readBrowserSessionConfig('?physicsHz=120&authorityLatencyMs=150&authorityDuplicate=1&authorityReorder=1'),
     ).toMatchObject({
       harnessEnabled: false,
+      generalWorkerCount: 1,
       physicsHz: 60,
       authorityTransportFaults: {
         harnessEnabled: false,
@@ -16,6 +17,11 @@ describe('浏览器会话频率与受控传输配置', () => {
         reorderInbound: false,
       },
     });
+  });
+
+  it('保留显式单通用 Worker 回退并允许双 Worker 对照', () => {
+    expect(readBrowserSessionConfig('?generalWorkers=1')).toMatchObject({ generalWorkerCount: 1 });
+    expect(readBrowserSessionConfig('?generalWorkers=2')).toMatchObject({ generalWorkerCount: 2 });
   });
 
   it.each([30, 60, 120] as const)('Harness 明确允许 %iHz 与受控传输故障', (physicsHz) => {
