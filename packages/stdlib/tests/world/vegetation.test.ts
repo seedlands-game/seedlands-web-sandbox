@@ -9,9 +9,9 @@ it('自然植被按 seed/坐标稳定且只在地表上方', () => {
   for (let x = -200; x <= 200; x++)
     for (let z = -200; z <= 200; z++) {
       const c = macroAt(seed, x, z, 7);
-      const a = vegetationAt(seed, x, c.terrainHeight + 1, z, c);
-      expect(a).toBe(vegetationAt(seed, x, c.terrainHeight + 1, z, c));
-      expect(vegetationAt(seed, x, c.terrainHeight + 2, z, c)).toBeNull();
+      const a = vegetationAt(seed, x, c.terrainHeight + 1, z, c, 10);
+      expect(a).toBe(vegetationAt(seed, x, c.terrainHeight + 1, z, c, 10));
+      expect(vegetationAt(seed, x, c.terrainHeight + 2, z, c, 10)).toBeNull();
       if (a !== null) found++;
     }
   expect(found).toBeGreaterThan(0);

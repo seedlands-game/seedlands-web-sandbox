@@ -53,9 +53,9 @@ export type ClassicScenario = Readonly<{
   }>;
 }>;
 
-const scenarioUrl = new URL('../../../../../playbooks/classic/scenarios/canonical-runtime-v1.json', import.meta.url);
+const scenarioUrl = new URL('../../../../../playbooks/classic/scenarios/canonical-runtime-v11.json', import.meta.url);
 
 export const classicScenario = JSON.parse(readFileSync(scenarioUrl, 'utf8')) as ClassicScenario;
 
-if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v1')
+if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v11')
   throw new Error('Unsupported Classic canonical scenario.');

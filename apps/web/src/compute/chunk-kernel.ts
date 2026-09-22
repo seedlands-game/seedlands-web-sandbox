@@ -13,6 +13,7 @@ const GRID = 38;
 const COLUMN_WORDS = 4;
 const biomeCodes: Record<MacroBiome, number> = { plains: 0, forest: 1, mountain: 2, dry: 3, cold: 4, wet: 5 };
 const treeThresholds = [0.987, 0.968, 0.995, 1, 1, 0.981];
+const treeThresholdsV11 = [0.987, 0.978, 0.995, 1, 1, 0.981];
 
 // 相同布局的 TS 控制组和 Wasm 共用准备工作；宏观地理仍由唯一的 TS 算法计算。
 export function prepareColumns(
@@ -34,7 +35,9 @@ export function prepareColumns(
       columns[index + 1] = kind;
       columns[index + 2] = context.hydrology.water ? (context.hydrology.waterLevel ?? -2147483648) : -2147483648;
       columns[index + 3] = Number(
-        !context.hydrology.water && context.terrainHeight >= 15 && hash2(seed ^ 0x44af, wx, wz) > treeThresholds[kind],
+        !context.hydrology.water &&
+          context.terrainHeight >= 15 &&
+          hash2(seed ^ 0x44af, wx, wz) > (version >= 11 ? treeThresholdsV11 : treeThresholds)[kind],
       );
     }
 }
@@ -93,8 +96,17 @@ export function columnVoxel(
       const th = columns[treeColumn];
       const dx = Math.abs(x + 3 - tx);
       const dz = Math.abs(z + 3 - tz);
-      if (dx === 0 && dz === 0 && wy > th && wy <= th + 4) return 4;
-      if (dx <= 2 && dz <= 2 && wy >= th + 3 && wy <= th + 6 && (dx + dz < 4 || wy >= th + 5)) return 5;
+      const trunkHeight = generatorVersion >= 11 ? 5 : 4;
+      if (dx === 0 && dz === 0 && wy > th && wy <= th + trunkHeight) return 4;
+      if (generatorVersion >= 11) {
+        const crownY = wy - th;
+        if (
+          (crownY >= 4 && crownY <= 5 && dx <= 2 && dz <= 2 && dx + dz < 4) ||
+          (crownY === 6 && dx <= 1 && dz <= 1) ||
+          (crownY === 7 && dx + dz <= 1)
+        )
+          return 5;
+      } else if (dx <= 2 && dz <= 2 && wy >= th + 3 && wy <= th + 6 && (dx + dz < 4 || wy >= th + 5)) return 5;
     }
   if (generatorVersion >= 7 && wy === height + 1 && waterLevel === -2147483648) {
     const roll = hash2(seed ^ 0x564547, worldX, worldZ);
@@ -102,7 +114,8 @@ export function columnVoxel(
     if (kind === 5) return roll > 0.94 ? 35 : 0;
     if (kind === 1 && roll > 0.985) return 34;
     if ((kind === 0 || kind === 1) && roll > 0.965) return 33;
-    if (kind !== 2 && kind !== 4 && roll > 0.82) return 32;
+    const tallGrassThreshold = generatorVersion >= 11 && (kind === 0 || kind === 1) ? 0.88 : 0.82;
+    if (kind !== 2 && kind !== 4 && roll > tallGrassThreshold) return 32;
   }
   return 0;
 }

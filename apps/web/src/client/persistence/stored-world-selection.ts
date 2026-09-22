@@ -13,6 +13,8 @@ export function selectStoredWorldVersion(
   seed: string,
   provider: KernelWorldgenProviderIdentity,
   mode: WorldOpenMode,
+  compatibleLegacyProvider: (candidate: KernelWorldgenProviderIdentity, generatorVersion: number) => boolean = () =>
+    false,
 ): number {
   const version = selectWorldGeneratorVersion(records, seed, GENERATOR_VERSION, mode);
   const selected = records.find((record) => record.seedText === seed && record.generatorVersion === version);
@@ -22,7 +24,11 @@ export function selectStoredWorldVersion(
   if (selected) {
     try {
       if (!selected.provider) throw new Error('Missing stored provider identity.');
-      assertWorldgenProviderIdentity(provider, selected.provider, version);
+      try {
+        assertWorldgenProviderIdentity(provider, selected.provider, version);
+      } catch (error) {
+        if (!compatibleLegacyProvider(selected.provider, version)) throw error;
+      }
     } catch {
       throw new Error('存档世界生成器身份不兼容，请使用原版本打开，或明确创建新版本世界。');
     }

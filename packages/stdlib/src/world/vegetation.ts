@@ -18,14 +18,22 @@ const hash2 = (seed: number, x: number, z: number) => {
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 };
 
-export function vegetationAt(seed: number, x: number, y: number, z: number, context: MacroContext): number | null {
+export function vegetationAt(
+  seed: number,
+  x: number,
+  y: number,
+  z: number,
+  context: MacroContext,
+  generatorVersion = 10,
+): number | null {
   if (y !== context.terrainHeight + 1 || context.hydrology.water) return null;
   const roll = hash2(seed ^ 0x564547, x, z);
   if (context.biome === 'dry') return roll > 0.992 ? IDs.Cactus : null;
   if (context.biome === 'wet') return roll > 0.94 ? IDs.SugarCane : null;
   if (context.biome === 'forest' && roll > 0.985) return IDs.Mushroom;
   if ((context.biome === 'plains' || context.biome === 'forest') && roll > 0.965) return IDs.Flower;
-  if (context.biome !== 'mountain' && context.biome !== 'cold' && roll > 0.82) return IDs.TallGrass;
+  const tallGrassThreshold = generatorVersion >= 11 && ['plains', 'forest'].includes(context.biome) ? 0.88 : 0.82;
+  if (context.biome !== 'mountain' && context.biome !== 'cold' && roll > tallGrassThreshold) return IDs.TallGrass;
   return null;
 }
 

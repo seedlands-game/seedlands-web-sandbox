@@ -56,7 +56,7 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('assigns stable IDs and complete materials to the expanded voxel palette', () => {
-    expect(GENERATOR_VERSION).toBe(10);
+    expect(GENERATOR_VERSION).toBe(11);
     expect(MAX_VOXEL_ID).toBe(Voxel.LitRedstoneOre);
     expect([Voxel.Farmland, Voxel.Lava, Voxel.Obsidian, Voxel.Fire, Voxel.Tnt]).toEqual([26, 27, 28, 29, 30]);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
@@ -121,7 +121,7 @@ describe('S4 voxel progression palette', () => {
   });
 
   it('keeps the staged path byte-identical for versions 2, 3, and 4', () => {
-    for (const version of [2, 3, 4, 5, 6, 7, 8, 9, 10])
+    for (const version of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
       for (const [cx, cy, cz] of [
         [0, 0, 0],
         [-2, -1, 3],

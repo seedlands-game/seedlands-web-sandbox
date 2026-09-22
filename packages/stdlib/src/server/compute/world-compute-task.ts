@@ -217,6 +217,7 @@ export async function runWorldComputeTask(
     const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
     const playerBodyPosition = findSafePlayerSpawn(
       proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks, provider),
+      task.generatorVersion,
     );
     await checkpoint(isCancelled, yieldTurn);
     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');

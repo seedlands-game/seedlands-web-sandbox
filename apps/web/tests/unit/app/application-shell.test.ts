@@ -5,6 +5,7 @@ import type { GlobalAudio } from '../../../src/app/audio/global-audio';
 import type { Game } from '../../../src/app/game';
 import type { ClientCapabilityState } from '../../../src/app/client-capability-preflight';
 import { createUiBridge } from '../../../src/app/ui/ui-bridge';
+import { GENERATOR_VERSION } from '@seedlands/stdlib/world/voxel';
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();
@@ -155,19 +156,24 @@ describe('ApplicationShell experiment and capability gates', () => {
   it('菜单列出、选择并删除世界，运行中拒绝删除', async () => {
     const game = createGame();
     game.listWorlds.mockResolvedValue([
-      { worldId: 'seedlands:g10:oak', seedText: 'oak', generatorVersion: 10, updatedAt: 2 },
+      {
+        worldId: `seedlands:g${GENERATOR_VERSION}:oak`,
+        seedText: 'oak',
+        generatorVersion: GENERATOR_VERSION,
+        updatedAt: 2,
+      },
     ]);
     const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
       preflight: async () => capability(),
     });
     await application.initialize();
     expect(application.worlds).toHaveLength(1);
-    application.selectWorld('oak', 10);
+    application.selectWorld('oak', GENERATOR_VERSION);
     expect(application.selectedWorldMode).toBe('continue');
-    await application.deleteWorld('seedlands:g10:oak');
-    expect(game.deleteWorld).toHaveBeenCalledWith('seedlands:g10:oak');
+    await application.deleteWorld(`seedlands:g${GENERATOR_VERSION}:oak`);
+    expect(game.deleteWorld).toHaveBeenCalledWith(`seedlands:g${GENERATOR_VERSION}:oak`);
     await application.start('oak', 'medium');
-    await expect(application.deleteWorld('seedlands:g10:oak')).rejects.toThrow(/主菜单/);
+    await expect(application.deleteWorld(`seedlands:g${GENERATOR_VERSION}:oak`)).rejects.toThrow(/主菜单/);
     application.dispose();
   });
 
@@ -201,6 +207,25 @@ describe('ApplicationShell experiment and capability gates', () => {
     expect(application.selectedWorldMode).toBe('continue-v8');
     await application.continueWorld();
     expect(game.start).toHaveBeenCalledWith('oak', null, 'medium', 'continue-v8');
+    application.dispose();
+  });
+
+  it('v10 世界在 v11 成为当前版本后仍以精确旧版模式选择和删除', async () => {
+    const game = createGame();
+    game.listWorlds.mockResolvedValue([
+      { worldId: 'seedlands:g10:oak', seedText: 'oak', generatorVersion: 10, updatedAt: 2 },
+    ]);
+    const application = new ApplicationShell(game, createUiBridge(), createAudio(), {
+      preflight: async () => capability(),
+    });
+    await application.initialize();
+    application.selectWorld('oak', 10);
+    expect(application.selectedWorldMode).toBe('continue-v10');
+    await application.continueWorld();
+    expect(game.start).toHaveBeenCalledWith('oak', null, 'medium', 'continue-v10');
+    application.leaveWorld();
+    await application.deleteWorld('seedlands:g10:oak');
+    expect(game.deleteWorld).toHaveBeenCalledWith('seedlands:g10:oak');
     application.dispose();
   });
 

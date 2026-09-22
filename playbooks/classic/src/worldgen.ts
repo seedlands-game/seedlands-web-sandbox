@@ -6,11 +6,34 @@ import { baseVoxel } from '@seedlands/stdlib/world/voxel';
 
 export const classicWorldgenIdentity = Object.freeze({
   id: 'seedlands:classic-worldgen',
-  implementationVersion: '10.0.0',
-  configurationIdentity: 'seedlands:classic-terrain-g2-g10',
-  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10]),
+  implementationVersion: '11.0.0',
+  configurationIdentity: 'seedlands:classic-terrain-g2-g11',
+  supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
   artifactIdentity: 'seedlands:overworld@1.0.0',
 });
+
+export function isCompatibleClassicWorldgenIdentity(
+  candidate: StandardWorldgenProvider['identity'],
+  generatorVersion: number,
+): boolean {
+  if (
+    candidate.id !== classicWorldgenIdentity.id ||
+    candidate.artifactIdentity !== classicWorldgenIdentity.artifactIdentity ||
+    !Number.isSafeInteger(generatorVersion) ||
+    generatorVersion < 2 ||
+    generatorVersion > 10
+  )
+    return false;
+  const maximumVersion = candidate.supportedGeneratorVersions.at(-1);
+  if (!Number.isSafeInteger(maximumVersion) || maximumVersion! < generatorVersion || maximumVersion! > 10) return false;
+  const expectedVersions = Array.from({ length: maximumVersion! - 1 }, (_, index) => index + 2);
+  return (
+    candidate.implementationVersion === `${maximumVersion}.0.0` &&
+    candidate.configurationIdentity === `seedlands:classic-terrain-g2-g${maximumVersion}` &&
+    candidate.supportedGeneratorVersions.length === expectedVersions.length &&
+    candidate.supportedGeneratorVersions.every((version, index) => version === expectedVersions[index])
+  );
+}
 
 type GenerateChunk = (
   seed: number,

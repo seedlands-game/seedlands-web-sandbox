@@ -4,7 +4,7 @@ import { makeChunk } from '../../src/world/chunk-generation';
 import { caveAir } from '../../src/world/cave-generation';
 import { decodeWorldSave } from '../../src/world/storage';
 
-it('V5控制字节冻结；旧版本(2-6)保存可解析，v7拒绝', () => {
+it('V5控制字节冻结；支持版本保存可解析，未来 v12 拒绝', () => {
   // V5 deep chunk stays byte-identical after adding V6 caves.
   const chunk = makeChunk(1837, -1, -2, 0, [], 5);
   const bytes = Buffer.alloc(chunk.byteLength);
@@ -13,13 +13,13 @@ it('V5控制字节冻结；旧版本(2-6)保存可解析，v7拒绝', () => {
     '23048253e362d35e6375ad051512dcaf09e6aa883cec953e1fee8916aa3a997a',
   );
 
-  for (const generatorVersion of [2, 3, 4, 5, 6, 7, 8, 9, 10])
+  for (const generatorVersion of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
     expect(
       decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion, player: [0, 2, 0], changes: [] }))
         ?.generatorVersion,
     ).toBe(generatorVersion);
   expect(
-    decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion: 11, player: [0, 2, 0], changes: [] })),
+    decodeWorldSave(JSON.stringify({ seed: 'cave', generatorVersion: 12, player: [0, 2, 0], changes: [] })),
   ).toBeNull();
 });
 

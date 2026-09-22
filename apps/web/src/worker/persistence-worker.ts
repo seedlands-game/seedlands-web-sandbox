@@ -40,6 +40,7 @@ import {
 } from './persistence-indexeddb';
 import { createPersistenceWorldgenCache, persistenceWorldgenProviders } from './persistence-worldgen-cache';
 import { deleteStoredWorld, listStoredWorlds, worldChunkRange } from './persistence-world-directory';
+import { isCompatibleClassicWorldgenIdentity } from '@seedlands/playbook-classic/worldgen';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
@@ -106,7 +107,13 @@ const initialize = async (task: InitTask) => {
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
-  const generatorVersion = selectStoredWorldVersion(records, task.seedText, task.provider, task.openMode);
+  const generatorVersion = selectStoredWorldVersion(
+    records,
+    task.seedText,
+    task.provider,
+    task.openMode,
+    isCompatibleClassicWorldgenIdentity,
+  );
   const provider = persistenceWorldgenProviders.resolve(task.provider, generatorVersion);
   const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
   config = {
@@ -124,7 +131,11 @@ const initialize = async (task: InitTask) => {
   if (existing) {
     const storedProvider = (existing as Partial<WorldRecord>).provider;
     if (!storedProvider) throw new Error('Stored world has no world-generation provider identity.');
-    assertWorldgenProviderIdentity(provider.identity, storedProvider, generatorVersion);
+    try {
+      assertWorldgenProviderIdentity(provider.identity, storedProvider, generatorVersion);
+    } catch (error) {
+      if (!isCompatibleClassicWorldgenIdentity(storedProvider, generatorVersion)) throw error;
+    }
   }
   if (!existing)
     store.put({
@@ -244,7 +255,7 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     worldId: config.worldId,
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
-    provider: config.provider,
+    provider: existing?.provider ?? config.provider,
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
@@ -428,7 +439,9 @@ const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
     worldId: config.worldId,
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
-    provider: config.provider,
+    provider:
+      ((await requestResult(metadataTransaction.objectStore('worlds').get(config.worldId))) as WorldRecord | undefined)
+        ?.provider ?? config.provider,
     player: null,
     corpusSummary: summary,
     updatedAt: Date.now(),

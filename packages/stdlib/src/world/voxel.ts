@@ -1,15 +1,16 @@
-import { macroAt, type MacroBiome, type MacroContext } from './macro-world';
+import { macroAt, type MacroBiome } from './macro-world';
 import { oreVoxel } from './ore-generation';
 import { caveAir } from './cave-generation';
 import { vegetationAt } from './vegetation';
 import { dungeonFor, dungeonVoxel } from './dungeon-generation';
 import { geologyVoxel } from './geology';
 import { remainingVoxelColors, remainingVoxelNames } from './remaining-voxel-presentation';
+import { isTreeOriginContext, treeVoxelAtOffset } from './tree-generation';
 
 export const CHUNK_SIZE = 32;
-export const GENERATOR_VERSION = 10;
+export const GENERATOR_VERSION = 11;
 export const LEGACY_GENERATOR_VERSION = 2;
-export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10]);
+export const SUPPORTED_GENERATOR_VERSIONS: readonly number[] = Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
 export const isSupportedGeneratorVersion = (value: unknown): value is number =>
   typeof value === 'number' && SUPPORTED_GENERATOR_VERSIONS.includes(value);
 export type ChunkCoord = { cx: number; cy: number; cz: number };
@@ -444,15 +445,6 @@ export const terrainHeight = (seed: number, x: number, z: number, generatorVersi
 export const biome = (seed: number, x: number, z: number, generatorVersion = GENERATOR_VERSION): MacroBiome =>
   macroAt(seed, x, z, generatorVersion).biome;
 
-function isTreeOrigin(seed: number, x: number, z: number, context: MacroContext): boolean {
-  const threshold: Partial<Record<MacroBiome, number>> = { forest: 0.968, plains: 0.987, wet: 0.981, mountain: 0.995 };
-  return (
-    !context.hydrology.water &&
-    context.terrainHeight >= 15 &&
-    hash2(seed ^ 0x44af, x, z) > (threshold[context.biome] ?? 1)
-  );
-}
-
 export function baseVoxel(
   seed: number,
   x: number,
@@ -496,15 +488,15 @@ export function baseVoxel(
   for (let tx = x - 3; tx <= x + 3; tx += 1)
     for (let tz = z - 3; tz <= z + 3; tz += 1) {
       const treeContext = queryMacro(tx, tz);
-      if (!isTreeOrigin(seed, tx, tz, treeContext)) continue;
+      if (!isTreeOriginContext(treeContext, hash2(seed ^ 0x44af, tx, tz), generatorVersion)) continue;
       const th = treeContext.terrainHeight;
-      if (x === tx && z === tz && y > th && y <= th + 4) return Voxel.Wood;
       const dx = Math.abs(x - tx),
         dz = Math.abs(z - tz);
-      if (dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)) return Voxel.Leaves;
+      const treeVoxel = treeVoxelAtOffset(dx, y, dz, th, generatorVersion);
+      if (treeVoxel !== null) return treeVoxel;
     }
   if (generatorVersion >= 7) {
-    const vegetation = vegetationAt(seed, x, y, z, context);
+    const vegetation = vegetationAt(seed, x, y, z, context, generatorVersion);
     if (vegetation !== null) return vegetation as VoxelId;
   }
   return Voxel.Air;

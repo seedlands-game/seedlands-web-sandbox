@@ -4,6 +4,15 @@ import { baseVoxel } from '@seedlands/stdlib/world/voxel';
 import { createClassicWorldgenProvider } from '../src/worldgen';
 
 describe('Classic worldgen provider column cache', () => {
+  it('声明当前 v11 与完整历史版本范围', () => {
+    const provider = createClassicWorldgenProvider();
+    expect(provider.identity).toMatchObject({
+      implementationVersion: '11.0.0',
+      configurationIdentity: 'seedlands:classic-terrain-g2-g11',
+      supportedGeneratorVersions: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    });
+    expect(provider.sampleVoxel({ seed: 2, generatorVersion: 11, x: 0, y: 64, z: 0 })).toBeTypeOf('number');
+  });
   it('同一 seed/version/x/z 的连续体素采样复用宏观上下文且保持逐值等价', () => {
     const sampledMacro = vi.fn(macroAt);
     const provider = createClassicWorldgenProvider(undefined, sampledMacro);

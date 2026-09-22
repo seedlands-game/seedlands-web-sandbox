@@ -282,10 +282,23 @@ fn column_voxel(
                 let th = i64::from(columns[(tree_column) as usize]);
                 let dx = (x + 3 - tx).abs();
                 let dz = (z + 3 - tz).abs();
-                if dx == 0 && dz == 0 && y > th && y <= th + 4 {
+                let trunk_height = if generator_version >= 11 { 5 } else { 4 };
+                if dx == 0 && dz == 0 && y > th && y <= th + trunk_height {
                     return 4;
                 }
-                if dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)
+                if generator_version >= 11 {
+                    let crown_y = y - th;
+                    if (crown_y >= 4 && crown_y <= 5 && dx <= 2 && dz <= 2 && dx + dz < 4)
+                        || (crown_y == 6 && dx <= 1 && dz <= 1)
+                        || (crown_y == 7 && dx + dz <= 1)
+                    {
+                        return 5;
+                    }
+                } else if dx <= 2
+                    && dz <= 2
+                    && y >= th + 3
+                    && y <= th + 6
+                    && (dx + dz < 4 || y >= th + 5)
                 {
                     return 5;
                 }
@@ -308,7 +321,12 @@ fn column_voxel(
         if (kind == 0 || kind == 1) && roll > 0.965 {
             return 33;
         }
-        if kind != 2 && kind != 4 && roll > 0.82 {
+        let tall_grass_threshold = if generator_version >= 11 && (kind == 0 || kind == 1) {
+            0.88
+        } else {
+            0.82
+        };
+        if kind != 2 && kind != 4 && roll > tall_grass_threshold {
             return 32;
         }
     }
