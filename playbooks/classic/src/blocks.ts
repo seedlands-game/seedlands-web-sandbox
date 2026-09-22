@@ -307,7 +307,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     (
       [
         [59, 'dead-bush', 0.05, null],
-        [60, 'white-wool', 0.8, null],
+        [60, 'wool', 0.8, null],
         [61, 'red-flower', 0.05, null],
         [62, 'red-mushroom', 0.05, null],
         [63, 'bricks', 2, 'pickaxe'],

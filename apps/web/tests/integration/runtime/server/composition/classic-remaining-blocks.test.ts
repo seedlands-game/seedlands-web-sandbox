@@ -30,9 +30,13 @@ it('十六色羊毛均可放置并按颜色规范掉落', () => {
   for (const [color, , voxel] of woolVoxelColors) {
     const itemId = `${color}-wool`;
     expect(classicContent.items.require(itemId).placesVoxel).toBe(voxel);
-    expect(classicContent.voxelGameplay.require(voxel).drop).toEqual({ itemId, count: 1 });
+    expect(classicContent.voxelGameplay.require(voxel).drop).toEqual({
+      itemId: color === 'white' ? 'wool' : itemId,
+      count: 1,
+    });
   }
   expect(classicContent.items.require('wool-block').placesVoxel).toBe(Voxel.Wool);
+  expect(classicContent.items.require('wool').placesVoxel).toBe(Voxel.Wool);
 });
 
 it('红石矿与燃烧熔炉有独立体素和明确掉落规则', () => {
