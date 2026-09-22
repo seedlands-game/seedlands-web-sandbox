@@ -22,14 +22,6 @@ export type ClassicScenario = Readonly<{
     hungerAdvanceMs: number;
     resourceVoxels: readonly Readonly<{ position: Point; voxel: number; itemId: string }>[];
     hostile: Readonly<{ id: string; position: Point }>;
-    npc: Readonly<{
-      creationRequestId: string;
-      name: string;
-      personality: string;
-      position: Point;
-      homePosition: Point;
-      food: Readonly<{ position: Point; itemId: 'berry'; count: number }>;
-    }>;
   }>;
   route: Readonly<{
     chunkCrossing: RoutePoint;
@@ -53,9 +45,9 @@ export type ClassicScenario = Readonly<{
   }>;
 }>;
 
-const scenarioUrl = new URL('../../../../../playbooks/classic/scenarios/canonical-runtime-v1.json', import.meta.url);
+const scenarioUrl = new URL('../../../../../playbooks/classic/scenarios/canonical-runtime-v2.json', import.meta.url);
 
 export const classicScenario = JSON.parse(readFileSync(scenarioUrl, 'utf8')) as ClassicScenario;
 
-if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v1')
+if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v2')
   throw new Error('Unsupported Classic canonical scenario.');
