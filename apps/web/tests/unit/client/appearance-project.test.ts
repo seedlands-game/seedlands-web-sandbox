@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { builtinAssets } from '../../../src/client/presentation/asset-catalog';
+import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
+import { terrainMaterial } from '../../../src/client/presentation/terrain-assets';
 import {
   createEmptyAppearanceProject,
   resolveAppearanceAssets,
@@ -55,6 +57,21 @@ function staticTriangleGlb(): Blob {
 }
 
 describe('外观项目', () => {
+  it('旧火炬纹理覆盖在没有显式火头覆盖时兼容继承到火头', () => {
+    const handleId = terrainMaterial(FaceMaterial.Torch)!.textureId;
+    const flameId = terrainMaterial(FaceMaterial.TorchFlame)!.textureId;
+    const handle = builtinAssets.find((asset) => asset.id === handleId)!;
+    if (handle.type !== 'pixel-texture') throw new Error('Missing torch texture fixture');
+    const override = {
+      ...structuredClone(handle),
+      source: 'user' as const,
+      revision: handle.revision + 1,
+      payload: { ...structuredClone(handle.payload), palette: [[3, 2, 1], ...handle.payload.palette.slice(1)] },
+    };
+    const resolved = resolveAppearanceAssets({ ...createEmptyAppearanceProject(), assets: [override] });
+    expect(resolved.find((asset) => asset.id === flameId)).toEqual({ ...override, id: flameId });
+  });
+
   it('接受受限的用户覆盖，并把模型材质覆盖投影为原材质标识', () => {
     const model = builtinAssets.find((asset) => asset.type === 'builtin-actor-model')!;
     const material = builtinAssets.find(

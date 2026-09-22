@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
 import { builtinTerrainTextures, terrainMaterials } from '../../../src/client/presentation/terrain-assets';
 import { compileTextureAtlas, validateTerrainTexture } from '../../../src/client/presentation/texture-pack';
+import { resolveTerrainTextures } from '../../../src/client/persistence/terrain-pack-store';
 
 describe('纹理源与编译合同', () => {
   it('覆盖全部逻辑方块面，源贴图为16像素，材质ID不依赖图集位置', () => {
@@ -43,5 +44,29 @@ describe('纹理源与编译合同', () => {
       FaceMaterial.LitRedstoneOre,
     ])
       expect(terrainMaterials.find((material) => material.faceMaterial === face)?.emissiveIntensity).toBeGreaterThan(0);
+  });
+
+  it('旧火炬地形覆盖在没有显式火头覆盖时兼容继承到火头', () => {
+    const handle = builtinTerrainTextures.find(
+      (texture) =>
+        texture.id === terrainMaterials.find((material) => material.faceMaterial === FaceMaterial.Torch)?.textureId,
+    )!;
+    const custom = {
+      ...structuredClone(handle),
+      id: 'user:legacy-torch',
+      source: 'user' as const,
+      revision: handle.revision + 1,
+      payload: { ...structuredClone(handle.payload), palette: [[1, 2, 3], ...handle.payload.palette.slice(1)] },
+    };
+    const resolved = resolveTerrainTextures({
+      schemaVersion: 1,
+      contentRevision: 1,
+      style: 'pixel16',
+      overrides: [{ faceMaterial: FaceMaterial.Torch, texture: custom }],
+    });
+    const flameId = terrainMaterials.find((material) => material.faceMaterial === FaceMaterial.TorchFlame)!.textureId;
+    const inherited = resolved.find((texture) => texture.id === flameId)!;
+    expect(inherited.source).toBe('user');
+    expect(inherited.payload).toEqual(custom.payload);
   });
 });

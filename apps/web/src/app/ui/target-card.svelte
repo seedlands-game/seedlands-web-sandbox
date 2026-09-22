@@ -36,12 +36,12 @@
     {/if}
     <div class="target-details">
       <strong>{interaction.target.label}</strong>
-      <small>{interaction.breaking.label}</small>
+      <small>采集中</small>
       <progress
         id="break-progress"
         max="1"
         value={interaction.breaking.progress}
-        aria-label={interaction.breaking.label}
+        aria-label={`正在采集 ${interaction.target.label}`}
       ></progress>
     </div>
   </div>

@@ -5,6 +5,8 @@ import { validateNativeAssets } from './asset-package';
 import { requireClassicItemDefinition } from './classic-item-registry';
 
 import { classicCreatureKinds } from './classic-creature-definitions';
+import { FaceMaterial } from '@seedlands/stdlib/world/voxel';
+import { terrainMaterial } from './terrain-assets';
 
 export const appearanceAnimationTargets = classicCreatureKinds;
 const retiredTargets = new Set(['grazer', 'night-stalker', 'settler']);
@@ -117,6 +119,18 @@ function mergeAssets(overrides: readonly Asset[]): Asset[] {
     if (original && original.type !== asset.type) throw new Error('内置资产覆盖必须保持资产类型');
     byId.set(asset.id, asset);
   }
+  const inheritLegacyTorchAsset = (kind: 'textureId' | 'id') => {
+    const handle = terrainMaterial(FaceMaterial.Torch);
+    const flame = terrainMaterial(FaceMaterial.TorchFlame);
+    if (!handle || !flame) return;
+    const handleId = kind === 'textureId' ? handle.textureId : handle.id;
+    const flameId = kind === 'textureId' ? flame.textureId : flame.id;
+    if (overrides.some((asset) => asset.id === flameId)) return;
+    const legacy = overrides.find((asset) => asset.id === handleId);
+    if (legacy) byId.set(flameId, { ...legacy, id: flameId });
+  };
+  inheritLegacyTorchAsset('textureId');
+  inheritLegacyTorchAsset('id');
   // Old texture-only overrides retain their original grip, depth and 16px density.
   // Explicit model or new detail-texture overrides always win; never rewrite the project.
   for (const legacy of legacyItemAssets) {
