@@ -14,13 +14,14 @@
 
 ## 本地证据
 
-- `pnpm verify:static:ci`：PASS。
+- `pnpm verify:static:ci`：PASS；远端首轮 `Architecture static checks`、`Deterministic module tests` 与 `Production build` 通过。
 - `pnpm test:deterministic:ci`：Kernel 28/28、stdlib 606/606 PASS。
 - 定向 Web：Pack loader/admission、presentation、第二 Playbook、compute/persistence、actor/mesh 共 45+ 项 PASS；Wasm mesh equivalence 6/6 PASS。
 - Rust：`world-kernels` 12/12 PASS；`world-kernels-wasm` crate PASS；`pnpm wasm:rust:build` fingerprint PASS。
 - 第二 Playbook production smoke：唯一 `classic-runtime.spec.ts`，production WebGL2 artifact 启动、storageId 500 可见、保存移除并重开仍为 0、无 page/network error，PASS。
 - Classic production：同一 artifact 的 C0–C5 与视觉回归 2/2 PASS；run `d26e60e3-3313-4388-9229-e947b431e2bb`，`sourceDigest=ad9a32c9c0443c86fb571293427c7d93b35043409f8fdb17675e18e35888539a`，`artifactDigest=17beb0c47357a03c42daf21d3a3c25574b690abb38a4601c2e5f54412b76d349`，279 files。
 - 第二 Playbook production smoke：`SEEDLANDS_PLAYBOOK=modular-world` 的 artifact 使用同一 `sourceDigest=ad9a32c9…`，`artifactDigest=977b79af9d0623056fc4fcd06b0cc55a6e259d7d3505471b1bf7578359d631a1`；唯一 Playwright spec 的定向 smoke 1/1 PASS，包含保存、reload 与同一 storageId 读回。
+- 远端首轮 `Classic headless contracts` 因两个测试 fixture 未同步新增 presentation resource receipt 而失败；生产路径无同类问题。fixture 已修，完整 `pnpm test:classic:headless` 23 files / 62 tests PASS，等待新 head 的远端重跑。
 
 ## 独立审阅
 

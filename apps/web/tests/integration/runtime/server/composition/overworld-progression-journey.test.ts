@@ -17,7 +17,7 @@ const createComposition = () =>
         algorithm: 'sha256',
         manifestDigest: 'a'.repeat(64),
         entryDigest: 'b'.repeat(64),
-        resources: [],
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
       },
     },
   ]);
