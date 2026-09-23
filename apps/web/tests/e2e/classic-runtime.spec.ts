@@ -104,6 +104,13 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       (!benchmarkMode || value.performance.scenarioId === telemetryRunId),
     30_000,
   );
+  const crossingFloor = [
+    [31, 59, 0],
+    [32, 59, 0],
+  ] as const;
+  const authorityFloor = await waitForAuthorityVoxels(page, crossingFloor);
+  expect(authorityFloor.every((entry) => entry.ok && entry.voxel === 3)).toBe(true);
+  await expect.poll(() => Promise.all(crossingFloor.map((position) => voxelAt(page, position)))).toEqual([3, 3]);
 
   expect(baseline.generatorVersion).toBe(classicScenario.generatorVersion);
   expect(baseline.runtime).toBe('authority-worker');

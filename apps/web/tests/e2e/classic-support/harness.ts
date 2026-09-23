@@ -3,6 +3,7 @@ import { reachedRouteTarget } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import { correctMouseToRoute, correctMouseUntilEntityAimed, mouseCorrectionToVoxel } from './target-aim';
 import { queryEntity } from './combat-entity';
+import type { HarnessResult, WorldCommitProjection } from './world-commit';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
 export type PlayerState = Readonly<{
@@ -32,15 +33,11 @@ export type ClassicSnapshot = Readonly<{
   player: Point;
   viewAngles: readonly [number, number];
   streamCenter: readonly [number, number];
-  loadedChunks: number;
-  renderedChunks: number;
-  onGround: boolean;
-  colliding: boolean;
+  loadedChunks: number; renderedChunks: number;
+  onGround: boolean; colliding: boolean;
   interactionAttempts: number;
-  mutationCount: number;
-  worldRevision: number;
-  remeshSchedulingCount: number;
-  lastCommitMeshChunkCount: number;
+  mutationCount: number; worldRevision: number;
+  remeshSchedulingCount: number; lastCommitMeshChunkCount: number;
   storageBytes: number;
   runtime: 'authority-worker';
   workers: Readonly<{ authority: number; logic: number; persistence: number; fluid: number; general: number }>;
@@ -113,11 +110,6 @@ export type ChromeTrace = Readonly<{
   }>[];
 }>;
 
-type HarnessResult<T> = Readonly<
-  | { ok: true; data: T; frontier: Readonly<Record<string, unknown>> }
-  | { ok: false; error: Readonly<{ code: string; message: string }> }
->;
-
 export type HarnessApi = {
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;
@@ -126,8 +118,8 @@ export type HarnessApi = {
   setTimePaused(paused: boolean): void;
   setTimeSpeed(speed: number): void;
   setWorldTime(hour: number): Promise<void>;
-  fillWorld(command: { from: Point; to: Point; voxel: number }): Promise<unknown>;
-  setVoxelAt(x: number, y: number, z: number, voxel: number): Promise<void>;
+  fillWorld(command: { from: Point; to: Point; voxel: number }): Promise<WorldCommitProjection | undefined>;
+  setVoxelAt(x: number, y: number, z: number, voxel: number): Promise<WorldCommitProjection | undefined>;
   getVoxelAt?(x: number, y: number, z: number): number | null;
   getChunkRevision?(cx: number, cy: number, cz: number): number | null;
   getRenderedChunkRevision?(cx: number, cy: number, cz: number): number | null;
@@ -162,7 +154,6 @@ export async function waitForSnapshot(
   predicate: (value: ClassicSnapshot) => boolean,
   timeout = 20_000,
 ): Promise<ClassicSnapshot> {
-  // Capture the exact object that satisfied the predicate; the live harness snapshot keeps changing.
   let matched: ClassicSnapshot | null = null;
   await expect
     .poll(
@@ -194,6 +185,10 @@ export async function prepareInitialState(
     };
     const harness = (window as unknown as ClassicWindow).__seedlandsHarness;
     if (!harness) throw new Error('Classic Harness is unavailable.');
+    const requireWorldEdit = (result: WorldCommitProjection | undefined, operation: string) => {
+      if (!result) throw new Error(`${operation} failed: unavailable.`);
+      if (result.reason) throw new Error(`${operation} failed: ${result.reason}.`);
+    };
     unwrap(await harness.world.clock({ kind: 'pause' }), 'pause');
     const nearby = unwrap(await harness.world.command({ type: 'query-nearby', radius: 512 }), 'query-nearby');
     const entities = (
@@ -211,10 +206,10 @@ export async function prepareInitialState(
           `remove initial ${item.itemId}`,
         );
     }
-    await harness.fillWorld(scenario.initialState.floor);
-    await harness.fillWorld(scenario.initialState.air);
+    requireWorldEdit(await harness.fillWorld(scenario.initialState.floor), 'fixture floor');
+    requireWorldEdit(await harness.fillWorld(scenario.initialState.air), 'fixture air');
     for (const resource of scenario.initialState.resourceVoxels)
-      await harness.setVoxelAt(...resource.position, resource.voxel);
+      requireWorldEdit(await harness.setVoxelAt(...resource.position, resource.voxel), `fixture ${resource.itemId}`);
     unwrap(
       await harness.world.command({ type: 'teleport', position: scenario.initialState.player }),
       'initial player position',

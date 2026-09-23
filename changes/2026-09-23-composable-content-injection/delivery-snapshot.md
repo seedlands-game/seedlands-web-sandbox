@@ -35,6 +35,9 @@
 - 后续纯文档 head `76980c8` 的 run `35806500887` 再次在 C1 暴露长按输入与主线程 snapshot 延迟的竞态，因此撤回完成核销。路线输入现改为测试进程计时的 300ms 真实 keydown/keyup 脉冲；固定时长只界定输入，不充当就绪条件，每段仍以 Authority ack、落地、位置和支持面状态验收。
 - 本地短脉冲回归曾在第五次采集得到正确 target-card 但 `interactionAttempts=0`；真实鼠标采集/攻击现在先确认 Pointer Lock，采集还要求 interactionAttempts 前进后才等待体素结果，区分输入未送达与玩法未完成。
 - hosted trace 证明失败集中在 C1 的 32 格长途移动，而 C4 已独立覆盖长途 streaming；不保留会改变低帧率正常长按语义的 Authority 输入租约。C1 固定起点改到 chunk 边界前 3.5 格，仍以真实转向、W+Space、Authority ack 和跨 Chunk 状态验收，不再把长途压力混入输入正确性阶段。
+- exact-head `1743d13` 的 failure snapshot 首轮只有 5 个资源写入（`mutationCount=5`），说明 fixture 没有区分原子 no-op 与准备失败。fixture 准备现要求每次写入返回明确 `WorldCommitResult` 且没有失败 `reason`，并在 C1 前同时验证 `[31,59,0]`、`[32,59,0]` 的 Authority 与派生体素均为 Stone。
+- 本地 fail-closed 首跑确认 air fill 可合法返回 `committed:false` 且无 `reason`（目标区原本已为空气）；fixture 因而拒绝缺失结果和 `chunk-unavailable`，但接受原子 no-op，最终状态仍由 C1 前 Authority/派生体素读回验收。
+- 修正后本地 production journey run `30bdd385-7fa6-4ddc-bdaf-c5dbb704ef71` 一次通过 C0–C5 与视觉回归（2 passed、第二 Playbook 定向 smoke 按 Classic artifact 预期 skipped）；本次 artifact `sourceDigest=6d159e6665df34933df30a6aab7e99ba1980c264001bb2f5b83c60b94a6ba6b8`、`artifactDigest=985882ab3bcede946eb0638a27a2c4b395dc64c126c1c9bfbe7f1d7292f5c781`。因执行时修复尚未提交，该记录只作为 pre-commit 验证，提交后仍重建并重跑 exact-head。
 
 ## 独立审阅
 
