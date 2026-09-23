@@ -3,7 +3,7 @@ import { reachedRouteTarget } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import { correctMouseToRoute, correctMouseUntilEntityAimed, mouseCorrectionToVoxel } from './target-aim';
 import { queryEntity } from './combat-entity';
-import type { HarnessResult, WorldCommitProjection } from './world-commit';
+import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
 export type PlayerState = Readonly<{
@@ -128,6 +128,7 @@ export type HarnessApi = {
   exportPerformanceTrace(): ChromeTrace;
   world: {
     identity(): Promise<HarnessResult<Record<string, unknown>>>;
+    prepare(command: Record<string, unknown>): Promise<HarnessResult<Record<string, unknown>>>;
     inspect(command: Record<string, unknown>): Promise<HarnessResult<Record<string, unknown>>>;
     command(command: Record<string, unknown>): Promise<HarnessResult<Record<string, unknown>>>;
     clock(command: Record<string, unknown>): Promise<HarnessResult<Record<string, unknown>>>;
@@ -178,6 +179,7 @@ export async function prepareInitialState(
   hostileId: string;
   identity: Record<string, unknown>;
 }> {
+  await prepareFixtureChunks(page, scenario);
   return page.evaluate(async (scenario) => {
     const unwrap = <T>(result: HarnessResult<T>, operation: string): T => {
       if (!result.ok) throw new Error(`${operation}: ${result.error.code}: ${result.error.message}`);
