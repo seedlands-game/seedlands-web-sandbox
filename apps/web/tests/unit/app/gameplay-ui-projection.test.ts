@@ -4,6 +4,7 @@ import { classicContent } from '../../fixtures/classic/content';
 
 const snapshot = () => ({
   recipes: classicContent.recipes.list(),
+  stationRecipes: classicContent.stations!.listRecipes(),
   revision: 7,
   player: {
     lifecycle: 'alive' as const,
@@ -18,6 +19,11 @@ const snapshot = () => ({
     ],
   },
   inventoryOpen: true,
+  cursor: {
+    stack: null,
+    craftingGrid: [{ itemId: 'wood-block', count: 1 }, null, null, null],
+  },
+  matchedCraftingRecipeIds: ['planks'],
   craftableRecipeIds: ['planks'],
   armorPoints: 14,
   oxygen: { value: 12, max: 20, visible: true },
@@ -51,6 +57,18 @@ describe('gameplay retained UI projection', () => {
       progress: { statistics: { 'blocks-mined': 3 }, achievements: ['first-block'] },
     });
     expect(projected.shell.gameplay.inventory).toHaveLength(24);
+    expect(projected.shell.gameplay.personalCrafting.slots).toHaveLength(4);
+    expect(projected.shell.gameplay.personalCrafting.slots[0]).toMatchObject({ itemId: 'wood-block', count: 1 });
+    expect(projected.shell.gameplay.personalCrafting.recipes).toContainEqual(
+      expect.objectContaining({ id: 'planks', matchesGrid: true, pattern: expect.any(Array) }),
+    );
+    expect(
+      projected.shell.gameplay.personalCrafting.recipes.find((recipe) => recipe.id === 'planks')?.pattern,
+    ).toHaveLength(4);
+    expect(projected.shell.gameplay.personalCrafting.recipes.some((recipe) => recipe.id === 'wood-pickaxe')).toBe(
+      false,
+    );
+    expect(projected.shell.gameplay.personalCrafting.recipes.some((recipe) => recipe.id === 'chest')).toBe(false);
     expect(projected.shell.gameplay.creativeCatalog).toContainEqual(
       expect.objectContaining({ itemId: 'white-wool', name: '白色羊毛' }),
     );

@@ -26,7 +26,9 @@ export function prepareCombatDamage(
   const deaths = health === 0 ? [target.id] : [];
   const removals = health === 0 && target.type !== 'player' ? [target.id] : [];
   const cursorStack = components.inventoryCursor?.stack;
-  const stacks = health === 0 ? [...components.inventory, cursorStack].flatMap((stack) => (stack ? [stack] : [])) : [];
+  const interactionItems = [cursorStack, ...(components.inventoryCursor?.craftingGrid ?? [])];
+  const stacks =
+    health === 0 ? [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [stack] : [])) : [];
   if (removals.length) {
     const drop = options.actorDeathDrop(target.id);
     if (drop) stacks.push(drop);
@@ -37,7 +39,7 @@ export function prepareCombatDamage(
           ...components,
           lifecycle: 'dead' as const,
           inventory: components.inventory.map(() => null),
-          inventoryCursor: cursorStack
+          inventoryCursor: interactionItems.some(Boolean)
             ? { ...emptyInventoryCursor(), revision: (components.inventoryCursor?.revision ?? 0) + 1 }
             : components.inventoryCursor,
           player: { ...components.player!, breakAction: null },

@@ -144,6 +144,7 @@ export type {
   ShapedStationRecipe,
   ShapelessStationRecipe,
 } from '../gameplay/modules/station-candidates';
+export { stationRecipeFitsGrid } from '../gameplay/modules/station-candidates';
 export type { FurnaceRecipe, FurnaceFuel, FurnaceSnapshotV1 } from '../gameplay/modules/furnace-candidates';
 
 export { defineStationActionsModule } from '../gameplay/modules/station-actions-module';

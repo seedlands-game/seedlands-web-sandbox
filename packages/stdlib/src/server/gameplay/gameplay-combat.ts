@@ -85,9 +85,11 @@ export function applyCombatDamage(
     context.assertCanRemoveActor(targetId, actorId);
     const drop = context.actorDeathDrop(targetId);
     const components = context.entities.actorComponentSnapshot(targetId);
-    const stacks = [...components.inventory, components.inventoryCursor?.stack].flatMap((stack) =>
-      stack ? [stack] : [],
-    );
+    const stacks = [
+      ...components.inventory,
+      components.inventoryCursor?.stack,
+      ...(components.inventoryCursor?.craftingGrid ?? []),
+    ].flatMap((stack) => (stack ? [stack] : []));
     if (drop) stacks.push(drop);
     const prepared = prepareEntityMutation(context.entities, {
       despawns: [context.entities.createReference(targetId)!],

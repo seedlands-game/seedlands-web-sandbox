@@ -66,6 +66,7 @@ const initialShell = (): ShellState => ({
   gameplay: {
     station: null,
     inventoryOpen: false,
+    personalCrafting: { slots: [], recipes: [] },
     lifecycle: 'alive',
     mode: 'survival',
     flightEnabled: false,

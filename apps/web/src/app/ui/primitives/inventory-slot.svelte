@@ -41,6 +41,7 @@
   aria-selected={active}
   {title}
   data-slot={address.kind === 'inventory' ? address.slot : undefined}
+  data-crafting-slot={address.kind === 'crafting' ? address.slot : undefined}
   data-station-slot={address.kind === 'station' ? address.slot : undefined}
   data-inventory-address={`${address.kind}:${address.slot}`}
   data-item={item.itemId ?? 'empty'}
@@ -67,6 +68,7 @@
     width: 100%;
     height: var(--classic-slot-size);
     min-width: 0;
+    overflow: hidden;
     padding: 0;
     display: grid;
     place-items: center;
@@ -96,8 +98,11 @@
   .item-slot :global(.item-icon) {
     position: absolute;
     inset: var(--classic-slot-icon-inset);
-    width: auto;
-    height: auto;
+    width: calc(100% - var(--classic-slot-icon-inset) - var(--classic-slot-icon-inset));
+    height: calc(100% - var(--classic-slot-icon-inset) - var(--classic-slot-icon-inset));
+    max-width: calc(100% - var(--classic-slot-icon-inset) - var(--classic-slot-icon-inset));
+    max-height: calc(100% - var(--classic-slot-icon-inset) - var(--classic-slot-icon-inset));
+    object-fit: contain;
     transform: none;
     image-rendering: pixelated;
     pointer-events: none;

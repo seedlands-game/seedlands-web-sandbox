@@ -18,6 +18,13 @@ describe('detached Combat damage candidate', () => {
   it('keeps player death and drops detached until apply', () => {
     const entities = setup('player');
     entities.actorStateAccess('target').inventory.add({ itemId: 'wood-block', count: 2 });
+    entities.actorStateAccess('target').replaceInventoryInteraction(1, {
+      version: 1,
+      revision: 1,
+      stack: null,
+      origin: null,
+      craftingGrid: [{ itemId: 'wood-block', count: 1 }, null, null, null],
+    });
     const before = entities.exportComponentSnapshot();
     const result = prepareCombatDamage({ entities, targetId: 'target', damage: 9, actorDeathDrop: () => null });
     expect(result.damage).toBe(3);
@@ -35,6 +42,7 @@ describe('detached Combat damage candidate', () => {
     ).toBe(true);
     expect(entities.query({ type: 'world-item' }).map((item) => item.stack)).toEqual([
       { itemId: 'wood-block', count: 2 },
+      { itemId: 'wood-block', count: 1 },
     ]);
   });
   it('prepares NPC inventory and archetype drops before despawn', () => {

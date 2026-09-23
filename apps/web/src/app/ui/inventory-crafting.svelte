@@ -3,7 +3,7 @@
   import { SvelteMap } from 'svelte/reactivity';
   import GameButton from './primitives/game-button.svelte';
   import GameOverlay from './primitives/game-overlay.svelte';
-  import PersonalRecipes from './personal-recipes.svelte';
+  import PersonalCrafting from './personal-crafting.svelte';
   import ItemIcon from './primitives/item-icon.svelte';
   import InventorySlot from './primitives/inventory-slot.svelte';
   import StationPanel from './station-panel.svelte';
@@ -37,7 +37,11 @@
     },
   );
   const itemAt = (slot: InventoryUiSlot) =>
-    slot.kind === 'inventory' ? gameplay.inventory[slot.slot] : gameplay.station?.slots[slot.slot];
+    slot.kind === 'inventory'
+      ? gameplay.inventory[slot.slot]
+      : slot.kind === 'crafting'
+        ? gameplay.personalCrafting.slots[slot.slot]
+        : gameplay.station?.slots[slot.slot];
   function accepts(slot: InventoryUiSlot): boolean {
     if (!cursor) return false;
     const limit = cursor.stackLimit ?? 1;
@@ -89,7 +93,7 @@
   });
   function parseSlot(value: string | undefined): InventoryUiSlot | null {
     const [kind, index] = (value ?? '').split(':');
-    return (kind === 'inventory' || kind === 'station') && /^\d+$/.test(index ?? '')
+    return (kind === 'inventory' || kind === 'crafting' || kind === 'station') && /^\d+$/.test(index ?? '')
       ? { kind, slot: Number(index) }
       : null;
   }
@@ -223,7 +227,7 @@
     {#if gameplay.mode === 'creative' && !gameplay.station}
       <CreativeCatalog {gameplay} {actions} />
     {:else}
-      <div class="survival-layout" class:with-recipes={!gameplay.station}>
+      <div class="survival-layout">
         <main class="inventory-main">
           {#if gameplay.station}
             <StationPanel
@@ -235,10 +239,18 @@
               onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
               oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
             />
-          {:else}<div class="bag-intro">
-              <h3>随身物品</h3>
-              <span>整理材料，准备下一次探索</span>
-            </div>{/if}
+          {:else}
+            <PersonalCrafting
+              slots={gameplay.personalCrafting.slots}
+              recipes={gameplay.personalCrafting.recipes}
+              {cursor}
+              {previews}
+              onpress={press}
+              onenter={enter}
+              onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+              oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+            />
+          {/if}
           <div role="grid" aria-label="背包槽位" class="bag-slots">
             <h3>背包</h3>
             <div class="slot-grid">
@@ -290,9 +302,6 @@
               >{/if}
           </div>
         </main>
-        {#if !gameplay.station}
-          <PersonalRecipes recipes={gameplay.recipes} holding={Boolean(cursor)} oncraft={actions.craftRecipe} />
-        {/if}
       </div>
       <footer class="inventory-help">
         <span><b>左键</b> 整组拿放 / 拖拽均分</span><span><b>右键</b> 拆半 / 拖拽单放</span><span
@@ -355,22 +364,8 @@
     display: grid;
     gap: 22px;
   }
-  .survival-layout.with-recipes {
-    grid-template-columns: minmax(0, 1fr) 200px;
-  }
   .inventory-main {
     min-width: 0;
-  }
-  .bag-intro {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #79633f60;
-    padding-bottom: 12px;
-  }
-  .bag-intro span {
-    font-size: 10px;
-    color: #a49f8e;
   }
   h3 {
     margin: 0;
@@ -450,10 +445,5 @@
     color: #fff0ca;
     font: 700 14px monospace;
     text-shadow: 1px 2px 0 #000;
-  }
-  @media (max-width: 720px) {
-    .survival-layout.with-recipes {
-      grid-template-columns: 1fr;
-    }
   }
 </style>

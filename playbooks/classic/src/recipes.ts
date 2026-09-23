@@ -115,6 +115,26 @@ const armorRecipes: readonly Recipe[] = armorTiers.flatMap(([tier, material, dur
 );
 
 export const overworldRecipes: readonly Recipe[] = [
+  {
+    id: 'wood-pickaxe',
+    inputs: [
+      { itemId: 'plank', count: 3 },
+      { itemId: 'stick', count: 2 },
+    ],
+    outputs: [{ itemId: 'wood-pickaxe', count: 1, instance: { durability: 60 } }],
+  },
+  ...toolTiers
+    .filter(([tier]) => tier !== 'stone')
+    .map(([tier, material]) => ({
+      id: `${tier}-pickaxe`,
+      inputs: [
+        { itemId: material, count: 3 },
+        { itemId: 'stick', count: 2 },
+      ],
+      outputs: [{ itemId: `${tier}-pickaxe`, count: 1, instance: { durability: toolDurability[tier] } }],
+    })),
+  { id: 'chest', inputs: [{ itemId: 'plank', count: 8 }], outputs: [{ itemId: 'chest', count: 1 }] },
+  { id: 'furnace', inputs: [{ itemId: 'cobblestone', count: 8 }], outputs: [{ itemId: 'furnace', count: 1 }] },
   ...resourceBlocks,
   ...meleeTools,
   ...shovelTools,

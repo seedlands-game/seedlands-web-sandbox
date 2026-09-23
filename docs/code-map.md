@@ -244,7 +244,7 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 
 
 ## Classic 初版续作（2026-09-21）
 
-- apps/web/src/app/ui/personal-recipes.svelte 拥有背包快捷配方的筛选、展示与意图回传；库存游标与格子手势仍由 inventory-crafting.svelte 持有。
+- apps/web/src/app/ui/personal-crafting.svelte 展示 Authority 投影的随身 2×2 网格、结果和共享配方手册；inventory-crafting.svelte 持有库存、随身合成格与工位共用的游标手势。Classic 的 2×2/3×3 均消费 stations.ts 中的同一网格配方目录。
 - packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
 - scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
 - 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。

@@ -92,10 +92,6 @@ export class BrowserInventoryPointer {
     return next;
   }
 
-  craft(recipeId: string): Promise<boolean> {
-    return this.legacy({ type: 'craft', recipeId }, '合成完成', '合成失败：材料不足或背包空间不足');
-  }
-
   async useItem(slot: number): Promise<boolean> {
     return this.legacy({ type: 'use-inventory', slot }, '食用 · 恢复饥饿', '你现在不饿，或这个物品暂时无法使用');
   }

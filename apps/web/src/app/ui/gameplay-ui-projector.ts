@@ -1,6 +1,6 @@
 import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
 import type { AuthorityStationView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
-import type { StationRecipe } from '@seedlands/stdlib/mod-api';
+import { stationRecipeFitsGrid, type StationRecipe } from '@seedlands/stdlib/mod-api';
 import { projectCombatUi, type CombatUiProjection } from './combat-ui-projector';
 import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
@@ -26,7 +26,11 @@ export type GameplayUiSource = Readonly<{
   stationRecipes?: readonly StationRecipe[];
   revision: number;
   inventoryIdentity?: string;
-  cursor?: Readonly<{ stack: GameplayUiSource['player']['inventory'][number] }>;
+  cursor?: Readonly<{
+    stack: GameplayUiSource['player']['inventory'][number];
+    craftingGrid: readonly GameplayUiSource['player']['inventory'][number][];
+  }>;
+  matchedCraftingRecipeIds?: readonly string[];
   items?: readonly ItemDefinition[];
   recipes?: readonly Recipe[];
   player: Readonly<{
@@ -80,6 +84,10 @@ export type GameplayUiProjection = Readonly<{
       station: StationUiPresentation | null;
       inventoryOpen: boolean;
       cursor: GameplayItemPresentation | null;
+      personalCrafting: Readonly<{
+        slots: readonly GameplayItemPresentation[];
+        recipes: StationUiPresentation['recipes'];
+      }>;
       inventoryIdentity: string;
       lifecycle: 'alive' | 'dead';
       mode: ActorMode;
@@ -138,6 +146,24 @@ const projectInventory = (
       : { slot, itemId: null, count: 0, name: '空槽位', edible: false };
   });
 
+const personalRecipePattern = (
+  recipe: StationRecipe,
+): readonly (Readonly<{
+  itemId: string;
+  count: number;
+  instance?: Readonly<{ durability: number }>;
+}> | null)[] => {
+  if (recipe.kind === 'shapeless') return [...recipe.inputs, ...Array(4 - recipe.inputs.length).fill(null)];
+  const occupied = recipe.pattern.flatMap((stack, index) =>
+    stack ? [{ stack, x: index % 3, y: Math.floor(index / 3) }] : [],
+  );
+  const left = Math.min(...occupied.map(({ x }) => x));
+  const top = Math.min(...occupied.map(({ y }) => y));
+  const result = Array.from({ length: 4 }, () => null) as Array<(typeof occupied)[number]['stack'] | null>;
+  for (const { stack, x, y } of occupied) result[(y - top) * 2 + x - left] = stack;
+  return result;
+};
+
 export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayUiProjection): GameplayUiProjection {
   const items = itemResolver(source.items);
   const recipes = source.recipes ?? [];
@@ -162,6 +188,18 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
   const selectedHotbarSlot =
     mode === 'creative' ? (source.player.creativeCatalog?.selectedSlot ?? 0) : source.player.selectedHotbarSlot;
   const hotbar = mode === 'creative' ? creativeHotbar : inventory.slice(0, hotbarSize);
+  const personalRecipeSources = (source.stationRecipes ?? []).filter((recipe) => stationRecipeFitsGrid(recipe, 2));
+  const personalRecipes: StationUiPresentation['recipes'] = personalRecipeSources.map((recipe) => ({
+    id: recipe.id,
+    output: projectInventory(recipe.outputs, recipe.outputs.length, items.require)[0] ?? null,
+    name: recipe.outputs.map((item) => `${items.require(item.itemId).name} × ${item.count}`).join(' + '),
+    pattern: projectInventory(personalRecipePattern(recipe), 4, items.require),
+    requirements:
+      recipe.kind === 'shapeless'
+        ? recipe.inputs.map((item) => `${items.require(item.itemId).name} × ${item.count}`).join(' + ')
+        : '按图放入合成区',
+    matchesGrid: source.matchedCraftingRecipeIds?.includes(recipe.id) ?? false,
+  }));
   const hud = reuse(
     {
       combat: projectCombatUi(source.player.combat),
@@ -195,6 +233,10 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
         inventoryOpen: source.inventoryOpen,
         inventoryIdentity: source.inventoryIdentity ?? '',
         cursor: source.cursor?.stack ? projectInventory([source.cursor.stack], 1, items.require)[0] : null,
+        personalCrafting: {
+          slots: projectInventory(source.cursor?.craftingGrid ?? [null, null, null, null], 4, items.require),
+          recipes: personalRecipes,
+        },
         lifecycle: source.player.lifecycle,
         mode,
         flightEnabled,

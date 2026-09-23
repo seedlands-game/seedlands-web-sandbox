@@ -38,6 +38,28 @@ const stationContent = createGameplayContent({
   },
 });
 
+const craftingContent = createGameplayContent({
+  items: [
+    { id: 'test:wood', name: 'Wood', itemType: 'resource', stackLimit: 64, capabilities: [] },
+    { id: 'test:stone', name: 'Stone', itemType: 'resource', stackLimit: 64, capabilities: [] },
+  ],
+  recipes: [],
+  meleeDefinitions: [],
+  stations: {
+    definitions: [{ kind: 'workbench', voxel: 11 }],
+    recipes: [
+      {
+        kind: 'shapeless',
+        id: 'test:stone',
+        inputs: [{ itemId: 'test:wood', count: 1 }],
+        outputs: [{ itemId: 'test:stone', count: 1 }],
+      },
+    ],
+    furnaceRecipes: [],
+    fuels: [],
+  },
+});
+
 const actor = (count = 9) => ({
   version: 1 as const,
   reference: { entityId: 'alice', epoch: 1, lifetime: 1 },
@@ -155,6 +177,59 @@ describe('inventory pointer candidate', () => {
     expect(closed.slots).toEqual(full.slots);
     expect(closed.cursor).toMatchObject({ revision: 8, stack: null, origin: null });
     expect(closed.dropIntents).toEqual([{ itemId: 'test:stone', count: 3 }]);
+  });
+
+  it('owns a persistent 2x2 crafting grid and crafts through the shared station matcher', () => {
+    const source = {
+      ...actor(1),
+      cursor: {
+        version: 1 as const,
+        revision: 2,
+        stack: null,
+        origin: null,
+        craftingGrid: [{ itemId: 'test:wood', count: 2 }, null, null, null],
+      },
+    };
+    const crafted = buildInventoryPointerCandidate(craftingContent, {
+      actor: source,
+      input: input({ kind: 'craft', batch: false }),
+    });
+    expect(crafted.cursor).toMatchObject({
+      revision: 3,
+      stack: { itemId: 'test:stone', count: 1 },
+      origin: null,
+      craftingGrid: [{ itemId: 'test:wood', count: 1 }, null, null, null],
+    });
+    expect(crafted.result.crafted).toBe(1);
+  });
+
+  it('settles cursor and all personal crafting slots exactly once on close', () => {
+    const source = {
+      ...actor(),
+      slots: Array.from({ length: 24 }, () => ({ itemId: 'test:wood', count: 64 })),
+      cursor: {
+        version: 1 as const,
+        revision: 7,
+        stack: { itemId: 'test:stone', count: 2 },
+        origin: null,
+        craftingGrid: [{ itemId: 'test:wood', count: 3 }, { itemId: 'test:stone', count: 4 }, null, null],
+      },
+    };
+    const closed = buildInventoryPointerCandidate(craftingContent, {
+      actor: source,
+      input: input({ kind: 'close' }),
+    });
+    expect(closed.cursor).toMatchObject({
+      revision: 8,
+      stack: null,
+      origin: null,
+      craftingGrid: [null, null, null, null],
+    });
+    expect(closed.dropIntents).toEqual([
+      { itemId: 'test:stone', count: 2 },
+      { itemId: 'test:wood', count: 3 },
+      { itemId: 'test:stone', count: 4 },
+    ]);
   });
 
   it('rejects illegal furnace output placement atomically', () => {

@@ -221,7 +221,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     stageResults.C2 = {
       status: 'PASS',
       observation:
-        'Mouse mining produced visible drops; movement picked them up; E opened inventory and visible recipes produced planks, an axe, a wood sword and a workbench.',
+        'Mouse mining produced visible drops; movement picked them up; E opened inventory and real 2x2 pointer interactions produced planks, sticks, a wood sword and a workbench.',
     };
     stageSamples.C2 = (await snapshot(page))!;
   });
@@ -280,6 +280,9 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await clickCanvasCenter(page, 'right');
     await expect(page.getByRole('dialog', { name: '工作台' })).toBeVisible();
     await expect(page.getByRole('grid', { name: '工作台槽位' })).toBeVisible();
+    await page.getByRole('dialog', { name: '工作台' }).getByText('配方手册', { exact: false }).click();
+    await expect(page.getByRole('dialog', { name: '工作台' }).locator('[data-recipe="planks"]')).toBeAttached();
+    await expect(page.getByRole('dialog', { name: '工作台' }).locator('[data-recipe="wood-pickaxe"]')).toBeAttached();
     await closeInventory(page);
     const workbenchBeforePickup = itemCount(await playerState(page), 'workbench');
     await mineVoxel(page, classicScenario.route.stationTarget);

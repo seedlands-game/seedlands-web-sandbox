@@ -1,4 +1,5 @@
 import type { ItemStack, StationContentInput, StationRecipe } from '@seedlands/stdlib/mod-api';
+import { overworldRecipes } from './recipes';
 const stack = (itemId: string, count = 1): ItemStack => ({ itemId, count });
 const pickaxe = (id: string, material: string, durability: number): StationRecipe => ({
   kind: 'shaped',
@@ -22,21 +23,37 @@ const ring = (id: string, material: string): StationRecipe => ({
   ],
   outputs: [stack(id)],
 });
+const shapedRecipes: readonly StationRecipe[] = [
+  pickaxe('wood-pickaxe', 'plank', 60),
+  pickaxe('stone-pickaxe', 'cobblestone', 132),
+  pickaxe('iron-pickaxe', 'iron-ingot', 250),
+  pickaxe('gold-pickaxe', 'gold-ingot', 32),
+  pickaxe('diamond-pickaxe', 'diamond', 1561),
+  ring('chest', 'plank'),
+  ring('furnace', 'cobblestone'),
+];
+const shapedIds = new Set(shapedRecipes.map((recipe) => recipe.id));
+
+/** One Classic grid recipe catalog is matched by both the personal 2x2 and workbench 3x3 owners. */
+export const overworldCraftingRecipes: readonly StationRecipe[] = [
+  ...shapedRecipes,
+  ...overworldRecipes
+    .filter((recipe) => !shapedIds.has(recipe.id))
+    .map((recipe) => ({
+      kind: 'shapeless' as const,
+      id: recipe.id,
+      inputs: recipe.inputs.flatMap((input) => Array.from({ length: input.count }, () => ({ ...input, count: 1 }))),
+      outputs: recipe.outputs,
+    })),
+];
+
 export const overworldStations: StationContentInput = {
   definitions: [
     { kind: 'workbench', voxel: 11 },
     { kind: 'chest', voxel: 12 },
     { kind: 'furnace', voxel: 13 },
   ],
-  recipes: [
-    pickaxe('wood-pickaxe', 'plank', 60),
-    pickaxe('stone-pickaxe', 'cobblestone', 132),
-    pickaxe('iron-pickaxe', 'iron-ingot', 250),
-    pickaxe('gold-pickaxe', 'gold-ingot', 32),
-    pickaxe('diamond-pickaxe', 'diamond', 1561),
-    ring('chest', 'plank'),
-    ring('furnace', 'cobblestone'),
-  ],
+  recipes: overworldCraftingRecipes,
   furnaceRecipes: [
     { id: 'smelt-gold', input: stack('gold-ore'), output: stack('gold-ingot'), durationSeconds: 10 },
     { id: 'smelt-iron', input: stack('raw-iron'), output: stack('iron-ingot'), durationSeconds: 10 },

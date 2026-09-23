@@ -57,15 +57,18 @@ export class ActorVitalsRuntime {
     this.options.assertCanChange();
     if (dead) this.options.assertCanCancelCombat(id);
     const cursorStack = components.inventoryCursor?.stack;
+    const interactionItems = [cursorStack, ...(components.inventoryCursor?.craftingGrid ?? [])];
     const spawns = dead
-      ? [...components.inventory, cursorStack].flatMap((stack) => (stack ? [{ position: entity.position, stack }] : []))
+      ? [...components.inventory, ...interactionItems].flatMap((stack) =>
+          stack ? [{ position: entity.position, stack }] : [],
+        )
       : [];
     const candidate = dead
       ? {
           ...components,
           lifecycle: 'dead' as const,
           inventory: components.inventory.map(() => null),
-          inventoryCursor: cursorStack
+          inventoryCursor: interactionItems.some(Boolean)
             ? { ...emptyInventoryCursor(), revision: (components.inventoryCursor?.revision ?? 0) + 1 }
             : components.inventoryCursor,
           player: { ...components.player!, breakAction: null },

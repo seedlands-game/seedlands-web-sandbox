@@ -217,6 +217,7 @@ export class BrowserGameplay {
       {
         revision: view.gameplayRevision,
         cursor: view.inventory?.cursor,
+        matchedCraftingRecipeIds: view.inventory?.matchedCraftingRecipeIds,
         inventoryIdentity: JSON.stringify(view.inventory?.actor),
         player: {
           combat: player.combat,
@@ -343,12 +344,6 @@ export class BrowserGameplay {
   inventoryPointer(command: InventoryUiCommand): Promise<boolean> {
     if (!this.inventoryOpen || this.inventoryClosing) return Promise.resolve(false);
     return this.inventoryPointerClient.send(command);
-  }
-
-  craftRecipe(recipeId: string): void {
-    void this.inventoryPointerClient.craft(recipeId).then((ok) => {
-      if (ok) this.present({ kind: 'craft' });
-    });
   }
 
   attackTarget(

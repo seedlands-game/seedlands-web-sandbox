@@ -71,7 +71,7 @@
       {
         "source": "changes/2026-09-08-gameplay-foundation/e2e and changes/2026-09-10-inventory-pointer-interactions/e2e/inventory-pointer.spec.ts",
         "stages": ["C2", "C3", "C5"],
-        "observation": "Real mouse mining, drop pickup, E inventory, visible recipe buttons, hotbar keyboard movement, food, placement, and a buffered wood-sword second combo hit are exercised before restored inventory."
+        "observation": "Real mouse mining, drop pickup, E inventory, 2x2 pointer crafting, shared 3x3 recipe visibility, hotbar keyboard movement, food, placement, and a buffered wood-sword second combo hit are exercised before restored inventory."
       },
       {
         "source": "changes/2026-09-10-creative-containers-visual-cohesion/e2e/creative-container-interaction.spec.ts",

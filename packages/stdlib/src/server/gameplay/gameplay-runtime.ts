@@ -432,7 +432,7 @@ export class GameplayRuntime {
   getCombatState = (id: string) => this.simulation.combatSnapshotFor(id);
 
   getInventory = (id: string) => this.inventoryActions.snapshot(id);
-  getInventoryPointerView = (id: string) => projectInventoryPointerView(this.entities, id);
+  getInventoryPointerView = (id: string) => projectInventoryPointerView(this.entities, this.content, id);
   giveItem = (id: string, stack: ItemStack) => this.inventoryActions.give(id, stack);
   removeItem = (id: string, stack: ItemStack) => this.inventoryActions.remove(id, stack);
   selectHotbarSlot = (id: string, slot: number) => this.selectHotbar(id, slot);

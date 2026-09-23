@@ -1,13 +1,16 @@
 import type { EntityLifetimeReference } from '../ecs-entity-owner';
 import type { StationComponentV1 } from '../ecs-station-state';
-import type { InventorySlot } from '../inventory';
+import { Inventory, type InventorySlot } from '../inventory';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 
 export type InventoryPointerSlotRef =
-  Readonly<{ kind: 'inventory'; slot: number }> | Readonly<{ kind: 'station'; slot: number }>;
+  | Readonly<{ kind: 'inventory'; slot: number }>
+  | Readonly<{ kind: 'crafting'; slot: number }>
+  | Readonly<{ kind: 'station'; slot: number }>;
 
 export type InventoryCursorOriginV1 =
   | Readonly<{ kind: 'inventory'; slot: number }>
+  | Readonly<{ kind: 'crafting'; slot: number }>
   | Readonly<{ kind: 'station'; reference: EntityLifetimeReference; slot: number }>;
 
 export type InventoryCursorV1 = Readonly<{
@@ -15,6 +18,7 @@ export type InventoryCursorV1 = Readonly<{
   revision: number;
   stack: Readonly<ItemStack> | null;
   origin: InventoryCursorOriginV1 | null;
+  craftingGrid: readonly InventorySlot[];
 }>;
 
 export type InventoryPointerStationRef = Readonly<{
@@ -159,15 +163,21 @@ function frozenStack(stack: Readonly<ItemStack> | null): InventorySlot {
 }
 
 export function emptyInventoryCursor(): InventoryCursorV1 {
-  return Object.freeze({ version: 1, revision: 0, stack: null, origin: null });
+  return Object.freeze({
+    version: 1,
+    revision: 0,
+    stack: null,
+    origin: null,
+    craftingGrid: Object.freeze([null, null, null, null]),
+  });
 }
 
 export function validateInventoryCursor(raw: unknown, items: ItemDefinitionRegistry): InventoryCursorV1 {
   if (raw === undefined) return emptyInventoryCursor();
   if (
     !isRecord(raw) ||
-    Object.keys(raw).some((key) => !['version', 'revision', 'stack', 'origin'].includes(key)) ||
-    Object.keys(raw).length !== 4 ||
+    Object.keys(raw).some((key) => !['version', 'revision', 'stack', 'origin', 'craftingGrid'].includes(key)) ||
+    (Object.keys(raw).length !== 4 && Object.keys(raw).length !== 5) ||
     raw.version !== 1 ||
     !integer(raw.revision)
   )
@@ -180,8 +190,11 @@ export function validateInventoryCursor(raw: unknown, items: ItemDefinitionRegis
   else {
     if (!isRecord(raw.origin) || !integer(raw.origin.slot, 0, MAX_SLOT))
       throw new TypeError('Actor inventory cursor origin is invalid.');
-    if (raw.origin.kind === 'inventory' && Object.keys(raw.origin).every((key) => ['kind', 'slot'].includes(key)))
-      origin = Object.freeze({ kind: 'inventory', slot: raw.origin.slot });
+    if (
+      (raw.origin.kind === 'inventory' || raw.origin.kind === 'crafting') &&
+      Object.keys(raw.origin).every((key) => ['kind', 'slot'].includes(key))
+    )
+      origin = Object.freeze({ kind: raw.origin.kind, slot: raw.origin.slot });
     else if (
       raw.origin.kind === 'station' &&
       Object.keys(raw.origin).every((key) => ['kind', 'reference', 'slot'].includes(key))
@@ -194,14 +207,31 @@ export function validateInventoryCursor(raw: unknown, items: ItemDefinitionRegis
     else throw new TypeError('Actor inventory cursor origin is invalid.');
   }
   if (stack === null && origin !== null) throw new TypeError('An empty inventory cursor cannot retain an origin.');
-  return Object.freeze({ version: 1, revision: raw.revision, stack, origin });
+  if (raw.craftingGrid !== undefined && !Array.isArray(raw.craftingGrid))
+    throw new TypeError('Actor personal crafting grid is invalid.');
+  const craftingGrid = new Inventory(
+    4,
+    raw.craftingGrid === undefined ? undefined : (raw.craftingGrid as InventorySlot[]),
+    items,
+  )
+    .snapshot()
+    .map(frozenStack);
+  if (origin?.kind === 'crafting' && origin.slot >= craftingGrid.length)
+    throw new TypeError('Actor inventory cursor origin is invalid.');
+  return Object.freeze({
+    version: 1,
+    revision: raw.revision,
+    stack,
+    origin,
+    craftingGrid: Object.freeze(craftingGrid),
+  });
 }
 
 function slotRef(raw: unknown): InventoryPointerSlotRef {
   if (
     !isRecord(raw) ||
     Object.keys(raw).some((key) => !['kind', 'slot'].includes(key)) ||
-    (raw.kind !== 'inventory' && raw.kind !== 'station') ||
+    (raw.kind !== 'inventory' && raw.kind !== 'crafting' && raw.kind !== 'station') ||
     !integer(raw.slot, 0, MAX_SLOT)
   )
     throw new TypeError('Inventory pointer slot reference is invalid.');

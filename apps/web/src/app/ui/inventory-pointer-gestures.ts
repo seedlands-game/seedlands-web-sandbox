@@ -1,5 +1,5 @@
 /** Input intentions only. Inventory contents always come from the authority response. */
-export type InventoryUiSlot = Readonly<{ kind: 'inventory' | 'station'; slot: number }>;
+export type InventoryUiSlot = Readonly<{ kind: 'inventory' | 'crafting' | 'station'; slot: number }>;
 export type InventoryUiCommand =
   | Readonly<{ kind: 'click'; slot: InventoryUiSlot; button: 0 | 2 }>
   | Readonly<{ kind: 'distribute'; slots: readonly InventoryUiSlot[]; button: 0 | 2 }>

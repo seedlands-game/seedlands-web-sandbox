@@ -475,8 +475,6 @@ export class Game {
   inventoryPointer = (command: InventoryControl) =>
     this.gameplayClient?.inventoryPointer(command) ?? Promise.resolve(false);
 
-  craftRecipe = (recipeId: string) => this.gameplayClient?.craftRecipe(recipeId);
-
   useInventoryItem = (slot: number) => this.gameplayClient?.useInventoryItem(slot);
 
   respawn = () => this.gameplayClient?.respawn();

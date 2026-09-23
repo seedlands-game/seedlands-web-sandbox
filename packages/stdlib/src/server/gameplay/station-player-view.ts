@@ -34,16 +34,17 @@ export function projectNearbyStations(
       traceVoxelRay(eye, center, getVoxel) !== 'clear'
     )
       return [];
-    const matchedRecipes =
+    const matchedRecipe =
       component.kind === 'workbench'
         ? runtime.content
             .stations!.listRecipes()
-            .filter((recipe) =>
+            .find((recipe) =>
               recipe.kind === 'shaped'
                 ? matchesShapedStationRecipe(component.grid, recipe, runtime.content.items)
                 : matchesShapelessStationRecipe(component.grid, recipe, runtime.content.items),
             )
-        : [];
+        : undefined;
+    const matchedRecipes = matchedRecipe ? [matchedRecipe] : [];
     return [
       {
         reference: runtime.entities.createReference(station.id)!,

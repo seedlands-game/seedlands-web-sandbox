@@ -7,6 +7,12 @@ import {
   type InventoryPointerInputV1,
 } from './modules/inventory-pointer-contract';
 import { STATION_CRAFT_OPERATION, STATION_TRANSFER_OPERATION } from './modules/station-action-model';
+import {
+  matchesShapedStationRecipe,
+  matchesShapelessStationRecipe,
+  stationRecipeFitsGrid,
+} from './modules/station-candidates';
+import type { GameplayContent } from './gameplay-content';
 
 type RegisteredPointerRuntime = Readonly<{
   pointer(id: string, input: InventoryPointerInputV1): InventoryPointerExecutionResult;
@@ -14,8 +20,18 @@ type RegisteredPointerRuntime = Readonly<{
 type InventoryPointerExecutionResult =
   Readonly<{ success: true; value?: ModuleInvocationValue }> | Readonly<{ success: false; reason: string }>;
 
-export function projectInventoryPointerView(entities: EntityStore, id: string) {
+export function projectInventoryPointerView(entities: EntityStore, content: GameplayContent, id: string) {
   const actor = entities.actorStateAccess(id);
+  const grid = actor.inventoryCursor.craftingGrid;
+  const matchedCraftingRecipe = content.stations
+    ?.listRecipes()
+    .find(
+      (recipe) =>
+        stationRecipeFitsGrid(recipe, 2) &&
+        (recipe.kind === 'shaped'
+          ? matchesShapedStationRecipe(grid, recipe, content.items)
+          : matchesShapelessStationRecipe(grid, recipe, content.items)),
+    );
   return {
     version: 1 as const,
     actor: entities.createReference(id)!,
@@ -23,6 +39,7 @@ export function projectInventoryPointerView(entities: EntityStore, id: string) {
     slots: actor.inventory.snapshot(),
     hotbarSize: actor.hotbarSize,
     cursor: actor.inventoryCursor,
+    matchedCraftingRecipeIds: Object.freeze(matchedCraftingRecipe ? [matchedCraftingRecipe.id] : []),
   };
 }
 

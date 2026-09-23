@@ -1,4 +1,4 @@
-import { expect, type Page, type TestInfo } from '@playwright/test';
+import { expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 import {
   inventory,
   closeInventory,
@@ -11,6 +11,27 @@ import {
 } from './harness';
 import { aimAtVoxelWithRealMouse } from './aim';
 import { classicScenario, type Point } from './scenario';
+import { itemCount } from './journey';
+
+async function placePersonalIngredients(panel: Locator, name: string, slots: readonly number[]): Promise<void> {
+  const source = panel.getByRole('gridcell', { name: new RegExp(`^${name} × [0-9]+(?: ·.*)?$`) }).first();
+  await expect(source).toBeVisible();
+  const sourceSlot = Number(await source.getAttribute('data-slot'));
+  const sourceCount = Number(await source.getAttribute('data-count'));
+  if (!Number.isSafeInteger(sourceSlot) || !Number.isSafeInteger(sourceCount) || sourceCount < slots.length)
+    throw new Error(`Insufficient ${name} for personal crafting.`);
+  await source.click();
+  for (const slot of slots)
+    await panel.locator(`[data-inventory-address="crafting:${slot}"]`).click({ button: 'right' });
+  if (sourceCount > slots.length) await panel.locator(`[data-slot="${sourceSlot}"]`).click();
+}
+
+async function takePersonalResult(panel: Locator, itemId: string): Promise<void> {
+  const result = panel.locator('[data-personal-craft-result]');
+  await expect(result).toHaveAttribute('data-item', itemId);
+  await result.click({ modifiers: ['Shift'] });
+  await expect(result).toHaveAttribute('data-item', 'empty');
+}
 
 export async function craftAndEquipBuildingPlanks(page: Page): Promise<void> {
   const rows = await page
@@ -24,14 +45,42 @@ export async function craftAndEquipBuildingPlanks(page: Page): Promise<void> {
   expect((await playerState(page)).hotbarSize).toBe(9);
   await expect(panel.getByRole('gridcell', { name: '原木 × 4', exact: true })).toBeVisible();
   await expect(panel.getByRole('gridcell', { name: '浆果 × 1', exact: true })).toBeVisible();
-  await panel.getByRole('button', { name: '合成 木板', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 木板', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 木板', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 木棍', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 木斧', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 木剑', exact: true }).click();
-  await panel.getByRole('button', { name: '合成 工作台', exact: true }).click();
-  await expect(panel.getByRole('gridcell', { name: /^木斧 × 1 · 耐久 60\/60$/ })).toBeVisible();
+  await expect(panel.locator('[data-crafting-slot]')).toHaveCount(4);
+  await panel.getByText('配方手册', { exact: false }).click();
+  await expect(panel.locator('[data-recipe="planks"]')).toBeAttached();
+  await expect(panel.locator('[data-recipe="wood-pickaxe"]')).toHaveCount(0);
+  await panel.getByText('配方手册', { exact: false }).click();
+  expect(
+    await panel.locator('[data-inventory-address]').evaluateAll((slots) =>
+      slots.flatMap((slot) => {
+        const image = slot.querySelector<HTMLImageElement>('.item-icon');
+        if (!image) return [];
+        const outer = slot.getBoundingClientRect();
+        const inner = image.getBoundingClientRect();
+        return inner.left >= outer.left &&
+          inner.top >= outer.top &&
+          inner.right <= outer.right &&
+          inner.bottom <= outer.bottom
+          ? []
+          : [slot.getAttribute('data-inventory-address')];
+      }),
+    ),
+  ).toEqual([]);
+
+  const logs = panel.getByRole('gridcell', { name: '原木 × 4', exact: true });
+  await logs.click();
+  await panel.locator('[data-inventory-address="crafting:0"]').click();
+  await takePersonalResult(panel, 'plank');
+  await expect.poll(async () => itemCount(await playerState(page), 'plank')).toBe(16);
+
+  await placePersonalIngredients(panel, '木板', [0, 1]);
+  await takePersonalResult(panel, 'stick');
+  await placePersonalIngredients(panel, '木板', [0, 1]);
+  await placePersonalIngredients(panel, '木棍', [2]);
+  await takePersonalResult(panel, 'wood-sword');
+  await placePersonalIngredients(panel, '木板', [0, 1, 2, 3]);
+  await takePersonalResult(panel, 'workbench');
+
   await expect(panel.getByRole('gridcell', { name: '木剑 × 1', exact: true })).toBeVisible();
   await expect(panel.getByRole('gridcell', { name: '工作台 × 1', exact: true })).toBeVisible();
   const planks = panel.getByRole('gridcell', { name: /^木板 × / }).first();

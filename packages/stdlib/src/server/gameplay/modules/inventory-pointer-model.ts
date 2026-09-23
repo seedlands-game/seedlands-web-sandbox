@@ -37,6 +37,7 @@ function frozenStack(stack: Readonly<ItemStack> | null): InventorySlot {
 
 type MutableState = {
   slots: InventorySlot[];
+  craftingSlots: InventorySlot[];
   cursorStack: InventorySlot;
   cursorOrigin: InventoryCursorOriginV1 | null;
   station: StationComponentV1 | null;
@@ -54,13 +55,15 @@ function stationSlots(component: StationComponentV1): InventorySlot[] {
 }
 
 function current(state: MutableState, ref: InventoryPointerSlotRef): InventorySlot {
-  const values = ref.kind === 'inventory' ? state.slots : state.stationSlots;
+  const values =
+    ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ? state.craftingSlots : state.stationSlots;
   if (!values || ref.slot >= values.length) throw new Error('invalid-pointer-slot');
   return values[ref.slot] ?? null;
 }
 
 function write(state: MutableState, ref: InventoryPointerSlotRef, value: InventorySlot): void {
-  const values = ref.kind === 'inventory' ? state.slots : state.stationSlots;
+  const values =
+    ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ? state.craftingSlots : state.stationSlots;
   if (!values || ref.slot >= values.length) throw new Error('invalid-pointer-slot');
   values[ref.slot] = value ? { ...value, ...(value.instance ? { instance: { ...value.instance } } : {}) } : null;
 }
@@ -69,9 +72,9 @@ function originFor(
   ref: InventoryPointerSlotRef,
   station: InventoryPointerStationProjectionV1 | undefined,
 ): InventoryCursorOriginV1 {
-  return ref.kind === 'inventory'
-    ? Object.freeze({ kind: 'inventory', slot: ref.slot })
-    : Object.freeze({ kind: 'station', reference: Object.freeze({ ...station!.reference }), slot: ref.slot });
+  return ref.kind === 'station'
+    ? Object.freeze({ kind: 'station', reference: Object.freeze({ ...station!.reference }), slot: ref.slot })
+    : Object.freeze({ kind: ref.kind, slot: ref.slot });
 }
 
 function canPlaceStation(
@@ -182,6 +185,7 @@ function destinations(
     if (source.kind === 'station') return actor.slots.map((_, slot) => ({ kind: 'inventory' as const, slot }));
     return stationSlots(station).map((_, slot) => ({ kind: 'station' as const, slot }));
   }
+  if (source.kind === 'crafting') return actor.slots.map((_, slot) => ({ kind: 'inventory' as const, slot }));
   if (source.kind !== 'inventory') throw new Error('station-context-required');
   const start = source.slot < actor.equipment.hotbarSize ? actor.equipment.hotbarSize : 0;
   const end = source.slot < actor.equipment.hotbarSize ? actor.slots.length : actor.equipment.hotbarSize;
@@ -230,6 +234,7 @@ function collect(
   const limit = content.items.require(cursor.itemId).stackLimit;
   const refs: InventoryPointerSlotRef[] = [
     ...state.slots.map((_, slot) => ({ kind: 'inventory' as const, slot })),
+    ...(state.station ? [] : state.craftingSlots.map((_, slot) => ({ kind: 'crafting' as const, slot }))),
     ...(state.stationSlots?.map((_, slot) => ({ kind: 'station' as const, slot })) ?? []),
   ];
   for (const ref of refs) {
@@ -278,7 +283,7 @@ function craft(
   state: MutableState,
   command: Extract<InventoryPointerCommand, { kind: 'craft' }>,
 ): void {
-  if (!state.station || state.station.kind !== 'workbench' || !state.stationSlots)
+  if (state.station && (state.station.kind !== 'workbench' || !state.stationSlots))
     throw new Error('station-is-not-workbench');
   if (
     !command.batch &&
@@ -286,7 +291,7 @@ function craft(
     state.cursorStack.count >= content.items.require(state.cursorStack.itemId).stackLimit
   )
     throw new Error('cursor-full');
-  let grid = state.stationSlots;
+  let grid = state.station ? state.stationSlots! : state.craftingSlots;
   let output = command.batch ? state.slots : [state.cursorStack];
   let crafted = 0;
   for (let attempt = 0; attempt < 1024; attempt += 1) {
@@ -303,11 +308,13 @@ function craft(
     if (!command.batch) break;
   }
   if (!crafted) throw new Error('recipe-mismatch');
-  state.stationSlots = grid;
+  if (state.station) state.stationSlots = grid;
+  else state.craftingSlots = grid;
   if (command.batch) state.slots = output;
   else {
     if (output.length !== 1 || !output[0]) throw new Error('unsupported-craft-output');
     state.cursorStack = output[0];
+    state.cursorOrigin = null;
   }
   state.crafted = crafted;
 }
@@ -317,13 +324,13 @@ function close(
   state: MutableState,
   station: InventoryPointerStationProjectionV1 | undefined,
 ): void {
-  if (!state.cursorStack) return;
   const origin = state.cursorOrigin;
-  if (origin?.kind === 'inventory' && origin.slot < state.slots.length) {
+  if (state.cursorStack && origin?.kind === 'inventory' && origin.slot < state.slots.length) {
     const target = state.slots[origin.slot];
     if (!target || sameItemStackIdentity(target, state.cursorStack))
       put(content, state, { kind: 'inventory', slot: origin.slot }, state.cursorStack.count);
   } else if (
+    state.cursorStack &&
     origin?.kind === 'station' &&
     station &&
     same(origin.reference, station.reference) &&
@@ -346,18 +353,18 @@ function close(
       }
     }
   }
-  if (state.cursorStack) {
-    const settled = settleInventoryCursor(content.items, state.slots, {
-      version: 1,
-      revision: 0,
-      stack: state.cursorStack,
-      origin: state.cursorOrigin,
-    });
-    state.slots = [...settled.slots];
-    state.drops.push(...settled.dropIntents.map((stack) => ({ ...stack })));
-    state.cursorStack = null;
-    state.cursorOrigin = null;
-  }
+  const settled = settleInventoryCursor(content.items, state.slots, {
+    version: 1,
+    revision: 0,
+    stack: state.cursorStack,
+    origin: state.cursorOrigin,
+    craftingGrid: state.craftingSlots,
+  });
+  state.slots = [...settled.slots];
+  state.drops.push(...settled.dropIntents.map((stack) => ({ ...stack })));
+  state.cursorStack = null;
+  state.cursorOrigin = null;
+  state.craftingSlots = [...settled.cursor.craftingGrid];
 }
 
 function finalizeStation(
@@ -413,12 +420,16 @@ export function buildInventoryPointerCandidate(
     if (station.component.revision >= Number.MAX_SAFE_INTEGER) throw new RangeError('Station revision exhausted.');
   }
   const usesStation =
-    input.command.kind === 'craft' ||
     ('slot' in input.command && input.command.slot.kind === 'station') ||
     (input.command.kind === 'distribute' && input.command.targets.some((target) => target.kind === 'station'));
   if (usesStation && !station) throw new Error('station-context-required');
+  const usesPersonalCrafting =
+    ('slot' in input.command && input.command.slot.kind === 'crafting') ||
+    (input.command.kind === 'distribute' && input.command.targets.some((target) => target.kind === 'crafting'));
+  if (usesPersonalCrafting && station) throw new Error('invalid-pointer-slot');
   const state: MutableState = {
     slots: new Inventory(actor.slots.length, actor.slots, content.items).snapshot(),
+    craftingSlots: [...cursor.craftingGrid],
     cursorStack: cursor.stack
       ? { ...cursor.stack, ...(cursor.stack.instance ? { instance: { ...cursor.stack.instance } } : {}) }
       : null,
@@ -428,7 +439,13 @@ export function buildInventoryPointerCandidate(
     drops: [],
     crafted: 0,
   };
-  const before = JSON.stringify([state.slots, state.cursorStack, state.cursorOrigin, state.stationSlots]);
+  const before = JSON.stringify([
+    state.slots,
+    state.craftingSlots,
+    state.cursorStack,
+    state.cursorOrigin,
+    state.stationSlots,
+  ]);
   switch (input.command.kind) {
     case 'click':
       click(content, state, station, input.command);
@@ -462,7 +479,9 @@ export function buildInventoryPointerCandidate(
       break;
     }
   }
-  const changed = before !== JSON.stringify([state.slots, state.cursorStack, state.cursorOrigin, state.stationSlots]);
+  const changed =
+    before !==
+    JSON.stringify([state.slots, state.craftingSlots, state.cursorStack, state.cursorOrigin, state.stationSlots]);
   if (changed && cursor.revision >= Number.MAX_SAFE_INTEGER)
     throw new RangeError('Inventory cursor revision exhausted.');
   const nextStation =
@@ -473,6 +492,7 @@ export function buildInventoryPointerCandidate(
     revision: cursor.revision + Number(changed),
     stack: frozenStack(state.cursorStack),
     origin: state.cursorStack ? state.cursorOrigin : null,
+    craftingGrid: Object.freeze(state.craftingSlots.map(frozenStack)),
   });
   const result = Object.freeze({
     version: 1 as const,

@@ -41,6 +41,10 @@ export type ShellState = Readonly<{
     station?: StationUiPresentation | null;
     inventoryOpen: boolean;
     cursor?: GameplayItemPresentation | null;
+    personalCrafting: Readonly<{
+      slots: readonly GameplayItemPresentation[];
+      recipes: NonNullable<StationUiPresentation>['recipes'];
+    }>;
     inventoryIdentity?: string;
     lifecycle: 'alive' | 'dead';
     mode: ActorMode;
@@ -147,7 +151,6 @@ export type UiActionPort = {
   setCreativeSlot: (slot: number, itemId: string | null) => void;
   toggleInventory: () => void;
   closeInventory: () => void;
-  craftRecipe: (recipeId: string) => void;
   inventoryPointer: (command: InventoryUiCommand) => Promise<boolean>;
   useInventoryItem: (slot: number) => void;
   respawn: () => void;

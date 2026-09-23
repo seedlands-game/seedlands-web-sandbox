@@ -79,6 +79,7 @@ export type AuthorityInventoryView = Readonly<{
   slots: readonly InventorySlot[];
   hotbarSize: number;
   cursor: InventoryCursorV1;
+  matchedCraftingRecipeIds: readonly string[];
 }>;
 export type AuthorityInventoryPointerAction = Readonly<{
   type: 'inventory-pointer';
