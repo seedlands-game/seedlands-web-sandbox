@@ -1,6 +1,6 @@
 # 可组合内容注入闭环
 
-状态：Complete。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
+状态：Active。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
 
 ## 用户结果、长期愿景与硬约束
 
@@ -86,7 +86,7 @@ archetype 改为有界 namespace-qualified ID；旧 Classic 非命名空间 ID �
 - [x] actor archetype registry 去固定名单。
 - [x] Pack presentation manifest 与 Web 通用消费。
 - [x] 第二 Playbook 无特权证明。
-- [x] 本地静态、确定性、production、C0–C5 与独立审阅完成；exact-head `8eba636` 的远端 run `35805790662` 六个 job 全部通过。此前 hosted SwiftShader 暴露的精确坐标采样、路线走廊、真实转向后水平瞄准与长按越界问题均保留真实键鼠输入修复，并由到点半径、越界走廊、只读 view angle、生产命中选择器和分段路线完成边界验证。
+- [ ] 本地静态、确定性、production、C0–C5 与独立审阅已完成；实现 head `8eba636` 曾全绿，但后续文档 head `76980c8` 再次暴露 hosted 输入长按期间浏览器快照延迟导致越过整段高架。路线改为由测试进程计时的 300ms 真实输入脉冲，每次无条件释放后再用 Authority ack、落地、位置和支持面验证；待新 exact-head CI 后核销。
 
 ## V1 显式边界
 

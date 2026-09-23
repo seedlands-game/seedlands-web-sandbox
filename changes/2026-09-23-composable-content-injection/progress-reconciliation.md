@@ -26,7 +26,7 @@
 
 全部为 COMPLETE 才输出 100%。Classic 原版精确等价度继续作为差异账，不冒充工程交付状态；排除范围不进入未完成分母。
 
-2026-09-23 最终核销：exact-head `8eba636` 的 CI run `35805790662` 六个 job 全部通过，当前 change ledger 为 10/10、100%。
+2026-09-23 状态回退：实现 head `8eba636` 的 CI run `35805790662` 曾六项全绿，但后续纯文档 head `76980c8` 的 Chromium 再次暴露 hosted 输入长按竞态；最终 exact-head 未全绿前恢复为 9/10、90%。
 
 ## Reporter 修正
 

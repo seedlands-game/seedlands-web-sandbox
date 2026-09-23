@@ -36,6 +36,7 @@ export type ClassicSnapshot = Readonly<{
   renderedChunks: number;
   onGround: boolean;
   colliding: boolean;
+  interactionAttempts: number;
   mutationCount: number;
   worldRevision: number;
   remeshSchedulingCount: number;
@@ -177,8 +178,7 @@ export async function waitForSnapshot(
   return matched!;
 }
 
-export const performanceTrace = (page: Page): Promise<ChromeTrace> =>
-  page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.exportPerformanceTrace());
+export const performanceTrace = (page: Page): Promise<ChromeTrace> => page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.exportPerformanceTrace()); // prettier-ignore
 
 export async function prepareInitialState(
   page: Page,
@@ -253,6 +253,10 @@ export async function lockPointer(page: Page): Promise<Locator> {
   return canvas;
 }
 
+async function ensurePointerLock(page: Page): Promise<void> {
+  if (!(await page.evaluate(() => document.pointerLockElement?.id === 'game'))) await lockPointer(page);
+}
+
 const mousePositions = new WeakMap<Page, { x: number; y: number }>();
 
 export async function moveMouseBy(page: Page, dx: number, dy: number): Promise<void> {
@@ -308,6 +312,7 @@ export async function walkTo(
   const deadline = Date.now() + (options.timeout ?? 45_000);
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+  let firstSegment = true;
   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
     if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
     await correctMouseToRoute({
@@ -317,25 +322,20 @@ export async function walkTo(
       move: (dx, dy) => moveMouseBy(page, dx, dy),
     });
     const segmentStart = current;
+    const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
     await page.keyboard.down(key);
-    if (options.jump) await page.keyboard.down('Space');
+    if (options.jump && firstSegment) await page.keyboard.down('Space');
     try {
-      current = await waitForSnapshot(
-        page,
-        (value) =>
-          reachedRouteTarget(value.player, target, key, tolerance, corridorTolerance) ||
-          Math.hypot(value.player[0] - segmentStart.player[0], value.player[2] - segmentStart.player[2]) >= 4,
-        Math.min(10_000, Math.max(1, deadline - Date.now())),
-      );
+      // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
+      await new Promise<void>((resolve) => setTimeout(resolve, 300));
     } finally {
       await page.keyboard.up(key);
-      if (options.jump) await page.keyboard.up('Space');
+      if (options.jump && firstSegment) await page.keyboard.up('Space');
     }
-    const sequenceBeforeRelease = current.authority.acknowledgedInputSequence;
+    firstSegment = false;
     current = await waitForSnapshot(
       page,
-      (value) =>
-        value.authority.acknowledgedInputSequence > sequenceBeforeRelease && value.onGround && !value.colliding,
+      (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding,
       Math.min(20_000, Math.max(1, deadline - Date.now())),
     );
     if (current.player[1] < segmentStart.player[1] - 2)
@@ -373,8 +373,11 @@ export async function mineVoxel(page: Page, target: Point): Promise<void> {
   if (before && target[0] + 0.5 - before.player[0] < 2.8)
     await walkTo(page, [target[0] - 2.8, 0.5], { key: 'KeyS', tolerance: 0.65, timeout: 5_000 });
   await adjustPitchToTarget(page, target);
+  await ensurePointerLock(page);
+  const attemptsBefore = (await snapshot(page))?.interactionAttempts ?? 0;
   await page.mouse.down({ button: 'left' });
   try {
+    await waitForSnapshot(page, (value) => value.interactionAttempts > attemptsBefore, 8_000);
     try {
       await expect
         .poll(
@@ -460,6 +463,7 @@ export async function attackWithRealMouse(page: Page, entityId: string): Promise
       }, entityId),
     move: (dx, dy) => moveMouseBy(page, dx, dy),
   });
+  await ensurePointerLock(page);
   await page.evaluate(() => {
     const target = window as Window & {
       __classicCombatEvidence?: string[];

@@ -1,6 +1,6 @@
 # 交付快照
 
-日期：2026-09-23。状态：Complete；代码、本地验收、独立审阅与 exact-head 远端 CI 全部完成。
+日期：2026-09-23。状态：代码、本地验收与独立审阅完成；最终 exact-head 远端 Chromium 仍在收尾。
 
 ## 已实现
 
@@ -32,6 +32,8 @@
 - exact-head `57ba2dc` 的 run `35803402652` 中 C1 已连续通过，但 failure snapshot 均显示 C2 开始时玩家已落到 y=19：旧 C1 把“观察到 streamCenter >= 1”与“释放按键”分开，低采样时可能跑过 224 格高架后才观测到跨 Chunk，随后在自然地形落地仍误判 C1 完成。C1 现直接复用 `walkTo(chunkCrossing)`，到 x≈33 即释放 W/Space，并额外断言仍位于高架高度。
 - exact-head `a6c4c69` 的 run `35804761595` 证明单次 `walkTo` 在 hosted 低采样下仍可能因横向误差持续按键直至离开高架。`walkTo` 改为最多约 4 格一段的真实输入：每段重新对准，按键至实际到达或位移上限，释放后等待 Authority ack 与落地，并在支持面下降超过 2 格时立即失败；长途路线仍由真实 Pointer Lock/键盘完成。
 - exact-head `8eba636` 的 run `35805790662` 全绿：Architecture static checks、Deterministic module tests、Classic headless contracts、Production build、Static verification 与 Chromium regression 全部 success；Chromium 7m29s，消费同次 identified production artifact。冻结 ledger 的 10/10 权重项均已核销。
+- 后续纯文档 head `76980c8` 的 run `35806500887` 再次在 C1 暴露长按输入与主线程 snapshot 延迟的竞态，因此撤回完成核销。路线输入现改为测试进程计时的 300ms 真实 keydown/keyup 脉冲；固定时长只界定输入，不充当就绪条件，每段仍以 Authority ack、落地、位置和支持面状态验收。
+- 本地短脉冲回归曾在第五次采集得到正确 target-card 但 `interactionAttempts=0`；真实鼠标采集/攻击现在先确认 Pointer Lock，采集还要求 interactionAttempts 前进后才等待体素结果，区分输入未送达与玩法未完成。
 
 ## 独立审阅
 
