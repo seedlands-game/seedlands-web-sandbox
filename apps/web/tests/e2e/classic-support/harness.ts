@@ -242,10 +242,8 @@ export async function prepareInitialState(
 }
 
 export async function lockPointer(page: Page): Promise<Locator> {
-  if (await page.locator('#debug').isVisible()) {
-    await page.keyboard.press('F3');
-    await expect(page.locator('#debug')).toBeHidden();
-  }
+  // prettier-ignore
+  if (await page.locator('#debug').isVisible()) { await page.keyboard.press('F3'); await expect(page.locator('#debug')).toBeHidden(); }
   const canvas = page.locator('#game');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Classic canvas is not visible.');
@@ -305,43 +303,45 @@ export async function walkTo(
   }> = {},
 ): Promise<ClassicSnapshot> {
   const key = options.key ?? 'KeyW';
-  let sequenceBeforeRelease = 0;
-  await correctMouseToRoute({
-    target,
-    direction: key,
-    observe: () => snapshot(page),
-    move: (dx, dy) => moveMouseBy(page, dx, dy),
-  });
-  await page.keyboard.down(key);
-  if (options.jump) await page.keyboard.down('Space');
-  try {
-    await expect
-      .poll(
-        async () => {
-          const current = await snapshot(page);
-          return current
-            ? reachedRouteTarget(
-                current.player,
-                target,
-                key,
-                options.tolerance ?? 0.65,
-                options.corridorTolerance ?? 1.5,
-              )
-            : false;
-        },
-        { timeout: options.timeout ?? 45_000, intervals: [100] },
-      )
-      .toBe(true);
-    sequenceBeforeRelease = (await snapshot(page))?.authority.acknowledgedInputSequence ?? 0;
-  } finally {
-    await page.keyboard.up(key);
-    if (options.jump) await page.keyboard.up('Space');
+  const tolerance = options.tolerance ?? 0.65;
+  const corridorTolerance = options.corridorTolerance ?? 1.5;
+  const deadline = Date.now() + (options.timeout ?? 45_000);
+  let current = await snapshot(page);
+  if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+  while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+    if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
+    await correctMouseToRoute({
+      target,
+      direction: key,
+      observe: () => snapshot(page),
+      move: (dx, dy) => moveMouseBy(page, dx, dy),
+    });
+    const segmentStart = current;
+    await page.keyboard.down(key);
+    if (options.jump) await page.keyboard.down('Space');
+    try {
+      current = await waitForSnapshot(
+        page,
+        (value) =>
+          reachedRouteTarget(value.player, target, key, tolerance, corridorTolerance) ||
+          Math.hypot(value.player[0] - segmentStart.player[0], value.player[2] - segmentStart.player[2]) >= 4,
+        Math.min(10_000, Math.max(1, deadline - Date.now())),
+      );
+    } finally {
+      await page.keyboard.up(key);
+      if (options.jump) await page.keyboard.up('Space');
+    }
+    const sequenceBeforeRelease = current.authority.acknowledgedInputSequence;
+    current = await waitForSnapshot(
+      page,
+      (value) =>
+        value.authority.acknowledgedInputSequence > sequenceBeforeRelease && value.onGround && !value.colliding,
+      Math.min(20_000, Math.max(1, deadline - Date.now())),
+    );
+    if (current.player[1] < segmentStart.player[1] - 2)
+      throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);
   }
-  return waitForSnapshot(
-    page,
-    (value) => value.authority.acknowledgedInputSequence > sequenceBeforeRelease && value.onGround && !value.colliding,
-    20_000,
-  );
+  return current;
 }
 
 export async function adjustPitchToTarget(page: Page, target: Point): Promise<void> {

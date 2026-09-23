@@ -30,6 +30,7 @@
 - 方块瞄准保留 target-card 的可见面反馈：已有命中时按相邻面的高低小步修正，完全脱靶时才用只读 view angle 重获目标，避免对地板目标的中心射线被前一格地板遮挡。
 - exact-head `1dbf0e5` 的 run `35802234986` 五个非浏览器门禁与视觉回归通过，但 C1 两次停在固定 `moveMouseBy(-80)` 后等待跨 Chunk；该段此前是唯一未复用通用路线对准的移动。初次 `+80px` 仍用于证明真实转向，随后按当前 yaw 与 chunk 目标计算真实鼠标纠偏，再执行 W+Space。
 - exact-head `57ba2dc` 的 run `35803402652` 中 C1 已连续通过，但 failure snapshot 均显示 C2 开始时玩家已落到 y=19：旧 C1 把“观察到 streamCenter >= 1”与“释放按键”分开，低采样时可能跑过 224 格高架后才观测到跨 Chunk，随后在自然地形落地仍误判 C1 完成。C1 现直接复用 `walkTo(chunkCrossing)`，到 x≈33 即释放 W/Space，并额外断言仍位于高架高度。
+- exact-head `a6c4c69` 的 run `35804761595` 证明单次 `walkTo` 在 hosted 低采样下仍可能因横向误差持续按键直至离开高架。`walkTo` 改为最多约 4 格一段的真实输入：每段重新对准，按键至实际到达或位移上限，释放后等待 Authority ack 与落地，并在支持面下降超过 2 格时立即失败；长途路线仍由真实 Pointer Lock/键盘完成。
 
 ## 独立审阅
 
