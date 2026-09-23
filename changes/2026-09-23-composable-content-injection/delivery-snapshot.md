@@ -40,6 +40,8 @@
 - 修正后本地 production journey run `30bdd385-7fa6-4ddc-bdaf-c5dbb704ef71` 一次通过 C0–C5 与视觉回归（2 passed、第二 Playbook 定向 smoke 按 Classic artifact 预期 skipped）；本次 artifact `sourceDigest=6d159e6665df34933df30a6aab7e99ba1980c264001bb2f5b83c60b94a6ba6b8`、`artifactDigest=985882ab3bcede946eb0638a27a2c4b395dc64c126c1c9bfbe7f1d7292f5c781`。因执行时修复尚未提交，该记录只作为 pre-commit 验证，提交后仍重建并重跑 exact-head。
 - exact-head `2c8c9837` 的本地 production journey run `cc841e1d-0631-480e-bc60-9ee0eb9f5b1e` 单 attempt 通过；远端 run `35818671971` 两次均在 fixture floor 明确返回 `chunk-unavailable`，证明 hosted worldgen 在写入前尚未准备完长条 fixture 覆盖的全部 Chunk。fixture 现通过公开 `world.prepare({ kind: 'chunks' })` 一次性预热并核对完整 key 集合，再执行原子 fill；不以重试 mutation 掩盖部分提交。
 - Authority 预热版本的本地 production journey run `09c93cff-6956-4200-b9c9-89f00bf43448` 单 attempt 通过 C0–C5 与视觉回归；`sourceDigest=e6d4aaf2d0b474e4834b9e27879dfabd0dd7f1e9571663deddbd99b4f736e001`。因预热修复尚未提交，该记录只作为 pre-commit 验证。
+- exact-head `7bd90fdd` 的远端 run `35819877376` 已证明 fixture 预热和 C0/C1 稳定通过；首 attempt 在第三个资源前停于 `x=37.56`，距目标中心超过 5 格，retry 在 C3 刚放置方块前只首段跳跃并耗尽路线预算。采集 helper 现先以真实输入进入目标前固定工作距离、确认 Pointer Lock 后重新瞄准；跳跃路线的每个短脉冲都同时发送 Space，以跨越路线中新放置的障碍。
+- 真实输入 helper 修正后的本地 production journey run `0e43da65-76f9-4c32-9bcb-85c090864d32` 单 attempt 通过 C0–C5 与视觉回归；在较低采样下 C4 用时 2.4 分钟仍由原有 90 秒双向分段预算完成。`sourceDigest=7d6cf11693b23f74d8e73d8d1477b9a4a8f02d612f12750ccf184423b629b2f3`，因修复尚未提交，只作 pre-commit 验证。
 
 ## 独立审阅
 

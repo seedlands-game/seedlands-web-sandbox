@@ -309,7 +309,6 @@ export async function walkTo(
   const deadline = Date.now() + (options.timeout ?? 45_000);
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
-  let firstSegment = true;
   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
     if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
     await correctMouseToRoute({
@@ -321,15 +320,14 @@ export async function walkTo(
     const segmentStart = current;
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
     await page.keyboard.down(key);
-    if (options.jump && firstSegment) await page.keyboard.down('Space');
+    if (options.jump) await page.keyboard.down('Space');
     try {
       // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
       await new Promise<void>((resolve) => setTimeout(resolve, 300));
     } finally {
       await page.keyboard.up(key);
-      if (options.jump && firstSegment) await page.keyboard.up('Space');
+      if (options.jump) await page.keyboard.up('Space');
     }
-    firstSegment = false;
     current = await waitForSnapshot(
       page,
       (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding,
@@ -367,10 +365,12 @@ export async function adjustPitchToTarget(page: Page, target: Point): Promise<vo
 
 export async function mineVoxel(page: Page, target: Point): Promise<void> {
   const before = await snapshot(page);
-  if (before && target[0] + 0.5 - before.player[0] < 2.8)
-    await walkTo(page, [target[0] - 2.8, 0.5], { key: 'KeyS', tolerance: 0.65, timeout: 5_000 });
-  await adjustPitchToTarget(page, target);
+  if (!before) throw new Error('Classic snapshot is unavailable before mining.');
+  const approach: RoutePoint = [target[0] - 2.8, target[2] + 0.5];
+  const key = before.player[0] <= approach[0] ? 'KeyW' : 'KeyS';
+  await walkTo(page, approach, { key, tolerance: 0.65, timeout: 15_000 });
   await ensurePointerLock(page);
+  await adjustPitchToTarget(page, target);
   const attemptsBefore = (await snapshot(page))?.interactionAttempts ?? 0;
   await page.mouse.down({ button: 'left' });
   try {
