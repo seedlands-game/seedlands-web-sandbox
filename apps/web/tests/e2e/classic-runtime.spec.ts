@@ -1,7 +1,7 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
 import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
-import { expectPresentedDrop } from './classic-support/drops';
+import { expectPresentedDropOrPickup } from './classic-support/drops';
 import {
   adjustPitchToTarget,
   attackWithRealMouse,
@@ -207,7 +207,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
         (value) => value.worldRevision > baseline.worldRevision && value.lastCommitMeshChunkCount > 0,
       );
       minedMeshEvidence = current;
-      await expectPresentedDrop(page, resource.itemId);
+      await expectPresentedDropOrPickup(page, resource.itemId, countBefore);
       await testInfo.attach(`drop-${resource.position[0]}`, {
         body: await page.screenshot(),
         contentType: 'image/png',
@@ -282,7 +282,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await closeInventory(page);
     const workbenchBeforePickup = itemCount(await playerState(page), 'workbench');
     await mineVoxel(page, classicScenario.route.stationTarget);
-    await expectPresentedDrop(page, 'workbench');
+    await expectPresentedDropOrPickup(page, 'workbench', workbenchBeforePickup);
     await walkTo(page, [classicScenario.route.stationTarget[0] + 1.5, 0.5], { jump: true });
     await expect
       .poll(async () => itemCount(await playerState(page), 'workbench'))
