@@ -26,6 +26,8 @@
 
 全部为 COMPLETE 才输出 100%。Classic 原版精确等价度继续作为差异账，不冒充工程交付状态；排除范围不进入未完成分母。
 
+2026-09-23 最终核销：exact-head `8eba636` 的 CI run `35805790662` 六个 job 全部通过，当前 change ledger 为 10/10、100%。
+
 ## Reporter 修正
 
 后续定时汇报必须运行 `node scripts/classic-progress-ledger.mjs` 并引用输出，不再自行估算 93–94%。需要汇报 Classic 原版等价度时，单独展示 coverage 的 IMPLEMENTED/PARTIAL/NOT_AUDITED 和 execution 分布，不与当前 change 完成度混算。
