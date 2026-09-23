@@ -424,7 +424,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       classicScenario.route.stationTarget[1] - 1,
       classicScenario.route.stationTarget[2],
     ];
-    const supportAim = await aimAtVoxelWithRealMouse(page, stationSupport);
+    const supportAim = await aimAtVoxelWithRealMouse(page, stationSupport, classicScenario.route.stationTarget);
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { realMouseAim: { support: supportAim } });
     await clickCanvasCenter(page, 'right');
     await expect.poll(() => voxelAt(page, classicScenario.route.stationTarget)).toBe(11);

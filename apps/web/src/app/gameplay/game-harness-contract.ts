@@ -50,5 +50,9 @@ export type HarnessApi = {
   } | null;
   presentedEntityPosition: (entityId: string) => [number, number, number] | null;
   aimedEntityId: () => string | null;
+  aimedVoxelTarget: () => {
+    position: readonly [number, number, number];
+    adjacent: readonly [number, number, number] | null;
+  } | null;
   playerDamageFeedback: () => { pitch: number; yaw: number; roll: number; active: boolean };
 };

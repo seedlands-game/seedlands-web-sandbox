@@ -39,7 +39,11 @@ const horizontalDistance = (player: Point, point: TargetCardPoint) =>
  * Every view change is Pointer Lock mouse input; the target card is the visible
  * readback used to decide the next bounded correction.
  */
-export async function aimAtVoxelWithRealMouse(page: Page, target: Point): Promise<RealMouseAimEvidence> {
+export async function aimAtVoxelWithRealMouse(
+  page: Page,
+  target: Point,
+  adjacent?: Point,
+): Promise<RealMouseAimEvidence> {
   const expected = target.join(',');
   const history: Array<string | null> = [];
   let firstObserved: string | null | undefined;
@@ -47,14 +51,17 @@ export async function aimAtVoxelWithRealMouse(page: Page, target: Point): Promis
   let totalY = 0;
 
   for (let attempt = 1; attempt <= 180; attempt += 1) {
-    const [observed, playerSnapshot] = await Promise.all([
+    const [observed, playerSnapshot, aimed] = await Promise.all([
       page.evaluate(() => document.querySelector('#target-card')?.getAttribute('data-target') ?? null),
       snapshot(page),
+      page.evaluate(() =>
+        (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.aimedVoxelTarget(),
+      ),
     ]);
     if (firstObserved === undefined) firstObserved = observed;
     history.push(observed);
     if (history.length > 12) history.shift();
-    if (observed === expected)
+    if (observed === expected && (!adjacent || aimed?.adjacent?.every((value, axis) => value === adjacent[axis])))
       return {
         target,
         firstObserved: firstObserved ?? null,

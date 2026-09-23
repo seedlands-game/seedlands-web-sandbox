@@ -102,6 +102,9 @@ export class BrowserGameplay {
   }
   // prettier-ignore
   setAimTarget(target: VoxelTarget | null): void { this.aimTarget = target?.inRange ? target : null; }
+  aimedVoxelTargetForHarness(): Pick<VoxelTarget, 'position' | 'adjacent'> | null {
+    return this.aimTarget ? { position: this.aimTarget.position, adjacent: this.aimTarget.adjacent } : null;
+  }
   prepareMeleeShowcase(): Promise<void> {
     return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
       .catch((error: unknown) => {

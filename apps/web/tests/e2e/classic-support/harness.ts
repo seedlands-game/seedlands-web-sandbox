@@ -121,6 +121,7 @@ export type HarnessApi = {
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;
   aimedEntityId(): string | null;
+  aimedVoxelTarget(): Readonly<{ position: Point; adjacent: Point | null }> | null;
   setView(yaw: number, pitch: number): void;
   setTimePaused(paused: boolean): void;
   setTimeSpeed(speed: number): void;
