@@ -80,8 +80,7 @@ export class AuthoritySession {
       state.activeTimeMs,
       state.scheduler ?? undefined,
     );
-    // prettier-ignore
-    this.input = new InputCommandBuffer(options.epoch, 'player-input', { maxHoldTicks: Math.ceil(options.frequencies.physicsHz / 2) });
+    this.input = new InputCommandBuffer(options.epoch, 'player-input');
     this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
     this.collisionWorld = new VoxelCollisionWorld(
       options.voxelSource,

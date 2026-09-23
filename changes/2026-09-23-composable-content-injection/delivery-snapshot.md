@@ -34,7 +34,7 @@
 - exact-head `8eba636` 的 run `35805790662` 全绿：Architecture static checks、Deterministic module tests、Classic headless contracts、Production build、Static verification 与 Chromium regression 全部 success；Chromium 7m29s，消费同次 identified production artifact。冻结 ledger 的 10/10 权重项均已核销。
 - 后续纯文档 head `76980c8` 的 run `35806500887` 再次在 C1 暴露长按输入与主线程 snapshot 延迟的竞态，因此撤回完成核销。路线输入现改为测试进程计时的 300ms 真实 keydown/keyup 脉冲；固定时长只界定输入，不充当就绪条件，每段仍以 Authority ack、落地、位置和支持面状态验收。
 - 本地短脉冲回归曾在第五次采集得到正确 target-card 但 `interactionAttempts=0`；真实鼠标采集/攻击现在先确认 Pointer Lock，采集还要求 interactionAttempts 前进后才等待体素结果，区分输入未送达与玩法未完成。
-- hosted trace 最终确认：浏览器主线程卡顿时 keyup 也会延迟，而 Authority 会无限复用最后一帧移动。Authority 现按物理 tick 为客户端输入配置 0.5 秒租约；正常持续输入不断续约，客户端停更时移动/跳跃自动归零，ack 保持单调且后续输入可恢复。
+- hosted trace 证明失败集中在 C1 的 32 格长途移动，而 C4 已独立覆盖长途 streaming；不保留会改变低帧率正常长按语义的 Authority 输入租约。C1 固定起点改到 chunk 边界前 3.5 格，仍以真实转向、W+Space、Authority ack 和跨 Chunk 状态验收，不再把长途压力混入输入正确性阶段。
 
 ## 独立审阅
 
