@@ -110,24 +110,27 @@ export class InputCommandBuffer {
   private consumedPhysicsTick = -1;
   private lastAcceptedTargetTick = -1;
   private resyncRequired = false;
-  private readonly limits: Readonly<{ maxFutureTicks: number; maxPendingCommands: number }>;
+  private readonly limits: Readonly<{ maxFutureTicks: number; maxPendingCommands: number; maxHoldTicks?: number }>;
 
   constructor(
     epoch: SessionEpoch,
     stream: string,
-    limits: Partial<Readonly<{ maxFutureTicks: number; maxPendingCommands: number }>> = {},
+    limits: Partial<Readonly<{ maxFutureTicks: number; maxPendingCommands: number; maxHoldTicks: number }>> = {},
   ) {
     this.gate = new EpochSequenceGate(epoch, stream);
     this.currentValue = idleInput(epoch, stream);
     this.limits = {
       maxFutureTicks: limits.maxFutureTicks ?? 240,
       maxPendingCommands: limits.maxPendingCommands ?? 256,
+      ...(limits.maxHoldTicks === undefined ? {} : { maxHoldTicks: limits.maxHoldTicks }),
     };
     if (
       !Number.isSafeInteger(this.limits.maxFutureTicks) ||
       this.limits.maxFutureTicks < 1 ||
       !Number.isSafeInteger(this.limits.maxPendingCommands) ||
-      this.limits.maxPendingCommands < 1
+      this.limits.maxPendingCommands < 1 ||
+      (this.limits.maxHoldTicks !== undefined &&
+        (!Number.isSafeInteger(this.limits.maxHoldTicks) || this.limits.maxHoldTicks < 1))
     )
       throw new RangeError('Input buffer limits must be positive integers.');
   }
@@ -196,6 +199,15 @@ export class InputCommandBuffer {
       this.consumedSequence = command.sequence;
       jumpEdge ||= command.edges.jumpPressed;
     }
+    if (
+      this.limits.maxHoldTicks !== undefined &&
+      physicsTick - this.currentValue.targetPhysicsTick > this.limits.maxHoldTicks
+    )
+      this.currentValue = {
+        ...this.currentValue,
+        state: { moveX: 0, moveZ: 0, verticalIntent: 0, jumpHeld: false },
+        edges: { jumpPressed: false },
+      };
     return {
       state: { ...this.currentValue.state },
       jumpRequested: jumpEdge || this.currentValue.state.jumpHeld,

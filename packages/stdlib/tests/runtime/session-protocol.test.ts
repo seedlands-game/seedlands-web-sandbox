@@ -84,6 +84,27 @@ describe('runtime session protocol', () => {
     expect(buffer.consumeForTick(4)).toMatchObject({ state: { moveX: 0 }, acknowledgedSequence: 2 });
   });
 
+  it('可选输入租约在客户端停更时归零移动且允许后续输入恢复', () => {
+    const buffer = new InputCommandBuffer('world:1', 'player-input', { maxHoldTicks: 3 });
+    const command: InputCommand = {
+      kind: 'input',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: 'world:1',
+      stream: 'player-input',
+      sequence: 1,
+      targetPhysicsTick: 2,
+      issuedAtMs: 10,
+      state: { moveX: 1, moveZ: 0, verticalIntent: 0, jumpHeld: true },
+      edges: { jumpPressed: true },
+    };
+
+    expect(buffer.push(command)).toBe('accepted');
+    expect(buffer.consumeForTick(5)).toMatchObject({ state: { moveX: 1, jumpHeld: true }, acknowledgedSequence: 1 });
+    expect(buffer.consumeForTick(6)).toMatchObject({ state: { moveX: 0, jumpHeld: false }, acknowledgedSequence: 1 });
+    expect(buffer.push({ ...command, sequence: 2, targetPhysicsTick: 8 })).toBe('accepted');
+    expect(buffer.consumeForTick(8)).toMatchObject({ state: { moveX: 1 }, acknowledgedSequence: 2 });
+  });
+
   it('迟到到已经积分 tick 的新输入进入明确重同步状态', () => {
     const buffer = new InputCommandBuffer('world:1', 'player-input');
     buffer.consumeForTick(5);

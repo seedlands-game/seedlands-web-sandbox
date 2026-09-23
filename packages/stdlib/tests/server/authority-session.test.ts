@@ -109,7 +109,7 @@ describe('AuthoritySession', () => {
     expect(session.wake(50).commitSequence).toBe(5);
   });
 
-  it('在逻辑没有返回新意图时仍独立产出固定物理快照', () => {
+  it('在逻辑没有返回新意图时仍独立产出固定物理快照并让过期玩家输入归零', () => {
     const server = new MemoryAuthorityServer(player());
     const session = new AuthoritySession({
       execution: createTestAuthorityExecution(),
@@ -129,7 +129,8 @@ describe('AuthoritySession', () => {
     for (let frame = 1; frame <= 60; frame += 1) snapshot = session.wake((frame * 1_000) / 60);
 
     expect(snapshot.physicsTick).toBe(60);
-    expect(snapshot.player.body.position.x).toBeGreaterThan(3);
+    expect(snapshot.player.body.position.x).toBeGreaterThan(2);
+    expect(snapshot.player.body.position.x).toBeLessThan(3);
     expect(snapshot.acknowledgedInputSequence).toBe(1);
     expect(server.gameplayAdvanceSeconds).toBeCloseTo(1, 7);
   });
