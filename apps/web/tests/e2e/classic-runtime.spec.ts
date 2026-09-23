@@ -28,7 +28,6 @@ import { clearNaturalFixtureEntities } from './classic-support/fixture-entities'
 import { startClassicWorld } from './classic-support/start';
 import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
 import { aimAtVoxelWithRealMouse } from './classic-support/aim';
-import { correctMouseToRoute } from './classic-support/target-aim';
 import {
   attachClassicEvidence,
   attachClassicFailure,
@@ -175,33 +174,11 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await page.keyboard.up('KeyW');
     const turned = (await snapshot(page))!;
     expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);
-    await correctMouseToRoute({
-      target: classicScenario.route.chunkCrossing,
-      direction: 'KeyW',
-      observe: () => snapshot(page),
-      move: (dx, dy) => moveMouseBy(page, dx, dy),
-    });
-    await page.keyboard.down('KeyW');
-    await page.keyboard.down('Space');
-    let crossed: ClassicSnapshot;
-    try {
-      crossed = await waitForSnapshot(page, (value) => value.streamCenter[0] >= 1, 90_000);
-    } finally {
-      await page.keyboard.up('KeyW');
-      await page.keyboard.up('Space');
-    }
-    crossed = await waitForSnapshot(
-      page,
-      (value) =>
-        value.authority.acknowledgedInputSequence > crossed.authority.acknowledgedInputSequence &&
-        value.streamCenter[0] >= 1 &&
-        value.onGround &&
-        !value.colliding,
-      30_000,
-    );
+    const crossed = await walkTo(page, classicScenario.route.chunkCrossing, { jump: true, timeout: 90_000 });
     expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);
     expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);
     expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);
+    expect(crossed.player[1]).toBeGreaterThan(61);
     expect(crossed.onGround).toBe(true);
     expect(crossed.colliding).toBe(false);
     stageResults.C1 = {
