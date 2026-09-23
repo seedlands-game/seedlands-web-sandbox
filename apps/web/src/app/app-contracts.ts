@@ -73,6 +73,7 @@ export type PerformanceSummary = {
 export type HarnessSnapshot = {
   frameMs: number;
   player: [number, number, number];
+  viewAngles: readonly [number, number];
   loadedChunks: number;
   renderedChunks: number;
   streamCenter: [number, number];

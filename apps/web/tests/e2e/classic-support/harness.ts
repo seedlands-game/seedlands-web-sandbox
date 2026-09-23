@@ -1,6 +1,8 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { reachedRouteTarget } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
+import { correctMouseToRoute, correctMouseUntilEntityAimed, mouseCorrectionToVoxel } from './target-aim';
+import { queryEntity } from './combat-entity';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
 export type PlayerState = Readonly<{
@@ -28,6 +30,7 @@ export type CharacterObservation = Readonly<{
 // prettier-ignore
 export type ClassicSnapshot = Readonly<{
   player: Point;
+  viewAngles: readonly [number, number];
   streamCenter: readonly [number, number];
   loadedChunks: number;
   renderedChunks: number;
@@ -117,6 +120,7 @@ type HarnessResult<T> = Readonly<
 export type HarnessApi = {
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;
+  aimedEntityId(): string | null;
   setView(yaw: number, pitch: number): void;
   setTimePaused(paused: boolean): void;
   setTimeSpeed(speed: number): void;
@@ -302,6 +306,12 @@ export async function walkTo(
 ): Promise<ClassicSnapshot> {
   const key = options.key ?? 'KeyW';
   let sequenceBeforeRelease = 0;
+  await correctMouseToRoute({
+    target,
+    direction: key,
+    observe: () => snapshot(page),
+    move: (dx, dy) => moveMouseBy(page, dx, dy),
+  });
   await page.keyboard.down(key);
   if (options.jump) await page.keyboard.down('Space');
   try {
@@ -345,10 +355,15 @@ export async function adjustPitchToTarget(page: Page, target: Point): Promise<vo
     if (observed === target.join(',')) return;
     const point = observed?.split(',').map(Number);
     const validPoint = point && point.length === 3 && point.every((value) => Number.isFinite(value));
-    const moveDown = validPoint
-      ? point[1]! > target[1] || (point[1] === target[1] && point[0]! > target[0])
-      : attempt < 60;
-    await moveMouseBy(page, 0, moveDown ? (validPoint ? 6 : 12) : validPoint ? -6 : -12);
+    if (validPoint) {
+      const moveDown = point[1]! > target[1] || (point[1] === target[1] && point[0]! > target[0]);
+      await moveMouseBy(page, 0, moveDown ? 6 : -6);
+      continue;
+    }
+    const current = await snapshot(page);
+    if (!current) continue;
+    const correction = mouseCorrectionToVoxel(current.player, current.viewAngles, target);
+    await moveMouseBy(page, correction.dx, correction.dy);
   }
   throw new Error(`Real mouse input could not aim at ${target.join(',')}; last targets=${JSON.stringify(history)}.`);
 }
@@ -423,24 +438,28 @@ export async function playerState(page: Page): Promise<PlayerState> {
   });
 }
 
-type EntityProjection = Readonly<{ id: string; health: number }>;
-
-const entity = (page: Page, entityId: string): Promise<EntityProjection | null> =>
-  page.evaluate(async (entityId) => {
-    const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.command({
-      type: 'query-entity',
-      entityId,
-    });
-    if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
-    const payload = result.data as { success?: boolean; data?: { entity?: EntityProjection | null } };
-    if (!payload.success) throw new Error('Entity query failed.');
-    return payload.data?.entity ?? null;
-  }, entityId);
-
 export async function attackWithRealMouse(page: Page, entityId: string): Promise<void> {
-  const initial = await entity(page, entityId);
+  const initial = await queryEntity(page, entityId);
   if (!initial) throw new Error('Classic hostile disappeared before combat.');
   expect(initial.health).toBe(12);
+  await correctMouseUntilEntityAimed({
+    entityId,
+    observe: () =>
+      page.evaluate((entityId) => {
+        const harness = (window as unknown as ClassicWindow).__seedlandsHarness!;
+        const entityPosition = harness.presentedEntityPosition(entityId);
+        const current = harness.snapshot();
+        return entityPosition
+          ? {
+              aimedEntityId: harness.aimedEntityId(),
+              entityPosition,
+              player: current.player,
+              viewAngles: current.viewAngles,
+            }
+          : null;
+      }, entityId),
+    move: (dx, dy) => moveMouseBy(page, dx, dy),
+  });
   await page.evaluate(() => {
     const target = window as Window & {
       __classicCombatEvidence?: string[];
@@ -468,7 +487,7 @@ export async function attackWithRealMouse(page: Page, entityId: string): Promise
         }),
       )
       .toEqual({ buffered: true, secondStep: true, secondDamage: true });
-    await expect.poll(() => entity(page, entityId)).toBeNull();
+    await expect.poll(() => queryEntity(page, entityId)).toBeNull();
   } finally {
     await page.mouse.up();
     await page.evaluate(() =>

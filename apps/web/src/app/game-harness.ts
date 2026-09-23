@@ -23,6 +23,7 @@ import type { CollisionDebugRuntime } from './player/collision-debug-runtime';
 import type { FluidFeedbackTarget } from './gameplay/fluid-feedback-tracker';
 import type { AuthorityBodySnapshot } from '@seedlands/stdlib/server/authority/authority-session-types';
 import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-harness-contract';
+import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
 
 export type HarnessApi = {
   world: WorldHarnessPort;
@@ -65,6 +66,7 @@ export type HarnessApi = {
     grounded: boolean;
   } | null;
   presentedEntityPosition: (entityId: string) => [number, number, number] | null;
+  aimedEntityId: () => string | null;
   playerDamageFeedback: () => { pitch: number; yaw: number; roll: number; active: boolean };
 };
 
@@ -211,6 +213,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
   return {
     frameMs: context.frameMs,
     player,
+    viewAngles: context.controller?.viewAngles ?? [0, -16],
     streamCenter: context.world?.streamCenter ?? [0, 0],
     loadedChunks: telemetry?.loadedChunks ?? 0,
     renderedChunks: telemetry?.renderedChunks ?? 0,
@@ -460,6 +463,22 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         : null;
     },
     presentedEntityPosition: (entityId) => bindings.gameplay()?.presentedEntityPosition(entityId) ?? null,
+    aimedEntityId: () => {
+      const controller = bindings.controller();
+      const camera = bindings.camera();
+      const gameplay = bindings.gameplay();
+      if (!controller || !camera || !gameplay) return null;
+      const position = controller.position;
+      const direction = camera.forward;
+      return (
+        nearestEntityHit(
+          gameplay.attackTargetsForHarness(),
+          [position.x, position.y, position.z],
+          [direction.x, direction.y, direction.z],
+          3,
+        )?.id ?? null
+      );
+    },
     playerDamageFeedback: () => bindings.controller()?.damageFeedback ?? { pitch: 0, yaw: 0, roll: 0, active: false },
   };
 }

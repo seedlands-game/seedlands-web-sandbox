@@ -24,6 +24,10 @@
 - 远端首轮 `Classic headless contracts` 因两个测试 fixture 未同步新增 presentation resource receipt 而失败；生产路径无同类问题。fixture 已修，完整 `pnpm test:classic:headless` 23 files / 62 tests PASS，等待新 head 的远端重跑。
 - exact-head `204c116f` 的 run `35796243829` 中静态、确定性、Classic headless、production build 与视觉回归通过；C0–C5 在 hosted SwiftShader 低采样率下暴露 Harness 固定方向越过精确坐标仍持续按键、以及只接受瞬时 `streamCenter === 1` 的验收缺陷。修复保留真实键盘输入，以“进入容差或沿路线越过且未横向偏离”释放按键，并把跨 Chunk 完成边界绑定到 `streamCenter >= 1`、Authority 新 ack、落地且无碰撞。纯逻辑反例 2/2 PASS；当前工作树重新生产构建后，唯一 Classic spec 为 C0–C5 与视觉 2 passed、第二 Playbook 按 Classic artifact 预期 skipped。
 - exact-head `0c774fb` 的 run `35798257813` 再次通过五个非浏览器门禁与视觉回归；C1 两次通过，C2 trace 显示真实转向留下 0.934 格横向偏移，测试把 0.65 格到点半径误作越界后的走廊宽度，持续后退至离开加载碰撞。到点半径保持 0.65，只有已沿 x 越过目标时使用 1.5 格路线走廊；超出走廊仍失败。
+- exact-head `0bf8c83` 的 run `35799448730` 再次通过五个非浏览器门禁与视觉回归；C2 后退步骤已通过，但目标卡持续为空。失败 snapshot 显示玩家安全落地于 `[28.78, 61.6, 1.37]`，距离首个资源仍约 5.8 格；根因是既有 `adjustPitchToTarget` 只修正俯仰，无法消除 C1 真实水平转向残差。Harness snapshot 新增 controller 的只读 `viewAngles`，瞄准仍只发送真实 Pointer Lock 鼠标输入，并以玩家位置、当前角度和目标中心计算有界 dx/dy。
+- 同一只读角度证据也用于战斗前把真实鼠标对准敌对实体中心；此前战斗 helper 直接沿用采矿后的向下视角，失败 snapshot 为 `yaw=-73.1, pitch=-47.2`，因此没有产生任何第一击或连击反馈。
+- 本地验证确认战斗恢复后，下一次前往工作台仍继承战斗 yaw；`walkTo` 因此在每段路线开始前以真实水平鼠标输入重新对准目标方向（S 则背向目标），不再假设采矿/战斗后的 yaw 自动回到 x 轴。
+- 方块瞄准保留 target-card 的可见面反馈：已有命中时按相邻面的高低小步修正，完全脱靶时才用只读 view angle 重获目标，避免对地板目标的中心射线被前一格地板遮挡。
 
 ## 独立审阅
 

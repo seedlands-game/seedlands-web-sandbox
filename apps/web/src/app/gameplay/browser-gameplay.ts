@@ -6,7 +6,7 @@ import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
-import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
+import { nearestEntityHit } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { voxelNames } from '@seedlands/stdlib/world/voxel';
@@ -356,14 +356,12 @@ export class BrowserGameplay {
     direction: readonly [number, number, number],
     maxDistance: number,
   ): boolean {
-    const target = this.options.authority.gameplay.entities
-      .filter((entity) => entity.type === 'creature' || entity.type === 'npc')
-      .map((entity) => ({
-        entity,
-        distance: entityHitDistance(entity.position, entity.archetype, origin, direction, maxDistance),
-      }))
-      .filter((hit): hit is typeof hit & { distance: number } => hit.distance !== null)
-      .sort((left, right) => left.distance - right.distance)[0]?.entity;
+    const target = nearestEntityHit(
+      this.options.authority.gameplay.entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc'),
+      origin,
+      direction,
+      maxDistance,
+    );
     if (!target) return false;
     void this.action({ type: 'attack', targetId: target.id }, (result) => {
       if (!result.success) {
@@ -383,6 +381,9 @@ export class BrowserGameplay {
     });
     return true;
   }
+
+  // prettier-ignore
+  attackTargetsForHarness() { return this.options.authority.gameplay.entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc'); }
 
   beginBreak(position: [number, number, number]): Promise<void> {
     if (rejectOutOfBoundsBrowserBreak(position, this.feedback.bind(this))) return Promise.resolve();

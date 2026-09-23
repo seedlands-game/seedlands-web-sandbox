@@ -86,7 +86,7 @@ archetype 改为有界 namespace-qualified ID；旧 Classic 非命名空间 ID �
 - [x] actor archetype registry 去固定名单。
 - [x] Pack presentation manifest 与 Web 通用消费。
 - [x] 第二 Playbook 无特权证明。
-- [ ] 本地静态、确定性、production、C0–C5 与独立审阅已完成；exact-head 远端除 Chromium 外通过。Chromium runs `35796243829` / `35798257813` 暴露 hosted SwiftShader 低采样率下固定方向移动越过精确坐标后不会释放按键、跨 Chunk 只接受瞬时 `streamCenter === 1`，以及把 0.65 格到点半径误作越界后的横向走廊宽度；保留真实输入，分别按“到点半径”“越界且仍在 1.5 格路线走廊”与 `streamCenter >= 1` 验收，完成 RED/GREEN 和新 exact-head CI 后核销。
+- [ ] 本地静态、确定性、production、C0–C5 与独立审阅已完成；exact-head 远端除 Chromium 外通过。Chromium runs `35796243829` / `35798257813` / `35799448730` 依次暴露 hosted SwiftShader 的精确坐标采样、路线走廊和真实转向后水平瞄准缺口；保留真实键鼠输入，按到点半径、越界走廊与只读 view angle 计算有界鼠标纠偏，完成 RED/GREEN 和新 exact-head CI 后核销。
 
 ## V1 显式边界
 
