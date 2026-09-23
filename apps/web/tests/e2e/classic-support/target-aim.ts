@@ -12,6 +12,9 @@ const normalizeDegrees = (value: number) => {
 
 const clampStep = (value: number) => Math.max(-MAX_MOUSE_STEP, Math.min(MAX_MOUSE_STEP, value));
 
+export const voxelInteractionDistance = (player: Point, target: Point) =>
+  Math.hypot(target[0] + 0.5 - player[0], target[1] + 0.5 - player[1], target[2] + 0.5 - player[2]);
+
 export function mouseCorrectionToVoxel(
   player: Point,
   viewAngles: readonly [number, number],

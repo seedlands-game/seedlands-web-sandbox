@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { horizontalMouseCorrectionToRoute, mouseCorrectionToPoint, mouseCorrectionToVoxel } from './target-aim';
+import {
+  horizontalMouseCorrectionToRoute,
+  mouseCorrectionToPoint,
+  mouseCorrectionToVoxel,
+  voxelInteractionDistance,
+} from './target-aim';
 
 describe('Classic real-mouse target correction', () => {
   it('corrects the hosted C1 yaw residue toward the first resource voxel', () => {
@@ -28,5 +33,10 @@ describe('Classic real-mouse target correction', () => {
   it('aligns W toward a route target and S away from it', () => {
     expect(horizontalMouseCorrectionToRoute([56, 61.6, 0.5], -73, [72.5, 0.5], 'KeyW')).toBeGreaterThan(0);
     expect(Math.abs(horizontalMouseCorrectionToRoute([208.5, 61.6, 0.5], -90, [72.5, 0.5], 'KeyS'))).toBe(0);
+  });
+
+  it('measures gameplay reach from the player to the voxel center', () => {
+    expect(voxelInteractionDistance([29.61, 61.6, 0.48], [34, 60, 0])).toBeGreaterThan(5);
+    expect(voxelInteractionDistance([31.5, 61.6, 0.5], [34, 60, 0])).toBeLessThan(5);
   });
 });

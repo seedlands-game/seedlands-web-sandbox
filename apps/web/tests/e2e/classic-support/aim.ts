@@ -1,5 +1,6 @@
 import type { Page } from '@playwright/test';
-import { moveMouseBy, snapshot } from './harness';
+import { snapshot } from './harness';
+import { moveMouseBy } from './mouse-input';
 import type { Point } from './scenario';
 
 const MOUSE_SENSITIVITY_DEGREES = 0.13;
