@@ -28,6 +28,7 @@ import { clearNaturalFixtureEntities } from './classic-support/fixture-entities'
 import { startClassicWorld } from './classic-support/start';
 import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
 import { aimAtVoxelWithRealMouse } from './classic-support/aim';
+import { correctMouseToRoute } from './classic-support/target-aim';
 import {
   attachClassicEvidence,
   attachClassicFailure,
@@ -174,7 +175,12 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await page.keyboard.up('KeyW');
     const turned = (await snapshot(page))!;
     expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);
-    await moveMouseBy(page, -80, 0);
+    await correctMouseToRoute({
+      target: classicScenario.route.chunkCrossing,
+      direction: 'KeyW',
+      observe: () => snapshot(page),
+      move: (dx, dy) => moveMouseBy(page, dx, dy),
+    });
     await page.keyboard.down('KeyW');
     await page.keyboard.down('Space');
     let crossed: ClassicSnapshot;
