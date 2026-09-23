@@ -254,6 +254,7 @@ export async function walkTo(
     tolerance?: number;
     corridorTolerance?: number;
     timeout?: number;
+    pulseMs?: number;
   }> = {},
 ): Promise<ClassicSnapshot> {
   const key = options.key ?? 'KeyW';
@@ -276,7 +277,7 @@ export async function walkTo(
     if (options.jump) await page.keyboard.down('Space');
     try {
       // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
-      await new Promise<void>((resolve) => setTimeout(resolve, 300));
+      await new Promise<void>((resolve) => setTimeout(resolve, options.pulseMs ?? 300));
     } finally {
       await page.keyboard.up(key);
       if (options.jump) await page.keyboard.up('Space');
@@ -319,8 +320,15 @@ export async function adjustPitchToTarget(page: Page, target: Point): Promise<vo
 export async function mineVoxel(page: Page, target: Point): Promise<void> {
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before mining.');
-  if (voxelInteractionDistance(current.player, target) > 4.5) {
-    await walkTo(page, [target[0] - 2.5, target[2] + 0.5], { key: 'KeyW', tolerance: 0.65, timeout: 15_000 });
+  const distance = voxelInteractionDistance(current.player, target);
+  if (distance < 2.5 || distance > 4.5) {
+    const approach: RoutePoint = [target[0] - 2.8, target[2] + 0.5];
+    await walkTo(page, approach, {
+      key: current.player[0] <= approach[0] ? 'KeyW' : 'KeyS',
+      tolerance: 0.45,
+      timeout: 15_000,
+      pulseMs: 100,
+    });
     current = await snapshot(page);
     if (!current || voxelInteractionDistance(current.player, target) > 5)
       throw new Error(`Mining target ${target.join(',')} remains out of range.`);

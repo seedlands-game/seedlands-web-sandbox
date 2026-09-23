@@ -262,6 +262,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await equipFromInventory(page, '工作台');
     await closeInventory(page);
     await page.keyboard.press('Digit1');
+    await walkTo(page, classicScenario.route.stationApproach, { jump: true });
     const stationSupport: Point = [
       classicScenario.route.stationTarget[0],
       classicScenario.route.stationTarget[1] - 1,

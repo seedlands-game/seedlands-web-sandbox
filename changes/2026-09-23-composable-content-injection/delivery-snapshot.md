@@ -45,6 +45,7 @@
 - exact-head `e8cb6d38` 的远端 run `35821592336` 已稳定通过 fixture、C0/C1，并分别推进到 C2/C3；failure snapshot 表明原“太近即后退”策略把首个资源从约 1.5 格退到 5 格外，工作台采集同样因进入点过冲而失去目标。采集现只在实际三维距离超过 4.5 格时向前接近，且在瞄准前显式确认不超过玩法 5 格交互范围。
 - 帧同步目标获取版本的本地 production journey run `605bc82a-2c61-469e-898d-fc829f79a445` 单 attempt 通过 C0–C5 与视觉回归；鼠标 primitive 拆到独立 helper，每次 Pointer Lock 移动后等待两个渲染帧再读 target-card。`sourceDigest=68928292a182fc02bb7ef5e959d136fcb3538cc48256014c140bf5839dbcfb7b`，因修复尚未提交，只作 pre-commit 验证。
 - exact-head `d5fe8e7f` 本地首次运行确认方块已破坏但掉落被立即拾取（`worldItemCount=0`、`inventoryOperationCount=1`），旧断言只接受仍可见的掉落实体而误报；修正为“世界中可见掉落或同物品库存已增加”，且后续库存增长断言不变。修正后的本地 run `46b031e5-5d95-48fe-b5ac-e40beb46561e` 单 attempt 通过 C0–C5 与视觉回归。
+- exact-head `4d9fa4c7` 的远端 run `35824579338` 首 attempt 已通过 C0–C5，后续恢复交互在支撑方块外 5 格瞄准失败；retry 则站在首个资源上方并在相邻面间振荡。近距定位现用 100ms 真实输入脉冲进入 2.5–5 格工作带，默认路线仍为 300ms；C5 恢复后显式回到既有 stationApproach。修正后的本地 run `d08eeb88-bebe-4924-bf9c-72d568aae828` 单 attempt 通过完整 journey 与视觉回归。
 
 ## 独立审阅
 
