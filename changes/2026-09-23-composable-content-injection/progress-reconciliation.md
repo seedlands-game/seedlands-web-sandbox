@@ -26,7 +26,7 @@
 
 全部为 COMPLETE 才输出 100%。Classic 原版精确等价度继续作为差异账，不冒充工程交付状态；排除范围不进入未完成分母。
 
-2026-09-23 最终核销：实现 head `4df6c220` 的 CI run `35827299068` 六项门禁全部 success；冻结 ledger 7 项、权重 10/10 全部 COMPLETE，工程交付口径为 100%。Classic 原版精确等价度仍按差异账单独汇报。
+2026-09-23 状态回退：实现 head `4df6c220` 的 CI run `35827299068` 六项门禁全部 success，但最终文档 head `40025e5e` 的 Chromium run `35828509491` 再次暴露近距输入脉冲与 Authority 就绪等待共用 deadline 的缺陷；最终 exact-head 未全绿前恢复为 9/10、90%。
 
 ## Reporter 修正
 

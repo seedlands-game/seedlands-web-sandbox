@@ -285,7 +285,7 @@ export async function walkTo(
     current = await waitForSnapshot(
       page,
       (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding,
-      Math.min(20_000, Math.max(1, deadline - Date.now())),
+      20_000,
     );
     if (current.player[1] < segmentStart.player[1] - 2)
       throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);

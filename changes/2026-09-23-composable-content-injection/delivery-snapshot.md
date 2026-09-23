@@ -1,6 +1,6 @@
 # 交付快照
 
-日期：2026-09-23。状态：Delivered；代码、本地验收、独立审阅与 exact-head 远端六项门禁全部完成。
+日期：2026-09-23。状态：代码、本地验收与独立审阅完成；最终 exact-head 远端 Chromium 仍在收尾。
 
 ## 已实现
 
@@ -47,6 +47,7 @@
 - exact-head `d5fe8e7f` 本地首次运行确认方块已破坏但掉落被立即拾取（`worldItemCount=0`、`inventoryOperationCount=1`），旧断言只接受仍可见的掉落实体而误报；修正为“世界中可见掉落或同物品库存已增加”，且后续库存增长断言不变。修正后的本地 run `46b031e5-5d95-48fe-b5ac-e40beb46561e` 单 attempt 通过 C0–C5 与视觉回归。
 - exact-head `4d9fa4c7` 的远端 run `35824579338` 首 attempt 已通过 C0–C5，后续恢复交互在支撑方块外 5 格瞄准失败；retry 则站在首个资源上方并在相邻面间振荡。近距定位现用 100ms 真实输入脉冲进入 2.5–5 格工作带，默认路线仍为 300ms；C5 恢复后显式回到既有 stationApproach。修正后的本地 run `d08eeb88-bebe-4924-bf9c-72d568aae828` 单 attempt 通过完整 journey 与视觉回归。
 - exact-head `4df6c220` 本地 production journey run `18ce7336-b64d-4917-bb96-92d67449370c` 单 attempt PASS；远端 run `35827299068` 的 Architecture static checks、Deterministic module tests、Classic headless contracts、Production build、Static verification 与 Chromium regression 全部 success。Chromium job `107072028331` 用时 9m05s，消费该 run 的 identified production artifact；冻结 ledger 10/10 核销。
+- 最终文档 head `40025e5e` 的远端 run `35828509491` 前五项门禁通过，但两个 Chromium attempt 均在近距 `walkTo` 最后一次脉冲后以 `Timeout 1ms` 失败。根因是总体 deadline 同时被错误用作已发送输入的 Authority ack/落地等待；修正后 deadline 只禁止发出新脉冲，每个已发送脉冲仍使用独立 20 秒就绪窗口。ledger 在新 exact-head 全绿前恢复为 9/10。
 
 ## 独立审阅
 

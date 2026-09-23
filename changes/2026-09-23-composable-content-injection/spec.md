@@ -1,6 +1,6 @@
 # 可组合内容注入闭环
 
-状态：Delivered。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
+状态：Active。用户要求直接实施，不再把 Classic 内容写死在 stdlib/Web，并把旧汇报长期停留的 94% 推进到可验证 100%。本 change 按 Breaking 管理；不改变单权威、WebGL2、紧凑数值体素存储和旧 Classic 存档 ABI。
 
 ## 用户结果、长期愿景与硬约束
 
@@ -86,7 +86,7 @@ archetype 改为有界 namespace-qualified ID；旧 Classic 非命名空间 ID �
 - [x] actor archetype registry 去固定名单。
 - [x] Pack presentation manifest 与 Web 通用消费。
 - [x] 第二 Playbook 无特权证明。
-- [x] 本地静态、确定性、production、C0–C5 与独立审阅完成；exact-head `4df6c220` 的远端 run `35827299068` 六项门禁全部 success，冻结 ledger 10/10 核销。
+- [ ] 本地静态、确定性、production、C0–C5 与独立审阅完成；实现 head `4df6c220` 的远端 run `35827299068` 六项门禁全部 success，但最终文档 head `40025e5e` 的 Chromium 再次暴露近距脉冲后把剩余 1ms 总体 deadline 误作 Authority 就绪窗口。待新 exact-head CI 后核销。
 
 ## V1 显式边界
 
