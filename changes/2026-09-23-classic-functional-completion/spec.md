@@ -1,0 +1,172 @@
+# Classic 功能闭环、统一光照与 Mod 唱片
+
+状态：实施中 / Breaking；用户已于 2026-09-24 明确批准现有目标与执行安排。
+
+日期：2026-09-23
+
+唯一协调目录：changes/2026-09-23-classic-functional-completion/
+唯一总负责人：Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10`。本轮授权不是对历史任一 SHA-256 的追认；后续以本文、`architecture.md`、`tasks.md` 与 `execution-state.md` 的当前内容为实施和恢复依据。
+TAKEOVER-01 公共实施负责人 / 唯一 Git writer：Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e`。总负责人负责派工、建模和准出，不代替 TAKEOVER-01 执行 Git 写入。
+
+## 目标与分层
+
+让 Classic 已注册内容从“存在于 registry 或内部 runtime 测试”变成玩家可从真实浏览器输入使用、得到可见反馈、保存并恢复的能力；统一自然光、方块光与实体/手持物的受光语义；交付一张由 Classic Mod 打包、可在唱片机播放的音频唱片。
+
+- Kernel 不增加 Classic 玩法概念，只保留现有身份、注册、授权、事务、调度、版本与窄端口。
+- stdlib 提供由配置驱动的交互、装备、结构、攀爬、路线、载具、媒体播放状态和纯光照算法，不识别 Classic item/voxel/species/track ID。
+- Classic/Mod 持有具体内容、规则参数、资源映射、曲目、获得方式和 render profile。
+- Web runtime 持有浏览器输入/HUD、预测、renderer、Web Audio、Pack media I/O 与失败反馈，只消费已提交投影/事实。
+
+## 当前事实
+
+- 当前注册 194 个物品。按唯一主 capability 统计：place=80、mine=15、melee=5、consume=10、till=5、fluid-container=3、ranged=1、armor=16、无 capability=59。注册或纯 runtime 测试不等于玩家可用。
+- BrowserGameplay.useTarget 当前只打开 station，useHeldItem 只 consume；AuthorityAction 缺少多数交互入口。两格结构、装备、流体、投射、农业、物种/生活技能、导航和车辆 runtime 多数是入口孤岛。
+- 门无开关/完整碰撞，梯子无攀爬，轨道无四个弯角，车辆不进入正式 Authority entity projection，玩家与车辆位置存在双 owner 风险。
+- 本轮此前运行四个既有 integration files / 16 tests 并通过，只是历史 control，不是新实现 GREEN。
+- 方块光由 per-chunk cache/3D texture 持有；自然光是全局 sun+ambient。地形/水把 block light 加到 dEmission，实体另以 0.72 增 emission，手持物未接入；质量档切 tone mapping。
+- record-13、record-cat 与 jukebox 只有内容/材质/配方。设置中的旧“本地参考曲”是 GlobalAudio.importReference → MusicPlayer 的内存 AudioBuffer，导入后立即替换当前音乐且不持久化；用户已明确取消这类自定义能力，本 change 必须让该上传/替换入口及专属状态和测试退场。内置合成音乐、master/music/sfx/ambience 音量与普通音效保持原语义。
+- Pack 构建会摘要并复制 manifest.resources；现有 presentation loader 单文件上限 1 MiB 且只处理图像/GLB，不能承载 2,976,045-byte MP3，也不得为音频放宽它。
+- docs/ci-testing.md 的 2026-09-20 条款已恢复 Classic Headless、Production build 和唯一 Chromium；09-16 冻结仅是历史段。
+
+## 完整内容行为矩阵
+
+矩阵覆盖当前 194 项；每族都要有后端 owner、真实入口、表现、保存与测试。原材料不伪造右键用途。
+
+| 内容族        | 代表/数量                                    | 完成合同                                                                               |
+| ------------- | -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 普通单格放置  | place=80 中非状态结构                        | 真实右键、原子扣物、碰撞/unknown/stale 拒绝、可见 mesh；registry 逐项不得 unclassified |
+| 采集与近战    | mine=15、melee=5                             | 正式 break/attack、品质/掉落/耐久；补 wood-sword 耐久                                  |
+| 食物与余物    | consume=10                                   | 生命/饥饿、满包原子；蘑菇煲返 bowl、奶桶返空桶                                         |
+| 农业          | till=5、种子、作物、骨粉                     | 锄地、种植、成长、收割、满包和恢复；Classic 配置具体作物                               |
+| 流体容器      | 桶、水桶、熔岩桶                             | 取/倒流体、挤奶、余容器；多桶和满包不吞物                                              |
+| 远程/投掷     | 弓、箭、雪球、鸡蛋                           | 瞄准/发射、弹药/耐久、命中/遮挡/孵化和恢复；复用唯一 Projectile owner                  |
+| 装备          | 16 件护甲                                    | 四槽穿脱/交换、减伤、耐久、满包、死亡策略、恢复与 HUD                                  |
+| 生物交互      | 剪刀、桶、骨、染料、鞍                       | 剪羊、挤奶、驯狼/坐下、染羊/骨粉、骑猪；距离/LOS/lifetime                              |
+| 环境/便携实体 | 打火石、TNT、画、钓鱼竿                      | 空气点火、已放置 TNT 原子引信、画锚点/掉落、投钩/收杆/奖励/耐久                        |
+| 导航          | 地图、指南针、时钟                           | 选中时显示权威地图/方向/相位；地图探索恢复；不拿全局 MacroMap 冒充                     |
+| 状态结构      | 门、床、活板门、梯子                         | 门两格/任一半开关/碰撞/联动破坏；床使用/重生；活板门切换；梯子上下攀爬                 |
+| 路线/载具     | 三类轨、三类矿车、船                         | 直线/四角/坡、部署、呈现、乘坐、控制、碰撞、安全下车、箱车/燃料和恢复                  |
+| 状态方块      | 告示牌、蛋糕、音符盒                         | 文本编辑/校验/渲染/恢复；蛋糕分片；音高切换/触发/恢复                                  |
+| 唱片          | record-13、record-cat、jukebox               | 一张旧 ID 绑定 Mod 曲目；插入/播放/取出/破坏/退出停止；恢复/失败反馈                   |
+| 合法材料/弹药 | 纸、锭、煤、木棍、线、羽毛、燧石、火药、箭等 | 保持合成/燃料/掉落/弹药；无行为返回 item-no-interaction，不伪造用途                    |
+| 差异          | redstone-dust 与复杂红石                     | 本轮仍为材料/配方；coverage 标 OUT_OF_SCOPE，不写 PASS                                 |
+
+16 dyes 需覆盖羊染色/既有配方，不能作为原料整体跳过。record、载具和鞍进入专属机制，不重复归普通 dispatcher。
+
+### 194 项显式扫描闭包
+
+下列五组由当前 overworldItems 机械枚举后唯一分配：总数 194、并集 194、去重后 194、missing=[]、extra=[]。状态含义不是永久分类，而是本 change 的 RED 基线与完成判据。
+
+| 状态            | 数量 | 当前缺口与完成判据                                                                                          |
+| --------------- | ---: | ----------------------------------------------------------------------------------------------------------- |
+| 已正常          |   96 | 当前正式入口已覆盖其唯一预期用途；本轮保持 owner、真实入口、表现、保存不回归，并在最终矩阵逐项标 GREEN 证据 |
+| 入口未接        |   53 | 已有 capability 或后端 runtime，但 Authority/Web 正式入口、投影或 UI 未闭环；完成需真实输入可达且失败原子   |
+| 行为缺失/不完整 |   21 | 仅注册/放置、缺状态机、余物、结构、载具或媒体行为；完成需本 spec 对应行为、保存和产品证据                   |
+| 纯材料/弹药     |   23 | 不新增普通右键；完成需配方/燃料/掉落/弹药引用闭包和 item-no-interaction 反例                                |
+| 明确非目标      |    1 | redstone-dust 保持材料；复杂红石另立合同，不计本轮 PASS                                                     |
+
+已正常（96）：golden-apple、cookie、dead-bush、wool-block、red-flower、red-mushroom、bricks、bookshelf、mossy-cobblestone、pumpkin、jack-o-lantern、lit-furnace、redstone-ore、lit-redstone-ore、slab、wood-stairs、cobblestone-stairs、torch、fence、sandstone-slab、wood-slab、white-wool、orange-wool、magenta-wool、light-blue-wool、yellow-wool、lime-wool、pink-wool、gray-wool、light-gray-wool、cyan-wool、purple-wool、blue-wool、brown-wool、green-wool、red-wool、black-wool、glowstone-block、lantern、dirt-block、stone-block、wood-block、sand-block、berry、apple、bread、raw-porkchop、cooked-porkchop、raw-fish、cooked-fish、plank、cobblestone、glass、gold-ore、diamond-ore、iron-block、gold-block、diamond-block、sandstone、stone-bricks、gold-pickaxe、diamond-pickaxe、stone-axe、iron-axe、gold-axe、diamond-axe、stone-sword、iron-sword、gold-sword、diamond-sword、wood-shovel、stone-shovel、iron-shovel、gold-shovel、diamond-shovel、wood-axe、stone-pickaxe、workbench、chest、furnace、raw-iron、wood-pickaxe、iron-pickaxe、wool、obsidian、sapling、flower、mushroom、sugar-cane、cactus、gravel、lapis-ore、clay-block、ice、snow-block、lapis-block。
+
+入口未接（53）：wood-hoe、stone-hoe、iron-hoe、gold-hoe、diamond-hoe、bucket、water-bucket、lava-bucket、bow、leather-helmet、leather-chestplate、leather-leggings、leather-boots、iron-helmet、iron-chestplate、iron-leggings、iron-boots、gold-helmet、gold-chestplate、gold-leggings、gold-boots、diamond-helmet、diamond-chestplate、diamond-leggings、diamond-boots、compass、clock、map、flint-and-steel、painting、snowball、white-dye、orange-dye、magenta-dye、light-blue-dye、yellow-dye、lime-dye、pink-dye、gray-dye、light-gray-dye、cyan-dye、purple-dye、blue-dye、brown-dye、green-dye、red-dye、black-dye、wheat-seeds、shears、bone、milk-bucket、egg、fishing-rod。
+
+行为缺失/不完整（21）：wood-sword、mushroom-stew、sign、wooden-door、cake、note-block、jukebox、trapdoor、ladder、record-13、record-cat、minecart、chest-minecart、furnace-minecart、boat、saddle、bed、rail、powered-rail、detector-rail、tnt。
+
+纯材料/弹药（23）：paper、brick、clay、book、sugar、cocoa-beans、wheat、gold-ingot、diamond、charcoal、stick、coal、iron-ingot、leather、bowl、string、feather、flint、ink-sac、rotten-flesh、gunpowder、slimeball、arrow。
+
+明确非目标（1）：redstone-dust。
+
+## 核心行为合同
+
+### 通用交互与装备
+
+- 每世界冻结 ItemInteractionRegistryV1：binding id、item/capability selector、trigger（self/voxel/entity）、operation id、presentation key。Classic 声明具体 ID/目标/产物/数值。
+- Authority 新增通用 interact intent，目标只允许 self、voxel hit/adjacent 或 entity lifetime reference，并带 `expectedSelection: { inventoryRevision, modeRevision, creativeCatalogRevision, selectedSlot }`；客户端不能提交 item、operation、binding 或 rule ID。
+- 稳定解析顺序：target definition → selected item binding → generic place → held/self。Authority 先完整比较 expectedSelection 四项，再按当前权威 mode 选择 survival inventory 或 creative catalog，并重查存活、距离、LOS、Chunk freshness、entity lifetime。Creative 交互不消耗物品，也不产生 bucket 等余物。
+- use-inventory 兼容保留并内部转 consume。协议 copy/validator/authorization/preparation/receipt/projection 同步。
+- 四 equipment slots 纳入正式 inventory pointer transaction。Classic 冻结死亡时装备与 inventory/cursor 一起掉落并清空；失败不部分提交。
+- 既有农业、流体、投射物、物种、生活技能、导航、环境和 final-entity runtime 改收 policy/config/operation，不向 stdlib 增加 Classic switch。
+
+### 结构、攀爬、路线和载具
+
+- StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
+- 旧 storage ID 不重解释；新状态使用追加的 Pack-owned stable variants。旧门只在可唯一识别合法 pair 时整批升级，孤立/歧义 fail closed。
+- ClimbSurfaceRegistryV1 只描述面、接触厚度与速度；Authority physics 仍是位置单 owner，Web 只预测已加载范围。
+- RouteDefinitionRegistryV1 描述 family、directed edges、曲线/坡度。车辆用 cell＋entry edge＋segment progress，正确处理四角、双向坡和 unknown frontier。
+- TransportRuntimeV2 使车辆成为 Authority 可见、有 lifetime 的 entity/component；mounted 关系双向唯一，mounted player 停止独立 walking 写位置。
+- Classic 声明具体门/梯/轨/车/船。sample:modular-world 用同 API 声明非 Classic 三格 panel、climb surface、corner guideway 和 pod/raft。
+
+### Mod 唱片与 Web 音频
+
+上传 MP3、自定义 BGM、用户 Blob 持久化合同已取消；既有“本地参考曲”替换能力也必须退场，不能与唱片并存。
+
+- 保留 record-13、record-cat、jukebox identity；record-13 绑定 seedlands:to-far-shores。唱片获得方式不是用户指定项，本轮冻结为复用现有正式创造目录：该目录由完整 item registry 投影，玩家可选择 record-13 放入创造快捷栏。不得为赠送唱片新增 starter loadout 或改存档，Web 也不得绕过现有创造模式 action 直接注入。生存模式的自然掉落不是本轮完成唱片播放旅程的前置；未来需要时由 Classic loot 另立合同。
+- 实现阶段仅复制 /Users/bytedance/Downloads/_sorted/media/overworld/Lifeformed × Janice Kwan — To Far Shores.mp3 到 playbooks/classic/assets/audio/to-far-shores.mp3；保留原件。复制前后核对 bytes=2976045 与 SHA256=3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9。产品只依赖相对路径/manifest；ASSETS.md 登记“用户提供，许可 unknown”。
+- stdlib MediaPlaybackModuleV1 定义资源引用、单槽设备状态、insert/eject/activate/stop/switch 和已提交事实；无 DOM/AudioContext，不识别 jukebox/唱片 ID/歌名/bytes。
+- Web 用独立、受 packs.lock 摘要保护的 media loader；不放宽图像/GLB loader。Web 负责 decode/output、gesture gate、普通全局音量、暂停、失败反馈与释放，只消费已提交状态/事实。
+- 删除设置页“本地参考曲”的文件选择/移除入口、GlobalAudio.importReference/removeReference 及 import epoch/reference snapshot 字段、MusicPlayer 的 reference buffer/source/import/remove/替换播放分支，并删除或改写只保护该旧能力的 reference-audio-lifecycle tests。保留内置合成音乐播放、shared AudioContext、world begin/end、master/music/sfx/ambience 音量、普通 SFX/ambience 及其测试；唱片音频接入现有 music bus，不复用旧 File/AudioBuffer 替换 API。
+- 保存 slot、track id、playing intent、revision；不保存 Blob/URL/AudioBuffer/cursor。恢复显示 resumePending，合法手势后从曲首恢复。取出、破坏、切换/关闭世界和 dispose 都停止释放。
+- 缺失/摘要不符在替换世界前拒绝；decode/play 失败可见但不伪造 authority stop、不损坏 slot/inventory。
+
+### 统一光照
+
+- 复用 per-chunk block-light owner，不退回相机 64³ 唯一体积。stdlib flood 只接 semantics/callback；移除 Classic voxel fallback。
+- 本轮保留 R8 block level，不做 RGB flood/WebGPU。Pack profile 声明 blockLightTint、surface self-emission、environment keyframes、固定 tone mapper/exposure；Classic 与 sample:modular-world 给出不同配置。
+- 同一 per-chunk residency/revision owner 增加 sky-visibility R8；unknown fail-dark，编辑立即 invalid，重建后原子发布，dispose 释放。
+- 线性空间只合成一次 received light = visible sky radiance + block irradiance；self emission 只给光源表面。terrain/water/actor/world-item/viewmodel 共用 SurfaceLightingSample；UI icon 不参与。
+- quality 只改阴影/反射/分辨率，不切 tone mapper/exposure。参数由 WebGL2 pixel readback RED 与真实浏览器矩阵冻结，不以源码或单图验收。
+
+## 兼容、失败与非目标
+
+- seed+generatorVersion、旧 voxel 0–88、item ID、Classic pack id、旧 Chunk bytes不重解释。Gameplay V4 只加 optional/versioned child state；旧档缺字段为空，完整校验后一次安装。
+- unknown/unloaded 不等于 Air/无光/断路成功；失败不扣物、不耗耐久/燃料、不推进 sequence。stale、满包、碰撞、越距、遮挡和 decode 失败有稳定可见原因。
+- voxel 写只经 World.edit()/prepared commit；多格、inventory、equipment、entity、media device、drop 不能先后双写。
+- 不做复杂红石、维度、RGB flood、WebGPU/GPU compute、LOD、离线追赶、World AI、Node Dedicated、全仓 ECS/renderer/physics 重写。
+- 不部署 production main，不改 DNS/域名/权限/凭据，不自动合并。
+- 不触碰既有 dirty：.github/workflows/ci.yml、README.md、README.zh-CN.md、apps/web/index.html、package.json、两个 unrelated changes 目录和两份 browser report。
+
+## 最小纵向切片、RED 与真实验收
+
+不能先完成全部公共 spine 再到产品。当前授权下的首个实施里程碑固定为 V1 Slice，只抽取三条旅程共同需要的最小接口：
+
+1. 普通 use：玩家从正式创造目录取得 water-bucket，以真实右键倒水，再用 bucket 收回；验证通用 interact intent、Classic item binding、inventory＋world 原子提交和可见反馈。
+2. 两格门：玩家取得 wooden-door，真实右键一次原子放置两格，点击任一半开/关且碰撞同步；验证 bounded multi-edit、structure definition、Chunk preparation 和 mesh/collision projection。
+3. Mod 唱片：玩家取得 record-13 和 jukebox，插入后播放 Pack MP3，取出/破坏/离开世界停止；同时旧设置 reference upload 已不可见且旧替换 API 已退场；验证 media state/fact、Pack resource 和 Web Audio 生命周期。
+
+V1 只新增上述消费者需要的 ItemInteractionDefinition、StructureDefinition、MediaTrack/MediaDevice 和 interact/projection/checkpoint 字段；不提前加入 equipment、climb、route、transport 或 lighting 字段。sample:modular-world 只以最小 test fixture 注册一个 click conversion、两格 panel 和 fake media device，证明 V1 无 Classic switch；它不是第二产品，也不进入浏览器旅程。
+
+V1 的 unit/integration GREEN 后立即串行生成一次临时 production artifact，用唯一浏览器线路/Cua 走完 water-bucket、door、record 三旅程和保存重开。该证据是早期架构验收，不替代最终完整矩阵；任一旅程失败先修复 V1，不继续扩展其余领域。后续按实际消费者逐步扩展同一接口，并在普通交互/装备、structure/transport、lighting 三个领域完成时各做一次有界浏览器 smoke；最终只保留一次全量 release artifact 作为交付身份。
+
+每个 IMPLEMENT 先在实际 owner 取得 RED：registry/assembly；interact protocol/transaction；194-item no-unclassified matrix；装备与各物品族原子正反例；门/梯/轨/车；media state/pack digest/Web output；synthetic lighting/WebGL2 readback。sample:modular-world 必须是不加载 Classic 的实际替代配置。
+
+协调者串行运行 package.json 声明的 format/path/lint/typecheck、定向 owner tests、受影响 deterministic、Classic headless、一次 production build 和唯一 Chromium。当前 Cua/Jev 路由从真实键鼠验收全部物品/结构/载具旅程、保存重开、音频启停/失败与昼夜/林下/室内/遮挡/跨 Chunk 光照；runtime 调用、source grep、HTTP 200 或单图都不能替代产品证据。
+
+本轮及后续例行功能更新默认在验收、commit、push、PR 后继续交付 Cloudflare Pages PR preview：live check seedlands-web-sandbox、pr-<PR号> 和权限；复用 Chromium 验收的同一 apps/web/dist；读回 terminal success、deploymentId、唯一 URL、稳定 alias、commit/source/artifact identity，并校验页面、Worker、Wasm、Pack、MP3 字节。旧 migration 的 401/DNS 是历史快照。权限不足标 INFRA_BLOCKED；不创建项目、不改 production branch/DNS/域名/权限/凭据。
+
+## 工作量与预算（修订版）
+
+| 阶段                                     | 复用依据                                                                               | 传统正常 / 保守 |        AI 活跃正常 / 保守 |
+| ---------------------------------------- | -------------------------------------------------------------------------------------- | --------------: | ------------------------: |
+| V1 slice：interact＋门＋唱片＋早期浏览器 | 复用现有 Authority request、block commit、Structure/Environment、AudioMixer、Pack lock |     6–9 / 13 PD |              20–30 / 40 h |
+| 普通交互与装备完整矩阵                   | 复用既有 capability、armor ECS、projectile/crop/species/life/navigation runtimes       |    9–14 / 20 PD |              30–46 / 60 h |
+| 其余结构、攀爬、路线、载具               | 复用 voxel model、physics、vehicle/rail checkpoints；位置单 owner 仍是高风险改造       |   12–18 / 27 PD |              36–54 / 72 h |
+| 统一光照                                 | 复用 per-chunk block-light cache、现有 shader/material 和 worldTime                    |     6–9 / 13 PD |              20–30 / 42 h |
+| 集成、完整浏览器、PR、preview            | 复用唯一 Harness/artifact 与既有 Cloudflare migration                                  |     5–8 / 12 PD |              18–30 / 42 h |
+| 总计                                     | 不重复计算 A0 调查；含旧 reference 退场                                                |   38–58 / 85 PD | 124–190 / 256 h aggregate |
+
+估算置信度为低到中等（约 55%）：194 项多数复用已有后端，但公共 prepared transaction、vehicle position owner、Pack descriptor 和真实浏览器修复量尚未用 V1 实测校准。四 worker 并行、公共文件与测试/browser 串行时，当前关键路径正常 58–82h，保守 112h；按保守剩余量只加一次 20% buffer，建议连续墙钟 135h。V1 结束后用实际 changed files、RED/GREEN 往返、浏览器返工和 usage 重估，若偏差超过 25% 先更新本文再进入下一域。请求配置固定 provider=traex model=gpt-5.6-sol/max/xhigh thinking=xhigh。Paseo snapshot 完整 model ID 与 runtime 归一化 gpt-5.6-sol/thinking=xhigh 分开记录；max 未被 runtime 独立回显。tokens、credits/API 费率/美元、额度分母与占比均 unknown；不伪造、不创建 Goal、不因本次修订扩预算。
+
+## 阶段与项目门禁
+
+1. A0：架构与实施分层已完成并获用户批准；历史 SHA 只作当时快照，不再作为当前实施前置。
+2. V1：只做 interact＋water-bucket、两格可开关门、唱片/旧上传退场及其最小 fixture；每个 checkpoint 的 done_when 见 tasks.md。立即用临时 production artifact 串行跑真实浏览器，失败不扩面。
+3. V2：在已验证 spine 上完成普通交互/装备矩阵，并做领域 browser smoke。
+4. V3：完成其余 structure/climb/route/transport，并做领域 browser smoke。
+5. V4：完成统一 lighting 与 WebGL2/browser 视觉矩阵。
+6. V5：协调者完成全量静态/定向/save/non-Classic/pack digest、交叉评审和唯一 release artifact。
+7. V6：只暂存本 change/治理增量，commit/push/PR 读回，再部署同一 release artifact 的 PR preview；夹带 dirty 或权限不足则精确阻塞。
+
+本 change 改公开契约、存档子状态、渲染管线和跨模块 owner，仍按 Breaking 管理。用户已明确批准当前目标和执行安排，因此不再重复请求历史 hash/IMPLEMENT；这不等于虚构用户曾审核某一 SHA。真实越界、权限变化、不可逆外部写入或架构重开条件仍须停止并只向唯一总负责人报告。
+
+## Delivery Snapshot
+
+当前已进入实施：V1.2 water/lava bucket、V1.3 Structure 合同与 RED、Media 私有 owner/loader、Lighting 纯模型及 A1 prepared multi-voxel batch 均已有定向证据，精确状态见 `execution-state.md`。A1 仍由 761 执行 A1-CLOSE；794 报告的 metadata 半提交、Water-only rescan、station bypass、batch 边界等仅登记为待复现风险，不在本快照宣称为确认 P0。尚未完成 A2/A3、两格门产品 GREEN、Media 公共/Pack/Web 组合根、Lighting 生产渲染、完整矩阵、production build、browser、commit/PR/preview。旧 4 files / 16 tests 仍只作此前 control。
