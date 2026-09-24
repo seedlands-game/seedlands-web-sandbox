@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { EnvironmentRuntime } from '@seedlands/stdlib/server/gameplay/environment-runtime';
-import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
@@ -30,7 +31,7 @@ it('GameplayRuntime 通过 World.edit 批次提交火与爆炸并恢复环境状
     ['3,0,0', Voxel.Tnt],
   ]);
   const callbacks = {
-    ...classicOptions(),
+    ...classicGameplayDomainOptions('block-rules'),
     platform: testCorePlatform,
     environmentSeed: 99,
     getWorldTime: () => 12,

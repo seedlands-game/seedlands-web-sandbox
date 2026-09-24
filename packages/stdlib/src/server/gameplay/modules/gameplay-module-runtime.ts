@@ -21,6 +21,7 @@ import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
 import { FORAGE_WORLD_COMPONENT } from './forage-model';
+import { STRUCTURE_ACTOR_COMPONENT, STRUCTURE_VOXEL_COMPONENT } from './structure-actions-module';
 
 const GAMEPLAY_OPERATION_FLUSH_LIMIT = 64;
 
@@ -55,6 +56,7 @@ export class GameplayModuleRuntime {
       feeding?: RegisteredStatePort;
       forage?: RegisteredStatePort;
       stations?: RegisteredStatePort;
+      structures?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -95,6 +97,11 @@ export class GameplayModuleRuntime {
       if ([FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT].includes(component) && this.options.feeding)
         return this.options.feeding;
       if (component === FORAGE_WORLD_COMPONENT && this.options.forage) return this.options.forage;
+      if (
+        (component === STRUCTURE_ACTOR_COMPONENT || component === STRUCTURE_VOXEL_COMPONENT) &&
+        this.options.structures
+      )
+        return this.options.structures;
       if (
         [STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT, FURNACE_WORLD_COMPONENT].includes(component) &&
         this.options.stations

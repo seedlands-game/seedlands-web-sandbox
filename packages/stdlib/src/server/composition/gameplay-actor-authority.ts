@@ -64,6 +64,7 @@ export function createGameplayActorAuthority(
               'seedlands.block-voxel',
               'seedlands.feeding-item',
               'seedlands.station',
+              'seedlands.structure',
             ],
             operations: ['read', 'execute'],
             scope: 'any',

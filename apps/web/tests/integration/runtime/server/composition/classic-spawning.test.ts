@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import { selectSpawn, shouldDespawnActor } from '@seedlands/stdlib/server/gameplay/spawn-policy';
-import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
@@ -33,7 +34,7 @@ it('固定 seed/tick 稳定选择并遵守亮度、距离、难度与上限', ()
 
 it('正式环境查询在暗处生成 hostile，peaceful 拒绝并进入快照', () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     environmentSeed: 42,
     getWorldTime: () => 0,
@@ -69,7 +70,7 @@ it('只有非持久且未驯服实体在128格外清退', () => {
 it('规则时钟每20秒只在已加载候选列周期刷新并恢复相位', () => {
   const createWorld = () => {
     const world = new GameplayRuntime({
-      ...classicOptions(),
+      ...classicGameplayDomainOptions(),
       platform: testCorePlatform,
       environmentSeed: 42,
       getWorldTime: () => 0,

@@ -14,7 +14,7 @@ import type { EntityStore } from '../entity-store';
 import { createInventoryCandidate } from './inventory-api';
 import type { InventorySlot } from '../inventory';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
-import { positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 import {
   STRUCTURE_BREAK_OPERATION,
@@ -43,6 +43,7 @@ export type PreparedStructureDependentRemovalV1 = PreparedStructureParticipant &
   Readonly<{
     removed: boolean;
     ejectedItem: Readonly<{ itemId: string }> | null;
+    facts: readonly ModuleInvocationValue[];
   }>;
 export type StructureHostCommitOptions = Readonly<{
   composition: WorldComposition;
@@ -61,8 +62,17 @@ export type StructureHostCommitOptions = Readonly<{
     inventoryChanged: boolean,
     precedingWorldCommit: WorldCommitResult,
   ): PreparedStructureParticipant & Readonly<{ revision: number }>;
+  prepareFactDelivery(
+    facts: readonly ModuleInvocationValue[],
+    precedingWorldCommit: WorldCommitResult,
+    gameplayRevision: number,
+  ): PreparedStructureParticipant;
 }>;
 
+const MAX_STRUCTURE_FACTS = 64;
+const MAX_FACT_NODES = 4_096;
+const MAX_FACT_DEPTH = 16;
+const MAX_FACT_DATA_BUDGET = 65_536;
 const operations = new Map<string, StructureOperationPlanV1['kind']>([
   [STRUCTURE_PLACE_OPERATION, 'place'],
   [STRUCTURE_TOGGLE_OPERATION, 'toggle'],
@@ -70,6 +80,52 @@ const operations = new Map<string, StructureOperationPlanV1['kind']>([
 ]);
 const same = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right);
 const positionKey = (position: StructurePositionV1): string => position.join(',');
+
+function snapshotFacts(removals: readonly PreparedStructureDependentRemovalV1[]): readonly ModuleInvocationValue[] {
+  const source = removals.flatMap((removal) => {
+    if (!Array.isArray(removal.facts)) throw new TypeError('Structure dependent removal facts must be an array.');
+    return removal.facts;
+  });
+  if (source.length > MAX_STRUCTURE_FACTS) throw new RangeError('Structure fact delivery capacity exceeded.');
+  let remaining = MAX_FACT_NODES;
+  let dataBudget = MAX_FACT_DATA_BUDGET;
+  const snapshot = (value: ModuleInvocationValue, depth: number): ModuleInvocationValue => {
+    if (--remaining < 0 || depth > MAX_FACT_DEPTH) throw new RangeError('Structure fact envelope exceeds its limit.');
+    if (value === null || typeof value === 'boolean') return value;
+    if (typeof value === 'string') {
+      dataBudget -= value.length;
+      if (dataBudget < 0) throw new RangeError('Structure fact envelope exceeds its data limit.');
+      return value;
+    }
+    if (typeof value === 'number') {
+      if (!Number.isFinite(value)) throw new TypeError('Structure fact numbers must be finite.');
+      return value;
+    }
+    if (Array.isArray(value)) {
+      const keys = Reflect.ownKeys(value);
+      if (
+        keys.length !== value.length + 1 ||
+        keys.some((key, index) => key !== (index < value.length ? String(index) : 'length'))
+      )
+        throw new TypeError('Structure fact arrays must be dense plain data.');
+      return Object.freeze(value.map((entry) => snapshot(entry, depth + 1)));
+    }
+    if (!value || typeof value !== 'object' || ![Object.prototype, null].includes(Object.getPrototypeOf(value)))
+      throw new TypeError('Structure fact envelopes must be plain data.');
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    if (Reflect.ownKeys(descriptors).some((key) => typeof key !== 'string'))
+      throw new TypeError('Structure fact envelopes must use string fields.');
+    const entries = Object.entries(descriptors).map(([key, descriptor]) => {
+      dataBudget -= key.length;
+      if (dataBudget < 0) throw new RangeError('Structure fact envelope exceeds its data limit.');
+      if (!descriptor.enumerable || !('value' in descriptor))
+        throw new TypeError('Structure fact envelope fields must be enumerable data.');
+      return [key, snapshot(descriptor.value as ModuleInvocationValue, depth + 1)] as const;
+    });
+    return Object.freeze(Object.fromEntries(entries));
+  };
+  return Object.freeze(source.map((fact) => snapshot(fact, 0)));
+}
 
 function expectedScope(
   actorId: string,
@@ -94,17 +150,29 @@ function assertReachable(
   target: Readonly<{ hit: StructurePositionV1; adjacent: StructurePositionV1 }>,
   readCell: StructureHostCommitOptions['readCell'],
   semantics: VoxelSemanticsRegistry,
+  ownCells: ReadonlySet<string>,
 ): void {
+  const origin = playerInteractionOrigin(actorPosition);
   for (const position of [target.hit, target.adjacent]) {
-    if (!positionsInRange(actorPosition, voxelCenter([...position]), 5)) throw new Error('out-of-range');
+    if (!positionsInRange(origin, voxelCenter([...position]), 5)) throw new Error('out-of-range');
     const visibility = traceVoxelRay(
       voxelCenter([...position]),
-      actorPosition,
-      (x, y, z) => readCell([x, y, z])?.voxel,
+      origin,
+      (x, y, z) => (ownCells.has(positionKey([x, y, z])) ? 0 : readCell([x, y, z])?.voxel),
       (voxel) => semantics.get(voxel)?.solid ?? false,
     );
     if (visibility !== 'clear') throw new Error(visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked');
   }
+}
+
+function assertTargetableHit(
+  hit: StructurePositionV1,
+  readCell: StructureHostCommitOptions['readCell'],
+  semantics: VoxelSemanticsRegistry,
+): void {
+  const cell = readCell(hit);
+  if (!cell) throw new Error('chunk-unavailable');
+  if (semantics.get(cell.voxel)?.targetable !== true) throw new Error('structure-hit-not-targetable');
 }
 
 function prepareInventory(
@@ -178,7 +246,10 @@ export function prepareStructureHostCommit(
   const target = Object.freeze([...context.target.position]) as StructurePositionV1;
   const readPositions: StructurePositionV1[] = [];
   const actor = projections.actor(actorId);
-  assertReachable(actor.position, action, options.readCell, options.semantics);
+  assertTargetableHit(action.hit, options.readCell, options.semantics);
+  const existing = options.registry.resolveTarget(action.hit, (position) => options.readCell(position)?.voxel);
+  const ownCells = new Set(existing?.parts.map((part) => positionKey(part.position)) ?? []);
+  assertReachable(actor.position, action, options.readCell, options.semantics, ownCells);
   const read = (position: StructurePositionV1) => {
     readPositions.push(position);
     return projections.voxel(position).voxel;
@@ -251,6 +322,8 @@ export function prepareStructureHostCommit(
   const gameplay = options.prepareGameplayChange(inventoryChanged, world.result);
   if (!Number.isSafeInteger(gameplay.revision) || gameplay.revision < 1)
     throw new RangeError('Structure gameplay revision is exhausted or invalid.');
+  const facts = snapshotFacts(removals);
+  const delivery = options.prepareFactDelivery(facts, world.result, gameplay.revision);
   const participants: readonly PreparedStructureParticipant[] = [
     ...(mutation ? [{ validate: mutation.validate, apply: () => void mutation.apply() }] : []),
     ...(cancellation ? [cancellation] : []),
@@ -258,12 +331,14 @@ export function prepareStructureHostCommit(
     world,
     receipt,
     gameplay,
+    delivery,
   ];
   const validateCondition = () => {
     assertAuthorized();
     const current = projections.actor(actorId);
     if (!same(current, actor)) throw new Error('structure-actor-stale');
-    assertReachable(current.position, action, options.readCell, options.semantics);
+    assertTargetableHit(action.hit, options.readCell, options.semantics);
+    assertReachable(current.position, action, options.readCell, options.semantics, ownCells);
     const repeatedPositions: StructurePositionV1[] = [];
     const repeated = buildRegisteredStructureCandidateV1(environment, {
       kind,

@@ -14,6 +14,7 @@ export type GameServerGameplayWorldPort = Readonly<{
   prepareVoxelEdits(actorId: string, edits: readonly ExpectedWorldVoxelEdit[]): PreparedWorldEditBatch;
   setWorldTime(hours: number): number;
   readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
+  readLoadedGameplayCell(x: number, y: number, z: number): Readonly<{ voxel: number; fluid: number }> | null;
   readGameplayVoxel(x: number, y: number, z: number): number | undefined;
   readFluidCell(x: number, y: number, z: number): FluidCell | null;
   biomeAt(x: number, z: number): string;

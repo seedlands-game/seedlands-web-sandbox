@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { resolveRailShape } from '@seedlands/stdlib/server/gameplay/rail-runtime';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
@@ -14,7 +15,7 @@ const voxel = ([x, y, z]: [number, number, number]) =>
   cells.get([Math.floor(x), Math.floor(y), Math.floor(z)].join(',')) ?? Voxel.Air;
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 12,
     getVoxel: voxel,

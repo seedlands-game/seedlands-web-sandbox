@@ -12,6 +12,11 @@ export const voxelCenter = (position: readonly [number, number, number]): Positi
   position[1] + 0.5,
   position[2] + 0.5,
 ];
+export const playerInteractionOrigin = (position: readonly [number, number, number]): Position => [
+  position[0],
+  position[1] + 1.6,
+  position[2],
+];
 export const positionsInRange = (left: readonly number[], right: readonly number[], radius: number) =>
   distanceSquared(left, right) <= radius * radius;
 

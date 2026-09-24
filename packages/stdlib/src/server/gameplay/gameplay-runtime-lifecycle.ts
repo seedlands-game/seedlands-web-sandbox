@@ -104,6 +104,7 @@ export function advanceGameplayRules(
     }> | null;
     modules: Readonly<{ flushQueued(): void }>;
     blocks: Readonly<{ drain(): void; takeCommits(): readonly WorldCommitResult[] }> | null;
+    structures?: Readonly<{ takeCommits(): readonly WorldCommitResult[] }> | null;
     players: ReadonlyMap<string, PlayerState>;
     simulation: AutonomyRuntime;
     revision(): number;
@@ -134,6 +135,7 @@ export function advanceGameplayRules(
   });
   if (seconds > 0 && options.revision() === startingRevision) options.touchWithoutEvent();
   commits.push(...(options.blocks?.takeCommits() ?? []));
+  commits.push(...(options.structures?.takeCommits() ?? []));
   return { commits };
 }
 

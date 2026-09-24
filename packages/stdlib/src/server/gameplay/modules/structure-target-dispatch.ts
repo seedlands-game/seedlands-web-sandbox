@@ -3,7 +3,7 @@ import type { ContentItemIdentityResolver } from '../../composition/content-item
 import type { ItemInteractionExpectedSelectionV1, ItemInteractionTarget } from './item-interaction-module';
 import { structureFootprintV1, type ResolvedStructureV1, type StructurePositionV1 } from './structure-definition';
 import type { StructureDefinitionRegistryV1 } from './structure-definition-module';
-import { positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 
 export type InteractionIntentV1 = 'use' | 'alternate';
@@ -28,17 +28,69 @@ export type StructurePlacementResolutionV1 =
       bearing: 'north' | 'east' | 'south' | 'west';
       chunkKeys: readonly string[];
     }>;
+export type StructureInteractionResolutionV1 =
+  | Exclude<StructureTargetResolutionV1, { status: 'resolved' }>
+  | Readonly<{
+      status: 'resolved';
+      kind: 'existing';
+      operation: 'toggle' | 'break';
+      target: StructurePositionV1;
+      structure: ResolvedStructureV1;
+      chunkKeys: readonly string[];
+    }>
+  | Readonly<{
+      status: 'resolved';
+      kind: 'placement';
+      operation: 'place';
+      target: StructurePositionV1;
+      definitionId: string;
+      stateId: string;
+      bearing: 'north' | 'east' | 'south' | 'west';
+      chunkKeys: readonly string[];
+    }>;
 export type StructureTargetInvocationV1 = Readonly<{
   version: 1;
   actorId: string;
   intent: InteractionIntentV1;
   target: Extract<ItemInteractionTarget, { kind: 'voxel' }>;
   selectedItemId: string | null;
-  structure: ResolvedStructureV1;
+  resolution: Extract<StructureInteractionResolutionV1, { status: 'resolved' }>;
 }>;
 export type StructureTargetInteractionResultV1 =
-  | Readonly<{ success: true; handled: true; value?: import('../../composition/contracts').ModuleInvocationValue }>
+  | Readonly<{
+      success: true;
+      handled: true;
+      value?: import('../../composition/contracts').ModuleInvocationValue;
+      commit?: import('../../game-server-types').WorldCommitResult;
+    }>
   | Readonly<{ success: false; reason: string }>;
+export type StructureTargetPortV1 = Readonly<{
+  prepare(action: AuthorityInteractActionV1, actorId: string): StructureInteractionResolutionV1;
+  prepareBreak(actorId: string, hit: StructurePositionV1): StructureInteractionResolutionV1;
+  resolve(
+    input: Readonly<{
+      actorId: string;
+      intent: InteractionIntentV1;
+      target: Extract<ItemInteractionTarget, { kind: 'voxel' }>;
+      selectedItemId: string | null;
+    }>,
+  ): StructureInteractionResolutionV1;
+  invoke(input: StructureTargetInvocationV1): StructureTargetInteractionResultV1;
+  breakFromMining(
+    actorId: string,
+    hit: StructurePositionV1,
+  ):
+    | Readonly<{ handled: false }>
+    | Readonly<{ handled: true; success: false; reason: string }>
+    | Readonly<{ handled: true; success: true; commit: import('../../game-server-types').WorldCommitResult }>;
+  completeBreakFromMining(
+    actorId: string,
+    hit: StructurePositionV1,
+  ):
+    | Readonly<{ handled: false }>
+    | Readonly<{ handled: true; success: false; reason: string }>
+    | Readonly<{ handled: true; success: true }>;
+}>;
 type ActorSelection = Readonly<{
   lifecycle: 'alive' | 'dead';
   position: readonly [number, number, number];
@@ -210,7 +262,7 @@ export function dispatchStructureTargetFirstV1(
         target: Extract<ItemInteractionTarget, { kind: 'voxel' }>;
         selectedItemId: string | null;
       }>,
-    ): StructureTargetResolutionV1;
+    ): StructureInteractionResolutionV1;
     invoke(input: StructureTargetInvocationV1): StructureTargetInteractionResultV1;
     fallback(): StructureTargetInteractionResultV1;
   }>,
@@ -227,20 +279,11 @@ export function dispatchStructureTargetFirstV1(
   if (!selectionMatches(actor, input.expectedSelection)) return { success: false, reason: 'stale-selection' };
   if (input.target.kind !== 'voxel') return options.fallback();
   const { hit, adjacent } = input.target;
+  const origin = playerInteractionOrigin(actor.position);
   if (hit.reduce((sum, coordinate, axis) => sum + Math.abs(coordinate - adjacent[axis]), 0) !== 1)
     return { success: false, reason: 'invalid-target' };
-  if (
-    !positionsInRange(actor.position, voxelCenter([...hit]), 5) ||
-    !positionsInRange(actor.position, voxelCenter([...adjacent]), 5)
-  )
+  if (!positionsInRange(origin, voxelCenter([...hit]), 5) || !positionsInRange(origin, voxelCenter([...adjacent]), 5))
     return { success: false, reason: 'out-of-range' };
-  for (const target of [hit, adjacent]) {
-    const visibility = traceVoxelRay(voxelCenter([...target]), actor.position, (x, y, z) =>
-      options.getVoxel([x, y, z]),
-    );
-    if (visibility !== 'clear')
-      return { success: false, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
-  }
   const itemId = selectedItem(actor);
   const resolved = options.resolve({
     actorId: input.actorId,
@@ -249,6 +292,20 @@ export function dispatchStructureTargetFirstV1(
     selectedItemId: itemId,
   });
   if (resolved.status === 'not-structure') return options.fallback();
+  const ownCells =
+    resolved.status === 'resolved' && resolved.kind === 'existing'
+      ? new Set(resolved.structure.parts.map((part) => key(part.position)))
+      : undefined;
+  const hitVisibility = traceVoxelRay(voxelCenter([...hit]), origin, (x, y, z) =>
+    ownCells?.has(key([x, y, z])) ? 0 : options.getVoxel([x, y, z]),
+  );
+  if (hitVisibility !== 'clear')
+    return { success: false, reason: hitVisibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
+  const adjacentVisibility = traceVoxelRay(voxelCenter([...adjacent]), origin, (x, y, z) =>
+    ownCells?.has(key([x, y, z])) ? 0 : options.getVoxel([x, y, z]),
+  );
+  if (adjacentVisibility !== 'clear')
+    return { success: false, reason: adjacentVisibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
   if (resolved.status === 'unavailable') return { success: false, reason: 'chunk-unavailable' };
   if (resolved.status === 'malformed') return { success: false, reason: resolved.reason ?? 'structure-malformed' };
   return options.invoke({
@@ -257,6 +314,6 @@ export function dispatchStructureTargetFirstV1(
     intent: input.intent,
     target: input.target,
     selectedItemId: itemId,
-    structure: resolved.structure,
+    resolution: resolved,
   });
 }

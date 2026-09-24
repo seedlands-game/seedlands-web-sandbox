@@ -76,6 +76,7 @@ export class GameServerGameplayHost {
     return new GameplayRuntime({
       getVoxel: (position) => this.world.readGameplayVoxel(...position),
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
+      getLoadedCell: (position) => this.world.readLoadedGameplayCell(...position),
       getFluidCell: (position) => this.world.readFluidCell(...position),
       voxelGeometry: this.world.voxelGeometry,
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
@@ -166,6 +167,9 @@ export class GameServerGameplayHost {
   }
   acknowledgeBlockCommit(value: ModuleInvocationValue) {
     return this.gameplay.acknowledgeBlockCommit(value);
+  }
+  get structureTargets() {
+    return this.gameplay.structureTargets;
   }
   bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.gameplay.bindModuleOperations(authorizer, source);

@@ -1,11 +1,12 @@
 import { expect, it } from 'vitest';
-import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 0,
     getVoxel: () => Voxel.Air,

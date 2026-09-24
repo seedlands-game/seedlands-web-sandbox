@@ -1,6 +1,5 @@
 import { projectAuthorityGameplayView } from './authority-gameplay-view';
 import { bindModuleCommandPort, type WorldModuleBinding } from '../commands/module-command';
-import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
@@ -43,6 +42,8 @@ import {
   prepareAuthorityRuntimeMesh,
   queueAuthorityRuntimeRecoveries,
 } from './authority-runtime-geometry';
+import { createAuthorityStructureTargetPort } from './authority-structure-runtime';
+import { createAuthoritySessionServerPort } from './authority-session-server-port';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -63,6 +64,7 @@ export class AuthorityRuntime {
   private readonly residency: AuthorityResidencyRuntime;
   private readonly mutationPreparation: AuthorityMutationPreparation;
   private readonly canonicalPreparation: AuthorityCanonicalPreparation;
+  private readonly structureTargets;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -75,10 +77,12 @@ export class AuthorityRuntime {
     this.currentTimeMs = options.startTimeMs;
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.residency = new AuthorityResidencyRuntime(server);
+    this.structureTargets = createAuthorityStructureTargetPort(server);
     this.mutationPreparation = new AuthorityMutationPreparation(
       server,
       (key) => this.requestUnknownChunk(key),
       options.platform.timers,
+      this.structureTargets,
     );
     this.canonicalPreparation = new AuthorityCanonicalPreparation(
       server,
@@ -90,49 +94,7 @@ export class AuthorityRuntime {
     const player = server.getEntity(playerId);
     if (!player) throw new Error(`Authority player is missing: ${playerId}`);
     this.initialBodyPosition = [...player.position];
-    const serverPort = {
-      get worldRevision() {
-        return server.worldRevision;
-      },
-      get mutationCount() {
-        return server.mutationCount;
-      },
-      get worldTime() {
-        return server.worldTime;
-      },
-      get fluidDiagnostics() {
-        return server.fluidDiagnostics;
-      },
-      getEntity: (id: string) => {
-        const entity = server.getEntity(id);
-        return !entity || entity.type === 'station' ? null : { ...entity, type: entity.type };
-      },
-      getActorModeState: (id: string) => server.getActorModeState(id),
-      createEntityReference: (id: string) => server.createEntityReference(id),
-      resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
-      queryEntities: () =>
-        server
-          .queryEntities()
-          .flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
-      updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
-        server.updateEntityWithoutSnapshot(id, update),
-      updateEntities: (updates: Parameters<GameServer['updateEntitiesWithoutSnapshot']>[0]) =>
-        server.updateEntitiesWithoutSnapshot(updates),
-      advanceGameplayRules: (seconds: number) => {
-        const result = server.advanceGameplayRules(seconds);
-        result.commits.forEach((commit) => this.recordWorldCommit(commit));
-        return result;
-      },
-      gameplayAdvanceCommitUpperBound: (seconds: number) => server.gameplayAdvanceCommitUpperBound(seconds),
-      advanceWorldClock: (hours: number) => server.advanceClock(hours),
-      setPhysicsActiveChunks: (keys: readonly string[]) => server.setPhysicsActiveChunks(keys),
-      queryPickupTargets: () =>
-        server
-          .queryEntities({ type: 'player' })
-          .filter((entity) => server.getPlayerState(entity.id).lifecycle === 'alive')
-          .map((entity) => ({ id: entity.id, position: [...entity.position] as [number, number, number] })),
-      pickupItem: (playerId: string, itemId: string) => server.pickupItem(playerId, itemId),
-    };
+    const serverPort = createAuthoritySessionServerPort(server, (commit) => this.recordWorldCommit(commit));
     this.session = new AuthoritySession({
       epoch: options.epoch,
       playerId,
@@ -435,8 +397,12 @@ export class AuthorityRuntime {
     if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
     if (target && !this.server.resolveEntityReference(target)) return rejectStale('stale-target-lifetime');
     const before = captureAuthorityStateVersion(this.server);
-    const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
-      this.recordWorldCommit(commit),
+    const result = applyAuthorityPlayerAction(
+      this.server,
+      this.playerId,
+      submittedAction,
+      (commit) => this.recordWorldCommit(commit),
+      this.structureTargets,
     );
     this.commitIfServerChanged(before);
     return { submittedAction, result, gameplay: this.view(), commits: this.takeCommits() };

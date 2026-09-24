@@ -2,7 +2,7 @@ import { isActorEntityType } from './ecs-actor-state';
 import type { WorldModuleBinding } from '../commands/module-command';
 import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
 import type { ModuleInvocationValue } from '../composition/contracts';
-import { createGameplayRegisteredAdapters } from './gameplay-registered-adapters';
+import { createGameplayRegisteredRuntimes } from './gameplay-registered-adapters';
 import { BLOCK_WORLD_COMPONENT } from './modules/block-action-model';
 import type { GameplayCallbacks, GameplayResult } from './gameplay-runtime-contracts';
 export type * from './gameplay-runtime-contracts';
@@ -62,6 +62,7 @@ import type { ProjectileVector } from './projectile-runtime';
 import { createGameplayWorldSystems } from './gameplay-world-systems';
 import { assertGameplayRevisionCapacity } from './gameplay-revision-capacity';
 import { GameplayProgressRuntime } from './gameplay-progress-runtime';
+import type { StructureTargetPortV1 } from './modules/structure-target-dispatch';
 
 type Position = [number, number, number];
 export class GameplayRuntime {
@@ -78,8 +79,7 @@ export class GameplayRuntime {
   readonly projectiles;
   private readonly players = new Map<string, PlayerState>();
   private persistedRevision = 0;
-  private inventoryOperationCount = 0;
-  private eventCount = 0;
+  private readonly counters = { inventoryOperationCount: 0, eventCount: 0 };
   private readonly behaviorCapabilities: BehaviorCapabilityRegistry | null;
   private readonly compositionGuard;
   private readonly inventoryActions;
@@ -94,6 +94,8 @@ export class GameplayRuntime {
   private readonly needsPlayerLimit;
   private readonly registeredFeeding: RegisteredFeedingRuntime | null;
   private readonly registeredCombat: RegisteredCombatRuntime | null;
+  private readonly registeredStructure;
+  readonly structureTargets: StructureTargetPortV1 | null;
   private readonly checkpoint: GameplayRuntimeCheckpoint;
   // prettier-ignore -- compact declarations for world-system façades assembled below.
   readonly speciesInteractions;
@@ -146,41 +148,35 @@ export class GameplayRuntime {
       simulation: () => this.simulation,
       assertCanChange: () => this.assertRevisionCapacity(),
       changed: (inventory, event) => {
-        if (inventory) this.inventoryOperationCount++;
+        if (inventory) this.counters.inventoryOperationCount++;
         this.touch(event);
       },
     });
     this.inventoryActions = adapters.inventory;
     this.vitals = adapters.vitals;
     this.blocks = adapters.blocks;
-    const registeredPorts = {
+    const registered = createGameplayRegisteredRuntimes({
+      callbacks,
       entities: this.entities,
       content: this.content,
-      actorAuthority: callbacks.moduleActorAuthority,
+      kernelState: this.kernelState,
+      counters: this.counters,
       modules: () => this.modules,
       simulation: () => this.simulation,
-      ...{ getVoxel: callbacks.getVoxel, getFluidCell: callbacks.getFluidCell, voxelGeometry: callbacks.voxelGeometry },
-      revision: () => this.kernelState.gameplayRevision,
-      assertCanChange: () => this.assertRevisionCapacity(),
-      changed: (inventory = false) => {
-        if (inventory) this.inventoryOperationCount++;
-        this.touch();
-      },
-    };
-    const registered = createGameplayRegisteredAdapters({
-      ...registeredPorts,
-      getLoadedVoxel: callbacks.getLoadedVoxel ?? (() => undefined),
-      composition: callbacks.composition,
       actorIds: () => [...this.players.keys(), ...this.simulation.actorIds()],
       rulesetRevision: () => this.ruleset.snapshot()?.revision ?? 0,
       now: () => this.gameplayTime,
-      systemAuthority: callbacks.moduleSystemAuthority,
-      prepareVoxelEdit: callbacks.prepareVoxelEdit,
+      assertCanChange: () => this.assertRevisionCapacity(),
+      changed: (inventory = false) => {
+        if (inventory) this.counters.inventoryOperationCount++;
+        this.touch();
+      },
     });
     this.registeredInventory = registered.inventory;
     this.registeredCombat = registered.combat;
     this.registeredBlocks = registered.blocks;
     this.registeredFeeding = registered.feeding;
+    this.registeredStructure = registered.structures;
     this.modes = new ModeRuntime({
       entities: this.entities,
       findSafeLanding: gameplayModeLandingFor(this.entities, callbacks, () => this.kernelState.gameplayRevision),
@@ -194,6 +190,7 @@ export class GameplayRuntime {
       feeding: this.registeredFeeding?.state,
       forage: registered.forage?.state,
       stations: registered.stations?.state,
+      structures: registered.structures?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -210,6 +207,7 @@ export class GameplayRuntime {
       }),
       mode: createModeStatePort(this.entities, this.modes, () => this.kernelState.gameplayRevision),
     });
+    this.structureTargets = registered.structureTargets;
     this.schedule = callbacks.composition
       ? createGameplayModuleSchedule(callbacks.composition, this.modules, callbacks.moduleSystemAuthority, () => {
           this.registeredCombat?.drain();
@@ -274,6 +272,7 @@ export class GameplayRuntime {
       schedule: this.schedule,
       modules: this.modules,
       blocks: this.registeredBlocks,
+      structures: this.registeredStructure,
       combat: this.registeredCombat,
       players: this.players,
       simulation: this.simulation,
@@ -508,7 +507,7 @@ export class GameplayRuntime {
   advanceRules = (seconds: number): { commits: WorldCommitResult[] } => this.advanceWorldRules.advance(seconds);
   advanceCommitUpperBound = (seconds: number): number => this.advanceWorldRules.commitUpperBound(seconds);
   createSnapshot = () => this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
-  metrics = () => collectRuntimeStatistics(this, this.inventoryOperationCount, this.eventCount);
+  metrics = () => collectRuntimeStatistics(this, this.counters.inventoryOperationCount, this.counters.eventCount);
   restoreSnapshot = (raw: unknown) => this.checkpoint.restore(raw);
   markPersisted = (revision: number): void =>
     void (this.persistedRevision = Math.max(this.persistedRevision, revision));
@@ -516,6 +515,6 @@ export class GameplayRuntime {
   private assertRevisionCapacity = (): void => assertGameplayRevisionCapacity(this.kernelState.gameplayRevision);
   private touch(event = true): void {
     this.kernelState.commitGameplay(this.kernelState.epoch);
-    if (event) this.eventCount += 1;
+    if (event) this.counters.eventCount += 1;
   }
 }

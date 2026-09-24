@@ -18,6 +18,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'queryNearbyEntities',
   'getActorModeState',
   'acknowledgeBlockCommit',
+  'structureTargets',
   'bindModuleOperations',
   'invokeModuleOperation',
   'invokeActorModuleOperation',

@@ -83,12 +83,15 @@ describe('Authority interaction mutation preparation', () => {
       () => undefined,
       testCorePlatform.timers,
       {
-        resolve: () => {
+        prepare: () => {
           calls += 1;
           return calls === 1
             ? { status: 'unavailable', chunkKeys: ['0,0,0', '0,1,0'] }
             : {
                 status: 'resolved',
+                kind: 'existing',
+                operation: 'toggle',
+                target: [31, 31, 0] as const,
                 chunkKeys: ['0,0,0', '0,1,0'],
                 structure: {
                   definitionId: 'sample:panel',
@@ -98,6 +101,9 @@ describe('Authority interaction mutation preparation', () => {
                   parts: [],
                 },
               };
+        },
+        prepareBreak: () => {
+          throw new Error('Unexpected Structure break preparation.');
         },
       },
     );
@@ -129,7 +135,10 @@ describe('Authority interaction mutation preparation', () => {
       () => undefined,
       testCorePlatform.timers,
       {
-        resolve: () => (++calls === 1 ? { status: 'unavailable', chunkKeys: ['0,1,0'] } : { status: 'not-structure' }),
+        prepare: () => (++calls === 1 ? { status: 'unavailable', chunkKeys: ['0,1,0'] } : { status: 'not-structure' }),
+        prepareBreak: () => {
+          throw new Error('Unexpected Structure break preparation.');
+        },
       },
     );
     await expect(

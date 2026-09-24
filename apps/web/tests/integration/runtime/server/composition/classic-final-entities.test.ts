@@ -1,5 +1,6 @@
 import { beforeEach, expect, it } from 'vitest';
-import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
@@ -7,7 +8,7 @@ const cells = new Map<string, number>();
 beforeEach(() => cells.clear());
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     environmentSeed: 19,
     getWorldTime: () => 20,

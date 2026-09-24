@@ -96,7 +96,7 @@ export class BrowserAuthorityIngress {
           {
             effect: 'allow',
             principal: { ids: ['browser-player'] },
-            resources: ['seedlands.combat', 'seedlands.inventory-item', 'seedlands.block-voxel'],
+            resources: ['seedlands.combat', 'seedlands.inventory-item', 'seedlands.block-voxel', 'seedlands.structure'],
             operations: ['read', 'execute'],
             scope: 'any',
           },

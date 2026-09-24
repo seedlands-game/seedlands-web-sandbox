@@ -5,8 +5,8 @@ import {
   Inventory,
   craftRecipe,
   GameplayRuntime,
-  classicOptions,
 } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import {
   armorDamageReduction,
@@ -34,7 +34,7 @@ it('护甲物品注册为可穿戴且带防护点数与耐久', () => {
 it('正式装备槽参与伤害减免、扣耐久并随 snapshot 恢复', () => {
   const create = () => {
     const world = new GameplayRuntime({
-      ...classicOptions(),
+      ...classicGameplayDomainOptions(),
       platform: testCorePlatform,
       getWorldTime: () => 12,
       getVoxel: () => 0,
@@ -64,7 +64,7 @@ it('正式装备槽参与伤害减免、扣耐久并随 snapshot 恢复', () => 
 
 it('创造模式免伤不磨损护甲，非法伤害保持旧失败语义', () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 12,
     getVoxel: () => 0,
@@ -92,7 +92,7 @@ it('创造模式免伤不磨损护甲，非法伤害保持旧失败语义', () =
 
 it('死亡目标拒绝重复伤害且不磨损护甲', () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 12,
     getVoxel: () => 0,

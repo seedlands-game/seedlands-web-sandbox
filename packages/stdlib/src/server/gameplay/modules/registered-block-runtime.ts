@@ -16,11 +16,13 @@ import {
   BLOCK_ADVANCE_OPERATION,
   BLOCK_SYSTEM,
 } from './block-action-model';
+import type { GameplayStructureTargetRuntime } from '../gameplay-structure-target-runtime';
 
 type Options = BlockHostOptions &
   Readonly<{
     modules(): GameplayModuleRuntime;
     systemAuthority?: ModuleSystemAuthority;
+    structureTargets?(): GameplayStructureTargetRuntime | null;
   }>;
 type Position = [number, number, number];
 
@@ -92,6 +94,13 @@ export class RegisteredBlockRuntime {
     return this.options.modules().invokeActor(this.options.actorAuthority, id, request);
   }
   beginBreak(id: string, position: Position) {
+    const structure = this.options.structureTargets?.()?.prepareBreak(id, position);
+    if (structure?.status === 'unavailable') return { success: false as const, reason: 'chunk-unavailable' };
+    if (structure?.status === 'malformed') return { success: false as const, reason: 'structure-malformed' };
+    if (structure?.status === 'resolved' && this.options.entities.playerStateAccess(id).mode === 'creative') {
+      const result = this.options.structureTargets!()!.breakFromMining(id, position);
+      return result.handled ? result : { success: false as const, reason: 'structure-target-stale' };
+    }
     const result = this.actorRequest(id, {
       operationId: BLOCK_BEGIN_OPERATION,
       target: { kind: 'voxel', position },
@@ -179,6 +188,11 @@ export class RegisteredBlockRuntime {
         }
       }
       if (binding) {
+        const structure = this.options.structureTargets?.()?.completeBreakFromMining(id, action.position);
+        if (structure?.handled) {
+          if (!structure.success) this.cancelPending(id);
+          continue;
+        }
         const result = this.invoke(binding, id, {
           operationId: BLOCK_FINISH_OPERATION,
           target: { kind: 'voxel', position: action.position },

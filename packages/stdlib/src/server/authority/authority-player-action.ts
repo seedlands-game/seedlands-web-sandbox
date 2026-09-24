@@ -9,22 +9,10 @@ import type { WorldCommitResult } from '../game-server-types';
 import { dispatchItemInteraction } from '../gameplay/modules/item-interaction-module';
 import {
   dispatchStructureTargetFirstV1,
-  type StructureTargetInteractionResultV1,
-  type StructureTargetInvocationV1,
-  type StructureTargetResolutionV1,
+  type StructureTargetPortV1,
 } from '../gameplay/modules/structure-target-dispatch';
 
-export type AuthorityStructureTargetPort = Readonly<{
-  resolve(
-    input: Readonly<{
-      actorId: string;
-      intent: Extract<AuthorityAction, { type: 'interact' }>['intent'];
-      target: Extract<Extract<AuthorityAction, { type: 'interact' }>['target'], { kind: 'voxel' }>;
-      selectedItemId: string | null;
-    }>,
-  ): StructureTargetResolutionV1;
-  invoke(input: StructureTargetInvocationV1): StructureTargetInteractionResultV1;
-}>;
+export type AuthorityStructureTargetPort = Pick<StructureTargetPortV1, 'resolve' | 'invoke'>;
 
 export function unavailableAuthorityPlayerAction(
   submittedAction: AuthorityAction,
@@ -84,7 +72,7 @@ export function applyAuthorityPlayerAction(
       return server.attackEntity(playerId, action.targetId);
     case 'begin-break': {
       const result = server.beginBreak(playerId, action.position);
-      if (result.success && result.commit) publishCommit(result.commit);
+      if ('success' in result && result.success && result.commit) publishCommit(result.commit);
       return result;
     }
     case 'cancel-break':
@@ -151,8 +139,9 @@ export function applyAuthorityPlayerAction(
           )
         : fallback();
       if (interaction.success && interaction.value !== undefined) {
-        const value = interaction.value;
-        const commit = server.acknowledgeBlockCommit(value);
+        const commit =
+          ('commit' in interaction ? interaction.commit : undefined) ??
+          server.acknowledgeBlockCommit(interaction.value);
         if (commit) publishCommit(commit);
       }
       return interaction;

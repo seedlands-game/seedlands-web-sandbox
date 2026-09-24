@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { GameplayRuntime, classicContent, classicOptions } from '../../../../fixtures/classic/content';
+import { GameplayRuntime, classicContent } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
@@ -8,7 +9,7 @@ const loaded = ([x, y, z]: [number, number, number]) =>
   Math.abs(x) <= 8 && y === 4 && Math.abs(z) <= 8 ? ((x + z) % 2 ? Voxel.Grass : Voxel.Stone) : undefined;
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicOptions(),
+    ...classicGameplayDomainOptions(),
     platform: testCorePlatform,
     environmentSeed: 7,
     getWorldTime: () => worldTime,

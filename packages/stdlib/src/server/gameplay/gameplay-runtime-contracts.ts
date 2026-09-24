@@ -15,6 +15,7 @@ type Position = [number, number, number];
 export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
   getLoadedVoxel?: (position: Position) => number | undefined;
+  getLoadedCell?: (position: Position) => Readonly<{ voxel: number; fluid: number }> | null;
   getFluidCell?: (position: Position) => FluidCell | null;
   voxelGeometry?: VoxelGeometryResolver;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;

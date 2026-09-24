@@ -33,6 +33,11 @@ export type RegisteredStructureRuntimeOptions = Readonly<{
     inventoryChanged: boolean,
     precedingWorldCommit: WorldCommitResult,
   ): PreparedStructureParticipant & Readonly<{ revision: number }>;
+  prepareFactDelivery(
+    facts: readonly import('../../composition/contracts').ModuleInvocationValue[],
+    precedingWorldCommit: WorldCommitResult,
+    gameplayRevision: number,
+  ): PreparedStructureParticipant;
   maxReceipts?: number;
   prepareCancellation(actorId: string): PreparedStructureParticipant;
   prepareDependentRemoval(position: StructurePositionV1): PreparedStructureDependentRemovalV1;
@@ -80,6 +85,7 @@ export class RegisteredStructureRuntime {
             prepareDependentRemoval: options.prepareDependentRemoval,
             prepareReceipt: (commit) => this.prepareReceipt(commit),
             prepareGameplayChange: options.prepareGameplayChange,
+            prepareFactDelivery: options.prepareFactDelivery,
           },
           projections,
           observed,
@@ -99,6 +105,10 @@ export class RegisteredStructureRuntime {
     const commit = this.receipts.find((entry) => entry.worldRevision === worldRevision);
     if (commit) this.receipts = this.receipts.filter((entry) => entry !== commit);
     return commit;
+  }
+
+  hasCommit(worldRevision: number): boolean {
+    return this.receipts.some((entry) => entry.worldRevision === worldRevision);
   }
 
   private actor(actorId: string): StructureActorProjectionV1 | null {

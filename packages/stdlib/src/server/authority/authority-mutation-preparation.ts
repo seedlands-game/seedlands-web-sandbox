@@ -6,7 +6,7 @@ import type { WorldMutationBuffer, VoxelEdit } from '../world-mutation';
 import { assertMutationCoordinate, assertVoxelValue } from '../world-mutation';
 import type { CoreTimerPort } from '../../runtime/platform-ports';
 import type { EntityLifetimeReference } from '../gameplay/ecs-entity-owner';
-import type { StructureTargetResolutionV1 } from '../gameplay/modules/structure-target-dispatch';
+import type { StructureTargetPortV1 } from '../gameplay/modules/structure-target-dispatch';
 
 const PREPARATION_TIMEOUT_MS = 5_000;
 const MAX_PREPARED_CHUNKS = 2_048;
@@ -67,9 +67,7 @@ export class AuthorityMutationPreparation {
     private readonly server: PreparationServer,
     private readonly requestChunk: (key: string) => void,
     private readonly timers: CoreTimerPort,
-    private readonly structureTargets?: Readonly<{
-      resolve(action: Extract<AuthorityAction, { type: 'interact' }>, playerId: string): StructureTargetResolutionV1;
-    }>,
+    private readonly structureTargets?: Pick<StructureTargetPortV1, 'prepare' | 'prepareBreak'>,
   ) {}
 
   async prepareEdits(edits: readonly VoxelEdit[]): Promise<boolean> {
@@ -114,12 +112,19 @@ export class AuthorityMutationPreparation {
     if (action.type === 'interact' && action.target.kind === 'entity')
       this.addEntityReferenceSegment(keys, playerId, action.target.reference, 5);
     if (!(await this.prepareKeys(keys))) return false;
-    if (action.type !== 'interact' || action.target.kind !== 'voxel' || !this.structureTargets) return true;
-    let target = this.structureTargets.resolve(action, playerId);
+    if (!this.structureTargets) return true;
+    const resolveStructure = () =>
+      action.type === 'interact' && action.target.kind === 'voxel'
+        ? this.structureTargets!.prepare(action, playerId)
+        : action.type === 'begin-break'
+          ? this.structureTargets!.prepareBreak(playerId, action.position)
+          : null;
+    let target = resolveStructure();
+    if (!target) return true;
     if (target.status === 'not-structure' || target.status === 'malformed') return true;
-    const additional = new Set(target.chunkKeys.filter((key) => !keys.has(key)));
+    const additional = new Set<string>(target.chunkKeys.filter((key) => !keys.has(key)));
     if (!(await this.prepareKeys(additional))) return false;
-    target = this.structureTargets.resolve(action, playerId);
+    target = resolveStructure()!;
     return target.status === 'resolved' || target.status === 'malformed';
   }
 

@@ -103,6 +103,7 @@ class GameServerWorld {
         prepareVoxelEdits: (actorId, edits) => this.worldCommitApi.prepareVoxelEdits(actorId, edits),
         setWorldTime: (hours) => this.setWorldTime(hours),
         readLoadedGameplayVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
+        readLoadedGameplayCell: (x, y, z) => this.readLoadedGameplayCell(x, y, z),
         readGameplayVoxel: (x, y, z) => this.readGameplayVoxel(x, y, z),
         readFluidCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
         voxelGeometry: this.voxelGeometry,
@@ -343,6 +344,13 @@ class GameServerWorld {
 
   private readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined {
     return this.peekLoadedVoxel(x, y, z)?.voxel;
+  }
+
+  private readLoadedGameplayCell(x: number, y: number, z: number) {
+    const loaded = this.peekLoadedVoxel(x, y, z);
+    if (!loaded) return null;
+    const fluid = this.fluidChunks.cell(x, y, z, false);
+    return { voxel: loaded.voxel, fluid: fluid ? fluid.level | (fluid.source ? 0x80 : 0) : 0 };
   }
 
   private readGameplayVoxel(x: number, y: number, z: number): number | undefined {

@@ -43,6 +43,7 @@ export const OVERWORLD_PRODUCT_PERMISSIONS: readonly ModulePermission[] = Object
   { resource: 'seedlands.block-actor', operations: ['read', 'execute'] },
   { resource: 'seedlands.block-voxel', operations: ['read', 'execute'] },
   { resource: 'seedlands.block-clock', operations: ['read', 'execute'] },
+  { resource: 'seedlands.structure', operations: ['read', 'execute'] },
   { resource: 'seedlands.ruleset', operations: ['read'] },
   { resource: 'seedlands.needs', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.combat', operations: ['read', 'execute'] },

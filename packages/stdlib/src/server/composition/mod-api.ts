@@ -116,6 +116,17 @@ export {
   VOXEL_GEOMETRY_CAPABILITY,
 } from '../gameplay/modules/voxel-geometry-module';
 export type { VoxelGeometryModuleOptionsV1 } from '../gameplay/modules/voxel-geometry-module';
+export {
+  defineStructureActionsModuleV1,
+  STRUCTURE_ACTIONS_CAPABILITY,
+  STRUCTURE_ACTOR_COMPONENT,
+  STRUCTURE_BREAK_OPERATION,
+  STRUCTURE_PLACE_OPERATION,
+  STRUCTURE_RESOURCE,
+  STRUCTURE_TOGGLE_OPERATION,
+  STRUCTURE_VOXEL_COMPONENT,
+} from '../gameplay/modules/structure-actions-module';
+export type { StructureActionPolicyV1 } from '../gameplay/modules/structure-actions-module';
 export { defineItemInteractionModule, ITEM_INTERACTION_CAPABILITY } from '../gameplay/modules/item-interaction-module';
 export type {
   ItemInteractionDefinition,

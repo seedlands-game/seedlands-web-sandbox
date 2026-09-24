@@ -156,6 +156,9 @@ describe('Structure target-first routing', () => {
           getVoxel: () => 0,
           resolve: () => ({
             status: 'resolved',
+            kind: 'existing',
+            operation: 'toggle',
+            target: [7, 31, 0],
             structure: registry.resolveTarget(
               [7, 31, 0],
               reader(
@@ -245,23 +248,60 @@ describe('Structure target-first routing', () => {
   );
 
   it.each([
-    ['diagonal', { hit: [7, 31, 0] as const, adjacent: [8, 32, 0] as const }, () => 0, 'invalid-target'],
-    ['out-of-range', { hit: [20, 31, 0] as const, adjacent: [21, 31, 0] as const }, () => 0, 'out-of-range'],
-    ['unknown', { hit: [7, 31, 0] as const, adjacent: [6, 31, 0] as const }, () => undefined, 'chunk-unavailable'],
-    [
-      'blocked',
-      { hit: [7, 31, 0] as const, adjacent: [6, 31, 0] as const },
-      ([, , z]: readonly number[]) => (z === 1 ? 3 : 0),
-      'blocked',
-    ],
-  ])('rejects %s target before Structure resolution', (_label, target, getVoxel, reason) => {
-    const resolve = vi.fn();
+    ['diagonal', { hit: [7, 31, 0] as const, adjacent: [8, 32, 0] as const }, (): number => 0, 'invalid-target'],
+    ['out-of-range', { hit: [20, 31, 0] as const, adjacent: [21, 31, 0] as const }, (): number => 0, 'out-of-range'],
+  ])('rejects %s target before resolving or falling back', (_label, target, getVoxel, reason) => {
+    const resolve = vi.fn(() => ({ status: 'not-structure' as const }));
+    const invoke = vi.fn();
+    const fallback = vi.fn();
     expect(
       dispatchStructureTargetFirstV1(
-        { actor: actor(null), getVoxel, resolve, invoke: vi.fn(), fallback: vi.fn() },
+        { actor: actor(null), getVoxel, resolve, invoke, fallback },
         { actorId: 'player', intent: 'use', target: { kind: 'voxel', ...target }, expectedSelection },
       ),
     ).toEqual({ success: false, reason });
     expect(resolve).not.toHaveBeenCalled();
+    expect(invoke).not.toHaveBeenCalled();
+    expect(fallback).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'unknown',
+      { status: 'unavailable' as const, chunkKeys: ['0,0,0'] },
+      (): number | undefined => undefined,
+      'chunk-unavailable',
+    ],
+    [
+      'blocked',
+      {
+        status: 'resolved' as const,
+        kind: 'placement' as const,
+        operation: 'place' as const,
+        target: [6, 31, 0] as const,
+        definitionId: 'sample:panel',
+        stateId: 'closed',
+        bearing: 'west' as const,
+        chunkKeys: ['0,0,0'],
+      },
+      ([, , z]: readonly number[]): number | undefined => (z === 1 ? 3 : 0),
+      'blocked',
+    ],
+  ])('fails a resolved Structure %s without invoking or falling back', (_label, resolved, getVoxel, reason) => {
+    const invoke = vi.fn();
+    const fallback = vi.fn();
+    expect(
+      dispatchStructureTargetFirstV1(
+        { actor: actor(null), getVoxel, resolve: () => resolved, invoke, fallback },
+        {
+          actorId: 'player',
+          intent: 'use',
+          target: { kind: 'voxel', hit: [7, 31, 0], adjacent: [6, 31, 0] },
+          expectedSelection,
+        },
+      ),
+    ).toEqual({ success: false, reason });
+    expect(invoke).not.toHaveBeenCalled();
+    expect(fallback).not.toHaveBeenCalled();
   });
 });

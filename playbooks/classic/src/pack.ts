@@ -29,6 +29,7 @@ import { classicRetiredActorsMigration } from './retired-actors-migration';
 import { classicItemInteractionModules } from './item-interactions';
 import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
 import { classicStructureDefinitionModule } from './structures';
+import { classicStructureActionsModule } from './structure-actions';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -97,6 +98,7 @@ export const pack = definePack({
       descriptors: classicWoodenDoorGeometryDescriptors,
     }),
     classicStructureDefinitionModule,
+    classicStructureActionsModule,
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
@@ -106,6 +108,7 @@ export const pack = definePack({
         { resource: 'seedlands.inventory', operations: ['execute'] },
         { resource: 'seedlands.inventory-item', operations: ['execute'] },
         { resource: 'seedlands.combat', operations: ['execute'] },
+        { resource: 'seedlands.structure', operations: ['execute'] },
       ],
     }),
     defineStationActionsModule(),

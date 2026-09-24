@@ -2,13 +2,8 @@ import { expect, it, vi } from 'vitest';
 import { createProjectileRuntime } from '@seedlands/stdlib/server/gameplay/projectile-runtime';
 import { fireSelectedRangedItem } from '@seedlands/stdlib/server/gameplay/ranged-action';
 import { createItemDefinitionRegistry } from '@seedlands/stdlib/server/gameplay/item-registry';
-import {
-  GameplayRuntime,
-  classicOptions,
-  getItemDefinition,
-  Inventory,
-  craftRecipe,
-} from '../../../../fixtures/classic/content';
+import { GameplayRuntime, getItemDefinition, Inventory, craftRecipe } from '../../../../fixtures/classic/content';
+import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
@@ -160,7 +155,7 @@ it('在途箭保存恢复后继续，id 高水位不重用且寿命到期销毁'
 it('GameplayRuntime 持有投射物并在保存恢复后通过正式伤害入口命中', () => {
   const createWorld = () =>
     new GameplayRuntime({
-      ...classicOptions(),
+      ...classicGameplayDomainOptions(),
       platform: testCorePlatform,
       getWorldTime: () => 0,
       getVoxel: () => Voxel.Air,
