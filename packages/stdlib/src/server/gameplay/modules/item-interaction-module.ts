@@ -1,5 +1,5 @@
 import type { EntityLifetimeReference } from '../ecs-entity-owner';
-import { positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 import type {
   ModDefinitionCatalog,
@@ -267,19 +267,18 @@ export function dispatchItemInteraction(
   let operationTarget: WorldAuthorizationTarget;
   if (target.kind === 'self') operationTarget = { kind: 'entity', entityId: actorId };
   else if (target.kind === 'voxel') {
+    const origin = playerInteractionOrigin(actor.position);
     if (target.hit.reduce((sum, coordinate, axis) => sum + Math.abs(coordinate - target.adjacent[axis]), 0) !== 1)
       return { success: false as const, reason: 'invalid-target' };
     if (
-      !positionsInRange(actor.position, voxelCenter([...target.hit]), 5) ||
-      !positionsInRange(actor.position, voxelCenter([...target.adjacent]), 5)
+      !positionsInRange(origin, voxelCenter([...target.hit]), 5) ||
+      !positionsInRange(origin, voxelCenter([...target.adjacent]), 5)
     )
       return { success: false as const, reason: 'out-of-range' };
-    const visibility = traceVoxelRay(voxelCenter([...target.hit]), actor.position, (x, y, z) =>
-      options.getVoxel([x, y, z]),
-    );
+    const visibility = traceVoxelRay(voxelCenter([...target.hit]), origin, (x, y, z) => options.getVoxel([x, y, z]));
     if (visibility !== 'clear')
       return { success: false as const, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
-    const adjacentVisibility = traceVoxelRay(voxelCenter([...target.adjacent]), actor.position, (x, y, z) =>
+    const adjacentVisibility = traceVoxelRay(voxelCenter([...target.adjacent]), origin, (x, y, z) =>
       options.getVoxel([x, y, z]),
     );
     if (adjacentVisibility !== 'clear')

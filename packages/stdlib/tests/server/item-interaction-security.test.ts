@@ -21,13 +21,16 @@ const binding = {
   moduleId: 'test:module',
   itemId: 'test:item',
 };
-const options = (voxel: (position: [number, number, number]) => number | undefined) => {
+const options = (
+  voxel: (position: [number, number, number]) => number | undefined,
+  actorPosition: readonly [number, number, number] = [0, 0, 0],
+) => {
   const invokeActor = vi.fn(() => ({ ok: true as const, value: { success: true }, revision: 1 }));
   return {
     invokeActor,
     value: {
       actor: () => ({
-        position: [0, 0, 0] as const,
+        position: actorPosition,
         lifecycle: 'alive' as const,
         mode: 'survival' as const,
         inventoryRevision: 1,
@@ -46,6 +49,24 @@ const options = (voxel: (position: [number, number, number]) => number | undefin
 };
 
 describe('item interaction target security', () => {
+  it('uses the trusted interaction origin for the Browser-03 downward voxel target', () => {
+    const floor = new Set(['68,30,2', '67,30,2']);
+    const context = options(
+      (position) => (floor.has(position.join(',')) ? 3 : 0),
+      [65.95881945378738, 32.600001, 2.4981569866156805],
+    );
+
+    expect(
+      dispatchItemInteraction(
+        context.value,
+        'player',
+        { kind: 'voxel', hit: [68, 30, 2], adjacent: [68, 31, 2] },
+        selection,
+      ),
+    ).toMatchObject({ success: true, handled: true });
+    expect(context.invokeActor).toHaveBeenCalledOnce();
+  });
+
   it.each([
     ['far adjacent', { kind: 'voxel' as const, hit: [1, 0, 0] as const, adjacent: [3, 0, 0] as const }],
     ['diagonal adjacent', { kind: 'voxel' as const, hit: [1, 0, 0] as const, adjacent: [2, 1, 0] as const }],
@@ -71,6 +92,34 @@ describe('item interaction target security', () => {
     expect(context.invokeActor).not.toHaveBeenCalled();
   });
 
+  it('rejects a hit behind a wall when adjacent remains visible', () => {
+    const context = options(([x, y]) => (x === 2 && y === 1 ? 3 : 0));
+    expect(
+      dispatchItemInteraction(
+        context.value,
+        'player',
+        { kind: 'voxel', hit: [3, 1, 0], adjacent: [3, 2, 0] },
+        selection,
+      ),
+    ).toEqual({ success: false, reason: 'blocked' });
+    expect(context.invokeActor).not.toHaveBeenCalled();
+  });
+
+  it('rejects stale selection before reading the target or invoking a handler', () => {
+    const getVoxel = vi.fn(() => 0);
+    const context = options(getVoxel);
+    expect(
+      dispatchItemInteraction(
+        context.value,
+        'player',
+        { kind: 'voxel', hit: [1, 0, 0], adjacent: [1, 1, 0] },
+        { ...selection, inventoryRevision: selection.inventoryRevision + 1 },
+      ),
+    ).toEqual({ success: false, reason: 'stale-selection' });
+    expect(getVoxel).not.toHaveBeenCalled();
+    expect(context.invokeActor).not.toHaveBeenCalled();
+  });
+
   it.each([
     [
       'unknown',
@@ -79,7 +128,7 @@ describe('item interaction target security', () => {
       'chunk-unavailable',
     ],
     [
-      'out-of-range',
+      'out-of-range from trusted interaction origin',
       (): number | undefined => 0,
       { kind: 'voxel' as const, hit: [5, 0, 0] as const, adjacent: [6, 0, 0] as const },
       'out-of-range',
