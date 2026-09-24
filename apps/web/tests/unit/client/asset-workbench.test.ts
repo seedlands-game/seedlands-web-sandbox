@@ -36,7 +36,8 @@ describe('统一资产目录与有界适配', () => {
               item.id.endsWith('-wool') ||
               ['sapling', 'flower', 'mushroom', 'sugar-cane', 'dead-bush', 'red-flower', 'red-mushroom'].includes(
                 item.id,
-              ))),
+              ))) ||
+          (item.id === 'wooden-door' && item.itemType === 'block' && item.placesVoxel === undefined),
       );
     }
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'tool', placesVoxel: 1 })).toBe(false);

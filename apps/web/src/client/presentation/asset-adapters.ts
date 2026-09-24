@@ -21,6 +21,7 @@ const pixelBlockItems = new Set([
   'red-flower',
   'red-mushroom',
 ]);
+const structurePixelItems = new Set(['wooden-door']);
 export const assetAdapter = (type: Asset['type']) => adapters[type];
 export const isNativeAsset = (asset: Asset): asset is NativeAsset =>
   asset.type === 'pixel-texture' || asset.type === 'extruded-pixel-model';
@@ -33,5 +34,5 @@ export const assetDependencies = (asset: Asset): string[] =>
 export const acceptsPixelItem = (item: { id: string; itemType: string; placesVoxel?: number }) =>
   (['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined) ||
   (item.itemType === 'block' &&
-    item.placesVoxel !== undefined &&
-    (item.id.endsWith('-wool') || pixelBlockItems.has(item.id)));
+    ((item.placesVoxel !== undefined && (item.id.endsWith('-wool') || pixelBlockItems.has(item.id))) ||
+      (item.placesVoxel === undefined && structurePixelItems.has(item.id))));

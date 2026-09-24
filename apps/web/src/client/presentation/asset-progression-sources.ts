@@ -77,6 +77,7 @@ export const progressionItemAssets = [
   ...pixelItemAssets('compass', '指南针', 'compass'),
   ...pixelItemAssets('clock', '时钟', 'clock'),
   ...pixelItemAssets('map', '地图', 'map'),
+  ...pixelItemAssets('wooden-door', '木门', 'wooden-door'),
   ...(
     [
       'flint-and-steel',

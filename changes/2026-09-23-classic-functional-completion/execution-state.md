@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T20:40:00Z
+更新时间：2026-09-24T21:06:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -31,15 +31,15 @@ Goal：未创建；本轮未提供 token budget。
 
 ## 当前阶段与期限
 
-| Owner                  | 阶段                      | agent/进程句柄                               | 期限/状态               | 当前事实                                                                                                                             |
-| ---------------------- | ------------------------- | -------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| root `4decc58...`      | 总负责人                  | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                    | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git/Harness `954ef...` | `GIT-07`                  | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | 完成，等待后续build租约 | code `5d056070...`、docs `260efa3e...` 已推送；首次local/upstream/ls-remote一致、ahead/behind `0/0`、index空；未browser/build/CI     |
-| 794 `7943067e...`      | `V1-HARNESS-GEOMETRY-01`  | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结       | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
-| Media `a288bb43...`    | `V1-HARNESS-MEDIA-01`     | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root 已准出，冻结       | controller `f9ada640...36a7`、test `8e6088a8...fd32`、evidence `9a41d72d...bbf3`；7+5 tests及types/lint通过，只证明forward           |
-| Scenario `761fb...`    | V1 canonical scenario     | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | root已准出，冻结        | root核6源码hash与evidence `73ce063b...f6f5`；真实DOM/PointerLock步骤无baseline后写口，尚未实际运行browser                            |
-| Legacy `a288bb43...`   | `LEGACY-LINEAGE-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结            | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
-| Lighting `88d41...`    | 等待 V1                   | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                    | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
+| Owner                   | 阶段                            | agent/进程句柄                               | 期限/状态         | 当前事实                                                                                                                             |
+| ----------------------- | ------------------------------- | -------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| root `4decc58...`       | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续              | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
+| Git/Artifact `954ef...` | `GIT-08 + V1-ARTIFACT-BUILD-02` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | GIT-08 staging中  | door显式pixel model与退休appearance fixture均已root准出；5 files/15、consumer 1、完整model 9/9、SSG、Web/root types通过              |
+| 794 `7943067e...`       | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结 | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
+| Media `a288bb43...`     | `V1-HARNESS-MEDIA-01`           | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root 已准出，冻结 | controller `f9ada640...36a7`、test `8e6088a8...fd32`、evidence `9a41d72d...bbf3`；7+5 tests及types/lint通过，只证明forward           |
+| Scenario `761fb...`     | V1 canonical scenario           | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | root已准出，冻结  | root核6源码hash与evidence `73ce063b...f6f5`；真实DOM/PointerLock步骤无baseline后写口，尚未实际运行browser                            |
+| Legacy `a288bb43...`    | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结      | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
+| Lighting `88d41...`     | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待              | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 
@@ -76,6 +76,7 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 - `classic-fluid-interactions` 的两个旧 negative spy 已用真实可控 no-op/stale 失败条件替换，当前 `10/10`；该结果只关闭测试夹具，不扩展 A2/B2 产品准出。
 - Media dependent-removal、Authority事务/drain/projection、V4恢复、Chunk residency、Classic Pack/MP3 builder、Web消费、restore owner和legacy lineage均已分别由root定向准出；GIT-06 staged tree已证明组合闭合。完整production artifact和浏览器真实音频仍未执行。
 - 12-file Classic composition扫描的早期 `73/31` 与探索树 `65/39` 已由fixture attribution明确归因；最终目标是当前闭包全 `104/104`，不得继续写成未归因历史债务。
+- `gameplay-model-assets.test.ts` 的历史 `custom:grazer-fur` 失败已确认是退休 actor fixture，并由现役 player/cloth 替换；完整文件 `9/9 PASS`，生产材质解析未改。证据见 `appearance-fixture-close-evidence.md`。
 - Lighting profile、block+sky GPU owner、五类消费者、真实 WebGL2 readback、Cua 动态矩阵尚未完成。
 - 未运行全量 deterministic、Classic headless、production build、唯一 Chromium、完整 save/reopen、CI、PR review 或 Cloudflare preview。
 
