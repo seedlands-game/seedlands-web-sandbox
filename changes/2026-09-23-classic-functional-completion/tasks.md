@@ -105,6 +105,15 @@ V1 只引入 water-bucket、两格可开关门、唱片三旅程所需公共接�
 
 ## V5–V6 串行验收与交付
 
+### RESTORE-OWNER-CLOSE-01
+
+Owner：954ef059-b17c-4842-bf46-5ebc1807b38e；阶段上限 2h。
+
+- RED：真实半程 mining 保存/restore 后继续完成时，旧 game-server-world-commit-adapter 调用已 dispose 的构造期 Kernel owner。
+- 实现：world commit adapter 使用当前 owner 的窄 getter；不改 Kernel、不降低 dispose/epoch 校验、不用全局 owner。
+- 回归：成功 restore 后新 edit/batch/fluid 使用新 owner；restore 前 prepared edit/batch 在成功 restore 后 stale；失败 restore 保留旧 owner并允许原 prepared 操作继续。
+- 验收：半程 mining 完成且只完成一次；必要 A1、Media、Structure restore tests、stdlib/root-test types、targeted ESLint/Prettier/diff PASS。未授权 browser/build/CI/Git。
+
 所有命令串行，不并发 test/build/dev server；单 checkpoint 超过 6h 时在当前可恢复边界记录执行/未执行项后退出，不把部分结果写 PASS。
 
 | checkpoint / owner                                       | 最长 | done_when                                                                                                                                                                                                        |

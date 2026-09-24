@@ -157,6 +157,13 @@ V1 的 unit/integration GREEN 后立即串行生成一次临时 production artif
 
 ## 阶段与项目门禁
 
+### Restore owner 关闭条件
+
+- GameServer 成功 restore 替换 GameplayRuntime 后，world commit adapter 必须在每次准备和提交时解析当前 KernelStateOwner，不得继续调用已经 dispose 的构造期 owner。
+- restore 前已经创建的 prepared world edit/batch 保留其捕获的 epoch、revision、Chunk 与 metadata owner；成功 restore 后必须判 stale 且零写，不能被透明重绑到新世界。
+- restore 失败不得替换 Gameplay、Kernel owner、Chunk 或现有 prepared 操作的新鲜度；失败前创建的合法 prepared edit 仍可按原 owner 提交。
+- 可执行 RED 是 gameplay-mining-progression.test.ts 的“restores actual half-finished mining...”真实保存/restore/继续挖掘路径；GREEN 后补直接 prepared edit/batch 与 fluid 在成功/失败 restore 边界的定向回归。
+
 1. A0：架构与实施分层已完成并获用户批准；历史 SHA 只作当时快照，不再作为当前实施前置。
 2. V1：只做 interact＋water-bucket、两格可开关门、唱片/旧上传退场及其最小 fixture；每个 checkpoint 的 done_when 见 tasks.md。立即用临时 production artifact 串行跑真实浏览器，失败不扩面。
 3. V2：在已验证 spine 上完成普通交互/装备矩阵，并做领域 browser smoke。
