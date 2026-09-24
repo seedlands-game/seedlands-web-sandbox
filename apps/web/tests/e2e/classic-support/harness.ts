@@ -10,6 +10,10 @@ import {
 import { queryEntity } from './combat-entity';
 import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
+import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
+import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import type { HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../../../src/app/app-contracts';
+import type { GlobalAudio } from '../../../src/app/audio/global-audio';
 export { clickCanvasCenter, lockPointer, moveMouseBy } from './mouse-input';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
@@ -131,6 +135,10 @@ export type HarnessApi = {
   getVoxelAt?(x: number, y: number, z: number): number | null;
   getChunkRevision?(cx: number, cy: number, cz: number): number | null;
   getRenderedChunkRevision?(cx: number, cy: number, cz: number): number | null;
+  getFluidCell?(x: number, y: number, z: number): Readonly<{ level: number; source: boolean }> | null;
+  getVoxelGeometry(voxel: number): VoxelGeometryDefinitionV1 | null;
+  getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId): RenderedMaterialMeshSummary | null; // prettier-ignore
+  mediaSnapshot(): HarnessMediaSnapshot;
   flushSave(): Promise<void>;
   beginPerformanceScenario(name: string): string;
   exportPerformanceTrace(): ChromeTrace;
@@ -147,7 +155,10 @@ export type HarnessApi = {
   };
 };
 
-export type ClassicWindow = Window & { __seedlandsHarness?: HarnessApi };
+export type ClassicWindow = Window & {
+  __seedlandsHarness?: HarnessApi;
+  __seedlandsAudio?: { snapshot(): ReturnType<GlobalAudio['snapshot']> };
+};
 
 export const snapshot = (page: Page) =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.snapshot() ?? null);

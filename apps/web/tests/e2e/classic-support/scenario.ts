@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 
 export type Point = readonly [number, number, number];
 export type RoutePoint = readonly [number, number];
+export type V1Placement = Readonly<{ support: Point; target: Point; approach: RoutePoint }>;
 
 export type ClassicScenario = Readonly<{
   schemaVersion: 1;
@@ -31,6 +32,11 @@ export type ClassicScenario = Readonly<{
     stationApproach: RoutePoint;
     farTurnaround: RoutePoint;
     returnPoint: RoutePoint;
+  }>;
+  v1Slice: Readonly<{
+    water: V1Placement;
+    door: Readonly<{ support: Point; lower: Point; upper: Point; approach: RoutePoint }>;
+    jukebox: V1Placement;
   }>;
   faultDesign: Readonly<Record<string, string>>;
   coverage: Readonly<{

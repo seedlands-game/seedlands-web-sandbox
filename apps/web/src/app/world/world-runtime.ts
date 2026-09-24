@@ -1,6 +1,6 @@
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { WorldChange } from '@seedlands/stdlib/world/storage';
 import type { WorldCommitResult, WorldEditBatch } from '@seedlands/stdlib/server/game-server-types';
 import { resolveFillCommand, type FillCommand } from '@seedlands/stdlib/server/commands/fill-command';
@@ -26,6 +26,8 @@ import {
   StreamingAdmissionRetry,
 } from './streaming-admission-retry';
 import type { WorldAuthorityPort } from './world-authority-port';
+import { getRenderedMaterialMeshFromChunks } from './rendered-material-mesh';
+export type { RenderedMaterialMeshSummary } from './rendered-material-mesh';
 export type { WorldAuthorityPort } from './world-authority-port';
 
 export { waitForInitialWorldReady } from './initial-world-ready';
@@ -267,6 +269,10 @@ export class World {
 
   getRenderedChunkRevision(cx: number, cy: number, cz: number): number | null {
     return this.repository.chunks.get(chunkKey(cx, cy, cz))?.task.chunkRevision ?? null;
+  }
+
+  getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId) {
+    return getRenderedMaterialMeshFromChunks(this.repository.chunks, cx, cy, cz, material);
   }
 
   beginFluidFeedbackSample(target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) {

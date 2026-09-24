@@ -86,6 +86,7 @@ export class Game {
   private debugSequence = 0;
   private readonly uiProjection = new GameUiProjection();
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
+  private harnessRenderedWorldEpoch: string | null = null;
   private sessionSequence = 0;
   private startGeneration = 0;
   private pendingStartAbort: AbortController | null = null;
@@ -263,6 +264,7 @@ export class Game {
       () => (this.lifecycle.staleVisibleCommits += 1),
       this.visualResources.waterLayer.id,
     );
+    this.harnessRenderedWorldEpoch = authority.runtimeEpoch;
     this.visualEffects = new AdvancedVisualEffects(
       this.app,
       this.camera,
@@ -326,6 +328,7 @@ export class Game {
     const restored = restoreBrowserPresentation(ready, { authority, world: this.world, camera: this.camera, environment: this.environment, audio: this.audio, controller: this.controller, gameplay: this.gameplayClient, worldAudio: this.worldAudio, authoritySync: this.authoritySync, commandSource: this.commandSource, createGameplay: (playerId) => this.createGameplay(authority, playerId), createController: () => this.createController(this.camera!) });
     // prettier-ignore
     Object.assign(this, { serverPlayerId: ready.playerId, seedText: ready.seedText, ...restored });
+    this.harnessRenderedWorldEpoch = authority.runtimeEpoch;
     this.media.beginRestore(authority.runtimeEpoch);
     runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
   }
@@ -409,7 +412,7 @@ export class Game {
         gameplay: () => this.gameplayClient,
         frameMs: () => this.frameLoop.frameMs,
         qualityLevel: () => this.qualityLevel,
-        authority: () => authority,
+        authority: () => this.authority,
         collisionDebug: () => this.collisionDebug,
         compute: () => this.computeRuntime,
         logic: () => this.logicClient,
@@ -417,6 +420,11 @@ export class Game {
         ui: () => this.uiBridge.metrics(),
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
+        renderedMaterialMesh: (cx, cy, cz, material) =>
+          this.world?.getRenderedMaterialMesh(cx, cy, cz, material) ?? null,
+        renderedWorldEpoch: () => this.harnessRenderedWorldEpoch,
+        media: () => this.media.snapshot(),
+        audio: () => this.audio?.snapshot().worldMedia ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
         setTimePaused: (paused) => runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
         setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
@@ -523,6 +531,7 @@ export class Game {
     this.companion.stop();
     this.startGeneration += 1;
     this.removeHarness?.();
+    this.harnessRenderedWorldEpoch = null;
     this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
     if (this.world) {
       this.lifecycle.disposedWorlds += 1;

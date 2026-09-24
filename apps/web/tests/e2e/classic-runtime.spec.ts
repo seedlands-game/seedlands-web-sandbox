@@ -39,6 +39,7 @@ import {
 import { classicScenario, type Point } from './classic-support/scenario';
 import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
 import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
+import * as v1 from './classic-support/v1-slice';
 import {
   equipFromInventory,
   inventorySignature,
@@ -70,7 +71,7 @@ test.afterEach(async ({ page }, testInfo) => {
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
-  test.setTimeout(480_000);
+  test.setTimeout(720_000);
   evidenceWritten = false;
   restoreEvidence = undefined;
   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
@@ -82,6 +83,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
   // prettier-ignore
   const prepared = await prepareInitialState(page, classicScenario);
+  await clearNaturalFixtureEntities(page);
   // prettier-ignore
   const artifact = await browserArtifact(page);
   const packLock = await browserPackLock(page);
@@ -105,8 +107,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     30_000,
   );
   const crossingFloor = [
-    [31, 59, 0],
-    [32, 59, 0],
+    [31, 30, 0],
+    [32, 30, 0],
   ] as const;
   const authorityFloor = await waitForAuthorityVoxels(page, crossingFloor);
   expect(authorityFloor.every((entry) => entry.ok && entry.voxel === 3)).toBe(true);
@@ -185,7 +187,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);
     expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);
     expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);
-    expect(crossed.player[1]).toBeGreaterThan(61);
+    expect(crossed.player[1]).toBeGreaterThan(32);
     expect(crossed.onGround).toBe(true);
     expect(crossed.colliding).toBe(false);
     stageResults.C1 = {
@@ -198,7 +200,6 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
 
   let minedMeshEvidence!: ClassicSnapshot;
   await test.step('C2 真实采集、掉落拾取、背包与配方', async () => {
-    await clearNaturalFixtureEntities(page);
     for (const resource of classicScenario.initialState.resourceVoxels) {
       const countBefore = itemCount(await playerState(page), resource.itemId);
       await mineVoxel(page, resource.position);
@@ -299,6 +300,12 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     stageSamples.C3 = (await snapshot(page))!;
   });
 
+  let v1SliceState!: v1.V1SliceState;
+  await test.step('V1 水桶、跨 Chunk 木门与唱片机均通过正式玩家输入', async () => {
+    await v1.expectV1AudioSettings(page);
+    v1SliceState = await v1.completeV1SliceBeforeSave(page);
+  });
+
   let routeTrace!: ChromeTrace;
   let sampleCompletedAt!: string;
   await test.step('C4 离开并返回局部资源，验证 Worker 到可见网格链路', async () => {
@@ -365,7 +372,13 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
 
   await test.step('C5 正式保存返回、同上下文继续并再次交互', async () => {
-    const persistedPositions = [classicScenario.route.buildTarget, classicScenario.route.stationTarget] as const;
+    const persistedPositions = [
+      classicScenario.route.buildTarget,
+      classicScenario.route.stationTarget,
+      classicScenario.v1Slice.door.lower,
+      classicScenario.v1Slice.door.upper,
+      classicScenario.v1Slice.jukebox.target,
+    ] as const;
     const stateBeforeSave = await playerState(page);
     const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
     const checkpointBefore = await checkpointVoxels(page, persistedPositions);
@@ -379,6 +392,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     };
     expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
     expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
+    v1.expectV1DoorEvidence(authorityBefore, v1SliceState.door);
+    v1.expectV1DoorEvidence(checkpointBefore, v1SliceState.door);
     const identityBefore = await page.evaluate(async () => {
       const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
       if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
@@ -399,6 +414,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       return result.data;
     });
     expect(identityAfter.epoch).not.toBe(identityBefore.epoch);
+    await v1.verifyV1SliceAfterRestore(page, v1SliceState, String(identityAfter.epoch));
     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
@@ -406,6 +422,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       derivedInitial: derivedAfterInitial,
     });
     expect(observedVoxel(authorityAfter, classicScenario.route.buildTarget)).toBe(16);
+    v1.expectV1DoorEvidence(authorityAfter, v1SliceState.door);
     await expect.poll(() => voxelAt(page, classicScenario.route.buildTarget)).toBe(16);
     const derivedAfterSynchronized = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
@@ -466,6 +483,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
 
   const final = (await snapshot(page))!;
   await settings.deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
+  await v1.expectWorldAudioReleased(page);
   await attachClassicEvidence(testInfo, {
     scenario: classicScenario,
     stages: stageResults,

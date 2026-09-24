@@ -22,6 +22,7 @@ import type { AuthorityBodySnapshot } from '@seedlands/stdlib/server/authority/a
 import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
 import type { HarnessApi } from './gameplay/game-harness-contract';
+import { createHarnessObservability } from './gameplay/game-harness-observability';
 export type { HarnessApi } from './gameplay/game-harness-contract';
 
 type RuntimeHarnessBindings = {
@@ -51,6 +52,10 @@ type RuntimeHarnessBindings = {
   queueSave: () => void;
   flushSave: () => Promise<void>;
   experiments: () => HarnessSnapshot['experiments'];
+  renderedMaterialMesh: Parameters<typeof createHarnessObservability>[0]['renderedMaterialMesh'];
+  renderedWorldEpoch: () => string | null;
+  media: Parameters<typeof createHarnessObservability>[0]['media'];
+  audio: Parameters<typeof createHarnessObservability>[0]['audio'];
 };
 
 declare global {
@@ -343,6 +348,13 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
 
 export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): HarnessApi {
   return {
+    ...createHarnessObservability({
+      authority: bindings.authority,
+      renderedMaterialMesh: bindings.renderedMaterialMesh,
+      renderedWorldEpoch: bindings.renderedWorldEpoch,
+      media: bindings.media,
+      audio: bindings.audio,
+    }),
     world: bindings.developerWorld(),
     snapshot: () =>
       createHarnessSnapshot({

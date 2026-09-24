@@ -17,11 +17,12 @@ import {
   type ChunkBlockLightSink,
 } from '../scene/block-light-volume';
 import type { BlockLightVolume } from '@seedlands/stdlib/world/voxel-light';
+import { recordRenderedMaterialMeshPart, type RenderedMaterialMeshResource } from './rendered-material-mesh';
 
 export const WATER_MESH_TRANSITION_MS = 180;
 export const MAX_ACTIVE_WATER_TRANSITIONS = 8;
 
-export type PlayCanvasChunkResource = {
+export type PlayCanvasChunkResource = RenderedMaterialMeshResource & {
   entity: pc.Entity;
   categoryEntities: Map<MeshPart['renderCategory'], pc.Entity>;
   meshes: pc.Mesh[];
@@ -133,6 +134,7 @@ export const createPlayCanvasChunkAdapter = (
       waterParts: [],
       waterTransition: null,
       transitionCancel: null,
+      renderedMaterialMeshes: new Map(),
       blockLightOrigin: new Float32Array(origin),
       blockLightSize: BLOCK_LIGHT_VOLUME_SIZE,
     };
@@ -140,6 +142,7 @@ export const createPlayCanvasChunkAdapter = (
   },
   commitPart: (resource, task, part) => {
     const span = telemetry.beginSpan('render', 'MeshCommit', 'main', task.traceId);
+    recordRenderedMaterialMeshPart(resource, part);
     const mesh = new pc.Mesh(app.graphicsDevice);
     if (part.layout === 'compact') {
       mesh.setPositions(part.positions);

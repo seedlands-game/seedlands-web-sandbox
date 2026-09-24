@@ -1,16 +1,26 @@
-import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import {
+  cloneMediaPlaybackCommittedBatchV1,
+  cloneMediaPlaybackProjectionsV1,
+  type MediaPlaybackCommittedBatchV1,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
 import { createBrowserPackMediaLoader, type PackMediaLoader } from '../../client/presentation/pack-media-loader';
 import type { GlobalAudio } from './global-audio';
 
 const MAX_PENDING_MEDIA_BATCHES = 64;
 type Loader = Pick<PackMediaLoader, 'validate' | 'resolve' | 'abort' | 'dispose'>;
+export type GameMediaControllerSnapshot = Readonly<{
+  worldEpoch: string | null;
+  projections: readonly MediaPlaybackProjectionV1[];
+  lastForwardedBatch: MediaPlaybackCommittedBatchV1 | null;
+}>;
 
 export class GameMediaController {
   private loader: Loader | null = null;
   private pendingProjection: readonly MediaPlaybackProjectionV1[] = Object.freeze([]);
   private pendingFacts: readonly MediaPlaybackCommittedBatchV1[] = Object.freeze([]);
   private activeEpoch: string | null = null;
+  private lastForwardedBatch: MediaPlaybackCommittedBatchV1 | null = null;
 
   constructor(
     private readonly audio: GlobalAudio | undefined,
@@ -28,13 +38,14 @@ export class GameMediaController {
   }
 
   beginWorld(epoch: string): void {
+    this.lastForwardedBatch = null;
     if (!this.audio || !this.loader) return;
     this.activeEpoch = epoch;
     this.audio.beginMediaWorld(epoch, this.loader, this.failed);
     this.audio.installMediaProjections(this.pendingProjection);
     const pending = this.pendingFacts.filter((batch) => batch.worldEpoch === epoch);
     this.pendingFacts = Object.freeze([]);
-    for (const batch of pending) this.audio.consumeMediaFacts(batch.facts);
+    for (const batch of pending) this.forward(batch);
   }
 
   beginRestore(epoch: string): void {
@@ -61,7 +72,7 @@ export class GameMediaController {
       return;
     }
     if (this.activeEpoch === batch.worldEpoch) {
-      this.audio?.consumeMediaFacts(batch.facts);
+      this.forward(batch);
       return;
     }
     if (this.activeEpoch !== null) return;
@@ -76,15 +87,40 @@ export class GameMediaController {
     this.audio?.setWorldMediaPaused(paused);
   }
 
+  snapshot(): GameMediaControllerSnapshot {
+    return Object.freeze({
+      worldEpoch: this.activeEpoch,
+      projections: cloneMediaPlaybackProjectionsV1(this.pendingProjection),
+      lastForwardedBatch: this.lastForwardedBatch
+        ? cloneMediaPlaybackCommittedBatchV1(this.lastForwardedBatch, this.activeEpoch ?? undefined)
+        : null,
+    });
+  }
+
   endWorld(): void {
     this.activeEpoch = null;
     this.pendingProjection = Object.freeze([]);
     this.pendingFacts = Object.freeze([]);
+    this.lastForwardedBatch = null;
   }
 
   dispose(): void {
     this.loader?.dispose();
     this.loader = null;
     this.endWorld();
+  }
+
+  private forward(batch: MediaPlaybackCommittedBatchV1): void {
+    if (!this.audio || !this.loader || this.activeEpoch !== batch.worldEpoch) return;
+    let candidate: MediaPlaybackCommittedBatchV1;
+    try {
+      candidate = cloneMediaPlaybackCommittedBatchV1(batch, this.activeEpoch);
+      for (const fact of candidate.facts) if (fact.resource) this.loader.validate(fact.resource);
+    } catch {
+      this.failed('唱片资源未通过当前世界资源锁校验。');
+      return;
+    }
+    this.audio.consumeMediaFacts(candidate.facts);
+    this.lastForwardedBatch = candidate;
   }
 }
