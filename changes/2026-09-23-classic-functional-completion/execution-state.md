@@ -60,16 +60,16 @@ Goal：未创建；本轮未提供 token budget。
 
 ## Git 批次
 
-| 批次                   | 内容                                                                                                                                   | 本地 SHA | 远端 SHA | 状态                            |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------- | ------------------------------- |
-| TAKEOVER-01 docs       | `spec.md`、`architecture.md`、`tasks.md`、`execution-state.md`，以及确认归属本 change 的 `docs/development-governance.md` preview 增量 | pending  | pending  | 待 scoped stage/commit/push     |
-| A1 production          | prepared world/fluid/host/contracts/tests                                                                                              | pending  | pending  | 761 A1-CLOSE 后独立语义批次     |
-| V1.2 interaction/fluid | protocol/Authority/Classic bindings/tests                                                                                              | pending  | pending  | 待按真实依赖拆分                |
-| V1.3 Structure         | definition/registry/models/RED/tests                                                                                                   | pending  | pending  | 依赖 A1/A2/A3 后再决定合并批次  |
-| Media private          | stdlib media owner + Web loader/player + upload retirement                                                                             | pending  | pending  | 依赖公共 media integration      |
-| Lighting model         | explicit semantics + sky/surface models/tests                                                                                          | pending  | pending  | 依赖 V4 public/profile/renderer |
+| 批次                   | 内容                                                                                                                                   | 本地 SHA                                   | 远端 SHA                                   | 状态                                  |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------- |
+| TAKEOVER-01 docs       | `spec.md`、`architecture.md`、`tasks.md`、`execution-state.md`，以及确认归属本 change 的 `docs/development-governance.md` preview 增量 | `7f168dfd8da71135607964eadbe81001d9b3fd25` | `7f168dfd8da71135607964eadbe81001d9b3fd25` | 已提交并推送；远端 ahead/behind `0/0` |
+| A1 production          | prepared world/fluid/host/contracts/tests                                                                                              | pending                                    | pending                                    | 761 A1-CLOSE 后独立语义批次           |
+| V1.2 interaction/fluid | protocol/Authority/Classic bindings/tests                                                                                              | pending                                    | pending                                    | 待按真实依赖拆分                      |
+| V1.3 Structure         | definition/registry/models/RED/tests                                                                                                   | pending                                    | pending                                    | 依赖 A1/A2/A3 后再决定合并批次        |
+| Media private          | stdlib media owner + Web loader/player + upload retirement                                                                             | pending                                    | pending                                    | 依赖公共 media integration            |
+| Lighting model         | explicit semantics + sky/surface models/tests                                                                                          | pending                                    | pending                                    | 依赖 V4 public/profile/renderer       |
 
-提交/推送后必须把 TAKEOVER-01 的 local/remote SHA 写回本表；若写回需要新 commit，则使用后续 execution-state checkpoint 批次，不 amend。
+TAKEOVER-01 首批文档已读回 local/remote SHA；本次回填使用独立 execution-state checkpoint commit，不 amend。
 
 ## 终点
 
