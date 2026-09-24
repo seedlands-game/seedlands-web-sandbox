@@ -173,3 +173,96 @@ seedlands.structure:execute
 - 运行后 HEAD 仍为 `a77f1f4e9fef107582a4d4b576889e3083b5893f`，`git status --short` 无输出，artifact receipt SHA256 仍为 `f35872ae48...4f890`。
 - `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；进程核验只命中执行查询本身，没有本树 Playwright、Chromium 或 Vite preview 遗留。
 - 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或测试/production 修改。
+
+---
+
+# Browser-03 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-03`
+结论：**FAIL；C0 与既有 C1-C3 已关闭，首个 V1 玩家动作在 water-bucket Authority LOS 被拒绝。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt。
+
+## Browser-03 身份
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-8ae1f514`
+- HEAD：`8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586`
+- `git status --short`：运行前后均无输出。
+- artifact source SHA：`8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586`
+- artifact digest：`f278d8a1f51a31ff3c5620adfe2d46ab80340351d43dfc1ecd0033c218aa0224`
+- artifact receipt SHA256：`636b046961e2bbf8be37ae48ede9e9b2501c8d8b4d5d8274842f80ef3045ed28`
+- dist：276 个文件；未重建、未修改。
+- host permission 差分为空；`seedlands.structure` 仅批准 `read,execute`。
+- 最新远端 `7d6bcfcc` 只含后续 docs，不替换本次 artifact。
+
+## Browser-03 唯一 Attempt
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-03-8ae1f514 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-24T22:24:18.324Z` 至 `2026-09-24T22:26:33.012Z`。
+机器窗口：`cdb24cc2-3589-4194-9aef-fd56ee90b757`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+Playwright 结果：1 failed，1 passed，1 skipped；没有 retry 或第二次 Harness 调用。
+
+- C0 PASS，约 3.9 秒；Browser-01/02 的两个启动阻塞均关闭。
+- C1 PointerLock/真实移动/跨 Chunk PASS，约 17.8 秒。
+- C2 真实采集/拾取/背包/合成 PASS，约 22.2 秒。
+- C3 真实建造/进食/战斗/工作台 PASS，约 16.4 秒。
+- V1 步骤运行约 12.0 秒后在第一条 water-bucket 旅程失败。
+- Classic 视觉回归 PASS，约 31.7 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+Harness receipt 记录 C0-C3 为 PASS；失败时 `current` 仍为真实 Authority/browser 快照，关键值为 player `[65.95881945378738,32.600001,2.4981569866156805]`、`worldRevision=14`、`interactionAttempts=11`、`actionCompletionCount=13`、`actionFailureCount=0`。
+
+## Water-bucket 首个根因
+
+真实输入链已完成，不是选中、瞄准或 click 丢失：
+
+- 创造目录按钮实际选中 `water-bucket`，hotbar active button 的 `data-item=water-bucket`。
+- target card 与只读 aimed target 精确命中 floor `[68,30,2]`，adjacent 为预期空气 `[68,31,2]`。
+- Playwright trace 记录一次真实 canvas right click。
+- 随后 UI 显示 `无法交互 · blocked`，目标 voxel 在 5 秒观察窗内保持 Air `0`，未变为 Water `8`。
+
+`blocked` 的确定性来源是公共 item interaction dispatcher 的 hit LOS：
+
+1. `packages/stdlib/src/server/gameplay/modules/item-interaction-module.ts:277` 从 hit voxel center 向 `actor.position` 调用 `traceVoxelRay`。
+2. 本次 hit center 为 `[68.5,30.5,2.5]`，actor position 为 `[65.95881945378738,32.600001,2.4981569866156805]`。
+3. 按 `voxel-ray.ts` 的实际 1/8-block 采样重放，hit LOS 依次经过 `[68,30,2]`、`[67,30,2]`、`[67,31,2]`、`[66,31,2]`、`[66,32,2]`；`[67,30,2]` 是 canonical floor Stone，因此返回 `blocked`。
+4. adjacent LOS 的采样格为 `[68,31,2]`、`[67,31,2]`、`[67,32,2]`、`[66,32,2]`，均为空；fluid candidate 若目标被占用会返回独立 `target-occupied`，本次没有进入该分支。
+5. 项目对 Structure/Media 路径已有 `playerInteractionOrigin(position) = [x,y+1.6,z]`；item dispatcher 此处使用 actor feet，导致合法的向下交互射线先穿过相邻 floor。
+
+因此首因是 Authority 公共 item-interaction LOS origin 与已有玩家交互眼位语义不一致，而不是 scenario 坐标、创造目录 selected item、浏览器输入、fluid handler、世界写入或 5 秒等待阈值。后续修复应在公共 item interaction dispatcher 使用可信 `playerInteractionOrigin(actor.position)` 并保留 hit/adjacent 双 LOS、安全距离和现有墙后负例；不能在场景绕过、放宽 blocked、增加 Harness 写口或改 fluid handler。
+
+## Browser-03 V1 结果矩阵
+
+- water-bucket：**FAIL at first action**；真实 select/aim/right-click 已证明，Authority 返回 `blocked`，目标仍 Air。
+- empty bucket 收 source：**NOT REACHED**。
+- door 两格/双 Chunk mesh+epoch/collision/toggle：**NOT REACHED**。
+- record fact/projection/audio：**NOT REACHED**。
+- restore/resumePending/新 epoch：**NOT REACHED**。
+- gesture resume/eject/audio cleanup：**NOT REACHED**。
+- C4 streaming 与 C5 save/continue：**NOT REACHED**。
+- 既有 Classic 视觉回归：**PASS**。
+
+## Browser-03 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-03/`
+
+- `010d69f890dea55ad2a1610ce0316c4ffb0de235263a66ee58813c3390a8f05c` `classic.json.log`
+- 原始内容 SHA-256 `5537a948f745541a108a24064b6c402683da83915d2729b02a7f53a420143385`，deterministic gzip `41a4c3d64189eea4c9106925327b226ac250f6f54ed72e0e2c786558c7e60363`，`canonical-error-context.md.log.gz`
+- 原始 trace SHA-256 `fb0dbcd0cb210018a8b6f473d89bbfdc598c51a464863136e73f835d5a009042`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `3f6719ffc182c7fe49da1cf8c2ac4f77b0f4db523b8335dd0956260ab5398bfd` `canonical-trace.zip.part-aa`（85000000 bytes）
+  - `b10ac536783db0a01fb8abd49ae2c4289198462f1e379b931e8de0304c78821d` `canonical-trace.zip.part-ab`（85000000 bytes）
+  - `7674d3f39f6c6a36a04cdef4da496388600425ded4669b6254574123d5c4e378` `canonical-trace.zip.part-ac`（23342205 bytes）
+- `3a9f138aa3adc2b9d286ed014999c9d1817bd9d6e4bebcb7a3a4dc1621ce1ace` `diagnosis.json`
+- `636b046961e2bbf8be37ae48ede9e9b2501c8d8b4d5d8274842f80ef3045ed28` `harness-artifact.json`
+- `ceaf85efcbe2b2698f2b599a51d2e348fcac135639fe0164dc966c428bb8c3b1` `performance-window.json.log`
+
+## Browser-03 运行后状态
+
+- `harness:classic` 失败后 artifact 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586`，`git status --short` 无输出，artifact receipt SHA256 仍为 `636b046961...5ed28`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN`、Chromium、Playwright 与 `vite preview` 进程查询均无输出；本次资源已清理。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或测试/production 修改。

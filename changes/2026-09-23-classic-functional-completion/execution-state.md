@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T22:21:00Z
+更新时间：2026-09-24T22:56:45Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -25,22 +25,24 @@ Goal：未创建；本轮未提供 token budget。
 | 低频监督 heartbeat | `46eeb208` | `*/20 * * * *`，Asia/Shanghai；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`；expiresAt=`2026-10-08T06:45:28.465Z` | active；不在本文推测下一次触发                                                                                                                               |
 | 已删除单次验证     | `949bd531` | `2026-09-24T06:46:00Z` 触发；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | failed：root already has an active run；未投递，已删除                                                                                                       |
 | 已删除闲置验证     | `8c8d05df` | `Classic idle wakeup proof`；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | **VERIFIED**：`2026-09-24T06:52:00Z` root 收到 daemon schedule；run=`c84043c8-1473-4459-bbff-79ab5e29dac6`，nonce=`classic-idle-supervisor-20260924`；已删除 |
-| 最近监督触发       | `46eeb208` | 同上                                                                                                               | `2026-09-24T22:00:00Z` root 实际巡检；run=`df58f485-f976-4abe-8123-370e23518fd7`                                                                             |
+| 最近监督触发       | `46eeb208` | 同上                                                                                                               | root 已实际观测 run=`cbe99926-cb3e-4f1b-b21b-67ae2e76634d`；本次未提供触发时间，不推测                                                                       |
 
 工具创建成功不等于实际续跑成功；本次 VERIFIED 依据是 root 实际收到 `<paseo-system> Schedule Classic idle wakeup proof fired`，并能被 daemon 自动唤醒执行工具。
 
 ## 当前阶段与期限
 
-| Owner                | 阶段                            | agent/进程句柄                               | 期限/状态                       | 当前事实                                                                                                                             |
-| -------------------- | ------------------------------- | -------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| root `4decc58...`    | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                            | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git/Build `954ef...` | `GIT-10 + V1-ARTIFACT-BUILD-04` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | artifact ready，等待browser租约 | 代码远端=`8ae1f514...`；artifact源码同SHA，artifact=`f278d8a1...0224`，receipt=`636b0469...ed28`；新tree/dist保留                    |
-| 794 `7943067e...`    | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结               | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
-| Media `a288bb43...`  | `V1-PRESENTATION-LOCK-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结                | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
-| Browser `761fb...`   | `V1-CANONICAL-BROWSER-02`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放      | Presentation旧schema已关闭；C0因host缺`seedlands.structure`拒绝，V1全部NOT OBSERVED；原始02证据保留                                  |
-| Browser 01（历史）   | `V1-CANONICAL-BROWSER-01`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放      | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
-| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                    | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
-| Lighting `88d41...`  | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                            | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
+| Owner                  | 阶段                            | agent/进程句柄                               | 期限/状态                  | 当前事实                                                                                                                             |
+| ---------------------- | ------------------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| root `4decc58...`      | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                       | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
+| Git/Build `954ef...`   | `GIT-11 + V1-ARTIFACT-BUILD-05` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | GIT-11隔离验证完成         | staged tree stdlib `8/8`、Web `22/22`、三类types与target static通过；待提交push后从新code SHA单次build                               |
+| 794 `7943067e...`      | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结          | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
+| Media `a288bb43...`    | `V1-PRESENTATION-LOCK-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结           | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
+| Interaction `761fb...` | `V1-ITEM-INTERACTION-ORIGIN-01` | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | root已准出，冻结           | dispatcher与registered fluid host统一可信eye origin；六hash已核，不再写；GIT-11最终隔离回归由954记录                                 |
+| Browser 03（历史）     | `V1-CANONICAL-BROWSER-03`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | C0/C1/C2/C3及Classic视觉PASS；首个water-bucket动作blocked且目标Air；door/media/C4/C5 NOT REACHED                                     |
+| Browser 02（历史）     | `V1-CANONICAL-BROWSER-02`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | Presentation旧schema已关闭；C0因host缺`seedlands.structure`拒绝，V1全部NOT OBSERVED；原始02证据保留                                  |
+| Browser 01（历史）     | `V1-CANONICAL-BROWSER-01`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
+| Legacy `a288bb43...`   | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结               | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
+| Lighting `88d41...`    | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                       | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 
@@ -110,7 +112,7 @@ GIT-06临时资源已精确清理：`/private/tmp/seedlands-git06-media` worktre
 
 GIT-07临时资源已精确清理：`/private/tmp/seedlands-git07-harness` worktree与`seedlands-git07-harness.patch`已删除；未执行全局prune。后续production阶段应从最终远端精确SHA创建干净detached worktree，第三方依赖可复用现有安装，但根与package级`@seedlands/*`必须解析到临时树自身源码；在默认全机锁中仅运行一次`pnpm build`生成并盖章dist，再用`pnpm harness:artifact`复验。取得root唯一browser lease后在同一树/同一dist运行`pnpm harness:classic`，不重新build。
 
-当前下一依赖是 root 读取 BUILD-04 evidence 后授予新的唯一browser lease；只允许复用`/private/tmp/seedlands-v1-acceptance-8ae1f514`既有dist，不得重建。Browser-02 lease已释放且V1仍NOT OBSERVED；当前不运行browser/build/Cua/CI。旧`/private/tmp/seedlands-v1-acceptance-a77f1f4e`已在Browser-02原始证据进入远端且BUILD-04成功后精确清理。
+Browser-03 lease已释放，`/private/tmp/seedlands-v1-acceptance-8ae1f514`原tree/dist身份不变且无遗留进程。C0/C1/C2/C3与Classic视觉已PASS；V1首个water-bucket动作因item interaction voxel LOS使用actor feet、与Structure可信`playerInteractionOrigin`不一致而blocked并命中Air，door/media/C4/C5均NOT REACHED。该缺陷已由`V1-ITEM-INTERACTION-ORIGIN-01`定向修复并经GIT-11 staged tree验证；当前由唯一Git writer提交push后从新code SHA生成BUILD-05，随后才可取得新browser lease。其他worker等待，不运行browser/Cua/CI。
 
 ## 终点
 

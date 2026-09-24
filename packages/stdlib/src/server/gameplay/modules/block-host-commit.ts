@@ -18,7 +18,7 @@ import type { EntityStore } from '../entity-store';
 import type { GameplayContent } from '../gameplay-content';
 import type { BreakAction } from '../player-state';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
-import { positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { playerOccupiesVoxelShape } from '../player-occupancy';
 import {
   buildFluidContainerInteractionCandidate,
@@ -200,7 +200,12 @@ export function prepareRegisteredBlockCommit(
     const entity = options.entities.get(id);
     const validateCondition = () => {
       validateActorExecution();
-      if (!entity || !positionsInRange(entity.position, voxelCenter([...candidate.hit.position]), 5))
+      if (!entity) throw new Error('out-of-range');
+      const origin = playerInteractionOrigin(entity.position);
+      if (
+        !positionsInRange(origin, voxelCenter([...candidate.hit.position]), 5) ||
+        !positionsInRange(origin, voxelCenter([...candidate.adjacent.position]), 5)
+      )
         throw new Error('out-of-range');
       if (
         !same(projections.actor(id), currentActor) ||

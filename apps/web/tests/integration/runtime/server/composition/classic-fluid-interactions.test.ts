@@ -28,6 +28,17 @@ const create = (options: ClassicOptions = classicOptions(), platform: CorePlatfo
     startTimeMs: 0,
     initialPlayerBodyPosition: [0.5, 60, 0.5],
   });
+const createAt = (initialPlayerBodyPosition: [number, number, number]) =>
+  AuthorityRuntime.create({
+    ...classicOptions(),
+    worldgenProvider: classicWorldgenProvider,
+    platform: testCorePlatform,
+    epoch: 'classic-fluid-browser-03',
+    seedText: 'classic-fluid-browser-03',
+    initialWorldTime: 8,
+    startTimeMs: 0,
+    initialPlayerBodyPosition,
+  });
 const classicOptionsWithReplaceableWater = (): ClassicOptions => {
   const fluid = defineFluidContainerInteractionModule({
     moduleId: 'seedlands:fluid-container-handler',
@@ -97,8 +108,119 @@ const invokeMode = (runtime: Runtime, operationId: string, input: Record<string,
     target: { kind: 'entity', entityId: runtime.playerId },
     input,
   });
+const invokeFluidDirect = (runtime: Runtime, hit: [number, number, number], adjacent: [number, number, number]) =>
+  runtime.server.invokeActorModuleOperation(runtime.playerId, {
+    operationId: classicFluidContainerOperationId,
+    target: { kind: 'voxel', position: hit },
+    input: { version: 1, trigger: 'voxel', target: { kind: 'voxel', hit, adjacent } },
+  });
 
 describe('Classic fluid interactions through Authority', () => {
+  it('revalidates a direct fluid operation from the trusted eye origin at the five-block boundary', async () => {
+    const runtime = await createAt([0.5, 0, 0.5]);
+    await load(runtime, [
+      { x: 4, y: 3, z: 0, value: Voxel.Stone },
+      { x: 4, y: 4, z: 0, value: Voxel.Air },
+    ]);
+    expect(invokeMode(runtime, 'seedlands:set-mode', { mode: 'creative' })).toMatchObject({ ok: true });
+    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'water-bucket' })).toMatchObject({
+      ok: true,
+    });
+    runtime.takeCommits();
+    const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision];
+
+    const result = invokeFluidDirect(runtime, [4, 3, 0], [4, 4, 0]);
+
+    expect(result).toMatchObject({ ok: true, value: { success: true, action: 'empty' } });
+    expect(runtime.server.getVoxel(4, 4, 0)).toBe(Voxel.Water);
+    expect(runtime.server.getFluidCell(4, 4, 0)).toMatchObject({ level: 8, source: true });
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(inventory);
+    expect(runtime.server.worldRevision).toBe(revisions[0]! + 1);
+    expect(runtime.server.gameplayRevision).toBe(revisions[1]! + 1);
+  });
+
+  it('rejects a direct fluid operation beyond the trusted eye-origin range without any commit', async () => {
+    const runtime = await createAt([0.5, 0, 0.5]);
+    await load(runtime, [
+      { x: 5, y: 3, z: 0, value: Voxel.Stone },
+      { x: 5, y: 4, z: 0, value: Voxel.Air },
+    ]);
+    expect(invokeMode(runtime, 'seedlands:set-mode', { mode: 'creative' })).toMatchObject({ ok: true });
+    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'water-bucket' })).toMatchObject({
+      ok: true,
+    });
+    runtime.takeCommits();
+    const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const before = {
+      voxel: runtime.server.getVoxel(5, 4, 0),
+      worldRevision: runtime.server.worldRevision,
+      gameplayRevision: runtime.server.gameplayRevision,
+      commitSequence: runtime.server.commitSequence,
+    };
+
+    expect(invokeFluidDirect(runtime, [5, 3, 0], [5, 4, 0])).toMatchObject({
+      ok: false,
+      code: 'OPERATION_FAILED',
+      message: 'out-of-range',
+    });
+    expect(runtime.server.getVoxel(5, 4, 0)).toBe(before.voxel);
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(inventory);
+    expect({
+      worldRevision: runtime.server.worldRevision,
+      gameplayRevision: runtime.server.gameplayRevision,
+      commitSequence: runtime.server.commitSequence,
+    }).toEqual({
+      worldRevision: before.worldRevision,
+      gameplayRevision: before.gameplayRevision,
+      commitSequence: before.commitSequence,
+    });
+    expect(runtime.takeCommits()).toEqual([]);
+  });
+
+  it('round-trips a Water source from the Browser-03 trusted eye origin without mutating creative inventory', async () => {
+    const runtime = await createAt([65.95881945378738, 32.600001, 2.4981569866156805]);
+    await load(runtime, [
+      { x: 68, y: 30, z: 2, value: Voxel.Stone },
+      { x: 68, y: 31, z: 2, value: Voxel.Air },
+      { x: 67, y: 30, z: 2, value: Voxel.Stone },
+      { x: 67, y: 31, z: 2, value: Voxel.Air },
+      { x: 66, y: 31, z: 2, value: Voxel.Air },
+      { x: 66, y: 32, z: 2, value: Voxel.Air },
+    ]);
+    expect(invokeMode(runtime, 'seedlands:set-mode', { mode: 'creative' })).toMatchObject({ ok: true });
+    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'water-bucket' })).toMatchObject({
+      ok: true,
+    });
+    const beforeInventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const beforeWorldRevision = runtime.server.worldRevision;
+    const beforeGameplayRevision = runtime.server.gameplayRevision;
+
+    const response = await runtime.performAction(action(runtime, [68, 30, 2], [68, 31, 2]));
+
+    expect(response.result).toMatchObject({ success: true, handled: true });
+    expect(runtime.server.getVoxel(68, 31, 2)).toBe(Voxel.Water);
+    expect(runtime.server.getFluidCell(68, 31, 2)).toMatchObject({ level: 8, source: true });
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforeInventory);
+    expect(runtime.server.worldRevision).toBe(beforeWorldRevision + 1);
+    expect(runtime.server.gameplayRevision).toBe(beforeGameplayRevision + 1);
+
+    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'bucket' })).toMatchObject({
+      ok: true,
+    });
+    const beforePickupInventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const beforePickupWorldRevision = runtime.server.worldRevision;
+    const beforePickupGameplayRevision = runtime.server.gameplayRevision;
+    const pickup = await runtime.performAction(action(runtime, [68, 31, 2], [67, 31, 2]));
+
+    expect(pickup.result).toMatchObject({ success: true, handled: true });
+    expect(runtime.server.getVoxel(68, 31, 2)).toBe(Voxel.Air);
+    expect(runtime.server.getFluidCell(68, 31, 2)).toBeNull();
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforePickupInventory);
+    expect(runtime.server.worldRevision).toBe(beforePickupWorldRevision + 1);
+    expect(runtime.server.gameplayRevision).toBe(beforePickupGameplayRevision + 1);
+  });
+
   it.each([
     [Voxel.Water, 'water-bucket'],
     [Voxel.Lava, 'lava-bucket'],
@@ -182,7 +304,7 @@ describe('Classic fluid interactions through Authority', () => {
   });
 
   it('keeps state on occupied, non-source, and full-inventory failures', async () => {
-    const runtime = await create();
+    const runtime = await createAt([1.5, 60, 2.5]);
     await load(runtime, [
       { x: 1, y: 59, z: 0, value: Voxel.Stone },
       { x: 1, y: 60, z: 0, value: Voxel.Stone },
