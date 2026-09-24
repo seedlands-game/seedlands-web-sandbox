@@ -1,0 +1,76 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 13h ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+devDependencies:
++ esbuild 0.28.2
++ eslint 10.9.1
++ husky 9.1.7
++ langchain 1.5.10
++ lint-staged 17.4.1
++ pg 8.23.0
++ playcanvas 2.21.4
++ prettier 3.9.6
++ prettier-plugin-svelte 4.1.1
++ svelte 5.57.0
++ svelte-check 4.7.6
++ tone 15.1.22
++ typescript 5.9.3
++ vite 7.3.6
++ vitest 4.1.11
+
+. prepare$ husky
+. prepare: Done
+Done in 1.3s using pnpm v11.25.0
+$ node scripts/harness/artifact.mjs --build
+$ pnpm --filter @seedlands/web build
+$ pnpm packs:build && pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build
+$ node ../../scripts/build-gameplay-packs.mjs --out public/packs
+{"ok":true,"lockPath":"/private/tmp/seedlands-v1-acceptance-a77f1f4e/apps/web/public/packs/packs.lock.json"}
+$ node ../../scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ node scripts/render-prerendered-start-screen.mjs --check
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /private/tmp/seedlands-v1-acceptance-a77f1f4e/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+5:57:38 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v1-acceptance-a77f1f4e/apps/web - using default configuration.
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 2740 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/capability-probe-worker-Ck8l_HX8.js          0.14 kB
+dist/asset-workbench.html                                1.08 kB │ gzip:   0.49 kB
+dist/.vite/manifest.json                                 3.10 kB │ gzip:   0.62 kB
+dist/index.html                                          4.61 kB │ gzip:   2.01 kB
+dist/assets/fluid-compute-worker-DIUIxUK4.js            13.89 kB
+dist/assets/game-logic-worker-HPU57qHj.js               17.44 kB
+dist/assets/rust-kernels-scalar-hRRXiZem.wasm           32.65 kB │ gzip:  14.83 kB
+dist/assets/rust-kernels-simd-cUjVQL8I.wasm             34.21 kB │ gzip:  15.69 kB
+dist/assets/persistence-worker-ZQ_CYCjn.js              74.09 kB
+dist/assets/world-worker-DiexBVyO.js                   105.51 kB
+dist/assets/authority-worker-CCDFEzBy.js             1,009.40 kB
+dist/assets/game-DCCgC_AS.css                            5.54 kB │ gzip:   1.93 kB
+dist/assets/assets-D5PBeSxB.css                         18.36 kB │ gzip:   4.64 kB
+dist/assets/bootstrap-DBNdjq5k.css                      49.52 kB │ gzip:  11.13 kB
+dist/assets/modulepreload-polyfill-B5Qt9EMX.js           0.71 kB │ gzip:   0.40 kB
+dist/assets/game-CzGFrjdt.js                             0.96 kB │ gzip:   0.57 kB
+dist/assets/preload-helper-BXl3LOEh.js                   1.11 kB │ gzip:   0.65 kB
+dist/assets/chunk-persistence-benchmark-DTd78XVB.js      2.24 kB │ gzip:   1.10 kB
+dist/assets/vendor-svelte-CVxNowTz.js                   46.80 kB │ gzip:  17.88 kB
+dist/assets/assets-Bz-_2ghC.js                          59.03 kB │ gzip:  21.91 kB
+dist/assets/vendor-common-D3-4p7n_.js                  104.54 kB │ gzip:  29.70 kB
+dist/assets/vendor-tone-CKLKH-mG.js                    131.70 kB │ gzip:  31.17 kB
+dist/assets/glb-model-resource-BobomOWg.js             185.17 kB │ gzip:  60.07 kB
+dist/assets/bootstrap-DHOEILTO.js                      492.85 kB │ gzip: 156.73 kB
+dist/assets/vendor-playcanvas-7APsQ7DR.js            1,999.37 kB │ gzip: 516.97 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.49s
+{"status":"PASS","schemaVersion":1,"sourceSha":"a77f1f4e9fef107582a4d4b576889e3083b5893f","sourceDigest":"71d48e4324a657932bc56ffd797841d4aa267d8561952e40fc87fba2307ef900","lockDigest":"44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169","artifactDigest":"b984a1c6c8ea700d753ea97f93f96ac85a93b0cbf9aad25d3f8b0bcad32b2487","files":276,"builtAt":"2026-09-24T21:57:43.971Z"}

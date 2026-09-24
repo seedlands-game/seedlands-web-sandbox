@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T21:46:00Z
+更新时间：2026-09-24T21:59:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -31,15 +31,15 @@ Goal：未创建；本轮未提供 token budget。
 
 ## 当前阶段与期限
 
-| Owner                | 阶段                            | agent/进程句柄                               | 期限/状态                  | 当前事实                                                                                                                             |
-| -------------------- | ------------------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| root `4decc58...`    | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                       | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git/Build `954ef...` | `GIT-09 + V1-ARTIFACT-BUILD-03` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | 实施中，最长2h             | presentation lock已root准出；先精确提交/推送，再从新远端SHA clean build；不browser/devserver/Cua/CI                                  |
-| 794 `7943067e...`    | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结          | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
-| Media `a288bb43...`  | `V1-PRESENTATION-LOCK-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结           | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
-| Browser `761fb...`   | `V1-CANONICAL-BROWSER-01`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
-| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结               | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
-| Lighting `88d41...`  | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                       | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
+| Owner                | 阶段                            | agent/进程句柄                               | 期限/状态                       | 当前事实                                                                                                                             |
+| -------------------- | ------------------------------- | -------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| root `4decc58...`    | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                            | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
+| Git/Build `954ef...` | `GIT-09 + V1-ARTIFACT-BUILD-03` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | artifact ready，等待browser租约 | GIT-09=`a77f1f4e...`已推送；clean build/artifact verify PASS，artifact=`b984a1c6...`/276 files；新树/dist保留                        |
+| 794 `7943067e...`    | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结               | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
+| Media `a288bb43...`  | `V1-PRESENTATION-LOCK-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结                | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
+| Browser `761fb...`   | `V1-CANONICAL-BROWSER-01`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放      | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
+| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                    | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
+| Lighting `88d41...`  | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                            | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 
@@ -96,6 +96,8 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 | GIT-08 Door presentation | 木门显式pixel model、退休appearance fixture与BUILD-01原始证据                                                                          | `60843904909b2439725a40bc1d4e725de8fcda18`                                                                                                         | `60843904909b2439725a40bc1d4e725de8fcda18` | detached 6 files/24、SSG、Web/root types、lint/format/diff/hooks通过；远端首次读回一致、index空                                   |
 | V1 Artifact 60843904     | 干净production build与artifact identity                                                                                                | `sourceDigest=74b1bd15...`；`artifactDigest=3700a655...`；276 files                                                                                | 不适用                                     | build/artifact PASS；同dist browser attempt 1在C0失败，tree/dist继续保留；不代表V1 browser GREEN                                  |
 | V1 Browser attempt 1     | 唯一canonical Chromium，复用60843904同一dist                                                                                           | `v1-canonical-browser-evidence.md` SHA `af84b437...dc6d`                                                                                           | 不适用                                     | `2 failed / 1 skipped`；C0报`Pack presentation resource lock is invalid`，V1全部NOT OBSERVED；lease释放，4273无监听               |
+| GIT-09 Presentation lock | 严格file/resource lock parser、browser01原始证据                                                                                       | `a77f1f4e9fef107582a4d4b576889e3083b5893f`                                                                                                         | `a77f1f4e9fef107582a4d4b576889e3083b5893f` | detached 4 files/27、SSG、Web/root types、lint/format/diff/hooks通过；远端一致、index空                                           |
+| V1 Artifact a77f1f4e     | presentation修复后的干净production artifact                                                                                            | `sourceDigest=71d48e43...`；`artifactDigest=b984a1c6...`；276 files                                                                                | 不适用                                     | `pnpm build`与`pnpm harness:artifact` PASS；新tree/dist保留给browser lease；旧608 tree已清理                                      |
 | Lighting model           | explicit semantics + sky/surface models/tests                                                                                          | pending                                                                                                                                            | pending                                    | 依赖 V4 public/profile/renderer                                                                                                   |
 
 TAKEOVER-01 首批文档已读回 local/remote SHA；本次回填使用独立 execution-state checkpoint commit，不 amend。
