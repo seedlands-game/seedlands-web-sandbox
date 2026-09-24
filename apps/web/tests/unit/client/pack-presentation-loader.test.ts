@@ -8,6 +8,15 @@ const sha256 = async (text: string) =>
 
 const response = (text: string, status = 200) =>
   new Response(text, { status, headers: { 'content-type': 'application/json' } });
+const bytes = (text: string) => new TextEncoder().encode(text).byteLength;
+const contentTypeForPath = (path: string) =>
+  path.endsWith('.mp3') ? 'audio/mpeg' : path.endsWith('.json') ? 'application/json' : 'application/octet-stream';
+const resourceLock = async (path: string, content: string) => ({
+  path,
+  sha256: await sha256(content),
+  size: bytes(content),
+  contentType: contentTypeForPath(path),
+});
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -77,6 +86,12 @@ describe('browser Pack presentation loader', () => {
       presentation: { path: 'presentation.json' },
     });
     const entry = 'export const pack = { modules: [] };';
+    const audio = {
+      path: 'playbooks/classic/assets/audio/to-far-shores.mp3',
+      sha256: '3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9',
+      size: 2_976_045,
+      contentType: 'audio/mpeg',
+    };
     const lock = JSON.stringify({
       schemaVersion: 1,
       packs: [
@@ -86,31 +101,30 @@ describe('browser Pack presentation loader', () => {
           manifest: { path: 'modular-world.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'modular-world.mjs', sha256: await sha256(entry) },
           resources: [
-            { path: 'presentation.json', sha256: await sha256(presentation) },
-            { path: 'models/sentinel.glb', sha256: await sha256('sentinel-glb') },
+            await resourceLock('presentation.json', presentation),
+            await resourceLock('models/sentinel.glb', 'sentinel-glb'),
+            audio,
           ],
         },
       ],
     });
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (input: URL | RequestInfo) => {
-        switch (new URL(String(input)).pathname) {
-          case '/packs/packs.lock.json':
-            return response(lock);
-          case '/packs/modular-world.manifest.json':
-            return response(manifest);
-          case '/packs/modular-world.mjs':
-            return response(entry, 200);
-          case '/packs/presentation.json':
-            return response(presentation);
-          case '/packs/models/sentinel.glb':
-            return response('sentinel-glb');
-          default:
-            return response('', 404);
-        }
-      }),
-    );
+    const fetch = vi.fn(async (input: URL | RequestInfo) => {
+      switch (new URL(String(input)).pathname) {
+        case '/packs/packs.lock.json':
+          return response(lock);
+        case '/packs/modular-world.manifest.json':
+          return response(manifest);
+        case '/packs/modular-world.mjs':
+          return response(entry, 200);
+        case '/packs/presentation.json':
+          return response(presentation);
+        case '/packs/models/sentinel.glb':
+          return response('sentinel-glb');
+        default:
+          return response('', 404);
+      }
+    });
+    vi.stubGlobal('fetch', fetch);
 
     await expect(loadBrowserPackPresentationCatalog(new URL('http://localhost/packs/'))).resolves.toEqual(
       expect.objectContaining({
@@ -127,6 +141,7 @@ describe('browser Pack presentation loader', () => {
         assetUrls: expect.objectContaining({ 'models/sentinel.glb': 'blob:pack-resource' }),
       }),
     );
+    expect(fetch.mock.calls.map(([input]) => new URL(String(input)).pathname)).not.toContain(`/packs/${audio.path}`);
   });
 
   it('assigns a browser-decodable media type to verified image Blob resources', async () => {
@@ -165,10 +180,7 @@ describe('browser Pack presentation loader', () => {
           version: '1.0.0',
           manifest: { path: 'pack.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'pack.mjs', sha256: 'a'.repeat(64) },
-          resources: [
-            { path: 'presentation.json', sha256: await sha256(presentation) },
-            { path: 'texture.svg', sha256: await sha256(svg) },
-          ],
+          resources: [await resourceLock('presentation.json', presentation), await resourceLock('texture.svg', svg)],
         },
       ],
     });
@@ -213,7 +225,7 @@ describe('browser Pack presentation loader', () => {
           version: '1.0.0',
           manifest: { path: 'broken.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'broken.mjs', sha256: await sha256(entry) },
-          resources: [{ path: 'presentation.json', sha256: 'a'.repeat(64) }],
+          resources: [{ ...(await resourceLock('presentation.json', presentation)), sha256: 'a'.repeat(64) }],
         },
       ],
     });
@@ -263,7 +275,7 @@ describe('browser Pack presentation loader', () => {
           version: '1.0.0',
           manifest: { path: 'broken.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'broken.mjs', sha256: 'a'.repeat(64) },
-          resources: [{ path: 'presentation.json', sha256: await sha256(presentation) }],
+          resources: [await resourceLock('presentation.json', presentation)],
         },
       ],
     });
@@ -310,7 +322,7 @@ describe('browser Pack presentation loader', () => {
           version: '1.0.0',
           manifest: { path: 'broken.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'broken.mjs', sha256: 'a'.repeat(64) },
-          resources: [{ path: 'presentation.json', sha256: await sha256(presentation) }],
+          resources: [await resourceLock('presentation.json', presentation)],
         },
       ],
     });
@@ -366,8 +378,8 @@ describe('browser Pack presentation loader', () => {
           manifest: { path: 'pack.manifest.json', sha256: await sha256(manifest) },
           entry: { path: 'pack.mjs', sha256: 'a'.repeat(64) },
           resources: [
-            { path: 'presentation.json', sha256: await sha256(presentation) },
-            { path: 'models/sentinel.glb', sha256: await sha256('model') },
+            await resourceLock('presentation.json', presentation),
+            await resourceLock('models/sentinel.glb', 'model'),
           ],
         },
       ],
@@ -428,8 +440,8 @@ describe('browser Pack presentation loader', () => {
           manifest: { path: `${id.split(':')[1]}.manifest.json`, sha256: await sha256(manifest(id)) },
           entry: { path: `${id.split(':')[1]}.mjs`, sha256: 'a'.repeat(64) },
           resources: [
-            { path: 'presentation.json', sha256: await sha256(presentation) },
-            { path: 'models/sentinel.glb', sha256: await sha256('model') },
+            await resourceLock('presentation.json', presentation),
+            await resourceLock('models/sentinel.glb', 'model'),
           ],
         })),
       ),

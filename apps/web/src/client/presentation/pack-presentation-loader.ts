@@ -17,9 +17,12 @@ export type PackPresentationCatalog = Readonly<{
 }>;
 
 type FileLock = Readonly<{ path: string; sha256: string }>;
+type ResourceLock = FileLock & Readonly<{ size: number; contentType: string }>;
 const MAX_PACKS = 16;
 const MAX_ENTRIES = 512;
+const MAX_RESOURCE_LOCKS = 128;
 const MAX_BYTES = 1_048_576;
+const MAX_RESOURCE_LOCK_BYTES = 32 * 1024 * 1024;
 const path = (value: unknown): value is string =>
   typeof value === 'string' &&
   /^(?:\.\/)?[a-zA-Z0-9_-][a-zA-Z0-9._/-]*$/.test(value) &&
@@ -81,11 +84,46 @@ async function read(url: URL): Promise<Uint8Array> {
   return bytes;
 }
 
-function lock(value: unknown): FileLock {
-  if (!object(value) || !exactKeys(value, ['path', 'sha256']) || !path(value.path) || !digest(value.sha256))
-    throw new TypeError('Pack presentation resource lock is invalid.');
+const lockedFileFields = (value: unknown): FileLock => {
+  if (!object(value) || !path(value.path) || !digest(value.sha256))
+    throw new TypeError('Pack presentation file lock is invalid.');
   return { path: value.path.replace(/^\.\//, ''), sha256: value.sha256.toLowerCase() };
+};
+
+function fileLock(value: unknown): FileLock {
+  if (!object(value) || !exactKeys(value, ['path', 'sha256']))
+    throw new TypeError('Pack presentation file lock is invalid.');
+  return lockedFileFields(value);
 }
+
+const lockedContentType = (resourcePath: string) =>
+  resourcePath.toLowerCase().endsWith('.mp3')
+    ? 'audio/mpeg'
+    : resourcePath.toLowerCase().endsWith('.json')
+      ? 'application/json'
+      : 'application/octet-stream';
+
+function resourceLock(value: unknown): ResourceLock {
+  if (!object(value) || !exactKeys(value, ['path', 'sha256', 'size', 'contentType']))
+    throw new TypeError('Pack presentation resource lock is invalid.');
+  const file = lockedFileFields(value);
+  if (
+    !Number.isSafeInteger(value.size) ||
+    (value.size as number) <= 0 ||
+    (value.size as number) > MAX_RESOURCE_LOCK_BYTES ||
+    typeof value.contentType !== 'string' ||
+    value.contentType !== lockedContentType(file.path)
+  )
+    throw new TypeError('Pack presentation resource lock metadata is invalid.');
+  return { ...file, size: value.size as number, contentType: value.contentType };
+}
+
+const verifyResource = async (resource: ResourceLock, packDirectory: URL): Promise<Uint8Array> => {
+  const bytes = await read(new URL(resource.path, packDirectory));
+  if (bytes.byteLength !== resource.size) throw new TypeError('Pack size mismatch: ' + resource.path);
+  if ((await hash(bytes)) !== resource.sha256) throw new TypeError('Pack digest mismatch: ' + resource.path);
+  return bytes;
+};
 
 function catalogEntry<T extends Record<string, unknown>>(
   values: unknown,
@@ -205,9 +243,19 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
   const createdAssetUrls: string[] = [];
   try {
     for (const pack of lockValue.packs) {
-      if (!object(pack) || !lockValue.packs.length || !object(pack.manifest) || !Array.isArray(pack.resources))
+      if (
+        !object(pack) ||
+        !exactKeys(pack, ['id', 'version', 'manifest', 'entry', 'resources']) ||
+        !lockValue.packs.length ||
+        !Array.isArray(pack.resources) ||
+        pack.resources.length > MAX_RESOURCE_LOCKS
+      )
         throw new TypeError('Pack lock entry is invalid.');
-      const manifestLock = lock(pack.manifest);
+      const manifestLock = fileLock(pack.manifest);
+      fileLock(pack.entry);
+      const resourceLocks = pack.resources.map(resourceLock);
+      const resourcesByPath = new Map(resourceLocks.map((resource) => [resource.path, resource] as const));
+      if (resourcesByPath.size !== resourceLocks.length) throw new TypeError('Pack resource lock path is duplicated.');
       const manifestBytes = await read(new URL(manifestLock.path, packDirectory));
       if ((await hash(manifestBytes)) !== manifestLock.sha256)
         throw new TypeError(`Pack digest mismatch: ${manifestLock.path}`);
@@ -221,24 +269,18 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
       )
         continue;
       const presentationPath = manifest.presentation.path.replace(/^\.\//, '');
-      const resource = pack.resources.map(lock).find((candidate) => candidate.path === presentationPath);
+      const resource = resourcesByPath.get(presentationPath);
       if (!resource) throw new TypeError('Pack presentation resource is not locked.');
-      const bytes = await read(new URL(resource.path, packDirectory));
-      if ((await hash(bytes)) !== resource.sha256) throw new TypeError(`Pack digest mismatch: ${resource.path}`);
+      const bytes = await verifyResource(resource, packDirectory);
       const parsed = parsePresentation(JSON.parse(decode(bytes)));
-      const lockedResources = new Set(pack.resources.map(lock).map((entry) => entry.path));
       for (const reference of referencedAssets(parsed))
-        if (!path(reference) || !lockedResources.has(reference.replace(/^\.\//, '')))
+        if (!path(reference) || !resourcesByPath.has(reference.replace(/^\.\//, '')))
           throw new TypeError(`Pack presentation asset is not locked: ${reference}`);
       for (const reference of referencedAssets(parsed)) {
         if (Object.hasOwn(merged.assetUrls, reference)) continue;
-        const resourceLock = pack.resources.map(lock).find((entry) => entry.path === reference.replace(/^\.\//, ''))!;
-        const assetBytes = await read(new URL(resourceLock.path, packDirectory));
-        if ((await hash(assetBytes)) !== resourceLock.sha256)
-          throw new TypeError(`Pack digest mismatch: ${resourceLock.path}`);
-        const objectUrl = URL.createObjectURL(
-          new Blob([assetBytes.slice().buffer], { type: mediaType(resourceLock.path) }),
-        );
+        const locked = resourcesByPath.get(reference.replace(/^\.\//, ''))!;
+        const assetBytes = await verifyResource(locked, packDirectory);
+        const objectUrl = URL.createObjectURL(new Blob([assetBytes.slice().buffer], { type: mediaType(locked.path) }));
         createdAssetUrls.push(objectUrl);
         (merged.assetUrls as Record<string, string>)[reference] = objectUrl;
       }
