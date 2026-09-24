@@ -102,6 +102,16 @@ export type {
 export { createInventoryCandidate } from '../gameplay/modules/inventory-api';
 export type { ItemDefinitionRegistry, ItemDefinitionInput, ItemStack } from '../gameplay/item-registry';
 export type { Recipe } from '../gameplay/recipe-registry';
+export { createVoxelGeometryRegistryV1 } from '../../world/voxel-geometry';
+export type {
+  VoxelGeometryBoxV1,
+  VoxelGeometryDefinitionV1,
+  VoxelGeometryRegistryV1,
+  VoxelGeometryVectorV1,
+  VoxelRenderBoxV1,
+} from '../../world/voxel-geometry';
+export { defineVoxelGeometryModule, VOXEL_GEOMETRY_CAPABILITY } from '../gameplay/modules/voxel-geometry-module';
+export type { VoxelGeometryModuleOptionsV1 } from '../gameplay/modules/voxel-geometry-module';
 
 export { defineModeModule } from '../gameplay/modules/mode-module';
 
