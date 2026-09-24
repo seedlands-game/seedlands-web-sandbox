@@ -1,5 +1,5 @@
 import { CHUNK_SIZE, voxelIndex, type FaceMaterialId } from './voxel';
-import { crossedPlantMaterialForVoxel, modelBoxesForVoxel } from './voxel-model';
+import { crossedPlantMaterialForVoxel, modelBoxesForVoxel, type VoxelGeometryResolver } from './voxel-model';
 
 export type VoxelModelFace = {
   material: FaceMaterialId;
@@ -29,9 +29,11 @@ export function forEachVoxelGeometryFace(
   voxel: number,
   cell: readonly [number, number, number],
   visit: (face: VoxelModelFace) => void,
+  geometry?: VoxelGeometryResolver,
 ): void {
+  const registered = geometry?.get(voxel);
   const visitBox = () => {
-    for (const box of modelBoxesForVoxel(voxel)) {
+    for (const box of registered?.boxes ?? modelBoxesForVoxel(voxel)) {
       for (let dimension = 0; dimension < 3; dimension += 1) {
         const u = (dimension + 1) % 3;
         const v = (dimension + 2) % 3;
@@ -102,11 +104,16 @@ export function forEachVoxelGeometryFace(
     }
   };
   visitBox();
-  visitCrossedPlant();
+  if (!registered) visitCrossedPlant();
 }
 
-export function forEachVoxelModelFace(data: Uint16Array, visit: (face: VoxelModelFace) => void): void {
+export function forEachVoxelModelFace(
+  data: Uint16Array,
+  visit: (face: VoxelModelFace) => void,
+  geometry?: VoxelGeometryResolver,
+): void {
   for (let y = 0; y < CHUNK_SIZE; y += 1)
     for (let z = 0; z < CHUNK_SIZE; z += 1)
-      for (let x = 0; x < CHUNK_SIZE; x += 1) forEachVoxelGeometryFace(data[voxelIndex(x, y, z)], [x, y, z], visit);
+      for (let x = 0; x < CHUNK_SIZE; x += 1)
+        forEachVoxelGeometryFace(data[voxelIndex(x, y, z)], [x, y, z], visit, geometry);
 }

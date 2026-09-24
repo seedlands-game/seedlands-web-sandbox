@@ -17,7 +17,6 @@ import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
 import { MultiRateScheduler } from '../../runtime/multi-rate-scheduler';
 import { InputCommandBuffer, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type * as SessionContract from './authority-session-types';
-import { VoxelCollisionWorld } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
 import { bodyStateForAuthorityEntity } from './creative-physics';
 import {
@@ -32,6 +31,8 @@ import { settleAuthorityPickups } from './authority-pickup-settlement';
 import { assertAdvanceCapacity, MAX_AUTHORITY_RECOVERIES_PER_STEP } from './authority-advance-capacity';
 import { commitAuthorityPhysicsEntities } from './authority-physics-entity-commit';
 import type { AuthoritySessionOptions } from './authority-session-options';
+import { createAuthorityCollisionWorld } from './authority-runtime-geometry';
+import type { VoxelCollisionWorld } from './voxel-collision-world';
 
 export type * from './authority-session-types';
 
@@ -82,11 +83,7 @@ export class AuthoritySession {
     );
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
     this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
-    this.collisionWorld = new VoxelCollisionWorld(
-      options.voxelSource,
-      options.requestUnknownChunk,
-      options.voxelSemantics,
-    );
+    this.collisionWorld = createAuthorityCollisionWorld(options);
     this.refreshBodies();
     for (const id of this.bodies.keys()) this.requestBodyRecovery(id, 'initialization', 2);
     if (restoredPaused) this.options.execution.commit();

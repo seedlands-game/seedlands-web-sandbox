@@ -30,6 +30,58 @@ describe('public network message semantics', () => {
         capabilities: ['administrative'],
       }),
     ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 15,
+        action: {
+          type: 'interact',
+          intent: 'toggle',
+          target: { kind: 'self' },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 14,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'voxel', hit: [0, 0, 0], adjacent: [1, 1, 0] },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 12,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'entity', reference: { entityId: 'cow-1', epoch: 1, lifetime: 2 } },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 13,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'entity', reference: { entityId: 'cow-1', epoch: 1, lifetime: 2 }, operationId: 'x:y' },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
     expect(isPublicInboundMessage({ ...action, capabilities: ['mutation'] })).toBe(false);
     expect(
       isPublicInboundMessage({

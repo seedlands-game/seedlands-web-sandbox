@@ -14,6 +14,7 @@ import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layo
 
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
 import type { ToolModel } from '../../client/presentation/asset-types';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 const heldItemScale = Object.freeze({
   tool: 0.72,
@@ -43,8 +44,9 @@ export class FirstPersonViewmodel {
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
     assets?: GameplayModelAssets,
+    voxelGeometry?: VoxelGeometryResolver,
   ) {
-    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app, voxelGeometry);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);

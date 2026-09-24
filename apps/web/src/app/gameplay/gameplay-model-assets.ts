@@ -11,6 +11,7 @@ import { resolvePixelModel } from '../../client/presentation/asset-package';
 import { itemMeshDefinition, type ItemMeshGroup } from '../../client/presentation/item-mesh-definition';
 import { builtinTerrainTextures, terrainMaterials } from '../../client/presentation/terrain-assets';
 import { Voxel, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 import { createPixelMaterial, createPixelMesh, addPixelNode } from './pixel-model-resource';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
@@ -112,6 +113,7 @@ export class GameplayModelAssets {
   constructor(
     private readonly app: pc.Application,
     resolvedAssets?: readonly Asset[],
+    private readonly voxelGeometry?: VoxelGeometryResolver,
   ) {
     this.textures = [];
     this.followsAppearanceRuntime = resolvedAssets === undefined;
@@ -239,7 +241,7 @@ export class GameplayModelAssets {
     resolvedAssets: readonly Asset[] | undefined,
   ): void {
     const semantics = getVoxelPresentationSemantics(this.app, voxel);
-    const definition = itemMeshDefinition(voxel, semantics?.faceMaterials);
+    const definition = itemMeshDefinition(voxel, semantics?.faceMaterials, this.voxelGeometry);
     const meshes = this.voxelMeshes.get(voxel) ?? this.createVoxelMeshes(voxel, definition.groups);
     const modelId = `builtin:model:${itemId}`;
     const variant = this.materialVariant(this.materialAssets(modelId, resolvedAssets));
@@ -367,16 +369,24 @@ export class GameplayModelAssets {
 }
 
 type SharedAssets = { assets: GameplayModelAssets; references: number };
-const sharedAssets = new WeakMap<pc.Application, SharedAssets>();
+const sharedAssets = new WeakMap<pc.Application, Map<VoxelGeometryResolver | undefined, SharedAssets>>();
 
 export type GameplayModelAssetsLease = Readonly<{ assets: GameplayModelAssets; release: () => void }>;
 
 /** Shares the small material/texture set between world actors and the camera viewmodel. */
-export function acquireGameplayModelAssets(app: pc.Application): GameplayModelAssetsLease {
-  let shared = sharedAssets.get(app);
+export function acquireGameplayModelAssets(
+  app: pc.Application,
+  voxelGeometry?: VoxelGeometryResolver,
+): GameplayModelAssetsLease {
+  let byGeometry = sharedAssets.get(app);
+  if (!byGeometry) {
+    byGeometry = new Map();
+    sharedAssets.set(app, byGeometry);
+  }
+  let shared = byGeometry.get(voxelGeometry);
   if (!shared) {
-    shared = { assets: new GameplayModelAssets(app), references: 0 };
-    sharedAssets.set(app, shared);
+    shared = { assets: new GameplayModelAssets(app, undefined, voxelGeometry), references: 0 };
+    byGeometry.set(voxelGeometry, shared);
   }
   shared.references += 1;
   let released = false;
@@ -388,7 +398,8 @@ export function acquireGameplayModelAssets(app: pc.Application): GameplayModelAs
       shared!.references -= 1;
       if (shared!.references === 0) {
         shared!.assets.dispose();
-        sharedAssets.delete(app);
+        byGeometry!.delete(voxelGeometry);
+        if (!byGeometry!.size) sharedAssets.delete(app);
       }
     },
   };

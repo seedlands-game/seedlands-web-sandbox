@@ -21,6 +21,7 @@ import type {
   AuthorityCachedPreparation,
   AuthorityClientOptions,
 } from './browser-authority-client-contract';
+import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 
 type Request = (payload: Record<string, unknown>, transfer?: Transferable[]) => Promise<unknown>;
 type Post = (message: AuthorityRequest, transfer?: Transferable[]) => void;
@@ -38,6 +39,7 @@ export class BrowserAuthorityChunkClient {
     private readonly request: Request,
     private readonly post: Post,
     private readonly options: AuthorityClientOptions,
+    private readonly activeVoxelGeometry: () => readonly VoxelGeometryDefinitionV1[] | undefined,
   ) {
     this.baselines = new AuthorityCollisionBaselineClient(
       this.meshes,
@@ -61,6 +63,7 @@ export class BrowserAuthorityChunkClient {
           this.meshes,
           this.revisions,
           lease,
+          this.activeVoxelGeometry(),
         );
         if (prepared) this.preparations.set(key, prepared);
       })
@@ -100,6 +103,7 @@ export class BrowserAuthorityChunkClient {
       generatorVersion: cached.payload.generatorVersion,
       provider: cached.payload.provider,
       ...(cached.payload.voxelSemantics ? { voxelSemantics: cached.payload.voxelSemantics } : {}),
+      ...(cached.payload.voxelGeometry ? { voxelGeometry: cached.payload.voxelGeometry } : {}),
       ...(cached.payload.preparationDiagnostics
         ? { preparationDiagnostics: cached.payload.preparationDiagnostics }
         : {}),

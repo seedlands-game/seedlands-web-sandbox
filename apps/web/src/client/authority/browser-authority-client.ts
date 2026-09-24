@@ -47,6 +47,11 @@ import {
   type DirectLogicDiagnostics,
 } from './browser-authority-direct-logic';
 import { createBrowserAuthorityWorldPort } from './browser-authority-world-port';
+import {
+  validateInitialAuthorityReadyGeometry,
+  validateRestoredAuthorityReadyGeometry,
+  voxelGeometryForAuthorityReady,
+} from './browser-authority-geometry';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
 export class BrowserAuthorityClient {
@@ -86,6 +91,7 @@ export class BrowserAuthorityClient {
       (payload, transfer) => this.request(payload, transfer),
       (message, transfer) => this.post(message, transfer),
       options,
+      () => this.voxelGeometry?.list(),
     );
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
     this.snapshotGate = new AuthoritySnapshotGate(epoch);
@@ -146,30 +152,22 @@ export class BrowserAuthorityClient {
     return ready;
   }
 
-  get readyState(): AuthorityReady | null {
-    return this.readyValue;
-  }
-
-  get isReady(): boolean {
-    return Boolean(this.readyValue) && !this.disposed && !this.failureValue;
-  }
-
-  get snapshot(): AuthoritySnapshot | null {
-    return this.snapshotValue;
-  }
+  // prettier-ignore
+  get readyState(): AuthorityReady | null { return this.readyValue; }
+  // prettier-ignore
+  get isReady(): boolean { return Boolean(this.readyValue) && !this.disposed && !this.failureValue; }
+  // prettier-ignore
+  get snapshot(): AuthoritySnapshot | null { return this.snapshotValue; }
 
   get gameplay(): AuthorityGameplayView {
     if (!this.gameplayValue) throw new Error('Authority gameplay view is not ready.');
     return this.gameplayValue;
   }
 
-  get seed(): number {
-    return this.requireReady().seed;
-  }
-
-  get seedText(): string {
-    return this.requireReady().seedText;
-  }
+  // prettier-ignore
+  get seed(): number { return this.requireReady().seed; }
+  // prettier-ignore
+  get seedText(): string { return this.requireReady().seedText; }
 
   get generatorVersion(): number {
     return this.requireReady().generatorVersion;
@@ -178,6 +176,9 @@ export class BrowserAuthorityClient {
   get voxelSemantics() {
     return createVoxelSemanticsRegistry(this.requireReady().voxelSemantics ?? []);
   }
+
+  // prettier-ignore
+  get voxelGeometry() { return voxelGeometryForAuthorityReady(this.readyValue); }
 
   get worldgenProvider(): NonNullable<AuthorityReady['worldgenProvider']> {
     const provider = this.requireReady().worldgenProvider;
@@ -414,14 +415,16 @@ export class BrowserAuthorityClient {
     switch (message.kind) {
       case 'authority-ready': {
         if (!this.readyWait.pending) return;
-        const readySnapshotRejection = this.snapshotGate.accept(message.ready.snapshot);
+        const acceptedReady = validateInitialAuthorityReadyGeometry(message.ready, (error) => this.failAll(error));
+        if (!acceptedReady) return;
+        const readySnapshotRejection = this.snapshotGate.accept(acceptedReady.snapshot);
         if (readySnapshotRejection === 'wrong-epoch')
           return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
-        this.readyValue = message.ready;
-        if (!readySnapshotRejection) this.snapshotValue = message.ready.snapshot;
-        this.chunks.initialize(message.ready.snapshot.worldRevision);
-        this.updateGameplay(message.ready.gameplay);
-        this.readyWait.resolve(message.ready);
+        this.readyValue = acceptedReady;
+        if (!readySnapshotRejection) this.snapshotValue = acceptedReady.snapshot;
+        this.chunks.initialize(acceptedReady.snapshot.worldRevision);
+        this.updateGameplay(acceptedReady.gameplay);
+        this.readyWait.resolve(acceptedReady);
         break;
       }
       case 'authority-bootstrap-needed':
@@ -468,15 +471,21 @@ export class BrowserAuthorityClient {
       case 'world-harness-response':
         if (!this.requests.has(message.requestId)) return;
         if (message.ready) {
+          const acceptedReady = validateRestoredAuthorityReadyGeometry(
+            message.ready,
+            message.requestId,
+            (requestId, error) => this.requests.reject(requestId, error),
+          );
+          if (!acceptedReady) return;
           this.storageBytesMeasured = false;
-          this.runtimeEpochValue = message.runtimeEpoch ?? message.ready.snapshot.epoch;
+          this.runtimeEpochValue = message.runtimeEpoch ?? acceptedReady.snapshot.epoch;
           this.snapshotGate = new AuthoritySnapshotGate(this.runtimeEpochValue);
           this.chunks.clear();
-          this.readyValue = message.ready;
+          this.readyValue = acceptedReady;
           this.snapshotValue = null;
           this.gameplayValue = null;
-          this.acceptSnapshot(message.ready.snapshot, message.ready.gameplay);
-          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, message.ready);
+          this.acceptSnapshot(acceptedReady.snapshot, acceptedReady.gameplay);
+          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, acceptedReady);
         }
         this.requests.resolve(message.requestId, message.result);
         break;

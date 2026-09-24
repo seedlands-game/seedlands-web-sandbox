@@ -353,9 +353,9 @@ const handleCurrent = async (message: AuthorityRequest) => {
       });
       break;
     case 'gameplay-action': {
-      ingress!.action(message.action);
+      const action = ingress!.action(message.action);
       await transact(message, async () => {
-        const result = await current.performAction(message.action);
+        const result = await current.performAction(action);
         return { result, gameplay: result.gameplay, commits: [...result.commits] };
       });
       break;

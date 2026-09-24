@@ -22,7 +22,7 @@ export function worldKernelAdapter(
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
   if (selected.includes('w04') || selected.includes('w05'))
     kernels.meshChunk = (options) => {
-      if (memory.failed || !options.semantics) return meshChunk(options);
+      if (options.geometry || memory.failed || !options.semantics) return meshChunk(options);
       try {
         const input = createMeshKernelInput(options);
         return runMeshDescriptorKernel(memory, input.window, input.fluidWindow, options.semantics);

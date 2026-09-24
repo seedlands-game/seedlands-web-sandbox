@@ -43,6 +43,8 @@ import {
 } from './canonical-chunk-observation';
 import { assertCorePlatformPorts } from '../runtime/platform-ports';
 import type { KernelWorldgenProvider, KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import { voxelGeometryForComposition } from './gameplay/modules/voxel-geometry-module';
+import type { VoxelGeometryRegistryV1 } from '../world/voxel-geometry';
 
 export type { VoxelEdit } from './world-mutation';
 export type * from './game-server-types';
@@ -59,6 +61,7 @@ class GameServerWorld {
   readonly seed: number;
   readonly generatorVersion: number;
   readonly worldgenProvider?: KernelWorldgenProviderIdentity;
+  readonly voxelGeometry?: VoxelGeometryRegistryV1;
   private readonly worldgenRuntime?: KernelWorldgenProvider;
   private readonly chunks = new Map<string, ServerChunk>();
   private accessSequence = 0;
@@ -81,6 +84,7 @@ class GameServerWorld {
     this.generatorVersion = options.generatorVersion ?? GENERATOR_VERSION;
     this.worldgenRuntime = options.worldgenProvider;
     this.worldgenProvider = options.worldgenProvider?.identity;
+    this.voxelGeometry = voxelGeometryForComposition(options.composition);
     if (!SUPPORTED_GENERATOR_VERSIONS.includes(this.generatorVersion))
       throw new Error(`Unsupported generator version ${this.generatorVersion}.`);
     this.persistence = options.persistence;
@@ -101,6 +105,7 @@ class GameServerWorld {
         readLoadedGameplayVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
         readGameplayVoxel: (x, y, z) => this.readGameplayVoxel(x, y, z),
         readFluidCell: (x, y, z) => this.fluidChunks.cell(x, y, z, true),
+        voxelGeometry: this.voxelGeometry,
       },
     );
     installGameServerGameplayApi(this, this.gameplayHost);

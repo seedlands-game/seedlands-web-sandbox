@@ -17,6 +17,7 @@ import {
   defineRecipeCraftingModule,
   defineBehaviorRegistryModule,
   defineStandardWorldgenModule,
+  defineVoxelGeometryModule,
 } from '@seedlands/stdlib/mod-api';
 import { overworldBlocks, overworldVoxelSemantics } from './blocks';
 import { overworldItems } from './items';
@@ -25,6 +26,9 @@ import { overworldMeleeDefinitions } from './combat';
 import { overworldActorProfiles, overworldDefaultPlayerMeleeDefinitionId } from './actors';
 import { classicWorldgenProvider } from './worldgen';
 import { classicRetiredActorsMigration } from './retired-actors-migration';
+import { classicItemInteractionModules } from './item-interactions';
+import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
+import { classicStructureDefinitionModule } from './structures';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -88,6 +92,11 @@ export const pack = definePack({
         fuels: overworldStations.fuels.map((fuel) => ({ ...fuel, itemId: namespaceId(fuel.itemId) })),
       },
     }),
+    defineVoxelGeometryModule({
+      moduleId: 'seedlands:overworld-voxel-geometry',
+      descriptors: classicWoodenDoorGeometryDescriptors,
+    }),
+    classicStructureDefinitionModule,
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
@@ -102,6 +111,7 @@ export const pack = definePack({
     defineStationActionsModule(),
     defineForageModule({ sourceVoxel: 5, drop: { itemId: 'berry', count: 1 }, intervalSeconds: 120 }),
     defineBlockActionsModule({ stations: true }),
+    ...classicItemInteractionModules,
     defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules', voxelDefinitions: overworldBlocks }),
     defineModeModule(),
     defineCombatModule(),

@@ -1,4 +1,4 @@
-import type { ModModule } from '../../composition/contracts';
+import type { ModModule, WorldComposition } from '../../composition/contracts';
 import { VOXEL_SEMANTICS_CAPABILITY } from './content-capabilities';
 import {
   createVoxelGeometryRegistryV1,
@@ -13,6 +13,14 @@ export type VoxelGeometryModuleOptionsV1 = Readonly<{
   moduleId: string;
   descriptors: readonly VoxelGeometryDefinitionV1[];
 }>;
+
+export function voxelGeometryForComposition(
+  composition: WorldComposition | undefined,
+): VoxelGeometryRegistryV1 | undefined {
+  return composition?.definitionMap.capabilities.some(({ id }) => id === VOXEL_GEOMETRY_CAPABILITY)
+    ? composition.capability<VoxelGeometryRegistryV1>(VOXEL_GEOMETRY_CAPABILITY)
+    : undefined;
+}
 
 export function defineVoxelGeometryModule(options: VoxelGeometryModuleOptionsV1): ModModule {
   if (!options || typeof options !== 'object' || Array.isArray(options))

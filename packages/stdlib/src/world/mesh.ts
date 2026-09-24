@@ -16,6 +16,7 @@ import type { RenderCategory } from './mesh-render-category';
 import { forEachVoxelModelFace, voxelModelFaceUvs } from './voxel-model-mesh';
 import { float32ToFloat16 } from './mesh-batching';
 import { classicMeshSemantics, type MeshSemanticsLookup } from './mesh-semantics';
+import type { VoxelGeometryResolver } from './voxel-model';
 
 export type { RenderCategory } from './mesh-render-category';
 
@@ -49,6 +50,7 @@ export type MeshOptions = {
   outside?: (x: number, y: number, z: number) => number;
   generatorVersion?: number;
   semantics?: MeshSemanticsLookup;
+  geometry?: VoxelGeometryResolver;
 };
 export type MeshAuthorityOverlay = {
   cx: number;
@@ -170,15 +172,26 @@ export function createProceduralMeshInput({
   };
 }
 
-const isGreedyVoxel = (semantics: MeshSemanticsLookup, voxel: number) =>
-  semantics.isRenderable(voxel) && !semantics.isModel(voxel);
-const isVisibleFace = (semantics: MeshSemanticsLookup, source: number, target: number) =>
-  isGreedyVoxel(semantics, source) &&
+const isGreedyVoxel = (semantics: MeshSemanticsLookup, geometry: VoxelGeometryResolver | undefined, voxel: number) =>
+  semantics.isRenderable(voxel) && !semantics.isModel(voxel) && !geometry?.get(voxel);
+const meshOccludes = (semantics: MeshSemanticsLookup, geometry: VoxelGeometryResolver | undefined, voxel: number) =>
+  geometry?.get(voxel)?.occludesFullFace ?? semantics.occludes(voxel);
+const isVisibleFace = (
+  semantics: MeshSemanticsLookup,
+  geometry: VoxelGeometryResolver | undefined,
+  source: number,
+  target: number,
+) =>
+  isGreedyVoxel(semantics, geometry, source) &&
   ((semantics.isGlass(source) && semantics.isGlass(target)) || (semantics.isIce(source) && semantics.isIce(target))
     ? false
     : semantics.isWater(source)
-      ? target === Voxel.Air || (target !== Voxel.Water && !semantics.isWater(target) && !semantics.occludes(target))
-      : target === Voxel.Air || semantics.isWater(target) || semantics.isIce(target) || !semantics.occludes(target));
+      ? target === Voxel.Air ||
+        (target !== Voxel.Water && !semantics.isWater(target) && !meshOccludes(semantics, geometry, target))
+      : target === Voxel.Air ||
+        semantics.isWater(target) ||
+        semantics.isIce(target) ||
+        !meshOccludes(semantics, geometry, target));
 
 function vertexAo(
   block: readonly number[],
@@ -188,6 +201,7 @@ function vertexAo(
   back: boolean,
   sample: (x: number, y: number, z: number) => number,
   semantics: MeshSemanticsLookup,
+  geometry?: VoxelGeometryResolver,
 ): readonly [number, number, number, number] {
   const normal = back ? -1 : 1;
   const outside = [...block];
@@ -201,10 +215,14 @@ function vertexAo(
     const corner = [...outside];
     corner[u] += su;
     corner[v] += sv;
-    const occupiedU = semantics.occludes(sample(sideU[0], sideU[1], sideU[2]));
-    const occupiedV = semantics.occludes(sample(sideV[0], sideV[1], sideV[2]));
+    const occupiedU = meshOccludes(semantics, geometry, sample(sideU[0], sideU[1], sideU[2]));
+    const occupiedV = meshOccludes(semantics, geometry, sample(sideV[0], sideV[1], sideV[2]));
     if (occupiedU && occupiedV) return 3;
-    return Number(occupiedU) + Number(occupiedV) + Number(semantics.occludes(sample(corner[0], corner[1], corner[2])));
+    return (
+      Number(occupiedU) +
+      Number(occupiedV) +
+      Number(meshOccludes(semantics, geometry, sample(corner[0], corner[1], corner[2])))
+    );
   });
   return values as unknown as readonly [number, number, number, number];
 }
@@ -222,6 +240,7 @@ export function meshChunk({
   fluidHalo,
   generatorVersion = GENERATOR_VERSION,
   semantics = classicMeshSemantics,
+  geometry,
 }: MeshOptions): Record<number, MeshData> {
   semantics.validate(data);
   if (halo) semantics.validate(halo);
@@ -310,8 +329,8 @@ export function meshChunk({
           const aHeight = semantics.isWater(a) ? fluidSurfaceAt(x[0], x[1], x[2]) : 0;
           const bHeight = semantics.isWater(b) ? fluidSurfaceAt(x[0] + q[0], x[1] + q[1], x[2] + q[2]) : 0;
           const step = waterStepFace(d, a, b, aHeight, bHeight);
-          const forward = step?.forward ?? isVisibleFace(semantics, a, b);
-          const back = step?.back ?? (!forward && isVisibleFace(semantics, b, a));
+          const forward = step?.forward ?? isVisibleFace(semantics, geometry, a, b);
+          const back = step?.back ?? (!forward && isVisibleFace(semantics, geometry, b, a));
           if (!forward && !back) {
             mask[m++] = null;
             continue;
@@ -325,7 +344,7 @@ export function meshChunk({
             material,
             renderCategory: semantics.renderCategory(material),
             back,
-            ao: semantics.isWater(id) ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample, semantics),
+            ao: semantics.isWater(id) ? [0, 0, 0, 0] : vertexAo(block, d, u, v, back, sample, semantics, geometry),
             fluidLevel: semantics.isWater(id) ? (step?.high ?? (back ? bHeight : aHeight)) : 0,
             fluidFloorHeight: step?.low ?? 0,
           };
@@ -377,20 +396,23 @@ export function meshChunk({
         }
     }
   }
-  forEachVoxelModelFace(data, (face) =>
-    add(
-      face.material,
-      face.positions,
-      face.normal,
-      face.dimension,
-      face.width,
-      face.height,
-      face.back,
-      [0, 0, 0, 0],
-      0,
-      0,
-      voxelModelFaceUvs(face),
-    ),
+  forEachVoxelModelFace(
+    data,
+    (face) =>
+      add(
+        face.material,
+        face.positions,
+        face.normal,
+        face.dimension,
+        face.width,
+        face.height,
+        face.back,
+        [0, 0, 0, 0],
+        0,
+        0,
+        voxelModelFaceUvs(face),
+      ),
+    geometry,
   );
   return Object.fromEntries(
     Object.entries(result).map(([material, value]) => {

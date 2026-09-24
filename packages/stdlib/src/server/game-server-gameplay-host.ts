@@ -14,7 +14,7 @@ import type {
 } from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
 import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
-import type { ItemStack } from './gameplay/item-registry';
+import type { ItemDefinitionRegistry, ItemStack } from './gameplay/item-registry';
 import type { ActorActionInput } from './simulation/action-runtime';
 import type { ActorRegistration } from './simulation/autonomy-runtime';
 import type { ActorAuthorityAction } from './simulation/actor-authority-rules';
@@ -25,7 +25,6 @@ import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
 import type { GameServerOptions } from './game-server-types';
-import type { ItemDefinitionRegistry } from './gameplay/item-registry';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
 import { isActorEntityType } from './gameplay/ecs-actor-state';
@@ -34,6 +33,7 @@ import type { KernelStateOwner } from '@seedlands/kernel/execution';
 import type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
 import { armorPoints } from './gameplay/armor-equipment';
 import type { ProjectileVector } from './gameplay/projectile-runtime';
+import * as ItemInteraction from './gameplay/modules/item-interaction-module';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
@@ -77,6 +77,7 @@ export class GameServerGameplayHost {
       getVoxel: (position) => this.world.readGameplayVoxel(...position),
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
       getFluidCell: (position) => this.world.readFluidCell(...position),
+      voxelGeometry: this.world.voxelGeometry,
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
       prepareVoxelEdits: (actorId, edits) => this.world.prepareVoxelEdits(actorId, edits),
       editBatch: (batch) => this.world.editBatch(batch),
@@ -178,6 +179,14 @@ export class GameServerGameplayHost {
   }
   invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
     return this.gameplay.invokeActorModuleOperation(actorId, request);
+  }
+  resolveItemInteraction(itemId: string, trigger: ItemInteraction.ItemInteractionTrigger) {
+    return (
+      ItemInteraction.itemInteractionRegistryForComposition(this.compositionOptions.composition)?.resolve(
+        itemId,
+        trigger,
+      ) ?? null
+    );
   }
   getNearbyStations(playerId: string) {
     return projectNearbyStations(this.gameplay, playerId, this.compositionOptions.moduleActorAuthority, (x, y, z) =>

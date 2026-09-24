@@ -1,6 +1,6 @@
 import type { Collider, FluidVolume, PhysicsWorld, WorldAabb } from '../../physics';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
-import { collisionBoxesForVoxel } from '../../world/voxel-model';
+import { collisionBoxesForVoxel, type VoxelGeometryResolver } from '../../world/voxel-model';
 import { waterSurfaceHeight } from '../../world/water-mesh-height';
 import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 
@@ -30,6 +30,7 @@ export class VoxelCollisionWorld implements PhysicsWorld {
     private readonly source: LoadedVoxelSource,
     private readonly requestUnknownChunk: (chunkKey: string) => void = () => undefined,
     private readonly semantics?: VoxelSemanticsResolver,
+    private readonly geometry?: VoxelGeometryResolver,
   ) {}
 
   beginStep(): void {
@@ -65,14 +66,17 @@ export class VoxelCollisionWorld implements PhysicsWorld {
             continue;
           }
           this.revisions.set(loaded.chunkKey, loaded.revision);
+          const registeredGeometry = this.geometry?.get(loaded.voxel);
           const semantics = this.semantics?.get(loaded.voxel);
-          const boxes = semantics
-            ? !semantics.solid
-              ? []
-              : semantics.meshKind === 'model'
-                ? collisionBoxesForVoxel(loaded.voxel)
-                : [{ min: [0, 0, 0] as const, max: [1, 1, 1] as const }]
-            : collisionBoxesForVoxel(loaded.voxel);
+          const boxes = registeredGeometry
+            ? registeredGeometry.collision
+            : semantics
+              ? !semantics.solid
+                ? []
+                : semantics.meshKind === 'model'
+                  ? collisionBoxesForVoxel(loaded.voxel)
+                  : [{ min: [0, 0, 0] as const, max: [1, 1, 1] as const }]
+              : collisionBoxesForVoxel(loaded.voxel);
           boxes.forEach((box, index) => {
             colliders.push({
               id: `voxel:${x},${y},${z}:${index}`,

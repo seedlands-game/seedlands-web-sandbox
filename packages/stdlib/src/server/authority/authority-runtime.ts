@@ -8,7 +8,6 @@ import type {
   AuthorityActionResult,
   AuthorityGameplayView,
   AuthorityMeshPayload,
-  AuthorityReady,
 } from '../protocol/authority-worker-protocol';
 import { GameServer } from '../game-server';
 import type { WorkerCanonicalResult, WorldCommitResult } from '../game-server-types';
@@ -29,9 +28,7 @@ import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnost
 import { projectAuthorityReady } from './authority-ready';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction, unavailableAuthorityPlayerAction } from './authority-player-action';
-import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
-import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
 import { acceptLogicIntentBatch, isValidLogicIntent, applyBoundLogicAction } from './authority-logic-intent-acceptance';
@@ -41,6 +38,11 @@ import {
   captureAuthorityStateVersion,
   type AuthorityStateVersion,
 } from './authority-state-version';
+import {
+  assertAuthorityRuntimeGeometry,
+  prepareAuthorityRuntimeMesh,
+  queueAuthorityRuntimeRecoveries,
+} from './authority-runtime-geometry';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -138,6 +140,7 @@ export class AuthorityRuntime {
       bodyConfigFor: (entity) => bodyConfigFor(bodyKindForEntity(entity)),
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
       voxelSemantics: server.voxelSemantics,
+      voxelGeometry: server.voxelGeometry,
       frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
       execution: server.authorityExecution,
@@ -154,6 +157,7 @@ export class AuthorityRuntime {
   }
 
   static async create(options: AuthorityRuntimeOptions): Promise<AuthorityRuntime> {
+    assertAuthorityRuntimeGeometry(options);
     const unknownChunks = createAuthorityCanonicalRouter();
     const server = new GameServer({
       seedText: options.seedText,
@@ -194,7 +198,7 @@ export class AuthorityRuntime {
     return runtime;
   }
 
-  ready(): AuthorityReady {
+  ready() {
     return projectAuthorityReady({
       server: this.server,
       playerId: this.playerId,
@@ -373,7 +377,7 @@ export class AuthorityRuntime {
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {
-    return prepareAuthorityMeshPayload(this.server, this.options.platform.now, cx, cy, cz);
+    return prepareAuthorityRuntimeMesh(this.server, this.options.platform.now, cx, cy, cz);
   }
 
   prepareHarnessChunks(chunks: readonly (readonly [number, number, number])[]): Promise<boolean> {
@@ -526,9 +530,7 @@ export class AuthorityRuntime {
 
   private recordWorldCommit(commit: WorldCommitResult): void {
     this.pendingCommits.push(commit);
-    queueBodyRecoveriesAfterCommit(commit, this.server.queryEntities(), (entityId, maxDistance) =>
-      this.session.requestBodyRecovery(entityId, 'external-geometry-change', maxDistance),
-    );
+    queueAuthorityRuntimeRecoveries(commit, this.server, this.session);
   }
 
   private currentChunkRevisions(reads: readonly Readonly<{ key: string; revision: number }>[]): boolean {

@@ -1,7 +1,12 @@
 import { FaceMaterial, Voxel, faceMaterialFor, isRenderable, isSolid, type FaceMaterialId } from './voxel';
 import { hasVoxelModelGeometry, voxelOccludesFullFace } from './voxel-model';
-import { MAX_VOXEL_FACE_MATERIAL_ID, type VoxelSemanticsDefinition } from './voxel-semantics';
+import {
+  MAX_VOXEL_FACE_MATERIAL_ID,
+  type VoxelSemanticsDefinition,
+  type VoxelSemanticsRegistry,
+} from './voxel-semantics';
 import { renderCategoryForMaterial } from './mesh-render-category';
+import type { VoxelGeometryRegistryV1 } from './voxel-geometry';
 
 export const MESH_SEMANTICS_RECORD_BYTES = 8;
 export const MESH_SEMANTICS_MAX_RECORDS = 4_096;
@@ -48,6 +53,22 @@ export type MeshSemanticsOptions = Readonly<{
   glassStorageIds?: readonly number[];
   iceStorageIds?: readonly number[];
 }>;
+
+export function validateVoxelGeometrySemantics(
+  semantics: Pick<VoxelSemanticsRegistry, 'get'>,
+  geometry: Pick<VoxelGeometryRegistryV1, 'list'>,
+): void {
+  for (const descriptor of geometry.list()) {
+    const voxel = semantics.get(descriptor.voxel);
+    if (!voxel) throw new TypeError(`Geometry voxel ${descriptor.voxel} is not registered.`);
+    if (!voxel.renderable) throw new TypeError(`Geometry voxel ${descriptor.voxel} is not renderable.`);
+    for (const box of descriptor.boxes)
+      if (!voxel.faceMaterials.includes(box.material))
+        throw new TypeError(`Geometry material ${box.material} is not registered for voxel ${descriptor.voxel}.`);
+    if (voxel.solid !== descriptor.collision.length > 0)
+      throw new TypeError(`Geometry collision does not match voxel semantics: ${descriptor.voxel}.`);
+  }
+}
 
 function checkedStorageId(storageId: number): void {
   if (!Number.isSafeInteger(storageId) || storageId < 0 || storageId >= MESH_SEMANTICS_MAX_RECORDS)

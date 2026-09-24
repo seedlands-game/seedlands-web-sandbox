@@ -13,6 +13,7 @@ import {
   type ModelAnimationController,
 } from './model-animation';
 import { createDamageTintMaterial } from './damage-tint-material';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 const PRESENTATION_SETTLE_DISTANCE = 0.001;
 
@@ -53,8 +54,9 @@ export class GameplayEntityPresenter {
     private readonly app: pc.Application,
     private readonly resolveItem?: (id: string) => ItemDefinition | null,
     private readonly sampleBlockLight?: GameplayBlockLightSampler,
+    voxelGeometry?: VoxelGeometryResolver,
   ) {
-    this.assetsLease = acquireGameplayModelAssets(app);
+    this.assetsLease = acquireGameplayModelAssets(app, voxelGeometry);
     this.bindings = getAppearanceAnimationBindings(app);
   }
 

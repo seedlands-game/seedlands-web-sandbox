@@ -94,6 +94,7 @@ export class GameFrameLoop {
       this.bindings.authority()?.snapshot ?? null,
       controller?.predictedPhysicsState ?? null,
       controller?.aimTarget ?? null,
+      this.bindings.authority()?.voxelGeometry,
     );
     this.bindings.waterExperience()?.updateImmersion(dt, controller?.waterImmersion, environment);
     const gameplay = this.bindings.gameplay();

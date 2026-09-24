@@ -9,6 +9,7 @@ import type {
 import { browserCorePlatform } from '../platform/core-platform';
 import { createBrowserAuthorityComposition } from './authority-worker-runtime-lifecycle';
 import type { VoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
+import { voxelGeometryForComposition } from '@seedlands/stdlib/mod-api';
 
 export function prepareBrowserAuthorityWorldgen(
   packArtifacts: readonly VerifiedPackArtifact[],
@@ -27,6 +28,7 @@ export function prepareBrowserAuthorityWorldgen(
     worldgenProvider: worldgenProviderForComposition(assembly.composition),
     starterEcology: gameplayContentForComposition(assembly.composition).actorProfiles.starterEcology,
     voxelSemantics: assembly.composition.capability<VoxelSemanticsRegistry>('seedlands:voxel-semantics').list(),
+    voxelGeometry: voxelGeometryForComposition(assembly.composition),
   };
 }
 
@@ -48,6 +50,7 @@ export function createBrowserAuthorityRuntime(
     ...prepared.assembly,
     ...options,
     worldgenProvider: prepared.worldgenProvider,
+    voxelGeometry: prepared.voxelGeometry,
     startTimeMs: 0,
     startClock: browserCorePlatform.now,
     platform: browserCorePlatform,

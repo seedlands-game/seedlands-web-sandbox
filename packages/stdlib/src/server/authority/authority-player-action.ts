@@ -6,6 +6,25 @@ import type {
 } from '../protocol/authority-worker-protocol';
 import type { GameServer } from '../game-server';
 import type { WorldCommitResult } from '../game-server-types';
+import { dispatchItemInteraction } from '../gameplay/modules/item-interaction-module';
+import {
+  dispatchStructureTargetFirstV1,
+  type StructureTargetInteractionResultV1,
+  type StructureTargetInvocationV1,
+  type StructureTargetResolutionV1,
+} from '../gameplay/modules/structure-target-dispatch';
+
+export type AuthorityStructureTargetPort = Readonly<{
+  resolve(
+    input: Readonly<{
+      actorId: string;
+      intent: Extract<AuthorityAction, { type: 'interact' }>['intent'];
+      target: Extract<Extract<AuthorityAction, { type: 'interact' }>['target'], { kind: 'voxel' }>;
+      selectedItemId: string | null;
+    }>,
+  ): StructureTargetResolutionV1;
+  invoke(input: StructureTargetInvocationV1): StructureTargetInteractionResultV1;
+}>;
 
 export function unavailableAuthorityPlayerAction(
   submittedAction: AuthorityAction,
@@ -19,6 +38,7 @@ export function applyAuthorityPlayerAction(
   playerId: string,
   action: AuthorityAction,
   publishCommit: (commit: WorldCommitResult) => void,
+  structureTargets?: AuthorityStructureTargetPort,
 ): unknown {
   const record = (result: unknown, statistic: import('../gameplay/gameplay-progress-runtime').GameplayStatistic) => {
     if ((result as { success?: boolean })?.success) server.progress.record(playerId, statistic, 1);
@@ -81,6 +101,62 @@ export function applyAuthorityPlayerAction(
       return server.moveInventorySlot(playerId, action.source, action.target);
     case 'use-inventory':
       return record(server.useInventoryItem(playerId, action.slot), 'items-consumed');
+    case 'interact': {
+      const actor = (id: string) => {
+        const entity = server.getEntity(id);
+        if (entity?.type !== 'player') return null;
+        const player = server.getPlayerState(id);
+        const inventory = server.getInventoryPointerView(id);
+        return {
+          position: entity.position,
+          lifecycle: player.lifecycle,
+          mode: player.mode?.value ?? 'survival',
+          inventoryRevision: inventory.revision,
+          modeRevision: player.mode?.revision ?? 0,
+          creativeCatalogRevision: player.creativeCatalog?.revision ?? 0,
+          selectedSlot:
+            player.mode?.value === 'creative' ? (player.creativeCatalog?.selectedSlot ?? 0) : player.selectedSlot,
+          survivalItemId: player.inventory[player.selectedSlot]?.itemId ?? null,
+          creativeItemId: player.creativeCatalog?.hotbar[player.creativeCatalog.selectedSlot] ?? null,
+        };
+      };
+      const fallback = () =>
+        dispatchItemInteraction(
+          {
+            actor,
+            resolveEntity: (reference) => server.resolveEntityReference(reference),
+            resolveInteraction: (itemId, trigger) => server.resolveItemInteraction(itemId, trigger),
+            invokeActor: (request) => server.invokeActorModuleOperation(playerId, request),
+            getVoxel: (position) => server.getVoxel(...position),
+          },
+          playerId,
+          action.target,
+          action.expectedSelection,
+        );
+      const interaction = structureTargets
+        ? dispatchStructureTargetFirstV1(
+            {
+              actor,
+              getVoxel: (position) => server.getVoxel(...position),
+              resolve: structureTargets.resolve,
+              invoke: structureTargets.invoke,
+              fallback,
+            },
+            {
+              actorId: playerId,
+              intent: action.intent,
+              target: action.target,
+              expectedSelection: action.expectedSelection,
+            },
+          )
+        : fallback();
+      if (interaction.success && interaction.value !== undefined) {
+        const value = interaction.value;
+        const commit = server.acknowledgeBlockCommit(value);
+        if (commit) publishCommit(commit);
+      }
+      return interaction;
+    }
     case 'set-difficulty':
       return server.setDifficulty(action.value, action.expectedRevision);
   }

@@ -11,6 +11,7 @@ import { voxelEmission, voxelLightCost } from '@seedlands/stdlib/world/voxel-lig
 import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
 import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
+import { classicWoodenDoorVariants } from './structures';
 
 /** Version 1 content preserves the supported numeric voxel palette. */
 const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.freeze({
@@ -375,7 +376,16 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
 });
 
 export const overworldBlocks: readonly VoxelGameplayDefinition[] = Object.freeze(
-  Object.values(definitions).map((definition) =>
+  [
+    ...Object.values(definitions),
+    ...classicWoodenDoorVariants.map(({ storageId }) => ({
+      voxel: storageId,
+      hardnessSeconds: 0.7,
+      preferredTool: null,
+      drop: null,
+      replaceable: false,
+    })),
+  ].map((definition) =>
     Object.freeze({ ...definition, drop: definition.drop ? Object.freeze({ ...definition.drop }) : null }),
   ),
 );
@@ -391,8 +401,8 @@ const materialForFace = (storageId: number, axis: number, positive: boolean) =>
  * helpers are only used to snapshot unchanged Classic semantics into the Pack;
  * composed consumers use the frozen registry rather than their switches.
  */
-export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Object.freeze(
-  Array.from({ length: 89 }, (_, storageId) => {
+export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Object.freeze([
+  ...Array.from({ length: 89 }, (_, storageId) => {
     const name = classicVoxelName.get(storageId);
     if (!name) throw new Error(`Classic voxel ID is missing: ${storageId}`);
     return Object.freeze({
@@ -434,4 +444,28 @@ export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Obje
       ),
     });
   }),
-);
+  ...classicWoodenDoorVariants.map(({ storageId, orientation, open, role }) =>
+    Object.freeze({
+      id: `seedlands:classic/wooden-door/${orientation}/${open ? 'open' : 'closed'}/${role}`,
+      storageId,
+      solid: !open,
+      targetable: true,
+      renderable: true,
+      // Public V1 does not yet admit Pack model geometry above the legacy 0-88 palette.
+      meshKind: 'cube' as const,
+      emission: 0,
+      lightCost: 1,
+      faceMaterials: Object.freeze([
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+      ]) as VoxelSemanticsDefinition['faceMaterials'],
+      materialCategories: Object.freeze([
+        Object.freeze([FaceMaterial.WoodenDoor, renderCategoryForMaterial(FaceMaterial.WoodenDoor)] as const),
+      ]),
+    }),
+  ),
+]);

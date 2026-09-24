@@ -16,7 +16,7 @@ import { createWorldRulesetState } from './modules/world-ruleset-state';
 import { ModeRuntime } from './modules/mode-runtime';
 import { createModeStatePort } from './modules/mode-state-port';
 import { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
-import { findGameplayModeLanding } from './gameplay-mode-landing';
+import { gameplayModeLandingFor } from './gameplay-mode-landing';
 import type { WorldResourceAuthorizer } from '../harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from '../composition/operation-contracts';
 import { createInventoryStatePort } from './modules/inventory-state-port';
@@ -159,7 +159,7 @@ export class GameplayRuntime {
       actorAuthority: callbacks.moduleActorAuthority,
       modules: () => this.modules,
       simulation: () => this.simulation,
-      getVoxel: callbacks.getVoxel,
+      ...{ getVoxel: callbacks.getVoxel, getFluidCell: callbacks.getFluidCell, voxelGeometry: callbacks.voxelGeometry },
       revision: () => this.kernelState.gameplayRevision,
       assertCanChange: () => this.assertRevisionCapacity(),
       changed: (inventory = false) => {
@@ -183,8 +183,7 @@ export class GameplayRuntime {
     this.registeredFeeding = registered.feeding;
     this.modes = new ModeRuntime({
       entities: this.entities,
-      findSafeLanding: (id) =>
-        findGameplayModeLanding(this.entities.get(id)!, callbacks.getVoxel, this.kernelState.gameplayRevision),
+      findSafeLanding: gameplayModeLandingFor(this.entities, callbacks, () => this.kernelState.gameplayRevision),
       assertCanChange: () => this.assertRevisionCapacity(),
       prepareCancelIncompatibleActions: (id, reason) => this.simulation.prepareInterruption(id, reason),
       changed: () => this.touch(),

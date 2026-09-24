@@ -34,7 +34,7 @@ const makeComposedRuntime = () => {
         algorithm: 'sha256' as const,
         manifestDigest: 'a'.repeat(64),
         entryDigest: 'b'.repeat(64),
-        resources: [],
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
       },
     },
   ]);
@@ -123,6 +123,72 @@ describe('公开动作回执参考投影', () => {
       status: 'executed',
       outcome: { success: false, reason: 'unknown-recipe' },
     });
+  });
+
+  it('projects an unbound item interaction as the bounded public V1.2 handoff reason', async () => {
+    const runtime = await makeComposedRuntime();
+    runtime.server.giveItem(runtime.playerId, { itemId: 'water-bucket', count: 1 });
+    const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
+    const action: AuthorityAction = {
+      type: 'interact',
+      intent: 'use',
+      target: { kind: 'self' },
+      expectedSelection: {
+        inventoryRevision: inventory.revision,
+        modeRevision: runtime.server.getPlayerState(runtime.playerId).mode!.revision,
+        creativeCatalogRevision: runtime.server.getPlayerState(runtime.playerId).creativeCatalog!.revision,
+        selectedSlot: runtime.server.getPlayerState(runtime.playerId).selectedSlot,
+      },
+    };
+    const receipt = await runtime.executeTransaction(identity(runtime, 0), () => runtime.performAction(action));
+    expect(projectActionReceiptReference(action, receipt, identity(runtime, 0))).toMatchObject({
+      status: 'executed',
+      action,
+      outcome: { success: false, reason: 'item-no-interaction' },
+    });
+  });
+
+  it('projects every bounded interaction failure reason without exposing private operation errors', async () => {
+    const runtime = await makeRuntime();
+    const action: AuthorityAction = {
+      type: 'interact',
+      intent: 'use',
+      target: { kind: 'self' },
+      expectedSelection: { inventoryRevision: 0, modeRevision: 0, creativeCatalogRevision: 0, selectedSlot: 0 },
+    };
+    for (const [sequence, reason] of [
+      'player-dead',
+      'invalid-target',
+      'stale-selection',
+      'no-selected-item',
+      'item-no-interaction',
+      'stale-target-lifetime',
+      'out-of-range',
+      'blocked',
+      'chunk-unavailable',
+      'target-occupied',
+      'not-fluid-source',
+      'inventory-full',
+      'world-not-changed',
+      'interaction-stale',
+      'interaction-rejected',
+      'structure-malformed',
+      'ambiguous-placement-orientation',
+    ].entries()) {
+      const receipt = {
+        status: 'executed',
+        commitSequence: sequence,
+        result: {
+          submittedAction: action,
+          result: { success: false, reason },
+          gameplay: { gameplayRevision: sequence },
+          commits: [],
+        },
+      } as const;
+      expect(projectActionReceiptReference(action, receipt as never, identity(runtime, sequence))).toMatchObject({
+        outcome: { success: false, reason },
+      });
+    }
   });
 
   it('重复事务投影为原回执而不是再次执行，版本冲突不伪造业务结果', async () => {

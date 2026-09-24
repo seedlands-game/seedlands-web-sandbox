@@ -3,6 +3,8 @@ import type { AuthorityGameplayView, AuthorityReady } from '../protocol/authorit
 import type { AuthoritySnapshot } from './authority-session';
 import type { AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
+import { createVoxelGeometryRegistryV1, type VoxelGeometryDefinitionV1 } from '../../world/voxel-geometry';
+import { validateVoxelGeometrySemantics } from '../../world/mesh-semantics';
 
 type Input = Readonly<{
   server: GameServer;
@@ -16,8 +18,14 @@ type Input = Readonly<{
   gameplay: AuthorityGameplayView;
 }>;
 
-export function projectAuthorityReady(input: Input): AuthorityReady {
+export function projectAuthorityReady(
+  input: Input,
+  voxelGeometry: readonly VoxelGeometryDefinitionV1[] | undefined = input.server.voxelGeometry?.list(),
+): AuthorityReady {
   const camp = input.server.queryPois(input.playerBodyPosition, 40, 'camp')[0];
+  const geometryRegistry = voxelGeometry ? createVoxelGeometryRegistryV1(voxelGeometry) : undefined;
+  if (geometryRegistry) validateVoxelGeometrySemantics(input.server.voxelSemantics, geometryRegistry);
+  const geometry = geometryRegistry?.list();
   return {
     playerId: input.playerId,
     playerBodyPosition: [...input.playerBodyPosition],
@@ -31,6 +39,7 @@ export function projectAuthorityReady(input: Input): AuthorityReady {
     snapshot: withAuthorityResidencyDiagnostics(input.snapshot, input.residency),
     gameplay: input.gameplay,
     voxelSemantics: input.server.voxelSemantics.list(),
+    ...(geometry ? { voxelGeometry: geometry } : {}),
     ...(input.server.restoredSnapshotMigrationReports.length
       ? { snapshotMigrationReports: input.server.restoredSnapshotMigrationReports }
       : {}),

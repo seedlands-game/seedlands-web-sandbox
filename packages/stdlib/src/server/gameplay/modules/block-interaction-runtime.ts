@@ -11,6 +11,7 @@ import { playerOccupiesVoxelShape } from '../player-occupancy';
 import type { PlayerState } from '../player-state';
 import type { VoxelGameplayRegistry } from '../voxel-gameplay';
 import type { FluidCell } from '../../fluid/fluid-cell';
+import type { VoxelGeometryResolver } from '../../../world/voxel-model';
 
 type Position = [number, number, number];
 type Failure = { success: false; reason: string };
@@ -22,6 +23,7 @@ export type BlockInteractionRuntimeOptions = Readonly<{
   getVoxel: (position: Position) => number | undefined;
   getFluidCell?: (position: Position) => FluidCell | null;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
+  voxelGeometry?: VoxelGeometryResolver;
   entities: EntityStore;
   assertCanChange(): void;
   items: ItemDefinitionRegistry;
@@ -87,7 +89,7 @@ export class BlockInteractionRuntime {
     if (!selectedItemId) return { success: false, reason: 'no-selected-item' };
     const place = this.options.items.capability(selectedItemId, 'place');
     if (!place) return { success: false, reason: 'item-not-placeable' };
-    if (playerOccupiesVoxelShape(entity.position, position, place.voxel))
+    if (playerOccupiesVoxelShape(entity.position, position, place.voxel, this.options.voxelGeometry))
       return { success: false, reason: 'player-collision' };
     const world = this.options.prepareVoxelEdit(id, position, place.voxel);
     if (!world.committed) return { success: false, reason: 'world-not-changed' };

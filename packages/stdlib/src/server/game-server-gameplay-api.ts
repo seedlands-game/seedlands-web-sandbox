@@ -21,6 +21,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'bindModuleOperations',
   'invokeModuleOperation',
   'invokeActorModuleOperation',
+  'resolveItemInteraction',
   'getNearbyStations',
   'listStationRecipes',
   'hasGameplayComposition',

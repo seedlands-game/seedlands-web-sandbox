@@ -30,9 +30,12 @@ import {
 } from './browser-gameplay-actions';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
+import { performVoxelTargetInteraction } from '../player/secondary-interaction';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
+  voxelGeometry?: VoxelGeometryResolver;
   performAction(action: AuthorityAction): Promise<AuthorityActionResult>;
 }>;
 
@@ -91,8 +94,9 @@ export class BrowserGameplay {
       options.app,
       (id) => this.itemDefinition(id) ?? null,
       options.sampleBlockLight,
+      options.authority.voxelGeometry,
     );
-    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
+    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera, undefined, options.authority.voxelGeometry);
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
   }
@@ -420,15 +424,16 @@ export class BrowserGameplay {
     });
   }
 
-  useTarget(position: [number, number, number]): boolean {
-    if (this.stations.open(position)) {
-      this.inventoryOpen = true;
-      this.options.releaseInput();
-      this.refresh();
-      return true;
-    }
-    return false;
-  }
+  // prettier-ignore
+  async useTarget(target: Pick<VoxelTarget, 'position' | 'adjacent'>, intent: 'use' | 'alternate'): Promise<'handled' | 'fallback'> {
+    return performVoxelTargetInteraction({
+      gameplay: this.options.authority.gameplay, target, intent,
+      openStation: (position) => { if (!this.stations.open(position)) return false;
+        this.inventoryOpen = true; this.options.releaseInput(); this.refresh(); return true;
+      },
+      perform: (action) => this.options.authority.performAction(action), refresh: () => this.refresh(),
+      succeeded: this.options.queueSave, failed: (reason) => this.feedback(`无法交互 · ${reason}`, 'error')
+    }); }
 
   useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;

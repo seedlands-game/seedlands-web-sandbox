@@ -69,7 +69,13 @@ const actor = (count = 9) => ({
   lifecycle: 'alive' as const,
   needs: { hunger: 20, maxHunger: 20, meaning: 'satiety' as const },
   inventoryRevision: 4,
-  cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
+  cursor: {
+    version: 1 as const,
+    revision: 0,
+    stack: null,
+    origin: null,
+    craftingGrid: [null, null, null, null],
+  },
 });
 
 const input = (command: InventoryPointerInputV1['command']): InventoryPointerInputV1 => ({
@@ -143,6 +149,7 @@ describe('inventory pointer candidate', () => {
         revision: 2,
         stack: { itemId: 'test:wood', count: 5 },
         origin: { kind: 'inventory' as const, slot: 1 },
+        craftingGrid: [null, null, null, null],
       },
     };
     const swapped = buildInventoryPointerCandidate(content, {
@@ -171,6 +178,7 @@ describe('inventory pointer candidate', () => {
         revision: 7,
         stack: { itemId: 'test:stone', count: 3 },
         origin: null,
+        craftingGrid: [null, null, null, null],
       },
     };
     const closed = buildInventoryPointerCandidate(content, { actor: full, input: input({ kind: 'close' }) });
@@ -248,6 +256,7 @@ describe('inventory pointer candidate', () => {
         revision: 1,
         stack: { itemId: 'test:ore', count: 1 },
         origin: null,
+        craftingGrid: [null, null, null, null],
       },
     };
     expect(() =>

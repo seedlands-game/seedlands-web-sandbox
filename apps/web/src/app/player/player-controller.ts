@@ -464,6 +464,7 @@ export class PlayerController {
       },
       () => undefined,
       world.authority.voxelSemantics,
+      world.authority.voxelGeometry,
     );
   }
 

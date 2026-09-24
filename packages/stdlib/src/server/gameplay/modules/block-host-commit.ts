@@ -9,7 +9,10 @@ import type {
   RegisteredCommitContext,
 } from '../../composition/operation-contracts';
 import type { PreparedWorldEdit } from '../../prepared-world-edit';
+import type { ExpectedWorldVoxelEdit, PreparedWorldEditBatch } from '../../world-transaction-commit';
 import type { WorldCommitResult } from '../../game-server-types';
+import type { FluidCell } from '../../fluid/fluid-cell';
+import type { VoxelGeometryResolver } from '../../../world/voxel-model';
 import type { AutonomyRuntime } from '../../simulation/autonomy-runtime';
 import type { EntityStore } from '../entity-store';
 import type { GameplayContent } from '../gameplay-content';
@@ -17,6 +20,12 @@ import type { BreakAction } from '../player-state';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
 import { positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { playerOccupiesVoxelShape } from '../player-occupancy';
+import {
+  buildFluidContainerInteractionCandidate,
+  FLUID_CONTAINER_INTERACTION_CAPABILITY,
+  isFluidContainerInteractionCandidate,
+  type FluidContainerInteractionConfig,
+} from './fluid-container-interaction';
 import type { createBlockStatePort } from './block-state-port';
 import type { createBlockOriginEnvironment } from './block-origin-environment';
 import {
@@ -45,7 +54,10 @@ export type BlockHostOptions = Readonly<{
   actorAuthority?: ModuleActorAuthority;
   simulation(): AutonomyRuntime;
   getVoxel(position: [number, number, number]): number | undefined;
+  getFluidCell?(position: [number, number, number]): FluidCell | null;
   prepareVoxelEdit(actorId: string, position: [number, number, number], voxel: number): PreparedWorldEdit;
+  prepareVoxelEdits?(actorId: string, edits: readonly ExpectedWorldVoxelEdit[]): PreparedWorldEditBatch;
+  voxelGeometry?: VoxelGeometryResolver;
   revision(): number;
   assertCanChange(): void;
   changed(inventory: boolean): void;
@@ -140,6 +152,75 @@ export function prepareRegisteredBlockCommit(
       updates.length > 0,
     );
   }
+  if (isFluidContainerInteractionCandidate(execution.candidateValue)) {
+    if (context.kind !== 'actor' || context.target.kind !== 'voxel' || execution.resource !== BLOCK_VOXEL_RESOURCE)
+      throw new TypeError('Fluid container interaction requires an actor voxel operation.');
+    const id = context.originalActorId;
+    const validateActorExecution = () =>
+      assertActorResourceExecution(options.composition, execution.authorizer, context, BLOCK_ACTOR_RESOURCE);
+    validateActorExecution();
+    const candidate = execution.candidateValue;
+    expected([
+      blockActorAddress(id),
+      blockVoxelAddress(candidate.hit.position),
+      blockVoxelAddress(candidate.adjacent.position),
+    ]);
+    const currentActor = projections.actor(id);
+    const currentHit = projections.voxel(candidate.hit.position);
+    const currentAdjacent = projections.voxel(candidate.adjacent.position);
+    const config = options.composition.capability<FluidContainerInteractionConfig>(
+      FLUID_CONTAINER_INTERACTION_CAPABILITY,
+    );
+    const expectedCandidate = buildFluidContainerInteractionCandidate(
+      options.content.items,
+      config,
+      currentActor,
+      currentHit,
+      currentAdjacent,
+      execution.effectiveInput,
+    );
+    if (config.operationId !== execution.operationId || !same(candidate, expectedCandidate) || candidate.actorId !== id)
+      throw new Error('fluid-interaction-stale');
+    const entity = options.entities.get(id);
+    const validateCondition = () => {
+      validateActorExecution();
+      if (!entity || !positionsInRange(entity.position, voxelCenter([...candidate.hit.position]), 5))
+        throw new Error('out-of-range');
+      if (
+        !same(projections.actor(id), currentActor) ||
+        !same(projections.voxel(candidate.hit.position), currentHit) ||
+        !same(projections.voxel(candidate.adjacent.position), currentAdjacent)
+      )
+        throw new Error('fluid-interaction-stale');
+    };
+    validateCondition();
+    const world = options.prepareVoxelEdit(id, [...candidate.targetPosition], candidate.toVoxel);
+    if (!world.committed) throw new Error('world-not-changed');
+    const components = options.entities.actorComponentSnapshot(id);
+    const inventoryChanged = !same(currentActor.slots, candidate.slots);
+    const mutation = prepareEntityMutation(options.entities, {
+      actors: [
+        {
+          reference: candidate.actorReference,
+          health: options.entities.playerStateAccess(id).health,
+          components: { ...components, inventory: [...candidate.slots] },
+        },
+      ],
+    });
+    const equippedChanged = !same(
+      currentActor.slots[currentActor.equipment.selectedSlot],
+      candidate.slots[currentActor.equipment.selectedSlot],
+    );
+    const cancellation = equippedChanged ? options.simulation().prepareCancellation([id], 'slot-changed') : undefined;
+    const receipt = prepareReceipt(world.result);
+    return finalize(
+      [mutation, ...(cancellation ? [cancellation] : []), world, receipt],
+      { ...candidate.result, commit: { worldRevision: world.result.worldRevision } },
+      true,
+      inventoryChanged,
+      validateCondition,
+    );
+  }
   const kind = operations.get(execution.operationId);
   if (!kind || context.kind !== 'actor') throw new TypeError('Unknown Block actor operation.');
   const id = context.originalActorId;
@@ -182,7 +263,7 @@ export function prepareRegisteredBlockCommit(
       if (
         kind === 'place' &&
         candidate.voxelEdit &&
-        playerOccupiesVoxelShape(entity.position, [...target], candidate.voxelEdit.toVoxel)
+        playerOccupiesVoxelShape(entity.position, [...target], candidate.voxelEdit.toVoxel, options.voxelGeometry)
       )
         throw new Error('player-collision');
       if (origin) origins.resolve(origin, target);

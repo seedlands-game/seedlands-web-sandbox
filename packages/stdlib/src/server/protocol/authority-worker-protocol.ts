@@ -27,6 +27,8 @@ import type {
   InventoryPointerStationRef,
 } from '../gameplay/modules/inventory-pointer-contract';
 import type { CharacterControlRequest, ControlBinding } from '../../runtime/character-control-protocol';
+import type { AuthorityInteractActionV1 } from '../gameplay/modules/structure-target-dispatch';
+export { copyAuthorityActionReference } from './network-action-reference-copy';
 
 type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
 type CharacterCapabilitiesRequest = Extract<CharacterControlRequest, { kind: 'capabilities' }>;
@@ -130,6 +132,8 @@ export type AuthorityReady = Readonly<{
   gameplay: AuthorityGameplayView;
   /** Bounded read-only projection of the composed voxel semantics. */
   voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
+  /** Bounded serializable geometry for this composition; omitted when no custom geometry exists. */
+  voxelGeometry?: readonly import('../../world/voxel-geometry').VoxelGeometryDefinitionV1[];
   snapshotMigrationReports?: readonly import('../gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
   campPosition?: [number, number, number];
 }>;
@@ -144,6 +148,8 @@ export type AuthorityMeshPayload = Readonly<{
   provider?: KernelWorldgenProviderIdentity;
   /** Same frozen composition semantics as AuthorityReady, copied into each worker task. */
   voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
+  /** Same validated geometry projection as AuthorityReady, copied into each worker task. */
+  voxelGeometry?: readonly import('../../world/voxel-geometry').VoxelGeometryDefinitionV1[];
   preparationDiagnostics?: Readonly<{
     authorityPrepareMs: number;
     persistenceWaitMs: number;
@@ -189,6 +195,7 @@ export type AuthorityAction =
   | Readonly<{ type: 'respawn' }>
   | Readonly<{ type: 'move-inventory'; source: number; target: number }>
   | Readonly<{ type: 'use-inventory'; slot: number }>
+  | AuthorityInteractActionV1
   | Readonly<{
       type: 'set-difficulty';
       value: import('../gameplay/difficulty-runtime').Difficulty;

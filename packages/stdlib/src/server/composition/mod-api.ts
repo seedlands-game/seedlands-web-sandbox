@@ -110,8 +110,64 @@ export type {
   VoxelGeometryVectorV1,
   VoxelRenderBoxV1,
 } from '../../world/voxel-geometry';
-export { defineVoxelGeometryModule, VOXEL_GEOMETRY_CAPABILITY } from '../gameplay/modules/voxel-geometry-module';
+export {
+  defineVoxelGeometryModule,
+  voxelGeometryForComposition,
+  VOXEL_GEOMETRY_CAPABILITY,
+} from '../gameplay/modules/voxel-geometry-module';
 export type { VoxelGeometryModuleOptionsV1 } from '../gameplay/modules/voxel-geometry-module';
+export { defineItemInteractionModule, ITEM_INTERACTION_CAPABILITY } from '../gameplay/modules/item-interaction-module';
+export type {
+  ItemInteractionDefinition,
+  ItemInteractionRegistryV1,
+  ItemInteractionTarget,
+  ItemInteractionTrigger,
+} from '../gameplay/modules/item-interaction-module';
+export { defineFluidContainerInteractionModule } from '../gameplay/modules/fluid-container-interaction';
+export type { FluidContainerInteractionConfig } from '../gameplay/modules/fluid-container-interaction';
+export {
+  defineStructureDefinitionV1,
+  resolveStructureRootV1,
+  structureFootprintV1,
+  transitionStructureStateV1,
+} from '../gameplay/modules/structure-definition';
+export type {
+  ResolvedStructureV1,
+  StructureCellReaderV1,
+  StructureDefinitionInputV1,
+  StructureDefinitionV1,
+  StructureFootprintPartV1,
+  StructureOffsetV1,
+  StructurePartDefinitionV1,
+  StructureLegacyStateDefinitionV1,
+  StructurePositionV1,
+  StructureStateDefinitionV1,
+  StructureTransitionDefinitionV1,
+} from '../gameplay/modules/structure-definition';
+export {
+  createStructureDefinitionRegistryV1,
+  defineStructureDefinitionModule,
+  STRUCTURE_DEFINITIONS_CAPABILITY,
+} from '../gameplay/modules/structure-definition-module';
+export type {
+  StructureDefinitionModuleOptions,
+  StructureDefinitionRegistryV1,
+  StructureVariantResolutionV1,
+} from '../gameplay/modules/structure-definition-module';
+export {
+  assertStructureMultiEditReadsV1,
+  buildStructurePlacementCandidateV1,
+  buildStructureTransitionCandidateV1,
+  prepareStructureMultiEditParticipantV1,
+  validateStructureMultiEditCandidateV1,
+} from '../gameplay/modules/structure-multi-edit-model';
+export type {
+  PreparedStructureMultiEditParticipantV1,
+  PreparedStructureVoxelBatchV1,
+  StructureMultiEditCandidateV1,
+  StructureMultiEditHostV1,
+  StructureVoxelEditCandidateV1,
+} from '../gameplay/modules/structure-multi-edit-model';
 
 export { defineModeModule } from '../gameplay/modules/mode-module';
 

@@ -23,7 +23,7 @@ export const portableItems: readonly ItemDefinitionInput[] = [
     capabilities: [{ type: 'consume', healthRestore: 10, hungerRestore: 10 }],
   },
   { id: 'sign', name: '告示牌', itemType: 'block', stackLimit: 16, capabilities: [{ type: 'place', voxel: 56 }] },
-  { id: 'wooden-door', name: '木门', itemType: 'block', stackLimit: 64, capabilities: [{ type: 'place', voxel: 52 }] },
+  { id: 'wooden-door', name: '木门', itemType: 'block', stackLimit: 64, capabilities: [] },
   { id: 'snowball', name: '雪球', itemType: 'resource', stackLimit: 16, capabilities: [] },
   { id: 'brick', name: '红砖', itemType: 'resource', stackLimit: 64, capabilities: [] },
   { id: 'clay', name: '黏土', itemType: 'resource', stackLimit: 64, capabilities: [] },

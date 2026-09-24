@@ -16,6 +16,9 @@ import { ComputeWorkerPool, type ComputeWorkerPort } from './compute-worker-pool
 import { wasmExperimentWorkerName } from './wasm-experiment-selection';
 import type { WasmWorkerSelection } from '../../compute/wasm-kernel-contract';
 import type { VoxelSemanticsDefinition } from '@seedlands/stdlib/world/voxel-semantics';
+import { createVoxelGeometryRegistryV1, type VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
+import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
+import { validateVoxelGeometrySemantics } from '@seedlands/stdlib/world/mesh-semantics';
 
 type MeshWorkerPort = {
   onerror?: ((failure: { taskId: number; error: Error }) => void) | null;
@@ -79,6 +82,8 @@ export class BrowserComputeRuntime {
   >();
   private readonly canonicalByKey = new Map<string, Promise<GeneratedCanonicalChunk>>();
   private taskSequence = 0;
+  private geometrySequence = 0;
+  private geometryIdentity: Readonly<{ canonical: string; revision: string }> | null = null;
   private disposed = false;
 
   constructor(private readonly options: Options) {
@@ -258,7 +263,20 @@ export class BrowserComputeRuntime {
     const provider = message.provider as KernelWorldgenProviderIdentity;
     const generatorVersion = message.generatorVersion as number;
     const providerRevision = worldgenProviderIdentityKey(provider);
-    const revision = `${String(message.chunkRevision)}:${String(message.haloRevision)}:${providerRevision}`;
+    const geometry =
+      message.voxelGeometry === undefined
+        ? undefined
+        : createVoxelGeometryRegistryV1(message.voxelGeometry as readonly VoxelGeometryDefinitionV1[]).list();
+    if (geometry) {
+      if (!Array.isArray(message.voxelSemantics))
+        throw new TypeError('Voxel geometry requires the matching voxel semantics projection.');
+      validateVoxelGeometrySemantics(
+        createVoxelSemanticsRegistry(message.voxelSemantics as readonly VoxelSemanticsDefinition[]),
+        createVoxelGeometryRegistryV1(geometry),
+      );
+    }
+    const geometryRevision = geometry ? this.geometryRevision(geometry) : 'legacy';
+    const revision = `${String(message.chunkRevision)}:${String(message.haloRevision)}:${providerRevision}:${geometryRevision}`;
     if (!Number.isSafeInteger(originalTaskId) || typeof key !== 'string')
       throw new TypeError('Mesh compute message identity is invalid.');
     const taskId = ++this.taskSequence;
@@ -280,7 +298,7 @@ export class BrowserComputeRuntime {
           (bytes, value) => bytes + (value instanceof ArrayBuffer ? value.byteLength : 0),
           0,
         ),
-        payload: message,
+        payload: geometry ? { ...message, voxelGeometry: geometry } : message,
       },
       transfer,
     );
@@ -288,6 +306,14 @@ export class BrowserComputeRuntime {
     this.originalMeshTaskIds.delete(taskId);
     this.meshProviders.delete(taskId);
     this.meshFailure(originalTaskId as number, new Error(`Mesh compute enqueue failed: ${result.status}`));
+  }
+
+  private geometryRevision(geometry: readonly VoxelGeometryDefinitionV1[]): string {
+    const canonical = JSON.stringify(geometry);
+    if (this.geometryIdentity?.canonical === canonical) return this.geometryIdentity.revision;
+    const revision = `geometry-${++this.geometrySequence}`;
+    this.geometryIdentity = { canonical, revision };
+    return revision;
   }
 
   private receive(task: ComputeTask, result: unknown): void {

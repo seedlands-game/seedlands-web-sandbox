@@ -1,4 +1,5 @@
 import { FaceMaterial, Voxel, isSolid, type FaceMaterialId } from './voxel';
+import type { VoxelGeometryRegistryV1 } from './voxel-geometry';
 
 export type LocalBox = Readonly<{
   min: readonly [number, number, number];
@@ -6,6 +7,7 @@ export type LocalBox = Readonly<{
 }>;
 
 export type VoxelModelBox = LocalBox & Readonly<{ material: FaceMaterialId }>;
+export type VoxelGeometryResolver = Pick<VoxelGeometryRegistryV1, 'get'>;
 
 const FULL_BOX: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
 const LANTERN_COLLISION: LocalBox = { min: [0.25, 0, 0.25], max: [0.75, 0.94, 0.75] };
@@ -84,7 +86,9 @@ const lanternModel: readonly VoxelModelBox[] = [
   { min: [0.34, 0.88, 0.47], max: [0.66, 0.94, 0.53], material: FaceMaterial.LanternFrame },
 ] as const;
 
-export function modelBoxesForVoxel(voxel: number): readonly VoxelModelBox[] {
+export function modelBoxesForVoxel(voxel: number, geometry?: VoxelGeometryResolver): readonly VoxelModelBox[] {
+  const registered = geometry?.get(voxel);
+  if (registered) return registered.boxes;
   return voxel === Voxel.Lantern ? lanternModel : (models.get(voxel) ?? []);
 }
 
@@ -100,7 +104,9 @@ export function hasVoxelModelGeometry(voxel: number): boolean {
   return modelBoxesForVoxel(voxel).length > 0 || crossedPlantMaterialForVoxel(voxel) !== undefined;
 }
 
-export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
+export function collisionBoxesForVoxel(voxel: number, geometry?: VoxelGeometryResolver): readonly LocalBox[] {
+  const registered = geometry?.get(voxel);
+  if (registered) return registered.collision;
   if (!isSolid(voxel)) return [];
   if (voxel === Voxel.Ladder || voxel === Voxel.Torch || voxel === Voxel.Sign) return [];
   if (voxel === Voxel.Fence) return [FENCE_COLLISION];
@@ -109,6 +115,9 @@ export function collisionBoxesForVoxel(voxel: number): readonly LocalBox[] {
     : (models.get(voxel)?.map(({ min, max }) => ({ min, max })) ?? [FULL_BOX]);
 }
 
-export function voxelOccludesFullFace(voxel: number): boolean {
-  return isSolid(voxel) && voxel !== Voxel.Glass && voxel !== Voxel.Ice && !hasVoxelModelGeometry(voxel);
+export function voxelOccludesFullFace(voxel: number, geometry?: VoxelGeometryResolver): boolean {
+  const registered = geometry?.get(voxel);
+  return registered
+    ? registered.occludesFullFace
+    : isSolid(voxel) && voxel !== Voxel.Glass && voxel !== Voxel.Ice && !hasVoxelModelGeometry(voxel);
 }

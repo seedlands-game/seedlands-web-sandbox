@@ -3,6 +3,7 @@ import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-typ
 import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import type { PendingMeshTask } from '../app-contracts';
 import type { VoxelSemanticsDefinition, VoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
+import type { VoxelGeometryDefinitionV1, VoxelGeometryRegistryV1 } from '@seedlands/stdlib/mod-api';
 
 export type WorldAuthorityPort = Readonly<{
   seedText: string;
@@ -16,6 +17,7 @@ export type WorldAuthorityPort = Readonly<{
   commitSequence: number;
   gameplay: AuthorityGameplayView;
   voxelSemantics: VoxelSemanticsRegistry;
+  voxelGeometry?: VoxelGeometryRegistryV1;
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void>;
   releasePreparation(cx: number, cy: number, cz: number): void;
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void;
@@ -30,6 +32,7 @@ export type WorldAuthorityPort = Readonly<{
     canonical?: Uint16Array;
     fluid?: Uint8Array;
     voxelSemantics?: readonly VoxelSemanticsDefinition[];
+    voxelGeometry?: readonly VoxelGeometryDefinitionV1[];
     overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
   };
   acceptWorkerCanonical(

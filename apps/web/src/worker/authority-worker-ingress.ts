@@ -5,7 +5,10 @@ import {
   type CommandSource,
   type ServerCommand,
 } from '@seedlands/stdlib/server/commands/command-contract';
-import type { AuthorityAction } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import {
+  copyAuthorityActionReference,
+  type AuthorityAction,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
 import {
@@ -26,6 +29,12 @@ const isInventoryCommand = (command: ServerCommand) =>
 const isBlockCommand = (command: ServerCommand) =>
   ['break-voxel', 'cancel-break', 'place-voxel'].includes(command.type);
 type Post = (response: AuthorityResponse) => void;
+const canonicalJson = (value: unknown): string =>
+  JSON.stringify(value, (_key, entry) =>
+    entry && typeof entry === 'object' && !Array.isArray(entry)
+      ? Object.fromEntries(Object.entries(entry).sort(([left], [right]) => left.localeCompare(right)))
+      : entry,
+  );
 
 export const rejectStaleAuthorityMessage = (message: AuthorityRequest, epoch: string, post: Post): void => {
   if (message.kind === 'input') {
@@ -149,8 +158,12 @@ export class BrowserAuthorityIngress {
     });
   }
 
-  action(action: AuthorityAction): void {
-    this.authorize('browser-player', playerActionAuthorizationRequests(this.playerId, action));
+  action(action: unknown): AuthorityAction {
+    const canonical = copyAuthorityActionReference(action);
+    if (canonicalJson(action) !== canonicalJson(canonical))
+      throw new TypeError('Gameplay action contains unsupported fields.');
+    this.authorize('browser-player', playerActionAuthorizationRequests(this.playerId, canonical));
+    return canonical;
   }
 
   command(command: ServerCommand, actionOwner: ActionOwner): CommandSource {

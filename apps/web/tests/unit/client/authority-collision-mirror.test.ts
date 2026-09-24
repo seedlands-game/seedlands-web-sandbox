@@ -18,7 +18,7 @@ const chunk = (revision: number): AuthorityCollisionCachedChunk => ({
 const commit = (
   previousRevision: number,
   revision: number,
-  cells = [{ index: voxelIndex(1, 2, 3), voxel: Voxel.Stone, fluid: 0x88 }],
+  cells = [{ index: voxelIndex(1, 2, 3), voxel: Voxel.Lava, fluid: 0x88 }],
 ): AuthorityCollisionCommit => ({
   committed: true,
   worldRevision: revision,
@@ -30,7 +30,7 @@ const commit = (
 });
 
 describe('权威碰撞镜像', () => {
-  it('按连续revision同时应用最终体素和流体，并让重复提交保持幂等', () => {
+  it('按连续revision保留Lava source并让重复提交保持幂等', () => {
     const cached = chunk(4);
     const requestBaseline = vi.fn();
     const apply = () =>
@@ -44,7 +44,7 @@ describe('权威碰撞镜像', () => {
     apply();
 
     const index = voxelIndex(1, 2, 3);
-    expect(cached.canonical[index]).toBe(Voxel.Stone);
+    expect(cached.canonical[index]).toBe(Voxel.Lava);
     expect(cached.fluid[index]).toBe(0x88);
     expect(cached.chunkRevision).toBe(5);
     expect(requestBaseline).not.toHaveBeenCalled();

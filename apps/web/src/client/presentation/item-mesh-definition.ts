@@ -9,6 +9,7 @@ import {
   hasVoxelModelGeometry,
   modelBoxesForVoxel,
   type LocalBox,
+  type VoxelGeometryResolver,
 } from '@seedlands/stdlib/world/voxel-model';
 
 export type ItemMeshGroup = Readonly<{
@@ -96,9 +97,10 @@ export function itemMeshDefinition(
     FaceMaterialId,
     FaceMaterialId,
   ],
+  geometry?: VoxelGeometryResolver,
 ): ItemMeshDefinition {
   const groups = new Map<FaceMaterialId, MutableGroup>();
-  const modelBoxes = modelBoxesForVoxel(voxel);
+  const modelBoxes = modelBoxesForVoxel(voxel, geometry);
   if (modelBoxes.length) {
     for (const box of modelBoxes) {
       const group = groupFor(groups, box.material);
@@ -111,7 +113,7 @@ export function itemMeshDefinition(
     if (material === undefined) throw new RangeError(`物品体素缺少交叉模型材质：${voxel}`);
     const group = groupFor(groups, material);
     group.boxCount = 2;
-    forEachVoxelGeometryFace(voxel, [0, 0, 0], (face) => appendGeometryFace(group, face));
+    forEachVoxelGeometryFace(voxel, [0, 0, 0], (face) => appendGeometryFace(group, face), geometry);
   } else {
     const box: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
     for (let dimension = 0; dimension < 3; dimension += 1)

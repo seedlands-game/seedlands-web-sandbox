@@ -1,6 +1,10 @@
 import type { AuthorityAction } from '../protocol/authority-worker-protocol';
 import { isActorArchetype } from '../gameplay/ecs-entity-owner';
 import {
+  cloneItemInteractionExpectedSelection,
+  isItemInteractionTarget,
+} from '../gameplay/modules/item-interaction-module';
+import {
   isPlayablePublicOutboundMessage,
   type PlayablePublicOutboundMessage,
 } from './network-playable-message-semantics';
@@ -229,6 +233,7 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
     respawn: [],
     'select-hotbar': ['slot'],
     'use-inventory': ['slot'],
+    interact: ['intent', 'target', 'expectedSelection'],
     craft: ['recipeId'],
     attack: ['targetId'],
     'begin-break': ['position'],
@@ -243,6 +248,14 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
     return false;
   if (value.type === 'cancel-break' || value.type === 'respawn') return true;
   if (value.type === 'select-hotbar' || value.type === 'use-inventory') return isSafeInteger(value.slot);
+  if (value.type === 'interact') {
+    try {
+      cloneItemInteractionExpectedSelection(value.expectedSelection);
+      return (value.intent === 'use' || value.intent === 'alternate') && isItemInteractionTarget(value.target);
+    } catch {
+      return false;
+    }
+  }
   if (value.type === 'craft') return isNonEmptyString(value.recipeId);
   if (value.type === 'attack') return isNonEmptyString(value.targetId);
   if (value.type === 'begin-break' || value.type === 'place') return isPosition(value.position);
