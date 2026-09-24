@@ -3,12 +3,12 @@ import { isFluidVoxel } from './fluid/fluid-cell-state';
 import type { ServerChunk, WorldCommitResult } from './game-server-types';
 import { assertMutationCoordinate, assertVoxelValue } from './world-mutation';
 import { createSingleWorldEditResult } from './single-world-edit';
+import type { PreparedWorldCommitMetadata } from './world-edit-batch-plan';
 
 type WorldEditPorts = Readonly<{
   getLoadedChunk(cx: number, cy: number, cz: number): ServerChunk | undefined;
   getRevision(): number;
-  setWorldRevision(revision: number): void;
-  addMutationCount(count: number): void;
+  prepareCommitMetadata(worldRevision: number, mutationCount: number): PreparedWorldCommitMetadata;
   isVoxelRegistered?: (value: number) => boolean;
 }>;
 export type PreparedWorldEdit = Readonly<{
@@ -27,7 +27,7 @@ export function prepareSingleWorldEdit(
   if (typeof actorId !== 'string' || !actorId.trim()) throw new TypeError('World edit actor is invalid.');
   for (const coordinate of [x, y, z]) assertMutationCoordinate(coordinate);
   assertVoxelValue(value, ports.isVoxelRegistered);
-  const { getLoadedChunk, getRevision, setWorldRevision, addMutationCount } = ports;
+  const { getLoadedChunk, getRevision } = ports;
   const cx = floorDiv(x, CHUNK_SIZE),
     cy = floorDiv(y, CHUNK_SIZE),
     cz = floorDiv(z, CHUNK_SIZE);
@@ -51,6 +51,7 @@ export function prepareSingleWorldEdit(
     if (!Number.isSafeInteger(revision) || revision < 0 || (changing && revision >= Number.MAX_SAFE_INTEGER))
       throw new RangeError('World edit revision capacity is exhausted or invalid.');
   const result = createSingleWorldEditResult({ actorId, x, y, z, value, worldRevision, chunk });
+  const metadata = result.committed ? ports.prepareCommitMetadata(result.worldRevision, 1) : undefined;
   freezeReceipt(result);
   let used = false,
     validated = false;
@@ -67,6 +68,7 @@ export function prepareSingleWorldEdit(
       chunk.fluid[index] !== previousFluid
     )
       throw new Error('Prepared world edit is stale.');
+    metadata?.validate();
     validated = true;
   };
   return Object.freeze({
@@ -79,13 +81,12 @@ export function prepareSingleWorldEdit(
       validate();
       used = true;
       if (result.committed) {
+        metadata!.apply();
         chunk.voxels[index] = value;
         chunk.fluid[index] = isFluidVoxel(value) ? 0x88 : 0;
         chunk.revision = chunkRevision + 1;
         chunk.dirty = true;
         chunk.materialized = true;
-        setWorldRevision(result.worldRevision);
-        addMutationCount(1);
       }
       return result;
     },

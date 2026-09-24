@@ -1,6 +1,5 @@
 import {
   CHUNK_SIZE,
-  Voxel,
   chunkKey,
   floorDiv,
   mod,
@@ -8,16 +7,29 @@ import {
   voxelIndex,
   type ChunkCoord,
 } from '../world/voxel';
-import type {
-  ServerChunk,
-  WorldCollisionChunkDelta,
-  VoxelRegionChanged,
-  WorldCommitResult,
-  WorldEditBatch,
-  WorldSemanticEvent,
-} from './game-server';
-import { assertMutationCoordinate, assertVoxelValue, type WorldMutationBuffer } from './world-mutation';
+import { isFluidVoxel } from './fluid/fluid-cell-state';
+import type { ServerChunk, VoxelRegionChanged, WorldCommitResult, WorldEditBatch } from './game-server';
+import { assertUniqueMutationBufferCoordinates, type WorldMutationBuffer } from './world-mutation';
+import {
+  buildWorldEditBatchResult,
+  compareChunkCoordinates,
+  compareChunkKeys,
+  prepareWorldEditBatchPlan,
+  type ExpectedWorldVoxelEdit,
+  type PreparedWorldEditBatch,
+  type PreparedWorldCommitMetadata,
+} from './world-edit-batch-plan';
 
+type UniqueChunkMutationPlan = ChunkCoord & {
+  key: string;
+  runs: Array<{ start: number; end: number }>;
+  chunk?: ServerChunk;
+  changeCount: number;
+  changedIndices?: Uint32Array;
+  changedValues?: Uint16Array;
+  seenIndices?: Uint8Array;
+  meshOffsets: Uint8Array;
+};
 type ChunkMutationPlan = ChunkCoord & {
   key: string;
   sparse?: Map<number, number>;
@@ -28,60 +40,15 @@ type ChunkMutationPlan = ChunkCoord & {
   changes?: Array<{ index: number; value: number; x: number; y: number; z: number }>;
 };
 
-type UniqueChunkMutationPlan = ChunkCoord & {
-  key: string;
-  runs: Array<{ start: number; end: number }>;
-  chunk?: ServerChunk;
-  changeCount: number;
-  changedIndices?: Uint32Array;
-  changedValues?: Uint16Array;
-  meshOffsets: Uint8Array;
-};
-
 type TransactionState = {
-  getChunk: (cx: number, cy: number, cz: number) => ServerChunk;
+  getChunk: (cx: number, cy: number, cz: number) => ServerChunk | undefined;
   getRevision: () => number;
-  setRevision: (revision: number) => void;
-  addMutationCount: (count: number) => void;
+  prepareCommitMetadata(worldRevision: number, mutationCount: number): PreparedWorldCommitMetadata;
   commitSingleEdit: (actorId: string, x: number, y: number, z: number, value: number) => WorldCommitResult;
   isVoxelRegistered?: (value: number) => boolean;
 };
 
-type CommitResultInput = {
-  startedAt: number;
-  validationFinishedAt: number;
-  resolveFinishedAt: number;
-  applyFinishedAt: number;
-  inputMutationCount: number;
-  mutationPayloadBytes: number;
-  mutationCapacityBytes: number;
-  structuralChange: VoxelRegionChanged | null;
-  semanticEvents: WorldSemanticEvent[];
-  collisionDelta: readonly WorldCollisionChunkDelta[];
-};
-
-const compareChunkCoordinates = (left: ChunkCoord, right: ChunkCoord): number =>
-  left.cx < right.cx
-    ? -1
-    : left.cx > right.cx
-      ? 1
-      : left.cy < right.cy
-        ? -1
-        : left.cy > right.cy
-          ? 1
-          : left.cz < right.cz
-            ? -1
-            : left.cz > right.cz
-              ? 1
-              : 0;
-
-const chunkCoordinatesFromKey = (key: string): ChunkCoord => {
-  const [cx, cy, cz] = key.split(',').map(Number);
-  return { cx, cy, cz };
-};
-
-export const compareChunkKeys = (left: string, right: string): number =>
-  compareChunkCoordinates(chunkCoordinatesFromKey(left), chunkCoordinatesFromKey(right));
+export { compareChunkKeys, type ExpectedWorldVoxelEdit, type PreparedWorldEditBatch };
 
 const coordinateFromIndex = (plan: ChunkCoord, index: number): [number, number, number] => {
   const x = index % CHUNK_SIZE;
@@ -91,32 +58,6 @@ const coordinateFromIndex = (plan: ChunkCoord, index: number): [number, number, 
   return [plan.cx * CHUNK_SIZE + x, plan.cy * CHUNK_SIZE + y, plan.cz * CHUNK_SIZE + z];
 };
 
-const buildResult = (revision: number, input: CommitResultInput): WorldCommitResult => {
-  const committed = input.structuralChange !== null || input.semanticEvents.length > 0;
-  return {
-    committed,
-    worldRevision: revision,
-    structuralChange: input.structuralChange,
-    semanticEvents: input.semanticEvents,
-    ...(input.collisionDelta.length ? { collisionDelta: input.collisionDelta } : {}),
-    metrics: {
-      timingStatus: 'measured',
-      inputMutationCount: input.inputMutationCount,
-      canonicalWriteCount: input.structuralChange?.mutationCount ?? 0,
-      dirtyChunkCount: input.structuralChange?.chunks.length ?? 0,
-      meshInvalidationCount: input.structuralChange?.meshChunks.length ?? 0,
-      structuralEventCount: input.structuralChange ? 1 : 0,
-      semanticEventCount: input.semanticEvents.length,
-      mutationPayloadBytes: input.mutationPayloadBytes,
-      mutationCapacityBytes: input.mutationCapacityBytes,
-      validationMs: input.validationFinishedAt - input.startedAt,
-      resolveMs: input.resolveFinishedAt - input.validationFinishedAt,
-      applyMs: input.applyFinishedAt - input.resolveFinishedAt,
-      commitMs: input.applyFinishedAt - input.startedAt,
-    },
-  };
-};
-
 export function commitWorldEditBatch(
   state: TransactionState,
   batch: WorldEditBatch,
@@ -124,7 +65,6 @@ export function commitWorldEditBatch(
 ): WorldCommitResult {
   const singleEditFastPath =
     batch.edits?.length === 1 && batch.buffers === undefined && (batch.semanticEvents?.length ?? 0) === 0;
-  const startedAt = singleEditFastPath ? 0 : now();
   if (!batch.actorId.trim()) throw new TypeError('World edit actorId must not be empty.');
   if (batch.edits !== undefined && batch.buffers !== undefined)
     throw new TypeError('World edit batch cannot contain both edits and buffers.');
@@ -134,21 +74,24 @@ export function commitWorldEditBatch(
     if (!event.subjectId.trim()) throw new TypeError('Semantic event subjectId must not be empty.');
   }
 
+  if (batch.edits) {
+    const prepared = prepareWorldEditBatchPlan(state, { ...batch, edits: batch.edits }, now);
+    prepared.validate();
+    const result = prepared.apply();
+    if (singleEditFastPath) return result;
+    try {
+      return prepared.measuredResult(now());
+    } catch {
+      return result;
+    }
+  }
+
+  const startedAt = now();
   let inputMutationCount = 0;
   let mutationPayloadBytes = 0;
   let mutationCapacityBytes = 0;
   let buffers: WorldMutationBuffer[] | null = null;
-  if (batch.edits !== undefined) {
-    for (const edit of batch.edits) {
-      assertMutationCoordinate(edit.x);
-      assertMutationCoordinate(edit.y);
-      assertMutationCoordinate(edit.z);
-      assertVoxelValue(edit.value, state.isVoxelRegistered);
-    }
-    inputMutationCount = batch.edits.length;
-    mutationPayloadBytes = inputMutationCount * 14;
-    mutationCapacityBytes = mutationPayloadBytes;
-  } else if (batch.buffers !== undefined) {
+  if (batch.buffers !== undefined) {
     const identities = new Set<string>();
     for (const buffer of batch.buffers) {
       const identity = `${buffer.priority}\u0000${buffer.sourceId}`;
@@ -170,12 +113,7 @@ export function commitWorldEditBatch(
               : 0,
     );
   }
-  const validationFinishedAt = singleEditFastPath ? startedAt : now();
-
-  if (singleEditFastPath) {
-    const edit = batch.edits![0];
-    return state.commitSingleEdit(batch.actorId, edit.x, edit.y, edit.z, edit.value);
-  }
+  const validationFinishedAt = now();
   if (buffers?.length === 1 && buffers[0].hasUniqueCoordinates && semanticInputs.length === 0)
     return commitUniqueBuffer(state, now, {
       actorId: batch.actorId,
@@ -216,11 +154,13 @@ export function commitWorldEditBatch(
       plan.sparse?.set(index, value);
     }
   };
-  if (batch.edits) batch.edits.forEach(({ x, y, z, value }) => addCandidate(x, y, z, value));
-  else buffers?.forEach((buffer) => buffer.forEach(addCandidate));
+  buffers?.forEach((buffer) => buffer.forEach(addCandidate));
 
   const plans = [...plansByKey.values()].sort(compareChunkCoordinates);
-  for (const plan of plans) plan.chunk = state.getChunk(plan.cx, plan.cy, plan.cz);
+  for (const plan of plans) {
+    plan.chunk = state.getChunk(plan.cx, plan.cy, plan.cz);
+    if (!plan.chunk) throw new Error(`World edit chunk is unavailable: ${plan.key}`);
+  }
   const changedPlans: ChunkMutationPlan[] = [];
   const meshChunks = new Set<string>();
   let canonicalWriteCount = 0;
@@ -249,7 +189,21 @@ export function commitWorldEditBatch(
   }
 
   const committed = canonicalWriteCount > 0 || semanticInputs.length > 0;
-  const worldRevision = committed ? state.getRevision() + 1 : state.getRevision();
+  const previousWorldRevision = state.getRevision();
+  if (
+    !Number.isSafeInteger(previousWorldRevision) ||
+    previousWorldRevision < 0 ||
+    (committed && previousWorldRevision >= Number.MAX_SAFE_INTEGER)
+  )
+    throw new RangeError('World edit revision capacity is exhausted or invalid.');
+  for (const plan of changedPlans)
+    if (
+      !Number.isSafeInteger(plan.chunk!.revision) ||
+      plan.chunk!.revision < 0 ||
+      plan.chunk!.revision >= Number.MAX_SAFE_INTEGER
+    )
+      throw new RangeError(`World edit Chunk revision capacity is exhausted or invalid: ${plan.key}`);
+  const worldRevision = committed ? previousWorldRevision + 1 : previousWorldRevision;
   const semanticEvents = semanticInputs.map((event) => ({ ...event, worldRevision }));
   const structuralChange: VoxelRegionChanged | null = canonicalWriteCount
     ? {
@@ -271,20 +225,29 @@ export function commitWorldEditBatch(
     cells: plan.changes!.map(({ index, value }) => ({
       index,
       voxel: value,
-      fluid: value === Voxel.Water ? 0x88 : 0,
+      fluid: isFluidVoxel(value) ? 0x88 : 0,
     })),
   }));
 
+  const metadata = committed ? state.prepareCommitMetadata(worldRevision, canonicalWriteCount) : undefined;
+  metadata?.validate();
+  metadata?.apply();
   for (const plan of changedPlans) {
-    for (const change of plan.changes!) plan.chunk!.voxels[change.index] = change.value;
+    for (const change of plan.changes!) {
+      plan.chunk!.voxels[change.index] = change.value;
+      plan.chunk!.fluid[change.index] = isFluidVoxel(change.value) ? 0x88 : 0;
+    }
     plan.chunk!.revision += 1;
     plan.chunk!.dirty = true;
     plan.chunk!.materialized = true;
   }
-  if (committed) state.setRevision(worldRevision);
-  state.addMutationCount(canonicalWriteCount);
-  const applyFinishedAt = now();
-  return buildResult(state.getRevision(), {
+  let applyFinishedAt = resolveFinishedAt;
+  try {
+    applyFinishedAt = now();
+  } catch {
+    // Metrics cannot turn an already committed transaction into a reported failure.
+  }
+  return buildWorldEditBatchResult(state.getRevision(), {
     startedAt,
     validationFinishedAt,
     resolveFinishedAt,
@@ -298,11 +261,29 @@ export function commitWorldEditBatch(
   });
 }
 
+export function prepareWorldEditBatch(
+  state: TransactionState,
+  actorId: string,
+  edits: readonly ExpectedWorldVoxelEdit[],
+  now: () => number,
+): PreparedWorldEditBatch {
+  return prepareWorldEditBatchPlan(
+    state,
+    {
+      actorId,
+      edits,
+      expected: edits,
+    },
+    now,
+  );
+}
+
 function commitUniqueBuffer(
   state: TransactionState,
   now: () => number,
   input: { actorId: string; buffer: WorldMutationBuffer; startedAt: number; validationFinishedAt: number },
 ): WorldCommitResult {
+  assertUniqueMutationBufferCoordinates(input.buffer);
   const plansByKey = new Map<string, UniqueChunkMutationPlan>();
   for (const run of input.buffer.chunkRuns) {
     const key = chunkKey(run.cx, run.cy, run.cz);
@@ -316,9 +297,11 @@ function commitUniqueBuffer(
   const plans = [...plansByKey.values()].sort(compareChunkCoordinates);
   for (const plan of plans) {
     plan.chunk = state.getChunk(plan.cx, plan.cy, plan.cz);
+    if (!plan.chunk) throw new Error(`World edit chunk is unavailable: ${plan.key}`);
     const capacity = plan.runs.reduce((count, run) => count + run.end - run.start, 0);
     plan.changedIndices = new Uint32Array(capacity);
     plan.changedValues = new Uint16Array(capacity);
+    plan.seenIndices = new Uint8Array(CHUNK_SIZE ** 3);
   }
 
   const changedPlans: UniqueChunkMutationPlan[] = [];
@@ -340,6 +323,9 @@ function commitUniqueBuffer(
         const localY = y - originY;
         const localZ = z - originZ;
         const index = voxelIndex(localX, localY, localZ);
+        if (plan.seenIndices![index])
+          throw new TypeError(`Unique mutation buffer contains duplicate coordinates: ${x},${y},${z}`);
+        plan.seenIndices![index] = 1;
         if (plan.chunk!.voxels[index] === value) return;
         plan.changedIndices![plan.changeCount] = index;
         plan.changedValues![plan.changeCount] = value;
@@ -373,7 +359,21 @@ function commitUniqueBuffer(
     }
   }
 
-  const worldRevision = canonicalWriteCount > 0 ? state.getRevision() + 1 : state.getRevision();
+  const previousWorldRevision = state.getRevision();
+  if (
+    !Number.isSafeInteger(previousWorldRevision) ||
+    previousWorldRevision < 0 ||
+    (canonicalWriteCount > 0 && previousWorldRevision >= Number.MAX_SAFE_INTEGER)
+  )
+    throw new RangeError('World edit revision capacity is exhausted or invalid.');
+  for (const plan of changedPlans)
+    if (
+      !Number.isSafeInteger(plan.chunk!.revision) ||
+      plan.chunk!.revision < 0 ||
+      plan.chunk!.revision >= Number.MAX_SAFE_INTEGER
+    )
+      throw new RangeError(`World edit Chunk revision capacity is exhausted or invalid: ${plan.key}`);
+  const worldRevision = canonicalWriteCount > 0 ? previousWorldRevision + 1 : previousWorldRevision;
   const structuralChange: VoxelRegionChanged | null = canonicalWriteCount
     ? {
         type: 'voxel-region-changed',
@@ -396,21 +396,30 @@ function commitUniqueBuffer(
       return {
         index: plan.changedIndices![index],
         voxel,
-        fluid: voxel === Voxel.Water ? 0x88 : 0,
+        fluid: isFluidVoxel(voxel) ? 0x88 : 0,
       };
     }),
   }));
+  const metadata = structuralChange ? state.prepareCommitMetadata(worldRevision, canonicalWriteCount) : undefined;
+  metadata?.validate();
+  metadata?.apply();
   for (const plan of changedPlans) {
-    for (let index = 0; index < plan.changeCount; index += 1)
-      plan.chunk!.voxels[plan.changedIndices![index]] = plan.changedValues![index];
+    for (let index = 0; index < plan.changeCount; index += 1) {
+      const voxel = plan.changedValues![index];
+      plan.chunk!.voxels[plan.changedIndices![index]] = voxel;
+      plan.chunk!.fluid[plan.changedIndices![index]] = isFluidVoxel(voxel) ? 0x88 : 0;
+    }
     plan.chunk!.revision += 1;
     plan.chunk!.dirty = true;
     plan.chunk!.materialized = true;
   }
-  if (structuralChange) state.setRevision(worldRevision);
-  state.addMutationCount(canonicalWriteCount);
-  const applyFinishedAt = now();
-  return buildResult(state.getRevision(), {
+  let applyFinishedAt = resolveFinishedAt;
+  try {
+    applyFinishedAt = now();
+  } catch {
+    // Metrics cannot turn an already committed transaction into a reported failure.
+  }
+  return buildWorldEditBatchResult(state.getRevision(), {
     startedAt: input.startedAt,
     validationFinishedAt: input.validationFinishedAt,
     resolveFinishedAt,

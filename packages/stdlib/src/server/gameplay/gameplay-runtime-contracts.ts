@@ -2,6 +2,7 @@ import type { ModuleActorAuthority } from '../composition/gameplay-actor-authori
 import type { ModuleSystemAuthority } from './modules/gameplay-module-schedule';
 import type { WorldComposition } from '../composition/contracts';
 import type { PreparedWorldEdit } from '../prepared-world-edit';
+import type { ExpectedWorldVoxelEdit, PreparedWorldEditBatch } from '../world-transaction-commit';
 import type { WorldEditBatch, WorldCommitResult } from '../game-server-types';
 import type { GameplayContent } from './gameplay-content';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
@@ -15,6 +16,7 @@ export type GameplayCallbacks = {
   getLoadedVoxel?: (position: Position) => number | undefined;
   getFluidCell?: (position: Position) => FluidCell | null;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
+  prepareVoxelEdits?: (actorId: string, edits: readonly ExpectedWorldVoxelEdit[]) => PreparedWorldEditBatch;
   editBatch?: (batch: WorldEditBatch) => WorldCommitResult;
   environmentSeed?: number;
   biomeAt?: (position: Position) => string;

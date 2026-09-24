@@ -5,6 +5,15 @@ import type { FluidCellValue, FluidChunkSnapshot, FluidPosition } from './fluid-
 import type { FluidCell } from './fluid-cell';
 
 export type PreviousFluidState = { x: number; y: number; z: number; voxel: number; cell: FluidCell | null };
+export type BatchFluidSidecarEffectPlan = Readonly<{
+  editedPositions: readonly (readonly [number, number, number])[];
+  effects: readonly Readonly<{
+    position: readonly [number, number, number];
+    activate: boolean;
+    removeSource: boolean;
+  }>[];
+  validate(): void;
+}>;
 
 export function readFluidChunk(
   key: string,
@@ -81,4 +90,68 @@ export function commitBatchFluidSidecars(
       callbacks.activate([state.x, state.y, state.z]);
     if (state.cell?.source && !isFluidVoxel(value)) callbacks.removeSource([state.x, state.y, state.z]);
   }
+}
+
+export function captureBatchFinalValues(batch: WorldEditBatch): Map<string, number> {
+  const final = new Map<string, number>();
+  batch.edits?.forEach(({ x, y, z, value }) => final.set(`${x},${y},${z}`, value));
+  [...(batch.buffers ?? [])]
+    .sort((left, right) =>
+      left.priority < right.priority
+        ? -1
+        : left.priority > right.priority
+          ? 1
+          : left.sourceId < right.sourceId
+            ? -1
+            : left.sourceId > right.sourceId
+              ? 1
+              : 0,
+    )
+    .forEach((buffer) => buffer.forEach((x, y, z, value) => final.set(`${x},${y},${z}`, value)));
+  return final;
+}
+
+/** Derived scheduling after canonical voxel/fluid bytes commit; notification failures never falsify the world receipt. */
+export function prepareBatchFluidSidecarEffects(
+  previous: ReadonlyMap<string, PreviousFluidState>,
+  final: ReadonlyMap<string, number>,
+  peekVoxel: (x: number, y: number, z: number) => number | undefined,
+): BatchFluidSidecarEffectPlan {
+  const nextVoxel = (x: number, y: number, z: number) => final.get(`${x},${y},${z}`) ?? peekVoxel(x, y, z);
+  const neighborPositions = new Map<string, readonly [number, number, number]>();
+  const effects = [...previous.values()].flatMap((state) => {
+    const value = final.get(`${state.x},${state.y},${state.z}`);
+    if (value === undefined || value === state.voxel) return [];
+    const neighbors = [
+      [state.x - 1, state.y, state.z],
+      [state.x + 1, state.y, state.z],
+      [state.x, state.y - 1, state.z],
+      [state.x, state.y + 1, state.z],
+      [state.x, state.y, state.z - 1],
+      [state.x, state.y, state.z + 1],
+    ] as const;
+    for (const position of neighbors) neighborPositions.set(position.join(','), position);
+    return [
+      Object.freeze({
+        position: Object.freeze([state.x, state.y, state.z]) as [number, number, number],
+        activate:
+          isFluidVoxel(state.voxel) ||
+          isFluidVoxel(value) ||
+          neighbors.some((position) => isFluidVoxel(nextVoxel(...position) ?? 0)),
+        removeSource: Boolean(state.cell?.source && !isFluidVoxel(value)),
+      }),
+    ];
+  });
+  const neighborReads = Object.freeze(
+    [...neighborPositions.values()].map((position) => Object.freeze({ position, voxel: peekVoxel(...position) })),
+  );
+  const editedPositions = Object.freeze(effects.map(({ position }) => position));
+  return Object.freeze({
+    editedPositions,
+    effects: Object.freeze(effects),
+    validate() {
+      if (neighborReads.some((entry) => peekVoxel(...entry.position) !== entry.voxel))
+        throw new Error('Prepared adjacent fluid state is stale.');
+    },
+  });
 }

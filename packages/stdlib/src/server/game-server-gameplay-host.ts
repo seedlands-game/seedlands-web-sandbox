@@ -1,10 +1,9 @@
 import { projectNearbyStations } from './gameplay/station-player-view';
 import type { WorldModuleBinding } from './commands/module-command';
 import type { ModuleInvocationValue } from './composition/contracts';
-import type { PreparedWorldEdit } from './prepared-world-edit';
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
-import type { WorldCommitResult, WorldEditBatch } from './game-server';
+import type { WorldEditBatch } from './game-server';
 import type {
   ActorArchetype,
   EntityQuery,
@@ -32,24 +31,12 @@ import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/
 import { isActorEntityType } from './gameplay/ecs-actor-state';
 import type { ActorControlSource } from './gameplay/ecs-actor-components';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
-import type { FluidCell } from './fluid/fluid-cell';
+import type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
 import { armorPoints } from './gameplay/armor-equipment';
 import type { ProjectileVector } from './gameplay/projectile-runtime';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
-
-export type GameServerGameplayWorldPort = Readonly<{
-  seed(): number;
-  worldTime(): number;
-  getVoxel(x: number, y: number, z: number): number;
-  editBatch(batch: WorldEditBatch): WorldCommitResult;
-  prepareVoxelEdit(actorId: string, position: readonly [number, number, number], voxel: number): PreparedWorldEdit;
-  setWorldTime(hours: number): number;
-  readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
-  readGameplayVoxel(x: number, y: number, z: number): number | undefined;
-  readFluidCell(x: number, y: number, z: number): FluidCell | null;
-  biomeAt(x: number, z: number): string;
-}>;
+export type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
 
 export type PreparedGameplayRestore = Readonly<{
   gameplay: GameplayRuntime;
@@ -91,6 +78,7 @@ export class GameServerGameplayHost {
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
       getFluidCell: (position) => this.world.readFluidCell(...position),
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
+      prepareVoxelEdits: (actorId, edits) => this.world.prepareVoxelEdits(actorId, edits),
       editBatch: (batch) => this.world.editBatch(batch),
       environmentSeed: this.world.seed(),
       biomeAt: ([x, , z]) => this.world.biomeAt(x, z),

@@ -1,6 +1,8 @@
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex, Voxel } from '../../world/voxel';
-import { isFluidCandidateResultValid } from './fluid-candidate-validator';
+import { fluidCandidateWorkId, normalizeFluidCandidateResult } from './fluid-candidate-validator';
+import { prepareFluidCandidateSettlement } from './fluid-candidate-settlement';
 import { FluidPriorityFrontier } from './fluid-priority-frontier';
+import * as FluidEditEffects from './fluid-edit-effect-plan';
 
 export const FLUID_TRANSACTION_PROTOCOL_VERSION = 1 as const;
 export const FLUID_FRONTIER_BATCH_SIZE = 128;
@@ -304,12 +306,12 @@ type AuthorityOptions = {
 
 /** Owns frontier leases and admission checks; writes remain in the authority's atomic apply callback. */
 export class FluidTransactionAuthority {
-  private readonly frontier = new FluidPriorityFrontier();
-  private readonly cleanupFrontier: FluidPosition[] = [];
-  private readonly cleanupQueued = new Set<string>();
+  private frontier = new FluidPriorityFrontier();
+  private cleanupFrontier: FluidPosition[] = [];
+  private cleanupQueued = new Set<string>();
   private readonly leases = new Map<string, FluidAuthoritySnapshot>();
   private readonly leaseInteractiveCounts = new Map<string, number>();
-  private readonly rescanJobs = new Map<string, number>();
+  private rescanJobs = new Map<string, number>();
   private nextWorkId = 1;
   private nextCommitSequence = 1;
   private acceptedCandidateCount = 0;
@@ -370,6 +372,20 @@ export class FluidTransactionAuthority {
     return accepted;
   }
 
+  prepareEditEffects(effects: readonly FluidEditEffects.FluidEditEffect[], priority: FluidActivationPriority) {
+    return FluidEditEffects.createPreparedFluidEditEffects(
+      () => this.editQueueState(),
+      (prepared) => {
+        this.frontier = prepared.frontier;
+        this.cleanupFrontier = prepared.cleanupFrontier;
+        this.cleanupQueued = prepared.cleanupQueued;
+        this.rescanJobs = prepared.rescanJobs;
+      },
+      effects,
+      priority,
+    );
+  }
+
   requestFluidWork(): FluidAuthoritySnapshot | null {
     if (this.leases.size) return null;
     this.pumpRescans();
@@ -399,13 +415,17 @@ export class FluidTransactionAuthority {
     return snapshot;
   }
 
-  commitFluidCandidate(candidate: FluidCandidate): FluidCandidateCommit {
-    const lease = this.leases.get(candidate.workId);
+  commitFluidCandidate(input: FluidCandidate): FluidCandidateCommit {
+    const workId = fluidCandidateWorkId(input);
+    const lease = workId === null ? undefined : this.leases.get(workId);
+    if (!lease) return this.rejectCandidate(undefined, 'work-id');
+    const candidate = normalizeFluidCandidateResult(lease, input);
+    if (!candidate) return this.rejectCandidate(lease, 'invalid-result');
     if (candidate.protocolVersion !== FLUID_TRANSACTION_PROTOCOL_VERSION || candidate.epoch !== this.epoch) {
       return this.rejectCandidate(lease, 'epoch');
     }
     if (
-      !lease ||
+      candidate.workId !== lease.workId ||
       !sameFrontier(lease.frontier, candidate.consumedFrontier) ||
       !sameFrontier(lease.cleanupFrontier ?? [], candidate.consumedCleanupFrontier ?? [])
     ) {
@@ -422,9 +442,6 @@ export class FluidTransactionAuthority {
     ) {
       return this.rejectCandidate(lease, 'read-set');
     }
-    if (!isFluidCandidateResultValid(lease, candidate)) {
-      return this.rejectCandidate(lease, 'invalid-result');
-    }
     if (
       candidate.writes.some((write) => {
         const current = this.options.readCell(write.position);
@@ -433,17 +450,19 @@ export class FluidTransactionAuthority {
     ) {
       return this.rejectCandidate(lease, 'cell-conflict');
     }
+    const settlement = prepareFluidCandidateSettlement(this.editQueueState(), candidate, lease);
+    const commitSequence = this.nextCommitSequence;
+    const result = Object.freeze({ accepted: true, commitSequence } as const);
     this.options.apply(candidate);
+    this.frontier = settlement.frontier;
+    this.cleanupFrontier = settlement.cleanupFrontier;
+    this.cleanupQueued = settlement.cleanupQueued;
+    this.rescanJobs = settlement.rescanJobs;
     this.leases.delete(candidate.workId);
     this.leaseInteractiveCounts.delete(candidate.workId);
-    candidate.nextFrontier.forEach((position) => this.enqueue(position));
-    candidate.nextCleanupFrontier?.forEach((position) => this.enqueueCleanup(position));
-    if (candidate.needsRescan)
-      [...candidate.consumedFrontier, ...(candidate.consumedCleanupFrontier ?? [])].forEach((position) =>
-        this.scheduleRescan(chunkKeyFor(position)),
-      );
     this.acceptedCandidateCount += 1;
-    return { accepted: true, commitSequence: this.nextCommitSequence++ };
+    this.nextCommitSequence = commitSequence + 1;
+    return result;
   }
 
   abortLease(workId: string, _reason: string): boolean {
@@ -454,30 +473,18 @@ export class FluidTransactionAuthority {
   }
 
   private enqueue(position: FluidPosition, priority: FluidActivationPriority = 'ordinary'): boolean {
-    if (!isActivePosition(position)) return true;
-    if (this.frontier.has(position)) {
-      this.frontier.enqueue(position, priority);
-      return true;
-    }
-    if (this.pending >= this.maxQueue) {
-      this.scheduleRescan(chunkKeyFor(position));
-      return false;
-    }
-    this.frontier.enqueue(position, priority);
-    return true;
+    return FluidEditEffects.enqueueFluidEditPosition(this.editQueueState(), position, priority);
   }
 
-  private enqueueCleanup(position: FluidPosition): boolean {
-    if (!isActivePosition(position)) return true;
-    const key = positionKey(position);
-    if (this.cleanupQueued.has(key)) return true;
-    if (this.pending >= this.maxQueue) {
-      this.scheduleRescan(chunkKeyFor(position));
-      return false;
-    }
-    this.cleanupQueued.add(key);
-    this.cleanupFrontier.push([...position] as FluidPosition);
-    return true;
+  private editQueueState(): FluidEditEffects.FluidEditQueueState {
+    return {
+      frontier: this.frontier,
+      cleanupFrontier: this.cleanupFrontier,
+      cleanupQueued: this.cleanupQueued,
+      rescanJobs: this.rescanJobs,
+      leasedCount: this.pending - this.frontier.pending - this.cleanupFrontier.length,
+      maxQueue: this.maxQueue,
+    };
   }
 
   private returnLease(lease: FluidAuthoritySnapshot): void {
@@ -504,10 +511,6 @@ export class FluidTransactionAuthority {
     return { accepted: false, reason };
   }
 
-  private scheduleRescan(key: string): void {
-    if (!this.rescanJobs.has(key)) this.rescanJobs.set(key, 0);
-  }
-
   private pumpRescans(): void {
     let remaining = RESCAN_SCAN_BUDGET;
     for (const [key, cursor] of [...this.rescanJobs]) {
@@ -516,7 +519,7 @@ export class FluidTransactionAuthority {
       if (!chunk) continue;
       let nextCursor = cursor;
       while (nextCursor < chunk.voxels.length && remaining && this.pending < this.maxQueue) {
-        if (chunk.voxels[nextCursor] === Voxel.Water) {
+        if (isFluidVoxel(chunk.voxels[nextCursor])) {
           const x = nextCursor % CHUNK_SIZE;
           const yz = Math.floor(nextCursor / CHUNK_SIZE);
           const z = yz % CHUNK_SIZE;

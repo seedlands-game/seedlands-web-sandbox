@@ -31,6 +31,13 @@ export class FluidTransactionRuntime<TCommit> {
     return this.authority.removeSource(position);
   }
 
+  prepareEditEffects(
+    effects: readonly Readonly<{ position: FluidPosition; activate: boolean; removeSource: boolean }>[],
+    priority: FluidActivationPriority,
+  ) {
+    return this.authority.prepareEditEffects(effects, priority);
+  }
+
   requestFluidWork(): FluidAuthoritySnapshot | null {
     return this.authority.requestFluidWork();
   }

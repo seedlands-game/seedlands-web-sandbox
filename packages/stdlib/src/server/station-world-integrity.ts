@@ -7,11 +7,12 @@ export function assertNoRawStationEdits(
   batch: WorldEditBatch,
   codec: StationStateCodec | undefined,
   entities: EntityStore,
-  getVoxel: (x: number, y: number, z: number) => number,
+  getVoxel: (x: number, y: number, z: number) => number | undefined,
 ): void {
   if (!codec) return;
   const check = (x: number, y: number, z: number, value: number) => {
     const previous = getVoxel(x, y, z);
+    if (previous === undefined) return;
     if (
       previous !== value &&
       (codec.kindForVoxel(previous) || codec.kindForVoxel(value) || entities.stationAt([x, y, z]))

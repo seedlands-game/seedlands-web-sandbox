@@ -210,9 +210,9 @@ describe('fluid transactions', () => {
     expect(authority.needsRescan).toContain('0,1,0');
   });
 
-  it('rescans an overflowed chunk incrementally and returns its pending water to the frontier', () => {
+  it.each([Voxel.Water, Voxel.Lava])('rescans an overflowed chunk and returns fluid %s to the frontier', (voxel) => {
     const chunk = makeChunk(0, 1, 0);
-    chunk.voxels[0] = Voxel.Water;
+    chunk.voxels[0] = voxel;
     chunk.fluid[0] = 0x88;
     const authority = new FluidTransactionAuthority({
       epoch: 1,

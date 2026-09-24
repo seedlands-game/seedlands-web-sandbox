@@ -5,8 +5,10 @@ import type { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import type { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import { commitFluidCandidate } from './fluid/fluid-candidate-commit';
 import { commitSingleWorldEdit } from './single-world-edit';
-import { commitServerWorldEdit, prepareServerWorldEdit } from './world-edit-runtime';
+import { commitServerWorldEdit, prepareServerWorldEdit, prepareServerWorldEditBatch } from './world-edit-runtime';
 import type { ServerChunk, WorldCommitResult, WorldEditBatch } from './game-server-types';
+import type { ExpectedWorldVoxelEdit } from './world-transaction-commit';
+import type { PreparedWorldCommitMetadata } from './world-edit-batch-plan';
 
 type Options = Readonly<{
   chunks: Map<string, ServerChunk>;
@@ -15,6 +17,7 @@ type Options = Readonly<{
   getRevision(): number;
   setRevision(revision: number): void;
   addMutationCount(count: number): void;
+  prepareCommitMetadata(worldRevision: number, mutationCount: number): PreparedWorldCommitMetadata;
   platform: Pick<CorePlatformPorts, 'now'>;
   fluidChunks: FluidChunkAccess;
   fluidWindow: FluidActiveWindow;
@@ -34,13 +37,16 @@ export class ServerWorldCommitHost {
     return prepareServerWorldEdit(this.worldEditOptions(), { actorId, position, value });
   }
 
+  prepareVoxelEdits(actorId: string, edits: readonly ExpectedWorldVoxelEdit[]) {
+    return prepareServerWorldEditBatch(this.worldEditOptions(), actorId, edits);
+  }
+
   applyFluidCandidate(candidate: FluidCandidate): WorldCommitResult {
     return commitFluidCandidate({
       candidate,
       chunks: this.options.chunks,
       worldRevision: this.options.getRevision(),
-      setWorldRevision: this.options.setRevision,
-      addMutationCount: this.options.addMutationCount,
+      prepareCommitMetadata: this.options.prepareCommitMetadata,
     });
   }
 
@@ -53,8 +59,7 @@ export class ServerWorldCommitHost {
       value,
       worldRevision: this.options.getRevision(),
       getChunk: this.options.getChunk,
-      setWorldRevision: this.options.setRevision,
-      addMutationCount: this.options.addMutationCount,
+      prepareCommitMetadata: this.options.prepareCommitMetadata,
     });
   }
 
@@ -66,6 +71,7 @@ export class ServerWorldCommitHost {
       getRevision: this.options.getRevision,
       setRevision: this.options.setRevision,
       addMutationCount: this.options.addMutationCount,
+      prepareCommitMetadata: this.options.prepareCommitMetadata,
       commitSingleEdit: (actorId: string, x: number, y: number, z: number, value: number) =>
         this.commitSingleEdit(actorId, x, y, z, value),
       now: this.options.platform.now,

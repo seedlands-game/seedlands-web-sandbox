@@ -1,18 +1,17 @@
 import { restoreServerChunk } from './server-chunk-restore';
 import { StationWorldResidency } from './station-world-residency';
-import { assertNoRawStationEdits, assertStationChunkIntegrity } from './station-world-integrity';
+import { assertStationChunkIntegrity } from './station-world-integrity';
 import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, biome, chunkKey, normalizeSeed } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayHost } from './game-server-gameplay-host';
 import { installGameServerGameplayApi, type GameServerGameplayApi } from './game-server-gameplay-api';
 import { initializeStarterEcologyBootstrap } from './starter-ecology-bootstrap';
-import { assertMutationCoordinate, assertVoxelValue, assertWorldMutationBatch } from './world-mutation';
 import type { FluidCell } from './fluid/fluid-cell';
 import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
-import { hasAdjacentFluid, isFluidVoxel } from './fluid/fluid-cell-state';
+import { isFluidVoxel } from './fluid/fluid-cell-state';
 import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
@@ -28,7 +27,12 @@ import {
 } from './chunk-residency';
 import { createServerDerivedMeshSnapshot, prepareServerWorkerMeshInput } from './server-mesh-snapshots';
 import { createLoadedGameplayVoxelReader, readCanonicalVoxel } from './server-voxel-access';
-import { ServerWorldCommitHost } from './server-world-commit-host';
+import type { ServerWorldCommitHost } from './server-world-commit-host';
+import {
+  createGameServerWorldCommitApi,
+  installGameServerWorldCommitApi,
+  type GameServerWorldCommitApi,
+} from './game-server-world-commit-adapter';
 import { generateGameServerChunk, prepareGameServerRestoreChunks } from './game-server-restore-candidate';
 import { acceptServerWorkerCanonical } from './game-server-canonical-admission';
 import { readLoadedCollisionBaseline } from './loaded-collision-baseline';
@@ -49,7 +53,6 @@ import type {
   WorkerCanonicalResult,
   WorkerMeshPreparation,
   WorldCommitResult,
-  WorldEditBatch,
 } from './game-server-types';
 
 class GameServerWorld {
@@ -71,6 +74,7 @@ class GameServerWorld {
   private readonly gameplayVoxelReader: (x: number, y: number, z: number) => number | undefined;
   private readonly gameplayHost: GameServerGameplayHost;
   private readonly worldCommits: ServerWorldCommitHost;
+  private readonly worldCommitApi: GameServerWorldCommitApi;
 
   constructor(readonly options: GameServerOptions) {
     this.seed = normalizeSeed(options.seedText);
@@ -90,8 +94,9 @@ class GameServerWorld {
         biomeAt: (x, z) => biome(this.seed, x, z, this.generatorVersion),
         worldTime: () => this.kernelState.worldTime,
         getVoxel: (x, y, z) => this.getVoxel(x, y, z),
-        editBatch: (batch) => this.editBatch(batch),
-        prepareVoxelEdit: (actorId, position, voxel) => this.prepareVoxelEdit(actorId, position, voxel),
+        editBatch: (batch) => this.worldCommitApi.editBatch(batch),
+        prepareVoxelEdit: (actorId, position, voxel) => this.worldCommits.prepareVoxelEdit(actorId, position, voxel),
+        prepareVoxelEdits: (actorId, edits) => this.worldCommitApi.prepareVoxelEdits(actorId, edits),
         setWorldTime: (hours) => this.setWorldTime(hours),
         readLoadedGameplayVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
         readGameplayVoxel: (x, y, z) => this.readGameplayVoxel(x, y, z),
@@ -124,22 +129,27 @@ class GameServerWorld {
         FluidSidecars.readFluidCell(position, (x, y, z) => this.fluidWindow.allowsPosition(x, y, z), this.chunks),
       apply: (candidate) => this.worldCommits.applyFluidCandidate(candidate),
     });
-    this.worldCommits = new ServerWorldCommitHost({
+    const worldCommit = createGameServerWorldCommitApi({
       chunks: this.chunks,
       getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
       getVoxel: this.getVoxel,
-      getRevision: () => this.kernelState.worldRevision,
-      setRevision: (revision) => this.kernelState.commitWorldRevision(this.kernelState.epoch, revision),
-      addMutationCount: (count) => {
-        this.appliedMutationCount += count;
-      },
+      getLoadedVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
+      kernelState: this.kernelState,
+      mutationCount: { get: () => this.appliedMutationCount, set: (value) => (this.appliedMutationCount = value) },
       platform: options.platform,
       fluidChunks: this.fluidChunks,
       fluidWindow: this.fluidWindow,
       fluidRuntime: () => this.fluidRuntime,
       priorityForBatch: (batch) => this.gameplayHost.fluidPriorityForBatch(batch),
-      isVoxelRegistered: options.composition ? (value) => this.voxelSemantics.get(value) !== undefined : undefined,
+      entities: () => this.gameplay.entities,
+      stationCodec: () => this.gameplay.content.stations?.codec,
+      isVoxelRegistered: options.composition
+        ? (value) => value === 0 || this.voxelSemantics.get(value) !== undefined
+        : undefined,
     });
+    this.worldCommits = worldCommit.commits;
+    this.worldCommitApi = worldCommit;
+    installGameServerWorldCommitApi(this, this.worldCommitApi);
   }
 
   get worldTime(): number {
@@ -361,32 +371,7 @@ class GameServerWorld {
   }
 
   edit(x: number, y: number, z: number, value: number, actorId = 'system'): WorldCommitResult {
-    [x, y, z].forEach(assertMutationCoordinate);
-    assertVoxelValue(
-      value,
-      this.options.composition ? (voxel) => this.voxelSemantics.get(voxel) !== undefined : undefined,
-    );
-    assertNoRawStationEdits(
-      { actorId, edits: [{ x, y, z, value }] },
-      this.gameplay.content.stations?.codec,
-      this.gameplay.entities,
-      this.getVoxel,
-    );
-    const previous = this.getVoxel(x, y, z);
-    const previousFluid = isFluidVoxel(previous) ? this.fluidChunks.cell(x, y, z, true) : null;
-    const result = this.worldCommits.commitSingleEdit(actorId, x, y, z, value);
-    if (result.committed) {
-      this.fluidWindow.includeEditedPosition(x, y, z);
-      this.fluidChunks.write(x, y, z, isFluidVoxel(value) ? { level: 8, source: true } : null);
-      if (
-        isFluidVoxel(previous) ||
-        isFluidVoxel(value) ||
-        hasAdjacentFluid((...at) => this.fluidChunks.peekVoxel(...at), x, y, z)
-      )
-        this.fluidRuntime.activate([x, y, z], this.gameplayHost.fluidPriorityForActor(actorId));
-      if (previousFluid?.source && !isFluidVoxel(value)) this.fluidRuntime.removeSource([x, y, z]);
-    }
-    return result;
+    return this.worldCommitApi.editBatch({ actorId, edits: [{ x, y, z, value }] });
   }
 
   requestFluidWork() {
@@ -426,19 +411,6 @@ class GameServerWorld {
     return isFluidVoxel(this.getVoxel(x, y, z))
       ? (this.fluidChunks.cell(x, y, z, true) ?? { level: 8, source: true })
       : null;
-  }
-
-  editBatch(batch: WorldEditBatch): WorldCommitResult {
-    assertWorldMutationBatch(
-      batch,
-      this.options.composition ? (voxel) => this.voxelSemantics.get(voxel) !== undefined : undefined,
-    );
-    assertNoRawStationEdits(batch, this.gameplay.content.stations?.codec, this.gameplay.entities, this.getVoxel);
-    return this.worldCommits.editBatch(batch);
-  }
-
-  prepareVoxelEdit(actorId: string, position: readonly [number, number, number], value: number) {
-    return this.worldCommits.prepareVoxelEdit(actorId, position, value);
   }
 
   async flushDirtyChunks(): Promise<string[]> {
@@ -561,5 +533,5 @@ class GameServerWorld {
   }
 }
 
-export type GameServer = GameServerWorld & GameServerGameplayApi;
+export type GameServer = GameServerWorld & GameServerGameplayApi & GameServerWorldCommitApi;
 export const GameServer = GameServerWorld as unknown as new (options: GameServerOptions) => GameServer;
