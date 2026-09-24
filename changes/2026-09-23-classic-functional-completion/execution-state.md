@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T19:21:00Z
+更新时间：2026-09-24T19:23:30Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -34,7 +34,7 @@ Goal：未创建；本轮未提供 token budget。
 | Owner                | 阶段                      | agent/进程句柄                               | 期限/状态                    | 当前事实                                                                                                                             |
 | -------------------- | ------------------------- | -------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | root `4decc58...`    | 总负责人                  | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                         | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git `954ef...`       | `GIT-06`                  | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | `19:12Z` 开始，最迟 `22:12Z` | 122路径代码闭包已隔离验证并提交为 `3d429701769989168e2397b8b27c3c4364b44a85`；正提交合同/evidence，随后push与远端读回                |
+| Git `954ef...`       | `GIT-06`                  | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | `19:12Z` 开始，`19:23Z` 完成 | 代码 `3d429701...`、合同/evidence `d8bcbbde...` 已推送；首次local/upstream/ls-remote一致、ahead/behind `0/0`、index空，临时树已清理  |
 | 761 `761fb4f2...`    | Media capacity 完成       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | 已完成，冻结                 | root 已核 evidence `876be0b0...a566d`；聚合 generation 容量边界已关闭，最终 runtime/test hash 为 `7a673f70...fbe9`/`0ec7c50a...933a` |
 | 794 `7943067e...`    | fixture attribution 完成  | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | 已完成，冻结                 | root 已核 evidence `ec0901a4...374d7`；10 个 fixture 与 helper 最终 GREEN，原2个RED已由 restore-owner/lineage分别关闭                |
 | Media `a288bb43...`  | `MEDIA-WEB-CLOSE-01`      | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                 | root 已核 evidence `c0f4ee4d...69ccf3` 与35 hash；14 files / 95 tests及Web types/lint/format PASS；不代表浏览器真实声音              |
@@ -43,7 +43,7 @@ Goal：未创建；本轮未提供 token budget。
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 
-Media、restore owner、generation capacity、legacy layout/lineage、Browser旧档反馈与fixture归因均已获root定向准出，当前进入 GIT-06 合并 staged-tree验证。device实例为 `position + definitionId`；fact/projection使用结构化 `resource { packId, path }`，snapshot不存resource/bytes。外层 `AuthorityResponse.epoch` 是worker session，batch `worldEpoch` 是 `runtimeEpochValue`；restore时两者可不同，旧world fact丢弃，只将projection标为 `resumePending`，不重放facts。正式drain唯一形态为readonly batch数组。仍未做浏览器真实声音、完整产品build或CI。
+Media、restore owner、generation capacity、legacy layout/lineage、Browser旧档反馈与fixture归因均已获root定向准出，并已完成GIT-06合并staged-tree验证和首次远端同步。device实例为 `position + definitionId`；fact/projection使用结构化 `resource { packId, path }`，snapshot不存resource/bytes。外层 `AuthorityResponse.epoch` 是worker session，batch `worldEpoch` 是 `runtimeEpochValue`；restore时两者可不同，旧world fact丢弃，只将projection标为 `resumePending`，不重放facts。正式drain唯一形态为readonly batch数组。仍未做浏览器真实声音、完整产品build或CI。
 
 GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib/Classic/Web/root-test/classic-test类型均PASS，stdlib Media/restore/Structure `15 files / 101 tests`、Classic lineage/Media `2/5`、Web Media+旧档反馈 `20/152`、12-file composition `12/104`、Authority/restore/Pack `5/39` 全PASS。临时Pack lock中MP3为 `2976045` bytes、`audio/mpeg`、SHA-256 `3c69ae...119c9`。全部staged TS/Svelte/MJS ESLint、非二进制Prettier、diff check和自然hooks PASS。首次 `pnpm` 因临时树依赖软链接以 `ERR_PNPM_UNSAFE_TASK_RUN_STATE_PATH` 在类型检查前退出；一次Svelte子检查为0诊断但wrapper清理报 `kill EPERM`，确认遗留PID不存在并仅清理本轮owner后，改用同一锁内的现有工具二进制确定性runner完整复验为exit 0。
 
@@ -51,7 +51,7 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 
 - V1.2 fluid：此前记录的 Web `32` tests、stdlib `19` tests、旧 bucket control `3` tests 通过；Lava collision server/Web mirror 各 `5` tests 通过。
 - V1.3 Structure：历史 checkpoint 为 stdlib `22` tests、Classic declarations `5` tests、public/staged assembly `5` tests 通过，Authority door 当时为准确 RED；该时间点已由后续 B3 PUBLIC STRUCTURE `25/25` Authority GREEN 取代。
-- Media 私有 owner：早期 checkpoint 为 `4 files / 24 tests`；MEDIA-DEPENDENT-01 后续扩展为 `5 files / 28 tests`，generation 聚合容量修复又由 `876be0b0...a566d` 覆盖；公共服务端与Web各层均已定向准出，待GIT-06合并树复验。
+- Media 私有 owner：早期 checkpoint 为 `4 files / 24 tests`；MEDIA-DEPENDENT-01 后续扩展为 `5 files / 28 tests`，generation 聚合容量修复又由 `876be0b0...a566d` 覆盖；公共服务端与Web各层均已定向准出，GIT-06合并树复验已通过。
 - Lighting 模型：最终 `6 files / 48 tests`，stdlib/Web typecheck、ESLint、Prettier、diff check 通过；shader/material/browser 证据尚未执行。
 - A1 prepared multi-voxel batch：上一 candidate 曾有 stdlib `65` tests、Web `16` tests 及 types/lint 等通过；root 读回 evidence SHA-256 `bfc812726dc19316e96957162371c48b93f036b28cce751940c166f37282d146` 且 15 个关键文件 hash 全匹配。该证据早于 closing review 的 P1/P2，只是历史 candidate 证据；当前准出依据是后续 R2 与独立 closing review。
 - A1-CLOSE-R2：首轮 `2 files / 40 tests` 为 `5 failed / 35 passed`，准确复现 fluid 写后外部输入读取与 false-unique 读前边界；最终 stdlib `7 files / 71 tests`（含合法 1M unique preflight control）、Web `2 files / 16 tests`、stdlib typecheck、targeted ESLint/Prettier、diff check 通过。证据见 `a1-close-r2-evidence.md`；独立 review 已关闭原 P1/P2，root 已准出并完成 GIT-03。
@@ -74,7 +74,7 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 - `v1-next-slice-map` 总体已接受；“垂直面一概拒绝”已被 root 否决，地面放门必须使用 Authority 拥有并校验的朝向。该 map 已收口；地面放置策略必须由 Authority 已验证的命中法向或权威 actor orientation 推导。
 - A2、A3.2、A3.3、B1、B2 只按各自 evidence 对应层准出；B3 已完成公共安装和两格门 Authority GREEN，并由 GIT-05 的 55-file 闭包提交推送。仍未做浏览器/WebGL 旅程。
 - `classic-fluid-interactions` 的两个旧 negative spy 已用真实可控 no-op/stale 失败条件替换，当前 `10/10`；该结果只关闭测试夹具，不扩展 A2/B2 产品准出。
-- Media dependent-removal、Authority事务/drain/projection、V4恢复、Chunk residency、Classic Pack/MP3 builder、Web消费、restore owner和legacy lineage均已分别由root定向准出；GIT-06仍须证明组合后的staged tree闭合。完整production artifact和浏览器真实音频仍未执行。
+- Media dependent-removal、Authority事务/drain/projection、V4恢复、Chunk residency、Classic Pack/MP3 builder、Web消费、restore owner和legacy lineage均已分别由root定向准出；GIT-06 staged tree已证明组合闭合。完整production artifact和浏览器真实音频仍未执行。
 - 12-file Classic composition扫描的早期 `73/31` 与探索树 `65/39` 已由fixture attribution明确归因；最终目标是当前闭包全 `104/104`，不得继续写成未归因历史债务。
 - Lighting profile、block+sky GPU owner、五类消费者、真实 WebGL2 readback、Cua 动态矩阵尚未完成。
 - 未运行全量 deterministic、Classic headless、production build、唯一 Chromium、完整 save/reopen、CI、PR review 或 Cloudflare preview。
@@ -90,10 +90,12 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 | GIT-04 public foundation | V1.2/A2 interaction routing、A3 geometry/Structure public composition、B1 plans 与 TEST-FIX                                            | `b08f500cc624d230eefa117b69dceb958e96aff1`                                                                                                         | `b08f500cc624d230eefa117b69dceb958e96aff1` | 已隔离 staged-tree 验证、提交并推送                                                                                               |
 | GIT-04 B2 private        | 未安装的 registered Structure actions/state/host/runtime 与 tests                                                                      | `a83a1f839bb61f6f5bffe86df01186cfa4418bb6`                                                                                                         | `a83a1f839bb61f6f5bffe86df01186cfa4418bb6` | 已隔离 staged-tree 验证、提交并推送                                                                                               |
 | GIT-05 B3 public         | 55-file Structure FACT/hit gate、Gameplay/Authority/Classic 安装、fixtures、证据与最终 state                                           | code `be0bde7e3ba3ddc228efa93bd005b1b0ed4a6ad5`；docs `578c7c8d04ba6e4e5e968cf4a66614d9925ebb55`；state `78545d877ed08ee0613a690ff53e36b0c2120b69` | `78545d877ed08ee0613a690ff53e36b0c2120b69` | 已推送；root `ls-remote` 确认最终 local/remote 相等，checkpoint 为 ahead/behind `0/0`、index clean；7-file `21/31` 失败闭包未提交 |
-| GIT-06 Media/restore     | Media server/Web/Worker/Classic/MP3/Pack、capacity/restore、lineage/layout、Browser反馈、fixtures/evidence                             | code `3d429701769989168e2397b8b27c3c4364b44a85`；docs pending                                                                                      | pending                                    | 122路径代码闭包隔离验证与自然hooks通过；正提交合同/evidence，随后统一push并读回；browser/audio真实设备仍未验收                    |
+| GIT-06 Media/restore     | Media server/Web/Worker/Classic/MP3/Pack、capacity/restore、lineage/layout、Browser反馈、fixtures/evidence                             | code `3d429701769989168e2397b8b27c3c4364b44a85`；docs `d8bcbbde133cf47a915fc257bd8d09e79d80c629`                                                   | `d8bcbbde133cf47a915fc257bd8d09e79d80c629` | 122路径代码闭包隔离验证及hooks通过；首次local/upstream/ls-remote一致、ahead/behind `0/0`、index空；真实browser/audio仍未验收      |
 | Lighting model           | explicit semantics + sky/surface models/tests                                                                                          | pending                                                                                                                                            | pending                                    | 依赖 V4 public/profile/renderer                                                                                                   |
 
 TAKEOVER-01 首批文档已读回 local/remote SHA；本次回填使用独立 execution-state checkpoint commit，不 amend。
+
+GIT-06临时资源已精确清理：`/private/tmp/seedlands-git06-media` worktree、`seedlands-git06-media.patch`、`seedlands-git06-pack`均已删除；未执行全局worktree prune，未触碰其他历史或并行worktree。最终state checkpoint只记录前两笔稳定SHA，不写自引用SHA。
 
 ## 终点
 
