@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "attempts": [
+    {
+      "schemaVersion": 1,
+      "status": "FAIL",
+      "attempt": 0,
+      "test": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+      "project": "chromium",
+      "benchmark": false,
+      "stages": {},
+      "errors": [
+        "TimeoutError: locator.waitFor: Timeout 10000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#start-card') to be hidden\u001b[22m\n\u001b[2m    24 × locator resolved to visible <section role=\"region\" id=\"start-card\" class=\"game-panel start-card\">…</section>\u001b[22m\n"
+      ],
+      "current": null,
+      "logicEvidence": []
+    },
+    {
+      "schemaVersion": 1,
+      "status": "FAIL",
+      "attempt": 0,
+      "test": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+      "project": "chromium",
+      "benchmark": false,
+      "stages": {},
+      "errors": [],
+      "current": null,
+      "logicEvidence": []
+    }
+  ]
+}

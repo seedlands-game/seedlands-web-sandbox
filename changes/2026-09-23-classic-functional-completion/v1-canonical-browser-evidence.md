@@ -79,3 +79,97 @@ Pack presentation resource lock is invalid.
 - 运行后 HEAD 仍为 `60843904909b2439725a40bc1d4e725de8fcda18`，`git status --short` 无输出，artifact receipt SHA256 仍为 `79f9cce274...9656`。
 - `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；本次 preview 已由 Playwright 清理。
 - 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装或全局配置修改。
+
+---
+
+# Browser-02 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-02`
+结论：**FAIL，C0 仍未关闭；Browser-01 的 resource-lock 兼容问题已关闭，但暴露了新的 host permission admission 缺口。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt。
+
+## Browser-02 身份
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-a77f1f4e`
+- HEAD：`a77f1f4e9fef107582a4d4b576889e3083b5893f`
+- `git status --short`：运行前后均无输出。
+- artifact source SHA：`a77f1f4e9fef107582a4d4b576889e3083b5893f`
+- artifact digest：`b984a1c6c8ea700d753ea97f93f96ac85a93b0cbf9aad25d3f8b0bcad32b2487`
+- artifact receipt SHA256：`f35872ae48e3934c37310bdbe3bd67902c1c4b8df0cf2ce5e19bd5b75dd4f890`
+- dist：276 个文件；未重建、未修改。
+- 最新远端 `0fabcd40` 只含后续 evidence/state，不替换本次 artifact。
+
+## Browser-02 唯一 Attempt
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-02-a77f1f4e node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-24T22:03:47.609Z` 至 `2026-09-24T22:04:20.180Z`。
+机器窗口：`21665d89-17d2-45ae-b742-d28d56f5e73f`，`waitedMs=2`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+Playwright 结果：2 failed，1 skipped；没有 retry 或第二次 Harness 调用。
+
+- 主 canonical：C0 启动步骤约 11.5 秒失败。
+- Classic 视觉回归：同一启动入口约 11.4 秒失败。
+- 非 Classic smoke：按既有条件 skipped。
+- Harness receipt：`status=FAIL`，主 canonical `stages={}`、`current=null`。
+
+## C0 进展与新首因
+
+Browser-01 的 resource lock schema 问题已关闭：Browser-02 trace 中 `packs.lock.json`、`overworld.manifest.json`、`playbooks/classic/presentation.json` 和 `to-far-shores.mp3` 均成功返回 HTTP 200，presentation/audio 已通过正式四字段 resource lock 校验。
+
+随后 Authority Worker 在 Pack 装配时抛出：
+
+```text
+Pack permission was not approved by the host: seedlands:overworld -> seedlands.structure
+```
+
+页面返回开始页并显示同一错误，`startClassicWorld()` 等待 `#start-card` 隐藏 10 秒后超时。超时仍是表象；新首因是 host-owned permission admission 与 Pack manifest 的权限请求不闭合：
+
+1. `overworld.manifest.json` 的 `seedlands:overworld-structure-actions` 请求 `seedlands.structure: read,execute`；behavior registry 也请求 `seedlands.structure:execute`。
+2. dist `packs/host-admissions.json` 的 `seedlands:overworld` permissions 完全缺少 `seedlands.structure`。
+3. 对 manifest 所有 module permission 与 host admission 做集合差分，唯一缺口是：
+
+```text
+seedlands.structure:read
+seedlands.structure:execute
+```
+
+4. 生成源 `scripts/product-pack-admissions.mjs` 的 `overworldPermissions` 同样没有 `seedlands.structure`，而 `build-gameplay-packs.mjs` 正式从该 host policy 生成 `host-admissions.json`。
+5. `packages/stdlib/src/server/composition/assembly.ts` 的 fail-closed 检查正确拒绝未批准权限；不应放宽 assembly 或从 Pack 请求反向生成 host grant。后续修复应由产品 host policy 明确批准 Classic Structure 所需的最小 `read,execute`，再生成新 artifact。
+
+## Browser-02 V1 关键结果
+
+以下仍为 **未观测（NOT OBSERVED）**，原因是世界在 Authority Pack 装配阶段、ready 之前失败：
+
+- water-bucket 倒 source 与空桶收回；
+- 木门两格跨 Chunk 实际 mesh、epoch、关闭碰撞和打开穿越；
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase；
+- save/return/continue 的新 epoch、门/slot 恢复与 resumePending；
+- 手势续播、eject stop；
+- 离开世界后的 audio 清理。
+
+## Browser-02 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-02/`
+
+- `381e0504e63d62f4c305dfe8ed3e4667a110baf92d40429178c31fe0567b5bf2` `classic.json`
+- 原始内容 SHA-256 `604ba927567ae429d5aa1c6431636f8fd01a5dd401c1271545934924f8a43239`，deterministic gzip `f1d31e4e33878d599451887abf2df5ddd03c6f5247c59ddbdc884b5fe74ceca8`，`canonical-error-context.md.log.gz`
+- 原始内容 SHA-256 `0cfa3047a282327cf547b4b1486b1e0ca41fb9733ebfe2d5a2102b648c5e4ff3`，deterministic gzip `d33ef23e304bca5d9e09e71baae1d8b29e12c730291894f1e30a74dbbbfc88c0`，`visual-error-context.md.log.gz`
+- `5b4213a9350881011414a8b28ab6535880207d3c987a538502ff4775aa286c70` `canonical-trace.zip`
+- `33bc25be50a90e39e21f8d1127d99f3e126778a5e911a400ff51a182221bfc88` `visual-trace.zip`
+- `f35872ae48e3934c37310bdbe3bd67902c1c4b8df0cf2ce5e19bd5b75dd4f890` `harness-artifact.json`
+- `322b3ee011afa91354b5eb89da80322f3b18934aaf1ac65481dba78b28c27b71` `performance-window.json.log`
+- `7259ae5ae2a3ba7ace583ec04b20e4ab27f784556156b491195cd53bfa2cd735` `host-admissions.json.log`
+- `14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3` `overworld.manifest.json.log`
+- `954cb2be23eb5d8823efddf34eb5fcced75a32253af1feaef9d6e193cbe4e3a5` `packs.lock.json`
+- `a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b` `presentation.json`
+
+## Browser-02 运行后状态
+
+- `harness:classic` 失败后 artifact 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `a77f1f4e9fef107582a4d4b576889e3083b5893f`，`git status --short` 无输出，artifact receipt SHA256 仍为 `f35872ae48...4f890`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；进程核验只命中执行查询本身，没有本树 Playwright、Chromium 或 Vite preview 遗留。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或测试/production 修改。
