@@ -11,8 +11,10 @@ import {
   dispatchStructureTargetFirstV1,
   type StructureTargetPortV1,
 } from '../gameplay/modules/structure-target-dispatch';
+import type { MediaTargetPortV1 } from '../gameplay/gameplay-media-target-runtime';
 
 export type AuthorityStructureTargetPort = Pick<StructureTargetPortV1, 'resolve' | 'invoke'>;
+export type AuthorityMediaTargetPort = Pick<MediaTargetPortV1, 'resolve' | 'invoke'>;
 
 export function unavailableAuthorityPlayerAction(
   submittedAction: AuthorityAction,
@@ -27,6 +29,7 @@ export function applyAuthorityPlayerAction(
   action: AuthorityAction,
   publishCommit: (commit: WorldCommitResult) => void,
   structureTargets?: AuthorityStructureTargetPort,
+  mediaTargets?: AuthorityMediaTargetPort,
 ): unknown {
   const record = (result: unknown, statistic: import('../gameplay/gameplay-progress-runtime').GameplayStatistic) => {
     if ((result as { success?: boolean })?.success) server.progress.record(playerId, statistic, 1);
@@ -121,23 +124,49 @@ export function applyAuthorityPlayerAction(
           action.target,
           action.expectedSelection,
         );
-      const interaction = structureTargets
-        ? dispatchStructureTargetFirstV1(
-            {
-              actor,
-              getVoxel: (position) => server.getVoxel(...position),
-              resolve: structureTargets.resolve,
-              invoke: structureTargets.invoke,
-              fallback,
-            },
-            {
-              actorId: playerId,
-              intent: action.intent,
-              target: action.target,
-              expectedSelection: action.expectedSelection,
-            },
-          )
-        : fallback();
+      const structureFallback = () =>
+        structureTargets
+          ? dispatchStructureTargetFirstV1(
+              {
+                actor,
+                getVoxel: (position) => server.getVoxel(...position),
+                resolve: structureTargets.resolve,
+                invoke: structureTargets.invoke,
+                fallback,
+              },
+              {
+                actorId: playerId,
+                intent: action.intent,
+                target: action.target,
+                expectedSelection: action.expectedSelection,
+              },
+            )
+          : fallback();
+      let interaction;
+      if (mediaTargets && action.target.kind === 'voxel') {
+        const currentActor = actor(playerId);
+        const expected = action.expectedSelection;
+        if (!currentActor || currentActor.lifecycle !== 'alive') return { success: false, reason: 'player-dead' };
+        if (
+          currentActor.inventoryRevision !== expected.inventoryRevision ||
+          currentActor.modeRevision !== expected.modeRevision ||
+          currentActor.creativeCatalogRevision !== expected.creativeCatalogRevision ||
+          currentActor.selectedSlot !== expected.selectedSlot
+        )
+          return { success: false, reason: 'stale-selection' };
+        const { hit, adjacent } = action.target;
+        if (hit.reduce((sum, coordinate, axis) => sum + Math.abs(coordinate - adjacent[axis]!), 0) !== 1)
+          return { success: false, reason: 'invalid-target' };
+        const resolved = mediaTargets.resolve(playerId, action.intent, hit);
+        interaction =
+          resolved.status === 'not-media'
+            ? structureFallback()
+            : resolved.status === 'unavailable'
+              ? { success: false as const, reason: 'chunk-unavailable' }
+              : resolved.status === 'malformed'
+                ? { success: false as const, reason: resolved.reason }
+                : mediaTargets.invoke(playerId, action.intent, hit, resolved);
+      } else interaction = structureFallback();
       if (interaction.success && interaction.value !== undefined) {
         const commit =
           ('commit' in interaction ? interaction.commit : undefined) ??

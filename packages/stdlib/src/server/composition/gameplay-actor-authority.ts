@@ -2,6 +2,7 @@ import { validateDurableExecutionOrigin, type DurableExecutionOriginV1 } from '.
 import type { EntityType } from '../gameplay/entity-store';
 import type { WorldModuleBinding } from '../commands/module-command';
 import { WorldResourceAuthorizer, type WorldResourceRegistration } from '../harness/world-authorization';
+import { MEDIA_PLAYBACK_RESOURCE } from '../gameplay/modules/media-playback-module';
 
 const PLAYER_SUBJECT = 'seedlands:local-player';
 const AUTONOMY_SUBJECT = 'seedlands:autonomy';
@@ -20,6 +21,7 @@ export function createGameplayActorAuthority(
     options.scriptAuthorization?.principalForSubject(AUTONOMY_SUBJECT)
   )
     throw new TypeError('Script policy cannot claim a reserved gameplay subject.');
+  const mediaRegistered = resources.some(({ id }) => id === MEDIA_PLAYBACK_RESOURCE);
   const forActor = (actorId: string, kind: EntityType): WorldModuleBinding | undefined => {
     if (kind !== 'player' && kind !== 'npc' && kind !== 'creature') return undefined;
     if (!actorId || actorId.trim() !== actorId || actorId.length > 256)
@@ -69,6 +71,17 @@ export function createGameplayActorAuthority(
             operations: ['read', 'execute'],
             scope: 'any',
           },
+          ...(mediaRegistered
+            ? [
+                {
+                  effect: 'allow' as const,
+                  principal: { ids: [principalId] },
+                  resources: [MEDIA_PLAYBACK_RESOURCE],
+                  operations: ['read', 'write', 'execute'] as const,
+                  scope: 'any' as const,
+                },
+              ]
+            : []),
           {
             effect: 'allow',
             principal: { ids: [principalId] },

@@ -6,16 +6,19 @@ import {
   createGameplaySystemAuthority,
 } from '@seedlands/stdlib/host';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import type { CorePlatformPorts } from '../../../../../../../packages/stdlib/src/runtime/platform-ports';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function setup(
   extra: readonly ModModule[] = [],
   observeClone?: () => void,
   getVoxel = ([, y]: [number, number, number]) => (y === 0 ? 3 : 0),
 ) {
-  const modules = [...pack.modules, ...extra];
+  const modules = classicGameplayDomainModules(
+    ['seedlands:mode-module', ...extra.map((module) => module.descriptor.id)],
+    extra,
+  );
   const selected = definePack({ id: 'test:prepared-mode', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [

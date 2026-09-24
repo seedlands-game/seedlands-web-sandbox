@@ -1,10 +1,12 @@
 import { restoreServerChunk } from './server-chunk-restore';
+import { MediaWorldResidency } from './media-world-residency';
 import { StationWorldResidency } from './station-world-residency';
 import { assertStationChunkIntegrity } from './station-world-integrity';
 import { GENERATOR_VERSION, SUPPORTED_GENERATOR_VERSIONS, biome, chunkKey, normalizeSeed } from '../world/voxel';
 import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics, ChunkSnapshot } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import { GameServerGameplayHost } from './game-server-gameplay-host';
+import { createGameServerFluidRuntime, createNextGameServerFluidRuntime } from './game-server-fluid-runtime';
 import { installGameServerGameplayApi, type GameServerGameplayApi } from './game-server-gameplay-api';
 import { initializeStarterEcologyBootstrap } from './starter-ecology-bootstrap';
 import type { FluidCell } from './fluid/fluid-cell';
@@ -12,7 +14,6 @@ import { FluidActiveWindow } from './fluid/fluid-active-window';
 import { FluidChunkAccess } from './fluid/fluid-chunk-access';
 import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue';
 import { isFluidVoxel } from './fluid/fluid-cell-state';
-import * as FluidSidecars from './fluid/fluid-edit-sidecars';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
@@ -67,17 +68,24 @@ class GameServerWorld {
   private accessSequence = 0;
   private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   private appliedMutationCount = 0;
-  private readonly fluidRuntime: FluidTransactionRuntime<WorldCommitResult>;
+  private fluidRuntime: FluidTransactionRuntime<WorldCommitResult>;
   private readonly fluidChunks: FluidChunkAccess;
   private readonly fluidChunkActivations = new FluidChunkActivationQueue();
   private readonly fluidWindow = new FluidActiveWindow();
   private readonly saves: GameSaveRuntime;
   private readonly canonicalResidency: CanonicalChunkResidency;
   private stationResidency: StationWorldResidency;
+  private readonly mediaResidency: MediaWorldResidency;
   private readonly gameplayVoxelReader: (x: number, y: number, z: number) => number | undefined;
   private readonly gameplayHost: GameServerGameplayHost;
   private readonly worldCommits: ServerWorldCommitHost;
   private readonly worldCommitApi: GameServerWorldCommitApi;
+  private readonly fluidRuntimeOptions = () => ({
+    chunks: this.chunks,
+    fluidWindow: this.fluidWindow,
+    fluidChunks: this.fluidChunks,
+    worldCommits: () => this.worldCommits,
+  });
 
   constructor(readonly options: GameServerOptions) {
     this.seed = normalizeSeed(options.seedText);
@@ -112,6 +120,10 @@ class GameServerWorld {
     installGameServerGameplayApi(this, this.gameplayHost);
     this.canonicalResidency = new CanonicalChunkResidency(options.canonicalResidency);
     this.stationResidency = new StationWorldResidency(this.gameplay.entities, this.canonicalResidency);
+    this.mediaResidency = new MediaWorldResidency(
+      () => this.gameplay.media.checkpointPositions(),
+      this.canonicalResidency,
+    );
     this.gameplayVoxelReader = options.onUnknownChunk
       ? createLoadedGameplayVoxelReader(this.chunks, options.onUnknownChunk)
       : this.getVoxel;
@@ -127,20 +139,13 @@ class GameServerWorld {
       clone: options.platform.clone,
     });
     this.fluidChunks = new FluidChunkAccess(this.chunks, (cx, cy, cz) => this.getChunk(cx, cy, cz));
-    this.fluidRuntime = new FluidTransactionRuntime({
-      epoch: options.fluidEpoch ?? 1,
-      readChunk: (key) =>
-        FluidSidecars.readFluidChunk(key, (candidate) => this.fluidWindow.allowsKey(candidate), this.chunks),
-      readCell: (position) =>
-        FluidSidecars.readFluidCell(position, (x, y, z) => this.fluidWindow.allowsPosition(x, y, z), this.chunks),
-      apply: (candidate) => this.worldCommits.applyFluidCandidate(candidate),
-    });
+    this.fluidRuntime = createGameServerFluidRuntime(options.fluidEpoch ?? 1, this.fluidRuntimeOptions());
     const worldCommit = createGameServerWorldCommitApi({
       chunks: this.chunks,
       getChunk: (cx, cy, cz) => this.getChunk(cx, cy, cz),
       getVoxel: this.getVoxel,
       getLoadedVoxel: (x, y, z) => this.readLoadedGameplayVoxel(x, y, z),
-      kernelState: this.kernelState,
+      kernelState: () => this.kernelState,
       mutationCount: { get: () => this.appliedMutationCount, set: (value) => (this.appliedMutationCount = value) },
       platform: options.platform,
       fluidChunks: this.fluidChunks,
@@ -158,9 +163,8 @@ class GameServerWorld {
     installGameServerWorldCommitApi(this, this.worldCommitApi);
   }
 
-  get worldTime(): number {
-    return this.kernelState.worldTime;
-  }
+  // prettier-ignore
+  get worldTime(): number { return this.kernelState.worldTime; }
 
   // prettier-ignore
   get executableWorldgenProvider(): KernelWorldgenProvider | undefined { return this.worldgenRuntime; }
@@ -180,11 +184,14 @@ class GameServerWorld {
     const prepared = await this.gameplayHost.prepareRestore();
     if (!prepared) {
       if (!checkpoint) return;
+      const fluid = createNextGameServerFluidRuntime(this.fluidRuntime, this.fluidRuntimeOptions());
       this.kernelState.replaceEpoch();
       this.kernelState.restoreCommitFrontier(checkpoint.commitSequence, checkpoint.worldRevision);
+      this.installRestoredFluidRuntime(fluid);
       return;
     }
     try {
+      const fluid = createNextGameServerFluidRuntime(this.fluidRuntime, this.fluidRuntimeOptions());
       prepared.gameplay.kernelState.prepareReplacement(this.kernelState.epoch, {
         commitSequence: checkpoint?.commitSequence ?? 0,
         worldRevision: checkpoint?.worldRevision ?? 0,
@@ -200,15 +207,19 @@ class GameServerWorld {
         currentChunks: this.chunks,
         currentEntities: this.gameplay.entities,
         candidateEntities: prepared.gameplay.entities,
+        mediaPositions: prepared.gameplay.media.checkpointPositions(),
         stationCodec: prepared.gameplay.content.stations?.codec,
         ...(this.options.composition ? { voxelSemantics: prepared.gameplay.content.voxelSemantics } : {}),
       });
+      prepared.gameplay.media.validateCheckpoint(([x, y, z]) => peekLoadedVoxel(chunks, x, y, z)?.voxel);
       this.chunks.clear();
       for (const [key, chunk] of chunks) this.chunks.set(key, chunk);
       this.accessSequence += chunks.size;
       this.stationResidency = new StationWorldResidency(prepared.gameplay.entities, this.canonicalResidency);
       this.stationResidency.refresh();
       this.gameplayHost.commitRestore(prepared);
+      this.mediaResidency.refresh();
+      this.installRestoredFluidRuntime(fluid);
     } catch (error) {
       try {
         this.gameplayHost.discardRestore(prepared);
@@ -253,18 +264,16 @@ class GameServerWorld {
 
   maintainCanonicalResidency(): number {
     this.stationResidency.refresh();
+    this.mediaResidency.refresh();
     return maintainCanonicalChunks(this.canonicalResidency, this.chunks, ({ key, chunk, accessEpoch, revision }) =>
       this.saves.evictChunkIfCurrent(key, chunk as ServerChunk, accessEpoch, revision),
     );
   }
 
-  setPhysicsActiveChunks(keys: readonly string[]): void {
-    this.canonicalResidency.replacePins('physics', keys);
-  }
+  setPhysicsActiveChunks = (keys: readonly string[]): void => this.canonicalResidency.replacePins('physics', keys);
 
-  retainMeshChunk(cx: number, cy: number, cz: number): void {
+  retainMeshChunk = (cx: number, cy: number, cz: number): void =>
     this.canonicalResidency.retainMesh(chunkKey(cx, cy, cz));
-  }
 
   retainMeshPreparationNeighborhood(cx: number, cy: number, cz: number): () => void {
     return retainCanonicalPreparation(this.canonicalResidency, canonicalChunkNeighborhoodKeys(cx, cy, cz), () =>
@@ -453,6 +462,7 @@ class GameServerWorld {
 
   async evictChunk(cx: number, cy: number, cz: number): Promise<boolean> {
     this.stationResidency.refresh();
+    this.mediaResidency.refresh();
     if (this.canonicalResidency.isPinned(chunkKey(cx, cy, cz))) return false;
     return this.saves.evictChunk(cx, cy, cz);
   }
@@ -528,8 +538,13 @@ class GameServerWorld {
     return restored;
   }
 
-  private syncFluidLeasePins(): void {
+  private syncFluidLeasePins = (): void =>
     this.canonicalResidency.replacePins('fluid', this.fluidRuntime.leasedChunkKeys);
+
+  private installRestoredFluidRuntime(runtime: FluidTransactionRuntime<WorldCommitResult>): void {
+    this.fluidRuntime = runtime;
+    this.fluidChunkActivations.restore(this.chunks);
+    this.syncFluidLeasePins();
   }
 
   private meshSnapshotSource() {

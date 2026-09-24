@@ -54,3 +54,7 @@ Classic art direction is documented in [Classic visual style](docs/classic-visua
 ## Classic UI pixel assets
 
 `apps/web/public/assets/ui/classic-panel.png`, `classic-hotbar-slot.png`, `classic-heart.png`, `classic-armor.png`, `classic-bubble.png`, and `classic-crest.png` are original repository-authored pixel artwork offered under Apache-2.0. They are deterministically generated from `scripts/assets/classic-ui/generate.mjs` using Node standard-library PNG encoding; the source contains the palette and pixel geometry. No generative image output, third-party UI art, or named-game texture is included.
+
+## User-provided Classic audio
+
+- `playbooks/classic/assets/audio/to-far-shores.mp3` was provided by the user for this Classic Mod resource import. Its license status is **unknown**. This repository does not claim that the recording is original, open source, or covered by Apache-2.0 or the CC BY 4.0 grants above. Do not redistribute it without separately confirming the necessary rights.

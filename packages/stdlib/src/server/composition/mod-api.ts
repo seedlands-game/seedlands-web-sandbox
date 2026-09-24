@@ -68,14 +68,19 @@ export type {
 export { defineInventoryModule } from '../gameplay/modules/inventory-module';
 export { defineContentModule } from '../gameplay/modules/content-module';
 export {
+  defineGameplaySnapshotPredecessorsV1,
   defineGameplaySnapshotMigrationModule,
   GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+  matchesGameplaySnapshotPredecessorV1,
 } from '../gameplay/gameplay-snapshot-migration';
 export type {
+  LegacyGameplaySnapshotVersion,
+  GameplaySnapshotPredecessorV1,
   GameplaySnapshotMigration,
   GameplaySnapshotMigrationContext,
   GameplaySnapshotMigrationReport,
 } from '../gameplay/gameplay-snapshot-migration';
+export type { CompositionCheckpointIdentity } from './checkpoint-identity';
 export { defineStandardWorldgenModule, WORLDGEN_PROVIDER_CAPABILITY } from '../worldgen/standard-worldgen-module';
 export type { StandardWorldgenProvider } from '../worldgen/standard-worldgen-module';
 export type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
@@ -127,6 +132,25 @@ export {
   STRUCTURE_VOXEL_COMPONENT,
 } from '../gameplay/modules/structure-actions-module';
 export type { StructureActionPolicyV1 } from '../gameplay/modules/structure-actions-module';
+export {
+  defineMediaPlaybackModuleV1,
+  MEDIA_PLAYBACK_CAPABILITY,
+  MEDIA_PLAYBACK_COMPONENT,
+  MEDIA_PLAYBACK_RESOURCE,
+  MEDIA_INSERT_OPERATION,
+  MEDIA_INSERT_AND_ACTIVATE_OPERATION,
+  MEDIA_EJECT_OPERATION,
+  MEDIA_ACTIVATE_OPERATION,
+  MEDIA_STOP_OPERATION,
+  MEDIA_SWITCH_OPERATION,
+} from '../gameplay/modules/media-playback-module';
+export type { MediaPlaybackModuleDefinitionV1 } from '../gameplay/modules/media-playback-module';
+export type {
+  MediaDeviceInstanceV1,
+  MediaPlaybackFactV1,
+  MediaPlaybackProjectionV1,
+  MediaResourceReferenceV1,
+} from '../gameplay/modules/media-playback-model';
 export { defineItemInteractionModule, ITEM_INTERACTION_CAPABILITY } from '../gameplay/modules/item-interaction-module';
 export type {
   ItemInteractionDefinition,

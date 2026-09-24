@@ -47,10 +47,12 @@ import { deleteBrowserWorld, latestBrowserWorldSeed, listBrowserWorlds } from '.
 import { executeGameSlashCommand } from './gameplay/game-command-runtime';
 import { createGameCommandConsumer } from './gameplay/game-command-consumer';
 import { disposeGameOwnedResources } from './world/game-runtime-disposal';
+import { GameMediaController } from './audio/game-media-controller';
 
 export class Game {
   private paused = false;
   private worldAudio: WorldAudio | null = null;
+  private readonly media: GameMediaController;
   private waterExperience: WaterExperience | null = null;
   private app: pc.Application | null = null;
   private world: World | null = null;
@@ -78,6 +80,7 @@ export class Game {
   private commandExecutor: CommandExecutorPort | null = null;
   private commandSource: CommandSource | null = null;
   private uiSession: UiWorldSession | null = null;
+  // prettier-ignore
   private hudSequence = 0;
   private interactionSequence = 0;
   private debugSequence = 0;
@@ -106,6 +109,8 @@ export class Game {
     experiments: ResolvedExperimentalClientOptions = resolveExperimentalClientOptions(),
   ) {
     this.experimentState = new GameExperimentState(experiments);
+    // prettier-ignore
+    this.media = new GameMediaController(audio, (message) => this.uiSession?.publishFeedback(++this.interactionSequence, { message, tone: 'error', durationMs: 6_000 }));
     this.frameLoop = new GameFrameLoop({
       app: () => this.app,
       authority: () => this.authority,
@@ -196,6 +201,7 @@ export class Game {
     const sessionConfig = readBrowserSessionConfig(location.search);
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
+    await this.media.load(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin));
     const clientOptions = {
       onSnapshot: (snapshot: import('@seedlands/stdlib/server/authority/authority-session').AuthoritySnapshot) =>
         this.authoritySync.receive(snapshot),
@@ -205,6 +211,7 @@ export class Game {
       },
       onCommit: (commit: import('@seedlands/stdlib/server/game-server-types').WorldCommitResult) =>
         this.world?.consumeServerCommit(commit),
+      ...this.media.callbacks,
       onUnknownChunk: (key: string) => runtimeControls.requestAuthorityChunk(this.world, key),
       // prettier-ignore
       onInputDecision: (decision: { sequence: number; decision: import('@seedlands/stdlib/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
@@ -240,7 +247,10 @@ export class Game {
     Object.assign(this, { authority, computeRuntime, logicClient });
     setVoxelPresentationSemantics(this.app, ready.voxelSemantics ?? []);
     this.environment.setTime(ready.worldTime);
-    if (this.audio) this.worldAudio = new WorldAudio(this.audio, ready.seed);
+    if (this.audio) {
+      this.worldAudio = new WorldAudio(this.audio, ready.seed);
+      this.media.beginWorld(authority.runtimeEpoch);
+    }
     this.world = new World(
       authority,
       computeRuntime.meshPort,
@@ -314,7 +324,9 @@ export class Game {
     if (!authority || !this.world || !this.camera || !this.environment) return;
     // prettier-ignore
     const restored = restoreBrowserPresentation(ready, { authority, world: this.world, camera: this.camera, environment: this.environment, audio: this.audio, controller: this.controller, gameplay: this.gameplayClient, worldAudio: this.worldAudio, authoritySync: this.authoritySync, commandSource: this.commandSource, createGameplay: (playerId) => this.createGameplay(authority, playerId), createController: () => this.createController(this.camera!) });
+    // prettier-ignore
     Object.assign(this, { serverPlayerId: ready.playerId, seedText: ready.seedText, ...restored });
+    this.media.beginRestore(authority.runtimeEpoch);
     runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
   }
 
@@ -435,6 +447,7 @@ export class Game {
       authority: this.authority,
       gameplay: this.gameplayClient,
       audio: this.worldAudio,
+      media: (value) => this.media.pause(value),
       camera: this.camera,
       world: this.world,
     });
@@ -456,6 +469,7 @@ export class Game {
 
   dispose() {
     this.abortStart();
+    this.media.dispose();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('pagehide', this.onPageHide);
   }
@@ -516,5 +530,6 @@ export class Game {
     // prettier-ignore
     disposeGameOwnedResources({ disposable: [this.worldAudio, this.uiSession, this.controller, this.collisionDebug, this.gameplayClient, this.world, this.logicClient, this.authority, this.computeRuntime], destroyable: [this.visualEffects, this.waterExperience, this.environment, this.visualResources, this.app], clear: () => { this.authoritySync.clear(); this.experimentState.clearRenderer(); }, target: this, fields: ['worldAudio', 'uiSession', 'commandExecutor', 'commandSource', 'removeHarness', 'controller', 'collisionDebug', 'gameplayClient', 'world', 'logicClient', 'authority', 'computeRuntime', 'visualEffects', 'waterExperience', 'environment', 'visualResources', 'app', 'camera'] });
     this.serverPlayerId = null;
+    this.media.endWorld();
   }
 }

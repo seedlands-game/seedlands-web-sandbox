@@ -19,7 +19,7 @@ const artifact = <Pack extends ReturnType<typeof definePack>>(pack: Pack) => ({
     algorithm: 'sha256' as const,
     manifestDigest: 'a'.repeat(64),
     entryDigest: 'b'.repeat(64),
-    resources: [],
+    resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
   },
 });
 

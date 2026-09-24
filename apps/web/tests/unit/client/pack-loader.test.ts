@@ -184,4 +184,76 @@ describe('browser Pack host admission loader', () => {
     await expect(loadBrowserProductAssembly(new URL('http://localhost/packs/'))).rejects.toThrow('not host-approved');
     expect(importEntry).not.toHaveBeenCalled();
   });
+
+  it('requires exact real resource size and content type metadata in the Pack lock', async () => {
+    vi.stubGlobal('location', { origin: 'http://localhost' });
+    const manifest = JSON.stringify({
+      schemaVersion: 1,
+      id: 'seedlands:overworld',
+      version: '1.0.0',
+      kind: 'playbook',
+      entry: 'overworld.mjs',
+      modules: [],
+      resources: ['presentation.json'],
+    });
+    const entry = 'export const pack = { modules: [] };';
+    const resource = '{}';
+    const manifestDigest = await sha256(manifest);
+    const entryDigest = await sha256(entry);
+    const resourceDigest = await sha256(resource);
+    const admission = {
+      id: 'seedlands:overworld',
+      version: '1.0.0',
+      integrity: {
+        algorithm: 'sha256' as const,
+        manifestDigest,
+        entryDigest,
+        resources: [{ path: 'presentation.json', digest: resourceDigest }],
+      },
+      permissions: [],
+    };
+    const lockResource = {
+      path: 'presentation.json',
+      sha256: resourceDigest,
+      size: new TextEncoder().encode(resource).byteLength,
+      contentType: 'application/json',
+    };
+    let currentResource: Record<string, unknown> = lockResource;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: URL | RequestInfo) => {
+        const path = new URL(String(url)).pathname;
+        if (path.endsWith('host-admissions.json'))
+          return new Response(JSON.stringify({ schemaVersion: 1, playbook: admission, extensions: [] }));
+        if (path.endsWith('packs.lock.json'))
+          return new Response(
+            JSON.stringify({
+              schemaVersion: 1,
+              packs: [
+                {
+                  id: 'seedlands:overworld',
+                  version: '1.0.0',
+                  manifest: { path: 'overworld.manifest.json', sha256: manifestDigest },
+                  entry: { path: 'overworld.mjs', sha256: entryDigest },
+                  resources: [currentResource],
+                },
+              ],
+            }),
+          );
+        if (path.endsWith('overworld.manifest.json')) return new Response(manifest);
+        if (path.endsWith('overworld.mjs')) return new Response(entry);
+        if (path.endsWith('presentation.json')) return new Response(resource);
+        return new Response('', { status: 404 });
+      }),
+    );
+
+    currentResource = { path: 'presentation.json', sha256: resourceDigest };
+    await expect(loadBrowserProductAssembly(new URL('http://localhost/packs/'))).rejects.toThrow(/resource lock/i);
+    currentResource = lockResource;
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue(
+      'data:text/javascript,export%20const%20pack%20%3D%20%7B%20modules%3A%20%5B%5D%20%7D%3B',
+    );
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    await expect(loadBrowserProductAssembly(new URL('http://localhost/packs/'))).resolves.toBeDefined();
+  });
 });

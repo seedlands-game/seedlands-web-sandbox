@@ -12,19 +12,40 @@ import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/sup
 
 function setup(withBlocks = true, extra: ModModule[] = [], cloneHook?: (value: unknown) => void) {
   const modules = [
-    ...pack.modules.filter((module) => withBlocks || !module.descriptor.id.includes('block-')),
+    ...pack.modules.filter(
+      (module) =>
+        withBlocks ||
+        (!module.descriptor.id.includes('block-') &&
+          !module.descriptor.requires?.some(({ id }) => id === 'seedlands:block-actions') &&
+          !module.descriptor.permissions?.some(({ resource }) => resource.startsWith('seedlands.block-'))),
+    ),
     ...extra,
   ];
-  const root = definePack({ id: 'test:block-actions', version: '1.0.0', kind: 'playbook', modules });
+  const root = definePack({
+    id: pack.manifest.id,
+    version: pack.manifest.version,
+    kind: pack.manifest.kind,
+    entry: pack.manifest.entry,
+    resources: pack.manifest.resources,
+    presentation: pack.manifest.presentation,
+    modules,
+  });
   const composition = assembleWorldPacks(
     [
       {
         ...root,
-        integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
+        integrity: {
+          algorithm: 'sha256',
+          manifestDigest: 'a'.repeat(64),
+          entryDigest: 'b'.repeat(64),
+          resources: (root.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
+        },
       },
     ],
     {
-      approvedPermissions: { 'test:block-actions': modules.flatMap((module) => module.descriptor.permissions ?? []) },
+      approvedPermissions: {
+        [pack.manifest.id]: modules.flatMap((module) => module.descriptor.permissions ?? []),
+      },
     },
   );
   const authority = createGameplayActorAuthority(composition.resources, { playerAlias: 'human' });
@@ -131,7 +152,7 @@ describe('actual registered Block consumers', () => {
     expect(server.placeVoxel('alice', position)).toMatchObject({ success: false, reason: 'test-final-clone-failure' });
     expect(failed).toBe(true);
     expect(snapshot(server)).toEqual(before);
-    expect(server.advanceGameplayRules(0).commits).toHaveLength(0);
+    expect(server.advanceGameplayRules(1e-9).commits).toHaveLength(0);
   });
   it('revalidates current geometry after final placement receipt cloning', () => {
     const { server } = setup(true, [], (value) => {
@@ -146,7 +167,7 @@ describe('actual registered Block consumers', () => {
     expect(server.getVoxel(...position)).toBe(Voxel.Air);
     expect(server.getInventory('alice')).toEqual(inventory);
     expect(server.queryEntities({ type: 'world-item' })).toHaveLength(0);
-    expect(server.advanceGameplayRules(0).commits).toHaveLength(0);
+    expect(server.advanceGameplayRules(1e-9).commits).toHaveLength(0);
   });
   it('does not let an actor complete a break before its host time has elapsed', () => {
     const { server, authority } = setup();
@@ -249,8 +270,8 @@ describe('actual registered Block consumers', () => {
     expect(server.queryEntities({ type: 'world-item' })).toHaveLength(1);
     expect(() => snapshot(server)).not.toThrow();
     rejectBob = false;
-    expect(server.advanceGameplayRules(0).commits).toHaveLength(2);
-    expect(server.advanceGameplayRules(0).commits).toHaveLength(0);
+    expect(server.advanceGameplayRules(1e-9).commits).toHaveLength(2);
+    expect(server.advanceGameplayRules(1e-9).commits).toHaveLength(0);
     expect(server.queryEntities({ type: 'world-item' })).toHaveLength(2);
   });
   it('does not complete mining when an after rule vetoes its next clock commit', () => {

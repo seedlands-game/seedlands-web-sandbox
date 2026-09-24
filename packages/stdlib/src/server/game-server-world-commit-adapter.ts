@@ -17,7 +17,7 @@ import { assertWorldEditBatchCardinality } from './world-edit-batch-plan';
 type Options = Readonly<{
   chunks: Map<string, ServerChunk>;
   getChunk(cx: number, cy: number, cz: number): ServerChunk;
-  kernelState: KernelStateOwner;
+  kernelState(): KernelStateOwner;
   mutationCount: Readonly<{ get(): number; set(value: number): void }>;
   platform: Pick<CorePlatformPorts, 'now'>;
   fluidChunks: FluidChunkAccess;
@@ -34,11 +34,14 @@ type Options = Readonly<{
 export function createGameServerWorldCommitApi(options: Options) {
   const commits = new ServerWorldCommitHost({
     ...options,
-    getRevision: () => options.kernelState.worldRevision,
-    setRevision: (revision) => options.kernelState.commitWorldRevision(options.kernelState.epoch, revision),
+    getRevision: () => options.kernelState().worldRevision,
+    setRevision: (revision) => {
+      const owner = options.kernelState();
+      owner.commitWorldRevision(owner.epoch, revision);
+    },
     addMutationCount: (count) => options.mutationCount.set(options.mutationCount.get() + count),
     prepareCommitMetadata: (revision, count) =>
-      prepareWorldCommitMetadata(options.kernelState, revision, count, options.mutationCount),
+      prepareWorldCommitMetadata(options.kernelState(), revision, count, options.mutationCount),
   });
   return Object.freeze({
     commits,

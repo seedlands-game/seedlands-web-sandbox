@@ -1,5 +1,5 @@
 import { assertGeneratedChunk, requireWorldgenProvider, type KernelWorldgenProvider } from '@seedlands/kernel/spatial';
-import { chunkKey } from '../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../world/voxel';
 import { legacyFluid } from './fluid/fluid-cell-state';
 import type { EntityStore } from './gameplay/entity-store';
 import type { StationStateCodec } from './gameplay/ecs-station-state';
@@ -23,6 +23,7 @@ type Input = Readonly<{
   candidateEntities: EntityStore;
   stationCodec?: StationStateCodec;
   voxelSemantics?: VoxelSemanticsResolver;
+  mediaPositions?: readonly (readonly [number, number, number])[];
 }>;
 
 export function generateGameServerChunk(
@@ -74,6 +75,8 @@ export function generateGameServerChunk(
 /** Builds every station-dependent Chunk before the live gameplay owner is exchanged. */
 export async function prepareGameServerRestoreChunks(input: Input): Promise<Map<string, ServerChunk>> {
   const keys = new Set([...stationChunkKeys(input.currentEntities), ...stationChunkKeys(input.candidateEntities)]);
+  for (const [x, y, z] of input.mediaPositions ?? [])
+    keys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
   const prepared = new Map<string, ServerChunk>();
   for (const key of keys) {
     const [cx, cy, cz] = key.split(',').map(Number) as [number, number, number];

@@ -1,25 +1,34 @@
 import { expect, it } from 'vitest';
 import { assembleOverworldPacks, createGameplaySystemAuthority } from '@seedlands/stdlib/host';
-import { pack } from '../../../../../../playbooks/classic/src/pack';
 import { GameplayRuntime } from '../../../fixtures/classic/content';
-import { capturedLegacyCompositionIdentity } from '../../../fixtures/classic/legacy-composition';
+import { classicKernelMigrationCompositionIdentity } from '../../../../../../playbooks/classic/src/legacy-composition-identities';
 import {
   createGameplaySnapshotMetadata,
   type GameplaySnapshotV3,
 } from '../../../../../../packages/stdlib/src/server/gameplay/gameplay-snapshot';
 import { testCorePlatform } from '../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './composition/classic-gameplay-domain-options';
 
 function create() {
+  const modules = classicGameplayDomainModules(['seedlands:overworld-content', 'seedlands:overworld-needs-rules']);
   const composition = assembleOverworldPacks([
     {
-      ...pack,
+      manifest: {
+        schemaVersion: 1,
+        id: 'seedlands:overworld',
+        version: '1.0.0',
+        kind: 'playbook',
+        entry: 'overworld.mjs',
+        modules: modules.map(({ descriptor }) => descriptor),
+      },
+      modules,
       integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
     },
   ]);
   const world = new GameplayRuntime({
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
-    legacyCompositionIdentity: capturedLegacyCompositionIdentity(),
+    legacyCompositionIdentity: classicKernelMigrationCompositionIdentity,
     platform: testCorePlatform,
     getWorldTime: () => 0,
     getVoxel: () => 0,
@@ -35,14 +44,14 @@ it('restores 512 retained actors, but rejects a 513-actor V3 or V4 before replac
   const source = create();
   for (let index = 0; index < 512; index++)
     source.spawnAutonomous(
-      { id: `npc-${index}`, type: 'npc', archetype: 'settler', position: [index, 1, 3] },
-      { archetype: 'settler' },
+      { id: `npc-${index}`, type: 'creature', archetype: 'zombie', position: [index, 1, 3] },
+      { archetype: 'zombie' },
     );
   const good = source.createSnapshot();
   const restored = create();
   restored.restoreSnapshot(good);
   expect(restored.simulation.actorIds()).toHaveLength(512);
-  source.entities.spawn({ id: 'overflow', type: 'npc', archetype: 'settler', position: [0, 1, 3] });
+  source.entities.spawn({ id: 'overflow', type: 'creature', archetype: 'zombie', position: [0, 1, 3] });
   const bad = source.createSnapshot();
   bad.simulation.actors.push({ ...bad.simulation.actors[0], entityId: 'overflow' });
   const legacy: GameplaySnapshotV3 = {

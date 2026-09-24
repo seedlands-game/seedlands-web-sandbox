@@ -33,6 +33,7 @@ import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
 import { validateCropCheckpoint, type CropCheckpoint } from './crop-runtime';
 import { validateFinalEntitiesCheckpoint, type FinalEntitiesCheckpoint } from './final-entities-runtime';
 import { validateGameplayProgressCheckpoint, type GameplayProgressCheckpoint } from './gameplay-progress-runtime';
+import type { RegisteredMediaPlaybackCheckpointV1 } from './modules/registered-media-playback-runtime';
 export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
 import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
@@ -81,6 +82,7 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   crops?: CropCheckpoint;
   finalEntities?: FinalEntitiesCheckpoint;
   progress?: GameplayProgressCheckpoint;
+  media?: RegisteredMediaPlaybackCheckpointV1;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -330,7 +332,12 @@ export function validateGameplaySnapshot(
 
   const sourceVersion = source.version;
   const items = options.items ?? defaultItemDefinitionRegistry;
-  const entities = new EntityStore(items, options.stationCodec, options.playerLayout, options.actorProfiles);
+  const entities = new EntityStore(
+    items,
+    options.stationCodec,
+    sourceVersion === 4 ? options.playerLayout : undefined,
+    options.actorProfiles,
+  );
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {

@@ -25,6 +25,7 @@ import type { CropRuntime } from './crop-runtime';
 import type { FinalEntitiesRuntime } from './final-entities-runtime';
 import type { GameplayProgressRuntime } from './gameplay-progress-runtime';
 import type { GameplaySnapshotMigration, GameplaySnapshotMigrationReport } from './gameplay-snapshot-migration';
+import type { RegisteredMediaPlaybackRuntime } from './modules/registered-media-playback-runtime';
 
 type Options = Readonly<{
   callbacks: GameplayCallbacks;
@@ -34,6 +35,7 @@ type Options = Readonly<{
   modules: GameplayModuleRuntime;
   registeredCombat: RegisteredCombatRuntime | null;
   registeredBlocks: RegisteredBlockRuntime | null;
+  registeredMedia: RegisteredMediaPlaybackRuntime | null;
   behaviorCapabilities: BehaviorCapabilityRegistry | null;
   content: GameplayContent;
   entities: EntityStore;
@@ -90,10 +92,14 @@ export class GameplayRuntimeCheckpoint {
     const ruleset = this.options.ruleset.snapshot();
     if (ruleset) snapshot.ruleset = ruleset;
     if (moduleSchedule) snapshot.moduleSchedule = moduleSchedule;
+    if (this.options.registeredMedia) snapshot.media = this.options.registeredMedia.checkpoint();
     return snapshot;
   }
 
-  restore(raw: unknown): { version: 1 | 2 | 3 | 4; worldTime?: number } {
+  restore(
+    raw: unknown,
+    options: Readonly<{ deferMediaWorldValidation?: boolean }> = {},
+  ): { version: 1 | 2 | 3 | 4; worldTime?: number } {
     const { callbacks } = this.options;
     GameplaySnapshot.validateGameplaySnapshotHeader(raw);
     const migrated = this.options.snapshotMigration
@@ -119,6 +125,15 @@ export class GameplayRuntimeCheckpoint {
       'moduleSchedule' in migrated.snapshot
     )
       throw new TypeError('Gameplay module schedule requires a composed host.');
+    const mediaRaw =
+      migrated.snapshot && typeof migrated.snapshot === 'object' && 'media' in migrated.snapshot
+        ? migrated.snapshot.media
+        : undefined;
+    if (!this.options.registeredMedia && mediaRaw !== undefined)
+      throw new TypeError('Gameplay media checkpoint requires a composed Media owner.');
+    const media = this.options.registeredMedia?.prepareCheckpointCandidate(mediaRaw, {
+      deferDeviceValidation: options.deferMediaWorldValidation,
+    });
     const restored = GameplaySnapshot.restoreGameplayRuntimeSnapshot(migrated.snapshot, {
       getVoxel: (x, y, z) => callbacks.getVoxel([x, y, z]) ?? Voxel.Stone,
       getWorldTime: callbacks.getWorldTime,
@@ -208,6 +223,8 @@ export class GameplayRuntimeCheckpoint {
         ? (migrated.snapshot.progress as import('./gameplay-progress-runtime').GameplayProgressCheckpoint)
         : undefined,
     );
+    media?.validate();
+    media?.apply();
     installSchedule?.();
     this.lastMigrationReports = Object.freeze(
       migrated.reports.map((report) =>

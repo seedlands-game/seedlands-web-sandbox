@@ -4,6 +4,15 @@ import type { PreparedStructureParticipant } from './modules/structure-host-comm
 
 export type GameplayStructureCounters = { inventoryOperationCount: number; eventCount: number };
 
+export function prepareGameplayWorldChange(
+  owner: KernelStateOwner,
+  counters: GameplayStructureCounters,
+  inventoryChanged: boolean,
+  precedingWorldCommit: Pick<WorldCommitResult, 'committed' | 'worldRevision'>,
+): PreparedStructureParticipant & Readonly<{ revision: number }> {
+  return prepareGameplayStructureChange(owner, counters, inventoryChanged, precedingWorldCommit);
+}
+
 export function prepareGameplayStructureChange(
   owner: KernelStateOwner,
   counters: GameplayStructureCounters,

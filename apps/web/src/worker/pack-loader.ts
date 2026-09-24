@@ -6,6 +6,7 @@ import type {
 } from '@seedlands/stdlib/server/composition/host-api';
 
 type FileLock = Readonly<{ path: string; sha256: string }>;
+type ResourceLock = FileLock & Readonly<{ size: number; contentType: string }>;
 const object = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const fileLock = (value: unknown): FileLock => {
@@ -19,6 +20,19 @@ const fileLock = (value: unknown): FileLock => {
   )
     throw new TypeError('Invalid Pack file lock.');
   return { path: value.path, sha256: value.sha256.toLowerCase() };
+};
+const resourceLock = (value: unknown): ResourceLock => {
+  const file = fileLock(value);
+  if (
+    !object(value) ||
+    !exactKeys(value, ['path', 'sha256', 'size', 'contentType']) ||
+    !Number.isSafeInteger(value.size) ||
+    (value.size as number) <= 0 ||
+    typeof value.contentType !== 'string' ||
+    !/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i.test(value.contentType)
+  )
+    throw new TypeError('Invalid Pack resource lock.');
+  return { ...file, size: value.size as number, contentType: value.contentType };
 };
 const hash = async (bytes: Uint8Array<ArrayBuffer>) =>
   [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
@@ -193,7 +207,7 @@ export async function loadBrowserPackArtifacts(
       !Array.isArray(manifest.modules)
     )
       throw new TypeError('Pack manifest and lock disagree.');
-    const resourceLocks = raw.resources.map(fileLock);
+    const resourceLocks = raw.resources.map(resourceLock);
     const expected = manifest.resources ?? [];
     if (
       !Array.isArray(expected) ||
@@ -202,7 +216,10 @@ export async function loadBrowserPackArtifacts(
     )
       throw new TypeError('Pack resource lock does not match manifest.');
     const bytes = await verified(entryFile);
-    for (const file of resourceLocks) await verified(file);
+    for (const file of resourceLocks) {
+      const resource = await verified(file);
+      if (resource.byteLength !== file.size) throw new TypeError(`Pack resource size mismatch: ${file.path}`);
+    }
     staged.push({
       manifest: manifest as PackManifest,
       bytes,

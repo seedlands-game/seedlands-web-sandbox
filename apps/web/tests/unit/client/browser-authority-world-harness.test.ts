@@ -7,6 +7,30 @@ import type {
   AuthorityReady,
   AuthorityResponse,
 } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import type { MediaPlaybackFactV1, MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
+
+const mediaDevice = { kind: 'voxel' as const, position: [1, 2, 3] as const, definitionId: 'sample:device' };
+const mediaResource = { packId: 'sample:pack', path: 'assets/audio/track.mp3' } as const;
+const mediaProjection = (revision: number): MediaPlaybackProjectionV1 => ({
+  version: 1,
+  device: mediaDevice,
+  revision,
+  slot: { itemId: 'sample:disc', trackId: 'sample:track' },
+  resource: mediaResource,
+  playing: false,
+  resumePending: true,
+});
+const mediaFact = (revision: number): MediaPlaybackFactV1 => ({
+  version: 1,
+  kind: 'activate',
+  device: mediaDevice,
+  revision,
+  previousTrackId: 'sample:track',
+  trackId: 'sample:track',
+  resource: mediaResource,
+  playing: true,
+  resumePending: false,
+});
 
 class FakeAuthorityWorker implements AuthorityWorkerPort {
   onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
@@ -293,5 +317,171 @@ describe('Browser Authority world harness', () => {
     });
     expect(worker.posts.at(-1)).toMatchObject({ kind: 'input', epoch: 'world:1', runtimeEpoch: 'world:1:runtime:1' });
     expect(client.storageBytesMeasurement).toBeNull();
+  });
+
+  it('atomically replaces media epoch on restore, accepts new-world facts and drops old-world facts', async () => {
+    const worker = new FakeAuthorityWorker();
+    const order: string[] = [];
+    const projections = vi.fn(() => order.push('projection'));
+    const facts = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'session:1', {
+      onMediaProjection: projections,
+      onMediaFacts: facts,
+      onWorldEpochChanged: () => order.push('epoch'),
+    });
+    const restoring = client.world.checkpoint({ kind: 'restore', snapshot: {} });
+    const request = worker.posts.at(-1) as { requestId: number };
+    const restoredBase = ready();
+    const restoredReady = {
+      ...restoredBase,
+      snapshot: { ...restoredBase.snapshot, epoch: 'runtime:2' },
+      gameplay: {
+        ...restoredBase.gameplay,
+        media: [{ ...mediaProjection(2), playing: true, resumePending: false }],
+      },
+    };
+    worker.emit({
+      kind: 'world-harness-response',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      requestId: request.requestId,
+      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      ready: restoredReady,
+      runtimeEpoch: 'runtime:2',
+    } as AuthorityResponse);
+    await restoring;
+    expect(order).toEqual(['epoch', 'projection']);
+
+    worker.emit({
+      kind: 'authority-media-facts',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      batch: { version: 1, worldEpoch: 'runtime:1', worldRevision: 0, gameplayRevision: 2, facts: [mediaFact(3)] },
+    });
+    worker.emit({
+      kind: 'authority-media-facts',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      batch: { version: 1, worldEpoch: 'runtime:2', worldRevision: 0, gameplayRevision: 2, facts: [mediaFact(2)] },
+    });
+    expect(facts).toHaveBeenCalledOnce();
+  });
+
+  it('preserves the old media world when a restored projection batch is malformed', async () => {
+    const worker = new FakeAuthorityWorker();
+    const projections = vi.fn();
+    const facts = vi.fn();
+    const changed = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'session:1', {
+      onMediaProjection: projections,
+      onMediaFacts: facts,
+      onWorldEpochChanged: changed,
+    });
+    const initialBase = ready();
+    const initialReady = {
+      ...initialBase,
+      snapshot: { ...initialBase.snapshot, epoch: 'session:1' },
+      gameplay: {
+        ...initialBase.gameplay,
+        media: [{ ...mediaProjection(1), playing: true, resumePending: false }],
+      },
+    };
+    const starting = client.start({
+      seedText: 'worker-client',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies: initialReady.frequencies,
+    });
+    worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'session:1', ready: initialReady });
+    await starting;
+    worker.emit({
+      kind: 'authority-media-facts',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      batch: { version: 1, worldEpoch: 'session:1', worldRevision: 0, gameplayRevision: 1, facts: [mediaFact(1)] },
+    });
+    projections.mockClear();
+    facts.mockClear();
+
+    const restoring = client.world.checkpoint({ kind: 'restore', snapshot: {} });
+    const request = worker.posts.at(-1) as { requestId: number };
+    const restoredBase = ready();
+    const restoredReady = {
+      ...restoredBase,
+      snapshot: { ...restoredBase.snapshot, epoch: 'runtime:2' },
+      gameplay: { ...restoredBase.gameplay, media: [{ ...mediaProjection(2), resource: null }] },
+    };
+    worker.emit({
+      kind: 'world-harness-response',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      requestId: request.requestId,
+      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      ready: restoredReady,
+      runtimeEpoch: 'runtime:2',
+    } as AuthorityResponse);
+
+    await expect(restoring).rejects.toThrow(/slot and resource/i);
+    expect(client.runtimeEpoch).toBe('session:1');
+    expect(projections).not.toHaveBeenCalled();
+    expect(changed).not.toHaveBeenCalled();
+
+    worker.emit({
+      kind: 'authority-media-facts',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      batch: { version: 1, worldEpoch: 'session:1', worldRevision: 0, gameplayRevision: 1, facts: [mediaFact(1)] },
+    });
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      snapshot: { ...initialReady.snapshot, physicsTick: 1 },
+      gameplay: {
+        ...initialReady.gameplay,
+        gameplayRevision: 2,
+        media: [{ ...mediaProjection(2), playing: true, resumePending: false }],
+      },
+    });
+    worker.emit({
+      kind: 'authority-media-facts',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      batch: { version: 1, worldEpoch: 'session:1', worldRevision: 0, gameplayRevision: 2, facts: [mediaFact(2)] },
+    });
+    expect(facts).toHaveBeenCalledOnce();
+  });
+
+  it('rejects a restored runtime epoch mismatch before replacing media state', async () => {
+    const worker = new FakeAuthorityWorker();
+    const projections = vi.fn();
+    const changed = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'session:1', {
+      onMediaProjection: projections,
+      onWorldEpochChanged: changed,
+    });
+    const restoring = client.world.checkpoint({ kind: 'restore', snapshot: {} });
+    const request = worker.posts.at(-1) as { requestId: number };
+    const restoredBase = ready();
+    const restoredReady = {
+      ...restoredBase,
+      snapshot: { ...restoredBase.snapshot, epoch: 'runtime:2' },
+      gameplay: { ...restoredBase.gameplay, media: [mediaProjection(2)] },
+    };
+    worker.emit({
+      kind: 'world-harness-response',
+      protocolVersion: 1,
+      epoch: 'session:1',
+      requestId: request.requestId,
+      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      ready: restoredReady,
+      runtimeEpoch: 'runtime:other',
+    } as AuthorityResponse);
+
+    await expect(restoring).rejects.toThrow(/runtime epoch/i);
+    expect(client.runtimeEpoch).toBe('session:1');
+    expect(projections).not.toHaveBeenCalled();
+    expect(changed).not.toHaveBeenCalled();
   });
 });

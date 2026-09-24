@@ -19,6 +19,7 @@ import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authorit
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
+import { publishAuthorityMediaBatches } from './authority-media-publisher';
 import { postAuthorityFatal } from './authority-worker-fatal';
 import { BrowserCharacterAuthority } from './authority-worker-character-control';
 import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
@@ -83,7 +84,8 @@ const tick = () => {
       const now = performance.now();
       const snapshot = runtime.wake(now);
       if (now - lastSnapshotPublishedAt < 1000 / 60) return;
-      const publishGameplay = now - lastGameplayPublishedAt >= 50;
+      const media = runtime.takeMediaFacts(runtimeEpoch);
+      const publishGameplay = media.length > 0 || now - lastGameplayPublishedAt >= 50;
       const commits = runtime.takeCommits();
       post({
         kind: 'authority-snapshot',
@@ -93,6 +95,7 @@ const tick = () => {
         ...(publishGameplay ? { gameplay: runtime.view() } : {}),
         ...(commits.length ? { commits } : {}),
       });
+      publishAuthorityMediaBatches(epoch, media, post);
       lastSnapshotPublishedAt = now;
       if (publishGameplay) lastGameplayPublishedAt = now;
     })

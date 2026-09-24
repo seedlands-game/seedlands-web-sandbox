@@ -43,7 +43,10 @@ import {
   queueAuthorityRuntimeRecoveries,
 } from './authority-runtime-geometry';
 import { createAuthorityStructureTargetPort } from './authority-structure-runtime';
+import { createAuthorityMediaTargetPort } from './authority-media-runtime';
 import { createAuthoritySessionServerPort } from './authority-session-server-port';
+import { cloneMediaPlaybackCommittedBatchV1 } from '../protocol/media-playback-protocol';
+import type { MediaPlaybackCommittedBatchV1 } from '../protocol/media-playback-protocol';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -65,6 +68,7 @@ export class AuthorityRuntime {
   private readonly mutationPreparation: AuthorityMutationPreparation;
   private readonly canonicalPreparation: AuthorityCanonicalPreparation;
   private readonly structureTargets;
+  private readonly mediaTargets;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -78,6 +82,7 @@ export class AuthorityRuntime {
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.residency = new AuthorityResidencyRuntime(server);
     this.structureTargets = createAuthorityStructureTargetPort(server);
+    this.mediaTargets = createAuthorityMediaTargetPort(server);
     this.mutationPreparation = new AuthorityMutationPreparation(
       server,
       (key) => this.requestUnknownChunk(key),
@@ -403,6 +408,7 @@ export class AuthorityRuntime {
       submittedAction,
       (commit) => this.recordWorldCommit(commit),
       this.structureTargets,
+      this.mediaTargets,
     );
     this.commitIfServerChanged(before);
     return { submittedAction, result, gameplay: this.view(), commits: this.takeCommits() };
@@ -483,6 +489,14 @@ export class AuthorityRuntime {
 
   takeCommits(): WorldCommitResult[] {
     return this.pendingCommits.splice(0);
+  }
+
+  takeMediaFacts(worldEpoch: string): readonly MediaPlaybackCommittedBatchV1[] {
+    return Object.freeze(
+      this.server
+        .takeCommittedMediaFacts()
+        .map((batch) => cloneMediaPlaybackCommittedBatchV1({ version: 1, worldEpoch, ...batch }, worldEpoch)),
+    );
   }
 
   private requestFluidWork(): void {

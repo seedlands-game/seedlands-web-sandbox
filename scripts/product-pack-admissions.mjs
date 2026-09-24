@@ -17,6 +17,7 @@ const overworldPermissions = Object.freeze([
   permission('seedlands.combat', ['read', 'execute']),
   permission('seedlands.combat-clock', ['read', 'execute']),
   permission('seedlands.mode', ['read', 'write', 'execute']),
+  permission('seedlands.media-playback', ['read', 'write', 'execute']),
 ]);
 
 const alternativePermissions = Object.freeze([

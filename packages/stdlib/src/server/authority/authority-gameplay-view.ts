@@ -25,6 +25,7 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     progress: server.progress.snapshot(playerId),
     difficulty: server.gameplayDifficulty,
     armorPoints: server.getPlayerArmorPoints(playerId),
+    media: server.mediaProjections(),
     metrics: server.gameplayMetrics(),
   };
 }

@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { gunzipSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import {
   assembleOverworldPacks,
@@ -7,14 +6,32 @@ import {
   createGameplaySystemAuthority,
 } from '@seedlands/stdlib/host';
 import { pack } from '../../../../../../../playbooks/classic/src/pack';
+import { classicGameplaySnapshotPredecessors } from '../../../../../../../playbooks/classic/src/legacy-composition-identities';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
 import type { CompositionCheckpointIdentity } from '../../../../../../../packages/stdlib/src/server/composition/checkpoint-identity';
+import { prepareWorldCommitMetadata } from '../../../../../../../packages/stdlib/src/server/prepared-world-commit-metadata';
+import { prepareWorldEditBatch } from '../../../../../../../packages/stdlib/src/server/world-transaction-commit';
+import type { ServerChunk } from '../../../../../../../packages/stdlib/src/server/game-server-types';
+import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 
 const PRECHANGE_CLASSIC_PACK_INTEGRITY = {
   manifestDigest: '74d0a1a50d2812053fa442ae00137d285dd6b80954c3e21d788053eb2ec243f2',
   entryDigest: 'a0822ae7e3ae985c47db22deee54d77f788a0cd72eece3f4a4c46a4c6037eee6',
 } as const;
+const PRE_MEDIA_CLASSIC_PACK_INTEGRITY = {
+  manifestDigest: '8c85965878299e56d918bdc89302789d38a26d3a04a1d924fe4e885daca3fae4',
+  entryDigest: '9a22f2d679b8a00bba8a66658457de477c1b05500cf353fb7ed368c6d69bf12a',
+} as const;
+const PRESENTATION_DIGEST = 'a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b';
+const MEDIA_OPERATION_IDS = new Set([
+  'seedlands:media-activate',
+  'seedlands:media-eject',
+  'seedlands:media-insert',
+  'seedlands:media-insert-and-activate',
+  'seedlands:media-stop',
+  'seedlands:media-switch',
+]);
 
 function prechangeClassicIdentity(): CompositionCheckpointIdentity {
   const composition = JSON.parse(
@@ -32,7 +49,32 @@ function prechangeClassicIdentity(): CompositionCheckpointIdentity {
   };
 }
 
-function create(digest = 'a', entryDigest = 'b'.repeat(64), legacyCompositionIdentity?: CompositionCheckpointIdentity) {
+function preMediaClassicIdentity(current: CompositionCheckpointIdentity): CompositionCheckpointIdentity {
+  const pack = current.packLock[0]!;
+  return {
+    ...current,
+    packLock: [
+      {
+        ...pack,
+        integrity: {
+          algorithm: 'sha256',
+          ...PRE_MEDIA_CLASSIC_PACK_INTEGRITY,
+          resources: [{ path: 'playbooks/classic/presentation.json', digest: PRESENTATION_DIGEST }],
+        },
+      },
+    ],
+    definitionMap: {
+      ...current.definitionMap,
+      modules: current.definitionMap.modules.filter(({ id }) => id !== 'seedlands:overworld-media'),
+      capabilities: current.definitionMap.capabilities.filter(({ id }) => id !== 'seedlands:media-playback'),
+      resources: current.definitionMap.resources.filter(({ id }) => id !== 'seedlands.media-playback'),
+      stateCodecs: current.definitionMap.stateCodecs.filter(({ id }) => id !== 'seedlands:media-playback-device'),
+      operations: current.definitionMap.operations.filter(({ id }) => !MEDIA_OPERATION_IDS.has(id)),
+    },
+  };
+}
+
+function create(digest = 'a', entryDigest = 'b'.repeat(64)) {
   const composition = assembleOverworldPacks([
     {
       ...pack,
@@ -40,22 +82,91 @@ function create(digest = 'a', entryDigest = 'b'.repeat(64), legacyCompositionIde
         algorithm: 'sha256',
         manifestDigest: digest.length === 1 ? digest.repeat(64) : digest,
         entryDigest,
-        resources: [],
+        resources: pack.manifest.resources!.map((path) => ({ path, digest: 'd'.repeat(64) })),
       },
     },
   ]);
-  return new GameplayRuntime({
+  const chunks = new Map<string, ServerChunk>();
+  const chunkAt = (cx: number, cy: number, cz: number) => {
+    const key = chunkKey(cx, cy, cz);
+    let chunk = chunks.get(key);
+    if (!chunk) {
+      chunk = {
+        key,
+        cx,
+        cy,
+        cz,
+        voxels: new Uint16Array(CHUNK_SIZE ** 3),
+        fluid: new Uint8Array(CHUNK_SIZE ** 3),
+        revision: 0,
+        persistedRevision: 0,
+        dirty: false,
+        materialized: false,
+        accessEpoch: 0,
+      };
+      chunks.set(key, chunk);
+    }
+    return chunk;
+  };
+  const readCell = ([x, y, z]: readonly [number, number, number]) => {
+    const chunk = chunkAt(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
+    const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
+    return { voxel: chunk.voxels[index]!, fluid: chunk.fluid[index]! };
+  };
+  let mutations = 0;
+  const runtime = new GameplayRuntime({
     composition,
     moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
-    legacyCompositionIdentity,
     platform: testCorePlatform,
-    getVoxel: () => 0,
+    getVoxel: (position) => readCell(position).voxel,
+    getLoadedCell: readCell,
     getWorldTime: () => 12,
-    prepareVoxelEdit: () => {
-      throw new Error('unused');
+    prepareVoxelEdit: (actorId, position, value) => {
+      const current = readCell(position);
+      return prepareWorldEditBatch(
+        {
+          getChunk: chunkAt,
+          getRevision: () => runtime.kernelState.worldRevision,
+          prepareCommitMetadata: (revision, count) =>
+            prepareWorldCommitMetadata(runtime.kernelState, revision, count, {
+              get: () => mutations,
+              set: (value) => (mutations = value),
+            }),
+          isVoxelRegistered: (voxel) => composition.definitionMap.voxels.some(({ storageId }) => storageId === voxel),
+        },
+        actorId,
+        [
+          {
+            x: position[0],
+            y: position[1],
+            z: position[2],
+            value,
+            expectedVoxel: current.voxel,
+            expectedFluid: current.fluid,
+          },
+        ],
+        () => 0,
+      );
     },
+    prepareVoxelEdits: (actorId, edits) =>
+      prepareWorldEditBatch(
+        {
+          getChunk: chunkAt,
+          getRevision: () => runtime.kernelState.worldRevision,
+          prepareCommitMetadata: (revision, count) =>
+            prepareWorldCommitMetadata(runtime.kernelState, revision, count, {
+              get: () => mutations,
+              set: (value) => (mutations = value),
+            }),
+          isVoxelRegistered: (voxel) => composition.definitionMap.voxels.some(({ storageId }) => storageId === voxel),
+        },
+        actorId,
+        edits,
+        () => 0,
+      ),
   });
+  return runtime;
 }
 
 describe('gameplay composition checkpoint', () => {
@@ -97,42 +208,66 @@ describe('gameplay composition checkpoint', () => {
   );
 
   it('migrates only the exact pre-pointer overworld V4 Pack identity', () => {
-    const source = create(
-      '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
-      '4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2',
-    );
+    const source = create();
     source.spawnPlayer({ id: 'saved', position: [0, 2, 0] });
     source.giveItem('saved', { itemId: 'plank', count: 9 });
-    const saved = source.createSnapshot();
-    const frozenBase = JSON.parse(
-      gunzipSync(
-        readFileSync(new URL('../../../../fixtures/checkpoints/base-checkpoint.json.gz', import.meta.url)),
-      ).toString('utf8'),
-    ) as { args: [{ snapshot: { gameplay: { composition: { definitionMap: unknown } } } }] };
-    // The old digest must carry its frozen registration graph, not the current module graph.
-    const legacySaved = {
-      ...saved,
-      composition: {
-        ...saved.composition,
-        definitionMap: frozenBase.args[0].snapshot.gameplay.composition.definitionMap,
-      },
-    };
-    const legacyActor = saved.entityStore.actors.find((actor) => actor.entityId === 'saved')! as {
+    const legacySaved = source.createSnapshot();
+    const predecessor = classicGameplaySnapshotPredecessors[1]!;
+    expect(predecessor.gameplayVersions).toEqual([4]);
+    expect(predecessor.identity.packLock[0]!.integrity).toEqual({
+      algorithm: 'sha256',
+      manifestDigest: '05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd',
+      entryDigest: '4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2',
+      resources: [],
+    });
+    // This is a synthetic V4 payload under Classic's frozen pre-pointer source envelope.
+    legacySaved.composition = structuredClone(predecessor.identity);
+    const legacyActor = legacySaved.entityStore.actors.find((actor) => actor.entityId === 'saved')! as {
       inventoryRevision?: number;
       inventoryCursor?: unknown;
     };
     delete legacyActor.inventoryRevision;
     delete legacyActor.inventoryCursor;
-    const target = create('c', 'b'.repeat(64), legacySaved.composition);
+    const altered = structuredClone(legacySaved);
+    const alteredPack = altered.composition!.packLock[0]!;
+    altered.composition = {
+      ...altered.composition!,
+      packLock: [
+        {
+          ...alteredPack,
+          integrity: {
+            ...alteredPack.integrity,
+            entryDigest: `0${alteredPack.integrity.entryDigest.slice(1)}`,
+          },
+        },
+      ],
+    };
+    const target = create('c');
 
     expect(target.restoreSnapshot(legacySaved)).toEqual({ version: 4, worldTime: 12 });
     expect(target.getInventory('saved').slots[0]).toEqual({ itemId: 'plank', count: 9 });
     expect(target.getInventoryPointerView('saved')).toMatchObject({ revision: 0, cursor: { stack: null } });
 
-    const altered = structuredClone(legacySaved) as typeof saved & {
-      composition: { packLock: Array<{ integrity: { entryDigest: string } }> };
-    };
-    altered.composition.packLock[0]!.integrity.entryDigest = `0${altered.composition.packLock[0]!.integrity.entryDigest.slice(1)}`;
+    const before = target.createSnapshot();
+    expect(() => target.restoreSnapshot(altered)).toThrow(/composition/i);
+    expect(target.createSnapshot()).toEqual(before);
+  });
+
+  it('migrates only the exact pre-Media Classic V4 identity and installs an empty Media child', () => {
+    const source = create();
+    source.spawnPlayer({ id: 'saved', position: [0, 2, 0] });
+    source.giveItem('saved', { itemId: 'record-13', count: 1 });
+    const saved = source.createSnapshot();
+    saved.composition = preMediaClassicIdentity(saved.composition!);
+    delete saved.media;
+    const target = create('c');
+
+    expect(target.restoreSnapshot(saved)).toEqual({ version: 4, worldTime: 12 });
+    expect(target.getInventory('saved').slots[0]).toEqual({ itemId: 'record-13', count: 1 });
+    expect(target.media.projections()).toEqual([]);
+
+    const altered = structuredClone(saved);
+    altered.composition!.definitionMap.operations.pop();
     const before = target.createSnapshot();
     expect(() => target.restoreSnapshot(altered)).toThrow(/composition/i);
     expect(target.createSnapshot()).toEqual(before);

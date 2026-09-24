@@ -63,9 +63,11 @@ import { createGameplayWorldSystems } from './gameplay-world-systems';
 import { assertGameplayRevisionCapacity } from './gameplay-revision-capacity';
 import { GameplayProgressRuntime } from './gameplay-progress-runtime';
 import type { StructureTargetPortV1 } from './modules/structure-target-dispatch';
+import { GameplayMediaFacade } from './gameplay-media-facade';
+import { GameplayRuntimeMetadata } from './gameplay-runtime-metadata';
 
 type Position = [number, number, number];
-export class GameplayRuntime {
+export class GameplayRuntime extends GameplayRuntimeMetadata {
   readonly content: GameplayContent;
   readonly inventoryState: ReturnType<typeof createInventoryStatePort>;
   readonly entities: EntityStore;
@@ -78,7 +80,7 @@ export class GameplayRuntime {
   readonly environmentQueries: GameplayEnvironmentFacade;
   readonly projectiles;
   private readonly players = new Map<string, PlayerState>();
-  private persistedRevision = 0;
+  protected persistedRevision = 0;
   private readonly counters = { inventoryOperationCount: 0, eventCount: 0 };
   private readonly behaviorCapabilities: BehaviorCapabilityRegistry | null;
   private readonly compositionGuard;
@@ -96,6 +98,7 @@ export class GameplayRuntime {
   private readonly registeredCombat: RegisteredCombatRuntime | null;
   private readonly registeredStructure;
   readonly structureTargets: StructureTargetPortV1 | null;
+  readonly media: GameplayMediaFacade;
   private readonly checkpoint: GameplayRuntimeCheckpoint;
   // prettier-ignore -- compact declarations for world-system façades assembled below.
   readonly speciesInteractions;
@@ -112,6 +115,7 @@ export class GameplayRuntime {
   private readonly advanceWorldRules;
 
   constructor(private readonly callbacks: GameplayCallbacks) {
+    super();
     const resolved = resolveGameplayComposition(callbacks);
     this.content = resolved.content;
     this.environment = new EnvironmentRuntime(callbacks.environmentSeed ?? 0);
@@ -177,6 +181,7 @@ export class GameplayRuntime {
     this.registeredBlocks = registered.blocks;
     this.registeredFeeding = registered.feeding;
     this.registeredStructure = registered.structures;
+    this.media = new GameplayMediaFacade(registered.media, registered.mediaTargets, this.content.voxelSemantics);
     this.modes = new ModeRuntime({
       entities: this.entities,
       findSafeLanding: gameplayModeLandingFor(this.entities, callbacks, () => this.kernelState.gameplayRevision),
@@ -191,6 +196,7 @@ export class GameplayRuntime {
       forage: registered.forage?.state,
       stations: registered.stations?.state,
       structures: registered.structures?.state,
+      media: registered.media?.state,
       composition: callbacks.composition,
       entities: this.entities,
       clone: callbacks.platform.clone,
@@ -317,6 +323,7 @@ export class GameplayRuntime {
       modules: this.modules,
       registeredCombat: this.registeredCombat,
       registeredBlocks: this.registeredBlocks,
+      registeredMedia: registered.media,
       behaviorCapabilities: this.behaviorCapabilities,
       content: this.content,
       entities: this.entities,
@@ -363,15 +370,6 @@ export class GameplayRuntime {
     this.kernelRuntime.dispose();
   };
 
-  get gameplayTime(): number {
-    return this.kernelState.gameplayTime;
-  }
-  get gameplayRevision(): number {
-    return this.kernelState.gameplayRevision;
-  }
-  get persistedGameplayRevision(): number {
-    return this.persistedRevision;
-  }
   get snapshotMigrationReports() {
     return this.checkpoint.migrationReports;
   }
@@ -508,7 +506,8 @@ export class GameplayRuntime {
   advanceCommitUpperBound = (seconds: number): number => this.advanceWorldRules.commitUpperBound(seconds);
   createSnapshot = () => this.checkpoint.create(() => this.kernelState.gameplayRevision, this.gameplayTime);
   metrics = () => collectRuntimeStatistics(this, this.counters.inventoryOperationCount, this.counters.eventCount);
-  restoreSnapshot = (raw: unknown) => this.checkpoint.restore(raw);
+  restoreSnapshot = (raw: unknown, options: Readonly<{ deferMediaWorldValidation?: boolean }> = {}) =>
+    this.checkpoint.restore(raw, options);
   markPersisted = (revision: number): void =>
     void (this.persistedRevision = Math.max(this.persistedRevision, revision));
   private player = (id: string): PlayerState => RuntimeLifecycle.requireGameplayPlayer(this.players, id);

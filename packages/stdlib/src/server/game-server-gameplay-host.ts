@@ -34,22 +34,16 @@ import type { GameServerGameplayWorldPort } from './game-server-gameplay-world-p
 import { armorPoints } from './gameplay/armor-equipment';
 import type { ProjectileVector } from './gameplay/projectile-runtime';
 import * as ItemInteraction from './gameplay/modules/item-interaction-module';
+import type { PreparedGameplayRestore } from './game-server-gameplay-restore';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
-
-export type PreparedGameplayRestore = Readonly<{
-  gameplay: GameplayRuntime;
-  restoredVersion: 1 | 2 | 3 | 4 | null;
-  snapshotMigrationReports: readonly import('./gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
-}>;
 
 export class GameServerGameplayHost {
   private activeGameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
   private restoredVersion: 1 | 2 | 3 | 4 | null = null;
-  private snapshotMigrationReports: readonly import('./gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[] =
-    [];
+  private snapshotMigrationReports: PreparedGameplayRestore['snapshotMigrationReports'] = [];
 
   constructor(
     private readonly gameplayPersistence: Persistence | undefined,
@@ -171,6 +165,11 @@ export class GameServerGameplayHost {
   get structureTargets() {
     return this.gameplay.structureTargets;
   }
+  get mediaTargets() {
+    return this.gameplay.media.targets;
+  }
+  mediaProjections = () => this.gameplay.media.projections();
+  takeCommittedMediaFacts = () => this.gameplay.media.takeCommittedFacts();
   bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.gameplay.bindModuleOperations(authorizer, source);
   }
@@ -441,7 +440,7 @@ export class GameServerGameplayHost {
     if (snapshot) {
       const gameplay = this.createGameplay();
       try {
-        const restored = gameplay.restoreSnapshot(snapshot);
+        const restored = gameplay.restoreSnapshot(snapshot, { deferMediaWorldValidation: true });
         gameplay.kernelState.setWorldTime(gameplay.kernelState.epoch, restored.worldTime ?? this.world.worldTime());
         return {
           gameplay,

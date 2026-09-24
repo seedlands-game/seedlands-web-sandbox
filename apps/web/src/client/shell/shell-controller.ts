@@ -1,5 +1,6 @@
 export type ShellQuality = 'low' | 'medium' | 'high';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
+import { browserGameplayFailureMessage } from '../persistence/legacy-gameplay-provenance-error';
 export type ApplicationShellState = Readonly<{
   phase: 'menu' | 'loading' | 'playing' | 'paused' | 'saving';
   seed: string;
@@ -95,6 +96,6 @@ export class ShellController {
   }
 
   private message(error: unknown, fallback: string) {
-    return error instanceof Error ? error.message : fallback;
+    return error instanceof Error ? browserGameplayFailureMessage(error) : fallback;
   }
 }

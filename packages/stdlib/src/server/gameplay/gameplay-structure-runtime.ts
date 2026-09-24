@@ -10,6 +10,8 @@ import type { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
 import { gameplayContentFromComposition } from './modules/content-capabilities';
+import type { RegisteredMediaPlaybackRuntime } from './modules/registered-media-playback-runtime';
+import type { MediaPlaybackFactV1 } from './modules/media-playback-model';
 
 export function createRegisteredGameplayStructure(
   options: Readonly<{
@@ -20,6 +22,7 @@ export function createRegisteredGameplayStructure(
     counters: GameplayStructureCounters;
     simulation(): AutonomyRuntime;
     modules(): GameplayModuleRuntime;
+    media?: RegisteredMediaPlaybackRuntime | null;
   }>,
 ) {
   const enabled = options.composition?.definitionMap.capabilities.some(({ id }) => id === STRUCTURE_ACTIONS_CAPABILITY);
@@ -38,10 +41,27 @@ export function createRegisteredGameplayStructure(
     prepareGameplayChange: (inventoryChanged, commit) =>
       prepareGameplayStructureChange(options.kernelState, options.counters, inventoryChanged, commit),
     prepareFactDelivery: (facts, commit, revision) =>
-      prepareStructureFactDelivery(composition, options.kernelState, facts, commit, revision),
+      options.media
+        ? options.media.prepareFactDelivery(facts as readonly MediaPlaybackFactV1[], commit.worldRevision, revision)
+        : prepareStructureFactDelivery(composition, options.kernelState, facts, commit, revision),
     prepareCancellation: (actorId) => options.simulation().prepareCancellation([actorId], 'slot-changed'),
-    prepareDependentRemoval: createStructureDependentRemoval(composition, (position) =>
-      options.callbacks.getLoadedCell!([...position]),
+    prepareDependentRemoval: createStructureDependentRemoval(
+      composition,
+      (position) => options.callbacks.getLoadedCell!([...position]),
+      options.media
+        ? {
+            prepare(position) {
+              const removal = options.media!.prepareDependentRemoval(position);
+              return Object.freeze({
+                removed: removal.removed,
+                ejectedItem: removal.ejectedItem ? { itemId: removal.ejectedItem.itemId } : null,
+                facts: removal.fact ? Object.freeze([removal.fact]) : Object.freeze([]),
+                validate: removal.validate,
+                apply: removal.apply,
+              });
+            },
+          }
+        : undefined,
     ),
   });
   const targets = createGameplayStructureTargetRuntime({

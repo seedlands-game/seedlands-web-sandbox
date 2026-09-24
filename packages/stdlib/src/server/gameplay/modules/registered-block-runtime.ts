@@ -17,6 +17,7 @@ import {
   BLOCK_SYSTEM,
 } from './block-action-model';
 import type { GameplayStructureTargetRuntime } from '../gameplay-structure-target-runtime';
+import { MEDIA_PLAYBACK_CAPABILITY } from './media-playback-module';
 
 type Options = BlockHostOptions &
   Readonly<{
@@ -41,6 +42,13 @@ export class RegisteredBlockRuntime {
       BLOCK_FINISH_OPERATION,
       BLOCK_ADVANCE_OPERATION,
     ].every((id) => options.composition.registrations.operations.some(({ definition }) => definition.id === id));
+    const ownsMedia = options.composition.definitionMap.capabilities.some(({ id }) => id === MEDIA_PLAYBACK_CAPABILITY);
+    if (
+      this.enabled &&
+      ownsMedia &&
+      (!options.prepareDependentRemoval || !options.prepareGameplayChange || !options.prepareFactDelivery)
+    )
+      throw new TypeError('Registered Block Media removal ports are unavailable.');
     this.origins = createBlockOriginEnvironment(options);
     this.projections = createBlockStatePort({
       ...options,

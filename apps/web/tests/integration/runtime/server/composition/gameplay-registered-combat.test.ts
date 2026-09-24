@@ -5,10 +5,17 @@ import {
   createGameplaySystemAuthority,
   createGameplayActorAuthority,
 } from '@seedlands/stdlib/host';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { WorldResourceAuthorizer } from '../../../../../../../packages/stdlib/src/server/harness/world-authorization';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
+
+const compositionResources = new WeakMap<GameplayRuntime, ReturnType<typeof assembleWorldPacks>['resources']>();
+const resourcesFor = (world: GameplayRuntime) => {
+  const resources = compositionResources.get(world);
+  if (!resources) throw new Error('Combat fixture composition resources are unavailable.');
+  return resources;
+};
 
 function setup(
   withCombat = false,
@@ -16,14 +23,17 @@ function setup(
   alias = 'test-player',
   allowOrigins: boolean | (() => boolean) = true,
 ) {
-  const modules = pack.modules.filter(
-    (module) =>
-      withCombat ||
-      !['seedlands:behavior-registry-module', 'seedlands:combat-module', 'seedlands:overworld-combat-rules'].includes(
-        module.descriptor.id,
-      ),
-  );
-  modules.push(...extra);
+  const modules = [
+    ...classicGameplayDomainModules(
+      [
+        'seedlands:inventory-actions-module',
+        'seedlands:mode-module',
+        ...(withCombat ? ['seedlands:overworld-combat-rules'] : []),
+        ...extra.map((module) => module.descriptor.id),
+      ],
+      extra,
+    ),
+  ];
   const selected = definePack({ id: 'test:no-combat', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -57,6 +67,7 @@ function setup(
     { id: 'wolf', type: 'creature', archetype: 'zombie', position: [0, 0, 1] },
     { archetype: 'zombie' },
   );
+  compositionResources.set(world, composition.resources);
   return world;
 }
 describe('registered Combat is the actual composed consumer', () => {
@@ -223,7 +234,7 @@ describe('registered Combat is the actual composed consumer', () => {
         },
       },
     ]);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -243,7 +254,7 @@ describe('registered Combat is the actual composed consumer', () => {
     const saved = world.createSnapshot();
     saved.entityStore.sequence = Number.MAX_SAFE_INTEGER;
     world.restoreSnapshot(saved);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -279,7 +290,7 @@ describe('registered Combat is the actual composed consumer', () => {
       if (failed) throw new TypeError('host resolver broken');
       return true;
     });
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -325,7 +336,7 @@ describe('registered Combat is the actual composed consumer', () => {
           },
         ],
       },
-      world.resources,
+      resourcesFor(world),
     );
     const execution = world.bindModuleOperations(authorization, {
       principalId: 'transfer',
@@ -362,7 +373,7 @@ describe('registered Combat is the actual composed consumer', () => {
           { effect: 'allow', resources: ['seedlands.ruleset'], operations: ['read'], scope: 'any' },
         ],
       },
-      world.resources,
+      resourcesFor(world),
     );
     const result = world.invokeModuleOperation(
       authorization,
@@ -397,7 +408,7 @@ describe('registered Combat is the actual composed consumer', () => {
         },
       },
     ]);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;

@@ -22,6 +22,7 @@ import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
 import { FORAGE_WORLD_COMPONENT } from './forage-model';
 import { STRUCTURE_ACTOR_COMPONENT, STRUCTURE_VOXEL_COMPONENT } from './structure-actions-module';
+import { MEDIA_PLAYBACK_COMPONENT } from './media-playback-module';
 
 const GAMEPLAY_OPERATION_FLUSH_LIMIT = 64;
 
@@ -57,6 +58,7 @@ export class GameplayModuleRuntime {
       forage?: RegisteredStatePort;
       stations?: RegisteredStatePort;
       structures?: RegisteredStatePort;
+      media?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -97,6 +99,7 @@ export class GameplayModuleRuntime {
       if ([FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT].includes(component) && this.options.feeding)
         return this.options.feeding;
       if (component === FORAGE_WORLD_COMPONENT && this.options.forage) return this.options.forage;
+      if (component === MEDIA_PLAYBACK_COMPONENT && this.options.media) return this.options.media;
       if (
         (component === STRUCTURE_ACTOR_COMPONENT || component === STRUCTURE_VOXEL_COMPONENT) &&
         this.options.structures

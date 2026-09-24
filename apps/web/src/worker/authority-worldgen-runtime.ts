@@ -10,6 +10,15 @@ import { browserCorePlatform } from '../platform/core-platform';
 import { createBrowserAuthorityComposition } from './authority-worker-runtime-lifecycle';
 import type { VoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { voxelGeometryForComposition } from '@seedlands/stdlib/mod-api';
+import { assertBrowserGameplayProvenance } from '../client/persistence/legacy-gameplay-provenance-error';
+
+type BrowserGameplaySnapshotSource = Readonly<{ loadGameplaySnapshot?(): unknown; dispose?(): void }>;
+
+export const readBrowserAuthorityGameplaySnapshot = (source: BrowserGameplaySnapshotSource | undefined): unknown => {
+  const snapshot = source?.loadGameplaySnapshot?.() ?? null;
+  assertBrowserGameplayProvenance(snapshot);
+  return snapshot;
+};
 
 export function prepareBrowserAuthorityWorldgen(
   packArtifacts: readonly VerifiedPackArtifact[],
@@ -46,6 +55,12 @@ export function createBrowserAuthorityRuntime(
     | 'moduleActorAuthority'
   >,
 ) {
+  try {
+    readBrowserAuthorityGameplaySnapshot(options.persistence);
+  } catch (error) {
+    (options.persistence as BrowserGameplaySnapshotSource | undefined)?.dispose?.();
+    throw error;
+  }
   return AuthorityRuntime.create({
     ...prepared.assembly,
     ...options,

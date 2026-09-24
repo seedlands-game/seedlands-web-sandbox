@@ -168,6 +168,25 @@ const assertLockedFile = (value, label) => {
     throw new TypeError(`${label}.sha256 must be a SHA-256 hex digest.`);
 };
 
+const contentTypeForPath = (path) =>
+  path.toLowerCase().endsWith('.mp3')
+    ? 'audio/mpeg'
+    : path.toLowerCase().endsWith('.json')
+      ? 'application/json'
+      : 'application/octet-stream';
+
+const assertLockedResource = (value, label) => {
+  assertLockedFile(value, label);
+  if (
+    Reflect.ownKeys(value).length !== 4 ||
+    !['path', 'sha256', 'size', 'contentType'].every((key) => Object.hasOwn(value, key)) ||
+    !Number.isSafeInteger(value.size) ||
+    value.size <= 0 ||
+    value.contentType !== contentTypeForPath(value.path)
+  )
+    throw new TypeError(label + ' metadata is invalid.');
+};
+
 const verifiedBytes = async (root, locked, label) => {
   const absolute = await realpath(resolve(root, locked.path));
   const fromRoot = relative(root, absolute);
@@ -275,7 +294,7 @@ export async function loadVerifiedPackArtifacts(lockPath) {
     assertLockedFile(entry.manifest, `${entry.id}.manifest`);
     assertLockedFile(entry.entry, `${entry.id}.entry`);
     if (!Array.isArray(entry.resources)) throw new TypeError(`${entry.id}.resources must be an array.`);
-    entry.resources.forEach((resource, index) => assertLockedFile(resource, `${entry.id}.resources[${index}]`));
+    entry.resources.forEach((resource, index) => assertLockedResource(resource, `${entry.id}.resources[${index}]`));
     assertUnique(
       entry.resources.map((resource) => resource.path),
       `${entry.id} locked resource`,
@@ -298,6 +317,8 @@ export async function loadVerifiedPackArtifacts(lockPath) {
     const resources = [];
     for (const resource of entry.resources) {
       const result = await verifiedBytes(root, resource, `${entry.id} resource`);
+      if (result.bytes.byteLength !== resource.size)
+        throw new TypeError(`${entry.id} resource size mismatch: ${resource.path}`);
       resources.push(Object.freeze({ path: resource.path, digest: result.digest }));
     }
     staged.push({ entry, manifest, manifestFile, entryFile, resources });

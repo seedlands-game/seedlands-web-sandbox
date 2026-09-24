@@ -19,7 +19,13 @@ const readDeclaredResource = async (path) => {
   const fromRoot = relative(root, file);
   if (isAbsolute(fromRoot) || fromRoot === '..' || fromRoot.startsWith('../'))
     throw new TypeError(`Pack resource resolves outside the repository: ${path}`);
-  return { path: path.replace(/^\.\//, ''), bytes: await readFile(file) };
+  const normalized = path.replace(/^\.\//, '');
+  const contentType = normalized.endsWith('.mp3')
+    ? 'audio/mpeg'
+    : normalized.endsWith('.json')
+      ? 'application/json'
+      : 'application/octet-stream';
+  return { path: normalized, bytes: await readFile(file), contentType };
 };
 
 const playbooks = {
@@ -66,7 +72,12 @@ export async function buildGameplayPacks(
         version: manifest.version,
         manifest: { path: `${playbook}.manifest.json`, sha256: digest(manifestBytes) },
         entry: { path: manifest.entry, sha256: digest(entryBytes) },
-        resources: resources.map(({ path, bytes }) => ({ path, sha256: digest(bytes) })),
+        resources: resources.map(({ path, bytes, contentType }) => ({
+          path,
+          sha256: digest(bytes),
+          size: bytes.byteLength,
+          contentType,
+        })),
       },
     ],
   };

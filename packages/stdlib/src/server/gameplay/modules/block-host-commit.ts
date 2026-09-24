@@ -28,6 +28,7 @@ import {
 } from './fluid-container-interaction';
 import type { createBlockStatePort } from './block-state-port';
 import type { createBlockOriginEnvironment } from './block-origin-environment';
+import { MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
 import {
   BLOCK_BEGIN_OPERATION,
   BLOCK_CANCEL_OPERATION,
@@ -61,6 +62,21 @@ export type BlockHostOptions = Readonly<{
   revision(): number;
   assertCanChange(): void;
   changed(inventory: boolean): void;
+  prepareDependentRemoval?(position: [number, number, number]): Participant &
+    Readonly<{
+      removed: boolean;
+      ejectedItem: Readonly<{ itemId: string; count: number }> | null;
+      facts: readonly ModuleInvocationValue[];
+    }>;
+  prepareGameplayChange?(
+    inventoryChanged: boolean,
+    precedingWorldCommit: WorldCommitResult,
+  ): Participant & Readonly<{ revision: number }>;
+  prepareFactDelivery?(
+    facts: readonly ModuleInvocationValue[],
+    precedingWorldCommit: WorldCommitResult,
+    gameplayRevision: number,
+  ): Participant;
 }>;
 const same = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 const breakState = (value: BlockBreakActionV1 | null): BreakAction | null =>
@@ -275,6 +291,15 @@ export function prepareRegisteredBlockCommit(
     { ...options, authorizer: execution.authorizer, context },
     candidate.voxelEdit ?? undefined,
   );
+  const dependentRemoval =
+    kind === 'finish' && candidate.voxelEdit
+      ? options.prepareDependentRemoval?.([...candidate.voxelEdit.position])
+      : undefined;
+  const validateDependentRemovalAccess = () => {
+    if (dependentRemoval?.removed)
+      assertActorResourceExecution(options.composition, execution.authorizer, context, MEDIA_PLAYBACK_RESOURCE);
+  };
+  validateDependentRemovalAccess();
   const components = options.entities.actorComponentSnapshot(id);
   const world = candidate.voxelEdit
     ? options.prepareVoxelEdit(id, [...candidate.voxelEdit.position], candidate.voxelEdit.toVoxel)
@@ -305,6 +330,14 @@ export function prepareRegisteredBlockCommit(
           ]
         : []),
       ...stationEffects.drops,
+      ...(dependentRemoval?.ejectedItem
+        ? [
+            {
+              position: candidate.voxelEdit!.position.map((value) => value + 0.5) as [number, number, number],
+              stack: dependentRemoval.ejectedItem,
+            },
+          ]
+        : []),
     ],
   });
   const equippedChanged = !same(
@@ -313,10 +346,47 @@ export function prepareRegisteredBlockCommit(
   );
   const cancellation = equippedChanged ? options.simulation().prepareCancellation([id], 'slot-changed') : undefined;
   const receipt = world ? prepareReceipt(world.result) : undefined;
+  if (dependentRemoval?.removed) {
+    if (!world || !options.prepareGameplayChange || !options.prepareFactDelivery)
+      throw new TypeError('Media Block removal requires prepared world, gameplay, and fact owners.');
+    const gameplay = options.prepareGameplayChange(inventoryChanged, world.result);
+    const delivery = options.prepareFactDelivery(dependentRemoval.facts, world.result, gameplay.revision);
+    const parts: readonly Participant[] = [
+      { validate: stationEffects.validate, apply() {} },
+      mutation,
+      ...(cancellation ? [cancellation] : []),
+      dependentRemoval,
+      world,
+      receipt!,
+      gameplay,
+      delivery,
+    ];
+    let validated = false,
+      used = false;
+    return Object.freeze({
+      ok: true as const,
+      revision: gameplay.revision,
+      value: Object.freeze({ ...candidate.result, commit: { worldRevision: world.result.worldRevision } }),
+      validate() {
+        validated = false;
+        if (used) throw new Error('Prepared Media Block transaction is stale.');
+        validateCondition();
+        validateDependentRemovalAccess();
+        for (const part of parts) part.validate();
+        validated = true;
+      },
+      apply() {
+        if (used || !validated) throw new Error('Prepared Media Block transaction requires validation.');
+        used = true;
+        for (const part of parts) part.apply();
+      },
+    });
+  }
   const parts: Participant[] = [
     { validate: stationEffects.validate, apply() {} },
     mutation,
     ...(cancellation ? [cancellation] : []),
+    ...(dependentRemoval ? [dependentRemoval] : []),
     ...(world ? [world] : []),
     ...(receipt ? [receipt] : []),
   ];

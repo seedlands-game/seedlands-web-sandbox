@@ -44,12 +44,6 @@
       unsubscribeAudio();
     };
   });
-  const chooseFile = async (event: Event) => {
-    const input = event.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) await application.audio.importReference(file);
-    input.value = '';
-  };
 </script>
 
 {#if view.state.phase === 'playing'}
@@ -215,17 +209,6 @@
               >立即刷新</GameButton
             >
           {/if}
-        </div>
-        <div class="reference-music">
-          <h3>本地参考曲</h3>
-          <p>仅在本机播放，不上传。支持 30 MiB / 10 分钟以内的音频；刷新后需重新选择。</p>
-          <label for="reference-audio"
-            >选择参考曲<input id="reference-audio" type="file" accept="audio/*" onchange={chooseFile} /></label
-          >
-          {#if audio.referenceName}<p class="reference-name">{audio.referenceName}</p>
-            <GameButton label="移除参考曲" onclick={() => application.audio.removeReference()}
-              >移除参考曲 · 使用内置音乐</GameButton
-            >{/if}
         </div>
         {#if audio.error}<p role="alert" class="start-error">{audio.error}</p>{/if}
         <GameButton label="返回" disabled={view.settingsChanging} onclick={() => application.closePanel()}

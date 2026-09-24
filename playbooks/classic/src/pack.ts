@@ -18,6 +18,7 @@ import {
   defineBehaviorRegistryModule,
   defineStandardWorldgenModule,
   defineVoxelGeometryModule,
+  defineMediaPlaybackModuleV1,
 } from '@seedlands/stdlib/mod-api';
 import { overworldBlocks, overworldVoxelSemantics } from './blocks';
 import { overworldItems } from './items';
@@ -30,6 +31,7 @@ import { classicItemInteractionModules } from './item-interactions';
 import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
 import { classicStructureDefinitionModule } from './structures';
 import { classicStructureActionsModule } from './structure-actions';
+import { classicMedia } from './media';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -42,7 +44,7 @@ export const pack = definePack({
   version: '1.0.0',
   kind: 'playbook',
   entry: 'overworld.mjs',
-  resources: ['playbooks/classic/presentation.json'],
+  resources: ['playbooks/classic/presentation.json', 'playbooks/classic/assets/audio/to-far-shores.mp3'],
   presentation: { path: 'playbooks/classic/presentation.json' },
   modules: [
     defineStandardWorldgenModule({
@@ -99,6 +101,7 @@ export const pack = definePack({
     }),
     classicStructureDefinitionModule,
     classicStructureActionsModule,
+    defineMediaPlaybackModuleV1({ moduleId: 'seedlands:overworld-media', definition: classicMedia }),
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
@@ -113,7 +116,7 @@ export const pack = definePack({
     }),
     defineStationActionsModule(),
     defineForageModule({ sourceVoxel: 5, drop: { itemId: 'berry', count: 1 }, intervalSeconds: 120 }),
-    defineBlockActionsModule({ stations: true }),
+    defineBlockActionsModule({ stations: true, media: true }),
     ...classicItemInteractionModules,
     defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules', voxelDefinitions: overworldBlocks }),
     defineModeModule(),

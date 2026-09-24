@@ -3,7 +3,7 @@ import {
   createGameplayActorAuthority,
   createGameplaySystemAuthority,
 } from '@seedlands/stdlib/host';
-import { definePack } from '@seedlands/stdlib/mod-api';
+import { defineBlockActionsModule, definePack, type ModModule } from '@seedlands/stdlib/mod-api';
 import type { GameplayCallbacks } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
 import { pack } from '../../../../../../../playbooks/classic/src/pack';
 
@@ -15,17 +15,24 @@ const ROOT_MODULES: Readonly<Record<Profile, readonly string[]>> = Object.freeze
 });
 const EXCLUDED_STRUCTURE_MODULES = new Set(['seedlands:overworld-structures', 'seedlands:overworld-structure-actions']);
 
-/** Real Classic content without registered action modules outside these direct domain tests. */
-export function classicGameplayDomainOptions(
-  profile: Profile = 'content',
-): Pick<GameplayCallbacks, 'composition' | 'moduleActorAuthority' | 'moduleSystemAuthority'> {
+export function classicGameplayDomainModules(
+  roots: readonly string[],
+  replacements: readonly ModModule[] = [],
+): readonly ModModule[] {
+  const replacementsById = new Map(replacements.map((module) => [module.descriptor.id, module]));
+  const available = [
+    ...pack.modules.map((module) => replacementsById.get(module.descriptor.id) ?? module),
+    ...replacements.filter(
+      (module) => !pack.modules.some((candidate) => candidate.descriptor.id === module.descriptor.id),
+    ),
+  ];
   const providers = new Map<string, string>();
-  for (const module of pack.modules)
+  for (const module of available)
     for (const capability of module.descriptor.provides ?? []) providers.set(capability.id, module.descriptor.id);
   const selected = new Set<string>();
   const include = (moduleId: string): void => {
     if (selected.has(moduleId)) return;
-    const module = pack.modules.find((candidate) => candidate.descriptor.id === moduleId);
+    const module = available.find((candidate) => candidate.descriptor.id === moduleId);
     if (!module) throw new Error(`Classic gameplay test module is missing: ${moduleId}`);
     selected.add(moduleId);
     for (const requirement of module.descriptor.requires ?? []) {
@@ -34,11 +41,21 @@ export function classicGameplayDomainOptions(
       include(provider);
     }
   };
-  ROOT_MODULES[profile].forEach(include);
+  roots.forEach(include);
   for (const moduleId of EXCLUDED_STRUCTURE_MODULES)
     if (selected.has(moduleId))
       throw new Error(`Classic gameplay domain fixture cannot install registered Structure: ${moduleId}`);
-  const modules = pack.modules.filter((module) => selected.has(module.descriptor.id));
+  return Object.freeze(available.filter((module) => selected.has(module.descriptor.id)));
+}
+
+/** Real Classic content without registered action modules outside these direct domain tests. */
+export function classicGameplayDomainOptions(
+  profile: Profile = 'content',
+): Pick<GameplayCallbacks, 'composition' | 'moduleActorAuthority' | 'moduleSystemAuthority'> {
+  const modules = classicGameplayDomainModules(
+    ROOT_MODULES[profile],
+    profile === 'block-rules' ? [defineBlockActionsModule()] : [],
+  );
   const local = definePack({
     id: pack.manifest.id,
     version: pack.manifest.version,

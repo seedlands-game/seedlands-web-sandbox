@@ -29,6 +29,7 @@ import type {
 import type { CharacterControlRequest, ControlBinding } from '../../runtime/character-control-protocol';
 import type { AuthorityInteractActionV1 } from '../gameplay/modules/structure-target-dispatch';
 export { copyAuthorityActionReference } from './network-action-reference-copy';
+export * from './media-playback-protocol';
 
 type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
 type CharacterCapabilitiesRequest = Extract<CharacterControlRequest, { kind: 'capabilities' }>;
@@ -115,6 +116,7 @@ export type AuthorityGameplayView = Readonly<{
   progress?: import('../gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
   difficulty?: import('../gameplay/difficulty-runtime').DifficultyCheckpoint;
   armorPoints?: number;
+  media?: readonly import('../gameplay/modules/media-playback-model').MediaPlaybackProjectionV1[];
   metrics: AuthorityGameplayMetrics;
 }>;
 
@@ -455,6 +457,7 @@ export type AuthorityResponse =
       commits?: readonly WorldCommitResult[];
     }>
   | AuthorityCommitMessage
+  | import('./media-playback-protocol').AuthorityMediaFactsResponseV1
   | Readonly<{
       kind: 'input-decision';
       protocolVersion: typeof PROTOCOL_VERSION;

@@ -11,6 +11,7 @@ import {
 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { MEDIA_PLAYBACK_RESOURCE } from '@seedlands/stdlib/mod-api';
 import {
   WorldResourceAuthorizer,
   commandAuthorizationRequests,
@@ -98,6 +99,13 @@ export class BrowserAuthorityIngress {
             principal: { ids: ['browser-player'] },
             resources: ['seedlands.combat', 'seedlands.inventory-item', 'seedlands.block-voxel', 'seedlands.structure'],
             operations: ['read', 'execute'],
+            scope: 'any',
+          },
+          {
+            effect: 'allow',
+            principal: { ids: ['browser-player'] },
+            resources: [MEDIA_PLAYBACK_RESOURCE],
+            operations: ['read', 'write', 'execute'],
             scope: 'any',
           },
           {

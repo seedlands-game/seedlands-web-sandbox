@@ -19,6 +19,9 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'getActorModeState',
   'acknowledgeBlockCommit',
   'structureTargets',
+  'mediaTargets',
+  'mediaProjections',
+  'takeCommittedMediaFacts',
   'bindModuleOperations',
   'invokeModuleOperation',
   'invokeActorModuleOperation',
@@ -103,7 +106,7 @@ export type GameServerGameplayApi = Pick<GameServerGameplayHost, (typeof GAME_SE
 export function installGameServerGameplayApi(target: object, host: GameServerGameplayHost): void {
   const prototype = GameServerGameplayHost.prototype;
   for (const name of GAME_SERVER_GAMEPLAY_API) {
-    const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, name) ?? Object.getOwnPropertyDescriptor(host, name);
     if (!descriptor) throw new Error(`Gameplay host API descriptor is missing: ${name}`);
     Object.defineProperty(
       target,

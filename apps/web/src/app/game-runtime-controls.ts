@@ -52,6 +52,7 @@ export function setGamePaused(
     authority: BrowserAuthorityClient | null;
     gameplay: { setSuspended(value: boolean): void } | null;
     audio: WorldAudio | null;
+    media?: (paused: boolean) => void;
     camera: pc.Entity | null;
     world: World | null;
   }>,
@@ -69,6 +70,7 @@ export function setGamePaused(
     paused,
     options.controller?.waterImmersion,
   );
+  options.media?.(paused);
 }
 
 export async function setAuthorityWorldClockPaused(

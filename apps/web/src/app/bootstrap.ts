@@ -108,8 +108,10 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     await application.initialize(options.resourceReady ?? Promise.resolve());
     await installPersistenceHarness();
     const onButtonClick = (event: MouseEvent) => {
-      if ((event.target as Element)?.closest('button'))
-        void audio.unlock().then(() => audio.play('hover', { scope: 'ui' }));
+      const button = (event.target as Element)?.closest('button');
+      void audio.unlock().then(() => {
+        if (button) audio.play('hover', { scope: 'ui' });
+      });
     };
     document.addEventListener('click', onButtonClick);
     persistExperimentalClientOptions(localStorage, experiments.options);
