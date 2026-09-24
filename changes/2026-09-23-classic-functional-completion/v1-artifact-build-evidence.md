@@ -205,3 +205,80 @@ af5b40d215a802146bf8cfb3b378f0862526b1949cb45f2ca096d9d142864e62  artifact-verif
 ```
 
 新验收树在build后仍tracked/index clean，无常驻build/dev/browser/benchmark进程。`/private/tmp/seedlands-v1-acceptance-a77f1f4e`与同一dist保留给root后续唯一browser租约；已确认browser01原始证据进入GIT-09后，旧`/private/tmp/seedlands-v1-acceptance-60843904`已精确清理。本阶段未运行browser/dev server/CI。
+
+## BUILD-04：产品宿主 Structure 准入后成功
+
+`V1-HOST-STRUCTURE-ADMISSION-01` 经 GIT-10 提交并推送为
+`8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586`。GIT-10 的 detached staged tree 通过产品
+admission `3 files / 8 tests`、root test typecheck、目标 ESLint/Prettier、完整 staged diff check 和
+自然 hooks；local、upstream、`ls-remote` 均为该 SHA，ahead/behind `0/0`，index 为空。
+
+从该远端 SHA 新建 `/private/tmp/seedlands-v1-acceptance-8ae1f514`。依赖视图复制 BUILD-03
+已验证布局，`node_modules/.pnpm-task-run-state-v1` 从一开始为真实目录；根与 package 级
+`@seedlands/*` 相对链接均解析到新树自身源码。构建前 tracked/index clean、dist 不存在；源码身份：
+
+```text
+sourceSha=8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586
+sourceDigest=fe543a6491a31286d4a187ab172915070ef82aafe870274d7896f7a8eee4252a
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+```
+
+本阶段唯一 build 命令：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -c 'set -o pipefail; pnpm build 2>&1 | tee /private/tmp/seedlands-v1-acceptance-8ae1f514-build.log'
+```
+
+结果：PASS。Pack build、Rust artifact 验证、SSG、Web typecheck 与 Vite production build 全部成功；
+Svelte 为 `0 errors / 0 warnings`。机器窗口 run
+`36765e9a-967f-417d-8193-382f01c52f95`，`2026-09-24T22:19:12.560Z` 至
+`2026-09-24T22:19:32.316Z`，exit `0`。生成的 artifact 身份：
+
+```text
+sourceSha=8ae1f514fa6e025ed31c4ab54ccf1c0960b8c586
+sourceDigest=fe543a6491a31286d4a187ab172915070ef82aafe870274d7896f7a8eee4252a
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=f278d8a1f51a31ff3c5620adfe2d46ab80340351d43dfc1ecd0033c218aa0224
+files=276
+builtAt=2026-09-24T22:19:31.799Z
+```
+
+同一树、同一 dist 随后运行：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -c 'set -o pipefail; pnpm harness:artifact 2>&1 | tee /private/tmp/seedlands-v1-acceptance-8ae1f514-artifact.log'
+```
+
+结果：PASS；机器窗口 run `6fa687ba-c70c-430a-893b-06f71da79ade`，
+`2026-09-24T22:19:48.756Z` 至 `2026-09-24T22:19:49.577Z`，exit `0`。全部身份字段、
+builtAt 与 276 个被盖章文件一致；磁盘共 277 文件是因为另含 receipt 自身。
+`apps/web/dist/harness-artifact.json` SHA-256 为
+`636b046961e2bbf8be37ae48ede9e9b2501c8d8b4d5d8274842f80ef3045ed28`。
+
+Pack 与产品 admission 核对：
+
+- `packs/host-admissions.json` SHA-256
+  `206b730961e79b3cda78acdd86d7616ab82194001e6c9f6b8462011397cf71d9`；Structure grant 精确为
+  `read,execute`，不含 `write`。
+- `packs/overworld.manifest.json` SHA-256
+  `14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3`；正式模块权限请求
+  34 条，与 host admission 差分 `missing=[]`。
+- `packs/packs.lock.json` SHA-256
+  `954cb2be23eb5d8823efddf34eb5fcced75a32253af1feaef9d6e193cbe4e3a5`。
+- MP3 路径 `playbooks/classic/assets/audio/to-far-shores.mp3`、size `2976045`、
+  contentType `audio/mpeg`、SHA-256
+  `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9` 均匹配。
+
+BUILD-04 原始证据逐字节归档到 `evidence/v1-artifact-build-04/`：
+
+```text
+7ae650bee4ed48953ac7771efb1874cd093e1c1aba8959eea1da5e7268799b8e  build.log
+8283fbbfc4217a266743bf143269422f29c15c529d86fb15bf7bd1183e824b36  build-receipt.json.log
+2de50e9023d83d8c41ef8a0f39f4aa8efb1738d0ffc75f1b7acdf91bac71914b  artifact-verify.log
+83f396747b723b6ec82b540170ec47e98abc4d0e6ff629b8e181c5a5d8826cb5  artifact-verify-receipt.json.log
+```
+
+验收树在 build 后仍 tracked/index clean，无常驻 build/dev/browser/benchmark 进程。
+`/private/tmp/seedlands-v1-acceptance-8ae1f514` 与同一 dist 保留给 root 后续唯一 browser lease；Browser-02
+原始证据已进入远端 GIT-10 且 BUILD-04 成功后，旧
+`/private/tmp/seedlands-v1-acceptance-a77f1f4e` 已精确清理。本阶段未运行 browser、dev server、Cua 或 CI。
