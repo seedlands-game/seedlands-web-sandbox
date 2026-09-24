@@ -12,6 +12,7 @@ const overworldPermissions = Object.freeze([
   permission('seedlands.block-actor', ['read', 'execute']),
   permission('seedlands.block-voxel', ['read', 'execute']),
   permission('seedlands.block-clock', ['read', 'execute']),
+  permission('seedlands.structure', ['read', 'execute']),
   permission('seedlands.ruleset', ['read']),
   permission('seedlands.needs', ['read', 'write', 'execute']),
   permission('seedlands.combat', ['read', 'execute']),

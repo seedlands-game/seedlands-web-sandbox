@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "playbook": {
+    "id": "seedlands:overworld",
+    "version": "1.0.0",
+    "integrity": {
+      "algorithm": "sha256",
+      "manifestDigest": "14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3",
+      "entryDigest": "9539898fa836a80116774ffaed01345e08ab775ccb9930154557f596e4c824ea",
+      "resources": [
+        {
+          "path": "playbooks/classic/presentation.json",
+          "digest": "a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b"
+        },
+        {
+          "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+          "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+        }
+      ]
+    },
+    "permissions": [
+      {
+        "resource": "seedlands.station",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.station-actor",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.forage-clock",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.furnace-clock",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.inventory",
+        "operations": [
+          "read",
+          "write",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.feeding-actor",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.feeding-item",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.inventory-item",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.block-actor",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.block-voxel",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.block-clock",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.ruleset",
+        "operations": [
+          "read"
+        ]
+      },
+      {
+        "resource": "seedlands.needs",
+        "operations": [
+          "read",
+          "write",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.combat",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.combat-clock",
+        "operations": [
+          "read",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.mode",
+        "operations": [
+          "read",
+          "write",
+          "execute"
+        ]
+      },
+      {
+        "resource": "seedlands.media-playback",
+        "operations": [
+          "read",
+          "write",
+          "execute"
+        ]
+      }
+    ]
+  },
+  "extensions": []
+}

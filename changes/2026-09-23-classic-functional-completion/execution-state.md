@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T21:59:00Z
+更新时间：2026-09-24T22:10:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -25,25 +25,26 @@ Goal：未创建；本轮未提供 token budget。
 | 低频监督 heartbeat | `46eeb208` | `*/20 * * * *`，Asia/Shanghai；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`；expiresAt=`2026-10-08T06:45:28.465Z` | active；不在本文推测下一次触发                                                                                                                               |
 | 已删除单次验证     | `949bd531` | `2026-09-24T06:46:00Z` 触发；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | failed：root already has an active run；未投递，已删除                                                                                                       |
 | 已删除闲置验证     | `8c8d05df` | `Classic idle wakeup proof`；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | **VERIFIED**：`2026-09-24T06:52:00Z` root 收到 daemon schedule；run=`c84043c8-1473-4459-bbff-79ab5e29dac6`，nonce=`classic-idle-supervisor-20260924`；已删除 |
-| 最近监督触发       | `46eeb208` | 同上                                                                                                               | `2026-09-24T21:20:00Z` root 实际巡检；run=`0f22854b-6f99-4300-87a2-bb6ab3395ff7`                                                                             |
+| 最近监督触发       | `46eeb208` | 同上                                                                                                               | `2026-09-24T22:00:00Z` root 实际巡检；run=`df58f485-f976-4abe-8123-370e23518fd7`                                                                             |
 
 工具创建成功不等于实际续跑成功；本次 VERIFIED 依据是 root 实际收到 `<paseo-system> Schedule Classic idle wakeup proof fired`，并能被 daemon 自动唤醒执行工具。
 
 ## 当前阶段与期限
 
-| Owner                | 阶段                            | agent/进程句柄                               | 期限/状态                       | 当前事实                                                                                                                             |
-| -------------------- | ------------------------------- | -------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| root `4decc58...`    | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                            | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git/Build `954ef...` | `GIT-09 + V1-ARTIFACT-BUILD-03` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | artifact ready，等待browser租约 | GIT-09=`a77f1f4e...`已推送；clean build/artifact verify PASS，artifact=`b984a1c6...`/276 files；新树/dist保留                        |
-| 794 `7943067e...`    | `V1-HARNESS-GEOMETRY-01`        | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结               | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
-| Media `a288bb43...`  | `V1-PRESENTATION-LOCK-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结                | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
-| Browser `761fb...`   | `V1-CANONICAL-BROWSER-01`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放      | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
-| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01`       | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                    | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
-| Lighting `88d41...`  | 等待 V1                         | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                            | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
+| Owner                | 阶段                             | agent/进程句柄                               | 期限/状态                  | 当前事实                                                                                                                             |
+| -------------------- | -------------------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| root `4decc58...`    | 总负责人                         | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                       | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
+| Git/Host `954ef...`  | `V1-HOST-STRUCTURE-ADMISSION-01` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | 定向GREEN，等待root准出    | 仅overworld增加Structure read/execute；正式Pack请求34条、missing=[]；真实assembly和alternative/unknown负例`3 files / 8 tests`通过    |
+| 794 `7943067e...`    | `V1-HARNESS-GEOMETRY-01`         | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结          | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染               |
+| Media `a288bb43...`  | `V1-PRESENTATION-LOCK-CLOSE-01`  | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root已准出，冻结           | production `0653bf32...b838`；4 files/27、Web/root types/lint/format PASS；四字段resource与两字段manifest严格分离                    |
+| Browser `761fb...`   | `V1-CANONICAL-BROWSER-02`        | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | Presentation旧schema已关闭；C0因host缺`seedlands.structure`拒绝，V1全部NOT OBSERVED；原始02证据保留                                  |
+| Browser 01（历史）   | `V1-CANONICAL-BROWSER-01`        | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | `21:28:56.064Z`至`21:29:28.495Z`；2 failed/1 skipped，均在C0因Pack presentation resource lock无效；V1全部NOT OBSERVED，4273无监听    |
+| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01`        | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结               | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
+| Lighting `88d41...`  | 等待 V1                          | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                       | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 
-Media、restore owner、generation capacity、legacy layout/lineage、Browser旧档反馈与fixture归因均已获root定向准出，并已完成GIT-06合并staged-tree验证和首次远端同步。device实例为 `position + definitionId`；fact/projection使用结构化 `resource { packId, path }`，snapshot不存resource/bytes。外层 `AuthorityResponse.epoch` 是worker session，batch `worldEpoch` 是 `runtimeEpochValue`；restore时两者可不同，旧world fact丢弃，只将projection标为 `resumePending`，不重放facts。BUILD-02完整production build及artifact校验已通过；唯一canonical browser已实际启动但在C0 Pack presentation lock门禁失败，未观察到真实玩法或音频结果。
+Media、restore owner、generation capacity、legacy layout/lineage、Browser旧档反馈与fixture归因均已获root定向准出，并已完成GIT-06合并staged-tree验证和首次远端同步。device实例为 `position + definitionId`；fact/projection使用结构化 `resource { packId, path }`，snapshot不存resource/bytes。外层 `AuthorityResponse.epoch` 是worker session，batch `worldEpoch` 是 `runtimeEpochValue`；restore时两者可不同，旧world fact丢弃，只将projection标为 `resumePending`，不重放facts。BUILD-03完整production build及artifact校验已通过；Browser-02关闭presentation lock门禁后在C0暴露host Structure admission缺口，仍未观察到真实玩法或音频结果。
 
 GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib/Classic/Web/root-test/classic-test类型均PASS，stdlib Media/restore/Structure `15 files / 101 tests`、Classic lineage/Media `2/5`、Web Media+旧档反馈 `20/152`、12-file composition `12/104`、Authority/restore/Pack `5/39` 全PASS。临时Pack lock中MP3为 `2976045` bytes、`audio/mpeg`、SHA-256 `3c69ae...119c9`。全部staged TS/Svelte/MJS ESLint、非二进制Prettier、diff check和自然hooks PASS。首次 `pnpm` 因临时树依赖软链接以 `ERR_PNPM_UNSAFE_TASK_RUN_STATE_PATH` 在类型检查前退出；一次Svelte子检查为0诊断但wrapper清理报 `kill EPERM`，确认遗留PID不存在并仅清理本轮owner后，改用同一锁内的现有工具二进制确定性runner完整复验为exit 0。
 
@@ -74,11 +75,11 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 - `v1-next-slice-map` 总体已接受；“垂直面一概拒绝”已被 root 否决，地面放门必须使用 Authority 拥有并校验的朝向。该 map 已收口；地面放置策略必须由 Authority 已验证的命中法向或权威 actor orientation 推导。
 - A2、A3.2、A3.3、B1、B2 只按各自 evidence 对应层准出；B3 已完成公共安装和两格门 Authority GREEN，并由 GIT-05 的 55-file 闭包提交推送。仍未做浏览器/WebGL 旅程。
 - `classic-fluid-interactions` 的两个旧 negative spy 已用真实可控 no-op/stale 失败条件替换，当前 `10/10`；该结果只关闭测试夹具，不扩展 A2/B2 产品准出。
-- Media dependent-removal、Authority事务/drain/projection、V4恢复、Chunk residency、Classic Pack/MP3 builder、Web消费、restore owner和legacy lineage均已分别由root定向准出；GIT-06 staged tree已证明组合闭合。BUILD-02 production artifact已生成并校验；浏览器在C0启动门禁失败，真实媒体播放仍未观察。
+- Media dependent-removal、Authority事务/drain/projection、V4恢复、Chunk residency、Classic Pack/MP3 builder、Web消费、restore owner和legacy lineage均已分别由root定向准出；GIT-06 staged tree已证明组合闭合。BUILD-03 production artifact已生成并校验；Browser-02在C0被host Structure admission拒绝，真实媒体播放仍未观察。
 - 12-file Classic composition扫描的早期 `73/31` 与探索树 `65/39` 已由fixture attribution明确归因；最终目标是当前闭包全 `104/104`，不得继续写成未归因历史债务。
 - `gameplay-model-assets.test.ts` 的历史 `custom:grazer-fur` 失败已确认是退休 actor fixture，并由现役 player/cloth 替换；完整文件 `9/9 PASS`，生产材质解析未改。证据见 `appearance-fixture-close-evidence.md`。
 - Lighting profile、block+sky GPU owner、五类消费者、真实 WebGL2 readback、Cua 动态矩阵尚未完成。
-- 未运行全量deterministic、完整Classic headless、C0之后的water/door/media/save-reopen旅程、CI、PR review或Cloudflare preview。唯一Chromium attempt已运行但失败，不能记为V1 browser GREEN。
+- 未运行全量deterministic、完整Classic headless、C0之后的water/door/media/save-reopen旅程、CI、PR review或Cloudflare preview。两次唯一Chromium attempt均在C0失败，不能记为V1 browser GREEN。
 
 ## Git 批次
 
@@ -98,6 +99,8 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 | V1 Browser attempt 1     | 唯一canonical Chromium，复用60843904同一dist                                                                                           | `v1-canonical-browser-evidence.md` SHA `af84b437...dc6d`                                                                                           | 不适用                                     | `2 failed / 1 skipped`；C0报`Pack presentation resource lock is invalid`，V1全部NOT OBSERVED；lease释放，4273无监听               |
 | GIT-09 Presentation lock | 严格file/resource lock parser、browser01原始证据                                                                                       | `a77f1f4e9fef107582a4d4b576889e3083b5893f`                                                                                                         | `a77f1f4e9fef107582a4d4b576889e3083b5893f` | detached 4 files/27、SSG、Web/root types、lint/format/diff/hooks通过；远端一致、index空                                           |
 | V1 Artifact a77f1f4e     | presentation修复后的干净production artifact                                                                                            | `sourceDigest=71d48e43...`；`artifactDigest=b984a1c6...`；276 files                                                                                | 不适用                                     | `pnpm build`与`pnpm harness:artifact` PASS；新tree/dist保留给browser lease；旧608 tree已清理                                      |
+| V1 Browser attempt 2     | 唯一canonical Chromium，复用a77f1f4e同一dist                                                                                           | `v1-canonical-browser-evidence.md`与`evidence/v1-canonical-browser-02/`                                                                            | 不适用                                     | Presentation schema已关闭；C0因host缺Structure授权失败，V1全部NOT OBSERVED；lease已释放                                           |
+| V1 Host Structure        | overworld产品宿主显式Structure read/execute与真实assembly正反例                                                                        | pending                                                                                                                                            | pending                                    | 定向`3 files / 8 tests`、正式Pack 34项权限missing=[]、types/lint/format/diff通过；等待root准出/GIT-10                             |
 | Lighting model           | explicit semantics + sky/surface models/tests                                                                                          | pending                                                                                                                                            | pending                                    | 依赖 V4 public/profile/renderer                                                                                                   |
 
 TAKEOVER-01 首批文档已读回 local/remote SHA；本次回填使用独立 execution-state checkpoint commit，不 amend。
@@ -106,7 +109,7 @@ GIT-06临时资源已精确清理：`/private/tmp/seedlands-git06-media` worktre
 
 GIT-07临时资源已精确清理：`/private/tmp/seedlands-git07-harness` worktree与`seedlands-git07-harness.patch`已删除；未执行全局prune。后续production阶段应从最终远端精确SHA创建干净detached worktree，第三方依赖可复用现有安装，但根与package级`@seedlands/*`必须解析到临时树自身源码；在默认全机锁中仅运行一次`pnpm build`生成并盖章dist，再用`pnpm harness:artifact`复验。取得root唯一browser lease后在同一树/同一dist运行`pnpm harness:classic`，不重新build。
 
-当前下一依赖：a288完成并由root准出`V1-PRESENTATION-LOCK-CLOSE-01`后，由唯一Git writer执行GIT-09和新SHA clean build；随后root重新授予唯一browser lease。当前不重跑browser/Cua/CI，也不清理`/private/tmp/seedlands-v1-acceptance-60843904`。
+当前下一依赖是 root 对`V1-HOST-STRUCTURE-ADMISSION-01`定向准出后，由唯一Git writer执行GIT-10和新SHA clean BUILD-04；随后才可由root授予新的唯一browser lease。Browser-02 lease已释放且V1仍NOT OBSERVED；当前不重跑browser/build/Cua/CI，不清理`/private/tmp/seedlands-v1-acceptance-a77f1f4e`。
 
 ## 终点
 
