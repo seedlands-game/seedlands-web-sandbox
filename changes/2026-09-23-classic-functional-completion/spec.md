@@ -136,6 +136,8 @@ V1 只新增上述消费者需要的 ItemInteractionDefinition、StructureDefini
 
 V1 的 unit/integration GREEN 后立即串行生成一次临时 production artifact，用唯一浏览器线路/Cua 走完 water-bucket、door、record 三旅程和保存重开。该证据是早期架构验收，不替代最终完整矩阵；任一旅程失败先修复 V1，不继续扩展其余领域。后续按实际消费者逐步扩展同一接口，并在普通交互/装备、structure/transport、lighting 三个领域完成时各做一次有界浏览器 smoke；最终只保留一次全量 release artifact 作为交付身份。
 
+V1 早期浏览器验收只通过现有 `?harness` BrowserProductHarness 增加三项只读 oracle：当前 Authority voxel geometry clone、postrender PlayCanvas material mesh 摘要、以及 Media controller projection/已转交 batch 与 GlobalAudio playing 的并列快照。它们没有写口、不是新 owner，不以 descriptor 证明渲染、不以 fact forward 证明 playing；完整签名、epoch 与唯一 scenario 约束见 `v1-harness-contract.md`。
+
 每个 IMPLEMENT 先在实际 owner 取得 RED：registry/assembly；interact protocol/transaction；194-item no-unclassified matrix；装备与各物品族原子正反例；门/梯/轨/车；media state/pack digest/Web output；synthetic lighting/WebGL2 readback。sample:modular-world 必须是不加载 Classic 的实际替代配置。
 
 协调者串行运行 package.json 声明的 format/path/lint/typecheck、定向 owner tests、受影响 deterministic、Classic headless、一次 production build 和唯一 Chromium。当前 Cua/Jev 路由从真实键鼠验收全部物品/结构/载具旅程、保存重开、音频启停/失败与昼夜/林下/室内/遮挡/跨 Chunk 光照；runtime 调用、source grep、HTTP 200 或单图都不能替代产品证据。

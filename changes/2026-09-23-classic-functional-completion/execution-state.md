@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-24T19:23:30Z
+更新时间：2026-09-24T20:35:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -25,21 +25,21 @@ Goal：未创建；本轮未提供 token budget。
 | 低频监督 heartbeat | `46eeb208` | `*/20 * * * *`，Asia/Shanghai；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`；expiresAt=`2026-10-08T06:45:28.465Z` | active；不在本文推测下一次触发                                                                                                                               |
 | 已删除单次验证     | `949bd531` | `2026-09-24T06:46:00Z` 触发；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | failed：root already has an active run；未投递，已删除                                                                                                       |
 | 已删除闲置验证     | `8c8d05df` | `Classic idle wakeup proof`；target=`4decc58b-bca7-4d00-a0ca-392fc5532f10`                                         | **VERIFIED**：`2026-09-24T06:52:00Z` root 收到 daemon schedule；run=`c84043c8-1473-4459-bbff-79ab5e29dac6`，nonce=`classic-idle-supervisor-20260924`；已删除 |
-| 最近监督触发       | `46eeb208` | 同上                                                                                                               | `2026-09-24T19:20:00Z` root 实际巡检；run=`abc4d2dc-c479-4a8b-a6bd-769837c3e2b3`，确认GIT-06正常推进                                                         |
+| 最近监督触发       | `46eeb208` | 同上                                                                                                               | `2026-09-24T20:00:00Z` root 实际巡检；run=`7dc56ea4-5148-4721-b714-3420a0694ceb`，确认 Harness 两线正常推进                                                  |
 
 工具创建成功不等于实际续跑成功；本次 VERIFIED 依据是 root 实际收到 `<paseo-system> Schedule Classic idle wakeup proof fired`，并能被 daemon 自动唤醒执行工具。
 
 ## 当前阶段与期限
 
-| Owner                | 阶段                      | agent/进程句柄                               | 期限/状态                    | 当前事实                                                                                                                             |
-| -------------------- | ------------------------- | -------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| root `4decc58...`    | 总负责人                  | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                         | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                  |
-| Git `954ef...`       | `GIT-06`                  | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | `19:12Z` 开始，`19:23Z` 完成 | 代码 `3d429701...`、合同/evidence `d8bcbbde...` 已推送；首次local/upstream/ls-remote一致、ahead/behind `0/0`、index空，临时树已清理  |
-| 761 `761fb4f2...`    | Media capacity 完成       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | 已完成，冻结                 | root 已核 evidence `876be0b0...a566d`；聚合 generation 容量边界已关闭，最终 runtime/test hash 为 `7a673f70...fbe9`/`0ec7c50a...933a` |
-| 794 `7943067e...`    | fixture attribution 完成  | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | 已完成，冻结                 | root 已核 evidence `ec0901a4...374d7`；10 个 fixture 与 helper 最终 GREEN，原2个RED已由 restore-owner/lineage分别关闭                |
-| Media `a288bb43...`  | `MEDIA-WEB-CLOSE-01`      | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                 | root 已核 evidence `c0f4ee4d...69ccf3` 与35 hash；14 files / 95 tests及Web types/lint/format PASS；不代表浏览器真实声音              |
-| Legacy `a288bb43...` | `LEGACY-LINEAGE-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结                 | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过 |
-| Lighting `88d41...`  | 等待 V1                   | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                         | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                             |
+| Owner                  | 阶段                      | agent/进程句柄                               | 期限/状态              | 当前事实                                                                                                                              |
+| ---------------------- | ------------------------- | -------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| root `4decc58...`      | 总负责人                  | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                   | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                   |
+| Git/Harness `954ef...` | `GIT-07`                  | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | code已提交，docs待提交 | 18路径detached闭包9 files/43、四类types、lint/format/diff/hooks通过；code=`5d056070...`，待docs提交/push/readback；未browser/build/CI |
+| 794 `7943067e...`      | `V1-HARNESS-GEOMETRY-01`  | Paseo `7943067e-ff8e-4faf-b717-f14bded59d1c` | root 已准出，冻结      | root 核五个 hash；indexed material/world origin/postrender current record，`4 files / 22 tests PASS`；不代表浏览器渲染                |
+| Media `a288bb43...`    | `V1-HARNESS-MEDIA-01`     | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | root 已准出，冻结      | controller `f9ada640...36a7`、test `8e6088a8...fd32`、evidence `9a41d72d...bbf3`；7+5 tests及types/lint通过，只证明forward            |
+| Scenario `761fb...`    | V1 canonical scenario     | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | root已准出，冻结       | root核6源码hash与evidence `73ce063b...f6f5`；真实DOM/PointerLock步骤无baseline后写口，尚未实际运行browser                             |
+| Legacy `a288bb43...`   | `LEGACY-LINEAGE-CLOSE-01` | Paseo `a288bb43-cad6-49bb-8a32-03b7d9d7cd94` | 已完成，冻结           | root 已核最终 coercion 修复：migration `f5e14fde...fd75`、test `f3474e3d...c1d7`、evidence `6ce8f4ff...0884c`；14/14及types/lint通过  |
+| Lighting `88d41...`    | 等待 V1                   | Paseo `88d41b38-2a70-4653-9cf1-7f35edf7e5e2` | 等待                   | 既有模型/消费者映射已报告；生产 shader/renderer 尚未接线                                                                              |
 
 root 已读取 SHA-256 `9ea40ceb8811ea19d2040065ab846503f611249f85b239f3dea514bf69dd48cf` 的 `a1-r2-closing-review.md`，原 P1/P2 均已独立 CLOSED。A1 production staged tree 已通过 stdlib `71`、Web `16`、stdlib typecheck、targeted lint/format/diff；GIT-03 已提交并推送，local/remote 均为 `7e57f2e5452bec7e10945baf4f12f5f40a5df0f7`。该准出不外推为完整 Classic/CI/browser。
 

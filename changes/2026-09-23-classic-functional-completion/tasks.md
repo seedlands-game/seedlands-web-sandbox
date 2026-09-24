@@ -42,6 +42,10 @@ V1 只引入 water-bucket、两格可开关门、唱片三旅程所需公共接�
 | V1.8 public integration / coordinator           |   6h | 三域 exports/pack.ts/snapshot/projection/browser-gameplay 窄接线；复制 MP3 并核 bytes/hash/provenance；format/typecheck/三域定向测试串行 GREEN                                                |
 | V1.9 early browser / coordinator                |   6h | 单个临时 production artifact 中真实完成 water-bucket、门、record/jukebox 三旅程和 save/reopen；上传入口不可见；音频停止释放可观察；失败则只记录和修 V1，不进入 V2                             |
 
+### V1-HARNESS-INTEGRATION-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 2h。先冻结 `v1-harness-contract.md`，再消费 794 的 postrender mesh 摘要和 a288 的 Media controller 快照，向现有 BrowserProductHarness 接入 `getVoxelGeometry`、`getRenderedMaterialMesh`、`mediaSnapshot`。761 独占唯一 canonical scenario 整体 y 减 29 及 bucket/door/record/restore 旅程；本阶段不写其文件、不运行 browser/build/CI。done_when 为共享组合测试、相关私有 seam 测试、Web types、targeted lint/format/diff GREEN，并准确记录真实浏览器仍待 root 单例租约。
+
 ## V2–V4：完整领域 IMPLEMENT
 
 最终精确文件范围以 Paseo IMPLEMENT 消息为准；每条消息写明“你不是唯一编辑者，不回退他人改动”。

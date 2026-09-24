@@ -4,7 +4,7 @@ CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查
 
 ## 2026-09-20 Classic 初版恢复
 
-本轮用户授权恢复产品施工与验收。当前 change 为 changes/2026-09-20-classic-playable-first-edition/spec.md；新增命令以 package.json 为准。复用 #36 的 artifact 和唯一 Classic 线路，先恢复有限资源成长/存档 Headless 及 production Chromium。使用单 worker/headless/静音，运行结果绑定产物摘要；不是性能测量，也不代表 Beta 全量内容已完成。下述 09-16 冻结描述历史基线；Kernel/stdlib 和静态检查仍持续执行。CI 新增 Classic headless contracts、Production build、Chromium regression，产品作业本阶段全量执行；浏览器下载同次 build 的含隐藏文件 dist 并校验身份，不重新构建。远端实际运行状态见本 change 证据。tsconfig.classic-tests.json 检查当前恢复的用例和浏览器配置，远端保护仍保持现状。
+2026-09-20 已恢复产品施工与验收入口；其后续实现现由 `changes/2026-09-23-classic-functional-completion/spec.md` 继续。新增命令仍以 `package.json` 为准。仓库已存在唯一 `apps/web/tests/e2e/classic-runtime.spec.ts`、根 `pnpm build`/`pnpm harness:artifact`/`pnpm harness:classic` 和对应 artifact/Classic runner，不再把这些入口描述为“尚不存在”或仍冻结；是否执行及结果仍须以当次 source、artifact 和 receipt 为准。通用 `harness/contracts.json`、`plan.mjs`、`run.mjs` 与 `verify:*` selector/runner 尚未落盘，下文相应章节仍是延期设计。复用 #36 的 artifact 与唯一 Classic 线路，使用单 worker/headless/静音；运行结果绑定产物摘要，不是性能测量，也不代表 Beta 全量内容已完成。下述 09-16 冻结只描述历史基线；Kernel/stdlib 与静态检查持续执行。CI 实际运行状态以当前 workflow 与证据为准；浏览器只消费同次 build 的完整 dist 并校验身份，不重新构建。`tsconfig.classic-tests.json` 检查当前恢复的用例和浏览器配置，远端保护仍保持现状。
 
 ## 2026-09-16 架构冻结阶段
 
@@ -14,7 +14,7 @@ CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查
 
 GitHub `main` 的 `Protect main` ruleset 现行仅要求 `Static verification`；本阶段 CI 不产生 `Production build` 和 `Chromium regression`，不得用空运行的同名 job 制造绿灯。required check 通过只代表当前架构冻结阶段的静态边界和 Kernel/stdlib 确定性测试通过，不代表生产构建、Classic/Chromium 或产品验收通过。其他 PR 审核与 review thread 规则仍独立生效。后续恢复产品验收须重新审核 SDD、命令、证据和保护规则。
 
-以下章节保留原完整 Harness 设计，供后续 Draft PR 恢复时审查；其中 `harness:*`、`verify:affected`、`verify:all` 命令及路径不是本阶段的可执行入口。原设计的字段详见 [Harness 合同](harness-contracts.md)。
+以下章节同时包含已落盘的 artifact/Classic 入口和尚未实现的通用 selector/runner 设计。可执行命令只以当前 `package.json` 为准；仅有源码入口不等于本轮已执行或已通过。字段详见 [Harness 合同](harness-contracts.md)。
 
 ## 延期设计：三个 required check
 
