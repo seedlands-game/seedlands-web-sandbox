@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-25T08:23:00Z
+更新时间：2026-09-25T08:42:22Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -34,7 +34,8 @@ Goal：未创建；本轮未提供 token budget。
 | Owner                       | 阶段                            | agent/进程句柄                               | 期限/状态                  | 当前事实                                                                                                                                                                                                                                   |
 | --------------------------- | ------------------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | root `4decc58...`           | 总负责人                        | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                       | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                                                                                                                        |
-| Git/Build `954ef...`        | `V1-ARTIFACT-BUILD-13`          | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | artifact ready，待root交接 | GIT-19远端=`87e64e0b...`；build/artifact均PASS；artifact=`ea44e007...dd0e`、receipt=`551dc1c4...6c7`、276 files；新tree/dist保留，Browser-12未运行                                                                                         |
+| Git/Docs `954ef...`         | `GIT-20-V1-BROWSER-GREEN`       | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | 执行中                     | root已独立准出Browser-12唯一canonical attempt；本阶段只提交13份原始证据与spec/tasks/state状态增量，不运行build/browser/CI；下一步V2.0仍待root冻结                                                                                          |
+| Browser 12（V1.9）          | `V1-CANONICAL-BROWSER-12`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | PASS，lease已释放          | source=`87e64e0b...`、artifact=`ea44e007...dd0e`；单attempt、C0-C5与完整V1水桶/门/唱片机/save旅程PASS，pageErrors/failedResponses空；non-Classic skip，Cua/听觉未运行                                                                      |
 | Browser 11（历史）          | `V1-CANONICAL-BROWSER-11`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | source=`6614a1f6...`、artifact=`ea44e007...dd0e`；closed probe PASS，upper target与真实右键发生，但origin-cell ray给出adjacent null，Web pre-Authority fallback；open/jukebox/Media/C4/C5/save NOT REACHED                                 |
 | Browser 10（历史）          | `V1-CANONICAL-BROWSER-10`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | source=`9727dbb9...`、artifact=`ea44e007...dd0e`；closed正交Authority碰撞PASS；接触位强制lower重瞄失败，interactionAttempts=13未增且未toggle；open/jukebox/Media/C4/C5/save NOT REACHED                                                    |
 | Browser 09（历史）          | `V1-CANONICAL-BROWSER-09`       | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | source=`244b18e3...`、artifact=`ea44e007...dd0e`；本次到达closed mesh/descriptor，真实轨迹先在x=70.4925受阻再沿z滑出门边，旧final-x oracle误报；open/jukebox/Media/C4/C5/save NOT REACHED                                                  |
@@ -88,7 +89,7 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 - 12-file Classic composition扫描的早期 `73/31` 与探索树 `65/39` 已由fixture attribution明确归因；最终目标是当前闭包全 `104/104`，不得继续写成未归因历史债务。
 - `gameplay-model-assets.test.ts` 的历史 `custom:grazer-fur` 失败已确认是退休 actor fixture，并由现役 player/cloth 替换；完整文件 `9/9 PASS`，生产材质解析未改。证据见 `appearance-fixture-close-evidence.md`。
 - Lighting profile、block+sky GPU owner、五类消费者、真实 WebGL2 readback、Cua 动态矩阵尚未完成。
-- 未运行全量deterministic、完整Classic headless、服务端修复后的production build/browser、CI、PR review或Cloudflare preview。Browser-04仍是旧artifact上的失败历史，不能以本次定向服务端 GREEN 记为产品可玩或 V1 browser GREEN。
+- V1 production build 与唯一 canonical Browser 已由 Browser-12 准出；仍未运行全量 deterministic、完整 Classic headless、Cua/人类听觉、完整 194 项矩阵、CI、PR review 或 Cloudflare preview。Browser-01 至 Browser-11 的失败仍是历史事实，不能被 Browser-12 的 V1.9 结果改写。
 
 ## Git 批次
 
@@ -136,6 +137,7 @@ GIT-06代码闭包从 `78545d87...` 建立122路径detached staged tree；stdlib
 | V1 Browser attempt 11      | 唯一canonical Chromium，复用6614a1f6同一dist                                                                                           | `v1-canonical-browser-evidence.md`与`evidence/v1-canonical-browser-11/`                                                                            | 不适用                                     | closed probe PASS；upper target与真实右键发生，但origin-cell ray的adjacent为null并触发Web pre-Authority fallback；其余未触达       |
 | GIT-19 Door entry face     | closed probe后真实回退到approach并要求upper+entry-face精确aim                                                                          | `87e64e0b244a971540227b2d829b950362797816`                                                                                                         | `87e64e0b244a971540227b2d829b950362797816` | 已推送；oracle/targetaim/route `30/30`、Classic/root types、3TS lint、可编辑format/diff与hooks通过；Browser GREEN待Browser-12      |
 | V1 Artifact 87e64e0b       | Door entry face fixture后的干净production artifact                                                                                     | `sourceDigest=c5a6bafe...`；`artifactDigest=ea44e007...`；276 files                                                                                | 不适用                                     | `pnpm build`与`pnpm harness:artifact` PASS；receipt=`551dc1c4...6c7`；新tree/dist保留给Browser-12                                  |
+| V1 Browser attempt 12      | 唯一canonical Chromium，复用87e64e0b同一dist                                                                                           | `v1-canonical-browser-evidence.md`与`evidence/v1-canonical-browser-12/`                                                                            | PASS                                       | `2 passed / 0 failed / 1 skipped`、无retry；C0-C5与完整V1旅程PASS，artifact后验PASS；只准出V1.9早期browser门禁                     |
 | Lighting model             | explicit semantics + sky/surface models/tests                                                                                          | pending                                                                                                                                            | pending                                    | 依赖 V4 public/profile/renderer                                                                                                    |
 
 TAKEOVER-01 首批文档已读回 local/remote SHA；本次回填使用独立 execution-state checkpoint commit，不 amend。
@@ -179,6 +181,12 @@ GIT-18提交`6614a1f675c93043a19fe225acab5a382481ad13`已推送；detached tree�
 Browser-11 在同一`6614a1f6...`artifact上通过closed正交probe，upper target与真实右键均发生；但接触位eye已在upper完整voxel cell内，production ray返回`adjacent=null`，Web在Authority前进入fallback，`interactionAttempts=13`未增加。open/jukebox/Media/C4/C5/save未触达，lease已释放。`V1-DOOR-ENTRY-FACE-CLOSE-01`仅让fixture用真实KeyS退回approach并要求upper+derived adjacent精确aim；production origin-cell无face限制仍存在。root已核6文件、delivery validation、两个MANIFEST及30份receipt并准出GIT-19；不外推为Browser GREEN。
 
 GIT-19提交`87e64e0b244a971540227b2d829b950362797816`已推送；detached tree通过oracle/targetaim/route `30/30`、Classic/root test types、3TS ESLint、可编辑文件Prettier/scoped diff及自然hooks。BUILD-13从该SHA创建`/private/tmp/seedlands-v1-acceptance-87e64e0b`；唯一build窗口`44d478a5-0f1c-4be3-8a98-2913df47892d`与唯一artifact窗口`eb2c9d79-e3d7-44ae-b3ba-22d62b0d556a`均`PASS/exit 0`。sourceDigest=`c5a6bafe5ba3c7b96b78f79502083795426cdca32826f181f84416baf46c6c3b`、lockDigest=`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest=`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`、276 files、receipt SHA=`551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7`。新树tracked clean、4273无监听且dist保留；Browser-12未运行。
+
+Browser-12唯一canonical attempt在同一`87e64e0b...`artifact上`PASS/exit 0`：窗口`2401a5ed-b68b-48c7-93f5-138046e9629a`，Playwright `2 passed / 0 failed / 1 skipped`、无retry；C0-C5与完整V1水桶/门/唱片机/save恢复旅程、Classic视觉均PASS，`pageErrors=[]`、`failedResponses=[]`。post-artifact窗口`fc715cf2-caaf-4eea-9c16-e5ed80a73557`PASS且source/lock/276-file map/artifact不漂移。恢复前后门`[95,96]`、jukebox`67`、world revision`146`保持，Authority epoch从`...:1:world:0`换代为`...:2:world:0`。瞬时media对象仅由同次内联断言证明，receipt未单独序列化，不补造。该结果准出V1.9早期browser门禁并允许root进入V2.0建模/冻结；不等于最终产品交付。
+
+root准出时Browser-12的13-entry manifest SHA为`310049981f927c80d4250ddb5f545bb0d7d4ce05f963d50929685ea8c9d58844`。GIT-20新增文档门禁receipt/stdout后，没有重命名或改写原13文件；最终manifest按实际归档路径重算并自校验，最终SHA与条目数只在本阶段checkpoint报告，避免文档与manifest互相自引用。
+
+当前未验收：Cua与人类听觉（NOT RUN）、性能（NOT_MEASURED）、non-Classic（既有skip）、完整194矩阵、V2/V3/V4、full deterministic、Classic headless、CI/review与PR preview。近接触薄门origin-cell`adjacent=null`的production限制仍未修，须在最终验收前由root裁决。下一阶段只有root冻结V2.0 equipment pointer target/projection与death prepared participant后才开始；794当前只读梳理，不是第二协调者。
 
 ## 终点
 

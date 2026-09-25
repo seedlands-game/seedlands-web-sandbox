@@ -1,0 +1,10 @@
+checkedAt=2026-09-25T08:38:24Z
+port4273Listeners:
+ownedProcesses:
+benchmarkLock=absent
+treeHead=87e64e0b244a971540227b2d829b950362797816
+treeStatus=clean
+artifactReceiptSha256=551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7
+stampedFileCount=276
+diskFileCount=277
+distSymlinkCount=0

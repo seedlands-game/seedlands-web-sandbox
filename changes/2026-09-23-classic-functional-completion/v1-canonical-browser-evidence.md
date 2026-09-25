@@ -82,6 +82,80 @@ Pack presentation resource lock is invalid.
 
 ---
 
+# Browser-12 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-12`
+
+结论：**PASS；唯一 canonical Chromium attempt 完成 C0-C5、完整 V1 水桶/门/唱片机旅程、保存恢复与 Classic 视觉回归。该结论是 headless Playwright 合同，不替代 Cua 或人类听觉验收。**
+
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，`retries=0`。
+
+## Browser-12 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-87e64e0b`
+- HEAD/source：`87e64e0b244a971540227b2d829b950362797816`
+- source digest：`c5a6bafe5ba3c7b96b78f79502083795426cdca32826f181f84416baf46c6c3b`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`
+- artifact receipt SHA256：`551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7`
+- dist：276 个 stamped 文件、磁盘 277 个文件（含 receipt）、无 symlink；未重建或修改。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-12-87e64e0b node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+机器窗口/run ID：`2401a5ed-b68b-48c7-93f5-138046e9629a`，UTC `2026-09-25T08:28:40.549Z` 至 `2026-09-25T08:34:09.921Z`，`waitedMs=1`，`exitCode=0`，`measurement.status=NOT_RECORDED`。Harness 内 correctness sample 为 `NOT_MEASURED`，本结果不作性能准出。
+
+Playwright：`2 passed / 0 failed / 1 skipped`，单 worker、单 Chromium、无 retry、无第二 Harness 调用。
+
+- C0 PASS，3.5 秒。
+- C1 PASS，18.1 秒。
+- C2 PASS，21.5 秒。
+- C3 PASS，16.4 秒。
+- V1 step PASS，43.8 秒。
+- C4 PASS，2.5 分钟。
+- C5 PASS，13.3 秒。
+- 重开后玻璃放置 PASS，1.8 秒；V5 金钻目录与钻石块建造 PASS，3.0 秒。
+- Classic 视觉回归 PASS，32.7 秒；non-Classic smoke 按既有条件 skipped。
+
+## V1 与恢复结果
+
+- 四项音量与旧 file upload 移除、water-bucket 放 source、empty bucket 收 source：**PASS**。
+- 正式 UI 切生存、落地无碰撞、真实走到门：**PASS**。
+- 门 support+adjacent 瞄准、两格原子放置、closed descriptor、跨 Chunk mesh/epoch/vertex/index：**PASS**。
+- closed Authority probe 的居中路线、fresh ack、safe corridor 和持续 6 tick 阻挡：**PASS**。
+- probe 后真实 `KeyS` 回同一 plan approach、client/Authority 退出 target cell、upper+近侧 adjacent 同轮 exact、真实右键与 Authority toggle：**PASS**。Browser-11 的 null adjacent fixture 阻塞已在真实路径关闭。
+- open descriptor 无 collision、mesh 薄轴旋转、Chunk revision 前进、真实穿越，以及后续 upper 关闭/lower 再打开：**PASS**。保存前门为 open pair `[95,96]`。
+- jukebox support+adjacent 真实 PointerLock、右键放置、record-13 插入、单一 insert-and-activate fact、projection playing 与 headless audio phase：**PASS**。
+- C4 四个 Chunk center 往返、资源有界、同 Chunk 新 trace 经 Worker complete、mesh commit 和 postrender：**PASS**。
+- C5 正式保存返回继续：**PASS**。Authority/checkpoint/derived 保存前后门均为 `[95,96]`、jukebox 为 `67`、world revision 为 `146`；Authority world epoch 从 `seedlands:classic-canonical-runtime-v11:1:world:0` 换为 `seedlands:classic-canonical-runtime-v11:2:world:0`。developer world identity 的独立换代及 Browser runtime epoch 的独立换代均由同一完成的 C5 断言验证。
+- restore 后 record slot/revision 保留、`playing=false`、`resumePending=true`、无旧 forwarded batch；真实 PointerLock gesture 后续播，随后真实 eject 得到空 slot/eject fact/audio idle，离开世界后 audio release：**PASS**。
+- receipt `pageErrors=[]`、`failedResponses=[]`；最终正式移动、恢复后工作台交互、玻璃与钻石块操作也完成。
+
+上述 V1 瞬时 media、mesh 与输入细项由同一次完整结束的内联断言证明；Harness receipt 另保存 C0-C5、restore authority/checkpoint/derived 状态和最终快照，但未单独序列化每个 media 瞬时对象。headless audio phase 只证明 Web Audio 可观察合同，不证明人类可听体验。近接触薄门 origin-cell 无 entry face 的产品限制也未被修改；本轮证明的是 fixture 通过真实键盘退回后可执行。
+
+## Browser-12 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/`
+
+- `classic.json.log`：Harness 原始 PASS receipt，包含唯一主 attempt、C0-C5、artifact/Pack/Worker/WebGL2、restore 与 final evidence。
+- `performance-window.json.log`：原始外层机器窗口 receipt。
+- `runner-output.jsonl` / `runner-exec-event.json.log`：从本次 Trae 会话按 process `8943` 和对应 call IDs 机械抽取的完整 11 段 tool output 与最终 `completed/exit 0` 事件。
+- `harness-artifact.json` 与 `playwright-last-run.json.log`：冻结 artifact receipt 与 Playwright 通过状态。
+- 成功运行没有生成 `trace.zip`、`error-context.md` 或 screenshot；实际产物集合记录于 `generated-artifacts.txt`，没有伪造空附件。
+- 全部 SHA256 见阶段 checkpoint manifest。
+
+## Browser-12 运行后状态
+
+- 锁内 `pnpm harness:artifact` 后验 PASS：窗口 `fc715cf2-caaf-4eea-9c16-e5ed80a73557`，source/lock/276-file map/artifact digest 无漂移。
+- HEAD 仍为 `87e64e0b244a971540227b2d829b950362797816`，验收 tree 的 tracked/index clean，artifact receipt SHA256 仍为 `551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7`。
+- 最终资源检查须确认 `4273` 无监听、本树 Browser12/Playwright/Chromium/preview 无遗留且 benchmark lock absent 后释放租约。
+- 未启动 Cua、第二浏览器路线或第二 attempt；未运行 build/CI，未修改 source/test/dist/baseline，未执行 Git/index/push/deploy。
+
+---
+
 # Browser-11 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-11`

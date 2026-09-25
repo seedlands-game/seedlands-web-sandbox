@@ -40,7 +40,7 @@ V1 只引入 water-bucket、两格可开关门、唱片三旅程所需公共接�
 | V1.6 media state + Classic / records            |   6h | 无 DOM 的 MediaPlayback state/actions/facts、Classic record-13/jukebox mapping、slot/inventory 原子性和 V4 缺字段恢复定向 GREEN；Pack MP3 复制仍由 coordinator                                |
 | V1.7 Web media + upload retirement / records    |   6h | 独立 locked media loader/world player 单测 GREEN；设置文件上传/移除 UI、GlobalAudio import/remove/reference state、MusicPlayer reference 分支和专属旧测试退场；内置 cue/四音量/SFX 回归 GREEN |
 | V1.8 public integration / coordinator           |   6h | 三域 exports/pack.ts/snapshot/projection/browser-gameplay 窄接线；复制 MP3 并核 bytes/hash/provenance；format/typecheck/三域定向测试串行 GREEN                                                |
-| V1.9 early browser / coordinator                |   6h | 单个临时 production artifact 中真实完成 water-bucket、门、record/jukebox 三旅程和 save/reopen；上传入口不可见；音频停止释放可观察；失败则只记录和修 V1，不进入 V2                             |
+| V1.9 early browser / coordinator                |   6h | 已完成：Browser-12 单一 production artifact/单一 Chromium attempt 完成 water-bucket、门、record/jukebox、save/reopen、C0-C5 与 Classic visual；Cua/人类听觉和非 Classic smoke 未准出          |
 
 ### V1-HARNESS-INTEGRATION-01
 
@@ -49,6 +49,7 @@ Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 2h。先冻结 `v1
 ## V2–V4：完整领域 IMPLEMENT
 
 最终精确文件范围以 Paseo IMPLEMENT 消息为准；每条消息写明“你不是唯一编辑者，不回退他人改动”。
+V1.9 早期 canonical browser 门禁已通过；进入 V2 仍须 root 冻结 V2.0 的 equipment pointer target/projection 与 death prepared participant 公共合同。794 当前只读梳理，不是第二协调者，不得在该合同冻结前写 production。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
