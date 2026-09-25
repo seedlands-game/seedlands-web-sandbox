@@ -207,6 +207,31 @@ export type {
 export { defineModeModule } from '../gameplay/modules/mode-module';
 export { ARMOR_SLOTS, isArmorSlot } from '../gameplay/modules/armor-policy';
 export type { ArmorSlot } from '../gameplay/modules/armor-policy';
+export {
+  DEATH_INVENTORY_POLICY_CAPABILITY,
+  defineDeathInventoryPolicyModuleV1,
+  resolveDeathInventoryPolicyCapabilityV1,
+} from '../gameplay/modules/death-inventory-policy-module';
+export type {
+  ActorDeathPolicyKindV1,
+  DeathInventoryPolicyCapabilityV1,
+  DeathInventoryPolicyDefinitionV1,
+} from '../gameplay/modules/death-inventory-policy-module';
+export {
+  buildDeathInventorySettlementCandidateV1,
+  freezeDeathInventorySettlementPolicyV1,
+  prepareDeathInventorySettlementParticipantV1,
+  prepareDeathInventorySettlementSeriesV1,
+} from '../gameplay/death-inventory-settlement';
+export type {
+  DeathInventoryDropIntentV1,
+  DeathInventoryDropSourceV1,
+  DeathInventoryIntrinsicDropV1,
+  DeathInventorySettlementCandidateV1,
+  DeathInventorySettlementDispositionV1,
+  DeathInventorySettlementPolicyV1,
+  DeathInventorySettlementSourceV1,
+} from '../gameplay/death-inventory-settlement';
 export type {
   InventoryCursorOriginV1,
   InventoryCursorV1,
