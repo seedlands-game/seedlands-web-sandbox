@@ -1,0 +1,51 @@
+$ node scripts/harness/artifact.mjs --build
+$ pnpm --filter @seedlands/web build
+$ pnpm packs:build && pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build
+$ node ../../scripts/build-gameplay-packs.mjs --out public/packs
+{"ok":true,"lockPath":"/private/tmp/seedlands-v2-acceptance-00009bf2/apps/web/public/packs/packs.lock.json"}
+$ node ../../scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ node scripts/render-prerendered-start-screen.mjs --check
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /private/tmp/seedlands-v2-acceptance-00009bf2/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+6:06:33 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-acceptance-00009bf2/apps/web - using default configuration.
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 2748 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/assets/capability-probe-worker-Ck8l_HX8.js          0.14 kB
+dist/asset-workbench.html                                1.08 kB │ gzip:   0.49 kB
+dist/.vite/manifest.json                                 3.10 kB │ gzip:   0.62 kB
+dist/index.html                                          4.61 kB │ gzip:   2.01 kB
+dist/assets/fluid-compute-worker-DIUIxUK4.js            13.89 kB
+dist/assets/game-logic-worker-HPU57qHj.js               17.44 kB
+dist/assets/rust-kernels-scalar-hRRXiZem.wasm           32.65 kB │ gzip:  14.83 kB
+dist/assets/rust-kernels-simd-cUjVQL8I.wasm             34.21 kB │ gzip:  15.69 kB
+dist/assets/persistence-worker-ZQ_CYCjn.js              74.09 kB
+dist/assets/world-worker-DiexBVyO.js                   105.51 kB
+dist/assets/authority-worker-BRB2R8a0.js             1,025.95 kB
+dist/assets/game-DCCgC_AS.css                            5.54 kB │ gzip:   1.93 kB
+dist/assets/assets-D5PBeSxB.css                         18.36 kB │ gzip:   4.64 kB
+dist/assets/bootstrap-DL8hDYsH.css                      50.37 kB │ gzip:  11.29 kB
+dist/assets/modulepreload-polyfill-B5Qt9EMX.js           0.71 kB │ gzip:   0.40 kB
+dist/assets/game-CNo4H6ow.js                             0.96 kB │ gzip:   0.57 kB
+dist/assets/preload-helper-BXl3LOEh.js                   1.11 kB │ gzip:   0.65 kB
+dist/assets/chunk-persistence-benchmark-B7rhEazS.js      2.24 kB │ gzip:   1.10 kB
+dist/assets/vendor-svelte-CVxNowTz.js                   46.80 kB │ gzip:  17.88 kB
+dist/assets/assets-Bz-_2ghC.js                          59.03 kB │ gzip:  21.91 kB
+dist/assets/vendor-common-D3-4p7n_.js                  104.54 kB │ gzip:  29.70 kB
+dist/assets/vendor-tone-CKLKH-mG.js                    131.70 kB │ gzip:  31.17 kB
+dist/assets/glb-model-resource-BobomOWg.js             185.17 kB │ gzip:  60.07 kB
+dist/assets/bootstrap-94khWet-.js                      497.35 kB │ gzip: 158.16 kB
+dist/assets/vendor-playcanvas-7APsQ7DR.js            1,999.37 kB │ gzip: 516.97 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.78s
+{"status":"PASS","schemaVersion":1,"sourceSha":"00009bf26c821d115264d224899dafde0d6cc163","sourceDigest":"315820d63fc0ca323380ca45b6a537cb541842a41e396f3bfe94b0507d062dff","lockDigest":"44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169","artifactDigest":"fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2","files":276,"builtAt":"2026-09-25T22:06:39.842Z"}

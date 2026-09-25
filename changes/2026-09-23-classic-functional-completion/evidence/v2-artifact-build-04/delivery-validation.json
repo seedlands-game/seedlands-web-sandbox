@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-04",
+  "status": "PASS",
+  "sourceSha": "00009bf26c821d115264d224899dafde0d6cc163",
+  "sourceTree": "e263d29f14a607103c3a80a40a9b7bed4997c58d",
+  "sourceDigest": "315820d63fc0ca323380ca45b6a537cb541842a41e396f3bfe94b0507d062dff",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2",
+  "builtAt": "2026-09-25T22:06:39.842Z",
+  "artifactFiles": 276,
+  "distFilesIncludingReceipt": 277,
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-00009bf2",
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReused": true,
+    "taskStateInsideAcceptanceTree": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "argv": ["pnpm", "build"],
+    "window": "af3d2a23-1348-4faa-b79d-682b2dd82173",
+    "startedAt": "2026-09-25T22:06:18.935Z",
+    "endedAt": "2026-09-25T22:06:41.432Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "827a7ce8eecee3f875897264a9706fefdb7a480479bb8f443be273478ade80e3",
+    "receiptSha256": "be015368db46932ab019eac2e5c692387a35cb3a4db0e70e7068799eccebcc2b"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "argv": ["pnpm", "harness:artifact"],
+    "window": "41a1a689-602f-4bea-813d-49ec3010bf5c",
+    "startedAt": "2026-09-25T22:06:50.722Z",
+    "endedAt": "2026-09-25T22:06:52.671Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "b6b4f9eca9b718abc14df793c4418700fb7704378c4bc9451708432288cafb31",
+    "receiptSha256": "ffd82759295ed5599f211160184b6dc9d6553d3d18e1eed861b679b26d433fbb"
+  },
+  "artifactReceiptSha256": "fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d",
+  "artifactMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "diskFileMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "artifactMapMatchesDisk": true,
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "readOnlyProbeDiagnostic": {
+    "status": "CORRECTED_WITHOUT_REBUILD",
+    "reason": "The first post-build probe guessed a nonexistent dist/packs/resources path and a top-level .resources array.",
+    "artifactMutated": false,
+    "buildRerun": false,
+    "artifactVerificationRerun": false
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "d2ded761592f78a370a932122490313da9ee49a59863165dff9406b13c023934"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 15,
+    "sha256": "b2fc6294c5f8e0e2a7f03ea06c813052b53584f487a41f8e0b030eb033852db0",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "metadataFormat": {
+    "window": "de5bd556-0477-4a75-b66a-16bf26c5f03f",
+    "status": "PASS",
+    "stdoutSha256": "4fe01c50ee1d1db70909d3fb7af67d5b6f85a847ab86530cbf465f1c8f72ac8d",
+    "receiptSha256": "727d7cc35964e475df9652ed4720c801d6f04a8b2670b26d5a6d75b3ec9cd892"
+  },
+  "metadataFinalFormat": {
+    "window": "3ce0af69-55fe-4bc4-a010-dfa2e399be07",
+    "status": "PASS",
+    "stdoutSha256": "60e100dcf00173b820b7d6103d3e8cd835a62ec24436ffea72d6a52cc1f3174c",
+    "receiptSha256": "f72e2a642406d0580fedd80614c6d008b4141cf3d7499fcb691816de98de3440"
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "8a5a43d60aa6a1496eac1c405ffb3d57f081411209615d1c9e32eda89e97a789",
+    "acceptanceTreePreserved": true,
+    "previousV2TreesPreserved": 3,
+    "v1AcceptanceTreesPreserved": 9
+  },
+  "includedCapabilities": [
+    "read-only-equipment-harness-oracle",
+    "canonical-equipment-fixture",
+    "classic-death-and-needs-from-build03"
+  ],
+  "boundaries": {
+    "browserEquipmentJourney": "NOT_OBSERVED",
+    "deathDurabilityMinusOneDropRespawn": "NOT_OBSERVED",
+    "armorVariants": "4 iron slots sampled; not the 16-item armor matrix",
+    "registeredMatrix": "not the 194-item completion matrix",
+    "fullV2": "NOT_VERIFIED"
+  },
+  "notRun": ["browser", "cua", "devserver", "ci", "deploy", "merge"]
+}

@@ -137,3 +137,40 @@ player retain 与 creature/npc despawn 策略。
 保留，旧两棵 V2 与九棵 V1 acceptance tree 均未清理。BUILD03 包含 GIT26/GIT27 的 Combat、direct Vitals、
 registered Needs、Classic death policy 与精确 V4 predecessor；未运行 Browser、Cua、CI、deploy 或 merge，不能据此
 宣称真实装备/死亡 UI/save、完整 194 矩阵或完整 V2 GREEN。
+
+## BUILD04：Equipment Harness Oracle + Canonical Fixture
+
+- 已推送 source SHA：`00009bf26c821d115264d224899dafde0d6cc163`；tree
+  `e263d29f14a607103c3a80a40a9b7bed4997c58d`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-00009bf2`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `af3d2a23-1348-4faa-b79d-682b2dd82173`，UTC
+  `2026-09-25T22:06:18.935Z` 至 `22:06:41.432Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte
+  types 与 Vite production build 均成功；Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `41a1a689-602f-4bea-813d-49ec3010bf5c`，UTC
+  `2026-09-25T22:06:50.722Z` 至 `22:06:52.671Z`，`PASS/exit 0`；没有第二次 build 或 artifact verify。
+
+两次输出的 identity 完全相同：
+
+```text
+sourceSha=00009bf26c821d115264d224899dafde0d6cc163
+sourceDigest=315820d63fc0ca323380ca45b6a537cb541842a41e396f3bfe94b0507d062dff
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2
+files=276
+builtAt=2026-09-25T22:06:39.842Z
+```
+
+`harness-artifact.json` 的 276 项 file map 与按相对路径排序的磁盘 map 逐字节一致；dist 共 277 个普通文件，
+另一个是 receipt 自身。receipt SHA-256 为 `fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d`，
+`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。首次后验只读探测
+误猜 `dist/packs/resources/...` 路径及顶层 `.resources[]`，因此失败；该探测未改 artifact，随后按 receipt 路径和实际
+`.packs[].resources[]` 读取成功，且未重跑 build/verify。
+
+构建后 acceptance tree tracked diff/index 为空，端口 4273 无监听且本树残留进程为 0。该 tree/dist 按要求保留，
+BUILD03、BUILD02、BUILD01 与九棵 V1 acceptance tree 均未清理。BUILD04 包含 equipment oracle 与 canonical fixture，
+但未运行 Browser、Cua、CI、deploy 或 merge；不能据此宣称真实 equipment journey、death/durability-1/drop/respawn、
+16 件护甲、194 项矩阵或完整 V2 GREEN。
