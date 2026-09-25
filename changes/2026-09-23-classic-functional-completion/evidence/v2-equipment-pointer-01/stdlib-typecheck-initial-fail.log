@@ -1,0 +1,5 @@
+$ tsc -p tsconfig.json --noEmit
+src/server/gameplay/modules/inventory-pointer-model.ts(190,25): error TS2367: This comparison appears to be unintentional because the types '"station" | "crafting" | "inventory"' and '"equipment"' have no overlap.
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

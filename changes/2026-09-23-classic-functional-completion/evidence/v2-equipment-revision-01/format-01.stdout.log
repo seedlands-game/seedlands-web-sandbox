@@ -1,0 +1,6 @@
+packages/stdlib/src/server/gameplay/prepared-entity-mutation.ts 59ms (unchanged)
+packages/stdlib/tests/server/prepared-entity-equipment-revision.test.ts 13ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-revision-contract.md 15ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 40ms (unchanged)
+changes/2026-09-23-classic-functional-completion/tasks.md 18ms (unchanged)
+changes/2026-09-23-classic-functional-completion/execution-state.md 40ms

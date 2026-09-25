@@ -1,0 +1,8 @@
+changes/2026-09-23-classic-functional-completion/equipment-spine-contract.md 34ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-spine-evidence.md 11ms
+changes/2026-09-23-classic-functional-completion/spec.md 38ms (unchanged)
+changes/2026-09-23-classic-functional-completion/tasks.md 18ms (unchanged)
+changes/2026-09-23-classic-functional-completion/execution-state.md 39ms
+packages/stdlib/src/server/gameplay/death-inventory-settlement.ts 29ms (unchanged)
+packages/stdlib/tests/server/equipment-spine-contract.test.ts 19ms (unchanged)
+packages/stdlib/src/server/protocol/network-action-reference-copy.ts 7ms (unchanged)

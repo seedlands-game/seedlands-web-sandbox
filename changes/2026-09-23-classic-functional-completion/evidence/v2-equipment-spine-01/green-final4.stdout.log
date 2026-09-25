@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts (9 tests | 1 failed) 12ms
+     × builds one stable detached drop intent per occupied bag, cursor, crafting, and armor source 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts > death inventory settlement contract > builds one stable detached drop intent per occupied bag, cursor, crafting, and armor source
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/stdlib/tests/server/equipment-spine-contract.test.ts:246:91
+    244|     expect(Object.isFrozen(candidate.dropIntents)).toBe(true);
+    245|     expect(Object.isFrozen(candidate.dropIntents[3]!.stack.instance)).…
+    246|     expect(Object.isFrozen(candidate.actorReplacement?.components.play…
+       |                                                                                           ^
+    247|   });
+    248|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 27 passed (28)
+   Start at  17:43:05
+   Duration  1.28s (transform 665ms, setup 0ms, import 913ms, tests 41ms, environment 0ms)
+

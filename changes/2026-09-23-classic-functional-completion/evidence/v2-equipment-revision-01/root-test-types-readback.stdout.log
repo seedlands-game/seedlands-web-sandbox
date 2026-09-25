@@ -1,0 +1,1 @@
+packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts(190,25): error TS2367: This comparison appears to be unintentional because the types '"station" | "inventory" | "crafting"' and '"equipment"' have no overlap.

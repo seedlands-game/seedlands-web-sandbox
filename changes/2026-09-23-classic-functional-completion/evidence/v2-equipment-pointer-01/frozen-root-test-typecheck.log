@@ -1,0 +1,4 @@
+packages/stdlib/tests/server/registered-station-equipment-host.test.ts(5,1): error TS6133: 'prepareEntityMutation' is declared but its value is never read.
+packages/stdlib/tests/server/registered-station-equipment-host.test.ts(9,1): error TS6133: 'WorldResourceAuthorizer' is declared but its value is never read.
+packages/stdlib/tests/server/registered-station-equipment-host.test.ts(142,10): error TS6133: 'ownedStacks' is declared but its value is never read.
+packages/stdlib/tests/server/registered-station-equipment-host.test.ts(159,7): error TS6133: 'putCursor' is declared but its value is never read.
