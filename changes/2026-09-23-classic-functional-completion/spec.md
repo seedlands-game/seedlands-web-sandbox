@@ -120,6 +120,20 @@ equipment 当目标，collect 不以 equipment 为 source。每个出队动作�
 绑定发起时 actor/station identity；失败不写 UI 第二状态或伪造装备。纯 creative catalog 不自行开放装备权限。
 本片不改变 stdlib/protocol/Classic content、combat/death policy、坐标、timeout 或 Harness。
 
+V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
+crafting、armor、drop、NPC intrinsic drop 合并到一次 death settlement series participant。composed 缺策略须
+稳定返回 `death-inventory-policy-unavailable` 且 resolve/combat/entity/effects 零提交；legacy uncomposed 调用必须
+显式选择兼容路径。本片不安装 Classic policy，不接 Needs/Vitals/Autonomy 其他 death producer。
+
+V2 direct Vitals death 子片冻结 `death-direct-vitals-contract.md`：`GameplayRuntime.applyDamage` 仍先执行难度与
+通用 armor policy，但 post-hit armor 必须作为 Vitals 的 proposed components，与 health、needs、四容器 death
+settlement 进入同一 prepared entity participant；不再在成功后另写 armor。致命 player 同时预备既有
+`prepareDeaths([id])` effects，entity/effects 全部 validate 后才首次写入。composed 缺 death policy 稳定
+`death-inventory-policy-unavailable` 且零提交；nonfatal 正常，uncomposed legacy 显式保留。本片只处理 player
+direct damage/legacy needs facade，不改 registered combat、Needs schedule、非 player producer 或 Classic policy。
+
 ### 结构、攀爬、路线和载具
 
 - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。

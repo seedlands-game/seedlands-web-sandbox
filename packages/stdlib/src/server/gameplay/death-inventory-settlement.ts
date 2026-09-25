@@ -58,6 +58,13 @@ export type DeathInventorySettlementCandidateV1 = Readonly<{
   dropIntents: readonly DeathInventoryDropIntentV1[];
 }>;
 
+export type DeathInventoryAdditionalActorReplacementV1 = Readonly<{
+  /** Authoritative pre-schedule frontier, detached by the mixed-series preparer. */
+  source: DeathInventorySettlementSourceV1;
+  /** Proposed living state only; death and despawn must use a policy-governed candidate. */
+  replacement: PreparedActorReplacement;
+}>;
+
 const isRecord = (raw: unknown): raw is Record<string, unknown> => {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
   const prototype = Object.getPrototypeOf(raw);
@@ -73,6 +80,25 @@ const exactRecord = (raw: unknown, keys: readonly string[], label: string): Reco
     ) ||
     Object.keys(descriptors).length !== keys.length ||
     keys.some((key) => !Object.hasOwn(descriptors, key))
+  )
+    throw new TypeError(`${label} is invalid.`);
+  return raw;
+};
+
+const exactOptionalRecord = (
+  raw: unknown,
+  required: readonly string[],
+  optional: readonly string[],
+  label: string,
+): Record<string, unknown> => {
+  if (!isRecord(raw)) throw new TypeError(`${label} is invalid.`);
+  const descriptors = Object.getOwnPropertyDescriptors(raw);
+  const allowed = [...required, ...optional];
+  if (
+    Reflect.ownKeys(descriptors).some(
+      (key) => typeof key !== 'string' || !allowed.includes(key) || !('value' in descriptors[key]!),
+    ) ||
+    required.some((key) => !Object.hasOwn(descriptors, key))
   )
     throw new TypeError(`${label} is invalid.`);
   return raw;
@@ -314,22 +340,76 @@ function assertDense(entries: readonly unknown[], label: string): void {
     if (!Object.hasOwn(entries, index)) throw new TypeError(`${label} must be dense.`);
 }
 
-function sourceIsFresh(entities: EntityStore, candidate: DeathInventorySettlementCandidateV1): void {
-  if (!candidate || candidate.version !== 1)
-    throw new TypeError('Death inventory settlement candidate version is invalid.');
-  const reference = candidate.source?.actorReference;
+function sourceIsFresh(entities: EntityStore, source: DeathInventorySettlementSourceV1): void {
+  const reference = source?.actorReference;
   if (!reference || !entities.resolveReference(reference))
     throw new Error('Death inventory settlement actor reference is stale.');
   const entity = entities.get(reference.entityId);
-  if (!entity || entity.health !== candidate.source.health)
-    throw new Error('Death inventory settlement actor health is stale.');
-  if (!sameSnapshot(entities.actorComponentSnapshot(reference.entityId), candidate.source.components))
+  if (!entity || entity.health !== source.health) throw new Error('Death inventory settlement actor health is stale.');
+  if (!sameSnapshot(entities.actorComponentSnapshot(reference.entityId), source.components))
     throw new Error('Death inventory settlement actor component source is stale.');
+}
+
+function validateCandidate(entities: EntityStore, candidate: DeathInventorySettlementCandidateV1): void {
+  if (!candidate || candidate.version !== 1)
+    throw new TypeError('Death inventory settlement candidate version is invalid.');
+  const reference = candidate.source?.actorReference;
+  sourceIsFresh(entities, candidate.source);
   if (Boolean(candidate.actorReplacement) === Boolean(candidate.despawnReference))
     throw new TypeError('Death inventory settlement actor replacement and despawn are invalid.');
   const targetReference = candidate.actorReplacement?.reference ?? candidate.despawnReference!;
   if (!sameSnapshot(targetReference, reference))
     throw new TypeError('Death inventory settlement target does not match its source.');
+}
+
+function validateAdditionalActorReplacement(
+  entities: EntityStore,
+  input: DeathInventoryAdditionalActorReplacementV1,
+): PreparedActorReplacement {
+  const value = exactRecord(input, ['source', 'replacement'], 'Death inventory additional actor replacement');
+  const rawSource = exactRecord(
+    value.source,
+    ['actorReference', 'health', 'components'],
+    'Death inventory settlement source',
+  );
+  const source = Object.freeze({
+    actorReference: frozenReference(rawSource.actorReference as EntityLifetimeReference),
+    health: rawSource.health as number,
+    components: frozenActorSnapshot(rawSource.components as ActorComponentSnapshot),
+  });
+  if (!Number.isFinite(source.health) || source.health <= 0 || source.components.lifecycle !== 'alive')
+    throw new TypeError('Death inventory additional actor source must be alive.');
+  if (source.components.entityId !== source.actorReference.entityId)
+    throw new TypeError('Death inventory actor snapshot is invalid.');
+  sourceIsFresh(entities, source);
+
+  const replacementValue = exactOptionalRecord(
+    value.replacement,
+    ['reference', 'health', 'components'],
+    ['position', 'physicsVelocity'],
+    'Death inventory additional actor replacement value',
+  );
+  const copiedPosition = (field: 'position' | 'physicsVelocity') => {
+    const raw = replacementValue[field];
+    return raw === undefined ? undefined : frozenPosition(raw as readonly [number, number, number]);
+  };
+  const position = copiedPosition('position');
+  const physicsVelocity = copiedPosition('physicsVelocity');
+  const replacement = Object.freeze({
+    reference: frozenReference(replacementValue.reference as EntityLifetimeReference),
+    health: replacementValue.health as number,
+    components: frozenActorSnapshot(replacementValue.components as ActorComponentSnapshot),
+    ...(position ? { position } : {}),
+    ...(physicsVelocity ? { physicsVelocity } : {}),
+  });
+  if (!Number.isFinite(replacement.health) || replacement.health <= 0 || replacement.components.lifecycle !== 'alive')
+    throw new TypeError('Death inventory additional actor replacement must remain alive.');
+  if (
+    replacement.components.entityId !== replacement.reference.entityId ||
+    !sameSnapshot(replacement.reference, source.actorReference)
+  )
+    throw new TypeError('Death inventory additional actor replacement does not match its source.');
+  return replacement;
 }
 
 const worldItemSpawn = (drop: DeathInventoryIntrinsicDropV1 | DeathInventoryDropIntentV1): PreparedWorldItemSpawn =>
@@ -370,24 +450,43 @@ export function prepareDeathInventorySettlementSeriesV1(
   entities: EntityStore,
   input: Readonly<{
     candidates: readonly DeathInventorySettlementCandidateV1[];
+    additionalActorReplacements?: readonly DeathInventoryAdditionalActorReplacementV1[];
     intrinsicDrops?: readonly DeathInventoryIntrinsicDropV1[];
   }>,
 ): PreparedEntityMutation {
-  if (!input || typeof input !== 'object') throw new TypeError('Death inventory settlement series input is invalid.');
-  const candidates = input.candidates;
-  const intrinsicDrops = input.intrinsicDrops ?? [];
+  const value = exactOptionalRecord(
+    input,
+    ['candidates'],
+    ['additionalActorReplacements', 'intrinsicDrops'],
+    'Death inventory settlement series input',
+  );
+  const candidates = value.candidates as readonly DeathInventorySettlementCandidateV1[];
+  const additionalActorReplacements =
+    (value.additionalActorReplacements as readonly DeathInventoryAdditionalActorReplacementV1[] | undefined) ?? [];
+  const intrinsicDrops = (value.intrinsicDrops as readonly DeathInventoryIntrinsicDropV1[] | undefined) ?? [];
   assertDense(candidates, 'Death inventory settlement candidates');
+  assertDense(additionalActorReplacements, 'Death inventory additional actor replacements');
   assertDense(intrinsicDrops, 'Death inventory intrinsic drops');
   if (candidates.length < 1) throw new RangeError('Death inventory settlement requires at least one candidate.');
 
   const actorIds = new Set<string>();
+  const additionalActors = additionalActorReplacements.map((entry) => {
+    const replacement = validateAdditionalActorReplacement(entities, entry);
+    const id = replacement.reference.entityId;
+    if (actorIds.has(id)) throw new TypeError(`Death inventory settlement contains a duplicate actor: ${id}`);
+    actorIds.add(id);
+    return replacement;
+  });
   for (const candidate of candidates) {
-    sourceIsFresh(entities, candidate);
+    validateCandidate(entities, candidate);
     const id = candidate.source.actorReference.entityId;
     if (actorIds.has(id)) throw new TypeError(`Death inventory settlement contains a duplicate actor: ${id}`);
     actorIds.add(id);
   }
-  const actors = candidates.flatMap((candidate) => (candidate.actorReplacement ? [candidate.actorReplacement] : []));
+  const actors = [
+    ...additionalActors,
+    ...candidates.flatMap((candidate) => (candidate.actorReplacement ? [candidate.actorReplacement] : [])),
+  ];
   const despawns = candidates.flatMap((candidate) => (candidate.despawnReference ? [candidate.despawnReference] : []));
   const spawns = [
     ...candidates.flatMap((candidate) => candidate.dropIntents.map(worldItemSpawn)),

@@ -5,6 +5,7 @@ import { setSpawnFromBed } from './bed-action';
 import { DifficultyRuntime, hostileActorsForPeaceful, type Difficulty } from './difficulty-runtime';
 import { prepareArmorDamage, equipSelectedArmor } from './armor-equipment';
 import type { ActorComponentAccess } from './ecs-actor-components';
+import type { ArmorEquipment } from './ecs-actor-armor-state';
 import type { ItemDefinitionRegistry } from './item-registry';
 
 type Position = [number, number, number];
@@ -28,14 +29,12 @@ export const applySurvivalDamage = (
   items: ItemDefinitionRegistry,
   actorId: string,
   amount: number,
-  apply: (amount: number) => GameplayResult,
+  apply: (amount: number, armor?: ArmorEquipment) => GameplayResult,
 ) => {
   if (!Number.isFinite(amount) || amount <= 0 || target.mode !== 'survival') return apply(amount);
   return applyDifficultyDamage(difficulty, simulation, actorId, amount, (adjusted) => {
     const candidate = prepareArmorDamage(target, items, adjusted);
-    const result = apply(candidate.damage);
-    if (result.success) target.replaceArmor(candidate.armor);
-    return result;
+    return apply(candidate.damage, candidate.armor);
   });
 };
 

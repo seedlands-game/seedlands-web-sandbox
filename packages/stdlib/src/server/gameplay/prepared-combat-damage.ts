@@ -4,6 +4,14 @@ import type { EntityStore } from './entity-store';
 import type { ItemStack } from './item-registry';
 import { prepareEntityMutation } from './prepared-entity-mutation';
 import { emptyInventoryCursor } from './modules/inventory-pointer-contract';
+import {
+  buildDeathInventorySettlementCandidateV1,
+  prepareDeathInventorySettlementSeriesV1,
+} from './death-inventory-settlement';
+import type { DeathInventoryPolicyCapabilityV1 } from './modules/death-inventory-policy-module';
+
+type CombatDeathInventoryMode =
+  Readonly<{ kind: 'legacy' }> | Readonly<{ kind: 'composed'; capability: DeathInventoryPolicyCapabilityV1 | null }>;
 
 /** Policy already selected the amount; this owner only prepares health, inventory and drops. */
 export function prepareCombatDamage(
@@ -12,6 +20,7 @@ export function prepareCombatDamage(
     targetId: string;
     damage: number;
     armor?: ArmorEquipment;
+    deathInventory: CombatDeathInventoryMode;
     actorDeathDrop(id: string): ItemStack | null;
   }>,
 ) {
@@ -27,19 +36,46 @@ export function prepareCombatDamage(
   const components = options.entities.actorComponentSnapshot(target.id);
   const deaths = health === 0 ? [target.id] : [];
   const removals = health === 0 && target.type !== 'player' ? [target.id] : [];
+  const armored = options.armor
+    ? { ...components, equipment: { ...components.equipment, armor: options.armor } }
+    : components;
+  if (health > 0) {
+    const entity = prepareEntityMutation(options.entities, {
+      actors: [{ reference, health, components: armored }],
+    });
+    return { damage, entity, deaths, removals };
+  }
+  if (options.deathInventory.kind === 'composed') {
+    const capability = options.deathInventory.capability;
+    if (!capability) throw new Error('death-inventory-policy-unavailable');
+    const settlementComponents =
+      target.type === 'player' ? { ...armored, player: { ...armored.player!, breakAction: null } } : armored;
+    const candidate = buildDeathInventorySettlementCandidateV1({
+      source: { actorReference: reference, health: target.health, components },
+      position: target.position,
+      settlementComponents,
+      policy: capability.policyFor(target.type),
+    });
+    const intrinsic = target.type === 'player' ? null : options.actorDeathDrop(target.id);
+    return {
+      damage,
+      entity: prepareDeathInventorySettlementSeriesV1(options.entities, {
+        candidates: [candidate],
+        ...(intrinsic ? { intrinsicDrops: [{ position: target.position, stack: intrinsic }] } : {}),
+      }),
+      deaths,
+      removals: candidate.despawnReference ? [target.id] : [],
+    };
+  }
   const cursorStack = components.inventoryCursor?.stack;
   const interactionItems = [cursorStack, ...(components.inventoryCursor?.craftingGrid ?? [])];
-  const stacks =
-    health === 0 ? [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [stack] : [])) : [];
+  const stacks = [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [stack] : []));
   if (removals.length) {
     const drop = options.actorDeathDrop(target.id);
     if (drop) stacks.push(drop);
   }
-  const armored = options.armor
-    ? { ...components, equipment: { ...components.equipment, armor: options.armor } }
-    : components;
   const next =
-    health === 0 && target.type === 'player'
+    target.type === 'player'
       ? {
           ...armored,
           lifecycle: 'dead' as const,

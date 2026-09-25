@@ -19,6 +19,10 @@ import type { CombatRequestResult, PreparedCombatMutation } from '../combat-runt
 import { prepareArmorDamage } from '../armor-equipment';
 import { prepareCombatDamage } from '../prepared-combat-damage';
 import type { PreparedEntityMutation } from '../prepared-entity-mutation';
+import {
+  resolveDeathInventoryPolicyCapabilityV1,
+  type DeathInventoryPolicyCapabilityV1,
+} from './death-inventory-policy-module';
 import type { ActionRuntime } from '../../simulation/action-runtime';
 import type { CombatAutonomyEffects } from '../../simulation/prepared-combat-effects';
 import { createCombatStatePort } from './combat-state-port';
@@ -56,8 +60,10 @@ export class RegisteredCombatRuntime {
   readonly environment;
   readonly state;
   readonly enabled: boolean;
+  private readonly deathInventoryPolicy: DeathInventoryPolicyCapabilityV1 | null;
   constructor(private readonly options: Options) {
     this.environment = createCombatHostEnvironment(options);
+    this.deathInventoryPolicy = resolveDeathInventoryPolicyCapabilityV1(options.composition);
     this.enabled = [COMBAT_REQUEST_OPERATION, COMBAT_RESOLVE_OPERATION, COMBAT_ADVANCE_OPERATION].every((id) =>
       options.composition.registrations.operations.some(({ definition }) => definition.id === id),
     );
@@ -227,13 +233,21 @@ export class RegisteredCombatRuntime {
       !reason && candidate.damage > 0 && target.mode === 'survival'
         ? prepareArmorDamage(target, this.options.content.items, candidate.damage)
         : null;
+    const effectiveDamage = armor?.damage ?? candidate.damage;
+    if (!reason && effectiveDamage > 0 && effectiveDamage >= target.health && !this.deathInventoryPolicy)
+      return {
+        ok: false,
+        code: 'DEATH_INVENTORY_POLICY_UNAVAILABLE',
+        reason: 'death-inventory-policy-unavailable',
+      };
     const damage = reason
       ? { damage: 0, entity: null, deaths: [], removals: [] }
       : prepareCombatDamage({
           entities,
           targetId: candidate.targetId,
-          damage: armor?.damage ?? candidate.damage,
+          damage: effectiveDamage,
           ...(armor ? { armor: armor.armor } : {}),
+          deathInventory: { kind: 'composed', capability: this.deathInventoryPolicy },
           actorDeathDrop: (id) => simulation().actorDeathDrop(id),
         });
     const plan = combat.prepareMutation({
