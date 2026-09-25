@@ -1,0 +1,14 @@
+37359d1a71d516362e9a73b2a920ffd15c98724b2d5b8a18c7702c778547b111  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/SOURCE-MANIFEST.sha256
+9dca92ee2c8762d96bb4fe7c59aabb634755358d849372bcc1383c47be51f8b4  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/delivery-validation.json
+cf6a2c43c2ea17dca415c6806fb23216c445f3281b6caf5c0290a7399aaea6e8  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/diff-delivery-frozen-02-window.json.log
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/diff-delivery-frozen-02.stdout.log
+133c859ec1987f1b3818c4a2f8117f3b94da0e4b990da25273f959fe21010383  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/docs-format-01-window.json.log
+886a626ad6753561ea10ef7d01713944531ab4e9cc44f88a65d691fbd024d865  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/docs-format-01.stdout.log
+4a67cccc3c8cad502ac42a330f428ef106ec7e9a12b057776f4f3cdecc8c260f  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/eslint-01-window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/eslint-01.stdout.log
+43fb4e90a9f98fdb20ea58520caa16317f67de58d36822c780da1acf710e14eb  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/green-01-window.json.log
+4b1847913f9630e389cd180bcf68bab1404eb40ccde287f74e4bd0a862ad34fa  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/green-01.stdout.log
+2166a115ac515139c4b5c5ea4e6252f5e6a89999992430eebeb726b286d8faf3  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/type-classic-01-window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/type-classic-01.stdout.log
+e1cb132e48849c37237a67c4bd2e9ccf1cdae901987c6a857cd7cc6356a97802  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/type-root-01-window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/v2-death-needs-fixture-close-02/type-root-01.stdout.log

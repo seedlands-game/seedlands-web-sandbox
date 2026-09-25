@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "ba92f1b7-beaa-4d16-9363-d8f715c63079",
+  "pid": 58556,
+  "startedAt": "2026-09-25T18:43:22.010Z",
+  "windowId": "ba92f1b7-beaa-4d16-9363-d8f715c63079",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-27-classic-death-and-needs/direct-vitals-death.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T18:43:23.363Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T18:43:22.011Z",
+      "loadAverage": [
+        2.4423828125,
+        3.1142578125,
+        3.1953125
+      ],
+      "freeMemoryBytes": 859078656,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T18:43:23.362Z",
+      "loadAverage": [
+        2.48681640625,
+        3.1123046875,
+        3.19384765625
+      ],
+      "freeMemoryBytes": 901611520,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CLASSIC-DEATH-POLICY-INSTALL-01",
+  "status": "CHECKPOINT_READY",
+  "baseline": "5fcdc1dffe3b4a7fbcf5e43c91ae45189ed10708",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "8ea222c160d8cb13ad261eff76d3c06ef84943ae27ed00b7688cbc9fbed35e70"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 109,
+    "sha256": "6b49dbc31d1a5335832e883577299d54c88beef913d1998906c3367b41a70cb7",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "classicPolicy": {
+    "moduleId": "seedlands:overworld-death-inventory-policy",
+    "capabilityId": "seedlands:death-inventory-policy",
+    "player": {
+      "inventory": "drop",
+      "cursor": "drop",
+      "crafting": "drop",
+      "armor": "drop",
+      "actor": "retain"
+    },
+    "creature": {
+      "inventory": "drop",
+      "cursor": "drop",
+      "crafting": "drop",
+      "armor": "drop",
+      "actor": "despawn"
+    },
+    "npc": {
+      "inventory": "drop",
+      "cursor": "drop",
+      "crafting": "drop",
+      "armor": "drop",
+      "actor": "despawn"
+    }
+  },
+  "predecessor": {
+    "gameplayVersions": [4],
+    "captureFileSha256": "ebad22c315758e0b9e305aaff6ba7c0c4adc7026ac506fb6dfe4b82abd1db405",
+    "canonicalSha256": "e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a",
+    "canonicalBytes": 39998,
+    "modules": 22,
+    "capabilities": 28,
+    "sourceSha": "1bbe3a60d55ffa5d05e405377624fbbd942e6327",
+    "artifactReceiptSha256": "aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a",
+    "packLockSha256": "fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332"
+  },
+  "red": {
+    "lineage": {
+      "window": "7226c57e-26c5-44ca-8cec-734ccb70af46",
+      "status": "EXPECTED_FAIL",
+      "failed": 2,
+      "passed": 2,
+      "reason": "Classic composition lacked the death policy capability and captured V4 predecessor",
+      "stdoutSha256": "3e3abbb8b0ef0087fcd026b09997534510bb05877af65ffdd1e726e526cf45e6",
+      "receiptSha256": "639d0d3ca9f233e088499de879a2340d7087df1e788dc57907b455575db75048"
+    },
+    "directVitals": {
+      "window": "82a822ac-547a-4547-a0f3-18d5a1d9816f",
+      "status": "EXPECTED_FAIL",
+      "failed": 1,
+      "passed": 5,
+      "reason": "death-inventory-policy-unavailable",
+      "stdoutSha256": "442fa0b3d638c63cca936305a813be39251f240a2b62b71da47d8df74bd9a4f6",
+      "receiptSha256": "09ef3a1953be7514af9e5735e579b4ffb9570b80be097d4411cc0de16a0566b0"
+    }
+  },
+  "tests": {
+    "lineage": {
+      "window": "850d497f-aed2-4a2f-ba8e-083661ba3863",
+      "status": "PASS",
+      "files": 1,
+      "passed": 4,
+      "stdoutSha256": "b45c51b278bea85c1a4fdbbb895fa1343f78bc672d189f1d85cc6ae9e647f9c7",
+      "receiptSha256": "31b68e72837fedaafeb6096112f04edee3b90fe040b3ce418aacea7398529a7b"
+    },
+    "fullClassicPack": {
+      "window": "ca1595ff-f488-4e6a-9372-73e21f59119f",
+      "status": "PASS",
+      "files": 1,
+      "passed": 3,
+      "stdoutSha256": "a107e23ab02f58657105613a58c2f48c25044b8b66c84fe80d8c9ebb33623624",
+      "receiptSha256": "fb5bc825373385c927ac700ef3cea255a2a2680ef9238ed874c5f4d58206d2b6"
+    },
+    "webAggregate": {
+      "window": "4a098ce6-9eb1-46e8-b12a-39faff05fd0f",
+      "status": "PASS",
+      "files": 3,
+      "passed": 18,
+      "maxWorkers": 1,
+      "stdoutSha256": "c15a9824bea0af925c715065d3f673e845cd7802e6c21748c9e9790397ef51bc",
+      "receiptSha256": "d8a804596f22d00810b69c4e76fc9cdec057c2ad756fd2dc115a2e64978bf07a"
+    },
+    "exactDropCounts": {
+      "window": "352aba62-5b27-4fb8-9b21-9db57c188d29",
+      "status": "PASS",
+      "files": 2,
+      "passed": 9,
+      "maxWorkers": 1,
+      "stdoutSha256": "3d7c437bbf3af4e81dac9a9076fca20b7165ec83f9a64281f1e38e89986cb23f",
+      "receiptSha256": "2636b3c67cb10c1a3e115eabd2ce3a342cad3bdec7531d9c69b0a305a4a39633"
+    }
+  },
+  "static": {
+    "classicProductionTypes": {
+      "window": "ee0df525-2bb7-4c27-8b8b-cd537762e599",
+      "status": "PASS",
+      "receiptSha256": "751333ddb782187b88f90be86b199a91eee51d0dc7cc3a8c70bdd050bb0bc13e"
+    },
+    "stdlibProductionTypes": {
+      "window": "a2b4d532-576e-4395-b9dc-65f5b720afd0",
+      "status": "PASS",
+      "receiptSha256": "402c788e58d7afbab33f3c8281cb041658d01a7af6f0ca61c9b2b198def35543"
+    },
+    "rootTestTypes": {
+      "window": "b526ddc0-cf2f-423e-91b5-bf25465e0bb5",
+      "status": "PASS",
+      "receiptSha256": "316b2c06f4f869d6df26e796894a99afadbd3a9f67190c28536228ffcd8b38d5"
+    },
+    "classicTestTypes": {
+      "window": "2645a0fc-3880-45d2-a1b0-001a17be1bf0",
+      "status": "PASS",
+      "receiptSha256": "5b39649949f8531521a53954caacbf752d38fda064da8d1d4e77308a1e720ec7"
+    },
+    "eslint": {
+      "window": "6b8a5510-1e2b-4ba6-abdb-ad54a415a44a",
+      "status": "PASS",
+      "receiptSha256": "5de2cb6169a4810516f93f24b01cc90962e9a75f1d2fdd3cea31efb6a09b9829"
+    },
+    "prettier": {
+      "window": "6a3413c5-827c-4d47-97a2-6b6bc508fb1e",
+      "status": "PASS",
+      "receiptSha256": "f886095679e785124c75f11d2c8688a2c8388a3f390e0003086bf3b5e2031498"
+    },
+    "docsFormatAfterNeedsReadback": {
+      "window": "dbb999bb-98ff-4ed8-a843-69f437b9d34d",
+      "status": "PASS",
+      "receiptSha256": "d00a2d0783f5b9acd08aaf0011fe8292a89e988ec61df1d69416a3941124cf8f"
+    },
+    "scopedDiffAfterNeedsReadback": {
+      "window": "2bedc810-033e-4c15-8fd7-fb80e9c2b5d4",
+      "status": "PASS",
+      "receiptSha256": "20c006bfc49cccaa8cc88d1292b078d1cc4d8b232c59260c48280d062b5fb1d1"
+    }
+  },
+  "registeredNeedsReadback": {
+    "status": "ROOT_APPROVED_AWAITING_COMBINED_GIT",
+    "productionSourceManifestSha256": "5df2e073c0dffc57d9d2d303efde6d9b6d8b85b545dab0089ec7fd762e9ca83d",
+    "productionEvidenceManifestSha256": "dc733d734807777782e38c4727987f0b1cdad7df68b935b785b8e085858f5faf",
+    "classicFixtureSourceManifestSha256": "37359d1a71d516362e9a73b2a920ffd15c98724b2d5b8a18c7702c778547b111",
+    "classicFixtureEvidenceManifestSha256": "5f73de5fc2b71662a32687ef4d38756d02695f78978653e3eb94aef8ff61fc38",
+    "ownedByThisStage": false
+  },
+  "notRun": ["git-stage", "git-commit", "git-push", "build", "artifact", "browser", "cua", "devserver", "ci", "deploy"],
+  "notClaimed": [
+    "registered-needs-implementation-ownership",
+    "browser-save-evidence",
+    "browser-death-journey",
+    "current-release-artifact",
+    "complete-v2-green"
+  ]
+}

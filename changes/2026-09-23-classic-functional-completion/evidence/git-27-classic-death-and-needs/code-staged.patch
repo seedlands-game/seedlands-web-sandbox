@@ -1,0 +1,1417 @@
+diff --git a/apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts b/apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts
+index efa178f0..e3a7e666 100644
+--- a/apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts
++++ b/apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts
+@@ -1,4 +1,10 @@
+ import { expect, it } from 'vitest';
++import {
++  assembleOverworldPacks,
++  createGameplayActorAuthority,
++  createGameplaySystemAuthority,
++} from '@seedlands/stdlib/host';
++import { definePack } from '@seedlands/stdlib/mod-api';
+ import {
+   classicContent,
+   getItemDefinition,
+@@ -6,8 +12,9 @@ import {
+   craftRecipe,
+   GameplayRuntime,
+ } from '../../../../fixtures/classic/content';
+-import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
++import { classicGameplayDomainModules, classicGameplayDomainOptions } from './classic-gameplay-domain-options';
+ import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
++import { pack } from '../../../../../../../playbooks/classic/src/pack';
+ import {
+   armorDamageReduction,
+   ARMOR_MAX_POINTS,
+@@ -21,6 +28,42 @@ const pieces = [
+   { id: 'diamond-chestplate', slot: 'chestplate', material: 'diamond', points: 8 },
+ ] as const;
+ 
++const createFullClassicWorld = () => {
++  const deathModuleId = 'seedlands:overworld-death-inventory-policy';
++  const selected = definePack({
++    id: pack.manifest.id,
++    version: pack.manifest.version,
++    kind: pack.manifest.kind,
++    entry: pack.manifest.entry,
++    modules: classicGameplayDomainModules([
++      'seedlands:overworld-content',
++      ...(pack.modules.some(({ descriptor }) => descriptor.id === deathModuleId) ? [deathModuleId] : []),
++    ]),
++  });
++  const composition = assembleOverworldPacks([
++    {
++      ...selected,
++      integrity: {
++        algorithm: 'sha256',
++        manifestDigest: 'a'.repeat(64),
++        entryDigest: 'b'.repeat(64),
++        resources: [],
++      },
++    },
++  ]);
++  return new GameplayRuntime({
++    composition,
++    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
++    moduleSystemAuthority: createGameplaySystemAuthority(composition),
++    platform: testCorePlatform,
++    getWorldTime: () => 12,
++    getVoxel: () => 0,
++    prepareVoxelEdit: () => {
++      throw new Error('unexpected');
++    },
++  });
++};
++
+ it('护甲物品注册为可穿戴且带防护点数与耐久', () => {
+   for (const piece of pieces) {
+     const definition = getItemDefinition(piece.id);
+@@ -90,23 +133,48 @@ it('创造模式免伤不磨损护甲，非法伤害保持旧失败语义', () =
+   expect(world.applyDamage('test', 'player', -1, 'combat')).toEqual({ success: false, reason: 'invalid-damage' });
+ });
+ 
+-it('死亡目标拒绝重复伤害且不磨损护甲', () => {
+-  const world = new GameplayRuntime({
+-    ...classicGameplayDomainOptions(),
+-    platform: testCorePlatform,
+-    getWorldTime: () => 12,
+-    getVoxel: () => 0,
+-    prepareVoxelEdit: () => {
+-      throw new Error('unexpected');
+-    },
+-  });
++it('Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player', () => {
++  const world = createFullClassicWorld();
+   world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
+   world.giveItem('player', { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } });
+-  world.equipSelectedArmor('player');
+-  world.applyDamage('test', 'player', 100, 'test');
+-  const before = world.entities.actorStateAccess('player').armor;
++  expect(world.equipSelectedArmor('player')).toMatchObject({ success: true });
++  world.giveItem('player', { itemId: 'berry', count: 2 });
++  const actor = world.entities.actorStateAccess('player');
++  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
++    version: 1,
++    revision: 1,
++    stack: { itemId: 'coal', count: 1 },
++    origin: { kind: 'inventory', slot: 0 },
++    craftingGrid: [{ itemId: 'plank', count: 1 }, null, null, null],
++  });
++  const beforeRevision = actor.inventoryRevision;
++  expect(world.applyDamage('test', 'player', 100, 'test')).toEqual({ success: true });
++  expect(world.getEntity('player')).toMatchObject({ type: 'player', health: 0 });
++  expect(world.getInventory('player').slots.every((slot) => slot === null)).toBe(true);
++  expect(world.getInventoryPointerView('player').cursor).toMatchObject({
++    stack: null,
++    craftingGrid: [null, null, null, null],
++  });
++  expect(world.entities.actorStateAccess('player').armor).toEqual({
++    helmet: null,
++    chestplate: null,
++    leggings: null,
++    boots: null,
++  });
++  expect(world.entities.actorStateAccess('player').inventoryRevision).toBe(beforeRevision + 1);
++  const settledDrops = world.queryEntities({ type: 'world-item' });
++  expect(settledDrops).toHaveLength(4);
++  expect(settledDrops.map(({ stack }) => stack)).toEqual(
++    expect.arrayContaining([
++      { itemId: 'berry', count: 2 },
++      { itemId: 'coal', count: 1 },
++      { itemId: 'plank', count: 1 },
++      { itemId: 'iron-helmet', count: 1, instance: { durability: 1 } },
++    ]),
++  );
++  const drops = world.queryEntities({ type: 'world-item' });
+   expect(world.applyDamage('test', 'player', 1, 'test')).toEqual({ success: false, reason: 'player-dead' });
+-  expect(world.entities.actorStateAccess('player').armor).toEqual(before);
++  expect(world.queryEntities({ type: 'world-item' })).toEqual(drops);
+ });
+ 
+ it('护甲按点数线性减伤，封顶且不为负，空护甲不减伤', () => {
+diff --git a/apps/web/tests/integration/runtime/server/composition/classic-death-policy.test.ts b/apps/web/tests/integration/runtime/server/composition/classic-death-policy.test.ts
+new file mode 100644
+index 00000000..c5a0e06f
+--- /dev/null
++++ b/apps/web/tests/integration/runtime/server/composition/classic-death-policy.test.ts
+@@ -0,0 +1,169 @@
++import { readFileSync } from 'node:fs';
++import { describe, expect, it } from 'vitest';
++import {
++  assembleOverworldPacks,
++  createGameplayActorAuthority,
++  createGameplaySystemAuthority,
++} from '@seedlands/stdlib/host';
++import type { CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
++import { pack } from '../../../../../../../playbooks/classic/src/pack';
++import { GameplayRuntime } from '../../../../fixtures/classic/content';
++import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
++
++const emptyArmor = () => ({ helmet: null, chestplate: null, leggings: null, boots: null });
++const preDeathV4Identity = () => {
++  const capture = JSON.parse(
++    readFileSync(
++      new URL(
++        '../../../../../../../changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json',
++        import.meta.url,
++      ),
++      'utf8',
++    ),
++  ) as { identity: { value: CompositionCheckpointIdentity } };
++  return capture.identity.value;
++};
++
++function createWorld() {
++  const composition = assembleOverworldPacks([
++    {
++      ...pack,
++      integrity: {
++        algorithm: 'sha256',
++        manifestDigest: 'a'.repeat(64),
++        entryDigest: 'b'.repeat(64),
++        resources: pack.manifest.resources!.map((path) => ({ path, digest: 'c'.repeat(64) })),
++      },
++    },
++  ]);
++  const runtime = new GameplayRuntime({
++    composition,
++    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
++    moduleSystemAuthority: createGameplaySystemAuthority(composition),
++    platform: testCorePlatform,
++    getWorldTime: () => 12,
++    getVoxel: () => 0,
++    getLoadedCell: () => ({ voxel: 0, fluid: 0 }),
++    prepareVoxelEdit: () => {
++      throw new Error('unexpected');
++    },
++    prepareVoxelEdits: () => {
++      throw new Error('unexpected');
++    },
++  });
++  runtime.spawnPlayer({ id: 'player', position: [0, 1, 0] });
++  return runtime;
++}
++
++function seedFourContainers(world: GameplayRuntime, id: string) {
++  const actor = world.entities.actorStateAccess(id);
++  actor.inventory.add({ itemId: 'berry', count: 2 });
++  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
++    version: 1,
++    revision: 1,
++    stack: { itemId: 'coal', count: 1 },
++    origin: null,
++    craftingGrid: [{ itemId: 'plank', count: 1 }, null, null, null],
++  });
++  actor.replaceArmor({
++    ...emptyArmor(),
++    helmet: { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } },
++  });
++}
++
++describe('Classic registered Combat death policy', () => {
++  it('restores the exact pre-death V4 envelope and preserves one settled death across another restore', () => {
++    const source = createWorld();
++    source.giveItem('player', { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } });
++    expect(source.equipSelectedArmor('player')).toMatchObject({ success: true });
++    source.giveItem('player', { itemId: 'berry', count: 2 });
++    const sourceActor = source.entities.actorStateAccess('player');
++    sourceActor.replaceInventoryInteraction(sourceActor.inventoryRevision + 1, {
++      version: 1,
++      revision: 1,
++      stack: { itemId: 'coal', count: 1 },
++      origin: null,
++      craftingGrid: [{ itemId: 'plank', count: 1 }, null, null, null],
++    });
++    const saved = source.createSnapshot();
++    saved.composition = preDeathV4Identity();
++    const sourceReference = source.entities.createReference('player')!;
++    const target = createWorld();
++
++    expect(target.restoreSnapshot(saved)).toEqual({ version: 4, worldTime: 12 });
++    const restoredReference = target.entities.createReference('player')!;
++    expect(restoredReference.epoch).toBeGreaterThan(sourceReference.epoch);
++    expect(restoredReference.lifetime).toBe(sourceReference.lifetime);
++    expect(target.applyDamage('fixture', 'player', 100, 'fixture')).toEqual({ success: true });
++    expect(target.getEntity('player')).toMatchObject({ type: 'player', health: 0 });
++    expect(target.getInventory('player').slots.every((slot) => slot === null)).toBe(true);
++    expect(target.getInventoryPointerView('player').cursor).toMatchObject({
++      stack: null,
++      craftingGrid: [null, null, null, null],
++    });
++    expect(target.entities.actorStateAccess('player').armor).toEqual(emptyArmor());
++    const droppedEntities = target.queryEntities({ type: 'world-item' });
++    expect(droppedEntities).toHaveLength(4);
++    const dropped = droppedEntities.map(({ stack }) => stack);
++    expect(dropped).toEqual(
++      expect.arrayContaining([
++        { itemId: 'berry', count: 2 },
++        { itemId: 'coal', count: 1 },
++        { itemId: 'plank', count: 1 },
++        { itemId: 'iron-helmet', count: 1, instance: { durability: 1 } },
++      ]),
++    );
++
++    const reopened = createWorld();
++    reopened.restoreSnapshot(target.createSnapshot());
++    expect(reopened.getEntity('player')).toMatchObject({ type: 'player', health: 0 });
++    expect(reopened.getInventory('player').slots.every((slot) => slot === null)).toBe(true);
++    expect(reopened.getInventoryPointerView('player').cursor.craftingGrid).toEqual([null, null, null, null]);
++    expect(reopened.queryEntities({ type: 'world-item' }).map(({ stack }) => stack)).toEqual(dropped);
++  });
++
++  it('drops creature containers plus intrinsic loot once and despawns the actor', () => {
++    const world = createWorld();
++    world.spawnAutonomous(
++      { id: 'zombie', type: 'creature', archetype: 'zombie', position: [0, 1, 1], health: 3.68 },
++      { archetype: 'zombie' },
++    );
++    seedFourContainers(world, 'zombie');
++
++    expect(world.attackEntity('player', 'zombie')).toMatchObject({ success: true, damage: 3.68 });
++    expect(world.getEntity('zombie')).toBeNull();
++    expect(world.simulation.actorIds()).not.toContain('zombie');
++    const dropped = world.queryEntities({ type: 'world-item' }).map(({ stack }) => stack);
++    expect(dropped).toHaveLength(5);
++    expect(dropped).toEqual(
++      expect.arrayContaining([
++        { itemId: 'berry', count: 2 },
++        { itemId: 'coal', count: 1 },
++        { itemId: 'plank', count: 1 },
++        { itemId: 'iron-helmet', count: 1, instance: { durability: 1 } },
++        { itemId: 'rotten-flesh', count: 1 },
++      ]),
++    );
++    expect(world.attackEntity('player', 'zombie').success).toBe(false);
++    expect(world.queryEntities({ type: 'world-item' }).map(({ stack }) => stack)).toEqual(dropped);
++  });
++
++  it('uses the same four-container policy for an unprofiled NPC and despawns it', () => {
++    const world = createWorld();
++    world.spawn({ id: 'npc', type: 'npc', position: [0, 1, 1], health: 3.68, maxHealth: 20 });
++    seedFourContainers(world, 'npc');
++
++    expect(world.attackEntity('player', 'npc')).toMatchObject({ success: true, damage: 3.68 });
++    expect(world.getEntity('npc')).toBeNull();
++    const dropped = world.queryEntities({ type: 'world-item' });
++    expect(dropped).toHaveLength(4);
++    expect(dropped.map(({ stack }) => stack)).toEqual(
++      expect.arrayContaining([
++        { itemId: 'berry', count: 2 },
++        { itemId: 'coal', count: 1 },
++        { itemId: 'plank', count: 1 },
++        { itemId: 'iron-helmet', count: 1, instance: { durability: 1 } },
++      ]),
++    );
++  });
++});
+diff --git a/apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts b/apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts
+index b8c8bb3b..6ed4d7f2 100644
+--- a/apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts
++++ b/apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts
+@@ -32,7 +32,6 @@ const MEDIA_OPERATION_IDS = new Set([
+   'seedlands:media-stop',
+   'seedlands:media-switch',
+ ]);
+-
+ function prechangeClassicIdentity(): CompositionCheckpointIdentity {
+   const composition = JSON.parse(
+     readFileSync(new URL('../../../../fixtures/npc/main-composition.json', import.meta.url), 'utf8'),
+@@ -65,8 +64,12 @@ function preMediaClassicIdentity(current: CompositionCheckpointIdentity): Compos
+     ],
+     definitionMap: {
+       ...current.definitionMap,
+-      modules: current.definitionMap.modules.filter(({ id }) => id !== 'seedlands:overworld-media'),
+-      capabilities: current.definitionMap.capabilities.filter(({ id }) => id !== 'seedlands:media-playback'),
++      modules: current.definitionMap.modules.filter(
++        ({ id }) => id !== 'seedlands:overworld-media' && id !== 'seedlands:overworld-death-inventory-policy',
++      ),
++      capabilities: current.definitionMap.capabilities.filter(
++        ({ id }) => id !== 'seedlands:media-playback' && id !== 'seedlands:death-inventory-policy',
++      ),
+       resources: current.definitionMap.resources.filter(({ id }) => id !== 'seedlands.media-playback'),
+       stateCodecs: current.definitionMap.stateCodecs.filter(({ id }) => id !== 'seedlands:media-playback-device'),
+       operations: current.definitionMap.operations.filter(({ id }) => !MEDIA_OPERATION_IDS.has(id)),
+diff --git a/apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts b/apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts
+index fac22008..a6ea8793 100644
+--- a/apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts
++++ b/apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts
+@@ -37,7 +37,7 @@ function setup(needs: boolean) {
+     : [];
+   const modules = classicGameplayDomainModules(
+     [
+-      ...(needs ? ['test:needs-rules'] : []),
++      ...(needs ? ['test:needs-rules', 'seedlands:overworld-death-inventory-policy'] : []),
+       'seedlands:mode-module',
+       'seedlands:overworld-combat-rules',
+       'seedlands:inventory-actions-module',
+diff --git a/changes/2026-09-23-classic-functional-completion/classic-death-policy-contract.md b/changes/2026-09-23-classic-functional-completion/classic-death-policy-contract.md
+new file mode 100644
+index 00000000..b1e7b975
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/classic-death-policy-contract.md
+@@ -0,0 +1,59 @@
++# V2 Classic Death Policy 安装合同
++
++阶段：`V2-CLASSIC-DEATH-POLICY-INSTALL-01`
++状态：合同冻结；Classic policy、精确 V4 predecessor 与迁移尚待 RED/GREEN。
++
++## Owner 与最小接口
++
++- Classic Playbook 唯一声明模块 `seedlands:overworld-death-inventory-policy`，通过公共
++  `defineDeathInventoryPolicyModuleV1` 提供 `seedlands:death-inventory-policy`。Kernel、stdlib producer 和 Web 不包含
++  Classic 物品 ID 或 actor ID 分支。
++- policy 固定为：player 的 inventory/cursor/crafting/armor 全部 `drop` 且 actor `retain`；creature/npc 的四容器全部
++  `drop` 且 actor `despawn`。定义是 Pack 组合身份的一部分，不使用宿主 callback、可变全局配置或新 snapshot child。
++- `pack.ts` 只安装该模块。已提交的 registered Combat 与 direct Vitals producer 从 composition 解析 capability；本阶段
++  不改 producer、Needs、runtime adapter、公开 settlement 或协议。非 Classic Pack 可不安装 capability，或安装不同的
++  player retain-inventory 策略，证明机制不依赖 Classic 内容。
++
++## 精确 V4 前身与迁移
++
++- BUILD02 产物捕获的完整 `CompositionCheckpointIdentity` 作为独立 literal 保存，并仅以
++  `gameplayVersions: [4]` 加入 predecessor。来源固定为 source
++  `1bbe3a60d55ffa5d05e405377624fbbd942e6327`、pack lock
++  `fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332`、artifact receipt
++  `aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a`；捕获 raw SHA-256 为
++  `ebad22c315758e0b9e305aaff6ba7c0c4adc7026ac506fb6dfe4b82abd1db405`，canonical identity SHA-256 为
++  `e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a`。不得从当前 target 动态删除 death 定义来伪造该前身。
++- 既有四条 exact predecessor 继续受理。pre-Media 特例仍只接受其固定 pack digest 和目标定义的精确投影；安装 death
++  后，该投影同时删除 Media 的 module/capability/resource/codec/operations 与 death policy 的 module/capability。不得按
++  digest 单独放行，不得忽略未知 module、capability、operation、resource、codec 或 definition identity 差异。
++- 合法 V4 代表 snapshot 在 exact source identity 下先由既有 migration 重投影到当前 target，再由 checkpoint guard 完整
++  校验。迁移不跳过 composition 验证；任一 identity 字段篡改必须 fail closed，且 active owner 零写。该夹具只证明
++  deterministic snapshot 兼容，不冒充真实 Browser 保存。
++
++## 死亡事务与可观察结果
++
++- direct Vitals 致死 player：同一 prepared death transaction 将命中后仍存在的 inventory、cursor、crafting 与 armor 各
++  掉落一次，清空四容器，player 保留为 dead；共享 inventory revision 只前进一次。重复伤害不新增掉落或磨损。
++- registered Combat 致死 creature/npc：固有 death drop 与四容器/装备在同一提交中生成，actor 从 ECS 与 simulation
++  清除；player 目标则保留 dead。实例耐久必须保持，不能重复或重造。
++- allocation/source/frontier/policy 失败继续由已提交 producer fail closed。本阶段不宣称 registered Needs、Browser、Cua、
++  artifact 或完整 Classic 死亡链路已验收。BUILD02 明确不含本阶段接线。
++
++## RED、GREEN 与验收
++
++- RED 必须可执行地证明：当前 Classic composition 缺 death capability；正式 Classic direct Vitals 致死未按四容器策略
++  结算；BUILD02 捕获的 exact V4 identity 未被 predecessor 接纳。失败不得是缺少 import 或测试收集。
++- GREEN 至少覆盖：模块 identity/冻结定义；player 四容器 drop+retain+一次 revision+重复致死无重复；正式 registered
++  Combat 的 creature/npc 四容器、固有掉落与 despawn；完整 pre-death identity restore；pre-pointer、pre-Media、
++  retired-graph 既有恢复；module/capability/definition/digest/resource near-miss 全拒绝。
++- 定向测试、相关 stdlib/root/Classic test types、精确 ESLint、可编辑文件 Prettier 与 scoped diff 均须通过性能窗口。原始
++  stdout/receipt、SOURCE/MANIFEST/delivery 逐项保留；本阶段不运行 build、Browser、Cua 或 CI。
++
++## 阶段 Done When 与预算
++
++- `done_when`：Classic policy 已安装；公开 composition 出现唯一 death capability；BUILD02 exact predecessor 和全部既有
++  支持集合可恢复；near-miss fail closed；正式 direct/registered death 定向 GREEN；证据身份可独立复核。
++- 传统工程量：1.5–2.5 PD。AI 连续墙钟：4–6 小时；阶段硬上限 6 小时。120% 保守建议：1.8–3 PD、4.8–7.2 小时，
++  超出本阶段则 checkpoint 后退出。
++- credits、API 等价费用、费率、当前额度分母及占比均为 `unknown`，不伪造换算。长期 architecture/docs owner 未变化，
++  本阶段仅更新当前 change 合同与状态。
+diff --git a/changes/2026-09-23-classic-functional-completion/death-needs-contract.md b/changes/2026-09-23-classic-functional-completion/death-needs-contract.md
+new file mode 100644
+index 00000000..11ab3fab
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/death-needs-contract.md
+@@ -0,0 +1,44 @@
++# V2 Registered Needs Death 合同
++
++阶段：`V2-DEATH-REGISTERED-NEEDS-01`
++状态：本片实现、正式 registered schedule 行为与静态 GREEN；Classic policy 接线待后续阶段。
++
++## 策略与 Owner
++
++- `GameplayRuntime` 构造 Needs port 时从同一 `callbacks.composition` 解析一次只读 death inventory policy。无
++  composition 显式传 `{ kind:'legacy' }`；有 composition 显式传 `{ kind:'composed', capability }`，其中 `null`
++  不能回退 legacy。不新增 `GameplayCallbacks` 可变策略、不按 Classic ID 分支。
++- registered Needs 继续只允许 player health/lifecycle 变化；creature/npc 的 health/lifecycle 保持 readonly，只有其
++  needs 数值可按既有 deficit profile 更新。无死亡批次不要求 policy，仍走一次普通 prepared entity series。
++- composed player `alive→dead` 必须选择 `policyFor('player')`。当前 public settlement 可 despawn ECS，但
++  `GameplayRuntime.players` membership 只有 imperative `despawnGameplayEntity` 清理，无法加入本事务；因此
++  `actor:'despawn'` 在本片稳定返回 `needs-player-despawn-policy-unsupported`，整批零提交，不静默 retain。
++
++## Mixed 单一事务
++
++- commit 先为每个 changed actor 捕获原始 reference、health、完整 components。存活变化构造
++  `additionalActorReplacements[{source,replacement}]`；死亡 player 以拟 needs、原 armor 和
++  `player.breakAction=null` 构造 public death candidate。
++- 批次含至少一名死亡时，所有 survivor 与 death 统一调用一次
++  `prepareDeathInventorySettlementSeriesV1`；不得内联 bag drops，也不得再创建第二 entity participant。无死亡批次
++  保持一次 `prepareEntityMutationSeries`。四容器 drop/retain 与共享 inventory revision 完全由公共 owner 决定。
++- 同批另准备一次 `prepareDeaths(deathIds)`。entity 与 effects 必须全部 validate 后才按既有安全顺序
++  entity→effects→changed apply。source/revision/lifetime/epoch/capacity/effects stale 或 abandon 均不能部分写 needs、
++  health、inventory、cursor、armor、drops、Combat、Action、perception 或 revisions。
++
++## 兼容、失败与测试
++
++- composed 缺 capability 的首次致死返回 `death-inventory-policy-unavailable`，包含 survivor needs 在内整批零提交；
++  同 composition 的无死亡批次继续成功。uncomposed legacy 保留当前 player bag-drop 行为与单一普通 series。
++- 正式 RED 使用非 Classic content + ruleset + registered Needs schedule，真实 `advanceRules(1)` 同批推进 survivor
++  与 dying player；失败必须发生在四容器 policy、retain 或 missing-policy 行为，而非 import/collection。
++- GREEN 覆盖 survivor+death 同批、drop/retain/no-policy、真实 Action/Combat effects、>128 drops 跨 segment 的末端
++  capacity fail-close、source/revision/lifetime/effects stale、nonplayer readonly、重复 dead tick、无死亡回归和
++  player-despawn fail-closed。公共 mixed-series 单测可作为 dependency 回归，但不能替代正式 schedule。
++
++## 预算与停止线
++
++- 传统工程量 1–1.5 PD；AI 连续墙钟预计 3–5 小时，硬上限 6 小时；120% 保守建议 1.2–1.8 PD、3.6–6 小时。
++- credits、API 等价费用、费率、额度分母和占比 unknown，不伪造换算。
++- 若必须新增 prepared player-membership owner、修改公共 settlement、Autonomy/Needs producer、Classic pack 或公开
++  exports，保留证据并交 root 裁决，不越域实施。
+diff --git a/changes/2026-09-23-classic-functional-completion/death-needs-fixture-contract.md b/changes/2026-09-23-classic-functional-completion/death-needs-fixture-contract.md
+new file mode 100644
+index 00000000..efe3b939
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/death-needs-fixture-contract.md
+@@ -0,0 +1,34 @@
++# V2 Registered Needs Fixture 收口合同
++
++阶段：`V2-DEATH-NEEDS-FIXTURE-CLOSE-02`
++状态：Classic policy dependency 已存在；fixture 接线与完整回归待本阶段完成。
++
++## 唯一修改
++
++- `gameplay-registered-needs.test.ts` 的 `setup(true)` 继续通过
++  `classicGameplayDomainModules(roots, replacements)` 选择真实 Classic 模块。roots 必须显式加入
++  `seedlands:overworld-death-inventory-policy`，因为该 helper 只沿 `descriptor.requires` 递归，不会自动选择 pack 中
++  与 Needs 无 requires 关系的 death capability provider。
++- 使用 `playbooks/classic/src/pack.ts` 已注册的真实 `classicDeathInventoryPolicyModule`；不得在测试内重新定义 policy、
++  mock capability、增加 fallback 或修改 helper 的全局默认。`setup(false)` 继续不安装 Needs 或 death policy，保持
++  “Playbook omits Needs module” 的原测试语义。
++- 不修改现有十项行为断言、production、Classic pack/迁移、当前 spec、tasks 或 execution-state。
++
++## RED 与 GREEN
++
++- RED 复用已归档窗口 `v2-death-registered-needs-regression-01`：完整 suite 为 `8 passed / 2 failed`；两个 death
++  case 均进入 registered schedule 后收到 `death-inventory-policy-unavailable`。测试源码 hash
++  `5f014572301ecee20d2b665d8e0ee202d82545d6f058e426d03896de144e167f`，stdout SHA-256
++  `df9c3acdad10b4405e4444f49f26463b75bb068ed5a35c3f7e4f3c4c4e74a5d4`，receipt SHA-256
++  `9d5df8d21a7197d10a9926819928ffdd1b14571dc40b69295c23b32d81921a49`。
++- 唯一行为变化是 `setup(true)` 的 selected module set 增加现有 Classic death policy。完整
++  `gameplay-registered-needs.test.ts` 必须 `10/10`，原 death allocation 与 incoming combat effects 断言不得跳过或
++  放宽。
++- 静态门禁为该测试的 root/Classic test types、定向 ESLint/Prettier 和 scoped diff；所有命令经默认
++  benchmark window，Vitest `--maxWorkers=1`。
++
++## 边界
++
++- 本片不准出整个 Classic policy 安装、迁移、production Needs、Direct Vitals、Combat、build、Browser、Cua 或
++  CI。954-owned dependency 的源码与测试只读，其最终交付身份由 root/954 独立冻结。
++- 长期 docs baseline 不更新：这是现有 test composition 的显式 root 修复，不改变公共接口、owner 或产品架构。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 400d4422..081ac27f 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -134,6 +134,13 @@ settlement 进入同一 prepared entity participant；不再在成功后另写 a
+ `death-inventory-policy-unavailable` 且零提交；nonfatal 正常，uncomposed legacy 显式保留。本片只处理 player
+ direct damage/legacy needs facade，不改 registered combat、Needs schedule、非 player producer 或 Classic policy。
+ 
++V2 registered Needs death 子片冻结 `death-needs-contract.md`：Needs port 从当前 composition 显式接收一次解析的
++death policy mode。无死亡批次维持既有单一 entity series；只允许 player `alive→dead` 进入 policy candidate，有死亡
++时全部 survivor replacement 与 death candidate 必须进入同一次 public mixed settlement series，并与一次
++`prepareDeaths(ids)` effects 在任何 apply 前全部 validate。composed 缺 policy 首次致死整批返回
++`death-inventory-policy-unavailable`；player despawn 在没有 prepared membership owner 前稳定 fail-closed，不遗留
++`GameplayRuntime.players`。本片不改变非 player health/lifecycle、Classic policy、Vitals/Combat 或 Autonomy owner。
++
+ ### 结构、攀爬、路线和载具
+ 
+ - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
+diff --git a/packages/stdlib/src/server/gameplay/gameplay-runtime.ts b/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+index ffc39535..a2da2f54 100644
+--- a/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
++++ b/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+@@ -10,7 +10,7 @@ import type { RegisteredCombatRuntime } from './modules/registered-combat-runtim
+ import type { RegisteredFeedingRuntime } from './modules/registered-feeding-runtime';
+ import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
+ import { NEEDS_COMPONENT } from './modules/needs-model';
+-import { createNeedsStatePort } from './modules/needs-state-port';
++import { createNeedsStatePort, resolveNeedsDeathInventoryMode } from './modules/needs-state-port';
+ import { createGameplayModuleSchedule } from './modules/gameplay-module-schedule';
+ import { createWorldRulesetState } from './modules/world-ruleset-state';
+ import { ModeRuntime } from './modules/mode-runtime';
+@@ -210,6 +210,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
+         assertCanChange: () => this.assertRevisionCapacity(),
+         changed: () => this.touch(),
+         prepareDeaths: (ids) => this.simulation.prepareDeaths(ids),
++        deathInventory: resolveNeedsDeathInventoryMode(callbacks.composition),
+       }),
+       mode: createModeStatePort(this.entities, this.modes, () => this.kernelState.gameplayRevision),
+     });
+diff --git a/packages/stdlib/src/server/gameplay/modules/needs-state-port.ts b/packages/stdlib/src/server/gameplay/modules/needs-state-port.ts
+index 7130cae2..d8151429 100644
+--- a/packages/stdlib/src/server/gameplay/modules/needs-state-port.ts
++++ b/packages/stdlib/src/server/gameplay/modules/needs-state-port.ts
+@@ -1,12 +1,23 @@
+ import { isActorEntityType } from '../ecs-actor-state';
+ import type { EntityStore } from '../entity-store';
+ import type { RegisteredStatePort, ModStateAddress } from '../../composition/operation-contracts';
++import type { WorldComposition } from '../../composition/contracts';
+ import {
+   prepareEntityMutationSeries,
+   type PreparedEntityMutationInput,
+   type PreparedActorReplacement,
+-  type PreparedWorldItemSpawn,
+ } from '../prepared-entity-mutation';
++import {
++  buildDeathInventorySettlementCandidateV1,
++  prepareDeathInventorySettlementSeriesV1,
++  type DeathInventoryAdditionalActorReplacementV1,
++  type DeathInventorySettlementCandidateV1,
++  type DeathInventorySettlementPolicyV1,
++} from '../death-inventory-settlement';
++import {
++  resolveDeathInventoryPolicyCapabilityV1,
++  type DeathInventoryPolicyCapabilityV1,
++} from './death-inventory-policy-module';
+ import {
+   NEEDS_COMPONENT,
+   NEEDS_PARTITIONS,
+@@ -17,6 +28,22 @@ import {
+ } from './needs-model';
+ 
+ type PreparedEffect = Readonly<{ validate(): void; apply(): void }>;
++type NeedsDeathInventoryMode =
++  Readonly<{ kind: 'legacy' }> | Readonly<{ kind: 'composed'; capability: DeathInventoryPolicyCapabilityV1 | null }>;
++
++const LEGACY_PLAYER_DEATH_POLICY: DeathInventorySettlementPolicyV1 = Object.freeze({
++  inventory: 'drop',
++  cursor: 'retain',
++  crafting: 'retain',
++  armor: 'retain',
++  actor: 'retain',
++});
++
++export const resolveNeedsDeathInventoryMode = (composition?: WorldComposition): NeedsDeathInventoryMode =>
++  composition
++    ? { kind: 'composed', capability: resolveDeathInventoryPolicyCapabilityV1(composition) }
++    : { kind: 'legacy' };
++
+ export function createNeedsStatePort(
+   options: Readonly<{
+     entities: EntityStore;
+@@ -25,6 +52,7 @@ export function createNeedsStatePort(
+     assertCanChange(): void;
+     changed(): void;
+     prepareDeaths(ids: readonly string[]): PreparedEffect;
++    deathInventory: NeedsDeathInventoryMode;
+   }>,
+ ): RegisteredStatePort {
+   const partitionId = (address: ModStateAddress) => {
+@@ -100,7 +128,8 @@ export function createNeedsStatePort(
+       const original = entries();
+       const seen = new Set<number>();
+       const actors: PreparedActorReplacement[] = [],
+-        spawns: PreparedWorldItemSpawn[] = [],
++        additionalActorReplacements: DeathInventoryAdditionalActorReplacementV1[] = [],
++        deathCandidates: DeathInventorySettlementCandidateV1[] = [],
+         deaths: string[] = [];
+       for (const write of writes) {
+         const index = partitionId(write.address);
+@@ -120,29 +149,52 @@ export function createNeedsStatePort(
+           )
+             return { ok: false, reason: 'needs-readonly-fields-changed' };
+           if (JSON.stringify(previous) === JSON.stringify(next)) continue;
+-          let components = options.entities.actorComponentSnapshot(previous.reference.entityId);
+-          components = { ...components, needs: { ...next.needs }, lifecycle: next.lifecycle };
++          const sourceComponents = options.entities.actorComponentSnapshot(previous.reference.entityId);
++          let components = { ...sourceComponents, needs: { ...next.needs }, lifecycle: next.lifecycle };
+           if (previous.lifecycle === 'alive' && next.lifecycle === 'dead') {
++            if (previous.kind !== 'player') return { ok: false, reason: 'needs-non-player-death-unsupported' };
++            const policy =
++              options.deathInventory.kind === 'legacy'
++                ? LEGACY_PLAYER_DEATH_POLICY
++                : options.deathInventory.capability?.policyFor('player');
++            if (!policy) return { ok: false, reason: 'death-inventory-policy-unavailable' };
++            if (policy.actor === 'despawn') return { ok: false, reason: 'needs-player-despawn-policy-unsupported' };
+             deaths.push(previous.reference.entityId);
+             const position = options.entities.get(previous.reference.entityId)!.position;
+-            spawns.push(...components.inventory.flatMap((stack) => (stack ? [{ position, stack }] : [])));
+             components = {
+               ...components,
+-              inventory: components.inventory.map(() => null),
+               player: { ...components.player!, breakAction: null },
+             };
++            deathCandidates.push(
++              buildDeathInventorySettlementCandidateV1({
++                source: {
++                  actorReference: previous.reference,
++                  health: previous.health,
++                  components: sourceComponents,
++                },
++                position,
++                settlementComponents: components,
++                policy,
++              }),
++            );
++            continue;
+           }
+-          actors.push({ reference: previous.reference, health: next.health, components });
++          const replacement = { reference: previous.reference, health: next.health, components };
++          actors.push(replacement);
++          additionalActorReplacements.push({
++            source: { actorReference: previous.reference, health: previous.health, components: sourceComponents },
++            replacement,
++          });
+         }
+       }
+-      if (!actors.length) return { ok: true, revision };
++      if (!actors.length && !deathCandidates.length) return { ok: true, revision };
+       options.assertCanChange();
+-      const segments: PreparedEntityMutationInput[] = [];
+-      for (let start = 0; start < actors.length; start += 128)
+-        segments.push({ actors: actors.slice(start, start + 128) });
+-      for (let start = 0; start < spawns.length; start += 128)
+-        segments.push({ spawns: spawns.slice(start, start + 128) });
+-      const entity = prepareEntityMutationSeries(options.entities, segments);
++      const entity = deathCandidates.length
++        ? prepareDeathInventorySettlementSeriesV1(options.entities, {
++            candidates: deathCandidates,
++            additionalActorReplacements,
++          })
++        : prepareEntityMutationSeries(options.entities, actorSegments(actors));
+       const effects = deaths.length ? options.prepareDeaths(deaths) : null;
+       entity.validate();
+       effects?.validate();
+@@ -153,3 +205,9 @@ export function createNeedsStatePort(
+     },
+   };
+ }
++
++function actorSegments(actors: readonly PreparedActorReplacement[]): PreparedEntityMutationInput[] {
++  const segments: PreparedEntityMutationInput[] = [];
++  for (let start = 0; start < actors.length; start += 128) segments.push({ actors: actors.slice(start, start + 128) });
++  return segments;
++}
+diff --git a/packages/stdlib/tests/server/registered-needs-death.test.ts b/packages/stdlib/tests/server/registered-needs-death.test.ts
+new file mode 100644
+index 00000000..d5943992
+--- /dev/null
++++ b/packages/stdlib/tests/server/registered-needs-death.test.ts
+@@ -0,0 +1,439 @@
++import { describe, expect, it } from 'vitest';
++import { assembleWorldPacks, definePack } from '../../src/server/composition/assembly';
++import type { ModModule } from '../../src/server/composition/contracts';
++import { createGameplayActorAuthority } from '../../src/server/composition/gameplay-actor-authority';
++import { createGameplaySystemAuthority } from '../../src/server/composition/gameplay-system-authority';
++import type { DeathInventoryPolicyDefinitionV1 } from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import {
++  defineDeathInventoryPolicyModuleV1,
++  resolveDeathInventoryPolicyCapabilityV1,
++} from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import { GameplayRuntime } from '../../src/server/gameplay/gameplay-runtime';
++import { prepareEntityMutation } from '../../src/server/gameplay/prepared-entity-mutation';
++import { defineCombatModule } from '../../src/server/gameplay/modules/combat-module';
++import { defineCombatRulesModule } from '../../src/server/gameplay/modules/combat-rules-module';
++import { defineContentModule } from '../../src/server/gameplay/modules/content-module';
++import { defineNeedsModule, needsAddress } from '../../src/server/gameplay/modules/needs-module';
++import {
++  advanceNeedsEntry,
++  NEEDS_PARTITIONS,
++  validateNeedsPartition,
++  type NeedsProfiles,
++} from '../../src/server/gameplay/modules/needs-model';
++import { defineNeedsRulesModule } from '../../src/server/gameplay/modules/needs-rules-module';
++import { createNeedsStatePort } from '../../src/server/gameplay/modules/needs-state-port';
++import { defineRulesetModule } from '../../src/server/gameplay/modules/ruleset-module';
++import { testCorePlatform } from '../support/core-platform';
++
++const emptyArmor = () => ({ helmet: null, chestplate: null, leggings: null, boots: null });
++const visor = (durability = 9) => ({ itemId: 'sample:visor', count: 1, instance: { durability } });
++const retain = { inventory: 'retain', cursor: 'retain', crafting: 'retain', armor: 'retain', actor: 'retain' } as const;
++const drop = { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' } as const;
++const despawn = { ...drop, actor: 'despawn' } as const;
++const profiles: NeedsProfiles = {
++  satiety: {
++    enabledModes: ['survival'],
++    hungerEverySeconds: 1,
++    hungerDelta: -1,
++    starvation: { threshold: 0, everySeconds: 1, damage: 1 },
++  },
++  deficit: { enabledModes: ['survival'], hungerEverySeconds: 1, hungerDelta: 1 },
++};
++const definition = (kind: 'drop' | 'retain' | 'despawn'): DeathInventoryPolicyDefinitionV1 => ({
++  version: 1,
++  actors: {
++    player: kind === 'drop' ? drop : kind === 'retain' ? retain : despawn,
++    creature: despawn,
++    npc: despawn,
++  },
++});
++const compositions = new WeakMap<GameplayRuntime, ReturnType<typeof assembleWorldPacks>>();
++
++function setup(policy: 'drop' | 'retain' | 'despawn' | null, extraModules: readonly ModModule[] = []) {
++  const content = defineContentModule({
++    moduleId: 'sample:registered-needs-content',
++    items: [
++      { id: 'sample:ore-a', name: 'Ore A', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:ore-b', name: 'Ore B', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:ore-c', name: 'Ore C', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:filler', name: 'Filler', itemType: 'resource', stackLimit: 1, capabilities: [] },
++      {
++        id: 'sample:visor',
++        name: 'Visor',
++        itemType: 'armor',
++        stackLimit: 1,
++        durability: { max: 40 },
++        capabilities: [{ type: 'armor', slot: 'helmet', points: 2 }],
++      },
++    ],
++    recipes: [],
++    meleeDefinitions: [
++      {
++        id: 'sample:strike',
++        range: 4,
++        steps: [{ damage: 1, windupSeconds: 2, hitSeconds: 0.1, recoverySeconds: 0.1 }],
++      },
++    ],
++    actorProfiles: [
++      {
++        archetype: 'night-stalker',
++        entityType: 'npc',
++        maxHealth: 20,
++        navigation: { speed: 1, perceptionRange: 8 },
++        meleeDefinitionId: 'sample:strike',
++      },
++    ],
++  });
++  const modules = [
++    content,
++    defineRulesetModule({ id: 'sample:registered-needs-rules', version: '1.0.0' }),
++    defineNeedsModule(),
++    defineCombatModule(),
++    defineCombatRulesModule({
++      moduleId: 'sample:registered-needs-combat-rules',
++      profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
++    }),
++    defineNeedsRulesModule({
++      moduleId: 'sample:registered-needs-policy',
++      profiles,
++    }),
++    ...(policy === null
++      ? []
++      : [
++          defineDeathInventoryPolicyModuleV1({
++            moduleId: 'sample:registered-needs-death-policy',
++            definition: definition(policy),
++          }),
++        ]),
++    ...extraModules,
++  ];
++  const pack = definePack({ id: 'sample:registered-needs', version: '1.0.0', kind: 'playbook', modules });
++  const composition = assembleWorldPacks(
++    [
++      {
++        ...pack,
++        integrity: {
++          algorithm: 'sha256',
++          manifestDigest: 'a'.repeat(64),
++          entryDigest: 'b'.repeat(64),
++          resources: [],
++        },
++      },
++    ],
++    { approvedPermissions: { [pack.manifest.id]: modules.flatMap((module) => module.descriptor.permissions ?? []) } },
++  );
++  const world = new GameplayRuntime({
++    composition,
++    moduleSystemAuthority: createGameplaySystemAuthority(composition),
++    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'human' }),
++    platform: testCorePlatform,
++    getWorldTime: () => 0,
++    getVoxel: () => 0,
++    prepareVoxelEdit: () => {
++      throw new Error('Unexpected voxel edit.');
++    },
++  });
++  world.spawnPlayer({ id: 'z-dying', position: [0, 2, 0] });
++  world.spawnPlayer({ id: 'a-survivor', position: [2, 2, 0] });
++  const dying = world.entities.actorStateAccess('z-dying');
++  dying.inventory.add({ itemId: 'sample:ore-a', count: 2 });
++  dying.replaceInventoryInteraction(dying.inventoryRevision + 1, {
++    version: 1,
++    revision: dying.inventoryCursor.revision + 1,
++    stack: { itemId: 'sample:ore-b', count: 1 },
++    origin: null,
++    craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++  });
++  dying.replaceArmor({ ...emptyArmor(), helmet: visor() });
++  world.entities.playerStateAccess('z-dying').breakAction = {
++    position: [1, 2, 3],
++    voxel: 4,
++    elapsedSeconds: 0.5,
++    requiredSeconds: 1,
++  };
++  const snapshot = world.createSnapshot();
++  const dyingActor = snapshot.entityStore.actors.find(({ entityId }) => entityId === 'z-dying')!;
++  dyingActor.needs.hunger = 0;
++  dyingActor.needs.starvationAccumulator = 0;
++  snapshot.entityStore.entities.find(({ id }) => id === 'z-dying')!.health = 1;
++  world.restoreSnapshot(snapshot);
++  compositions.set(world, composition);
++  return world;
++}
++
++const worldState = (world: GameplayRuntime) => ({
++  entities: structuredClone(world.entities.exportComponentSnapshot()),
++  simulation: structuredClone(world.simulation.snapshot()),
++  revision: world.gameplayRevision,
++});
++
++function armStarvation(world: GameplayRuntime, ids: readonly string[]): void {
++  const snapshot = world.createSnapshot();
++  for (const id of ids) {
++    const actor = snapshot.entityStore.actors.find(({ entityId }) => entityId === id)!;
++    actor.needs.hunger = 0;
++    actor.needs.starvationAccumulator = 0;
++    snapshot.entityStore.entities.find((entry) => entry.id === id)!.health = 1;
++  }
++  world.restoreSnapshot(snapshot);
++}
++
++function disarmStarvation(world: GameplayRuntime): void {
++  const snapshot = world.createSnapshot();
++  const actor = snapshot.entityStore.actors.find(({ entityId }) => entityId === 'z-dying')!;
++  actor.needs.hunger = 20;
++  actor.needs.starvationAccumulator = 0;
++  snapshot.entityStore.entities.find(({ id }) => id === 'z-dying')!.health = 20;
++  world.restoreSnapshot(snapshot);
++}
++
++function prepareNeedsCommit(
++  world: GameplayRuntime,
++  prepareDeaths: (ids: readonly string[]) => ReturnType<GameplayRuntime['simulation']['prepareDeaths']>,
++) {
++  const port = createNeedsStatePort({
++    entities: world.entities,
++    actorIds: () => world.entities.exportComponentSnapshot().actors.map(({ entityId }) => entityId),
++    revision: () => world.gameplayRevision,
++    assertCanChange: () => undefined,
++    changed: () => world.recordAuthorityMutation(),
++    prepareDeaths,
++    deathInventory: {
++      kind: 'composed',
++      capability: resolveDeathInventoryPolicyCapabilityV1(compositions.get(world)!),
++    },
++  });
++  const projected = Array.from({ length: NEEDS_PARTITIONS }, (_, partition) => {
++    const address = needsAddress(partition);
++    const state = port.read(address);
++    return { address, ...state };
++  });
++  return () =>
++    port.commit(
++      projected.map(({ address, revision }) => ({ address, revision })),
++      projected.map(({ address, value }) => {
++        const before = validateNeedsPartition(value);
++        return {
++          address,
++          value: {
++            ...before,
++            entries: before.entries.map((entry) => advanceNeedsEntry(entry, profiles[entry.needs.hungerMeaning], 1)),
++          },
++        };
++      }),
++    );
++}
++
++describe('registered Needs death inventory policy', () => {
++  it('commits one survivor and one player death with all four containers in one schedule transaction', () => {
++    const world = setup('drop');
++    const dyingRevision = world.entities.actorStateAccess('z-dying').inventoryRevision;
++    const survivorRevision = world.entities.actorStateAccess('a-survivor').inventoryRevision;
++
++    world.advanceRules(1);
++
++    expect(world.getPlayerState('a-survivor').hunger).toBe(19);
++    expect(world.entities.actorStateAccess('a-survivor').inventoryRevision).toBe(survivorRevision);
++    const dying = world.entities.actorStateAccess('z-dying');
++    expect(dying).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: dyingRevision + 1 });
++    expect(dying.inventory.snapshot().every((slot) => slot === null)).toBe(true);
++    expect(dying.inventoryCursor).toMatchObject({ stack: null, craftingGrid: [null, null, null, null] });
++    expect(dying.armor).toEqual(emptyArmor());
++    expect(world.entities.playerStateAccess('z-dying').breakAction).toBeNull();
++    expect(world.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:ore-a', count: 2 },
++      { itemId: 'sample:ore-b', count: 1 },
++      { itemId: 'sample:ore-c', count: 1 },
++      visor(),
++    ]);
++    const dropped = world.entities.query({ type: 'world-item' }).map(({ stack }) => stack);
++    world.advanceRules(1);
++    expect(world.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual(dropped);
++  });
++
++  it('retains all containers while committing the same registered starvation death', () => {
++    const world = setup('retain');
++    const beforeRevision = world.entities.actorStateAccess('z-dying').inventoryRevision;
++
++    world.advanceRules(1);
++
++    const dying = world.entities.actorStateAccess('z-dying');
++    expect(dying).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: beforeRevision });
++    expect(dying.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', count: 2 });
++    expect(dying.inventoryCursor).toMatchObject({
++      stack: { itemId: 'sample:ore-b', count: 1 },
++      craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++    });
++    expect(dying.armor).toEqual({ ...emptyArmor(), helmet: visor() });
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects a missing composed policy before any survivor or death write', () => {
++    const world = setup(null);
++    const before = worldState(world);
++
++    expect(() => world.advanceRules(1)).toThrow(/death-inventory-policy-unavailable/);
++    expect(worldState(world)).toEqual(before);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects player despawn policy without orphaning GameplayRuntime membership', () => {
++    const world = setup('despawn');
++    const before = worldState(world);
++
++    expect(() => world.advanceRules(1)).toThrow(/needs-player-despawn-policy-unsupported/);
++    expect(worldState(world)).toEqual(before);
++    expect(world.getPlayerState('z-dying')).toMatchObject({ lifecycle: 'alive', health: 1 });
++  });
++
++  it.each([null, 'despawn'] as const)('keeps a nonfatal batch available with %s policy', (policy) => {
++    const world = setup(policy);
++    disarmStarvation(world);
++
++    expect(() => world.advanceRules(1)).not.toThrow();
++    expect(world.getPlayerState('a-survivor')).toMatchObject({ lifecycle: 'alive', health: 20, hunger: 19 });
++    expect(world.getPlayerState('z-dying')).toMatchObject({ lifecycle: 'alive', health: 20, hunger: 19 });
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('settles a real incoming combat action through the same death effects participant', () => {
++    const world = setup('drop');
++    world.spawnAutonomous(
++      { id: 'stalker', type: 'npc', archetype: 'night-stalker', position: [1, 2, 0] },
++      { archetype: 'night-stalker' },
++    );
++    expect(world.simulation.requestActorCombat('stalker', 'z-dying', 'sample:strike')).toMatchObject({ success: true });
++
++    world.advanceRules(1);
++
++    expect(world.getPlayerState('z-dying')).toMatchObject({ health: 0, lifecycle: 'dead' });
++    expect(world.simulation.combat.snapshotFor('stalker').active).toBeNull();
++    expect(world.simulation.actions.forActor('stalker')).toBeNull();
++  });
++
++  it('rejects a rule that changes non-player health and leaves the whole batch untouched', () => {
++    const corrupt: ModModule = {
++      descriptor: {
++        id: 'sample:corrupt-npc-health',
++        version: '1.0.0',
++        permissions: [{ resource: 'seedlands.needs', operations: ['read', 'write', 'execute'] }],
++      },
++      register(api) {
++        api.registerRule({
++          id: 'sample:corrupt-npc-health/after',
++          operationId: 'seedlands:advance-needs',
++          stage: 'after',
++          apply(_context, _input, state) {
++            for (let partition = 0; partition < NEEDS_PARTITIONS; partition++) {
++              const address = needsAddress(partition);
++              const current = validateNeedsPartition(state.read(address));
++              if (!current.entries.some(({ kind }) => kind !== 'player')) continue;
++              state.write(address, {
++                ...current,
++                entries: current.entries.map((entry) =>
++                  entry.kind === 'player' ? entry : { ...entry, health: entry.health - 1 },
++                ),
++              });
++            }
++          },
++        });
++      },
++    };
++    const world = setup('drop', [corrupt]);
++    world.spawnAutonomous(
++      { id: 'npc', type: 'npc', archetype: 'night-stalker', position: [4, 2, 0] },
++      { archetype: 'night-stalker' },
++    );
++    const before = worldState(world);
++
++    expect(() => world.advanceRules(1)).toThrow(/needs-readonly-fields-changed/);
++    expect(worldState(world)).toEqual(before);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects survivor source drift before applying its mixed death candidate', () => {
++    const world = setup('drop');
++    let concurrent: ReturnType<typeof worldState> | undefined;
++    const commit = prepareNeedsCommit(world, (ids) => {
++      const survivor = world.entities.actorComponentSnapshot('a-survivor');
++      const mutation = prepareEntityMutation(world.entities, {
++        actors: [
++          {
++            reference: world.entities.createReference('a-survivor')!,
++            health: world.entities.get('a-survivor')!.health!,
++            components: { ...survivor, needs: { ...survivor.needs, hunger: 18 } },
++          },
++        ],
++      });
++      mutation.validate();
++      mutation.apply();
++      concurrent = worldState(world);
++      return world.simulation.prepareDeaths(ids);
++    });
++
++    expect(() => commit()).toThrow(/stale|changed/i);
++    expect(worldState(world)).toEqual(concurrent);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects death effects drift before applying the mixed entity series', () => {
++    const world = setup('drop');
++    const action = world.simulation.actions.start({ actorId: 'z-dying', type: 'idle' }, 0);
++    world.simulation.actions.markRunning(action.id, []);
++    let concurrent: ReturnType<typeof worldState> | undefined;
++    const commit = prepareNeedsCommit(world, (ids) => {
++      const effects = world.simulation.prepareDeaths(ids);
++      world.simulation.actions.interruptActor('z-dying', 0, 'concurrent-cancel');
++      concurrent = worldState(world);
++      return effects;
++    });
++
++    expect(() => commit()).toThrow(/stale/i);
++    expect(worldState(world)).toEqual(concurrent);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('abandons the prepared mixed entity series when death effects preparation fails', () => {
++    const world = setup('drop');
++    const before = worldState(world);
++    const commit = prepareNeedsCommit(world, () => {
++      throw new Error('fixture-death-effects-unavailable');
++    });
++
++    expect(() => commit()).toThrow('fixture-death-effects-unavailable');
++    expect(worldState(world)).toEqual(before);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('preflights more than 128 drops and rejects the final allocator slot without partial writes', () => {
++    const world = setup('drop');
++    const deathIds = ['z-dying'];
++    for (let index = 0; index < 6; index++) {
++      const id = `z-dying-${index}`;
++      deathIds.push(id);
++      world.spawnPlayer({ id, position: [4 + index * 2, 2, 0] });
++      const actor = world.entities.actorStateAccess(id);
++      expect(actor.inventory.add({ itemId: 'sample:filler', count: actor.inventory.capacity })).toBe(true);
++    }
++    armStarvation(world, deathIds);
++    const dropCount = deathIds.reduce(
++      (total, id) =>
++        total +
++        world.entities.actorStateAccess(id).inventory.snapshot().filter(Boolean).length +
++        Number(world.entities.actorStateAccess(id).inventoryCursor.stack !== null) +
++        world.entities.actorStateAccess(id).inventoryCursor.craftingGrid.filter(Boolean).length +
++        Object.values(world.entities.actorStateAccess(id).armor).filter(Boolean).length,
++      0,
++    );
++    expect(dropCount).toBe(148);
++    const exhausted = world.createSnapshot();
++    exhausted.entityStore.lifetimeHighWater = Number.MAX_SAFE_INTEGER - dropCount + 1;
++    world.restoreSnapshot(exhausted);
++    expect(world.entities.exportComponentSnapshot().lifetimeHighWater).toBe(Number.MAX_SAFE_INTEGER - dropCount + 1);
++    const before = worldState(world);
++
++    expect(() => world.advanceRules(1)).toThrow(/capacity|exhausted/i);
++    expect(worldState(world)).toEqual(before);
++    expect(world.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++});
+diff --git a/playbooks/classic/src/death-inventory-policy.ts b/playbooks/classic/src/death-inventory-policy.ts
+new file mode 100644
+index 00000000..a1a24efb
+--- /dev/null
++++ b/playbooks/classic/src/death-inventory-policy.ts
+@@ -0,0 +1,20 @@
++import { defineDeathInventoryPolicyModuleV1 } from '@seedlands/stdlib/mod-api';
++
++const dropAll = Object.freeze({
++  inventory: 'drop' as const,
++  cursor: 'drop' as const,
++  crafting: 'drop' as const,
++  armor: 'drop' as const,
++});
++
++export const classicDeathInventoryPolicyModule = defineDeathInventoryPolicyModuleV1({
++  moduleId: 'seedlands:overworld-death-inventory-policy',
++  definition: {
++    version: 1,
++    actors: {
++      player: { ...dropAll, actor: 'retain' },
++      creature: { ...dropAll, actor: 'despawn' },
++      npc: { ...dropAll, actor: 'despawn' },
++    },
++  },
++});
+diff --git a/playbooks/classic/src/legacy-composition-identities.ts b/playbooks/classic/src/legacy-composition-identities.ts
+index 6d67d9d8..eec0b958 100644
+--- a/playbooks/classic/src/legacy-composition-identities.ts
++++ b/playbooks/classic/src/legacy-composition-identities.ts
+@@ -1,4 +1,5 @@
+ import { defineGameplaySnapshotPredecessorsV1, type CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
++import { classicPreDeathV4CompositionIdentity } from './pre-death-v4-composition-identity';
+ 
+ // Exact production capture from c18a890. Keep this independent of current Pack assembly.
+ const CAPTURED_KERNEL_MIGRATION_IDENTITY =
+@@ -62,6 +63,10 @@ export const classicGameplaySnapshotPredecessors = defineGameplaySnapshotPredece
+       false,
+     ),
+   },
++  {
++    gameplayVersions: [4],
++    identity: classicPreDeathV4CompositionIdentity,
++  },
+ ]);
+ 
+ export const classicKernelMigrationCompositionIdentity = classicGameplaySnapshotPredecessors[0]!.identity;
+diff --git a/playbooks/classic/src/pack.ts b/playbooks/classic/src/pack.ts
+index 0a884f4f..60228a2e 100644
+--- a/playbooks/classic/src/pack.ts
++++ b/playbooks/classic/src/pack.ts
+@@ -32,6 +32,7 @@ import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
+ import { classicStructureDefinitionModule } from './structures';
+ import { classicStructureActionsModule } from './structure-actions';
+ import { classicMedia } from './media';
++import { classicDeathInventoryPolicyModule } from './death-inventory-policy';
+ 
+ const namespaceId = (id: string) => `seedlands:${id}`;
+ const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
+@@ -102,6 +103,7 @@ export const pack = definePack({
+     classicStructureDefinitionModule,
+     classicStructureActionsModule,
+     defineMediaPlaybackModuleV1({ moduleId: 'seedlands:overworld-media', definition: classicMedia }),
++    classicDeathInventoryPolicyModule,
+     defineRecipeCraftingModule(),
+     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
+     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
+diff --git a/playbooks/classic/src/pre-death-v4-composition-identity.ts b/playbooks/classic/src/pre-death-v4-composition-identity.ts
+new file mode 100644
+index 00000000..afbab8b2
+--- /dev/null
++++ b/playbooks/classic/src/pre-death-v4-composition-identity.ts
+@@ -0,0 +1,9 @@
++import type { CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
++
++// Exact BUILD02 production-artifact capture from source 1bbe3a60; do not derive this from the current Pack.
++const CAPTURED_PRE_DEATH_V4_IDENTITY =
++  '{"version":1,"playbookId":"seedlands:overworld","packLock":[{"id":"seedlands:overworld","version":"1.0.0","integrity":{"algorithm":"sha256","manifestDigest":"14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3","entryDigest":"4b12ea606bd12dc62e74ea40e5e90678231cf866fecd2ce2a97eea3a21c38142","resources":[{"path":"playbooks/classic/assets/audio/to-far-shores.mp3","digest":"3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"},{"path":"playbooks/classic/presentation.json","digest":"a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b"}]}}],"definitionMap":{"schemaVersion":2,"stateCodecs":[{"id":"seedlands:actor-mode","version":"1.0.0","resource":"seedlands.mode","moduleId":"seedlands:mode-module"},{"id":"seedlands:actor-needs","version":"1.0.0","resource":"seedlands.needs","moduleId":"seedlands:needs-module","partitions":5},{"id":"seedlands:block-actor","version":"1.0.0","resource":"seedlands.block-actor","moduleId":"seedlands:block-actions-module"},{"id":"seedlands:block-voxel","version":"1.0.0","resource":"seedlands.block-voxel","moduleId":"seedlands:block-actions-module"},{"id":"seedlands:block-world","version":"1.0.0","resource":"seedlands.block-clock","moduleId":"seedlands:block-actions-module","partitions":8},{"id":"seedlands:combat-actor","version":"1.0.0","resource":"seedlands.combat","moduleId":"seedlands:combat-module"},{"id":"seedlands:combat-world","version":"1.0.0","resource":"seedlands.combat-clock","moduleId":"seedlands:combat-module","partitions":5},{"id":"seedlands:forage-world","version":"1.0.0","resource":"seedlands.forage-clock","moduleId":"seedlands:forage-module"},{"id":"seedlands:furnace-world","version":"1.0.0","resource":"seedlands.furnace-clock","moduleId":"seedlands:station-actions-module","partitions":8},{"id":"seedlands:inventory","version":"1.0.0","resource":"seedlands.inventory","moduleId":"seedlands:inventory-module"},{"id":"seedlands:inventory-actor","version":"1.0.0","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module"},{"id":"seedlands:inventory-item","version":"1.0.0","resource":"seedlands.inventory-item","moduleId":"seedlands:inventory-actions-module"},{"id":"seedlands:media-playback-device","version":"1.0.0","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media"},{"id":"seedlands:station-actor","version":"1.0.0","resource":"seedlands.station-actor","moduleId":"seedlands:station-actions-module"},{"id":"seedlands:station-instance","version":"1.0.0","resource":"seedlands.station","moduleId":"seedlands:station-actions-module"},{"id":"seedlands:structure-actor","version":"1.0.0","resource":"seedlands.structure","moduleId":"seedlands:overworld-structure-actions"},{"id":"seedlands:structure-voxel","version":"1.0.0","resource":"seedlands.structure","moduleId":"seedlands:overworld-structure-actions"},{"id":"seedlands:world-ruleset","version":"1.0.0","resource":"seedlands.ruleset","moduleId":"seedlands:ruleset-module"}],"operations":[{"id":"seedlands:advance-combat","resource":"seedlands.combat-clock","moduleId":"seedlands:combat-module","executionKind":"system"},{"id":"seedlands:advance-needs","resource":"seedlands.needs","moduleId":"seedlands:needs-module","executionKind":"system"},{"id":"seedlands:block-advance","resource":"seedlands.block-clock","moduleId":"seedlands:block-actions-module","executionKind":"system"},{"id":"seedlands:block-begin","resource":"seedlands.block-voxel","moduleId":"seedlands:block-actions-module","executionKind":"actor"},{"id":"seedlands:block-cancel","resource":"seedlands.block-actor","moduleId":"seedlands:block-actions-module","executionKind":"actor"},{"id":"seedlands:block-finish","resource":"seedlands.block-voxel","moduleId":"seedlands:block-actions-module","executionKind":"actor"},{"id":"seedlands:block-place","resource":"seedlands.block-voxel","moduleId":"seedlands:block-actions-module","executionKind":"actor"},{"id":"seedlands:fluid-container-interact","resource":"seedlands.block-voxel","moduleId":"seedlands:fluid-container-handler","executionKind":"actor"},{"id":"seedlands:forage-advance","resource":"seedlands.forage-clock","moduleId":"seedlands:forage-module","executionKind":"system"},{"id":"seedlands:furnace-advance","resource":"seedlands.furnace-clock","moduleId":"seedlands:station-actions-module","executionKind":"system"},{"id":"seedlands:inventory-consume","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-craft","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-drop","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-move","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-pickup","resource":"seedlands.inventory-item","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-select","resource":"seedlands.inventory","moduleId":"seedlands:inventory-actions-module","executionKind":"actor"},{"id":"seedlands:inventory-transfer","resource":"seedlands.inventory","moduleId":"seedlands:inventory-module","executionKind":"actor"},{"id":"seedlands:media-activate","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:media-eject","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:media-insert","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:media-insert-and-activate","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:media-stop","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:media-switch","resource":"seedlands.media-playback","moduleId":"seedlands:overworld-media","executionKind":"actor"},{"id":"seedlands:request-combat","resource":"seedlands.combat","moduleId":"seedlands:combat-module","executionKind":"actor"},{"id":"seedlands:resolve-combat","resource":"seedlands.combat","moduleId":"seedlands:combat-module","executionKind":"actor"},{"id":"seedlands:set-creative-catalog","resource":"seedlands.mode","moduleId":"seedlands:mode-module","executionKind":"actor"},{"id":"seedlands:set-flight","resource":"seedlands.mode","moduleId":"seedlands:mode-module","executionKind":"actor"},{"id":"seedlands:set-mode","resource":"seedlands.mode","moduleId":"seedlands:mode-module","executionKind":"actor"},{"id":"seedlands:station-craft","resource":"seedlands.station","moduleId":"seedlands:station-actions-module","executionKind":"actor"},{"id":"seedlands:station-transfer","resource":"seedlands.station","moduleId":"seedlands:station-actions-module","executionKind":"actor"},{"id":"seedlands:structure-break","resource":"seedlands.structure","moduleId":"seedlands:overworld-structure-actions","executionKind":"actor"},{"id":"seedlands:structure-place","resource":"seedlands.structure","moduleId":"seedlands:overworld-structure-actions","executionKind":"actor"},{"id":"seedlands:structure-toggle","resource":"seedlands.structure","moduleId":"seedlands:overworld-structure-actions","executionKind":"actor"}],"rules":[{"id":"seedlands:overworld-block-rules/begin-before","operationId":"seedlands:block-begin","moduleId":"seedlands:overworld-block-rules","stage":"before"},{"id":"seedlands:overworld-block-rules/finish-before","operationId":"seedlands:block-finish","moduleId":"seedlands:overworld-block-rules","stage":"before"},{"id":"seedlands:overworld-block-rules/place-before","operationId":"seedlands:block-place","moduleId":"seedlands:overworld-block-rules","stage":"before"},{"id":"seedlands:overworld-combat-rules/request-before","operationId":"seedlands:request-combat","moduleId":"seedlands:overworld-combat-rules","stage":"before"},{"id":"seedlands:overworld-combat-rules/resolve-before","operationId":"seedlands:resolve-combat","moduleId":"seedlands:overworld-combat-rules","stage":"before"},{"id":"seedlands:overworld-needs-rules/before","operationId":"seedlands:advance-needs","moduleId":"seedlands:overworld-needs-rules","stage":"before"},{"id":"seedlands:overworld-block-rules/begin-after","operationId":"seedlands:block-begin","moduleId":"seedlands:overworld-block-rules","stage":"after"},{"id":"seedlands:overworld-block-rules/cancel-after","operationId":"seedlands:block-cancel","moduleId":"seedlands:overworld-block-rules","stage":"after"},{"id":"seedlands:overworld-block-rules/finish-after","operationId":"seedlands:block-finish","moduleId":"seedlands:overworld-block-rules","stage":"after"},{"id":"seedlands:overworld-block-rules/place-after","operationId":"seedlands:block-place","moduleId":"seedlands:overworld-block-rules","stage":"after"},{"id":"seedlands:overworld-combat-rules/request-after","operationId":"seedlands:request-combat","moduleId":"seedlands:overworld-combat-rules","stage":"after"},{"id":"seedlands:overworld-combat-rules/resolve-after","operationId":"seedlands:resolve-combat","moduleId":"seedlands:overworld-combat-rules","stage":"after"},{"id":"seedlands:overworld-needs-rules/after","operationId":"seedlands:advance-needs","moduleId":"seedlands:overworld-needs-rules","stage":"after"}],"packs":[{"id":"seedlands:overworld","version":"1.0.0"}],"modules":[{"id":"seedlands:behavior-registry-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:combat-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-item-interactions","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-media","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-worldgen","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:recipe-crafting-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:ruleset-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:needs-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-combat-rules","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-content","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:forage-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:inventory-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:mode-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-needs-rules","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-voxel-geometry","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:station-actions-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:block-actions-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:inventory-actions-module","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-structures","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:fluid-container-handler","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-block-rules","version":"1.0.0","packId":"seedlands:overworld"},{"id":"seedlands:overworld-structure-actions","version":"1.0.0","packId":"seedlands:overworld"}],"capabilities":[{"id":"seedlands:actor-modes","version":"1.0.0","moduleId":"seedlands:mode-module"},{"id":"seedlands:actor-profiles","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:behavior-registry","version":"1.0.0","moduleId":"seedlands:behavior-registry-module"},{"id":"seedlands:block-actions","version":"1.0.0","moduleId":"seedlands:block-actions-module"},{"id":"seedlands:block-rules","version":"1.0.0","moduleId":"seedlands:overworld-block-rules"},{"id":"seedlands:combat","version":"1.0.0","moduleId":"seedlands:combat-module"},{"id":"seedlands:content-crafting","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:crafting-match","version":"1.0.0","moduleId":"seedlands:recipe-crafting-module"},{"id":"seedlands:fluid-container-interaction","version":"1.0.0","moduleId":"seedlands:fluid-container-handler"},{"id":"seedlands:forage","version":"1.0.0","moduleId":"seedlands:forage-module"},{"id":"seedlands:gameplay-snapshot-migration","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:inventory","version":"1.0.0","moduleId":"seedlands:inventory-module"},{"id":"seedlands:inventory-actions","version":"1.0.0","moduleId":"seedlands:inventory-actions-module"},{"id":"seedlands:item-interactions","version":"1.0.0","moduleId":"seedlands:overworld-item-interactions"},{"id":"seedlands:items","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:media-playback","version":"1.0.0","moduleId":"seedlands:overworld-media"},{"id":"seedlands:melee-definitions","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:needs","version":"1.0.0","moduleId":"seedlands:needs-module"},{"id":"seedlands:player-inventory-layout","version":"1.0.0","moduleId":"seedlands:inventory-module","definitionIdentity":"{\\"capacity\\":36,\\"hotbarSize\\":9}"},{"id":"seedlands:recipes","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:station-actions","version":"1.0.0","moduleId":"seedlands:station-actions-module"},{"id":"seedlands:station-content","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:structure-actions","version":"1.0.0","moduleId":"seedlands:overworld-structure-actions"},{"id":"seedlands:structure-definitions","version":"1.0.0","moduleId":"seedlands:overworld-structures"},{"id":"seedlands:voxel-geometry","version":"1.0.0","moduleId":"seedlands:overworld-voxel-geometry"},{"id":"seedlands:voxel-semantics","version":"1.0.0","moduleId":"seedlands:overworld-content"},{"id":"seedlands:world-ruleset","version":"1.0.0","moduleId":"seedlands:ruleset-module"},{"id":"seedlands:worldgen-provider","version":"1.0.0","moduleId":"seedlands:overworld-worldgen","definitionIdentity":"{\\"id\\":\\"seedlands:classic-worldgen\\",\\"implementationVersion\\":\\"11.0.0\\",\\"configurationIdentity\\":\\"seedlands:classic-terrain-g2-g11\\",\\"supportedGeneratorVersions\\":[2,3,4,5,6,7,8,9,10,11],\\"artifactIdentity\\":\\"seedlands:overworld@1.0.0\\"}"}],"resources":[{"id":"seedlands.block-actor","operations":["read","execute"]},{"id":"seedlands.block-clock","operations":["read","execute"]},{"id":"seedlands.block-voxel","operations":["read","execute"]},{"id":"seedlands.combat","operations":["read","execute"]},{"id":"seedlands.combat-clock","operations":["read","execute"]},{"id":"seedlands.forage-clock","operations":["read","execute"]},{"id":"seedlands.furnace-clock","operations":["read","execute"]},{"id":"seedlands.inventory","operations":["read","write","execute"]},{"id":"seedlands.inventory-item","operations":["read","execute"]},{"id":"seedlands.media-playback","operations":["read","write","execute"]},{"id":"seedlands.mode","operations":["read","write","execute"]},{"id":"seedlands.needs","operations":["read","write","execute"]},{"id":"seedlands.ruleset","operations":["read"]},{"id":"seedlands.station","operations":["read","execute"]},{"id":"seedlands.station-actor","operations":["read","execute"]},{"id":"seedlands.structure","operations":["read","execute"]}],"items":[{"id":"seedlands:apple","storageId":"apple"},{"id":"seedlands:arrow","storageId":"arrow"},{"id":"seedlands:bed","storageId":"bed"},{"id":"seedlands:berry","storageId":"berry"},{"id":"seedlands:black-dye","storageId":"black-dye"},{"id":"seedlands:black-wool","storageId":"black-wool"},{"id":"seedlands:blue-dye","storageId":"blue-dye"},{"id":"seedlands:blue-wool","storageId":"blue-wool"},{"id":"seedlands:boat","storageId":"boat"},{"id":"seedlands:bone","storageId":"bone"},{"id":"seedlands:book","storageId":"book"},{"id":"seedlands:bookshelf","storageId":"bookshelf"},{"id":"seedlands:bow","storageId":"bow"},{"id":"seedlands:bowl","storageId":"bowl"},{"id":"seedlands:bread","storageId":"bread"},{"id":"seedlands:brick","storageId":"brick"},{"id":"seedlands:bricks","storageId":"bricks"},{"id":"seedlands:brown-dye","storageId":"brown-dye"},{"id":"seedlands:brown-wool","storageId":"brown-wool"},{"id":"seedlands:bucket","storageId":"bucket"},{"id":"seedlands:cactus","storageId":"cactus"},{"id":"seedlands:cake","storageId":"cake"},{"id":"seedlands:charcoal","storageId":"charcoal"},{"id":"seedlands:chest","storageId":"chest"},{"id":"seedlands:chest-minecart","storageId":"chest-minecart"},{"id":"seedlands:clay","storageId":"clay"},{"id":"seedlands:clay-block","storageId":"clay-block"},{"id":"seedlands:clock","storageId":"clock"},{"id":"seedlands:coal","storageId":"coal"},{"id":"seedlands:cobblestone","storageId":"cobblestone"},{"id":"seedlands:cobblestone-stairs","storageId":"cobblestone-stairs"},{"id":"seedlands:cocoa-beans","storageId":"cocoa-beans"},{"id":"seedlands:compass","storageId":"compass"},{"id":"seedlands:cooked-fish","storageId":"cooked-fish"},{"id":"seedlands:cooked-porkchop","storageId":"cooked-porkchop"},{"id":"seedlands:cookie","storageId":"cookie"},{"id":"seedlands:cyan-dye","storageId":"cyan-dye"},{"id":"seedlands:cyan-wool","storageId":"cyan-wool"},{"id":"seedlands:dead-bush","storageId":"dead-bush"},{"id":"seedlands:detector-rail","storageId":"detector-rail"},{"id":"seedlands:diamond","storageId":"diamond"},{"id":"seedlands:diamond-axe","storageId":"diamond-axe"},{"id":"seedlands:diamond-block","storageId":"diamond-block"},{"id":"seedlands:diamond-boots","storageId":"diamond-boots"},{"id":"seedlands:diamond-chestplate","storageId":"diamond-chestplate"},{"id":"seedlands:diamond-helmet","storageId":"diamond-helmet"},{"id":"seedlands:diamond-hoe","storageId":"diamond-hoe"},{"id":"seedlands:diamond-leggings","storageId":"diamond-leggings"},{"id":"seedlands:diamond-ore","storageId":"diamond-ore"},{"id":"seedlands:diamond-pickaxe","storageId":"diamond-pickaxe"},{"id":"seedlands:diamond-shovel","storageId":"diamond-shovel"},{"id":"seedlands:diamond-sword","storageId":"diamond-sword"},{"id":"seedlands:dirt-block","storageId":"dirt-block"},{"id":"seedlands:egg","storageId":"egg"},{"id":"seedlands:feather","storageId":"feather"},{"id":"seedlands:fence","storageId":"fence"},{"id":"seedlands:fishing-rod","storageId":"fishing-rod"},{"id":"seedlands:flint","storageId":"flint"},{"id":"seedlands:flint-and-steel","storageId":"flint-and-steel"},{"id":"seedlands:flower","storageId":"flower"},{"id":"seedlands:furnace","storageId":"furnace"},{"id":"seedlands:furnace-minecart","storageId":"furnace-minecart"},{"id":"seedlands:glass","storageId":"glass"},{"id":"seedlands:glowstone-block","storageId":"glowstone-block"},{"id":"seedlands:gold-axe","storageId":"gold-axe"},{"id":"seedlands:gold-block","storageId":"gold-block"},{"id":"seedlands:gold-boots","storageId":"gold-boots"},{"id":"seedlands:gold-chestplate","storageId":"gold-chestplate"},{"id":"seedlands:gold-helmet","storageId":"gold-helmet"},{"id":"seedlands:gold-hoe","storageId":"gold-hoe"},{"id":"seedlands:gold-ingot","storageId":"gold-ingot"},{"id":"seedlands:gold-leggings","storageId":"gold-leggings"},{"id":"seedlands:gold-ore","storageId":"gold-ore"},{"id":"seedlands:gold-pickaxe","storageId":"gold-pickaxe"},{"id":"seedlands:gold-shovel","storageId":"gold-shovel"},{"id":"seedlands:gold-sword","storageId":"gold-sword"},{"id":"seedlands:golden-apple","storageId":"golden-apple"},{"id":"seedlands:gravel","storageId":"gravel"},{"id":"seedlands:gray-dye","storageId":"gray-dye"},{"id":"seedlands:gray-wool","storageId":"gray-wool"},{"id":"seedlands:green-dye","storageId":"green-dye"},{"id":"seedlands:green-wool","storageId":"green-wool"},{"id":"seedlands:gunpowder","storageId":"gunpowder"},{"id":"seedlands:ice","storageId":"ice"},{"id":"seedlands:ink-sac","storageId":"ink-sac"},{"id":"seedlands:iron-axe","storageId":"iron-axe"},{"id":"seedlands:iron-block","storageId":"iron-block"},{"id":"seedlands:iron-boots","storageId":"iron-boots"},{"id":"seedlands:iron-chestplate","storageId":"iron-chestplate"},{"id":"seedlands:iron-helmet","storageId":"iron-helmet"},{"id":"seedlands:iron-hoe","storageId":"iron-hoe"},{"id":"seedlands:iron-ingot","storageId":"iron-ingot"},{"id":"seedlands:iron-leggings","storageId":"iron-leggings"},{"id":"seedlands:iron-pickaxe","storageId":"iron-pickaxe"},{"id":"seedlands:iron-shovel","storageId":"iron-shovel"},{"id":"seedlands:iron-sword","storageId":"iron-sword"},{"id":"seedlands:jack-o-lantern","storageId":"jack-o-lantern"},{"id":"seedlands:jukebox","storageId":"jukebox"},{"id":"seedlands:ladder","storageId":"ladder"},{"id":"seedlands:lantern","storageId":"lantern"},{"id":"seedlands:lapis-block","storageId":"lapis-block"},{"id":"seedlands:lapis-ore","storageId":"lapis-ore"},{"id":"seedlands:lava-bucket","storageId":"lava-bucket"},{"id":"seedlands:leather","storageId":"leather"},{"id":"seedlands:leather-boots","storageId":"leather-boots"},{"id":"seedlands:leather-chestplate","storageId":"leather-chestplate"},{"id":"seedlands:leather-helmet","storageId":"leather-helmet"},{"id":"seedlands:leather-leggings","storageId":"leather-leggings"},{"id":"seedlands:light-blue-dye","storageId":"light-blue-dye"},{"id":"seedlands:light-blue-wool","storageId":"light-blue-wool"},{"id":"seedlands:light-gray-dye","storageId":"light-gray-dye"},{"id":"seedlands:light-gray-wool","storageId":"light-gray-wool"},{"id":"seedlands:lime-dye","storageId":"lime-dye"},{"id":"seedlands:lime-wool","storageId":"lime-wool"},{"id":"seedlands:lit-furnace","storageId":"lit-furnace"},{"id":"seedlands:lit-redstone-ore","storageId":"lit-redstone-ore"},{"id":"seedlands:magenta-dye","storageId":"magenta-dye"},{"id":"seedlands:magenta-wool","storageId":"magenta-wool"},{"id":"seedlands:map","storageId":"map"},{"id":"seedlands:milk-bucket","storageId":"milk-bucket"},{"id":"seedlands:minecart","storageId":"minecart"},{"id":"seedlands:mossy-cobblestone","storageId":"mossy-cobblestone"},{"id":"seedlands:mushroom","storageId":"mushroom"},{"id":"seedlands:mushroom-stew","storageId":"mushroom-stew"},{"id":"seedlands:note-block","storageId":"note-block"},{"id":"seedlands:obsidian","storageId":"obsidian"},{"id":"seedlands:orange-dye","storageId":"orange-dye"},{"id":"seedlands:orange-wool","storageId":"orange-wool"},{"id":"seedlands:painting","storageId":"painting"},{"id":"seedlands:paper","storageId":"paper"},{"id":"seedlands:pink-dye","storageId":"pink-dye"},{"id":"seedlands:pink-wool","storageId":"pink-wool"},{"id":"seedlands:plank","storageId":"plank"},{"id":"seedlands:powered-rail","storageId":"powered-rail"},{"id":"seedlands:pumpkin","storageId":"pumpkin"},{"id":"seedlands:purple-dye","storageId":"purple-dye"},{"id":"seedlands:purple-wool","storageId":"purple-wool"},{"id":"seedlands:rail","storageId":"rail"},{"id":"seedlands:raw-fish","storageId":"raw-fish"},{"id":"seedlands:raw-iron","storageId":"raw-iron"},{"id":"seedlands:raw-porkchop","storageId":"raw-porkchop"},{"id":"seedlands:record-13","storageId":"record-13"},{"id":"seedlands:record-cat","storageId":"record-cat"},{"id":"seedlands:red-dye","storageId":"red-dye"},{"id":"seedlands:red-flower","storageId":"red-flower"},{"id":"seedlands:red-mushroom","storageId":"red-mushroom"},{"id":"seedlands:red-wool","storageId":"red-wool"},{"id":"seedlands:redstone-dust","storageId":"redstone-dust"},{"id":"seedlands:redstone-ore","storageId":"redstone-ore"},{"id":"seedlands:rotten-flesh","storageId":"rotten-flesh"},{"id":"seedlands:saddle","storageId":"saddle"},{"id":"seedlands:sand-block","storageId":"sand-block"},{"id":"seedlands:sandstone","storageId":"sandstone"},{"id":"seedlands:sandstone-slab","storageId":"sandstone-slab"},{"id":"seedlands:sapling","storageId":"sapling"},{"id":"seedlands:shears","storageId":"shears"},{"id":"seedlands:sign","storageId":"sign"},{"id":"seedlands:slab","storageId":"slab"},{"id":"seedlands:slimeball","storageId":"slimeball"},{"id":"seedlands:snow-block","storageId":"snow-block"},{"id":"seedlands:snowball","storageId":"snowball"},{"id":"seedlands:stick","storageId":"stick"},{"id":"seedlands:stone-axe","storageId":"stone-axe"},{"id":"seedlands:stone-block","storageId":"stone-block"},{"id":"seedlands:stone-bricks","storageId":"stone-bricks"},{"id":"seedlands:stone-hoe","storageId":"stone-hoe"},{"id":"seedlands:stone-pickaxe","storageId":"stone-pickaxe"},{"id":"seedlands:stone-shovel","storageId":"stone-shovel"},{"id":"seedlands:stone-sword","storageId":"stone-sword"},{"id":"seedlands:string","storageId":"string"},{"id":"seedlands:sugar","storageId":"sugar"},{"id":"seedlands:sugar-cane","storageId":"sugar-cane"},{"id":"seedlands:tnt","storageId":"tnt"},{"id":"seedlands:torch","storageId":"torch"},{"id":"seedlands:trapdoor","storageId":"trapdoor"},{"id":"seedlands:water-bucket","storageId":"water-bucket"},{"id":"seedlands:wheat","storageId":"wheat"},{"id":"seedlands:wheat-seeds","storageId":"wheat-seeds"},{"id":"seedlands:white-dye","storageId":"white-dye"},{"id":"seedlands:white-wool","storageId":"white-wool"},{"id":"seedlands:wood-axe","storageId":"wood-axe"},{"id":"seedlands:wood-block","storageId":"wood-block"},{"id":"seedlands:wood-hoe","storageId":"wood-hoe"},{"id":"seedlands:wood-pickaxe","storageId":"wood-pickaxe"},{"id":"seedlands:wood-shovel","storageId":"wood-shovel"},{"id":"seedlands:wood-slab","storageId":"wood-slab"},{"id":"seedlands:wood-stairs","storageId":"wood-stairs"},{"id":"seedlands:wood-sword","storageId":"wood-sword"},{"id":"seedlands:wooden-door","storageId":"wooden-door"},{"id":"seedlands:wool","storageId":"wool"},{"id":"seedlands:wool-block","storageId":"wool-block"},{"id":"seedlands:workbench","storageId":"workbench"},{"id":"seedlands:yellow-dye","storageId":"yellow-dye"},{"id":"seedlands:yellow-wool","storageId":"yellow-wool"}],"recipes":[{"id":"seedlands:arrows","storageId":"arrows"},{"id":"seedlands:bed","storageId":"bed"},{"id":"seedlands:black-dye","storageId":"black-dye"},{"id":"seedlands:black-wool","storageId":"black-wool"},{"id":"seedlands:blue-wool","storageId":"blue-wool"},{"id":"seedlands:boat","storageId":"boat"},{"id":"seedlands:book","storageId":"book"},{"id":"seedlands:bookshelf","storageId":"bookshelf"},{"id":"seedlands:bow","storageId":"bow"},{"id":"seedlands:bowl","storageId":"bowl"},{"id":"seedlands:bread","storageId":"bread"},{"id":"seedlands:bricks","storageId":"bricks"},{"id":"seedlands:brown-dye","storageId":"brown-dye"},{"id":"seedlands:brown-wool","storageId":"brown-wool"},{"id":"seedlands:bucket","storageId":"bucket"},{"id":"seedlands:cake","storageId":"cake"},{"id":"seedlands:chest","storageId":"chest"},{"id":"seedlands:chest-minecart","storageId":"chest-minecart"},{"id":"seedlands:clay-block","storageId":"clay-block"},{"id":"seedlands:clock","storageId":"clock"},{"id":"seedlands:cobblestone-stairs","storageId":"cobblestone-stairs"},{"id":"seedlands:compass","storageId":"compass"},{"id":"seedlands:cookie","storageId":"cookie"},{"id":"seedlands:cyan-dye","storageId":"cyan-dye"},{"id":"seedlands:cyan-wool","storageId":"cyan-wool"},{"id":"seedlands:detector-rails","storageId":"detector-rails"},{"id":"seedlands:diamond-axe","storageId":"diamond-axe"},{"id":"seedlands:diamond-block","storageId":"diamond-block"},{"id":"seedlands:diamond-block-unpack","storageId":"diamond-block-unpack"},{"id":"seedlands:diamond-boots","storageId":"diamond-boots"},{"id":"seedlands:diamond-chestplate","storageId":"diamond-chestplate"},{"id":"seedlands:diamond-helmet","storageId":"diamond-helmet"},{"id":"seedlands:diamond-hoe","storageId":"diamond-hoe"},{"id":"seedlands:diamond-leggings","storageId":"diamond-leggings"},{"id":"seedlands:diamond-pickaxe","storageId":"diamond-pickaxe"},{"id":"seedlands:diamond-shovel","storageId":"diamond-shovel"},{"id":"seedlands:diamond-sword","storageId":"diamond-sword"},{"id":"seedlands:fence","storageId":"fence"},{"id":"seedlands:fishing-rod","storageId":"fishing-rod"},{"id":"seedlands:flint-and-steel","storageId":"flint-and-steel"},{"id":"seedlands:furnace","storageId":"furnace"},{"id":"seedlands:furnace-minecart","storageId":"furnace-minecart"},{"id":"seedlands:gold-axe","storageId":"gold-axe"},{"id":"seedlands:gold-block","storageId":"gold-block"},{"id":"seedlands:gold-block-unpack","storageId":"gold-block-unpack"},{"id":"seedlands:gold-boots","storageId":"gold-boots"},{"id":"seedlands:gold-chestplate","storageId":"gold-chestplate"},{"id":"seedlands:gold-helmet","storageId":"gold-helmet"},{"id":"seedlands:gold-hoe","storageId":"gold-hoe"},{"id":"seedlands:gold-leggings","storageId":"gold-leggings"},{"id":"seedlands:gold-pickaxe","storageId":"gold-pickaxe"},{"id":"seedlands:gold-shovel","storageId":"gold-shovel"},{"id":"seedlands:gold-sword","storageId":"gold-sword"},{"id":"seedlands:golden-apple","storageId":"golden-apple"},{"id":"seedlands:gray-dye","storageId":"gray-dye"},{"id":"seedlands:gray-wool","storageId":"gray-wool"},{"id":"seedlands:green-wool","storageId":"green-wool"},{"id":"seedlands:iron-axe","storageId":"iron-axe"},{"id":"seedlands:iron-block","storageId":"iron-block"},{"id":"seedlands:iron-block-unpack","storageId":"iron-block-unpack"},{"id":"seedlands:iron-boots","storageId":"iron-boots"},{"id":"seedlands:iron-chestplate","storageId":"iron-chestplate"},{"id":"seedlands:iron-helmet","storageId":"iron-helmet"},{"id":"seedlands:iron-hoe","storageId":"iron-hoe"},{"id":"seedlands:iron-leggings","storageId":"iron-leggings"},{"id":"seedlands:iron-pickaxe","storageId":"iron-pickaxe"},{"id":"seedlands:iron-shovel","storageId":"iron-shovel"},{"id":"seedlands:iron-sword","storageId":"iron-sword"},{"id":"seedlands:jack-o-lantern","storageId":"jack-o-lantern"},{"id":"seedlands:jukebox","storageId":"jukebox"},{"id":"seedlands:ladder","storageId":"ladder"},{"id":"seedlands:lantern","storageId":"lantern"},{"id":"seedlands:lapis-block","storageId":"lapis-block"},{"id":"seedlands:lapis-block-unpack","storageId":"lapis-block-unpack"},{"id":"seedlands:leather-boots","storageId":"leather-boots"},{"id":"seedlands:leather-chestplate","storageId":"leather-chestplate"},{"id":"seedlands:leather-helmet","storageId":"leather-helmet"},{"id":"seedlands:leather-leggings","storageId":"leather-leggings"},{"id":"seedlands:light-blue-dye","storageId":"light-blue-dye"},{"id":"seedlands:light-blue-wool","storageId":"light-blue-wool"},{"id":"seedlands:light-gray-dye","storageId":"light-gray-dye"},{"id":"seedlands:light-gray-wool","storageId":"light-gray-wool"},{"id":"seedlands:lime-dye","storageId":"lime-dye"},{"id":"seedlands:lime-wool","storageId":"lime-wool"},{"id":"seedlands:magenta-dye","storageId":"magenta-dye"},{"id":"seedlands:magenta-wool","storageId":"magenta-wool"},{"id":"seedlands:map","storageId":"map"},{"id":"seedlands:minecart","storageId":"minecart"},{"id":"seedlands:mushroom-stew","storageId":"mushroom-stew"},{"id":"seedlands:note-block","storageId":"note-block"},{"id":"seedlands:orange-dye","storageId":"orange-dye"},{"id":"seedlands:orange-wool","storageId":"orange-wool"},{"id":"seedlands:painting","storageId":"painting"},{"id":"seedlands:paper","storageId":"paper"},{"id":"seedlands:pink-dye","storageId":"pink-dye"},{"id":"seedlands:pink-wool","storageId":"pink-wool"},{"id":"seedlands:planks","storageId":"planks"},{"id":"seedlands:powered-rails","storageId":"powered-rails"},{"id":"seedlands:purple-dye","storageId":"purple-dye"},{"id":"seedlands:purple-wool","storageId":"purple-wool"},{"id":"seedlands:rails","storageId":"rails"},{"id":"seedlands:red-dye","storageId":"red-dye"},{"id":"seedlands:red-wool","storageId":"red-wool"},{"id":"seedlands:sandstone","storageId":"sandstone"},{"id":"seedlands:sandstone-slab","storageId":"sandstone-slab"},{"id":"seedlands:shears","storageId":"shears"},{"id":"seedlands:sign","storageId":"sign"},{"id":"seedlands:slab","storageId":"slab"},{"id":"seedlands:snow-block","storageId":"snow-block"},{"id":"seedlands:sticks","storageId":"sticks"},{"id":"seedlands:stone-axe","storageId":"stone-axe"},{"id":"seedlands:stone-bricks","storageId":"stone-bricks"},{"id":"seedlands:stone-hoe","storageId":"stone-hoe"},{"id":"seedlands:stone-pickaxe","storageId":"stone-pickaxe"},{"id":"seedlands:stone-shovel","storageId":"stone-shovel"},{"id":"seedlands:stone-sword","storageId":"stone-sword"},{"id":"seedlands:sugar","storageId":"sugar"},{"id":"seedlands:tnt","storageId":"tnt"},{"id":"seedlands:torch","storageId":"torch"},{"id":"seedlands:trapdoor","storageId":"trapdoor"},{"id":"seedlands:white-dye","storageId":"white-dye"},{"id":"seedlands:white-wool","storageId":"white-wool"},{"id":"seedlands:wood-axe","storageId":"wood-axe"},{"id":"seedlands:wood-hoe","storageId":"wood-hoe"},{"id":"seedlands:wood-pickaxe","storageId":"wood-pickaxe"},{"id":"seedlands:wood-shovel","storageId":"wood-shovel"},{"id":"seedlands:wood-slab","storageId":"wood-slab"},{"id":"seedlands:wood-stairs","storageId":"wood-stairs"},{"id":"seedlands:wood-sword","storageId":"wood-sword"},{"id":"seedlands:wooden-door","storageId":"wooden-door"},{"id":"seedlands:wool","storageId":"wool"},{"id":"seedlands:workbench","storageId":"workbench"},{"id":"seedlands:yellow-dye","storageId":"yellow-dye"},{"id":"seedlands:yellow-wool","storageId":"yellow-wool"}],"voxels":[{"id":"seedlands:classic/air","storageId":0},{"id":"seedlands:classic/bed","storageId":55},{"id":"seedlands:classic/bedrock","storageId":42},{"id":"seedlands:classic/black-wool","storageId":88},{"id":"seedlands:classic/blue-wool","storageId":84},{"id":"seedlands:classic/bookshelf","storageId":64},{"id":"seedlands:classic/bricks","storageId":63},{"id":"seedlands:classic/brown-wool","storageId":85},{"id":"seedlands:classic/cactus","storageId":36},{"id":"seedlands:classic/cake","storageId":58},{"id":"seedlands:classic/chest","storageId":12},{"id":"seedlands:classic/clay","storageId":45},{"id":"seedlands:classic/coal-ore","storageId":14},{"id":"seedlands:classic/cobblestone","storageId":17},{"id":"seedlands:classic/cobblestone-stairs","storageId":51},{"id":"seedlands:classic/cyan-wool","storageId":82},{"id":"seedlands:classic/dead-bush","storageId":59},{"id":"seedlands:classic/detector-rail","storageId":41},{"id":"seedlands:classic/diamond-block","storageId":23},{"id":"seedlands:classic/diamond-ore","storageId":20},{"id":"seedlands:classic/dirt","storageId":2},{"id":"seedlands:classic/dungeon-chest","storageId":38},{"id":"seedlands:classic/farmland","storageId":26},{"id":"seedlands:classic/fence","storageId":57},{"id":"seedlands:classic/fire","storageId":29},{"id":"seedlands:classic/flower","storageId":33},{"id":"seedlands:classic/furnace","storageId":13},{"id":"seedlands:classic/glass","storageId":18},{"id":"seedlands:classic/glowstone","storageId":9},{"id":"seedlands:classic/gold-block","storageId":22},{"id":"seedlands:classic/gold-ore","storageId":19},{"id":"seedlands:classic/grass","storageId":1},{"id":"seedlands:classic/gravel","storageId":43},{"id":"seedlands:classic/gray-wool","storageId":80},{"id":"seedlands:classic/green-wool","storageId":86},{"id":"seedlands:classic/ice","storageId":46},{"id":"seedlands:classic/iron-block","storageId":21},{"id":"seedlands:classic/iron-ore","storageId":15},{"id":"seedlands:classic/jack-o-lantern","storageId":69},{"id":"seedlands:classic/jukebox","storageId":67},{"id":"seedlands:classic/ladder","storageId":53},{"id":"seedlands:classic/lantern","storageId":10},{"id":"seedlands:classic/lapis-block","storageId":48},{"id":"seedlands:classic/lapis-ore","storageId":44},{"id":"seedlands:classic/lava","storageId":27},{"id":"seedlands:classic/leaves","storageId":5},{"id":"seedlands:classic/light-blue-wool","storageId":76},{"id":"seedlands:classic/light-gray-wool","storageId":81},{"id":"seedlands:classic/lime-wool","storageId":78},{"id":"seedlands:classic/lit-furnace","storageId":71},{"id":"seedlands:classic/lit-redstone-ore","storageId":73},{"id":"seedlands:classic/magenta-wool","storageId":75},{"id":"seedlands:classic/mossy-cobblestone","storageId":65},{"id":"seedlands:classic/mushroom","storageId":34},{"id":"seedlands:classic/note-block","storageId":66},{"id":"seedlands:classic/obsidian","storageId":28},{"id":"seedlands:classic/orange-wool","storageId":74},{"id":"seedlands:classic/pink-wool","storageId":79},{"id":"seedlands:classic/planks","storageId":16},{"id":"seedlands:classic/powered-rail","storageId":40},{"id":"seedlands:classic/pumpkin","storageId":68},{"id":"seedlands:classic/purple-wool","storageId":83},{"id":"seedlands:classic/rail","storageId":39},{"id":"seedlands:classic/red-flower","storageId":61},{"id":"seedlands:classic/red-mushroom","storageId":62},{"id":"seedlands:classic/red-wool","storageId":87},{"id":"seedlands:classic/redstone-ore","storageId":72},{"id":"seedlands:classic/sand","storageId":6},{"id":"seedlands:classic/sandstone","storageId":24},{"id":"seedlands:classic/sapling","storageId":31},{"id":"seedlands:classic/sign","storageId":56},{"id":"seedlands:classic/slab","storageId":49},{"id":"seedlands:classic/snow","storageId":7},{"id":"seedlands:classic/snow-block","storageId":47},{"id":"seedlands:classic/spawner","storageId":37},{"id":"seedlands:classic/stone","storageId":3},{"id":"seedlands:classic/stone-bricks","storageId":25},{"id":"seedlands:classic/sugar-cane","storageId":35},{"id":"seedlands:classic/tall-grass","storageId":32},{"id":"seedlands:classic/tnt","storageId":30},{"id":"seedlands:classic/torch","storageId":54},{"id":"seedlands:classic/trapdoor","storageId":70},{"id":"seedlands:classic/water","storageId":8},{"id":"seedlands:classic/wood","storageId":4},{"id":"seedlands:classic/wood-stairs","storageId":50},{"id":"seedlands:classic/wooden-door","storageId":52},{"id":"seedlands:classic/wooden-door/east/closed/lower","storageId":93},{"id":"seedlands:classic/wooden-door/east/closed/upper","storageId":94},{"id":"seedlands:classic/wooden-door/east/open/lower","storageId":95},{"id":"seedlands:classic/wooden-door/east/open/upper","storageId":96},{"id":"seedlands:classic/wooden-door/north/closed/lower","storageId":89},{"id":"seedlands:classic/wooden-door/north/closed/upper","storageId":90},{"id":"seedlands:classic/wooden-door/north/open/lower","storageId":91},{"id":"seedlands:classic/wooden-door/north/open/upper","storageId":92},{"id":"seedlands:classic/wooden-door/south/closed/lower","storageId":97},{"id":"seedlands:classic/wooden-door/south/closed/upper","storageId":98},{"id":"seedlands:classic/wooden-door/south/open/lower","storageId":99},{"id":"seedlands:classic/wooden-door/south/open/upper","storageId":100},{"id":"seedlands:classic/wooden-door/west/closed/lower","storageId":101},{"id":"seedlands:classic/wooden-door/west/closed/upper","storageId":102},{"id":"seedlands:classic/wooden-door/west/open/lower","storageId":103},{"id":"seedlands:classic/wooden-door/west/open/upper","storageId":104},{"id":"seedlands:classic/wool","storageId":60},{"id":"seedlands:classic/workbench","storageId":11},{"id":"seedlands:classic/yellow-wool","storageId":77}],"systems":[{"moduleId":"seedlands:block-actions-module","definition":{"id":"seedlands:block-system","operationId":"seedlands:block-advance","cadence":"every-advance","before":[],"after":[]}},{"moduleId":"seedlands:combat-module","definition":{"id":"seedlands:combat-system","operationId":"seedlands:advance-combat","cadence":"every-advance","before":[],"after":[]}},{"moduleId":"seedlands:forage-module","definition":{"id":"seedlands:forage-system","operationId":"seedlands:forage-advance","intervalSeconds":120,"cadence":"interval","before":[],"after":[]}},{"moduleId":"seedlands:station-actions-module","definition":{"id":"seedlands:furnace-system","operationId":"seedlands:furnace-advance","cadence":"every-advance","before":[],"after":[]}},{"moduleId":"seedlands:needs-module","definition":{"id":"seedlands:needs-system","operationId":"seedlands:advance-needs","cadence":"every-advance","before":[],"after":[]}}],"lifecycles":[]}}';
++
++export const classicPreDeathV4CompositionIdentity = JSON.parse(
++  CAPTURED_PRE_DEATH_V4_IDENTITY,
++) as CompositionCheckpointIdentity;
+diff --git a/playbooks/classic/src/retired-actors-migration.ts b/playbooks/classic/src/retired-actors-migration.ts
+index ab6909d5..b71eec58 100644
+--- a/playbooks/classic/src/retired-actors-migration.ts
++++ b/playbooks/classic/src/retired-actors-migration.ts
+@@ -22,6 +22,8 @@ const MEDIA_OPERATION_IDS = new Set([
+   'seedlands:media-stop',
+   'seedlands:media-switch',
+ ]);
++const DEATH_POLICY_MODULE_ID = 'seedlands:overworld-death-inventory-policy';
++const DEATH_POLICY_CAPABILITY_ID = 'seedlands:death-inventory-policy';
+ type RecordValue = Record<string, unknown>;
+ 
+ const record = (value: unknown): RecordValue | null =>
+@@ -106,8 +108,8 @@ const isPreMediaClassicSource = (snapshot: RecordValue, targetComposition: unkno
+     ],
+     definitionMap: {
+       ...definitionMap,
+-      modules: modules.filter(({ id }) => id !== MEDIA_MODULE_ID),
+-      capabilities: capabilities.filter(({ id }) => id !== MEDIA_CAPABILITY_ID),
++      modules: modules.filter(({ id }) => id !== MEDIA_MODULE_ID && id !== DEATH_POLICY_MODULE_ID),
++      capabilities: capabilities.filter(({ id }) => id !== MEDIA_CAPABILITY_ID && id !== DEATH_POLICY_CAPABILITY_ID),
+       resources: resources.filter(({ id }) => id !== MEDIA_RESOURCE_ID),
+       stateCodecs: stateCodecs.filter(({ id }) => id !== MEDIA_STATE_ID),
+       operations: operations.filter(({ id }) => !MEDIA_OPERATION_IDS.has(String(id))),
+diff --git a/playbooks/classic/tests/legacy-composition-lineage.test.ts b/playbooks/classic/tests/legacy-composition-lineage.test.ts
+index 245c956c..3759be15 100644
+--- a/playbooks/classic/tests/legacy-composition-lineage.test.ts
++++ b/playbooks/classic/tests/legacy-composition-lineage.test.ts
+@@ -1,12 +1,17 @@
+ import { readFileSync } from 'node:fs';
++import { createHash } from 'node:crypto';
+ import { gunzipSync } from 'node:zlib';
+ import { describe, expect, it } from 'vitest';
+-import type { CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
++import { matchesGameplaySnapshotPredecessorV1, type CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
++import { assembleOverworldPacks } from '@seedlands/stdlib/host';
+ import {
+   classicGameplaySnapshotPredecessors,
+   classicKernelMigrationCompositionIdentity,
+ } from '../src/legacy-composition-identities';
+ import { classicRetiredActorsMigration } from '../src/retired-actors-migration';
++import { pack } from '../src/pack';
++import { classicPreDeathV4CompositionIdentity } from '../src/pre-death-v4-composition-identity';
++import { canonicalCompositionCheckpointIdentity } from '../../../packages/stdlib/src/server/composition/checkpoint-identity';
+ 
+ const captured = (): CompositionCheckpointIdentity => {
+   const checkpoint = JSON.parse(
+@@ -20,6 +25,30 @@ const deeplyFrozen = (value: unknown): boolean => {
+   if (!value || typeof value !== 'object') return true;
+   return Object.isFrozen(value) && Object.values(value).every(deeplyFrozen);
+ };
++const preDeathV4Captured = (): CompositionCheckpointIdentity => {
++  const capture = JSON.parse(
++    readFileSync(
++      new URL(
++        '../../../changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json',
++        import.meta.url,
++      ),
++      'utf8',
++    ),
++  ) as { identity: { value: CompositionCheckpointIdentity } };
++  return capture.identity.value;
++};
++const currentComposition = () =>
++  assembleOverworldPacks([
++    {
++      ...pack,
++      integrity: {
++        algorithm: 'sha256',
++        manifestDigest: 'a'.repeat(64),
++        entryDigest: 'b'.repeat(64),
++        resources: pack.manifest.resources!.map((path) => ({ path, digest: 'c'.repeat(64) })),
++      },
++    },
++  ]);
+ 
+ describe('Classic gameplay snapshot lineage', () => {
+   it('owns the exact captured c18a890 composition without a runtime fixture dependency', () => {
+@@ -41,4 +70,125 @@ describe('Classic gameplay snapshot lineage', () => {
+     expect((rejected.snapshot as typeof exact).composition).toEqual(tampered.composition);
+     expect((rejected.snapshot as typeof exact).composition).not.toEqual(target);
+   });
++
++  it('installs the one frozen Classic death policy capability in the production composition', () => {
++    const composition = currentComposition();
++    const definitions = composition.definitionMap.capabilities.filter(
++      ({ id }) => id === 'seedlands:death-inventory-policy',
++    );
++    expect(definitions).toHaveLength(1);
++    expect(definitions[0]).toMatchObject({
++      moduleId: 'seedlands:overworld-death-inventory-policy',
++      version: '1.0.0',
++    });
++    expect(
++      composition
++        .capability<{ policyFor(kind: 'player' | 'creature' | 'npc'): unknown }>('seedlands:death-inventory-policy')
++        .policyFor('player'),
++    ).toEqual({ inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' });
++  });
++
++  it('accepts only the full captured pre-death V4 identity', () => {
++    const exact = preDeathV4Captured();
++    expect(classicPreDeathV4CompositionIdentity).toEqual(exact);
++    expect(
++      createHash('sha256')
++        .update(canonicalCompositionCheckpointIdentity(classicPreDeathV4CompositionIdentity))
++        .digest('hex'),
++    ).toBe('e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a');
++    expect(classicGameplaySnapshotPredecessors.map(({ identity }) => identity)).toContainEqual(exact);
++    expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, exact)).toBe(true);
++    expect(exact.definitionMap.modules).toHaveLength(22);
++    expect(exact.definitionMap.capabilities).toHaveLength(28);
++
++    for (const altered of [
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          modules: [
++            ...exact.definitionMap.modules,
++            { id: 'sample:unknown', packId: 'seedlands:overworld', version: '1.0.0' },
++          ],
++        },
++      },
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          capabilities: [
++            ...exact.definitionMap.capabilities,
++            {
++              id: 'sample:unknown',
++              moduleId: 'seedlands:overworld-content',
++              version: '1.0.0',
++            },
++          ],
++        },
++      },
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          modules: exact.definitionMap.modules.map((entry, index) =>
++            index === 0 ? { ...entry, version: '9.9.9' } : entry,
++          ),
++        },
++      },
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          capabilities: exact.definitionMap.capabilities.map((entry) =>
++            entry.definitionIdentity === undefined ? entry : { ...entry, definitionIdentity: '{}' },
++          ),
++        },
++      },
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          capabilities: exact.definitionMap.capabilities.map((entry, index) =>
++            index === 0 ? { ...entry, version: '9.9.9' } : entry,
++          ),
++        },
++      },
++      {
++        ...exact,
++        definitionMap: {
++          ...exact.definitionMap,
++          resources: [...exact.definitionMap.resources, { id: 'sample.unknown', operations: ['read' as const] }],
++        },
++      },
++      {
++        ...exact,
++        packLock: exact.packLock.map((entry, index) =>
++          index === 0 ? { ...entry, integrity: { ...entry.integrity, entryDigest: '0'.repeat(64) } } : entry,
++        ),
++      },
++      {
++        ...exact,
++        packLock: exact.packLock.map((entry, index) =>
++          index === 0 ? { ...entry, integrity: { ...entry.integrity, manifestDigest: '0'.repeat(64) } } : entry,
++        ),
++      },
++      {
++        ...exact,
++        packLock: exact.packLock.map((entry, index) =>
++          index === 0
++            ? {
++                ...entry,
++                integrity: {
++                  ...entry.integrity,
++                  resources: entry.integrity.resources.map((resource, resourceIndex) =>
++                    resourceIndex === 0 ? { ...resource, digest: '0'.repeat(64) } : resource,
++                  ),
++                },
++              }
++            : entry,
++        ),
++      },
++    ])
++      expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, altered)).toBe(false);
++  });
+ });

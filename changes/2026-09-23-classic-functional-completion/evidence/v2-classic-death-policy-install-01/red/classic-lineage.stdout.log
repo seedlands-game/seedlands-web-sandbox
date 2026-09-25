@@ -1,0 +1,5878 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/playbook-classic| playbooks/classic/tests/legacy-composition-lineage.test.ts (4 tests | 2 failed) 45ms
+     × installs the one frozen Classic death policy capability in the production composition 22ms
+     × accepts only the full captured pre-death V4 identity and reprojects it to the current composition 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/playbook-classic| playbooks/classic/tests/legacy-composition-lineage.test.ts > Classic gameplay snapshot lineage > installs the one frozen Classic death policy capability in the production composition
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ playbooks/classic/tests/legacy-composition-lineage.test.ts:76:25
+     74|       ({ id }) => id === 'seedlands:death-inventory-policy',
+     75|     );
+     76|     expect(definitions).toHaveLength(1);
+       |                         ^
+     77|     expect(definitions[0]).toMatchObject({
+     78|       moduleId: 'seedlands:overworld-death-inventory-policy',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/playbook-classic| playbooks/classic/tests/legacy-composition-lineage.test.ts > Classic gameplay snapshot lineage > accepts only the full captured pre-death V4 identity and reprojects it to the current composition
+AssertionError: expected [ …(4) ] to deep equally contain { version: 1, …(3) }
+
+- Expected:
+{
+  "definitionMap": {
+    "capabilities": [
+      {
+        "id": "seedlands:actor-modes",
+        "moduleId": "seedlands:mode-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:actor-profiles",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:behavior-registry",
+        "moduleId": "seedlands:behavior-registry-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-actions",
+        "moduleId": "seedlands:block-actions-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-rules",
+        "moduleId": "seedlands:overworld-block-rules",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:combat",
+        "moduleId": "seedlands:combat-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:content-crafting",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:crafting-match",
+        "moduleId": "seedlands:recipe-crafting-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:fluid-container-interaction",
+        "moduleId": "seedlands:fluid-container-handler",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:forage",
+        "moduleId": "seedlands:forage-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:gameplay-snapshot-migration",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory",
+        "moduleId": "seedlands:inventory-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory-actions",
+        "moduleId": "seedlands:inventory-actions-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:item-interactions",
+        "moduleId": "seedlands:overworld-item-interactions",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:items",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:media-playback",
+        "moduleId": "seedlands:overworld-media",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:melee-definitions",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:needs",
+        "moduleId": "seedlands:needs-module",
+        "version": "1.0.0",
+      },
+      {
+        "definitionIdentity": "{\"capacity\":36,\"hotbarSize\":9}",
+        "id": "seedlands:player-inventory-layout",
+        "moduleId": "seedlands:inventory-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:recipes",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:station-actions",
+        "moduleId": "seedlands:station-actions-module",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:station-content",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:structure-actions",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:structure-definitions",
+        "moduleId": "seedlands:overworld-structures",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:voxel-geometry",
+        "moduleId": "seedlands:overworld-voxel-geometry",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:voxel-semantics",
+        "moduleId": "seedlands:overworld-content",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:world-ruleset",
+        "moduleId": "seedlands:ruleset-module",
+        "version": "1.0.0",
+      },
+      {
+        "definitionIdentity": "{\"id\":\"seedlands:classic-worldgen\",\"implementationVersion\":\"11.0.0\",\"configurationIdentity\":\"seedlands:classic-terrain-g2-g11\",\"supportedGeneratorVersions\":[2,3,4,5,6,7,8,9,10,11],\"artifactIdentity\":\"seedlands:overworld@1.0.0\"}",
+        "id": "seedlands:worldgen-provider",
+        "moduleId": "seedlands:overworld-worldgen",
+        "version": "1.0.0",
+      },
+    ],
+    "items": [
+      {
+        "id": "seedlands:apple",
+        "storageId": "apple",
+      },
+      {
+        "id": "seedlands:arrow",
+        "storageId": "arrow",
+      },
+      {
+        "id": "seedlands:bed",
+        "storageId": "bed",
+      },
+      {
+        "id": "seedlands:berry",
+        "storageId": "berry",
+      },
+      {
+        "id": "seedlands:black-dye",
+        "storageId": "black-dye",
+      },
+      {
+        "id": "seedlands:black-wool",
+        "storageId": "black-wool",
+      },
+      {
+        "id": "seedlands:blue-dye",
+        "storageId": "blue-dye",
+      },
+      {
+        "id": "seedlands:blue-wool",
+        "storageId": "blue-wool",
+      },
+      {
+        "id": "seedlands:boat",
+        "storageId": "boat",
+      },
+      {
+        "id": "seedlands:bone",
+        "storageId": "bone",
+      },
+      {
+        "id": "seedlands:book",
+        "storageId": "book",
+      },
+      {
+        "id": "seedlands:bookshelf",
+        "storageId": "bookshelf",
+      },
+      {
+        "id": "seedlands:bow",
+        "storageId": "bow",
+      },
+      {
+        "id": "seedlands:bowl",
+        "storageId": "bowl",
+      },
+      {
+        "id": "seedlands:bread",
+        "storageId": "bread",
+      },
+      {
+        "id": "seedlands:brick",
+        "storageId": "brick",
+      },
+      {
+        "id": "seedlands:bricks",
+        "storageId": "bricks",
+      },
+      {
+        "id": "seedlands:brown-dye",
+        "storageId": "brown-dye",
+      },
+      {
+        "id": "seedlands:brown-wool",
+        "storageId": "brown-wool",
+      },
+      {
+        "id": "seedlands:bucket",
+        "storageId": "bucket",
+      },
+      {
+        "id": "seedlands:cactus",
+        "storageId": "cactus",
+      },
+      {
+        "id": "seedlands:cake",
+        "storageId": "cake",
+      },
+      {
+        "id": "seedlands:charcoal",
+        "storageId": "charcoal",
+      },
+      {
+        "id": "seedlands:chest",
+        "storageId": "chest",
+      },
+      {
+        "id": "seedlands:chest-minecart",
+        "storageId": "chest-minecart",
+      },
+      {
+        "id": "seedlands:clay",
+        "storageId": "clay",
+      },
+      {
+        "id": "seedlands:clay-block",
+        "storageId": "clay-block",
+      },
+      {
+        "id": "seedlands:clock",
+        "storageId": "clock",
+      },
+      {
+        "id": "seedlands:coal",
+        "storageId": "coal",
+      },
+      {
+        "id": "seedlands:cobblestone",
+        "storageId": "cobblestone",
+      },
+      {
+        "id": "seedlands:cobblestone-stairs",
+        "storageId": "cobblestone-stairs",
+      },
+      {
+        "id": "seedlands:cocoa-beans",
+        "storageId": "cocoa-beans",
+      },
+      {
+        "id": "seedlands:compass",
+        "storageId": "compass",
+      },
+      {
+        "id": "seedlands:cooked-fish",
+        "storageId": "cooked-fish",
+      },
+      {
+        "id": "seedlands:cooked-porkchop",
+        "storageId": "cooked-porkchop",
+      },
+      {
+        "id": "seedlands:cookie",
+        "storageId": "cookie",
+      },
+      {
+        "id": "seedlands:cyan-dye",
+        "storageId": "cyan-dye",
+      },
+      {
+        "id": "seedlands:cyan-wool",
+        "storageId": "cyan-wool",
+      },
+      {
+        "id": "seedlands:dead-bush",
+        "storageId": "dead-bush",
+      },
+      {
+        "id": "seedlands:detector-rail",
+        "storageId": "detector-rail",
+      },
+      {
+        "id": "seedlands:diamond",
+        "storageId": "diamond",
+      },
+      {
+        "id": "seedlands:diamond-axe",
+        "storageId": "diamond-axe",
+      },
+      {
+        "id": "seedlands:diamond-block",
+        "storageId": "diamond-block",
+      },
+      {
+        "id": "seedlands:diamond-boots",
+        "storageId": "diamond-boots",
+      },
+      {
+        "id": "seedlands:diamond-chestplate",
+        "storageId": "diamond-chestplate",
+      },
+      {
+        "id": "seedlands:diamond-helmet",
+        "storageId": "diamond-helmet",
+      },
+      {
+        "id": "seedlands:diamond-hoe",
+        "storageId": "diamond-hoe",
+      },
+      {
+        "id": "seedlands:diamond-leggings",
+        "storageId": "diamond-leggings",
+      },
+      {
+        "id": "seedlands:diamond-ore",
+        "storageId": "diamond-ore",
+      },
+      {
+        "id": "seedlands:diamond-pickaxe",
+        "storageId": "diamond-pickaxe",
+      },
+      {
+        "id": "seedlands:diamond-shovel",
+        "storageId": "diamond-shovel",
+      },
+      {
+        "id": "seedlands:diamond-sword",
+        "storageId": "diamond-sword",
+      },
+      {
+        "id": "seedlands:dirt-block",
+        "storageId": "dirt-block",
+      },
+      {
+        "id": "seedlands:egg",
+        "storageId": "egg",
+      },
+      {
+        "id": "seedlands:feather",
+        "storageId": "feather",
+      },
+      {
+        "id": "seedlands:fence",
+        "storageId": "fence",
+      },
+      {
+        "id": "seedlands:fishing-rod",
+        "storageId": "fishing-rod",
+      },
+      {
+        "id": "seedlands:flint",
+        "storageId": "flint",
+      },
+      {
+        "id": "seedlands:flint-and-steel",
+        "storageId": "flint-and-steel",
+      },
+      {
+        "id": "seedlands:flower",
+        "storageId": "flower",
+      },
+      {
+        "id": "seedlands:furnace",
+        "storageId": "furnace",
+      },
+      {
+        "id": "seedlands:furnace-minecart",
+        "storageId": "furnace-minecart",
+      },
+      {
+        "id": "seedlands:glass",
+        "storageId": "glass",
+      },
+      {
+        "id": "seedlands:glowstone-block",
+        "storageId": "glowstone-block",
+      },
+      {
+        "id": "seedlands:gold-axe",
+        "storageId": "gold-axe",
+      },
+      {
+        "id": "seedlands:gold-block",
+        "storageId": "gold-block",
+      },
+      {
+        "id": "seedlands:gold-boots",
+        "storageId": "gold-boots",
+      },
+      {
+        "id": "seedlands:gold-chestplate",
+        "storageId": "gold-chestplate",
+      },
+      {
+        "id": "seedlands:gold-helmet",
+        "storageId": "gold-helmet",
+      },
+      {
+        "id": "seedlands:gold-hoe",
+        "storageId": "gold-hoe",
+      },
+      {
+        "id": "seedlands:gold-ingot",
+        "storageId": "gold-ingot",
+      },
+      {
+        "id": "seedlands:gold-leggings",
+        "storageId": "gold-leggings",
+      },
+      {
+        "id": "seedlands:gold-ore",
+        "storageId": "gold-ore",
+      },
+      {
+        "id": "seedlands:gold-pickaxe",
+        "storageId": "gold-pickaxe",
+      },
+      {
+        "id": "seedlands:gold-shovel",
+        "storageId": "gold-shovel",
+      },
+      {
+        "id": "seedlands:gold-sword",
+        "storageId": "gold-sword",
+      },
+      {
+        "id": "seedlands:golden-apple",
+        "storageId": "golden-apple",
+      },
+      {
+        "id": "seedlands:gravel",
+        "storageId": "gravel",
+      },
+      {
+        "id": "seedlands:gray-dye",
+        "storageId": "gray-dye",
+      },
+      {
+        "id": "seedlands:gray-wool",
+        "storageId": "gray-wool",
+      },
+      {
+        "id": "seedlands:green-dye",
+        "storageId": "green-dye",
+      },
+      {
+        "id": "seedlands:green-wool",
+        "storageId": "green-wool",
+      },
+      {
+        "id": "seedlands:gunpowder",
+        "storageId": "gunpowder",
+      },
+      {
+        "id": "seedlands:ice",
+        "storageId": "ice",
+      },
+      {
+        "id": "seedlands:ink-sac",
+        "storageId": "ink-sac",
+      },
+      {
+        "id": "seedlands:iron-axe",
+        "storageId": "iron-axe",
+      },
+      {
+        "id": "seedlands:iron-block",
+        "storageId": "iron-block",
+      },
+      {
+        "id": "seedlands:iron-boots",
+        "storageId": "iron-boots",
+      },
+      {
+        "id": "seedlands:iron-chestplate",
+        "storageId": "iron-chestplate",
+      },
+      {
+        "id": "seedlands:iron-helmet",
+        "storageId": "iron-helmet",
+      },
+      {
+        "id": "seedlands:iron-hoe",
+        "storageId": "iron-hoe",
+      },
+      {
+        "id": "seedlands:iron-ingot",
+        "storageId": "iron-ingot",
+      },
+      {
+        "id": "seedlands:iron-leggings",
+        "storageId": "iron-leggings",
+      },
+      {
+        "id": "seedlands:iron-pickaxe",
+        "storageId": "iron-pickaxe",
+      },
+      {
+        "id": "seedlands:iron-shovel",
+        "storageId": "iron-shovel",
+      },
+      {
+        "id": "seedlands:iron-sword",
+        "storageId": "iron-sword",
+      },
+      {
+        "id": "seedlands:jack-o-lantern",
+        "storageId": "jack-o-lantern",
+      },
+      {
+        "id": "seedlands:jukebox",
+        "storageId": "jukebox",
+      },
+      {
+        "id": "seedlands:ladder",
+        "storageId": "ladder",
+      },
+      {
+        "id": "seedlands:lantern",
+        "storageId": "lantern",
+      },
+      {
+        "id": "seedlands:lapis-block",
+        "storageId": "lapis-block",
+      },
+      {
+        "id": "seedlands:lapis-ore",
+        "storageId": "lapis-ore",
+      },
+      {
+        "id": "seedlands:lava-bucket",
+        "storageId": "lava-bucket",
+      },
+      {
+        "id": "seedlands:leather",
+        "storageId": "leather",
+      },
+      {
+        "id": "seedlands:leather-boots",
+        "storageId": "leather-boots",
+      },
+      {
+        "id": "seedlands:leather-chestplate",
+        "storageId": "leather-chestplate",
+      },
+      {
+        "id": "seedlands:leather-helmet",
+        "storageId": "leather-helmet",
+      },
+      {
+        "id": "seedlands:leather-leggings",
+        "storageId": "leather-leggings",
+      },
+      {
+        "id": "seedlands:light-blue-dye",
+        "storageId": "light-blue-dye",
+      },
+      {
+        "id": "seedlands:light-blue-wool",
+        "storageId": "light-blue-wool",
+      },
+      {
+        "id": "seedlands:light-gray-dye",
+        "storageId": "light-gray-dye",
+      },
+      {
+        "id": "seedlands:light-gray-wool",
+        "storageId": "light-gray-wool",
+      },
+      {
+        "id": "seedlands:lime-dye",
+        "storageId": "lime-dye",
+      },
+      {
+        "id": "seedlands:lime-wool",
+        "storageId": "lime-wool",
+      },
+      {
+        "id": "seedlands:lit-furnace",
+        "storageId": "lit-furnace",
+      },
+      {
+        "id": "seedlands:lit-redstone-ore",
+        "storageId": "lit-redstone-ore",
+      },
+      {
+        "id": "seedlands:magenta-dye",
+        "storageId": "magenta-dye",
+      },
+      {
+        "id": "seedlands:magenta-wool",
+        "storageId": "magenta-wool",
+      },
+      {
+        "id": "seedlands:map",
+        "storageId": "map",
+      },
+      {
+        "id": "seedlands:milk-bucket",
+        "storageId": "milk-bucket",
+      },
+      {
+        "id": "seedlands:minecart",
+        "storageId": "minecart",
+      },
+      {
+        "id": "seedlands:mossy-cobblestone",
+        "storageId": "mossy-cobblestone",
+      },
+      {
+        "id": "seedlands:mushroom",
+        "storageId": "mushroom",
+      },
+      {
+        "id": "seedlands:mushroom-stew",
+        "storageId": "mushroom-stew",
+      },
+      {
+        "id": "seedlands:note-block",
+        "storageId": "note-block",
+      },
+      {
+        "id": "seedlands:obsidian",
+        "storageId": "obsidian",
+      },
+      {
+        "id": "seedlands:orange-dye",
+        "storageId": "orange-dye",
+      },
+      {
+        "id": "seedlands:orange-wool",
+        "storageId": "orange-wool",
+      },
+      {
+        "id": "seedlands:painting",
+        "storageId": "painting",
+      },
+      {
+        "id": "seedlands:paper",
+        "storageId": "paper",
+      },
+      {
+        "id": "seedlands:pink-dye",
+        "storageId": "pink-dye",
+      },
+      {
+        "id": "seedlands:pink-wool",
+        "storageId": "pink-wool",
+      },
+      {
+        "id": "seedlands:plank",
+        "storageId": "plank",
+      },
+      {
+        "id": "seedlands:powered-rail",
+        "storageId": "powered-rail",
+      },
+      {
+        "id": "seedlands:pumpkin",
+        "storageId": "pumpkin",
+      },
+      {
+        "id": "seedlands:purple-dye",
+        "storageId": "purple-dye",
+      },
+      {
+        "id": "seedlands:purple-wool",
+        "storageId": "purple-wool",
+      },
+      {
+        "id": "seedlands:rail",
+        "storageId": "rail",
+      },
+      {
+        "id": "seedlands:raw-fish",
+        "storageId": "raw-fish",
+      },
+      {
+        "id": "seedlands:raw-iron",
+        "storageId": "raw-iron",
+      },
+      {
+        "id": "seedlands:raw-porkchop",
+        "storageId": "raw-porkchop",
+      },
+      {
+        "id": "seedlands:record-13",
+        "storageId": "record-13",
+      },
+      {
+        "id": "seedlands:record-cat",
+        "storageId": "record-cat",
+      },
+      {
+        "id": "seedlands:red-dye",
+        "storageId": "red-dye",
+      },
+      {
+        "id": "seedlands:red-flower",
+        "storageId": "red-flower",
+      },
+      {
+        "id": "seedlands:red-mushroom",
+        "storageId": "red-mushroom",
+      },
+      {
+        "id": "seedlands:red-wool",
+        "storageId": "red-wool",
+      },
+      {
+        "id": "seedlands:redstone-dust",
+        "storageId": "redstone-dust",
+      },
+      {
+        "id": "seedlands:redstone-ore",
+        "storageId": "redstone-ore",
+      },
+      {
+        "id": "seedlands:rotten-flesh",
+        "storageId": "rotten-flesh",
+      },
+      {
+        "id": "seedlands:saddle",
+        "storageId": "saddle",
+      },
+      {
+        "id": "seedlands:sand-block",
+        "storageId": "sand-block",
+      },
+      {
+        "id": "seedlands:sandstone",
+        "storageId": "sandstone",
+      },
+      {
+        "id": "seedlands:sandstone-slab",
+        "storageId": "sandstone-slab",
+      },
+      {
+        "id": "seedlands:sapling",
+        "storageId": "sapling",
+      },
+      {
+        "id": "seedlands:shears",
+        "storageId": "shears",
+      },
+      {
+        "id": "seedlands:sign",
+        "storageId": "sign",
+      },
+      {
+        "id": "seedlands:slab",
+        "storageId": "slab",
+      },
+      {
+        "id": "seedlands:slimeball",
+        "storageId": "slimeball",
+      },
+      {
+        "id": "seedlands:snow-block",
+        "storageId": "snow-block",
+      },
+      {
+        "id": "seedlands:snowball",
+        "storageId": "snowball",
+      },
+      {
+        "id": "seedlands:stick",
+        "storageId": "stick",
+      },
+      {
+        "id": "seedlands:stone-axe",
+        "storageId": "stone-axe",
+      },
+      {
+        "id": "seedlands:stone-block",
+        "storageId": "stone-block",
+      },
+      {
+        "id": "seedlands:stone-bricks",
+        "storageId": "stone-bricks",
+      },
+      {
+        "id": "seedlands:stone-hoe",
+        "storageId": "stone-hoe",
+      },
+      {
+        "id": "seedlands:stone-pickaxe",
+        "storageId": "stone-pickaxe",
+      },
+      {
+        "id": "seedlands:stone-shovel",
+        "storageId": "stone-shovel",
+      },
+      {
+        "id": "seedlands:stone-sword",
+        "storageId": "stone-sword",
+      },
+      {
+        "id": "seedlands:string",
+        "storageId": "string",
+      },
+      {
+        "id": "seedlands:sugar",
+        "storageId": "sugar",
+      },
+      {
+        "id": "seedlands:sugar-cane",
+        "storageId": "sugar-cane",
+      },
+      {
+        "id": "seedlands:tnt",
+        "storageId": "tnt",
+      },
+      {
+        "id": "seedlands:torch",
+        "storageId": "torch",
+      },
+      {
+        "id": "seedlands:trapdoor",
+        "storageId": "trapdoor",
+      },
+      {
+        "id": "seedlands:water-bucket",
+        "storageId": "water-bucket",
+      },
+      {
+        "id": "seedlands:wheat",
+        "storageId": "wheat",
+      },
+      {
+        "id": "seedlands:wheat-seeds",
+        "storageId": "wheat-seeds",
+      },
+      {
+        "id": "seedlands:white-dye",
+        "storageId": "white-dye",
+      },
+      {
+        "id": "seedlands:white-wool",
+        "storageId": "white-wool",
+      },
+      {
+        "id": "seedlands:wood-axe",
+        "storageId": "wood-axe",
+      },
+      {
+        "id": "seedlands:wood-block",
+        "storageId": "wood-block",
+      },
+      {
+        "id": "seedlands:wood-hoe",
+        "storageId": "wood-hoe",
+      },
+      {
+        "id": "seedlands:wood-pickaxe",
+        "storageId": "wood-pickaxe",
+      },
+      {
+        "id": "seedlands:wood-shovel",
+        "storageId": "wood-shovel",
+      },
+      {
+        "id": "seedlands:wood-slab",
+        "storageId": "wood-slab",
+      },
+      {
+        "id": "seedlands:wood-stairs",
+        "storageId": "wood-stairs",
+      },
+      {
+        "id": "seedlands:wood-sword",
+        "storageId": "wood-sword",
+      },
+      {
+        "id": "seedlands:wooden-door",
+        "storageId": "wooden-door",
+      },
+      {
+        "id": "seedlands:wool",
+        "storageId": "wool",
+      },
+      {
+        "id": "seedlands:wool-block",
+        "storageId": "wool-block",
+      },
+      {
+        "id": "seedlands:workbench",
+        "storageId": "workbench",
+      },
+      {
+        "id": "seedlands:yellow-dye",
+        "storageId": "yellow-dye",
+      },
+      {
+        "id": "seedlands:yellow-wool",
+        "storageId": "yellow-wool",
+      },
+    ],
+    "lifecycles": [],
+    "modules": [
+      {
+        "id": "seedlands:behavior-registry-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:combat-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-item-interactions",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-media",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-worldgen",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:recipe-crafting-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:ruleset-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:needs-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-combat-rules",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-content",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:forage-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:mode-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-needs-rules",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-voxel-geometry",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:station-actions-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-actions-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory-actions-module",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-structures",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:fluid-container-handler",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-block-rules",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:overworld-structure-actions",
+        "packId": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+    ],
+    "operations": [
+      {
+        "executionKind": "system",
+        "id": "seedlands:advance-combat",
+        "moduleId": "seedlands:combat-module",
+        "resource": "seedlands.combat-clock",
+      },
+      {
+        "executionKind": "system",
+        "id": "seedlands:advance-needs",
+        "moduleId": "seedlands:needs-module",
+        "resource": "seedlands.needs",
+      },
+      {
+        "executionKind": "system",
+        "id": "seedlands:block-advance",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-clock",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:block-begin",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-voxel",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:block-cancel",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-actor",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:block-finish",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-voxel",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:block-place",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-voxel",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:fluid-container-interact",
+        "moduleId": "seedlands:fluid-container-handler",
+        "resource": "seedlands.block-voxel",
+      },
+      {
+        "executionKind": "system",
+        "id": "seedlands:forage-advance",
+        "moduleId": "seedlands:forage-module",
+        "resource": "seedlands.forage-clock",
+      },
+      {
+        "executionKind": "system",
+        "id": "seedlands:furnace-advance",
+        "moduleId": "seedlands:station-actions-module",
+        "resource": "seedlands.furnace-clock",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-consume",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-craft",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-drop",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-move",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-pickup",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory-item",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-select",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:inventory-transfer",
+        "moduleId": "seedlands:inventory-module",
+        "resource": "seedlands.inventory",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-activate",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-eject",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-insert",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-insert-and-activate",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-stop",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:media-switch",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:request-combat",
+        "moduleId": "seedlands:combat-module",
+        "resource": "seedlands.combat",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:resolve-combat",
+        "moduleId": "seedlands:combat-module",
+        "resource": "seedlands.combat",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:set-creative-catalog",
+        "moduleId": "seedlands:mode-module",
+        "resource": "seedlands.mode",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:set-flight",
+        "moduleId": "seedlands:mode-module",
+        "resource": "seedlands.mode",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:set-mode",
+        "moduleId": "seedlands:mode-module",
+        "resource": "seedlands.mode",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:station-craft",
+        "moduleId": "seedlands:station-actions-module",
+        "resource": "seedlands.station",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:station-transfer",
+        "moduleId": "seedlands:station-actions-module",
+        "resource": "seedlands.station",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:structure-break",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "resource": "seedlands.structure",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:structure-place",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "resource": "seedlands.structure",
+      },
+      {
+        "executionKind": "actor",
+        "id": "seedlands:structure-toggle",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "resource": "seedlands.structure",
+      },
+    ],
+    "packs": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+      },
+    ],
+    "recipes": [
+      {
+        "id": "seedlands:arrows",
+        "storageId": "arrows",
+      },
+      {
+        "id": "seedlands:bed",
+        "storageId": "bed",
+      },
+      {
+        "id": "seedlands:black-dye",
+        "storageId": "black-dye",
+      },
+      {
+        "id": "seedlands:black-wool",
+        "storageId": "black-wool",
+      },
+      {
+        "id": "seedlands:blue-wool",
+        "storageId": "blue-wool",
+      },
+      {
+        "id": "seedlands:boat",
+        "storageId": "boat",
+      },
+      {
+        "id": "seedlands:book",
+        "storageId": "book",
+      },
+      {
+        "id": "seedlands:bookshelf",
+        "storageId": "bookshelf",
+      },
+      {
+        "id": "seedlands:bow",
+        "storageId": "bow",
+      },
+      {
+        "id": "seedlands:bowl",
+        "storageId": "bowl",
+      },
+      {
+        "id": "seedlands:bread",
+        "storageId": "bread",
+      },
+      {
+        "id": "seedlands:bricks",
+        "storageId": "bricks",
+      },
+      {
+        "id": "seedlands:brown-dye",
+        "storageId": "brown-dye",
+      },
+      {
+        "id": "seedlands:brown-wool",
+        "storageId": "brown-wool",
+      },
+      {
+        "id": "seedlands:bucket",
+        "storageId": "bucket",
+      },
+      {
+        "id": "seedlands:cake",
+        "storageId": "cake",
+      },
+      {
+        "id": "seedlands:chest",
+        "storageId": "chest",
+      },
+      {
+        "id": "seedlands:chest-minecart",
+        "storageId": "chest-minecart",
+      },
+      {
+        "id": "seedlands:clay-block",
+        "storageId": "clay-block",
+      },
+      {
+        "id": "seedlands:clock",
+        "storageId": "clock",
+      },
+      {
+        "id": "seedlands:cobblestone-stairs",
+        "storageId": "cobblestone-stairs",
+      },
+      {
+        "id": "seedlands:compass",
+        "storageId": "compass",
+      },
+      {
+        "id": "seedlands:cookie",
+        "storageId": "cookie",
+      },
+      {
+        "id": "seedlands:cyan-dye",
+        "storageId": "cyan-dye",
+      },
+      {
+        "id": "seedlands:cyan-wool",
+        "storageId": "cyan-wool",
+      },
+      {
+        "id": "seedlands:detector-rails",
+        "storageId": "detector-rails",
+      },
+      {
+        "id": "seedlands:diamond-axe",
+        "storageId": "diamond-axe",
+      },
+      {
+        "id": "seedlands:diamond-block",
+        "storageId": "diamond-block",
+      },
+      {
+        "id": "seedlands:diamond-block-unpack",
+        "storageId": "diamond-block-unpack",
+      },
+      {
+        "id": "seedlands:diamond-boots",
+        "storageId": "diamond-boots",
+      },
+      {
+        "id": "seedlands:diamond-chestplate",
+        "storageId": "diamond-chestplate",
+      },
+      {
+        "id": "seedlands:diamond-helmet",
+        "storageId": "diamond-helmet",
+      },
+      {
+        "id": "seedlands:diamond-hoe",
+        "storageId": "diamond-hoe",
+      },
+      {
+        "id": "seedlands:diamond-leggings",
+        "storageId": "diamond-leggings",
+      },
+      {
+        "id": "seedlands:diamond-pickaxe",
+        "storageId": "diamond-pickaxe",
+      },
+      {
+        "id": "seedlands:diamond-shovel",
+        "storageId": "diamond-shovel",
+      },
+      {
+        "id": "seedlands:diamond-sword",
+        "storageId": "diamond-sword",
+      },
+      {
+        "id": "seedlands:fence",
+        "storageId": "fence",
+      },
+      {
+        "id": "seedlands:fishing-rod",
+        "storageId": "fishing-rod",
+      },
+      {
+        "id": "seedlands:flint-and-steel",
+        "storageId": "flint-and-steel",
+      },
+      {
+        "id": "seedlands:furnace",
+        "storageId": "furnace",
+      },
+      {
+        "id": "seedlands:furnace-minecart",
+        "storageId": "furnace-minecart",
+      },
+      {
+        "id": "seedlands:gold-axe",
+        "storageId": "gold-axe",
+      },
+      {
+        "id": "seedlands:gold-block",
+        "storageId": "gold-block",
+      },
+      {
+        "id": "seedlands:gold-block-unpack",
+        "storageId": "gold-block-unpack",
+      },
+      {
+        "id": "seedlands:gold-boots",
+        "storageId": "gold-boots",
+      },
+      {
+        "id": "seedlands:gold-chestplate",
+        "storageId": "gold-chestplate",
+      },
+      {
+        "id": "seedlands:gold-helmet",
+        "storageId": "gold-helmet",
+      },
+      {
+        "id": "seedlands:gold-hoe",
+        "storageId": "gold-hoe",
+      },
+      {
+        "id": "seedlands:gold-leggings",
+        "storageId": "gold-leggings",
+      },
+      {
+        "id": "seedlands:gold-pickaxe",
+        "storageId": "gold-pickaxe",
+      },
+      {
+        "id": "seedlands:gold-shovel",
+        "storageId": "gold-shovel",
+      },
+      {
+        "id": "seedlands:gold-sword",
+        "storageId": "gold-sword",
+      },
+      {
+        "id": "seedlands:golden-apple",
+        "storageId": "golden-apple",
+      },
+      {
+        "id": "seedlands:gray-dye",
+        "storageId": "gray-dye",
+      },
+      {
+        "id": "seedlands:gray-wool",
+        "storageId": "gray-wool",
+      },
+      {
+        "id": "seedlands:green-wool",
+        "storageId": "green-wool",
+      },
+      {
+        "id": "seedlands:iron-axe",
+        "storageId": "iron-axe",
+      },
+      {
+        "id": "seedlands:iron-block",
+        "storageId": "iron-block",
+      },
+      {
+        "id": "seedlands:iron-block-unpack",
+        "storageId": "iron-block-unpack",
+      },
+      {
+        "id": "seedlands:iron-boots",
+        "storageId": "iron-boots",
+      },
+      {
+        "id": "seedlands:iron-chestplate",
+        "storageId": "iron-chestplate",
+      },
+      {
+        "id": "seedlands:iron-helmet",
+        "storageId": "iron-helmet",
+      },
+      {
+        "id": "seedlands:iron-hoe",
+        "storageId": "iron-hoe",
+      },
+      {
+        "id": "seedlands:iron-leggings",
+        "storageId": "iron-leggings",
+      },
+      {
+        "id": "seedlands:iron-pickaxe",
+        "storageId": "iron-pickaxe",
+      },
+      {
+        "id": "seedlands:iron-shovel",
+        "storageId": "iron-shovel",
+      },
+      {
+        "id": "seedlands:iron-sword",
+        "storageId": "iron-sword",
+      },
+      {
+        "id": "seedlands:jack-o-lantern",
+        "storageId": "jack-o-lantern",
+      },
+      {
+        "id": "seedlands:jukebox",
+        "storageId": "jukebox",
+      },
+      {
+        "id": "seedlands:ladder",
+        "storageId": "ladder",
+      },
+      {
+        "id": "seedlands:lantern",
+        "storageId": "lantern",
+      },
+      {
+        "id": "seedlands:lapis-block",
+        "storageId": "lapis-block",
+      },
+      {
+        "id": "seedlands:lapis-block-unpack",
+        "storageId": "lapis-block-unpack",
+      },
+      {
+        "id": "seedlands:leather-boots",
+        "storageId": "leather-boots",
+      },
+      {
+        "id": "seedlands:leather-chestplate",
+        "storageId": "leather-chestplate",
+      },
+      {
+        "id": "seedlands:leather-helmet",
+        "storageId": "leather-helmet",
+      },
+      {
+        "id": "seedlands:leather-leggings",
+        "storageId": "leather-leggings",
+      },
+      {
+        "id": "seedlands:light-blue-dye",
+        "storageId": "light-blue-dye",
+      },
+      {
+        "id": "seedlands:light-blue-wool",
+        "storageId": "light-blue-wool",
+      },
+      {
+        "id": "seedlands:light-gray-dye",
+        "storageId": "light-gray-dye",
+      },
+      {
+        "id": "seedlands:light-gray-wool",
+        "storageId": "light-gray-wool",
+      },
+      {
+        "id": "seedlands:lime-dye",
+        "storageId": "lime-dye",
+      },
+      {
+        "id": "seedlands:lime-wool",
+        "storageId": "lime-wool",
+      },
+      {
+        "id": "seedlands:magenta-dye",
+        "storageId": "magenta-dye",
+      },
+      {
+        "id": "seedlands:magenta-wool",
+        "storageId": "magenta-wool",
+      },
+      {
+        "id": "seedlands:map",
+        "storageId": "map",
+      },
+      {
+        "id": "seedlands:minecart",
+        "storageId": "minecart",
+      },
+      {
+        "id": "seedlands:mushroom-stew",
+        "storageId": "mushroom-stew",
+      },
+      {
+        "id": "seedlands:note-block",
+        "storageId": "note-block",
+      },
+      {
+        "id": "seedlands:orange-dye",
+        "storageId": "orange-dye",
+      },
+      {
+        "id": "seedlands:orange-wool",
+        "storageId": "orange-wool",
+      },
+      {
+        "id": "seedlands:painting",
+        "storageId": "painting",
+      },
+      {
+        "id": "seedlands:paper",
+        "storageId": "paper",
+      },
+      {
+        "id": "seedlands:pink-dye",
+        "storageId": "pink-dye",
+      },
+      {
+        "id": "seedlands:pink-wool",
+        "storageId": "pink-wool",
+      },
+      {
+        "id": "seedlands:planks",
+        "storageId": "planks",
+      },
+      {
+        "id": "seedlands:powered-rails",
+        "storageId": "powered-rails",
+      },
+      {
+        "id": "seedlands:purple-dye",
+        "storageId": "purple-dye",
+      },
+      {
+        "id": "seedlands:purple-wool",
+        "storageId": "purple-wool",
+      },
+      {
+        "id": "seedlands:rails",
+        "storageId": "rails",
+      },
+      {
+        "id": "seedlands:red-dye",
+        "storageId": "red-dye",
+      },
+      {
+        "id": "seedlands:red-wool",
+        "storageId": "red-wool",
+      },
+      {
+        "id": "seedlands:sandstone",
+        "storageId": "sandstone",
+      },
+      {
+        "id": "seedlands:sandstone-slab",
+        "storageId": "sandstone-slab",
+      },
+      {
+        "id": "seedlands:shears",
+        "storageId": "shears",
+      },
+      {
+        "id": "seedlands:sign",
+        "storageId": "sign",
+      },
+      {
+        "id": "seedlands:slab",
+        "storageId": "slab",
+      },
+      {
+        "id": "seedlands:snow-block",
+        "storageId": "snow-block",
+      },
+      {
+        "id": "seedlands:sticks",
+        "storageId": "sticks",
+      },
+      {
+        "id": "seedlands:stone-axe",
+        "storageId": "stone-axe",
+      },
+      {
+        "id": "seedlands:stone-bricks",
+        "storageId": "stone-bricks",
+      },
+      {
+        "id": "seedlands:stone-hoe",
+        "storageId": "stone-hoe",
+      },
+      {
+        "id": "seedlands:stone-pickaxe",
+        "storageId": "stone-pickaxe",
+      },
+      {
+        "id": "seedlands:stone-shovel",
+        "storageId": "stone-shovel",
+      },
+      {
+        "id": "seedlands:stone-sword",
+        "storageId": "stone-sword",
+      },
+      {
+        "id": "seedlands:sugar",
+        "storageId": "sugar",
+      },
+      {
+        "id": "seedlands:tnt",
+        "storageId": "tnt",
+      },
+      {
+        "id": "seedlands:torch",
+        "storageId": "torch",
+      },
+      {
+        "id": "seedlands:trapdoor",
+        "storageId": "trapdoor",
+      },
+      {
+        "id": "seedlands:white-dye",
+        "storageId": "white-dye",
+      },
+      {
+        "id": "seedlands:white-wool",
+        "storageId": "white-wool",
+      },
+      {
+        "id": "seedlands:wood-axe",
+        "storageId": "wood-axe",
+      },
+      {
+        "id": "seedlands:wood-hoe",
+        "storageId": "wood-hoe",
+      },
+      {
+        "id": "seedlands:wood-pickaxe",
+        "storageId": "wood-pickaxe",
+      },
+      {
+        "id": "seedlands:wood-shovel",
+        "storageId": "wood-shovel",
+      },
+      {
+        "id": "seedlands:wood-slab",
+        "storageId": "wood-slab",
+      },
+      {
+        "id": "seedlands:wood-stairs",
+        "storageId": "wood-stairs",
+      },
+      {
+        "id": "seedlands:wood-sword",
+        "storageId": "wood-sword",
+      },
+      {
+        "id": "seedlands:wooden-door",
+        "storageId": "wooden-door",
+      },
+      {
+        "id": "seedlands:wool",
+        "storageId": "wool",
+      },
+      {
+        "id": "seedlands:workbench",
+        "storageId": "workbench",
+      },
+      {
+        "id": "seedlands:yellow-dye",
+        "storageId": "yellow-dye",
+      },
+      {
+        "id": "seedlands:yellow-wool",
+        "storageId": "yellow-wool",
+      },
+    ],
+    "resources": [
+      {
+        "id": "seedlands.block-actor",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.block-clock",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.block-voxel",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.combat",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.combat-clock",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.forage-clock",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.furnace-clock",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.inventory",
+        "operations": [
+          "read",
+          "write",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.inventory-item",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.media-playback",
+        "operations": [
+          "read",
+          "write",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.mode",
+        "operations": [
+          "read",
+          "write",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.needs",
+        "operations": [
+          "read",
+          "write",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.ruleset",
+        "operations": [
+          "read",
+        ],
+      },
+      {
+        "id": "seedlands.station",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.station-actor",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+      {
+        "id": "seedlands.structure",
+        "operations": [
+          "read",
+          "execute",
+        ],
+      },
+    ],
+    "rules": [
+      {
+        "id": "seedlands:overworld-block-rules/begin-before",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-begin",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/finish-before",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-finish",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/place-before",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-place",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-combat-rules/request-before",
+        "moduleId": "seedlands:overworld-combat-rules",
+        "operationId": "seedlands:request-combat",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-combat-rules/resolve-before",
+        "moduleId": "seedlands:overworld-combat-rules",
+        "operationId": "seedlands:resolve-combat",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-needs-rules/before",
+        "moduleId": "seedlands:overworld-needs-rules",
+        "operationId": "seedlands:advance-needs",
+        "stage": "before",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/begin-after",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-begin",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/cancel-after",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-cancel",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/finish-after",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-finish",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-block-rules/place-after",
+        "moduleId": "seedlands:overworld-block-rules",
+        "operationId": "seedlands:block-place",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-combat-rules/request-after",
+        "moduleId": "seedlands:overworld-combat-rules",
+        "operationId": "seedlands:request-combat",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-combat-rules/resolve-after",
+        "moduleId": "seedlands:overworld-combat-rules",
+        "operationId": "seedlands:resolve-combat",
+        "stage": "after",
+      },
+      {
+        "id": "seedlands:overworld-needs-rules/after",
+        "moduleId": "seedlands:overworld-needs-rules",
+        "operationId": "seedlands:advance-needs",
+        "stage": "after",
+      },
+    ],
+    "schemaVersion": 2,
+    "stateCodecs": [
+      {
+        "id": "seedlands:actor-mode",
+        "moduleId": "seedlands:mode-module",
+        "resource": "seedlands.mode",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:actor-needs",
+        "moduleId": "seedlands:needs-module",
+        "partitions": 5,
+        "resource": "seedlands.needs",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-actor",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-actor",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-voxel",
+        "moduleId": "seedlands:block-actions-module",
+        "resource": "seedlands.block-voxel",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:block-world",
+        "moduleId": "seedlands:block-actions-module",
+        "partitions": 8,
+        "resource": "seedlands.block-clock",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:combat-actor",
+        "moduleId": "seedlands:combat-module",
+        "resource": "seedlands.combat",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:combat-world",
+        "moduleId": "seedlands:combat-module",
+        "partitions": 5,
+        "resource": "seedlands.combat-clock",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:forage-world",
+        "moduleId": "seedlands:forage-module",
+        "resource": "seedlands.forage-clock",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:furnace-world",
+        "moduleId": "seedlands:station-actions-module",
+        "partitions": 8,
+        "resource": "seedlands.furnace-clock",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory",
+        "moduleId": "seedlands:inventory-module",
+        "resource": "seedlands.inventory",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory-actor",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:inventory-item",
+        "moduleId": "seedlands:inventory-actions-module",
+        "resource": "seedlands.inventory-item",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:media-playback-device",
+        "moduleId": "seedlands:overworld-media",
+        "resource": "seedlands.media-playback",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:station-actor",
+        "moduleId": "seedlands:station-actions-module",
+        "resource": "seedlands.station-actor",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:station-instance",
+        "moduleId": "seedlands:station-actions-module",
+        "resource": "seedlands.station",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:structure-actor",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "resource": "seedlands.structure",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:structure-voxel",
+        "moduleId": "seedlands:overworld-structure-actions",
+        "resource": "seedlands.structure",
+        "version": "1.0.0",
+      },
+      {
+        "id": "seedlands:world-ruleset",
+        "moduleId": "seedlands:ruleset-module",
+        "resource": "seedlands.ruleset",
+        "version": "1.0.0",
+      },
+    ],
+    "systems": [
+      {
+        "definition": {
+          "after": [],
+          "before": [],
+          "cadence": "every-advance",
+          "id": "seedlands:block-system",
+          "operationId": "seedlands:block-advance",
+        },
+        "moduleId": "seedlands:block-actions-module",
+      },
+      {
+        "definition": {
+          "after": [],
+          "before": [],
+          "cadence": "every-advance",
+          "id": "seedlands:combat-system",
+          "operationId": "seedlands:advance-combat",
+        },
+        "moduleId": "seedlands:combat-module",
+      },
+      {
+        "definition": {
+          "after": [],
+          "before": [],
+          "cadence": "interval",
+          "id": "seedlands:forage-system",
+          "intervalSeconds": 120,
+          "operationId": "seedlands:forage-advance",
+        },
+        "moduleId": "seedlands:forage-module",
+      },
+      {
+        "definition": {
+          "after": [],
+          "before": [],
+          "cadence": "every-advance",
+          "id": "seedlands:furnace-system",
+          "operationId": "seedlands:furnace-advance",
+        },
+        "moduleId": "seedlands:station-actions-module",
+      },
+      {
+        "definition": {
+          "after": [],
+          "before": [],
+          "cadence": "every-advance",
+          "id": "seedlands:needs-system",
+          "operationId": "seedlands:advance-needs",
+        },
+        "moduleId": "seedlands:needs-module",
+      },
+    ],
+    "voxels": [
+      {
+        "id": "seedlands:classic/air",
+        "storageId": 0,
+      },
+      {
+        "id": "seedlands:classic/bed",
+        "storageId": 55,
+      },
+      {
+        "id": "seedlands:classic/bedrock",
+        "storageId": 42,
+      },
+      {
+        "id": "seedlands:classic/black-wool",
+        "storageId": 88,
+      },
+      {
+        "id": "seedlands:classic/blue-wool",
+        "storageId": 84,
+      },
+      {
+        "id": "seedlands:classic/bookshelf",
+        "storageId": 64,
+      },
+      {
+        "id": "seedlands:classic/bricks",
+        "storageId": 63,
+      },
+      {
+        "id": "seedlands:classic/brown-wool",
+        "storageId": 85,
+      },
+      {
+        "id": "seedlands:classic/cactus",
+        "storageId": 36,
+      },
+      {
+        "id": "seedlands:classic/cake",
+        "storageId": 58,
+      },
+      {
+        "id": "seedlands:classic/chest",
+        "storageId": 12,
+      },
+      {
+        "id": "seedlands:classic/clay",
+        "storageId": 45,
+      },
+      {
+        "id": "seedlands:classic/coal-ore",
+        "storageId": 14,
+      },
+      {
+        "id": "seedlands:classic/cobblestone",
+        "storageId": 17,
+      },
+      {
+        "id": "seedlands:classic/cobblestone-stairs",
+        "storageId": 51,
+      },
+      {
+        "id": "seedlands:classic/cyan-wool",
+        "storageId": 82,
+      },
+      {
+        "id": "seedlands:classic/dead-bush",
+        "storageId": 59,
+      },
+      {
+        "id": "seedlands:classic/detector-rail",
+        "storageId": 41,
+      },
+      {
+        "id": "seedlands:classic/diamond-block",
+        "storageId": 23,
+      },
+      {
+        "id": "seedlands:classic/diamond-ore",
+        "storageId": 20,
+      },
+      {
+        "id": "seedlands:classic/dirt",
+        "storageId": 2,
+      },
+      {
+        "id": "seedlands:classic/dungeon-chest",
+        "storageId": 38,
+      },
+      {
+        "id": "seedlands:classic/farmland",
+        "storageId": 26,
+      },
+      {
+        "id": "seedlands:classic/fence",
+        "storageId": 57,
+      },
+      {
+        "id": "seedlands:classic/fire",
+        "storageId": 29,
+      },
+      {
+        "id": "seedlands:classic/flower",
+        "storageId": 33,
+      },
+      {
+        "id": "seedlands:classic/furnace",
+        "storageId": 13,
+      },
+      {
+        "id": "seedlands:classic/glass",
+        "storageId": 18,
+      },
+      {
+        "id": "seedlands:classic/glowstone",
+        "storageId": 9,
+      },
+      {
+        "id": "seedlands:classic/gold-block",
+        "storageId": 22,
+      },
+      {
+        "id": "seedlands:classic/gold-ore",
+        "storageId": 19,
+      },
+      {
+        "id": "seedlands:classic/grass",
+        "storageId": 1,
+      },
+      {
+        "id": "seedlands:classic/gravel",
+        "storageId": 43,
+      },
+      {
+        "id": "seedlands:classic/gray-wool",
+        "storageId": 80,
+      },
+      {
+        "id": "seedlands:classic/green-wool",
+        "storageId": 86,
+      },
+      {
+        "id": "seedlands:classic/ice",
+        "storageId": 46,
+      },
+      {
+        "id": "seedlands:classic/iron-block",
+        "storageId": 21,
+      },
+      {
+        "id": "seedlands:classic/iron-ore",
+        "storageId": 15,
+      },
+      {
+        "id": "seedlands:classic/jack-o-lantern",
+        "storageId": 69,
+      },
+      {
+        "id": "seedlands:classic/jukebox",
+        "storageId": 67,
+      },
+      {
+        "id": "seedlands:classic/ladder",
+        "storageId": 53,
+      },
+      {
+        "id": "seedlands:classic/lantern",
+        "storageId": 10,
+      },
+      {
+        "id": "seedlands:classic/lapis-block",
+        "storageId": 48,
+      },
+      {
+        "id": "seedlands:classic/lapis-ore",
+        "storageId": 44,
+      },
+      {
+        "id": "seedlands:classic/lava",
+        "storageId": 27,
+      },
+      {
+        "id": "seedlands:classic/leaves",
+        "storageId": 5,
+      },
+      {
+        "id": "seedlands:classic/light-blue-wool",
+        "storageId": 76,
+      },
+      {
+        "id": "seedlands:classic/light-gray-wool",
+        "storageId": 81,
+      },
+      {
+        "id": "seedlands:classic/lime-wool",
+        "storageId": 78,
+      },
+      {
+        "id": "seedlands:classic/lit-furnace",
+        "storageId": 71,
+      },
+      {
+        "id": "seedlands:classic/lit-redstone-ore",
+        "storageId": 73,
+      },
+      {
+        "id": "seedlands:classic/magenta-wool",
+        "storageId": 75,
+      },
+      {
+        "id": "seedlands:classic/mossy-cobblestone",
+        "storageId": 65,
+      },
+      {
+        "id": "seedlands:classic/mushroom",
+        "storageId": 34,
+      },
+      {
+        "id": "seedlands:classic/note-block",
+        "storageId": 66,
+      },
+      {
+        "id": "seedlands:classic/obsidian",
+        "storageId": 28,
+      },
+      {
+        "id": "seedlands:classic/orange-wool",
+        "storageId": 74,
+      },
+      {
+        "id": "seedlands:classic/pink-wool",
+        "storageId": 79,
+      },
+      {
+        "id": "seedlands:classic/planks",
+        "storageId": 16,
+      },
+      {
+        "id": "seedlands:classic/powered-rail",
+        "storageId": 40,
+      },
+      {
+        "id": "seedlands:classic/pumpkin",
+        "storageId": 68,
+      },
+      {
+        "id": "seedlands:classic/purple-wool",
+        "storageId": 83,
+      },
+      {
+        "id": "seedlands:classic/rail",
+        "storageId": 39,
+      },
+      {
+        "id": "seedlands:classic/red-flower",
+        "storageId": 61,
+      },
+      {
+        "id": "seedlands:classic/red-mushroom",
+        "storageId": 62,
+      },
+      {
+        "id": "seedlands:classic/red-wool",
+        "storageId": 87,
+      },
+      {
+        "id": "seedlands:classic/redstone-ore",
+        "storageId": 72,
+      },
+      {
+        "id": "seedlands:classic/sand",
+        "storageId": 6,
+      },
+      {
+        "id": "seedlands:classic/sandstone",
+        "storageId": 24,
+      },
+      {
+        "id": "seedlands:classic/sapling",
+        "storageId": 31,
+      },
+      {
+        "id": "seedlands:classic/sign",
+        "storageId": 56,
+      },
+      {
+        "id": "seedlands:classic/slab",
+        "storageId": 49,
+      },
+      {
+        "id": "seedlands:classic/snow",
+        "storageId": 7,
+      },
+      {
+        "id": "seedlands:classic/snow-block",
+        "storageId": 47,
+      },
+      {
+        "id": "seedlands:classic/spawner",
+        "storageId": 37,
+      },
+      {
+        "id": "seedlands:classic/stone",
+        "storageId": 3,
+      },
+      {
+        "id": "seedlands:classic/stone-bricks",
+        "storageId": 25,
+      },
+      {
+        "id": "seedlands:classic/sugar-cane",
+        "storageId": 35,
+      },
+      {
+        "id": "seedlands:classic/tall-grass",
+        "storageId": 32,
+      },
+      {
+        "id": "seedlands:classic/tnt",
+        "storageId": 30,
+      },
+      {
+        "id": "seedlands:classic/torch",
+        "storageId": 54,
+      },
+      {
+        "id": "seedlands:classic/trapdoor",
+        "storageId": 70,
+      },
+      {
+        "id": "seedlands:classic/water",
+        "storageId": 8,
+      },
+      {
+        "id": "seedlands:classic/wood",
+        "storageId": 4,
+      },
+      {
+        "id": "seedlands:classic/wood-stairs",
+        "storageId": 50,
+      },
+      {
+        "id": "seedlands:classic/wooden-door",
+        "storageId": 52,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/east/closed/lower",
+        "storageId": 93,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/east/closed/upper",
+        "storageId": 94,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/east/open/lower",
+        "storageId": 95,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/east/open/upper",
+        "storageId": 96,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/north/closed/lower",
+        "storageId": 89,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/north/closed/upper",
+        "storageId": 90,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/north/open/lower",
+        "storageId": 91,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/north/open/upper",
+        "storageId": 92,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/south/closed/lower",
+        "storageId": 97,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/south/closed/upper",
+        "storageId": 98,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/south/open/lower",
+        "storageId": 99,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/south/open/upper",
+        "storageId": 100,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/west/closed/lower",
+        "storageId": 101,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/west/closed/upper",
+        "storageId": 102,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/west/open/lower",
+        "storageId": 103,
+      },
+      {
+        "id": "seedlands:classic/wooden-door/west/open/upper",
+        "storageId": 104,
+      },
+      {
+        "id": "seedlands:classic/wool",
+        "storageId": 60,
+      },
+      {
+        "id": "seedlands:classic/workbench",
+        "storageId": 11,
+      },
+      {
+        "id": "seedlands:classic/yellow-wool",
+        "storageId": 77,
+      },
+    ],
+  },
+  "packLock": [
+    {
+      "id": "seedlands:overworld",
+      "integrity": {
+        "algorithm": "sha256",
+        "entryDigest": "4b12ea606bd12dc62e74ea40e5e90678231cf866fecd2ce2a97eea3a21c38142",
+        "manifestDigest": "14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3",
+        "resources": [
+          {
+            "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+            "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+          },
+          {
+            "digest": "a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b",
+            "path": "playbooks/classic/presentation.json",
+          },
+        ],
+      },
+      "version": "1.0.0",
+    },
+  ],
+  "playbookId": "seedlands:overworld",
+  "version": 1,
+}
+
++ Received:
+[
+  {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-modes",
+          "moduleId": "seedlands:mode-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:behavior-registry",
+          "moduleId": "seedlands:behavior-registry-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions",
+          "moduleId": "seedlands:block-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-rules",
+          "moduleId": "seedlands:overworld-block-rules",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat",
+          "moduleId": "seedlands:combat-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:crafting-match",
+          "moduleId": "seedlands:recipe-crafting-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding",
+          "moduleId": "seedlands:feeding-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage",
+          "moduleId": "seedlands:forage-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:gameplay-content",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions",
+          "moduleId": "seedlands:inventory-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs",
+          "moduleId": "seedlands:needs-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "seedlands:berry",
+          "storageId": "berry",
+        },
+        {
+          "id": "seedlands:chest",
+          "storageId": "chest",
+        },
+        {
+          "id": "seedlands:coal",
+          "storageId": "coal",
+        },
+        {
+          "id": "seedlands:dirt-block",
+          "storageId": "dirt-block",
+        },
+        {
+          "id": "seedlands:furnace",
+          "storageId": "furnace",
+        },
+        {
+          "id": "seedlands:glowstone-block",
+          "storageId": "glowstone-block",
+        },
+        {
+          "id": "seedlands:iron-ingot",
+          "storageId": "iron-ingot",
+        },
+        {
+          "id": "seedlands:iron-pickaxe",
+          "storageId": "iron-pickaxe",
+        },
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:plank",
+          "storageId": "plank",
+        },
+        {
+          "id": "seedlands:raw-iron",
+          "storageId": "raw-iron",
+        },
+        {
+          "id": "seedlands:sand-block",
+          "storageId": "sand-block",
+        },
+        {
+          "id": "seedlands:stone-block",
+          "storageId": "stone-block",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-block",
+          "storageId": "wood-block",
+        },
+        {
+          "id": "seedlands:wood-pickaxe",
+          "storageId": "wood-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "seedlands:behavior-registry-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipe-crafting-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:ruleset-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-content",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:mode-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-block-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-needs",
+          "moduleId": "seedlands:needs-module",
+          "resource": "seedlands.needs",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:block-advance",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-begin",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-cancel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-finish",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-place",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:consume-world-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:forage-advance",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-consume",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-craft",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-drop",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-move",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-pickup",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-select",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-transfer",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:request-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:resolve-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-creative-catalog",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-flight",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:planks",
+          "storageId": "planks",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "resources": [
+        {
+          "id": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.ruleset",
+          "operations": [
+            "read",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [
+        {
+          "id": "seedlands:overworld-block-rules/begin-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/before",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/before",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/begin-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/cancel-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-cancel",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/after",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/after",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "after",
+        },
+      ],
+      "stateCodecs": [
+        {
+          "id": "seedlands:actor-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-needs",
+          "moduleId": "seedlands:needs-module",
+          "partitions": 5,
+          "resource": "seedlands.needs",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actor",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-voxel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-world",
+          "moduleId": "seedlands:block-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.block-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-actor",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-world",
+          "moduleId": "seedlands:combat-module",
+          "partitions": 5,
+          "resource": "seedlands.combat-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actor",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-world",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actor",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-item",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "resource": "seedlands.ruleset",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:block-system",
+            "operationId": "seedlands:block-advance",
+          },
+          "moduleId": "seedlands:block-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:combat-system",
+            "operationId": "seedlands:advance-combat",
+          },
+          "moduleId": "seedlands:combat-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "interval",
+            "id": "seedlands:forage-system",
+            "intervalSeconds": 120,
+            "operationId": "seedlands:forage-advance",
+          },
+          "moduleId": "seedlands:forage-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:needs-system",
+            "operationId": "seedlands:advance-needs",
+          },
+          "moduleId": "seedlands:needs-module",
+        },
+      ],
+    },
+    "packLock": [
+      {
+        "id": "seedlands:overworld",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "924d61fc72f253c85e191caa79f1c7ff51f83bc6237ad613a7c0c5595c2c169f",
+          "manifestDigest": "e3c199e87d101672c1635d481771972edbf39deb43c336063ab3753d0b01bb89",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "seedlands:overworld",
+    "version": 1,
+  },
+  {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-modes",
+          "moduleId": "seedlands:mode-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:behavior-registry",
+          "moduleId": "seedlands:behavior-registry-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions",
+          "moduleId": "seedlands:block-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-rules",
+          "moduleId": "seedlands:overworld-block-rules",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat",
+          "moduleId": "seedlands:combat-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:crafting-match",
+          "moduleId": "seedlands:recipe-crafting-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding",
+          "moduleId": "seedlands:feeding-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage",
+          "moduleId": "seedlands:forage-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:gameplay-content",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions",
+          "moduleId": "seedlands:inventory-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs",
+          "moduleId": "seedlands:needs-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "seedlands:berry",
+          "storageId": "berry",
+        },
+        {
+          "id": "seedlands:chest",
+          "storageId": "chest",
+        },
+        {
+          "id": "seedlands:coal",
+          "storageId": "coal",
+        },
+        {
+          "id": "seedlands:dirt-block",
+          "storageId": "dirt-block",
+        },
+        {
+          "id": "seedlands:furnace",
+          "storageId": "furnace",
+        },
+        {
+          "id": "seedlands:glowstone-block",
+          "storageId": "glowstone-block",
+        },
+        {
+          "id": "seedlands:iron-ingot",
+          "storageId": "iron-ingot",
+        },
+        {
+          "id": "seedlands:iron-pickaxe",
+          "storageId": "iron-pickaxe",
+        },
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:plank",
+          "storageId": "plank",
+        },
+        {
+          "id": "seedlands:raw-iron",
+          "storageId": "raw-iron",
+        },
+        {
+          "id": "seedlands:sand-block",
+          "storageId": "sand-block",
+        },
+        {
+          "id": "seedlands:stone-block",
+          "storageId": "stone-block",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-block",
+          "storageId": "wood-block",
+        },
+        {
+          "id": "seedlands:wood-pickaxe",
+          "storageId": "wood-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "seedlands:behavior-registry-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipe-crafting-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:ruleset-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-content",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:mode-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-block-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-needs",
+          "moduleId": "seedlands:needs-module",
+          "resource": "seedlands.needs",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:block-advance",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-begin",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-cancel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-finish",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-place",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:consume-world-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:forage-advance",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-consume",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-craft",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-drop",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-move",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-pickup",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-select",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-transfer",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:request-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:resolve-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-creative-catalog",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-flight",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:planks",
+          "storageId": "planks",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "resources": [
+        {
+          "id": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.ruleset",
+          "operations": [
+            "read",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [
+        {
+          "id": "seedlands:overworld-block-rules/begin-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/before",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/before",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/begin-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/cancel-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-cancel",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/after",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/after",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "after",
+        },
+      ],
+      "stateCodecs": [
+        {
+          "id": "seedlands:actor-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-needs",
+          "moduleId": "seedlands:needs-module",
+          "partitions": 5,
+          "resource": "seedlands.needs",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actor",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-voxel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-world",
+          "moduleId": "seedlands:block-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.block-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-actor",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-world",
+          "moduleId": "seedlands:combat-module",
+          "partitions": 5,
+          "resource": "seedlands.combat-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actor",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-world",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actor",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-item",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "resource": "seedlands.ruleset",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:block-system",
+            "operationId": "seedlands:block-advance",
+          },
+          "moduleId": "seedlands:block-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:combat-system",
+            "operationId": "seedlands:advance-combat",
+          },
+          "moduleId": "seedlands:combat-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "interval",
+            "id": "seedlands:forage-system",
+            "intervalSeconds": 120,
+            "operationId": "seedlands:forage-advance",
+          },
+          "moduleId": "seedlands:forage-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:needs-system",
+            "operationId": "seedlands:advance-needs",
+          },
+          "moduleId": "seedlands:needs-module",
+        },
+      ],
+    },
+    "packLock": [
+      {
+        "id": "seedlands:overworld",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "4a773fe7225f13ef018def0a930b469aa82e558fdebc5172b7ef602ed8e148e2",
+          "manifestDigest": "05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "seedlands:overworld",
+    "version": 1,
+  },
+  {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-modes",
+          "moduleId": "seedlands:mode-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions",
+          "moduleId": "seedlands:block-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-rules",
+          "moduleId": "seedlands:overworld-block-rules",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat",
+          "moduleId": "seedlands:combat-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:crafting-match",
+          "moduleId": "seedlands:recipe-crafting-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding",
+          "moduleId": "seedlands:feeding-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage",
+          "moduleId": "seedlands:forage-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:gameplay-content",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions",
+          "moduleId": "seedlands:inventory-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs",
+          "moduleId": "seedlands:needs-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "seedlands:berry",
+          "storageId": "berry",
+        },
+        {
+          "id": "seedlands:chest",
+          "storageId": "chest",
+        },
+        {
+          "id": "seedlands:coal",
+          "storageId": "coal",
+        },
+        {
+          "id": "seedlands:dirt-block",
+          "storageId": "dirt-block",
+        },
+        {
+          "id": "seedlands:furnace",
+          "storageId": "furnace",
+        },
+        {
+          "id": "seedlands:glowstone-block",
+          "storageId": "glowstone-block",
+        },
+        {
+          "id": "seedlands:iron-ingot",
+          "storageId": "iron-ingot",
+        },
+        {
+          "id": "seedlands:iron-pickaxe",
+          "storageId": "iron-pickaxe",
+        },
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:plank",
+          "storageId": "plank",
+        },
+        {
+          "id": "seedlands:raw-iron",
+          "storageId": "raw-iron",
+        },
+        {
+          "id": "seedlands:sand-block",
+          "storageId": "sand-block",
+        },
+        {
+          "id": "seedlands:stone-block",
+          "storageId": "stone-block",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-block",
+          "storageId": "wood-block",
+        },
+        {
+          "id": "seedlands:wood-pickaxe",
+          "storageId": "wood-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "seedlands:combat-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipe-crafting-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:ruleset-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-content",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:mode-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-block-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-needs",
+          "moduleId": "seedlands:needs-module",
+          "resource": "seedlands.needs",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:block-advance",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-begin",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-cancel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-finish",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-place",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:consume-world-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:forage-advance",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-consume",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-craft",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-drop",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-move",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-pickup",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-select",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-transfer",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:request-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:resolve-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-creative-catalog",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-flight",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:planks",
+          "storageId": "planks",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "resources": [
+        {
+          "id": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.ruleset",
+          "operations": [
+            "read",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [
+        {
+          "id": "seedlands:overworld-block-rules/begin-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/before",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/before",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/begin-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/cancel-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-cancel",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/after",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/after",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "after",
+        },
+      ],
+      "stateCodecs": [
+        {
+          "id": "seedlands:actor-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-needs",
+          "moduleId": "seedlands:needs-module",
+          "partitions": 5,
+          "resource": "seedlands.needs",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actor",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-voxel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-world",
+          "moduleId": "seedlands:block-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.block-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-actor",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-world",
+          "moduleId": "seedlands:combat-module",
+          "partitions": 5,
+          "resource": "seedlands.combat-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actor",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-world",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actor",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-item",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "resource": "seedlands.ruleset",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:block-system",
+            "operationId": "seedlands:block-advance",
+          },
+          "moduleId": "seedlands:block-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:combat-system",
+            "operationId": "seedlands:advance-combat",
+          },
+          "moduleId": "seedlands:combat-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "interval",
+            "id": "seedlands:forage-system",
+            "intervalSeconds": 120,
+            "operationId": "seedlands:forage-advance",
+          },
+          "moduleId": "seedlands:forage-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:needs-system",
+            "operationId": "seedlands:advance-needs",
+          },
+          "moduleId": "seedlands:needs-module",
+        },
+      ],
+    },
+    "packLock": [
+      {
+        "id": "seedlands:overworld",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "7583373d53f9cb3f2447bf40478eb9f8d817adc80060effa385633ecaacf5e6a",
+          "manifestDigest": "05bc5e57bb6cfd4ed0e2da821f8b6e803bb7e3676453988a131a4b8524c066dd",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "seedlands:overworld",
+    "version": 1,
+  },
+  {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-modes",
+          "moduleId": "seedlands:mode-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions",
+          "moduleId": "seedlands:block-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-rules",
+          "moduleId": "seedlands:overworld-block-rules",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat",
+          "moduleId": "seedlands:combat-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:crafting-match",
+          "moduleId": "seedlands:recipe-crafting-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding",
+          "moduleId": "seedlands:feeding-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage",
+          "moduleId": "seedlands:forage-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:gameplay-content",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions",
+          "moduleId": "seedlands:inventory-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "seedlands:overworld-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs",
+          "moduleId": "seedlands:needs-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "seedlands:berry",
+          "storageId": "berry",
+        },
+        {
+          "id": "seedlands:chest",
+          "storageId": "chest",
+        },
+        {
+          "id": "seedlands:coal",
+          "storageId": "coal",
+        },
+        {
+          "id": "seedlands:dirt-block",
+          "storageId": "dirt-block",
+        },
+        {
+          "id": "seedlands:furnace",
+          "storageId": "furnace",
+        },
+        {
+          "id": "seedlands:glowstone-block",
+          "storageId": "glowstone-block",
+        },
+        {
+          "id": "seedlands:iron-ingot",
+          "storageId": "iron-ingot",
+        },
+        {
+          "id": "seedlands:iron-pickaxe",
+          "storageId": "iron-pickaxe",
+        },
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:plank",
+          "storageId": "plank",
+        },
+        {
+          "id": "seedlands:raw-iron",
+          "storageId": "raw-iron",
+        },
+        {
+          "id": "seedlands:sand-block",
+          "storageId": "sand-block",
+        },
+        {
+          "id": "seedlands:stone-block",
+          "storageId": "stone-block",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-block",
+          "storageId": "wood-block",
+        },
+        {
+          "id": "seedlands:wood-pickaxe",
+          "storageId": "wood-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "seedlands:combat-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipe-crafting-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:ruleset-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:needs-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-content",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:mode-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actions-module",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:overworld-block-rules",
+          "packId": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:advance-needs",
+          "moduleId": "seedlands:needs-module",
+          "resource": "seedlands.needs",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:block-advance",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-begin",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-cancel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-finish",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:block-place",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:consume-world-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:forage-advance",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+        },
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-consume",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-craft",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-drop",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-move",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-pickup",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-select",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:inventory-transfer",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:request-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:resolve-combat",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-creative-catalog",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-flight",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:set-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "seedlands:overworld",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [
+        {
+          "id": "seedlands:lantern",
+          "storageId": "lantern",
+        },
+        {
+          "id": "seedlands:planks",
+          "storageId": "planks",
+        },
+        {
+          "id": "seedlands:stone-pickaxe",
+          "storageId": "stone-pickaxe",
+        },
+        {
+          "id": "seedlands:wood-axe",
+          "storageId": "wood-axe",
+        },
+        {
+          "id": "seedlands:wood-sword",
+          "storageId": "wood-sword",
+        },
+        {
+          "id": "seedlands:workbench",
+          "storageId": "workbench",
+        },
+      ],
+      "resources": [
+        {
+          "id": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.feeding-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.ruleset",
+          "operations": [
+            "read",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [
+        {
+          "id": "seedlands:overworld-block-rules/begin-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-before",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-before",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/before",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/before",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "before",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/begin-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-begin",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/cancel-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-cancel",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/finish-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-finish",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-block-rules/place-after",
+          "moduleId": "seedlands:overworld-block-rules",
+          "operationId": "seedlands:block-place",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/request-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:request-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-combat-rules/resolve-after",
+          "moduleId": "seedlands:overworld-combat-rules",
+          "operationId": "seedlands:resolve-combat",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-feeding-rules/after",
+          "moduleId": "seedlands:overworld-feeding-rules",
+          "operationId": "seedlands:consume-world-item",
+          "stage": "after",
+        },
+        {
+          "id": "seedlands:overworld-needs-rules/after",
+          "moduleId": "seedlands:overworld-needs-rules",
+          "operationId": "seedlands:advance-needs",
+          "stage": "after",
+        },
+      ],
+      "stateCodecs": [
+        {
+          "id": "seedlands:actor-mode",
+          "moduleId": "seedlands:mode-module",
+          "resource": "seedlands.mode",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:actor-needs",
+          "moduleId": "seedlands:needs-module",
+          "partitions": 5,
+          "resource": "seedlands.needs",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-actor",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-voxel",
+          "moduleId": "seedlands:block-actions-module",
+          "resource": "seedlands.block-voxel",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:block-world",
+          "moduleId": "seedlands:block-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.block-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-actor",
+          "moduleId": "seedlands:combat-module",
+          "resource": "seedlands.combat",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:combat-world",
+          "moduleId": "seedlands:combat-module",
+          "partitions": 5,
+          "resource": "seedlands.combat-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-actor",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:feeding-item",
+          "moduleId": "seedlands:feeding-actions-module",
+          "resource": "seedlands.feeding-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:forage-world",
+          "moduleId": "seedlands:forage-module",
+          "resource": "seedlands.forage-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory",
+          "moduleId": "seedlands:inventory-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-actor",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:inventory-item",
+          "moduleId": "seedlands:inventory-actions-module",
+          "resource": "seedlands.inventory-item",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "moduleId": "seedlands:ruleset-module",
+          "resource": "seedlands.ruleset",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:block-system",
+            "operationId": "seedlands:block-advance",
+          },
+          "moduleId": "seedlands:block-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:combat-system",
+            "operationId": "seedlands:advance-combat",
+          },
+          "moduleId": "seedlands:combat-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "interval",
+            "id": "seedlands:forage-system",
+            "intervalSeconds": 120,
+            "operationId": "seedlands:forage-advance",
+          },
+          "moduleId": "seedlands:forage-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:needs-system",
+            "operationId": "seedlands:advance-needs",
+          },
+          "moduleId": "seedlands:needs-module",
+        },
+      ],
+    },
+    "packLock": [
+      {
+        "id": "seedlands:overworld",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "a0822ae7e3ae985c47db22deee54d77f788a0cd72eece3f4a4c46a4c6037eee6",
+          "manifestDigest": "74d0a1a50d2812053fa442ae00137d285dd6b80954c3e21d788053eb2ec243f2",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "seedlands:overworld",
+    "version": 1,
+  },
+]
+
+ ❯ playbooks/classic/tests/legacy-composition-lineage.test.ts:93:81
+     91|     const target = currentComposition().checkpointIdentity;
+     92|     const exact = { version: 4, composition: preDeathV4Captured() };
+     93|     expect(classicGameplaySnapshotPredecessors.map(({ identity }) => i…
+       |                                                                                 ^
+     94|     expect(classicRetiredActorsMigration.migrate(exact, { targetCompos…
+     95|       composition: target,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 2 passed (4)
+   Start at  01:04:34
+   Duration  668ms (transform 445ms, setup 0ms, import 550ms, tests 45ms, environment 0ms)
+
