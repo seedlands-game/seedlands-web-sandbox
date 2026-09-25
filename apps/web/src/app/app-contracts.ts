@@ -17,7 +17,11 @@ import type { AuthorityResidencyDiagnostics } from '@seedlands/stdlib/server/aut
 import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import type { RenderedMaterialMeshSummary as WorldRenderedMaterialMeshSummary } from './world/world-runtime';
 import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
-import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type {
+  AuthorityGameplayView,
+  AuthorityInventoryView,
+  MediaPlaybackCommittedBatchV1,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { WorldMediaRuntimeSnapshot } from './audio/world-media-runtime';
 
 export type MeshPart = MeshData;
@@ -29,6 +33,18 @@ export type HarnessMediaSnapshot = Readonly<{
   projection: readonly MediaPlaybackProjectionV1[];
   lastForwardedBatch: MediaPlaybackCommittedBatchV1 | null;
   audio: WorldMediaRuntimeSnapshot | null;
+}>;
+
+export type HarnessEquipmentSnapshot = Readonly<{
+  runtimeEpoch: string;
+  gameplayRevision: number;
+  actor: AuthorityInventoryView['actor'];
+  inventoryRevision: number;
+  slots: AuthorityInventoryView['slots'];
+  armor: AuthorityInventoryView['armor'];
+  cursor: AuthorityInventoryView['cursor'];
+  player: Readonly<Pick<AuthorityGameplayView['player'], 'health' | 'lifecycle'>>;
+  armorPoints: number | null;
 }>;
 
 export type WorkerResult = {

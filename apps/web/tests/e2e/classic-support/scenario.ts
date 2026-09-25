@@ -3,6 +3,12 @@ import { readFileSync } from 'node:fs';
 export type Point = readonly [number, number, number];
 export type RoutePoint = readonly [number, number];
 export type V1Placement = Readonly<{ support: Point; target: Point; approach: RoutePoint }>;
+export type V2EquipmentResource = V1Placement &
+  Readonly<{
+    itemId: 'wood-block' | 'stone-block' | 'iron-block';
+    dropItemId: 'wood-block' | 'cobblestone' | 'iron-block';
+    voxel: number;
+  }>;
 
 export type ClassicScenario = Readonly<{
   schemaVersion: 1;
@@ -38,6 +44,10 @@ export type ClassicScenario = Readonly<{
     door: Readonly<{ support: Point; lower: Point; upper: Point; approach: RoutePoint }>;
     jukebox: V1Placement;
   }>;
+  v2Equipment: Readonly<{
+    resourceStrip: readonly V2EquipmentResource[];
+    workbench: V1Placement;
+  }>;
   faultDesign: Readonly<Record<string, string>>;
   coverage: Readonly<{
     included: readonly string[];
@@ -57,3 +67,11 @@ export const classicScenario = JSON.parse(readFileSync(scenarioUrl, 'utf8')) as 
 
 if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v11')
   throw new Error('Unsupported Classic canonical scenario.');
+
+export const classicPersistedPositions = Object.freeze([
+  classicScenario.route.buildTarget,
+  classicScenario.route.stationTarget,
+  classicScenario.v1Slice.door.lower,
+  classicScenario.v1Slice.door.upper,
+  classicScenario.v1Slice.jukebox.target,
+]);

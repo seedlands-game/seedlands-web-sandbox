@@ -43,6 +43,91 @@
     "door": { "support": [70, 30, 0], "lower": [70, 31, 0], "upper": [70, 32, 0], "approach": [67.5, 0.5] },
     "jukebox": { "support": [76, 30, 2], "target": [76, 31, 2], "approach": [73.5, 2.5] }
   },
+  "v2Equipment": {
+    "resourceStrip": [
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [80, 30, 2],
+        "target": [80, 31, 2],
+        "approach": [80.5, -0.5]
+      },
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [82, 30, 2],
+        "target": [82, 31, 2],
+        "approach": [82.5, -0.5]
+      },
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [84, 30, 2],
+        "target": [84, 31, 2],
+        "approach": [84.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [86, 30, 2],
+        "target": [86, 31, 2],
+        "approach": [86.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [88, 30, 2],
+        "target": [88, 31, 2],
+        "approach": [88.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [90, 30, 2],
+        "target": [90, 31, 2],
+        "approach": [90.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [92, 30, 2],
+        "target": [92, 31, 2],
+        "approach": [92.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [94, 30, 2],
+        "target": [94, 31, 2],
+        "approach": [94.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [96, 30, 2],
+        "target": [96, 31, 2],
+        "approach": [96.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [98, 30, 2],
+        "target": [98, 31, 2],
+        "approach": [98.5, -0.5]
+      }
+    ],
+    "workbench": { "support": [78, 30, -2], "target": [78, 31, -2], "approach": [78.5, 0.5] }
+  },
   "faultDesign": {
     "wrongPlaybook": "C0 rejects a loaded identity or Pack asset other than Classic.",
     "inputBypass": "C1 requires Pointer Lock plus acknowledged keyboard input and an authority trajectory crossing a Chunk boundary.",
@@ -59,6 +144,7 @@
       "mining drop pickup inventory and personal crafting",
       "placement food existing combat and workbench runtime",
       "creative bucket source round-trip two-Chunk wooden door and jukebox record lifecycle",
+      "survival acquisition crafting and pointer interaction for four iron armor slots",
       "streaming resource release and rebuild",
       "save return continue and post-restore interaction",
       "Worker Wasm WebGL2 mesh and telemetry correlation"

@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createVoxelGeometryRegistryV1, type MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
 import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
-import { createHarnessObservability } from '../../../src/app/gameplay/game-harness-observability';
+import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import {
+  createHarnessObservability,
+  type HarnessObservabilityBindings,
+} from '../../../src/app/gameplay/game-harness-observability';
 
 const geometry = createVoxelGeometryRegistryV1([
   {
@@ -41,11 +45,96 @@ const batch: MediaPlaybackCommittedBatchV1 = {
   ],
 };
 
+const gameplayView = (
+  options: Readonly<{ health?: number; firstItemId?: string; armorPoints?: number | null }> = {},
+): AuthorityGameplayView => ({
+  gameplayRevision: 11,
+  gameplayTime: 7,
+  player: {
+    entityId: 'player-1',
+    spawnPosition: [0, 2, 0],
+    health: options.health ?? 17,
+    maxHealth: 20,
+    hunger: 14,
+    maxHunger: 20,
+    lifecycle: 'alive',
+    inventory: [],
+    selectedSlot: 0,
+    hotbarSize: 9,
+    attackCooldownSeconds: 0,
+    hungerAccumulator: 0,
+    healingAccumulator: 0,
+    starvationAccumulator: 0,
+    breakAction: null,
+  },
+  entities: [],
+  actors: [],
+  inventory: {
+    version: 1,
+    actor: { entityId: 'player-1', epoch: 2, lifetime: 7 },
+    revision: 13,
+    slots: [{ itemId: options.firstItemId ?? 'sample:pickaxe', count: 1, instance: { durability: 8 } }, null],
+    hotbarSize: 2,
+    armor: {
+      helmet: { itemId: 'sample:helmet', count: 1, instance: { durability: 4 } },
+      chestplate: { itemId: 'sample:chestplate', count: 1, instance: { durability: 9 } },
+      leggings: { itemId: 'sample:leggings', count: 1, instance: { durability: 7 } },
+      boots: { itemId: 'sample:boots', count: 1, instance: { durability: 3 } },
+    },
+    cursor: {
+      version: 1,
+      revision: 5,
+      stack: { itemId: 'sample:cursor', count: 1, instance: { durability: 2 } },
+      origin: {
+        kind: 'station',
+        reference: { entityId: 'bench-1', epoch: 2, lifetime: 9 },
+        slot: 3,
+      },
+      craftingGrid: [{ itemId: 'sample:craft', count: 1, instance: { durability: 6 } }, null, null, null],
+    },
+    matchedCraftingRecipeIds: [],
+  },
+  craftableRecipeIds: [],
+  ...(options.armorPoints === null ? {} : { armorPoints: options.armorPoints ?? 17 }),
+  metrics: {
+    entityCount: 1,
+    worldItemCount: 0,
+    creatureCount: 0,
+    npcCount: 0,
+    nearbyVisitedBucketCount: 0,
+    nearbyCandidateCount: 0,
+    nearbyReturnedCount: 0,
+    inventoryOperationCount: 0,
+    gameplayEventCount: 0,
+    snapshotBytes: 0,
+    retainedActorCount: 0,
+    activeActorCount: 0,
+    behaviorEvaluationCount: 0,
+    navigationPlanCount: 0,
+    navigationExpandedNodeCount: 0,
+    pathRecomputeCount: 0,
+    actionCompletionCount: 0,
+    actionFailureCount: 0,
+    actionInterruptionCount: 0,
+    perceptionLineOfSightCheckCount: 0,
+    simulationTime: 0,
+  },
+});
+
 const bindings = () => {
   let authorityEpoch = 'world:2';
+  let authorityReady = true;
+  let authorityGameplay = gameplayView();
+  let authorityValue: NonNullable<ReturnType<HarnessObservabilityBindings['authority']>> | null;
   let renderedWorldEpoch: string | null = 'world:2';
   let authorityGeometry = geometry;
   const authority = {
+    get isReady() {
+      return authorityReady;
+    },
+    get gameplay() {
+      return authorityGameplay;
+    },
     get voxelGeometry() {
       return authorityGeometry;
     },
@@ -53,6 +142,7 @@ const bindings = () => {
       return authorityEpoch;
     },
   };
+  authorityValue = authority;
   const rendered = {
     chunkKey: '0,0,0',
     chunkRevision: 7,
@@ -65,7 +155,7 @@ const bindings = () => {
   let renderedSummary: typeof rendered | null = rendered;
   return {
     developerWorld: () => ({}),
-    authority: () => authority,
+    authority: () => authorityValue,
     world: () => null,
     renderedMaterialMesh: vi.fn(() => renderedSummary),
     renderedWorldEpoch: () => renderedWorldEpoch,
@@ -76,6 +166,9 @@ const bindings = () => {
       error: null,
     }),
     setAuthorityEpoch: (value: string) => (authorityEpoch = value),
+    setAuthorityReady: (value: boolean) => (authorityReady = value),
+    setAuthorityGameplay: (value: AuthorityGameplayView) => (authorityGameplay = value),
+    setAuthority: (value: typeof authority | null) => (authorityValue = value),
     setAuthorityGeometry: (value: typeof geometry) => (authorityGeometry = value),
     setRenderedWorldEpoch: (value: string | null) => (renderedWorldEpoch = value),
     setRenderedSummary: (value: typeof rendered | null) => (renderedSummary = value),
@@ -160,5 +253,176 @@ describe('BrowserProductHarness V1 read-only observability', () => {
       lastForwardedBatch: batch,
       audio: null,
     });
+  });
+
+  it('returns a detached recursively frozen equipment projection with all four slots and cursor origin', () => {
+    const current = bindings();
+    const api = createHarnessObservability(current);
+    const source = current.authority()!.gameplay;
+    const snapshot = api.equipmentSnapshot();
+
+    expect(snapshot).toEqual({
+      runtimeEpoch: 'world:2',
+      gameplayRevision: 11,
+      actor: { entityId: 'player-1', epoch: 2, lifetime: 7 },
+      inventoryRevision: 13,
+      slots: [{ itemId: 'sample:pickaxe', count: 1, instance: { durability: 8 } }, null],
+      armor: {
+        helmet: { itemId: 'sample:helmet', count: 1, instance: { durability: 4 } },
+        chestplate: { itemId: 'sample:chestplate', count: 1, instance: { durability: 9 } },
+        leggings: { itemId: 'sample:leggings', count: 1, instance: { durability: 7 } },
+        boots: { itemId: 'sample:boots', count: 1, instance: { durability: 3 } },
+      },
+      cursor: {
+        version: 1,
+        revision: 5,
+        stack: { itemId: 'sample:cursor', count: 1, instance: { durability: 2 } },
+        origin: { kind: 'station', reference: { entityId: 'bench-1', epoch: 2, lifetime: 9 }, slot: 3 },
+        craftingGrid: [{ itemId: 'sample:craft', count: 1, instance: { durability: 6 } }, null, null, null],
+      },
+      player: { health: 17, lifecycle: 'alive' },
+      armorPoints: 17,
+    });
+    expect(snapshot?.actor).not.toBe(source.inventory.actor);
+    expect(snapshot?.slots).not.toBe(source.inventory.slots);
+    expect(snapshot?.slots[0]).not.toBe(source.inventory.slots[0]);
+    expect(snapshot?.slots[0]?.instance).not.toBe(source.inventory.slots[0]?.instance);
+    expect(snapshot?.armor).not.toBe(source.inventory.armor);
+    expect(snapshot?.armor.helmet).not.toBe(source.inventory.armor.helmet);
+    expect(snapshot?.armor.helmet?.instance).not.toBe(source.inventory.armor.helmet?.instance);
+    expect(snapshot?.cursor).not.toBe(source.inventory.cursor);
+    expect(snapshot?.cursor.stack).not.toBe(source.inventory.cursor.stack);
+    expect(snapshot?.cursor.stack?.instance).not.toBe(source.inventory.cursor.stack?.instance);
+    expect(snapshot?.cursor.origin).not.toBe(source.inventory.cursor.origin);
+    if (snapshot?.cursor.origin?.kind === 'station' && source.inventory.cursor.origin?.kind === 'station')
+      expect(snapshot.cursor.origin.reference).not.toBe(source.inventory.cursor.origin.reference);
+    expect(snapshot?.cursor.craftingGrid[0]).not.toBe(source.inventory.cursor.craftingGrid[0]);
+    expect(snapshot?.cursor.craftingGrid[0]?.instance).not.toBe(source.inventory.cursor.craftingGrid[0]?.instance);
+    expect(Object.isFrozen(snapshot)).toBe(true);
+    expect(Object.isFrozen(snapshot?.actor)).toBe(true);
+    expect(Object.isFrozen(snapshot?.slots)).toBe(true);
+    expect(Object.isFrozen(snapshot?.slots[0]?.instance)).toBe(true);
+    expect(Object.isFrozen(snapshot?.armor)).toBe(true);
+    expect(Object.values(snapshot?.armor ?? {}).every((slot) => !slot || Object.isFrozen(slot))).toBe(true);
+    expect(Object.values(snapshot?.armor ?? {}).every((slot) => !slot || Object.isFrozen(slot.instance))).toBe(true);
+    expect(Object.isFrozen(snapshot?.cursor)).toBe(true);
+    expect(Object.isFrozen(snapshot?.cursor.stack)).toBe(true);
+    expect(Object.isFrozen(snapshot?.cursor.stack?.instance)).toBe(true);
+    expect(Object.isFrozen(snapshot?.cursor.origin)).toBe(true);
+    expect(snapshot?.cursor.origin?.kind !== 'station' || Object.isFrozen(snapshot.cursor.origin.reference)).toBe(true);
+    expect(Object.isFrozen(snapshot?.cursor.craftingGrid)).toBe(true);
+    expect(snapshot?.cursor.craftingGrid.every((slot) => !slot || Object.isFrozen(slot))).toBe(true);
+    expect(snapshot?.cursor.craftingGrid.every((slot) => !slot?.instance || Object.isFrozen(slot.instance))).toBe(true);
+    expect(Object.isFrozen(snapshot?.player)).toBe(true);
+
+    Object.assign(source.inventory.actor, { epoch: 99 });
+    Object.assign(source.inventory.slots[0]!.instance!, { durability: 1 });
+    Object.assign(source.inventory.armor.helmet!.instance!, { durability: 1 });
+    Object.assign(source.inventory.cursor.origin!, { slot: 8 });
+    Object.assign(source.inventory.cursor.craftingGrid[0]!.instance!, { durability: 1 });
+    Object.assign(source.player, { health: 1 });
+    expect(snapshot?.actor.epoch).toBe(2);
+    expect(snapshot?.slots[0]?.instance?.durability).toBe(8);
+    expect(snapshot?.armor.helmet?.instance?.durability).toBe(4);
+    expect(snapshot?.cursor.origin).toMatchObject({ slot: 3 });
+    expect(snapshot?.cursor.craftingGrid[0]?.instance?.durability).toBe(6);
+    expect(snapshot?.player.health).toBe(17);
+  });
+
+  it('returns null when Authority is missing, not ready, or has no runtime epoch', () => {
+    const current = bindings();
+    const api = createHarnessObservability(current);
+    current.setAuthority(null);
+    expect(api.equipmentSnapshot()).toBeNull();
+
+    let notReadyGameplayReads = 0;
+    current.setAuthority({
+      isReady: false,
+      runtimeEpoch: 'world:2',
+      voxelGeometry: geometry,
+      get gameplay() {
+        notReadyGameplayReads += 1;
+        throw new Error('Authority gameplay view is not ready.');
+      },
+    });
+    expect(api.equipmentSnapshot()).toBeNull();
+    expect(notReadyGameplayReads).toBe(0);
+
+    let emptyEpochGameplayReads = 0;
+    current.setAuthority({
+      isReady: true,
+      runtimeEpoch: '',
+      voxelGeometry: geometry,
+      get gameplay() {
+        emptyEpochGameplayReads += 1;
+        throw new Error('An empty epoch must be rejected before gameplay is read.');
+      },
+    });
+    expect(api.equipmentSnapshot()).toBeNull();
+    expect(emptyEpochGameplayReads).toBe(0);
+  });
+
+  it('returns null when the client, epoch, or gameplay object changes during one observation', () => {
+    const clientChanged = bindings();
+    const firstClient = clientChanged.authority()!;
+    const secondClient = bindings().authority()!;
+    let clientReads = 0;
+    expect(
+      createHarnessObservability({
+        ...clientChanged,
+        authority: () => (++clientReads === 1 ? firstClient : secondClient),
+      }).equipmentSnapshot(),
+    ).toBeNull();
+    expect(clientReads).toBe(2);
+
+    const epochView = gameplayView();
+    let epochReads = 0;
+    const changingEpoch = {
+      isReady: true,
+      gameplay: epochView,
+      voxelGeometry: geometry,
+      get runtimeEpoch() {
+        return ++epochReads === 1 ? 'world:2' : 'world:3';
+      },
+    };
+    expect(
+      createHarnessObservability({ ...bindings(), authority: () => changingEpoch }).equipmentSnapshot(),
+    ).toBeNull();
+    expect(epochReads).toBe(2);
+
+    const firstGameplay = gameplayView();
+    const secondGameplay = gameplayView({ health: 9 });
+    let gameplayReads = 0;
+    const changingGameplay = {
+      isReady: true,
+      runtimeEpoch: 'world:2',
+      voxelGeometry: geometry,
+      get gameplay() {
+        return ++gameplayReads === 1 ? firstGameplay : secondGameplay;
+      },
+    };
+    expect(
+      createHarnessObservability({ ...bindings(), authority: () => changingGameplay }).equipmentSnapshot(),
+    ).toBeNull();
+    expect(gameplayReads).toBe(2);
+  });
+
+  it('returns current data after an epoch change without reusing an older snapshot', () => {
+    const current = bindings();
+    const api = createHarnessObservability(current);
+    const first = api.equipmentSnapshot();
+    const next = gameplayView({ health: 9, firstItemId: 'sample:new', armorPoints: null });
+    current.setAuthorityEpoch('world:3');
+    current.setAuthorityGameplay(next);
+    const second = api.equipmentSnapshot();
+
+    expect(first).toMatchObject({ runtimeEpoch: 'world:2', armorPoints: 17 });
+    expect(second).toMatchObject({
+      runtimeEpoch: 'world:3',
+      slots: [{ itemId: 'sample:new', count: 1 }, null],
+      player: { health: 9, lifecycle: 'alive' },
+      armorPoints: null,
+    });
+    expect(second).not.toBe(first);
   });
 });

@@ -120,6 +120,23 @@ equipment 当目标，collect 不以 equipment 为 source。每个出队动作�
 绑定发起时 actor/station identity；失败不写 UI 第二状态或伪造装备。纯 creative catalog 不自行开放装备权限。
 本片不改变 stdlib/protocol/Classic content、combat/death policy、坐标、timeout 或 Harness。
 
+V2 canonical equipment fixture 子片冻结 `equipment-journey-contract.md`：在完整 V1 后、C4 前，以真实 UI
+创造放置固定 3 原木、3 石块、4 铁块资源带，再切回生存经真实采集、拾取、合成取得四件铁甲与额外头盔；
+覆盖四槽 click/Shift quick-move、错槽完整零变、occupied swap、脱穿与关闭结算。C5 在原 V1 media/门恢复
+校验后，使用同一 Authority 的窄只读 equipment snapshot 验证 runtime/actor 双身份换代及 bag/cursor/armor/
+durability/revision 精确恢复，再以新 identity 继续一次真实 pointer 操作。不得以 creative catalog 直接给物、
+Harness 写状态、生产 action、teleport/setView、随机 fallback、第二路线或新增 timeout 代替玩家路径。当前
+canonical 无确定纯键鼠致死入口，因此实战耐久、死亡掉落与重生 Browser 证据保持 `NOT OBSERVED`；本 smoke
+不代表 16 件护甲或 194 项矩阵全部完成。
+
+V2 canonical equipment fixture Close-02 修复三个已定位的夹具缺口：固定资源带的每一格必须先在 survival
+沿同一 approach 真实行走，再经正式 UI 切 creative 选择/放置，并在 voxel readback 后切回 survival 等待 Authority
+physics tick 前进且 grounded/non-colliding；equipment-origin close 的提交等待必须保持 runtime epoch 与 actor
+identity；C5 必须把 C4
+之后、实际保存前的 equipment snapshot 以 `before.v2EquipmentPreSave` 写入既有 restore evidence，恢复比较使用同一
+baseline。不得修改坐标、timeout、瞄准预算、V1 路线或生产 oracle；本收口仍不提供 Browser、实战耐久、死亡掉落
+或重生证据。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

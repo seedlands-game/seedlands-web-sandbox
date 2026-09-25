@@ -36,10 +36,11 @@ import {
   type ClassicStage as Stage,
   type ClassicStageResult as StageResult,
 } from './classic-support/evidence';
-import { classicScenario, type Point } from './classic-support/scenario';
+import { classicPersistedPositions, classicScenario, type Point } from './classic-support/scenario';
 import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
 import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
 import * as v1 from './classic-support/v1-slice';
+import * as equipment from './classic-support/equipment-journey';
 import {
   equipFromInventory,
   inventorySignature,
@@ -305,6 +306,10 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await v1.expectV1AudioSettings(page);
     v1SliceState = await v1.completeV1SliceBeforeSave(page);
   });
+  const equipmentJourney = await test.step('V2 真实资源链与背包手势完成四槽装备矩阵', () =>
+    equipment.completeEquipmentJourneyBeforeSave(page, (value) => {
+      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', { v2Equipment: value });
+    }));
 
   let routeTrace!: ChromeTrace;
   let sampleCompletedAt!: string;
@@ -372,33 +377,23 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
 
   await test.step('C5 正式保存返回、同上下文继续并再次交互', async () => {
-    const persistedPositions = [
-      classicScenario.route.buildTarget,
-      classicScenario.route.stationTarget,
-      classicScenario.v1Slice.door.lower,
-      classicScenario.v1Slice.door.upper,
-      classicScenario.v1Slice.jukebox.target,
-    ] as const;
+    const persistedPositions = classicPersistedPositions;
     const stateBeforeSave = await playerState(page);
+    const equipmentBeforeSave = await equipment.expectEquipmentReadyForSave(page, equipmentJourney);
     const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
     const checkpointBefore = await checkpointVoxels(page, persistedPositions);
     const derivedBefore = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
-    restoreEvidence = {
-      before: {
-        authority: authorityBefore,
-        checkpoint: checkpointBefore,
-        derived: derivedBefore,
-      },
-    };
+    restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', {
+      authority: authorityBefore,
+      checkpoint: checkpointBefore,
+      derived: derivedBefore,
+      v2EquipmentPreSave: equipmentBeforeSave,
+    });
     expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
     expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
     v1.expectV1DoorEvidence(authorityBefore, v1SliceState.door);
     v1.expectV1DoorEvidence(checkpointBefore, v1SliceState.door);
-    const identityBefore = await page.evaluate(async () => {
-      const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
-      if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
-      return result.data;
-    });
+    const developerEpochBefore = await equipment.developerWorldEpoch(page);
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
     await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
@@ -408,18 +403,18 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       (value) => value.onGround && !value.colliding && value.workers.authority === 1,
       30_000,
     );
-    const identityAfter = await page.evaluate(async () => {
-      const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
-      if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
-      return result.data;
-    });
-    expect(identityAfter.epoch).not.toBe(identityBefore.epoch);
+    const developerEpochAfter = await equipment.developerWorldEpoch(page);
+    expect(developerEpochAfter).not.toBe(developerEpochBefore);
     await v1.verifyV1SliceAfterRestore(page, v1SliceState);
+    const restoredEquipment = await equipment.verifyEquipmentJourneyAfterRestore(page, equipmentBeforeSave, (value) => {
+      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { v2Equipment: value });
+    });
     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
       authority: authorityAfter,
       derivedInitial: derivedAfterInitial,
+      v2Equipment: restoredEquipment,
     });
     expect(observedVoxel(authorityAfter, classicScenario.route.buildTarget)).toBe(16);
     v1.expectV1DoorEvidence(authorityAfter, v1SliceState.door);
@@ -472,8 +467,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
         'Save and return created a fresh epoch, restored build/workbench/inventory state, reacquired and reopened the station through visible target-card readback plus real mouse input, and accepted a new real movement input.',
     };
     stageSamples.C5 = (await snapshot(page))!;
-    const preRestoreTrace = traceEpoch(routeTrace, identityBefore.epoch, 'C0-C4');
-    const postRestoreTrace = traceEpoch(await performanceTrace(page), identityAfter.epoch, 'C5');
+    const preRestoreTrace = traceEpoch(routeTrace, developerEpochBefore, 'C0-C4');
+    const postRestoreTrace = traceEpoch(await performanceTrace(page), developerEpochAfter, 'C5');
     routeTrace = { traceEvents: [...preRestoreTrace.traceEvents, ...postRestoreTrace.traceEvents] };
     sampleCompletedAt = new Date().toISOString();
   });
