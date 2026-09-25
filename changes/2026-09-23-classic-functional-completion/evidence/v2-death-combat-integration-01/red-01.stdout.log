@@ -1,0 +1,131 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts (9 tests | 4 failed) 61ms
+     × settles a lethal player hit with post-hit armor and one shared revision 25ms
+     × despawns a lethal NPC and appends its intrinsic drop exactly once 5ms
+     × retains all containers while still committing player death and post-hit durability 4ms
+     × rejects a composed lethal resolve without policy and leaves the pending frontier untouched 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > settles a lethal player hit with post-hit armor and one shared revision
+AssertionError: expected { helmet: null, …(3) } to deeply equal { Object (helmet, chestplate, ...) }
+
+- Expected
++ Received
+
+  {
+    "boots": null,
+-   "chestplate": null,
++   "chestplate": {
++     "count": 1,
++     "instance": {
++       "durability": 4,
++     },
++     "itemId": "sample:suit",
++   },
+    "helmet": null,
+    "leggings": null,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:264:26
+    262|     expect(target.inventory.snapshot().every((slot) => slot === null))…
+    263|     expect(target.inventoryCursor).toMatchObject({ stack: null, crafti…
+    264|     expect(target.armor).toEqual(emptyArmor());
+       |                          ^
+    265|     expect(fixture.runtime.entities.playerStateAccess(fixture.targetId…
+    266|     expect(fixture.runtime.entities.query({ type: 'world-item' }).map(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > despawns a lethal NPC and appends its intrinsic drop exactly once
+AssertionError: expected [ …(4) ] to deeply equal [ …(5) ]
+
+- Expected
++ Received
+
+@@ -11,15 +11,8 @@
+      "count": 1,
+      "itemId": "sample:ore-c",
+    },
+    {
+      "count": 1,
+-     "instance": {
+-       "durability": 4,
+-     },
+-     "itemId": "sample:suit",
+-   },
+-   {
+-     "count": 1,
+      "itemId": "sample:trophy",
+    },
+  ]
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:285:21
+    283|     expect(fixture.runtime.entities.get(fixture.targetId)).toBeNull();
+    284|     const dropped = fixture.runtime.entities.query({ type: 'world-item…
+    285|     expect(dropped).toEqual([
+       |                     ^
+    286|       { itemId: 'sample:ore-a', count: 2 },
+    287|       { itemId: 'sample:ore-b', count: 1 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > retains all containers while still committing player death and post-hit durability
+AssertionError: expected null to deeply equal { itemId: 'sample:ore-a', count: 2 }
+
+- Expected:
+{
+  "count": 2,
+  "itemId": "sample:ore-a",
+}
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:304:38
+    302|     const target = fixture.runtime.entities.actorStateAccess(fixture.t…
+    303|     expect(target).toMatchObject({ health: 0, lifecycle: 'dead', inven…
+    304|     expect(target.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a',…
+       |                                      ^
+    305|     expect(target.inventoryCursor).toMatchObject({
+    306|       stack: { itemId: 'sample:ore-b', count: 1 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > rejects a composed lethal resolve without policy and leaves the pending frontier untouched
+AssertionError: expected { ok: true, …(2) } to deeply equal { ok: false, …(2) }
+
+- Expected
++ Received
+
+  {
+-   "code": "DEATH_INVENTORY_POLICY_UNAVAILABLE",
+-   "message": "death-inventory-policy-unavailable",
+-   "ok": false,
++   "ok": true,
++   "revision": 5,
++   "value": {
++     "damage": 5,
++     "outcome": "hit",
++     "success": true,
++   },
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:320:31
+    318|     const before = entityState(fixture.runtime);
+    319|
+    320|     expect(pending.resolve()).toEqual({
+       |                               ^
+    321|       ok: false,
+    322|       code: 'DEATH_INVENTORY_POLICY_UNAVAILABLE',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 5 passed (9)
+   Start at  23:17:16
+   Duration  940ms (transform 659ms, setup 0ms, import 798ms, tests 61ms, environment 0ms)
+

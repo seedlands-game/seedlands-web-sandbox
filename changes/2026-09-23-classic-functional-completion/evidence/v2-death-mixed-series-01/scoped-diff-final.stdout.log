@@ -1,0 +1,13 @@
+ .../execution-state.md                             |   4 +-
+ .../tasks.md                                       |  20 +++-
+ packages/stdlib/src/server/composition/mod-api.ts  |  47 ++++++++
+ .../server/gameplay/death-inventory-settlement.ts  | 123 +++++++++++++++++++--
+ 4 files changed, 177 insertions(+), 17 deletions(-)
+ M changes/2026-09-23-classic-functional-completion/execution-state.md
+ M changes/2026-09-23-classic-functional-completion/tasks.md
+ M packages/stdlib/src/server/composition/mod-api.ts
+ M packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
+?? changes/2026-09-23-classic-functional-completion/death-mixed-series-contract.md
+?? changes/2026-09-23-classic-functional-completion/death-mixed-series-evidence.md
+?? changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+?? packages/stdlib/tests/server/death-inventory-mixed-series.test.ts

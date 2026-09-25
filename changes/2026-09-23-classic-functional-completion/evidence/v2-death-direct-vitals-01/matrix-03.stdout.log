@@ -1,0 +1,59 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts (7 tests | 2 failed) 32ms
+     × drops all four owned containers with post-hit armor in one revision 18ms
+     × rejects a stale death effects frontier before applying health or inventory 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > drops all four owned containers with post-hit armor in one revision
+AssertionError: expected { success: false, …(1) } to match object { success: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:150:54
+    148|       { archetype: 'night-stalker' },
+    149|     );
+    150|     expect(runtime.attackEntity('player', 'target')).toMatchObject({ s…
+       |                                                      ^
+    151|
+    152|     expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > rejects a stale death effects frontier before applying health or inventory
+AssertionError: expected { success: false, …(1) } to match object { success: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:225:54
+    223|       { archetype: 'night-stalker' },
+    224|     );
+    225|     expect(runtime.attackEntity('player', 'target')).toMatchObject({ s…
+       |                                                      ^
+    226|     let concurrent: ReturnType<typeof runtimeState> | undefined;
+    227|     const vitals = directVitals(fixture, (ids) => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 5 passed (7)
+   Start at  23:54:20
+   Duration  880ms (transform 639ms, setup 0ms, import 777ms, tests 32ms, environment 0ms)
+

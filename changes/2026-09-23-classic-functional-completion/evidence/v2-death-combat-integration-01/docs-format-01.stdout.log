@@ -1,0 +1,5 @@
+packages/stdlib/tests/server/registered-combat-death.test.ts 66ms (unchanged)
+apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts 27ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-combat-contract.md 19ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-combat-evidence.md 11ms
+changes/2026-09-23-classic-functional-completion/evidence/v2-death-combat-integration-01/delivery-validation.json 5ms (unchanged)

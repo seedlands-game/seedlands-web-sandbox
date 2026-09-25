@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-combat-diff-delivery-frozen",
+  "pid": 87875,
+  "startedAt": "2026-09-25T15:40:18.954Z",
+  "windowId": "v2-death-combat-diff-delivery-frozen",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-combat-integration-01/diff-delivery-frozen-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:40:19.624Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:40:18.955Z",
+      "loadAverage": [
+        3.71923828125,
+        4.26171875,
+        4.0009765625
+      ],
+      "freeMemoryBytes": 280248320,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:40:19.622Z",
+      "loadAverage": [
+        3.82177734375,
+        4.27392578125,
+        4.00634765625
+      ],
+      "freeMemoryBytes": 386531328,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

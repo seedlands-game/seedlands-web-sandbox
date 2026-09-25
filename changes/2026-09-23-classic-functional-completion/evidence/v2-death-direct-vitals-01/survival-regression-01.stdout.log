@@ -1,0 +1,60 @@
+12:01:59 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/survival-gameplay.test.ts (11 tests | 2 failed) 570ms
+     × crafts through the server rule and changes selected tool mining speed 4ms
+     × consumes food only when it can restore hunger 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/survival-gameplay.test.ts > crafting and survival rules > crafts through the server rule and changes selected tool mining speed
+AssertionError: expected { success: false, …(1) } to match object { success: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/survival-gameplay.test.ts:106:50
+    104|     server.giveItem('player-1', { itemId: ItemIds.WoodBlock, count: 1 …
+    105|     expect(server.craft('player-1', 'planks')).toMatchObject({ success…
+    106|     expect(server.craft('player-1', 'wood-axe')).toMatchObject({ succe…
+       |                                                  ^
+    107|     expect(server.getInventory('player-1').slots).toContainEqual({
+    108|       itemId: ItemIds.WoodAxe,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/survival-gameplay.test.ts > crafting and survival rules > consumes food only when it can restore hunger
+AssertionError: expected { success: false, …(1) } to match object { success: false, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "reason": "hunger-full",
++   "reason": "health-full",
+    "success": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/survival-gameplay.test.ts:134:48
+    132|     const server = createPlayerServer();
+    133|     server.giveItem('player-1', { itemId: ItemIds.Berry, count: 2 });
+    134|     expect(server.useSelectedItem('player-1')).toMatchObject({ success…
+       |                                                ^
+    135|     expect(server.getInventory('player-1').slots[0]).toEqual({ itemId:…
+    136|     server.setHungerForDebug('player-1', 17);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  00:01:59
+   Duration  1.77s (transform 903ms, setup 0ms, import 1.12s, tests 570ms, environment 0ms)
+

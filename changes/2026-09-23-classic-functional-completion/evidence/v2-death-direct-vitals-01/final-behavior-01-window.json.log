@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-direct-vitals-final-behavior-01",
+  "pid": 2698,
+  "startedAt": "2026-09-25T15:58:40.610Z",
+  "windowId": "v2-death-direct-vitals-final-behavior-01",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/final-behavior-01-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:58:41.904Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:58:40.611Z",
+      "loadAverage": [
+        3.52734375,
+        3.634765625,
+        3.7919921875
+      ],
+      "freeMemoryBytes": 924024832,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:58:41.903Z",
+      "loadAverage": [
+        3.72509765625,
+        3.673828125,
+        3.8046875
+      ],
+      "freeMemoryBytes": 738590720,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

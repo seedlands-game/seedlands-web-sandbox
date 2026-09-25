@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts (20 tests | 1 failed) 34ms
+     × rejects cross-set duplicate, mismatched reference and death-shaped additional replacements 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts > death inventory settlement series > rejects cross-set duplicate, mismatched reference and death-shaped additional replacements
+AssertionError: expected [Function] to throw error matching /duplicate actor/i but got 'Death inventory additional actor repl…'
+
+- Expected:
+/duplicate actor/i
+
++ Received:
+"Death inventory additional actor replacement must remain alive."
+
+ ❯ packages/stdlib/tests/server/death-inventory-settlement-series.test.ts:286:7
+    284|         ],
+    285|       }),
+    286|     ).toThrow(/duplicate actor/i);
+       |       ^
+    287|     expect(() =>
+    288|       prepareDeathInventorySettlementSeriesV1(entities, {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 19 passed (20)
+   Start at  23:30:42
+   Duration  278ms (transform 143ms, setup 0ms, import 173ms, tests 34ms, environment 0ms)
+

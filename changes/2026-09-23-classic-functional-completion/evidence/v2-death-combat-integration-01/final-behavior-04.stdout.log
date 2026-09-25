@@ -1,0 +1,54 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts (11 tests | 1 failed) 74ms
+     × retains a dead NPC when its composed actor policy selects retain 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > retains a dead NPC when its composed actor policy selects retain
+AssertionError: expected [ { id: 'world-item-1', …(6) } ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "id": "world-item-1",
++     "kind": "world-item",
++     "lifecycle": "active",
++     "physicsVelocity": [
++       0,
++       0,
++       0,
++     ],
++     "position": [
++       0,
++       0,
++       1,
++     ],
++     "stack": {
++       "count": 1,
++       "itemId": "sample:trophy",
++     },
++     "type": "world-item",
++   },
++ ]
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:345:68
+    343|     expect(target.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a',…
+    344|     expect(target.armor).toEqual({ ...emptyArmor(), helmet: null, ches…
+    345|     expect(fixture.runtime.entities.query({ type: 'world-item' })).toE…
+       |                                                                    ^
+    346|     expect(fixture.runtime.simulation.actorIds()).toContain(fixture.ta…
+    347|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  23:28:57
+   Duration  924ms (transform 645ms, setup 0ms, import 781ms, tests 74ms, environment 0ms)
+

@@ -1,0 +1,36 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts (7 tests | 1 failed | 6 skipped) 18ms
+     × drops all four owned containers with post-hit armor in one revision 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > drops all four owned containers with post-hit armor in one revision
+AssertionError: {"success":false,"reason":"combat-unavailable"}: expected { success: false, …(1) } to match object { success: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:151:44
+    149|     );
+    150|     const attack = runtime.attackEntity('player', 'target');
+    151|     expect(attack, JSON.stringify(attack)).toMatchObject({ success: tr…
+       |                                            ^
+    152|
+    153|     expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toE…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 skipped (7)
+   Start at  23:54:44
+   Duration  879ms (transform 648ms, setup 0ms, import 788ms, tests 18ms, environment 0ms)
+

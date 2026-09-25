@@ -1,0 +1,10 @@
+changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md 23ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-direct-vitals-evidence.md 14ms (unchanged)
+[error] changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/delivery-validation.json: SyntaxError: Unexpected token, expected "," (48:5)
+[error]   46 |     "scopedDiffWindow": "v2-death-direct-vitals-diff-delivery-frozen",
+[error]   47 |     "scopedDiffStatus": "PASS"
+[error] > 48 |     "scopedDiffWindow": "v2-death-direct-vitals-diff-delivery-frozen",
+[error]      |     ^
+[error]   49 |     "scopedDiffStatus": "PASS"
+[error]   50 |   },
+[error]   51 |   "remaining": [

@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-26-DEATH-PRODUCERS-AND-MIXED",
+  "status": "READY_FOR_EVIDENCE_COMMIT",
+  "baseline": "9f5a6ff49cccb1e5ecb9fae9ae0ab9277f42769e",
+  "sourceCommit": "746282901e0c76b6fbe15a71b98b13a861f6dc40",
+  "sourceTree": "31c7ad381d2d4df3c8da10914ddd2bb4a03517db",
+  "stagedPatchSha256": "cfce7eb31c9e21783c95f4d0caaab8bda890d5caf9758b5b0f4fc305305ed7b3",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "6d2609faab69d433888196f2644ad78823056e03251cf96b6d6e81299b112bc7"
+  },
+  "frozenSlices": {
+    "registeredCombat": {
+      "sourceManifestSha256": "c4cb32f4bce930fbe923a200991968613a6dba41d060a3e8ff0b942bf96bdb34",
+      "evidenceManifestSha256": "b65154116c4f8265f61b22aeeb06d7e10083e423b8edef84560a7a6efa2d2e00",
+      "sourceEntries": 10,
+      "evidenceEntries": 62,
+      "identityException": "The older spec hash is superseded by the approved Direct Vitals spec."
+    },
+    "directVitals": {
+      "sourceManifestSha256": "e5dac755095dcacbc1105d1bee61ddaa0f62764c08540f4b413a8e4df7c9ceb9",
+      "evidenceManifestSha256": "d77a79017f33e7c0568bd523f0c57b3602130bfa82c1f9d33ebfbe21d4c8d4de",
+      "sourceEntries": 8,
+      "evidenceEntries": 80,
+      "specSha256": "2865752d30b66c6e6703f714ade29516a62c7903f219270eb8708e9f349cd6b9",
+      "identityException": "The intermediate settlement hash is superseded by the approved mixed-series source."
+    },
+    "mixedSeries": {
+      "sourceManifestSha256": "159917734e0371f08c6e0c0a8aad282ffecea82a039f5e892dee84eac9472c1e",
+      "evidenceManifestSha256": "82fe93d4ee388d3ddefae4a52b2be4bd8a9ac856752573288a3212bfce18c87c",
+      "sourceEntries": 10,
+      "evidenceEntries": 95,
+      "settlementSha256": "b7d2c53becb79258c54c0868a298e5bdae8d8e634608d704aa88fed29c2871cb",
+      "predecessorIdentitySha256": "e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a"
+    }
+  },
+  "sharedFileOwnership": {
+    "path": "packages/stdlib/src/server/composition/mod-api.ts",
+    "committedChange": "one DeathInventoryAdditionalActorReplacementV1 type export",
+    "excludedWorkingTreeChange": "46-line route and transport exports",
+    "excludedWorkingTreeDiffPreserved": true
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git26-death",
+    "temporaryCommit": "ce9b621de1b5f7816904ed34a90fca0f14a22e5a",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true,
+    "trackedCleanAfterValidation": true
+  },
+  "tests": {
+    "publicPolicySeriesSpine": {
+      "window": "cef6ae87-13a5-4254-8d17-35380e3d2995",
+      "status": "PASS_4_FILES_38_TESTS"
+    },
+    "registeredDeath": {
+      "window": "4120ada0-f72f-40be-a39d-1460e5a273b9",
+      "status": "PASS_1_FILE_11_TESTS"
+    },
+    "directVitals": {
+      "window": "3c95a7dc-500b-4917-a536-3c54f76fc5dd",
+      "status": "PASS_1_FILE_11_TESTS"
+    },
+    "registeredCombatExisting": {
+      "window": "03bac30d-4e9b-452d-849e-3114e5d5c4df",
+      "status": "PASS_1_FILE_19_TESTS"
+    },
+    "stdlibArmorFood": {
+      "window": "0d68078d-4db1-4db8-a1b3-1545c768b4e7",
+      "status": "PASS_2_FILES_12_TESTS"
+    },
+    "directVitalsLegacyTargeted": {
+      "window": "a7e1bf9c-c3be-42c8-b311-57abde89bce5",
+      "status": "PASS_4_SKIPPED_1"
+    },
+    "preparedCombat": {
+      "window": "29a77c8d-b502-4e50-83ea-4c4dedb1f744",
+      "status": "PASS_3_FILES_13_TESTS"
+    }
+  },
+  "expectedFailures": {
+    "legacyEquipmentDeath": {
+      "window": "5d4bc7d5-6a71-4d24-af02-e597373980ea",
+      "status": "EXPECTED_FAIL_1_WITH_2_PASS",
+      "reason": "legacy pure combat death still retains armor"
+    },
+    "classicArmorDeath": {
+      "window": "826f050d-78c8-4c0c-8a7d-bd3f19010f94",
+      "status": "EXPECTED_FAIL_1_WITH_5_PASS",
+      "reason": "Classic policy is not installed, so the first lethal call fails closed and the repeated-dead premise is absent"
+    },
+    "legacyVitalsFullFile": {
+      "window": "8ed623e1-aa1b-43c0-bf88-9a911e9c3aad",
+      "status": "EXPECTED_FIXTURE_FAIL_1_WITH_4_PASS",
+      "reason": "retired grazer profile setup fails before the producer path; player Vitals subset passed separately"
+    }
+  },
+  "static": {
+    "stdlibTypes": { "window": "2a201da2-53b9-4540-8296-f63fe1f5d201", "status": "PASS" },
+    "rootTestTypes": { "window": "aa2bf0e6-9188-4c1f-b1c4-45891dcb39aa", "status": "PASS" },
+    "classicTestTypes": { "window": "e269cab6-2b5b-411f-a053-c2ad8ddcf9cd", "status": "PASS" },
+    "stagedEslint": { "window": "403418ac-8338-46ca-b64c-549a469676a8", "status": "PASS" },
+    "editableFormat": { "window": "ced3b249-4dd5-4597-bdf7-28c21b3cec82", "status": "PASS" },
+    "scopedDiff": {
+      "window": "c35ec143-2db2-4b6d-b4eb-978904fd9907",
+      "status": "PASS_19_PATHS",
+      "allowedWhitespace": "one frozen Markdown hard break in death-mixed-series-contract.md"
+    }
+  },
+  "artifactState": {
+    "latestBuildSourceSha": "1bbe3a60d55ffa5d05e405377624fbbd942e6327",
+    "includesThisCommit": false
+  },
+  "notImplemented": [
+    "classic-death-policy-installation",
+    "classic-predecessor-installation",
+    "registered-needs-death-producer",
+    "complete-death-save-restore",
+    "complete-v2-product-acceptance"
+  ],
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "deploy", "merge"]
+}
