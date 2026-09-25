@@ -66,6 +66,12 @@ const initialShell = (): ShellState => ({
   gameplay: {
     station: null,
     inventoryOpen: false,
+    equipment: {
+      helmet: { slot: 'helmet', itemId: null, count: 0, name: '空头盔槽', edible: false },
+      chestplate: { slot: 'chestplate', itemId: null, count: 0, name: '空胸甲槽', edible: false },
+      leggings: { slot: 'leggings', itemId: null, count: 0, name: '空护腿槽', edible: false },
+      boots: { slot: 'boots', itemId: null, count: 0, name: '空靴子槽', edible: false },
+    },
     personalCrafting: { slots: [], recipes: [] },
     lifecycle: 'alive',
     mode: 'survival',

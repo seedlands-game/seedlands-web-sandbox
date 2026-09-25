@@ -225,9 +225,7 @@ export class BrowserGameplay {
     const projection = projectGameplayUi(
       {
         revision: view.gameplayRevision,
-        cursor: view.inventory?.cursor,
-        matchedCraftingRecipeIds: view.inventory?.matchedCraftingRecipeIds,
-        inventoryIdentity: JSON.stringify(view.inventory?.actor),
+        inventoryView: view.inventory,
         player: {
           combat: player.combat,
           lifecycle: player.lifecycle,

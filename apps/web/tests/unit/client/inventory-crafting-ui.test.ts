@@ -33,6 +33,20 @@ const gameplay: ShellState['gameplay'] = {
   lifecycle: 'alive',
   mode: 'survival',
   flightEnabled: false,
+  equipment: {
+    helmet: {
+      slot: 'helmet',
+      itemId: 'iron-helmet',
+      count: 1,
+      name: '铁头盔',
+      edible: false,
+      stackLimit: 1,
+      durability: { current: 41, max: 165 },
+    },
+    chestplate: { slot: 'chestplate', itemId: null, count: 0, name: '空胸甲槽', edible: false },
+    leggings: { slot: 'leggings', itemId: null, count: 0, name: '空护腿槽', edible: false },
+    boots: { slot: 'boots', itemId: null, count: 0, name: '空靴子槽', edible: false },
+  },
   inventory: Array.from({ length: 36 }, (_, slot) => empty(slot)),
   creativeCatalog: [],
   selectedHotbarSlot: 0,
@@ -49,6 +63,24 @@ describe('personal crafting inventory UI', () => {
     expect(body).toContain('data-personal-craft-result');
     expect(body).toContain('1 个 2×2 配方');
     expect(body).not.toContain('快捷合成');
+  });
+
+  it('renders four typed equipment slots from committed item presentations', () => {
+    const { body } = render(InventoryCrafting, { props: { actions, gameplay } });
+    expect(body).toContain('aria-label="装备槽位"');
+    expect(body.match(/data-equipment-slot=/g)).toHaveLength(4);
+    expect(body).toContain('data-equipment-slot="helmet"');
+    expect(body).toContain('data-equipment-slot="chestplate"');
+    expect(body).toContain('data-equipment-slot="leggings"');
+    expect(body).toContain('data-equipment-slot="boots"');
+    expect(body.indexOf('data-equipment-slot="helmet"')).toBeLessThan(body.indexOf('data-equipment-slot="chestplate"'));
+    expect(body.indexOf('data-equipment-slot="chestplate"')).toBeLessThan(
+      body.indexOf('data-equipment-slot="leggings"'),
+    );
+    expect(body.indexOf('data-equipment-slot="leggings"')).toBeLessThan(body.indexOf('data-equipment-slot="boots"'));
+    expect(body).toContain('铁头盔');
+    expect(body).toContain('耐久 41/165');
+    expect(body).toContain('空胸甲槽');
   });
 
   it('constrains inventory images to the slot content box', () => {

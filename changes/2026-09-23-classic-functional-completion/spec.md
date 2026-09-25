@@ -113,6 +113,13 @@ V2.1c combat 子片冻结 `equipment-combat-contract.md`：registered combat 在
 部分写 health、armor、revision 或 committed fact。该子片不改变 ruleset/difficulty/death settlement、公共
 协议、Classic ID、UI 或存档格式；真实 death armor 清算仍保留给 I2.2。
 
+V2.2a Web UI 子片冻结 `equipment-web-ui-contract.md`：浏览器只投影 Authority 已提交的四槽 armor，并在
+survival 背包或任意已打开 station 中以明确的头盔/胸甲/护腿/靴子槽显示与 bag 一致的图标、数量、tooltip
+和耐久。装备槽 click、Shift quick-move 与数字键 hotbar 继续走唯一 inventory-pointer queue；distribute 不把
+equipment 当目标，collect 不以 equipment 为 source。每个出队动作仍读取最新 inventory/station revision，并
+绑定发起时 actor/station identity；失败不写 UI 第二状态或伪造装备。纯 creative catalog 不自行开放装备权限。
+本片不改变 stdlib/protocol/Classic content、combat/death policy、坐标、timeout 或 Harness。
+
 ### 结构、攀爬、路线和载具
 
 - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。

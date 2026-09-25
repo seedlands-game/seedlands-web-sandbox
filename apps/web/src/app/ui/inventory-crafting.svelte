@@ -6,16 +6,24 @@
   import PersonalCrafting from './personal-crafting.svelte';
   import ItemIcon from './primitives/item-icon.svelte';
   import InventorySlot from './primitives/inventory-slot.svelte';
+  import EquipmentPanel from './equipment-panel.svelte';
   import StationPanel from './station-panel.svelte';
   import CreativeCatalog from './creative-catalog.svelte';
-  import { InventoryPointerGestures, inventorySlotKey, type InventoryUiSlot } from './inventory-pointer-gestures';
+  import {
+    InventoryPointerGestures,
+    inventoryGestureContextIdentity,
+    inventorySlotKey,
+    parseInventoryUiSlotAddress,
+    type InventoryUiBulkSlot,
+    type InventoryUiSlot,
+  } from './inventory-pointer-gestures';
   import type { ShellState, UiActionPort, ActorMode } from './ui-contracts';
 
   let { gameplay, actions }: { gameplay: ShellState['gameplay']; actions: UiActionPort } = $props();
   const hotbarSize = $derived(gameplay.hotbarSize ?? 8);
   let hovered = $state<InventoryUiSlot | null>(null);
   let foodSlot = $state<number | null>(null);
-  let dragSlots = $state<readonly InventoryUiSlot[]>([]);
+  let dragSlots = $state<readonly InventoryUiBulkSlot[]>([]);
   let dragButton = $state<0 | 2>(0);
   let pointer = $state({ x: 0, y: 0 });
   let closing = $state(false);
@@ -36,13 +44,19 @@
       dragButton = button;
     },
   );
-  const itemAt = (slot: InventoryUiSlot) =>
-    slot.kind === 'inventory'
-      ? gameplay.inventory[slot.slot]
-      : slot.kind === 'crafting'
-        ? gameplay.personalCrafting.slots[slot.slot]
-        : gameplay.station?.slots[slot.slot];
-  function accepts(slot: InventoryUiSlot): boolean {
+  function itemAt(slot: InventoryUiSlot) {
+    switch (slot.kind) {
+      case 'inventory':
+        return gameplay.inventory[slot.slot];
+      case 'crafting':
+        return gameplay.personalCrafting.slots[slot.slot];
+      case 'station':
+        return gameplay.station?.slots[slot.slot];
+      case 'equipment':
+        return gameplay.equipment[slot.slot];
+    }
+  }
+  function accepts(slot: InventoryUiBulkSlot): boolean {
     if (!cursor) return false;
     const limit = cursor.stackLimit ?? 1;
     const item = itemAt(slot);
@@ -75,14 +89,19 @@
     cursor
       ? cursor.count -
           [...previews].reduce((sum, [key, count]) => {
-            const slot = parseSlot(key)!;
+            const slot = parseInventoryUiSlotAddress(key)!;
             return sum + count - (itemAt(slot)?.count ?? 0);
           }, 0)
       : 0,
   );
 
   const contextIdentity = $derived(
-    `${gameplay.inventoryOpen}:${gameplay.mode}:${gameplay.inventoryIdentity ?? ''}:${gameplay.station?.id ?? ''}`,
+    inventoryGestureContextIdentity({
+      inventoryOpen: gameplay.inventoryOpen,
+      mode: gameplay.mode,
+      inventoryIdentity: gameplay.inventoryIdentity,
+      stationId: gameplay.station?.id,
+    }),
   );
   $effect(() => {
     // Normal inventory updates must not cancel an in-progress gesture.
@@ -91,14 +110,8 @@
     hovered = null;
     foodSlot = null;
   });
-  function parseSlot(value: string | undefined): InventoryUiSlot | null {
-    const [kind, index] = (value ?? '').split(':');
-    return (kind === 'inventory' || kind === 'crafting' || kind === 'station') && /^\d+$/.test(index ?? '')
-      ? { kind, slot: Number(index) }
-      : null;
-  }
   function slotUnderPointer(event: PointerEvent): InventoryUiSlot | null {
-    return parseSlot(
+    return parseInventoryUiSlotAddress(
       document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-inventory-address]')?.dataset
         .inventoryAddress,
     );
@@ -229,28 +242,36 @@
     {:else}
       <div class="survival-layout">
         <main class="inventory-main">
-          {#if gameplay.station}
-            <StationPanel
-              station={gameplay.station}
-              {cursor}
-              {previews}
+          <div class="inventory-workspace">
+            <EquipmentPanel
+              equipment={gameplay.equipment}
               onpress={press}
               onenter={enter}
-              onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-              oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              onactivate={(address) => gestures.command({ kind: 'click', slot: address, button: 0 })}
             />
-          {:else}
-            <PersonalCrafting
-              slots={gameplay.personalCrafting.slots}
-              recipes={gameplay.personalCrafting.recipes}
-              {cursor}
-              {previews}
-              onpress={press}
-              onenter={enter}
-              onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-              oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
-            />
-          {/if}
+            {#if gameplay.station}
+              <StationPanel
+                station={gameplay.station}
+                {cursor}
+                {previews}
+                onpress={press}
+                onenter={enter}
+                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              />
+            {:else}
+              <PersonalCrafting
+                slots={gameplay.personalCrafting.slots}
+                recipes={gameplay.personalCrafting.recipes}
+                {cursor}
+                {previews}
+                onpress={press}
+                onenter={enter}
+                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              />
+            {/if}
+          </div>
           <div role="grid" aria-label="背包槽位" class="bag-slots">
             <h3>背包</h3>
             <div class="slot-grid">
@@ -331,7 +352,7 @@
     padding: 18px 22px;
   }
   :global(#ui #inventory-crafting .inventory-dialog:has(.station-panel)) {
-    width: min(650px, calc(100vw - 32px));
+    width: min(860px, calc(100vw - 32px));
   }
   header {
     display: flex;
@@ -366,6 +387,12 @@
   }
   .inventory-main {
     min-width: 0;
+  }
+  .inventory-workspace {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
   }
   h3 {
     margin: 0;
@@ -445,5 +472,10 @@
     color: #fff0ca;
     font: 700 14px monospace;
     text-shadow: 1px 2px 0 #000;
+  }
+  @media (max-width: 720px) {
+    .inventory-workspace {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
