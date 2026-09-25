@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "3de50736-995c-4925-bc6c-5c6201a72ad5",
+  "pid": 81853,
+  "startedAt": "2026-09-25T05:39:02.296Z",
+  "windowId": "3de50736-995c-4925-bc6c-5c6201a72ad5",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-real-mouse-aim-close-01/untracked-docs-diff-check-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T05:39:02.333Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T05:39:02.297Z",
+      "loadAverage": [
+        4.04345703125,
+        4.12646484375,
+        3.63232421875
+      ],
+      "freeMemoryBytes": 797671424,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T05:39:02.332Z",
+      "loadAverage": [
+        4.04345703125,
+        4.12646484375,
+        3.63232421875
+      ],
+      "freeMemoryBytes": 790511616,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
