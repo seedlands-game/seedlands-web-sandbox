@@ -158,10 +158,12 @@ Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer，阶段上�
 Web equipment presentation 与 pointer queue：只提交 CLOSE-02 SOURCE 的 18 项、两份 UI evidence 目录和
 本批 metadata/state；不接 death producer，不运行 Browser/Cua/CI/deploy。
 
-状态：LOCAL_DELIVERY_READY。精确 staged tree 的 UI/queue `33/33`、creative-mode/UI bridge `10/10`、
-Web/Svelte、root test、Classic test types、staged ESLint、format、scoped diff 均 PASS。代码/测试/spec/合同已提交
-`ff17b4cc14d6650fe2156e559883c824464f5b5d`；evidence/state 待第二笔提交。真实浏览器装备旅程与 death producer
-仍未准出；BUILD02 必须从推送后的 source SHA 单独生成。
+状态：BUILD_GREEN_EVIDENCE_READY。精确 staged tree 的 UI/queue `33/33`、creative-mode/UI bridge `10/10`、
+Web/Svelte、root test、Classic test types、staged ESLint、format、scoped diff 均 PASS。代码/测试/spec/合同提交为
+`ff17b4cc14d6650fe2156e559883c824464f5b5d`，evidence/state 提交为
+`1bbe3a60d55ffa5d05e405377624fbbd942e6327`，已推送且 PR 已更新。BUILD02 从该 source SHA 的 clean tree
+唯一 build 与 artifact verify 均 PASS；build evidence/state 待独立提交。真实浏览器装备旅程与 death producer
+仍未准出。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
