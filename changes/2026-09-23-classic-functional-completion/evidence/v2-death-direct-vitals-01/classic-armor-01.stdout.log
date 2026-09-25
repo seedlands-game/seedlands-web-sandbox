@@ -1,0 +1,37 @@
+11:57:43 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts (6 tests | 1 failed) 60ms
+   × 死亡目标拒绝重复伤害且不磨损护甲 12ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts > 死亡目标拒绝重复伤害且不磨损护甲
+AssertionError: expected { success: true } to deeply equal { success: false, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "reason": "player-dead",
+-   "success": false,
++   "success": true,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts:108:58
+    106|   world.applyDamage('test', 'player', 100, 'test');
+    107|   const before = world.entities.actorStateAccess('player').armor;
+    108|   expect(world.applyDamage('test', 'player', 1, 'test')).toEqual({ suc…
+       |                                                          ^
+    109|   expect(world.entities.actorStateAccess('player').armor).toEqual(befo…
+    110| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  23:57:43
+   Duration  1.21s (transform 864ms, setup 0ms, import 1.08s, tests 60ms, environment 0ms)
+

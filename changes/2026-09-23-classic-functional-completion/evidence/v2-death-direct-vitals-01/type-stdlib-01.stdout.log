@@ -1,0 +1,9 @@
+$ tsc -p tsconfig.json --noEmit
+src/server/gameplay/gameplay-runtime.ts(484,7): error TS2345: Argument of type '(adjusted: any, armor: any) => GameplayResult' is not assignable to parameter of type '(amount: number) => GameplayResult'.
+  Target signature provides too few arguments. Expected 2 or more, but got 1.
+src/server/gameplay/gameplay-runtime.ts(484,8): error TS7006: Parameter 'adjusted' implicitly has an 'any' type.
+src/server/gameplay/gameplay-runtime.ts(484,18): error TS7006: Parameter 'armor' implicitly has an 'any' type.
+src/server/gameplay/gameplay-survival-settings.ts(37,36): error TS2554: Expected 1 arguments, but got 2.
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

@@ -1,0 +1,9 @@
+packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts 37ms (unchanged)
+packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts 8ms (unchanged)
+packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts 5ms (unchanged)
+packages/stdlib/src/server/gameplay/gameplay-runtime.ts 24ms (unchanged)
+packages/stdlib/tests/server/direct-vitals-death.test.ts 22ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 61ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md 5ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-direct-vitals-evidence.md 8ms
+changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/delivery-validation.json 6ms (unchanged)

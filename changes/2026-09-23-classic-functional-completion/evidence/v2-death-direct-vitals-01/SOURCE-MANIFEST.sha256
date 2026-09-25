@@ -1,0 +1,8 @@
+9b99c7b277c7f4bba08bd04de63b122dbf96df62561643689adf9db91030eb42  packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts
+6c489d90e7535d77d8d06b9e6df42623da4d4d150cf298450e08c5f8c3ec0a18  packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts
+076ff652d9b7a90f3199ff03a97e28b60e7ff9cf1bede34c1534cec16615044d  packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts
+e90cbc4b01d203be9a66be32db3e8cf016f67b97f39a5a9312a3615a1b0f0b74  packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+1318af27ce4cceb2cc54caaab00840fa8b8f54f48f6f3a394d42650c619d8e4f  packages/stdlib/tests/server/direct-vitals-death.test.ts
+2865752d30b66c6e6703f714ade29516a62c7903f219270eb8708e9f349cd6b9  changes/2026-09-23-classic-functional-completion/spec.md
+9cd6eec50777174c485e9d3ec8c70e8690d97ea229dd24524a72b6cc292944fd  changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md
+61d919fae2f507f6c719ddcb4781d41332cd5929ebc1cdd22304ed3df2757072  changes/2026-09-23-classic-functional-completion/death-direct-vitals-evidence.md

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-direct-vitals-diff-delivery-frozen",
+  "pid": 17507,
+  "startedAt": "2026-09-25T16:11:00.191Z",
+  "windowId": "v2-death-direct-vitals-diff-delivery-frozen",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/diff-delivery-frozen-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T16:11:00.790Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T16:11:00.192Z",
+      "loadAverage": [
+        3.66748046875,
+        3.701171875,
+        3.734375
+      ],
+      "freeMemoryBytes": 850690048,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T16:11:00.788Z",
+      "loadAverage": [
+        3.66748046875,
+        3.701171875,
+        3.734375
+      ],
+      "freeMemoryBytes": 862306304,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

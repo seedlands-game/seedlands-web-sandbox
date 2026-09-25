@@ -1,0 +1,2194 @@
+diff --git a/apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts b/apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts
+index 49fa043d..370e780a 100644
+--- a/apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts
++++ b/apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts
+@@ -157,7 +157,13 @@ describe('V2 equipment behavior RED', () => {
+       helmet: { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } },
+       chestplate: { itemId: 'iron-chestplate', count: 1, instance: { durability: 5 } },
+     });
+-    const result = prepareCombatDamage({ entities, targetId: 'target', damage: 3, actorDeathDrop: () => null });
++    const result = prepareCombatDamage({
++      entities,
++      targetId: 'target',
++      damage: 3,
++      deathInventory: { kind: 'legacy' },
++      actorDeathDrop: () => null,
++    });
+     result.entity!.validate();
+     result.entity!.apply();
+ 
+diff --git a/apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts b/apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts
+index e7af17f6..94dfe893 100644
+--- a/apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts
++++ b/apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts
+@@ -1,5 +1,5 @@
+ import { describe, expect, it } from 'vitest';
+-import { definePack, type ModModule } from '@seedlands/stdlib/mod-api';
++import { defineDeathInventoryPolicyModuleV1, definePack, type ModModule } from '@seedlands/stdlib/mod-api';
+ import {
+   assembleWorldPacks,
+   createGameplaySystemAuthority,
+@@ -23,15 +23,27 @@ function setup(
+   alias = 'test-player',
+   allowOrigins: boolean | (() => boolean) = true,
+ ) {
++  const deathPolicy = defineDeathInventoryPolicyModuleV1({
++    moduleId: 'test:registered-combat-death-policy',
++    definition: {
++      version: 1,
++      actors: {
++        player: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' },
++        creature: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
++        npc: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
++      },
++    },
++  });
++  const extensions = withCombat ? [deathPolicy, ...extra] : extra;
+   const modules = [
+     ...classicGameplayDomainModules(
+       [
+         'seedlands:inventory-actions-module',
+         'seedlands:mode-module',
+         ...(withCombat ? ['seedlands:overworld-combat-rules'] : []),
+-        ...extra.map((module) => module.descriptor.id),
++        ...extensions.map((module) => module.descriptor.id),
+       ],
+-      extra,
++      extensions,
+     ),
+   ];
+   const selected = definePack({ id: 'test:no-combat', version: '1.0.0', kind: 'playbook', modules });
+diff --git a/apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts b/apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts
+index 2b59fd63..da9be1fa 100644
+--- a/apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts
++++ b/apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts
+@@ -26,7 +26,13 @@ describe('detached Combat damage candidate', () => {
+       craftingGrid: [{ itemId: 'wood-block', count: 1 }, null, null, null],
+     });
+     const before = entities.exportComponentSnapshot();
+-    const result = prepareCombatDamage({ entities, targetId: 'target', damage: 9, actorDeathDrop: () => null });
++    const result = prepareCombatDamage({
++      entities,
++      targetId: 'target',
++      damage: 9,
++      deathInventory: { kind: 'legacy' },
++      actorDeathDrop: () => null,
++    });
+     expect(result.damage).toBe(3);
+     expect(result.deaths).toEqual(['target']);
+     expect(result.removals).toEqual([]);
+@@ -52,6 +58,7 @@ describe('detached Combat damage candidate', () => {
+       entities,
+       targetId: 'target',
+       damage: 3,
++      deathInventory: { kind: 'legacy' },
+       actorDeathDrop: () => ({ itemId: 'berry', count: 2 }),
+     });
+     expect(entities.get('target')).not.toBeNull();
+@@ -72,18 +79,22 @@ describe('detached Combat damage candidate', () => {
+         entities,
+         targetId: 'target',
+         damage: 3,
++        deathInventory: { kind: 'legacy' },
+         actorDeathDrop: () => {
+           throw new Error('drop-definition-failed');
+         },
+       }),
+     ).toThrow('drop-definition-failed');
+     expect(entities.exportComponentSnapshot()).toEqual(before);
+-    expect(prepareCombatDamage({ entities, targetId: 'target', damage: 0, actorDeathDrop: () => null })).toMatchObject({
+-      damage: 0,
+-      entity: null,
+-      deaths: [],
+-      removals: [],
+-    });
++    expect(
++      prepareCombatDamage({
++        entities,
++        targetId: 'target',
++        damage: 0,
++        deathInventory: { kind: 'legacy' },
++        actorDeathDrop: () => null,
++      }),
++    ).toMatchObject({ damage: 0, entity: null, deaths: [], removals: [] });
+     expect(entities.exportComponentSnapshot()).toEqual(before);
+   });
+ });
+diff --git a/changes/2026-09-23-classic-functional-completion/death-combat-contract.md b/changes/2026-09-23-classic-functional-completion/death-combat-contract.md
+new file mode 100644
+index 00000000..4598a0f1
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/death-combat-contract.md
+@@ -0,0 +1,52 @@
++# V2 Registered Combat Death 合同
++
++阶段：`V2-DEATH-COMBAT-INTEGRATION-01`
++状态：本片实现、确定性行为与静态 GREEN；Classic 接线和完整产品验收待后续阶段。
++
++## Owner 与选择
++
++- `RegisteredCombatRuntime` 在构造时从自己的 `WorldComposition` 解析一次只读
++  `seedlands:death-inventory-policy@1.0.0` capability；不向 `GameplayCallbacks` 增加策略，不创建第二状态 owner。
++- registered ruleset 继续决定合法 hit 的 raw damage、mode immunity 与 revision；现有 origin、authorization、
++  range、LOS、target lifetime 和 cancel 门禁不变。非致命命中继续使用 I2.1c 已验证的 health+armor 单 actor
++  replacement。
++- 只有实际 `alive -> dead` 时才按目标真实 `player | creature | npc` kind 调用 `policyFor`。composed world
++  缺 capability 时返回稳定 `death-inventory-policy-unavailable`，且在 combat plan、entity participant 与 effects
++  任一 apply 前拒绝；非致命命中不要求该 capability。
++- `prepareCombatDamage` 的私有调用合同必须用 discriminant 区分 `{ kind: 'legacy' }` 与
++  `{ kind: 'composed', capability }`；`capability: null` 不得回退到 legacy 默认。现有 uncomposed 直接调用显式
++  选择 legacy 兼容。
++
++## 单一事务与死亡语义
++
++- 致命命中先捕获原始 target reference、health 与完整 actor components 作为 source。I2.1c 的
++  `prepareArmorDamage` 已用命中前 points 得出实际伤害与 post-hit armor；settlement components 覆盖该 armor，
++  player 同时清空 `breakAction`。破损件不进入掉落，未破损件以命中后 durability 进入掉落或保留。
++- 仅调用一次 `buildDeathInventorySettlementCandidateV1` 与一次
++  `prepareDeathInventorySettlementSeriesV1`。player retain/dead；NPC/creature 按 policy retain/dead 或 despawn。
++  bag、cursor、crafting、armor 按 policy 每个实例恰好一次。
++- `actorDeathDrop` 是 inventory settlement 之外的 intrinsic drop，只求值一次，并作为同一 series 的末尾 spawn
++  加入；不得与 actor inventory 重复。`deaths` 固定来自实际致死，`removals` 从 candidate 的 despawn 结果推导。
++- 所有 combat/action/perception/entity participants 必须先全部 validate 再按既有 commit 顺序 apply。source
++  health/components/revision、actor lifetime/epoch、allocator/capacity 或 effects 任一 stale，以及 abandon/cancel，
++  都不得部分提交 health、armor、inventory revision、drops、combat result 或 receipt。重复攻击已死/已移除目标
++  不得增加 drop。
++
++## 测试与边界
++
++- 可执行 RED 使用非 Classic `sample:*` content、正式 registered request→resolve 与显式 policy capability；
++  必须实际到达 lethal host，失败在 drop/retain/missing-policy 行为，不使用 missing import/collection。
++- GREEN 至少覆盖：player drop+retain、NPC drop+despawn、bag/cursor/crafting/armor、命中后 durability 与破损、
++  intrinsic 恰一次、revision 一次、receipt/lastResult/health 一致；missing policy、无装备非致命、invalid target、
++  unauthorized、resolve rule cancel、prepare 后 component/revision/lifetime/effects stale、capacity 与 abandon。
++- 既有 legacy prepared damage 测试显式选择 legacy，并继续保持旧行为；共享 death RED 可适配为显式 policy
++  的纯模型用例，但不能替代 registered producer RED。Needs/Vitals/Autonomy 混合 death series、Classic policy
++  安装、UI、Browser/Cua、build、CI 均不在本阶段。
++
++## 预算与停止线
++
++- 传统工程量 1-1.5 PD；AI 连续墙钟预计 3-5 小时，阶段硬上限 6 小时；120% 保守建议 1.2-1.8 PD、
++  3.6-6 小时。
++- credits、API 等价费用、费率、当前额度分母与占比均 unknown，不伪造换算。
++- 若必须修改 public protocol/projection/exports、composition root、Classic policy 或其他 death producer 才能
++  完成，保留 RED 并交 root 裁决，不越域实施。
+diff --git a/changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md b/changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md
+new file mode 100644
+index 00000000..16c0e04f
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/death-direct-vitals-contract.md
+@@ -0,0 +1,49 @@
++# V2 Direct Vitals Death 合同
++
++阶段：`V2-DEATH-DIRECT-VITALS-01`
++状态：本片实现、确定性行为与静态 GREEN；Classic 策略安装及其他 death producer 待后续阶段。
++
++## Owner 与入口
++
++- `GameplayRuntime.applyDamage` 保持唯一 direct player damage facade：difficulty 先调整 hostile damage，survival
++  正伤害再调用通用 `prepareArmorDamage`。facade 不再在 Vitals 成功后 `replaceArmor`；它把实际 damage 与完整
++  post-hit armor 一起交给同一个 `ActorVitalsRuntime` transaction。
++- `createGameplayDomainAdapters` 在构造 Vitals 时只解析一次 `callbacks.composition` 的只读 death inventory policy
++  capability。无 composition 明确传 `{ kind: 'legacy' }`；有 composition 明确传
++  `{ kind: 'composed', capability }`，其中 `null` 不得回退 legacy。不得增加外部可变 policy callback 或 Classic ID
++  switch。
++- Vitals 只处理 player。heal、nonfatal damage、creative immunity 与 uncomposed `advanceNeeds` 保持既有 owner；
++  不接 NPC/creature death、不修改 registered Needs state port。
++
++## 单一事务
++
++- 每次 commit 先捕获原始 actor reference、health 与完整 components。nonfatal proposed components 可同时包含
++  needs 与 post-hit armor，并通过一次 `PreparedEntityMutation` actor replacement 写入；armor 实质变化由既有 owner
++  统一令 `inventoryRevision +1`。
++- composed alive→dead 使用原始 snapshot 作 settlement source；post-hit armor、拟提交 needs 与
++  `player.breakAction=null` 作 settlement components。按 `policyFor('player')` 构造一次 candidate，并只准备一个
++  settlement entity participant。破损 armor 不掉落；未破损件以命中后 durability 掉落或保留。
++- legacy lethal 明确保留当前 player 兼容：inventory、cursor、crafting 掉落并清空，actor retain/dead，armor 使用
++  post-hit replacement 但不加入 legacy drops。composed 缺 capability 的 lethal 返回
++  `{ success:false, reason:'death-inventory-policy-unavailable' }`；`advanceNeeds` 无返回通道时抛同名 Error，均零写。
++- lethal 同时调用一次真实 `simulation.prepareDeaths([id])`。entity 与 effects 必须全部 validate 后才首次 apply；按
++  既有 Needs 安全顺序 entity→effects→touch。禁止事后 `cancelCombat/cancelTarget/unregister`，也不创建第二 Action、
++  Combat 或 perception owner。
++
++## 失败与测试
++
++- source component/revision、entity epoch/lifetime/allocator/capacity 或 effects frontier 任一 stale，以及 prepared
++  candidate abandon，都不得部分写 health、needs、armor、bag、cursor、crafting、drop、combat、Action、perception 或
++  gameplay revision。重复 dead damage 不新增 drop。
++- 正式 RED 使用非 Classic composition 与 `GameplayRuntime.applyDamage`：drop policy 下现实现不掉 post-hit armor 且
++  revision 分步推进；retain policy 被忽略；missing policy lethal 被接受。测试必须正常 collection 并实际到达 Vitals。
++- GREEN 覆盖 composed drop/retain/no-policy、post-hit 破损与耐久、单 revision、combat/action cancellation、source/
++  lifetime/capacity/effects stale、abandon、nonfatal/creative、legacy lethal、heal 与 `advanceNeeds` 回归。已有
++  `gameplay-atomic-vitals` 继续覆盖真实 allocator failure；新增测试不得把真实 effects participant 替成 no-op。
++
++## 预算与停止线
++
++- 传统工程量 1–1.5 PD；AI 连续墙钟预计 3–5 小时，硬上限 6 小时；120% 保守建议 1.2–1.8 PD、3.6–6 小时。
++- credits、API 等价费用、费率、当前额度分母与占比均 unknown，不伪造换算。
++- 若必须修改公共 death settlement、registered combat、Needs/Autonomy producer、Classic pack、public exports 或
++  persistence schema 才能完成，保留 RED 并交 root 裁决，不越域实施。
+diff --git a/changes/2026-09-23-classic-functional-completion/death-mixed-series-contract.md b/changes/2026-09-23-classic-functional-completion/death-mixed-series-contract.md
+new file mode 100644
+index 00000000..dca382c0
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/death-mixed-series-contract.md
+@@ -0,0 +1,80 @@
++# Death mixed series 合同
++
++阶段：`V2-DEATH-MIXED-SERIES-01 + PREDECESSOR-CAPTURE`  
++基线：`9f5a6ff49cccb1e5ecb9fae9ae0ab9277f42769e`
++
++## 公共输入
++
++`prepareDeathInventorySettlementSeriesV1(entities, input)` 保持至少一个
++`DeathInventorySettlementCandidateV1`，并新增可选
++`additionalActorReplacements: readonly DeathInventoryAdditionalActorReplacementV1[]`。每项精确包含：
++
++```ts
++type DeathInventoryAdditionalActorReplacementV1 = Readonly<{
++  source: DeathInventorySettlementSourceV1;
++  replacement: PreparedActorReplacement;
++}>;
++```
++
++`source` 是调度前的权威 frontier，包含 lifetime reference、health 和完整 actor components；
++`replacement` 是同一 actor 的拟存活状态，可携带既有 actor replacement 的可选 position/physics velocity。构造过程
++复制并冻结 source 与 replacement，调用者后续修改不影响 prepared mutation。additional replacement 必须保持
++`health > 0` 且 `lifecycle === 'alive'`；死亡、despawn、
++inventory drop 和 intrinsic drop 只能经 policy-governed death candidate 与已有 `intrinsicDrops` 输入表达。
++
++## 原子与失败边界
++
++- additional replacements、death replacements/despawns、所有容器 drops 和 intrinsic drops 按确定顺序合并，
++  每段仍最多 `128` entries，且只调用一次 `prepareEntityMutationSeries`。既有 `192` segments 总预算不变。
++- additional source 使用与 death candidate 相同的完整 freshness：reference/epoch/lifetime、health、needs、armor、
++  inventory/cursor revision 和完整 components 必须仍与权威 ECS 一致。prepare 后继续由底层 series 校验 owner、
++  epoch、sequence、lifetime/order high-water 与所有 touched snapshots。
++- source 与 replacement reference 必须完全一致；additional 与 death candidates 跨集合不得重复 actor；
++  replacement/despawn 互斥由 death candidate 保持。additional 只接受完整 `PreparedActorReplacement` 的字段，
++  可选 position/physics velocity 复制冻结；它不接受 spawn、despawn 或其他绕过字段。
++- 任一 source stale、非法附加字段、伪死亡 replacement、跨集合冲突、最终 spawn capacity 或 series 总预算失败，
++  都在 apply 前失败且 survivor、dead actor、drops、inventory revision 与 allocator 均零写。
++- 该接口只服务“至少有一个死亡”的混合批次。没有死亡的调用方继续使用普通
++  `prepareEntityMutationSeries`，不把通用 actor update 反向塞入 death owner。
++
++## Producer 边界
++
++本片不接 Needs、Vitals、registered Combat、Autonomy 或 GameplayRuntime。后续 Needs producer 可把同一 schedule
++中的存活 player/NPC needs update 放入 `additionalActorReplacements`，但仍须维持非 player health/lifecycle readonly；
++player death 才进入 policy candidate。Autonomy effects 必须与返回的唯一 entity series 先全部 validate、再 apply，
++不得两个 participant 先后 apply 冒充原子。
++
++## Pre-death V4 身份
++
++在修改 Classic Pack 前，从保留 clean BUILD02 tree 的已验证 Pack bytes 实际 load+assemble 捕获完整
++`CompositionCheckpointIdentity`：
++
++- source SHA：`1bbe3a60d55ffa5d05e405377624fbbd942e6327`；tree：
++  `4d70cef0e00c8617290159e1aa83a685126b1fc4`。
++- artifact receipt SHA-256：`aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a`；
++  packs.lock SHA-256：`fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332`。
++- Pack manifest：`14e53b01e8c31a80d10bcb4109d3e3c13abe69b046b60f2ebc80bbd9f585bcb3`；
++  entry：`4b12ea606bd12dc62e74ea40e5e90678231cf866fecd2ce2a97eea3a21c38142`。
++- canonical identity：`39998` bytes，SHA-256
++  `e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a`，包含 `22` modules、
++  `28` capabilities。完整 literal 在 `evidence/v2-death-mixed-series-01/pre-death-v4-identity.json`。
++
++捕获使用 clean tree 自带 `scripts/pack-integrity.mjs` 校验并加载 `packs.lock.json` 和 entry bytes，再把同一
++clean tree 的 assembly/canonicalizer 通过 esbuild `write:false` 仅在内存转译后执行。捕获前后 tree 均 clean，未重建
++或修改 artifact。未来 Classic 安装必须把该完整 literal 作为 `gameplayVersions: [4]` 的 exact predecessor；不得只拼
++digest，也不得从新 target 动态删除 death capability。现有 pre-Media target 剥离逻辑需在后续 Classic 串行阶段验证，
++本片不改 migration。
++
++## Done When 与预算
++
++- 可执行 RED 证明旧 API 会忽略 survivor replacement；GREEN 覆盖 mixed success、detach、stale、冲突、非法绕过、
++  capacity 零写、跨 128 entries，并保留既有 death policy/series/equipment 合同。
++- stdlib、root test、Classic test types，精确 ESLint/Prettier/scoped diff 通过；原始失败和 window receipts 全部保留。
++- 传统人工估算：`1.5-2.0 PD`；AI 活跃预算：`3-5h`，保守 `x120%` 上限 `6h`。实际工时在 evidence 回填。
++  credits、API 等价费率、当前额度及分母均为 `unknown`，不伪造换算或占比。
++- 不改长期 docs：本片只是当前 change 内已冻结 stdlib transaction 细化，不改变 Kernel/stdlib/Playbook/Web owner。
++
++## 明确未完成
++
++Classic policy 安装和 predecessor 声明、pre-Media 迁移适配、GameplayRuntime resolver/wiring、Needs/Vitals/Combat/
++Autonomy producer、Browser/Cua、build、CI、Git/提交/推送均不属于本片。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index c6b66c97..400d4422 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -120,6 +120,20 @@ equipment 当目标，collect 不以 equipment 为 source。每个出队动作
+ 绑定发起时 actor/station identity；失败不写 UI 第二状态或伪造装备。纯 creative catalog 不自行开放装备权限。
+ 本片不改变 stdlib/protocol/Classic content、combat/death policy、坐标、timeout 或 Harness。
+ 
++V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
++解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
++命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
++crafting、armor、drop、NPC intrinsic drop 合并到一次 death settlement series participant。composed 缺策略须
++稳定返回 `death-inventory-policy-unavailable` 且 resolve/combat/entity/effects 零提交；legacy uncomposed 调用必须
++显式选择兼容路径。本片不安装 Classic policy，不接 Needs/Vitals/Autonomy 其他 death producer。
++
++V2 direct Vitals death 子片冻结 `death-direct-vitals-contract.md`：`GameplayRuntime.applyDamage` 仍先执行难度与
++通用 armor policy，但 post-hit armor 必须作为 Vitals 的 proposed components，与 health、needs、四容器 death
++settlement 进入同一 prepared entity participant；不再在成功后另写 armor。致命 player 同时预备既有
++`prepareDeaths([id])` effects，entity/effects 全部 validate 后才首次写入。composed 缺 death policy 稳定
++`death-inventory-policy-unavailable` 且零提交；nonfatal 正常，uncomposed legacy 显式保留。本片只处理 player
++direct damage/legacy needs facade，不改 registered combat、Needs schedule、非 player producer 或 Classic policy。
++
+ ### 结构、攀爬、路线和载具
+ 
+ - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
+diff --git a/packages/stdlib/src/server/composition/mod-api.ts b/packages/stdlib/src/server/composition/mod-api.ts
+index 7cece21c..3f25c2a5 100644
+--- a/packages/stdlib/src/server/composition/mod-api.ts
++++ b/packages/stdlib/src/server/composition/mod-api.ts
+@@ -224,6 +224,7 @@ export {
+   prepareDeathInventorySettlementSeriesV1,
+ } from '../gameplay/death-inventory-settlement';
+ export type {
++  DeathInventoryAdditionalActorReplacementV1,
+   DeathInventoryDropIntentV1,
+   DeathInventoryDropSourceV1,
+   DeathInventoryIntrinsicDropV1,
+diff --git a/packages/stdlib/src/server/gameplay/death-inventory-settlement.ts b/packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
+index 3881a0f1..50cde222 100644
+--- a/packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
++++ b/packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
+@@ -58,6 +58,13 @@ export type DeathInventorySettlementCandidateV1 = Readonly<{
+   dropIntents: readonly DeathInventoryDropIntentV1[];
+ }>;
+ 
++export type DeathInventoryAdditionalActorReplacementV1 = Readonly<{
++  /** Authoritative pre-schedule frontier, detached by the mixed-series preparer. */
++  source: DeathInventorySettlementSourceV1;
++  /** Proposed living state only; death and despawn must use a policy-governed candidate. */
++  replacement: PreparedActorReplacement;
++}>;
++
+ const isRecord = (raw: unknown): raw is Record<string, unknown> => {
+   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+   const prototype = Object.getPrototypeOf(raw);
+@@ -78,6 +85,25 @@ const exactRecord = (raw: unknown, keys: readonly string[], label: string): Reco
+   return raw;
+ };
+ 
++const exactOptionalRecord = (
++  raw: unknown,
++  required: readonly string[],
++  optional: readonly string[],
++  label: string,
++): Record<string, unknown> => {
++  if (!isRecord(raw)) throw new TypeError(`${label} is invalid.`);
++  const descriptors = Object.getOwnPropertyDescriptors(raw);
++  const allowed = [...required, ...optional];
++  if (
++    Reflect.ownKeys(descriptors).some(
++      (key) => typeof key !== 'string' || !allowed.includes(key) || !('value' in descriptors[key]!),
++    ) ||
++    required.some((key) => !Object.hasOwn(descriptors, key))
++  )
++    throw new TypeError(`${label} is invalid.`);
++  return raw;
++};
++
+ const frozenReference = (reference: EntityLifetimeReference): EntityLifetimeReference => {
+   const raw = exactRecord(reference, ['entityId', 'epoch', 'lifetime'], 'Death inventory actor reference');
+   if (
+@@ -314,17 +340,21 @@ function assertDense(entries: readonly unknown[], label: string): void {
+     if (!Object.hasOwn(entries, index)) throw new TypeError(`${label} must be dense.`);
+ }
+ 
+-function sourceIsFresh(entities: EntityStore, candidate: DeathInventorySettlementCandidateV1): void {
+-  if (!candidate || candidate.version !== 1)
+-    throw new TypeError('Death inventory settlement candidate version is invalid.');
+-  const reference = candidate.source?.actorReference;
++function sourceIsFresh(entities: EntityStore, source: DeathInventorySettlementSourceV1): void {
++  const reference = source?.actorReference;
+   if (!reference || !entities.resolveReference(reference))
+     throw new Error('Death inventory settlement actor reference is stale.');
+   const entity = entities.get(reference.entityId);
+-  if (!entity || entity.health !== candidate.source.health)
+-    throw new Error('Death inventory settlement actor health is stale.');
+-  if (!sameSnapshot(entities.actorComponentSnapshot(reference.entityId), candidate.source.components))
++  if (!entity || entity.health !== source.health) throw new Error('Death inventory settlement actor health is stale.');
++  if (!sameSnapshot(entities.actorComponentSnapshot(reference.entityId), source.components))
+     throw new Error('Death inventory settlement actor component source is stale.');
++}
++
++function validateCandidate(entities: EntityStore, candidate: DeathInventorySettlementCandidateV1): void {
++  if (!candidate || candidate.version !== 1)
++    throw new TypeError('Death inventory settlement candidate version is invalid.');
++  const reference = candidate.source?.actorReference;
++  sourceIsFresh(entities, candidate.source);
+   if (Boolean(candidate.actorReplacement) === Boolean(candidate.despawnReference))
+     throw new TypeError('Death inventory settlement actor replacement and despawn are invalid.');
+   const targetReference = candidate.actorReplacement?.reference ?? candidate.despawnReference!;
+@@ -332,6 +362,56 @@ function sourceIsFresh(entities: EntityStore, candidate: DeathInventorySettlemen
+     throw new TypeError('Death inventory settlement target does not match its source.');
+ }
+ 
++function validateAdditionalActorReplacement(
++  entities: EntityStore,
++  input: DeathInventoryAdditionalActorReplacementV1,
++): PreparedActorReplacement {
++  const value = exactRecord(input, ['source', 'replacement'], 'Death inventory additional actor replacement');
++  const rawSource = exactRecord(
++    value.source,
++    ['actorReference', 'health', 'components'],
++    'Death inventory settlement source',
++  );
++  const source = Object.freeze({
++    actorReference: frozenReference(rawSource.actorReference as EntityLifetimeReference),
++    health: rawSource.health as number,
++    components: frozenActorSnapshot(rawSource.components as ActorComponentSnapshot),
++  });
++  if (!Number.isFinite(source.health) || source.health <= 0 || source.components.lifecycle !== 'alive')
++    throw new TypeError('Death inventory additional actor source must be alive.');
++  if (source.components.entityId !== source.actorReference.entityId)
++    throw new TypeError('Death inventory actor snapshot is invalid.');
++  sourceIsFresh(entities, source);
++
++  const replacementValue = exactOptionalRecord(
++    value.replacement,
++    ['reference', 'health', 'components'],
++    ['position', 'physicsVelocity'],
++    'Death inventory additional actor replacement value',
++  );
++  const copiedPosition = (field: 'position' | 'physicsVelocity') => {
++    const raw = replacementValue[field];
++    return raw === undefined ? undefined : frozenPosition(raw as readonly [number, number, number]);
++  };
++  const position = copiedPosition('position');
++  const physicsVelocity = copiedPosition('physicsVelocity');
++  const replacement = Object.freeze({
++    reference: frozenReference(replacementValue.reference as EntityLifetimeReference),
++    health: replacementValue.health as number,
++    components: frozenActorSnapshot(replacementValue.components as ActorComponentSnapshot),
++    ...(position ? { position } : {}),
++    ...(physicsVelocity ? { physicsVelocity } : {}),
++  });
++  if (!Number.isFinite(replacement.health) || replacement.health <= 0 || replacement.components.lifecycle !== 'alive')
++    throw new TypeError('Death inventory additional actor replacement must remain alive.');
++  if (
++    replacement.components.entityId !== replacement.reference.entityId ||
++    !sameSnapshot(replacement.reference, source.actorReference)
++  )
++    throw new TypeError('Death inventory additional actor replacement does not match its source.');
++  return replacement;
++}
++
+ const worldItemSpawn = (drop: DeathInventoryIntrinsicDropV1 | DeathInventoryDropIntentV1): PreparedWorldItemSpawn =>
+   Object.freeze({ position: frozenPosition(drop.position), stack: frozenStack(drop.stack) as ItemStack });
+ 
+@@ -370,24 +450,43 @@ export function prepareDeathInventorySettlementSeriesV1(
+   entities: EntityStore,
+   input: Readonly<{
+     candidates: readonly DeathInventorySettlementCandidateV1[];
++    additionalActorReplacements?: readonly DeathInventoryAdditionalActorReplacementV1[];
+     intrinsicDrops?: readonly DeathInventoryIntrinsicDropV1[];
+   }>,
+ ): PreparedEntityMutation {
+-  if (!input || typeof input !== 'object') throw new TypeError('Death inventory settlement series input is invalid.');
+-  const candidates = input.candidates;
+-  const intrinsicDrops = input.intrinsicDrops ?? [];
++  const value = exactOptionalRecord(
++    input,
++    ['candidates'],
++    ['additionalActorReplacements', 'intrinsicDrops'],
++    'Death inventory settlement series input',
++  );
++  const candidates = value.candidates as readonly DeathInventorySettlementCandidateV1[];
++  const additionalActorReplacements =
++    (value.additionalActorReplacements as readonly DeathInventoryAdditionalActorReplacementV1[] | undefined) ?? [];
++  const intrinsicDrops = (value.intrinsicDrops as readonly DeathInventoryIntrinsicDropV1[] | undefined) ?? [];
+   assertDense(candidates, 'Death inventory settlement candidates');
++  assertDense(additionalActorReplacements, 'Death inventory additional actor replacements');
+   assertDense(intrinsicDrops, 'Death inventory intrinsic drops');
+   if (candidates.length < 1) throw new RangeError('Death inventory settlement requires at least one candidate.');
+ 
+   const actorIds = new Set<string>();
++  const additionalActors = additionalActorReplacements.map((entry) => {
++    const replacement = validateAdditionalActorReplacement(entities, entry);
++    const id = replacement.reference.entityId;
++    if (actorIds.has(id)) throw new TypeError(`Death inventory settlement contains a duplicate actor: ${id}`);
++    actorIds.add(id);
++    return replacement;
++  });
+   for (const candidate of candidates) {
+-    sourceIsFresh(entities, candidate);
++    validateCandidate(entities, candidate);
+     const id = candidate.source.actorReference.entityId;
+     if (actorIds.has(id)) throw new TypeError(`Death inventory settlement contains a duplicate actor: ${id}`);
+     actorIds.add(id);
+   }
+-  const actors = candidates.flatMap((candidate) => (candidate.actorReplacement ? [candidate.actorReplacement] : []));
++  const actors = [
++    ...additionalActors,
++    ...candidates.flatMap((candidate) => (candidate.actorReplacement ? [candidate.actorReplacement] : [])),
++  ];
+   const despawns = candidates.flatMap((candidate) => (candidate.despawnReference ? [candidate.despawnReference] : []));
+   const spawns = [
+     ...candidates.flatMap((candidate) => candidate.dropIntents.map(worldItemSpawn)),
+diff --git a/packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts b/packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts
+index 8e526e7b..64ed72fd 100644
+--- a/packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts
++++ b/packages/stdlib/src/server/gameplay/gameplay-domain-adapters.ts
+@@ -6,6 +6,7 @@ import type { GameplayContent } from './gameplay-content';
+ import type { GameplayCallbacks } from './gameplay-runtime-contracts';
+ import type { PlayerState } from './player-state';
+ import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
++import { resolveDeathInventoryPolicyCapabilityV1 } from './modules/death-inventory-policy-module';
+ 
+ /** Existing domain facades share the same instance owners, including uncomposed test hosts. */
+ export function createGameplayDomainAdapters(
+@@ -20,6 +21,12 @@ export function createGameplayDomainAdapters(
+   }>,
+ ) {
+   const { entities, content, callbacks, player, simulation, assertCanChange, changed } = options;
++  const deathInventory = callbacks.composition
++    ? {
++        kind: 'composed' as const,
++        capability: resolveDeathInventoryPolicyCapabilityV1(callbacks.composition),
++      }
++    : { kind: 'legacy' as const };
+   const inventory = new ActorInventoryRuntime({
+     actor: (id) => entities.actorStateAccess(id),
+     recipes: content.recipes,
+@@ -34,10 +41,8 @@ export function createGameplayDomainAdapters(
+   const vitals = new ActorVitalsRuntime({
+     player: player,
+     assertCanChange: assertCanChange,
+-    assertCanCancelCombat: (id) => simulation().assertCanCancelCombat(id),
+-    cancelCombat: (id) => {
+-      simulation().cancelCombat(id, 'attacker-dead');
+-    },
++    prepareDeaths: (ids) => simulation().prepareDeaths(ids),
++    deathInventory,
+     touch: (event) => changed(false, event),
+     entities: entities,
+   });
+diff --git a/packages/stdlib/src/server/gameplay/gameplay-runtime.ts b/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+index a16cb6e8..ffc39535 100644
+--- a/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
++++ b/packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+@@ -481,7 +481,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
+       this.content.items,
+       actorId,
+       amount,
+-      (adjusted) => this.vitals.applyDamage(actorId, playerId, adjusted, cause),
++      (adjusted, armor) => this.vitals.applyDamage(actorId, playerId, adjusted, cause, armor),
+     );
+   equipSelectedArmor = (playerId: string) =>
+     equipArmor(this.entities.actorStateAccess(playerId), this.content.items, () => this.touch());
+diff --git a/packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts b/packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts
+index 093f815f..38e0163f 100644
+--- a/packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts
++++ b/packages/stdlib/src/server/gameplay/gameplay-survival-settings.ts
+@@ -5,6 +5,7 @@ import { setSpawnFromBed } from './bed-action';
+ import { DifficultyRuntime, hostileActorsForPeaceful, type Difficulty } from './difficulty-runtime';
+ import { prepareArmorDamage, equipSelectedArmor } from './armor-equipment';
+ import type { ActorComponentAccess } from './ecs-actor-components';
++import type { ArmorEquipment } from './ecs-actor-armor-state';
+ import type { ItemDefinitionRegistry } from './item-registry';
+ 
+ type Position = [number, number, number];
+@@ -28,14 +29,12 @@ export const applySurvivalDamage = (
+   items: ItemDefinitionRegistry,
+   actorId: string,
+   amount: number,
+-  apply: (amount: number) => GameplayResult,
++  apply: (amount: number, armor?: ArmorEquipment) => GameplayResult,
+ ) => {
+   if (!Number.isFinite(amount) || amount <= 0 || target.mode !== 'survival') return apply(amount);
+   return applyDifficultyDamage(difficulty, simulation, actorId, amount, (adjusted) => {
+     const candidate = prepareArmorDamage(target, items, adjusted);
+-    const result = apply(candidate.damage);
+-    if (result.success) target.replaceArmor(candidate.armor);
+-    return result;
++    return apply(candidate.damage, candidate.armor);
+   });
+ };
+ 
+diff --git a/packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts b/packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts
+index f47a696f..c524d2b2 100644
+--- a/packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts
++++ b/packages/stdlib/src/server/gameplay/modules/actor-vitals-runtime.ts
+@@ -2,28 +2,49 @@ import type { GameplayResult } from '../gameplay-runtime';
+ import type { PlayerState } from '../player-state';
+ import type { EntityStore } from '../entity-store';
+ import type { ActorComponentSnapshot } from '../ecs-actor-components';
+-import { prepareEntityMutation } from '../prepared-entity-mutation';
++import type { ArmorEquipment } from '../ecs-actor-armor-state';
++import { prepareEntityMutation, type PreparedEntityMutation } from '../prepared-entity-mutation';
+ import { advancePlayerNeeds } from './needs-runtime';
+ import { emptyInventoryCursor } from './inventory-pointer-contract';
++import {
++  buildDeathInventorySettlementCandidateV1,
++  prepareDeathInventorySettlementSeriesV1,
++} from '../death-inventory-settlement';
++import type { DeathInventoryPolicyCapabilityV1 } from './death-inventory-policy-module';
++
++type ActorVitalsDeathInventoryMode =
++  Readonly<{ kind: 'legacy' }> | Readonly<{ kind: 'composed'; capability: DeathInventoryPolicyCapabilityV1 | null }>;
++
++type PreparedEffect = Readonly<{ validate(): void; apply(): void }>;
+ 
+ export class ActorVitalsRuntime {
+   constructor(
+     private readonly options: Readonly<{
+       player(id: string): PlayerState;
+       assertCanChange(): void;
+-      assertCanCancelCombat(id: string): void;
+-      cancelCombat(id: string): void;
++      prepareDeaths(ids: readonly string[]): PreparedEffect;
++      deathInventory: ActorVitalsDeathInventoryMode;
+       touch(event?: boolean): void;
+       entities: EntityStore;
+     }>,
+   ) {}
+-  applyDamage(_actorId: string, playerId: string, amount: number, _cause: string): GameplayResult {
++  applyDamage(
++    _actorId: string,
++    playerId: string,
++    amount: number,
++    _cause: string,
++    armor?: ArmorEquipment,
++  ): GameplayResult {
+     const player = this.options.player(playerId);
+     if (!Number.isFinite(amount) || amount <= 0) return { success: false, reason: 'invalid-damage' };
+     if (player.lifecycle === 'dead') return { success: false, reason: 'player-dead' };
+     if (player.mode === 'creative') return { success: true };
+-    this.commit(playerId, Math.max(0, player.health - amount), this.options.entities.actorComponentSnapshot(playerId));
+-    return { success: true };
++    const components = this.options.entities.actorComponentSnapshot(playerId);
++    return this.commit(
++      playerId,
++      Math.max(0, player.health - amount),
++      armor ? { ...components, equipment: { ...components.equipment, armor } } : components,
++    );
+   }
+ 
+   advanceNeeds(id: string, seconds: number): void {
+@@ -34,7 +55,7 @@ export class ActorVitalsRuntime {
+       candidate.lifecycle = 'dead';
+     });
+     const components = this.options.entities.actorComponentSnapshot(id);
+-    this.commit(
++    const result = this.commit(
+       id,
+       candidate.health,
+       {
+@@ -49,19 +70,53 @@ export class ActorVitalsRuntime {
+       },
+       false,
+     );
++    if (!result.success) throw new Error(result.reason);
+   }
+ 
+-  private commit(id: string, health: number, components: ActorComponentSnapshot, event = true): void {
++  private commit(id: string, health: number, components: ActorComponentSnapshot, event = true): GameplayResult {
+     const dead = health === 0;
+     const entity = this.options.entities.get(id)!;
++    if (dead && this.options.deathInventory.kind === 'composed' && !this.options.deathInventory.capability)
++      return { success: false, reason: 'death-inventory-policy-unavailable' };
+     this.options.assertCanChange();
+-    if (dead) this.options.assertCanCancelCombat(id);
++    const reference = this.options.entities.createReference(id)!;
++    const sourceComponents = this.options.entities.actorComponentSnapshot(id);
++    let prepared: PreparedEntityMutation;
++    if (dead && this.options.deathInventory.kind === 'composed') {
++      const settlementComponents = {
++        ...components,
++        player: { ...components.player!, breakAction: null },
++      };
++      const candidate = buildDeathInventorySettlementCandidateV1({
++        source: { actorReference: reference, health: entity.health!, components: sourceComponents },
++        position: entity.position,
++        settlementComponents,
++        policy: this.options.deathInventory.capability!.policyFor('player'),
++      });
++      prepared = prepareDeathInventorySettlementSeriesV1(this.options.entities, { candidates: [candidate] });
++    } else {
++      prepared = this.prepareLegacyMutation(reference, health, components, entity.position, dead);
++    }
++    const effects = dead ? this.options.prepareDeaths([id]) : null;
++    prepared.validate();
++    effects?.validate();
++    prepared.apply();
++    effects?.apply();
++    this.options.touch(event);
++    return { success: true };
++  }
++
++  private prepareLegacyMutation(
++    reference: NonNullable<ReturnType<EntityStore['createReference']>>,
++    health: number,
++    components: ActorComponentSnapshot,
++    position: readonly [number, number, number],
++    dead: boolean,
++  ) {
+     const cursorStack = components.inventoryCursor?.stack;
+     const interactionItems = [cursorStack, ...(components.inventoryCursor?.craftingGrid ?? [])];
+     const spawns = dead
+-      ? [...components.inventory, ...interactionItems].flatMap((stack) =>
+-          stack ? [{ position: entity.position, stack }] : [],
+-        )
++      ? [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [{ position, stack }] : []))
+       : [];
+     const candidate = dead
+       ? {
+@@ -74,26 +129,21 @@ export class ActorVitalsRuntime {
+           player: { ...components.player!, breakAction: null },
+         }
+       : components;
+-    const prepared = prepareEntityMutation(this.options.entities, {
+-      actors: [{ reference: this.options.entities.createReference(id)!, health, components: candidate }],
++    return prepareEntityMutation(this.options.entities, {
++      actors: [{ reference, health, components: candidate }],
+       spawns,
+     });
+-    prepared.validate();
+-    prepared.apply();
+-    if (dead) this.options.cancelCombat(id);
+-    this.options.touch(event);
+   }
+ 
+   healPlayer(playerId: string, amount: number): GameplayResult {
+     const player = this.options.player(playerId);
+     if (player.lifecycle === 'dead') return { success: false, reason: 'player-dead' };
+     if (!Number.isFinite(amount) || amount <= 0) return { success: false, reason: 'invalid-heal' };
+-    this.commit(
++    return this.commit(
+       playerId,
+       Math.min(player.maxHealth, player.health + amount),
+       this.options.entities.actorComponentSnapshot(playerId),
+     );
+-    return { success: true };
+   }
+ 
+   setHungerForDebug(playerId: string, hunger: number): void {
+diff --git a/packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts b/packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts
+index df77ca98..07998f79 100644
+--- a/packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts
++++ b/packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts
+@@ -19,6 +19,10 @@ import type { CombatRequestResult, PreparedCombatMutation } from '../combat-runt
+ import { prepareArmorDamage } from '../armor-equipment';
+ import { prepareCombatDamage } from '../prepared-combat-damage';
+ import type { PreparedEntityMutation } from '../prepared-entity-mutation';
++import {
++  resolveDeathInventoryPolicyCapabilityV1,
++  type DeathInventoryPolicyCapabilityV1,
++} from './death-inventory-policy-module';
+ import type { ActionRuntime } from '../../simulation/action-runtime';
+ import type { CombatAutonomyEffects } from '../../simulation/prepared-combat-effects';
+ import { createCombatStatePort } from './combat-state-port';
+@@ -56,8 +60,10 @@ export class RegisteredCombatRuntime {
+   readonly environment;
+   readonly state;
+   readonly enabled: boolean;
++  private readonly deathInventoryPolicy: DeathInventoryPolicyCapabilityV1 | null;
+   constructor(private readonly options: Options) {
+     this.environment = createCombatHostEnvironment(options);
++    this.deathInventoryPolicy = resolveDeathInventoryPolicyCapabilityV1(options.composition);
+     this.enabled = [COMBAT_REQUEST_OPERATION, COMBAT_RESOLVE_OPERATION, COMBAT_ADVANCE_OPERATION].every((id) =>
+       options.composition.registrations.operations.some(({ definition }) => definition.id === id),
+     );
+@@ -227,13 +233,21 @@ export class RegisteredCombatRuntime {
+       !reason && candidate.damage > 0 && target.mode === 'survival'
+         ? prepareArmorDamage(target, this.options.content.items, candidate.damage)
+         : null;
++    const effectiveDamage = armor?.damage ?? candidate.damage;
++    if (!reason && effectiveDamage > 0 && effectiveDamage >= target.health && !this.deathInventoryPolicy)
++      return {
++        ok: false,
++        code: 'DEATH_INVENTORY_POLICY_UNAVAILABLE',
++        reason: 'death-inventory-policy-unavailable',
++      };
+     const damage = reason
+       ? { damage: 0, entity: null, deaths: [], removals: [] }
+       : prepareCombatDamage({
+           entities,
+           targetId: candidate.targetId,
+-          damage: armor?.damage ?? candidate.damage,
++          damage: effectiveDamage,
+           ...(armor ? { armor: armor.armor } : {}),
++          deathInventory: { kind: 'composed', capability: this.deathInventoryPolicy },
+           actorDeathDrop: (id) => simulation().actorDeathDrop(id),
+         });
+     const plan = combat.prepareMutation({
+diff --git a/packages/stdlib/src/server/gameplay/prepared-combat-damage.ts b/packages/stdlib/src/server/gameplay/prepared-combat-damage.ts
+index 6f2d98b7..1b4596c9 100644
+--- a/packages/stdlib/src/server/gameplay/prepared-combat-damage.ts
++++ b/packages/stdlib/src/server/gameplay/prepared-combat-damage.ts
+@@ -4,6 +4,14 @@ import type { EntityStore } from './entity-store';
+ import type { ItemStack } from './item-registry';
+ import { prepareEntityMutation } from './prepared-entity-mutation';
+ import { emptyInventoryCursor } from './modules/inventory-pointer-contract';
++import {
++  buildDeathInventorySettlementCandidateV1,
++  prepareDeathInventorySettlementSeriesV1,
++} from './death-inventory-settlement';
++import type { DeathInventoryPolicyCapabilityV1 } from './modules/death-inventory-policy-module';
++
++type CombatDeathInventoryMode =
++  Readonly<{ kind: 'legacy' }> | Readonly<{ kind: 'composed'; capability: DeathInventoryPolicyCapabilityV1 | null }>;
+ 
+ /** Policy already selected the amount; this owner only prepares health, inventory and drops. */
+ export function prepareCombatDamage(
+@@ -12,6 +20,7 @@ export function prepareCombatDamage(
+     targetId: string;
+     damage: number;
+     armor?: ArmorEquipment;
++    deathInventory: CombatDeathInventoryMode;
+     actorDeathDrop(id: string): ItemStack | null;
+   }>,
+ ) {
+@@ -27,19 +36,46 @@ export function prepareCombatDamage(
+   const components = options.entities.actorComponentSnapshot(target.id);
+   const deaths = health === 0 ? [target.id] : [];
+   const removals = health === 0 && target.type !== 'player' ? [target.id] : [];
++  const armored = options.armor
++    ? { ...components, equipment: { ...components.equipment, armor: options.armor } }
++    : components;
++  if (health > 0) {
++    const entity = prepareEntityMutation(options.entities, {
++      actors: [{ reference, health, components: armored }],
++    });
++    return { damage, entity, deaths, removals };
++  }
++  if (options.deathInventory.kind === 'composed') {
++    const capability = options.deathInventory.capability;
++    if (!capability) throw new Error('death-inventory-policy-unavailable');
++    const settlementComponents =
++      target.type === 'player' ? { ...armored, player: { ...armored.player!, breakAction: null } } : armored;
++    const candidate = buildDeathInventorySettlementCandidateV1({
++      source: { actorReference: reference, health: target.health, components },
++      position: target.position,
++      settlementComponents,
++      policy: capability.policyFor(target.type),
++    });
++    const intrinsic = target.type === 'player' ? null : options.actorDeathDrop(target.id);
++    return {
++      damage,
++      entity: prepareDeathInventorySettlementSeriesV1(options.entities, {
++        candidates: [candidate],
++        ...(intrinsic ? { intrinsicDrops: [{ position: target.position, stack: intrinsic }] } : {}),
++      }),
++      deaths,
++      removals: candidate.despawnReference ? [target.id] : [],
++    };
++  }
+   const cursorStack = components.inventoryCursor?.stack;
+   const interactionItems = [cursorStack, ...(components.inventoryCursor?.craftingGrid ?? [])];
+-  const stacks =
+-    health === 0 ? [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [stack] : [])) : [];
++  const stacks = [...components.inventory, ...interactionItems].flatMap((stack) => (stack ? [stack] : []));
+   if (removals.length) {
+     const drop = options.actorDeathDrop(target.id);
+     if (drop) stacks.push(drop);
+   }
+-  const armored = options.armor
+-    ? { ...components, equipment: { ...components.equipment, armor: options.armor } }
+-    : components;
+   const next =
+-    health === 0 && target.type === 'player'
++    target.type === 'player'
+       ? {
+           ...armored,
+           lifecycle: 'dead' as const,
+diff --git a/packages/stdlib/tests/server/death-inventory-mixed-series.test.ts b/packages/stdlib/tests/server/death-inventory-mixed-series.test.ts
+new file mode 100644
+index 00000000..dc7b053d
+--- /dev/null
++++ b/packages/stdlib/tests/server/death-inventory-mixed-series.test.ts
+@@ -0,0 +1,335 @@
++import { describe, expect, it } from 'vitest';
++import {
++  buildDeathInventorySettlementCandidateV1,
++  prepareDeathInventorySettlementSeriesV1,
++  type DeathInventoryAdditionalActorReplacementV1,
++  type DeathInventorySettlementPolicyV1,
++} from '../../src/server/gameplay/death-inventory-settlement';
++import type { DeathInventoryAdditionalActorReplacementV1 as PublicAdditionalActorReplacementV1 } from '../../src/server/composition/mod-api';
++import type { ActorComponentSnapshot } from '../../src/server/gameplay/ecs-actor-components';
++import { EntityStore } from '../../src/server/gameplay/entity-store';
++import { createItemDefinitionRegistry } from '../../src/server/gameplay/item-registry';
++
++const items = createItemDefinitionRegistry([
++  ...Array.from({ length: 3 }, (_, index) => ({
++    id: `sample:ore-${index}`,
++    name: `Ore ${index}`,
++    itemType: 'resource' as const,
++    stackLimit: 64,
++    capabilities: [],
++  })),
++  {
++    id: 'sample:visor',
++    name: 'Visor',
++    itemType: 'armor',
++    stackLimit: 1,
++    durability: { max: 40 },
++    capabilities: [{ type: 'armor' as const, slot: 'helmet' as const, points: 2 }],
++  },
++]);
++const emptyArmor = () => ({ helmet: null, chestplate: null, leggings: null, boots: null });
++const retainAll: DeathInventorySettlementPolicyV1 = {
++  inventory: 'retain',
++  cursor: 'retain',
++  crafting: 'retain',
++  armor: 'retain',
++  actor: 'retain',
++};
++const dropAll: DeathInventorySettlementPolicyV1 = {
++  ...retainAll,
++  inventory: 'drop',
++  cursor: 'drop',
++  crafting: 'drop',
++  armor: 'drop',
++};
++
++const snapshot = (entities: EntityStore) => structuredClone(entities.exportComponentSnapshot());
++const death = (entities: EntityStore, id = 'dead', policy = retainAll) => {
++  const components = entities.actorComponentSnapshot(id);
++  return buildDeathInventorySettlementCandidateV1({
++    source: { actorReference: entities.createReference(id)!, health: entities.get(id)!.health!, components },
++    position: entities.get(id)!.position,
++    settlementComponents: components,
++    policy,
++  });
++};
++const additional = (
++  entities: EntityStore,
++  id: string,
++  components: ActorComponentSnapshot,
++): DeathInventoryAdditionalActorReplacementV1 => {
++  const reference = entities.createReference(id)!;
++  return {
++    source: {
++      actorReference: reference,
++      health: entities.get(id)!.health!,
++      components: entities.actorComponentSnapshot(id),
++    },
++    replacement: { reference, health: entities.get(id)!.health!, components },
++  };
++};
++const pair = () => {
++  const entities = new EntityStore(items);
++  entities.spawn({ id: 'survivor', type: 'player', position: [0, 2, 0], health: 12, maxHealth: 20 });
++  entities.spawn({ id: 'dead', type: 'player', position: [2, 2, 0], health: 1, maxHealth: 20 });
++  return entities;
++};
++const hungry = (source: ActorComponentSnapshot, hunger: number): ActorComponentSnapshot => ({
++  ...structuredClone(source),
++  needs: { ...source.needs, hunger },
++});
++
++describe('death inventory mixed series', () => {
++  it('commits one living needs replacement with all four death containers exactly once', () => {
++    const entities = pair();
++    const dead = entities.actorStateAccess('dead');
++    dead.inventory.add({ itemId: 'sample:ore-0', count: 2 });
++    dead.replaceInventoryInteraction(dead.inventoryRevision + 1, {
++      version: 1,
++      revision: dead.inventoryCursor.revision + 1,
++      stack: { itemId: 'sample:ore-1', count: 1 },
++      origin: null,
++      craftingGrid: [{ itemId: 'sample:ore-2', count: 1 }, null, null, null],
++    });
++    dead.replaceArmor({
++      ...emptyArmor(),
++      helmet: { itemId: 'sample:visor', count: 1, instance: { durability: 9 } },
++    });
++    const survivor = entities.actorComponentSnapshot('survivor');
++    const publicInput: PublicAdditionalActorReplacementV1 = additional(entities, 'survivor', hungry(survivor, 17));
++    const prepared = prepareDeathInventorySettlementSeriesV1(entities, {
++      candidates: [death(entities, 'dead', dropAll)],
++      additionalActorReplacements: [publicInput],
++    });
++
++    prepared.validate();
++    prepared.apply();
++    expect(entities.actorStateAccess('survivor').hunger).toBe(17);
++    expect(entities.actorStateAccess('dead').lifecycle).toBe('dead');
++    expect(entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:ore-0', count: 2 },
++      { itemId: 'sample:ore-1', count: 1 },
++      { itemId: 'sample:ore-2', count: 1 },
++      { itemId: 'sample:visor', count: 1, instance: { durability: 9 } },
++    ]);
++  });
++
++  it.each([
++    ['health', (entities: EntityStore) => (entities.actorStateAccess('survivor').health = 11)],
++    ['needs', (entities: EntityStore) => (entities.actorStateAccess('survivor').hunger = 19)],
++    [
++      'armor',
++      (entities: EntityStore) =>
++        entities.actorStateAccess('survivor').replaceArmor({
++          ...emptyArmor(),
++          helmet: { itemId: 'sample:visor', count: 1, instance: { durability: 8 } },
++        }),
++    ],
++    [
++      'inventory revision',
++      (entities: EntityStore) => {
++        const actor = entities.actorStateAccess('survivor');
++        actor.replaceInventoryInteraction(actor.inventoryRevision + 1, actor.inventoryCursor);
++      },
++    ],
++  ])('rejects additional actor %s drift before preparing any mutation', (_label, mutate) => {
++    const entities = pair();
++    const source = entities.actorComponentSnapshot('survivor');
++    const replacement = additional(entities, 'survivor', hungry(source, 17));
++    mutate(entities);
++    const before = snapshot(entities);
++
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [death(entities)],
++        additionalActorReplacements: [replacement],
++      }),
++    ).toThrow(/stale/i);
++    expect(entities.exportComponentSnapshot()).toEqual(before);
++  });
++
++  it('rejects restore lifetime drift before prepare and full frontier drift after prepare', () => {
++    const entities = pair();
++    const source = entities.actorComponentSnapshot('survivor');
++    const old = additional(entities, 'survivor', hungry(source, 17));
++    entities.restoreComponentSnapshot(entities.exportComponentSnapshot());
++    const restored = snapshot(entities);
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [death(entities)],
++        additionalActorReplacements: [old],
++      }),
++    ).toThrow(/reference.*stale/i);
++    expect(entities.exportComponentSnapshot()).toEqual(restored);
++
++    const current = entities.actorComponentSnapshot('survivor');
++    const prepared = prepareDeathInventorySettlementSeriesV1(entities, {
++      candidates: [death(entities)],
++      additionalActorReplacements: [additional(entities, 'survivor', hungry(current, 17))],
++    });
++    entities.actorStateAccess('survivor').hunger = 18;
++    const changed = snapshot(entities);
++    expect(() => prepared.validate()).toThrow(/component.*changed|stale/i);
++    expect(entities.exportComponentSnapshot()).toEqual(changed);
++  });
++
++  it.each(['epoch', 'lifetime'] as const)('rejects a forged additional source %s', (field) => {
++    const entities = pair();
++    const source = entities.actorComponentSnapshot('survivor');
++    const valid = additional(entities, 'survivor', hungry(source, 17));
++    const before = snapshot(entities);
++    const forged = {
++      ...valid,
++      source: {
++        ...valid.source,
++        actorReference: {
++          ...valid.source.actorReference,
++          [field]: valid.source.actorReference[field] + 1,
++        },
++      },
++    };
++
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [death(entities)],
++        additionalActorReplacements: [forged],
++      }),
++    ).toThrow(/reference.*stale/i);
++    expect(entities.exportComponentSnapshot()).toEqual(before);
++  });
++
++  it('detaches additional source and replacement state before returning the prepared frontier', () => {
++    const entities = pair();
++    const source = structuredClone(entities.actorComponentSnapshot('survivor'));
++    const proposed = hungry(source, 17);
++    const reference = entities.createReference('survivor')!;
++    const position: [number, number, number] = [4, 3, 2];
++    const prepared = prepareDeathInventorySettlementSeriesV1(entities, {
++      candidates: [death(entities)],
++      additionalActorReplacements: [
++        {
++          source: { actorReference: reference, health: 12, components: source },
++          replacement: { reference, health: 12, components: proposed, position },
++        },
++      ],
++    });
++    source.needs.hunger = 1;
++    proposed.needs.hunger = 2;
++    position[0] = 9;
++
++    prepared.validate();
++    prepared.apply();
++    expect(entities.actorStateAccess('survivor').hunger).toBe(17);
++    expect(entities.get('survivor')?.position).toEqual([4, 3, 2]);
++  });
++
++  it('rejects cross-set duplicates, mismatched references and death-shaped additional replacements', () => {
++    const entities = pair();
++    const source = entities.actorComponentSnapshot('survivor');
++    const valid = additional(entities, 'survivor', source);
++    const candidate = death(entities);
++    const before = snapshot(entities);
++
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [candidate],
++        additionalActorReplacements: [
++          {
++            source: candidate.source,
++            replacement: {
++              reference: candidate.source.actorReference,
++              health: candidate.source.health,
++              components: candidate.source.components,
++            },
++          },
++        ],
++      }),
++    ).toThrow(/duplicate actor/i);
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [candidate],
++        additionalActorReplacements: [
++          { ...valid, replacement: { ...valid.replacement, reference: candidate.source.actorReference } },
++        ],
++      }),
++    ).toThrow(/does not match/i);
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [candidate],
++        additionalActorReplacements: [
++          {
++            ...valid,
++            replacement: { ...valid.replacement, health: 0, components: { ...source, lifecycle: 'dead' } },
++          },
++        ],
++      }),
++    ).toThrow(/must remain alive/i);
++    expect(entities.exportComponentSnapshot()).toEqual(before);
++  });
++
++  it('rejects spawn/despawn bypass fields and unknown series input', () => {
++    const entities = pair();
++    const components = entities.actorComponentSnapshot('survivor');
++    const valid = additional(entities, 'survivor', components);
++    const before = snapshot(entities);
++    for (const invalid of [
++      { ...valid, spawns: [] },
++      { ...valid, replacement: { ...valid.replacement, despawn: true } },
++      { ...valid, source: { ...valid.source, extra: true } },
++    ])
++      expect(() =>
++        prepareDeathInventorySettlementSeriesV1(entities, {
++          candidates: [death(entities)],
++          additionalActorReplacements: [invalid as DeathInventoryAdditionalActorReplacementV1],
++        }),
++      ).toThrow(/additional actor replacement|settlement source/i);
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [death(entities)],
++        additionalActorReplacements: [valid],
++        unknown: true,
++      } as Parameters<typeof prepareDeathInventorySettlementSeriesV1>[1]),
++    ).toThrow(/series input/i);
++    expect(entities.exportComponentSnapshot()).toEqual(before);
++  });
++
++  it('preflights final spawn capacity before survivor, death, drop or revision writes', () => {
++    const entities = pair();
++    entities.actorStateAccess('dead').inventory.add({ itemId: 'sample:ore-0', count: 2 });
++    const saved = entities.exportComponentSnapshot();
++    entities.restoreComponentSnapshot({ ...saved, lifetimeHighWater: Number.MAX_SAFE_INTEGER });
++    const survivor = entities.actorComponentSnapshot('survivor');
++    const before = snapshot(entities);
++
++    expect(() =>
++      prepareDeathInventorySettlementSeriesV1(entities, {
++        candidates: [death(entities, 'dead', dropAll)],
++        additionalActorReplacements: [additional(entities, 'survivor', hungry(survivor, 17))],
++      }),
++    ).toThrow(/capacity|exhausted/i);
++    expect(entities.exportComponentSnapshot()).toEqual(before);
++    expect(entities.actorStateAccess('survivor').hunger).toBe(20);
++    expect(entities.actorStateAccess('dead').inventoryRevision).toBe(0);
++    expect(entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('combines more than 128 survivor and death entries under one series frontier', () => {
++    const entities = new EntityStore(items);
++    const additionalActorReplacements = Array.from({ length: 128 }, (_, index) => {
++      const id = `survivor-${index}`;
++      entities.spawn({ id, type: 'player', position: [index, 2, 0], health: 12, maxHealth: 20 });
++      const source = entities.actorComponentSnapshot(id);
++      return additional(entities, id, hungry(source, 19));
++    });
++    entities.spawn({ id: 'dead', type: 'player', position: [130, 2, 0], health: 1, maxHealth: 20 });
++    const prepared = prepareDeathInventorySettlementSeriesV1(entities, {
++      candidates: [death(entities)],
++      additionalActorReplacements,
++    });
++
++    prepared.validate();
++    prepared.apply();
++    expect(entities.actorStateAccess('survivor-127').hunger).toBe(19);
++    expect(entities.actorStateAccess('dead').lifecycle).toBe('dead');
++  });
++});
+diff --git a/packages/stdlib/tests/server/direct-vitals-death.test.ts b/packages/stdlib/tests/server/direct-vitals-death.test.ts
+new file mode 100644
+index 00000000..8b5c2646
+--- /dev/null
++++ b/packages/stdlib/tests/server/direct-vitals-death.test.ts
+@@ -0,0 +1,397 @@
++import { describe, expect, it } from 'vitest';
++import { assembleWorldPacks, definePack } from '../../src/server/composition/assembly';
++import type { DeathInventoryPolicyDefinitionV1 } from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import {
++  defineDeathInventoryPolicyModuleV1,
++  resolveDeathInventoryPolicyCapabilityV1,
++} from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import { GameplayRuntime } from '../../src/server/gameplay/gameplay-runtime';
++import { createGameplayContent } from '../../src/server/gameplay/gameplay-content';
++import { ActorVitalsRuntime } from '../../src/server/gameplay/modules/actor-vitals-runtime';
++import { defineContentModule } from '../../src/server/gameplay/modules/content-module';
++import { PlayerState } from '../../src/server/gameplay/player-state';
++import { prepareEntityMutation } from '../../src/server/gameplay/prepared-entity-mutation';
++import { testCorePlatform } from '../support/core-platform';
++
++const emptyArmor = () => ({ helmet: null, chestplate: null, leggings: null, boots: null });
++const visor = (durability: number) => ({ itemId: 'sample:visor', count: 1, instance: { durability } });
++const suit = (durability: number) => ({ itemId: 'sample:suit', count: 1, instance: { durability } });
++const drop = { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' } as const;
++const retain = { inventory: 'retain', cursor: 'retain', crafting: 'retain', armor: 'retain', actor: 'retain' } as const;
++const policy = (kind: 'drop' | 'retain'): DeathInventoryPolicyDefinitionV1 => ({
++  version: 1,
++  actors: { player: kind === 'drop' ? drop : retain, creature: drop, npc: drop },
++});
++const sampleItems = [
++  { id: 'sample:ore-a', name: 'Ore A', itemType: 'resource' as const, stackLimit: 64, capabilities: [] },
++  { id: 'sample:ore-b', name: 'Ore B', itemType: 'resource' as const, stackLimit: 64, capabilities: [] },
++  { id: 'sample:ore-c', name: 'Ore C', itemType: 'resource' as const, stackLimit: 64, capabilities: [] },
++  {
++    id: 'sample:visor',
++    name: 'Visor',
++    itemType: 'armor' as const,
++    stackLimit: 1,
++    durability: { max: 40 },
++    capabilities: [{ type: 'armor' as const, slot: 'helmet' as const, points: 2 }],
++  },
++  {
++    id: 'sample:suit',
++    name: 'Suit',
++    itemType: 'armor' as const,
++    stackLimit: 1,
++    durability: { max: 80 },
++    capabilities: [{ type: 'armor' as const, slot: 'chestplate' as const, points: 6 }],
++  },
++] as const;
++const sampleMelee = [
++  { id: 'sample:strike', range: 4, steps: [{ damage: 1, windupSeconds: 1, hitSeconds: 0.1, recoverySeconds: 0.1 }] },
++] as const;
++const sampleProfiles = [
++  {
++    archetype: 'night-stalker' as const,
++    entityType: 'npc' as const,
++    maxHealth: 20,
++    navigation: { speed: 1, perceptionRange: 8 },
++    meleeDefinitionId: 'sample:strike',
++  },
++] as const;
++
++function setup(deathPolicy: 'drop' | 'retain' | null) {
++  const content = defineContentModule({
++    moduleId: 'sample:direct-vitals-content',
++    items: sampleItems,
++    recipes: [],
++    meleeDefinitions: [],
++  });
++  const modules = [
++    content,
++    ...(deathPolicy === null
++      ? []
++      : [
++          defineDeathInventoryPolicyModuleV1({
++            moduleId: 'sample:direct-vitals-death-policy',
++            definition: policy(deathPolicy),
++          }),
++        ]),
++  ];
++  const pack = definePack({ id: 'sample:direct-vitals', version: '1.0.0', kind: 'playbook', modules });
++  const composition = assembleWorldPacks([
++    {
++      ...pack,
++      integrity: {
++        algorithm: 'sha256',
++        manifestDigest: 'a'.repeat(64),
++        entryDigest: 'b'.repeat(64),
++        resources: [],
++      },
++    },
++  ]);
++  const runtime = new GameplayRuntime({
++    composition,
++    platform: testCorePlatform,
++    getVoxel: () => 0,
++    getWorldTime: () => 12,
++    prepareVoxelEdit: () => {
++      throw new Error('Unexpected voxel edit.');
++    },
++  });
++  runtime.spawnPlayer({ id: 'player', position: [0, 2, 0] });
++  const actor = runtime.entities.actorStateAccess('player');
++  actor.inventory.add({ itemId: 'sample:ore-a', count: 2 });
++  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
++    version: 1,
++    revision: actor.inventoryCursor.revision + 1,
++    stack: { itemId: 'sample:ore-b', count: 1 },
++    origin: null,
++    craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++  });
++  actor.replaceArmor({ ...emptyArmor(), helmet: visor(1), chestplate: suit(5) });
++  runtime.entities.playerStateAccess('player').breakAction = {
++    position: [1, 2, 3],
++    voxel: 4,
++    elapsedSeconds: 0.5,
++    requiredSeconds: 1,
++  };
++  return { runtime, composition };
++}
++
++const runtimeState = (runtime: GameplayRuntime) => ({
++  entity: runtime.entities.exportComponentSnapshot(),
++  simulation: runtime.simulation.snapshot(),
++  revision: runtime.gameplayRevision,
++});
++
++function directVitals(
++  fixture: ReturnType<typeof setup>,
++  prepareDeaths: (ids: readonly string[]) => ReturnType<GameplayRuntime['simulation']['prepareDeaths']> = (ids) =>
++    fixture.runtime.simulation.prepareDeaths(ids),
++) {
++  const { runtime, composition } = fixture;
++  const player = new PlayerState('player', [0, 2, 0], undefined, runtime.entities);
++  return new ActorVitalsRuntime({
++    player: (id) => {
++      if (id !== player.entityId) throw new RangeError(`Unknown player: ${id}`);
++      return player;
++    },
++    entities: runtime.entities,
++    assertCanChange: () => undefined,
++    prepareDeaths,
++    deathInventory: { kind: 'composed', capability: resolveDeathInventoryPolicyCapabilityV1(composition) },
++    touch: () => runtime.recordAuthorityMutation(),
++  });
++}
++
++function startPlayerAction(runtime: GameplayRuntime) {
++  const action = runtime.simulation.actions.start({ actorId: 'player', type: 'idle' }, 0);
++  runtime.simulation.actions.markRunning(action.id, []);
++}
++
++function legacySetup() {
++  const runtime = new GameplayRuntime({
++    content: createGameplayContent({
++      items: sampleItems,
++      recipes: [],
++      meleeDefinitions: sampleMelee,
++      actorProfiles: sampleProfiles,
++      defaultPlayerMeleeDefinitionId: 'sample:strike',
++    }),
++    platform: testCorePlatform,
++    getVoxel: () => 0,
++    getWorldTime: () => 12,
++    prepareVoxelEdit: () => {
++      throw new Error('Unexpected voxel edit.');
++    },
++  });
++  runtime.spawnPlayer({ id: 'player', position: [0, 2, 0] });
++  runtime.spawnAutonomous(
++    { id: 'target', type: 'npc', archetype: 'night-stalker', position: [0, 2, 1] },
++    { archetype: 'night-stalker' },
++  );
++  const actor = runtime.entities.actorStateAccess('player');
++  actor.inventory.add({ itemId: 'sample:ore-a', count: 2 });
++  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
++    version: 1,
++    revision: actor.inventoryCursor.revision + 1,
++    stack: { itemId: 'sample:ore-b', count: 1 },
++    origin: null,
++    craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++  });
++  actor.replaceArmor({ ...emptyArmor(), helmet: visor(1), chestplate: suit(5) });
++  return runtime;
++}
++
++describe('direct Vitals death inventory policy', () => {
++  it('drops all four owned containers with post-hit armor in one revision', () => {
++    const { runtime } = setup('drop');
++    const beforeRevision = runtime.entities.actorStateAccess('player').inventoryRevision;
++    startPlayerAction(runtime);
++
++    expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toEqual({ success: true });
++    const actor = runtime.entities.actorStateAccess('player');
++    expect(actor).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: beforeRevision + 1 });
++    expect(actor.inventory.snapshot().every((slot) => slot === null)).toBe(true);
++    expect(actor.inventoryCursor).toMatchObject({ stack: null, craftingGrid: [null, null, null, null] });
++    expect(actor.armor).toEqual(emptyArmor());
++    expect(runtime.entities.playerStateAccess('player').breakAction).toBeNull();
++    expect(runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:ore-a', count: 2 },
++      { itemId: 'sample:ore-b', count: 1 },
++      { itemId: 'sample:ore-c', count: 1 },
++      suit(4),
++    ]);
++    expect(runtime.simulation.actions.forActor('player')).toBeNull();
++    const dropped = runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack);
++    expect(runtime.applyDamage('hazard', 'player', 1, 'sample')).toEqual({
++      success: false,
++      reason: 'player-dead',
++    });
++    expect(runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual(dropped);
++  });
++
++  it('retains all containers but commits post-hit armor on death', () => {
++    const { runtime } = setup('retain');
++    const beforeRevision = runtime.entities.actorStateAccess('player').inventoryRevision;
++
++    expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toEqual({ success: true });
++    const actor = runtime.entities.actorStateAccess('player');
++    expect(actor).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: beforeRevision + 1 });
++    expect(actor.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', count: 2 });
++    expect(actor.inventoryCursor).toMatchObject({
++      stack: { itemId: 'sample:ore-b', count: 1 },
++      craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++    });
++    expect(actor.armor).toEqual({ ...emptyArmor(), chestplate: suit(4) });
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects lethal composed damage without a policy and preserves the full runtime', () => {
++    const { runtime } = setup(null);
++    const before = runtime.createSnapshot();
++
++    expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toEqual({
++      success: false,
++      reason: 'death-inventory-policy-unavailable',
++    });
++    expect(runtime.createSnapshot()).toEqual(before);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('keeps nonfatal armor atomic without a policy and leaves creative damage untouched', () => {
++    const { runtime } = setup(null);
++    const actor = runtime.entities.actorStateAccess('player');
++    const beforeRevision = actor.inventoryRevision;
++
++    expect(runtime.applyDamage('hazard', 'player', 10, 'sample')).toEqual({ success: true });
++    expect(runtime.entities.get('player')?.health).toBe(13.2);
++    expect(actor.armor).toEqual({ ...emptyArmor(), chestplate: suit(4) });
++    expect(actor.inventoryRevision).toBe(beforeRevision + 1);
++    expect(runtime.healPlayer('player', 1)).toEqual({ success: true });
++    expect(runtime.entities.get('player')?.health).toBe(14.2);
++    expect(actor.armor).toEqual({ ...emptyArmor(), chestplate: suit(4) });
++    expect(actor.inventoryRevision).toBe(beforeRevision + 1);
++
++    const components = runtime.entities.actorComponentSnapshot('player');
++    actor.replaceModeComponents({
++      mode: { ...components.mode!, value: 'creative', revision: actor.modeRevision + 1 },
++      creativeCatalog: components.creativeCatalog!,
++      flight: components.flight!,
++    });
++    const creative = runtimeState(runtime);
++    expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toEqual({ success: true });
++    expect(runtimeState(runtime)).toEqual(creative);
++  });
++
++  it('rejects a stale death effects frontier before applying health or inventory', () => {
++    const fixture = setup('drop');
++    const { runtime } = fixture;
++    startPlayerAction(runtime);
++    let concurrent: ReturnType<typeof runtimeState> | undefined;
++    const vitals = directVitals(fixture, (ids) => {
++      const effects = runtime.simulation.prepareDeaths(ids);
++      runtime.simulation.actions.interruptActor('player', 0, 'concurrent-cancel');
++      concurrent = runtimeState(runtime);
++      return effects;
++    });
++
++    expect(() => vitals.applyDamage('hazard', 'player', 100, 'sample', emptyArmor())).toThrow(/stale/i);
++    expect(runtimeState(runtime)).toEqual(concurrent);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects a stale source replacement before applying death effects', () => {
++    const fixture = setup('drop');
++    const { runtime } = fixture;
++    let concurrent: ReturnType<typeof runtimeState> | undefined;
++    const vitals = directVitals(fixture, (ids) => {
++      const components = runtime.entities.actorComponentSnapshot('player');
++      const mutation = prepareEntityMutation(runtime.entities, {
++        actors: [
++          {
++            reference: runtime.entities.createReference('player')!,
++            health: runtime.entities.get('player')!.health!,
++            components: {
++              ...components,
++              needs: { ...components.needs, hunger: 17 },
++              equipment: { ...components.equipment, armor: { ...emptyArmor(), chestplate: suit(7) } },
++            },
++          },
++        ],
++      });
++      mutation.validate();
++      mutation.apply();
++      concurrent = runtimeState(runtime);
++      return runtime.simulation.prepareDeaths(ids);
++    });
++
++    expect(() => vitals.applyDamage('hazard', 'player', 100, 'sample', emptyArmor())).toThrow(/stale|changed/i);
++    expect(runtimeState(runtime)).toEqual(concurrent);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects a restored actor lifetime before applying death effects', () => {
++    const fixture = setup('drop');
++    const { runtime } = fixture;
++    let concurrent: ReturnType<typeof runtimeState> | undefined;
++    const vitals = directVitals(fixture, (ids) => {
++      const effects = runtime.simulation.prepareDeaths(ids);
++      runtime.entities.restoreComponentSnapshot(runtime.entities.exportComponentSnapshot());
++      concurrent = runtimeState(runtime);
++      return effects;
++    });
++
++    expect(() => vitals.applyDamage('hazard', 'player', 100, 'sample', emptyArmor())).toThrow(/owner|epoch|stale/i);
++    expect(runtimeState(runtime)).toEqual(concurrent);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('abandons the prepared entity candidate when death effects preparation fails', () => {
++    const fixture = setup('drop');
++    const { runtime } = fixture;
++    const before = runtimeState(runtime);
++    const vitals = directVitals(fixture, () => {
++      throw new Error('fixture-death-effects-unavailable');
++    });
++
++    expect(() => vitals.applyDamage('hazard', 'player', 100, 'sample', emptyArmor())).toThrow(
++      'fixture-death-effects-unavailable',
++    );
++    expect(runtimeState(runtime)).toEqual(before);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('rejects composed drop allocation exhaustion without applying death effects', () => {
++    const { runtime } = setup('drop');
++    const exhausted = runtime.createSnapshot();
++    exhausted.entityStore.sequence = Number.MAX_SAFE_INTEGER;
++    runtime.restoreSnapshot(exhausted);
++    const before = runtimeState(runtime);
++
++    expect(() => runtime.applyDamage('hazard', 'player', 100, 'sample')).toThrow(/sequence.*exhausted/i);
++    expect(runtimeState(runtime)).toEqual(before);
++    expect(runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('uses the same composed policy for direct legacy needs advancement', () => {
++    const retained = setup('retain');
++    const retainedPlayer = retained.runtime.entities.playerStateAccess('player');
++    retained.runtime.updateEntityWithoutSnapshot('player', { health: 1 });
++    retainedPlayer.hunger = 0;
++    retainedPlayer.starvationAccumulator = 14;
++    const retainedVitals = directVitals(retained);
++
++    retainedVitals.advanceNeeds('player', 1);
++    expect(retained.runtime.entities.get('player')?.health).toBe(0);
++    expect(retainedPlayer).toMatchObject({ lifecycle: 'dead', hunger: 0, starvationAccumulator: 0 });
++    expect(retainedPlayer.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', count: 2 });
++    expect(retained.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++
++    const missing = setup(null);
++    const missingPlayer = missing.runtime.entities.playerStateAccess('player');
++    missing.runtime.updateEntityWithoutSnapshot('player', { health: 1 });
++    missingPlayer.hunger = 0;
++    missingPlayer.starvationAccumulator = 14;
++    const before = runtimeState(missing.runtime);
++
++    expect(() => directVitals(missing).advanceNeeds('player', 1)).toThrow('death-inventory-policy-unavailable');
++    expect(runtimeState(missing.runtime)).toEqual(before);
++    expect(missing.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++
++  it('preserves explicit uncomposed legacy death while preparing combat and armor atomically', () => {
++    const runtime = legacySetup();
++    const beforeRevision = runtime.entities.actorStateAccess('player').inventoryRevision;
++    expect(runtime.attackEntity('player', 'target')).toMatchObject({ success: true });
++
++    expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toEqual({ success: true });
++    const actor = runtime.entities.actorStateAccess('player');
++    expect(actor).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: beforeRevision + 1 });
++    expect(actor.armor).toEqual({ ...emptyArmor(), chestplate: suit(4) });
++    expect(runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:ore-a', count: 2 },
++      { itemId: 'sample:ore-b', count: 1 },
++      { itemId: 'sample:ore-c', count: 1 },
++    ]);
++    expect(runtime.simulation.combat.snapshotFor('player').active).toBeNull();
++    expect(runtime.simulation.actions.forActor('player')).toBeNull();
++  });
++});
+diff --git a/packages/stdlib/tests/server/registered-combat-armor.test.ts b/packages/stdlib/tests/server/registered-combat-armor.test.ts
+index da42389c..d9e2b026 100644
+--- a/packages/stdlib/tests/server/registered-combat-armor.test.ts
++++ b/packages/stdlib/tests/server/registered-combat-armor.test.ts
+@@ -413,6 +413,7 @@ describe('registered Combat armor transaction', () => {
+       targetId: 'target',
+       damage: 9.2,
+       armor: { ...emptyArmor(), helmet: armor('sample:visor', 2) },
++      deathInventory: { kind: 'legacy' },
+       actorDeathDrop: () => null,
+     });
+     candidate.entity!.validate();
+@@ -425,6 +426,7 @@ describe('registered Combat armor transaction', () => {
+       targetId: 'target',
+       damage: 9.2,
+       armor: { ...emptyArmor(), helmet: armor('sample:visor', 2) },
++      deathInventory: { kind: 'legacy' },
+       actorDeathDrop: () => null,
+     });
+     lifetime.entities.restoreComponentSnapshot(lifetime.entities.exportComponentSnapshot());
+diff --git a/packages/stdlib/tests/server/registered-combat-death.test.ts b/packages/stdlib/tests/server/registered-combat-death.test.ts
+new file mode 100644
+index 00000000..3c5c2f51
+--- /dev/null
++++ b/packages/stdlib/tests/server/registered-combat-death.test.ts
+@@ -0,0 +1,526 @@
++import { describe, expect, it } from 'vitest';
++import { assembleWorldPacks, definePack } from '../../src/server/composition/assembly';
++import { createGameplayActorAuthority } from '../../src/server/composition/gameplay-actor-authority';
++import { createGameplaySystemAuthority } from '../../src/server/composition/gameplay-system-authority';
++import type { CommittedOperationFact } from '../../src/server/composition/operation-contracts';
++import type { DeathInventoryPolicyDefinitionV1 } from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import {
++  defineDeathInventoryPolicyModuleV1,
++  resolveDeathInventoryPolicyCapabilityV1,
++} from '../../src/server/gameplay/modules/death-inventory-policy-module';
++import { GameplayRuntime } from '../../src/server/gameplay/gameplay-runtime';
++import { prepareCombatDamage } from '../../src/server/gameplay/prepared-combat-damage';
++import { prepareEntityMutation } from '../../src/server/gameplay/prepared-entity-mutation';
++import { defineCombatModule } from '../../src/server/gameplay/modules/combat-module';
++import { defineCombatRulesModule } from '../../src/server/gameplay/modules/combat-rules-module';
++import { defineContentModule } from '../../src/server/gameplay/modules/content-module';
++import { defineInventoryActionsModule } from '../../src/server/gameplay/modules/inventory-actions-module';
++import { defineInventoryModule } from '../../src/server/gameplay/modules/inventory-module';
++import { defineRulesetModule } from '../../src/server/gameplay/modules/ruleset-module';
++import { testCorePlatform } from '../support/core-platform';
++
++const emptyArmor = () => ({ helmet: null, chestplate: null, leggings: null, boots: null });
++const visor = (durability: number) => ({ itemId: 'sample:visor', count: 1, instance: { durability } });
++const suit = (durability: number) => ({ itemId: 'sample:suit', count: 1, instance: { durability } });
++const retain = { inventory: 'retain', cursor: 'retain', crafting: 'retain', armor: 'retain', actor: 'retain' } as const;
++const dropRetain = { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' } as const;
++const dropDespawn = { ...dropRetain, actor: 'despawn' } as const;
++const policy = (kind: 'drop' | 'retain'): DeathInventoryPolicyDefinitionV1 => ({
++  version: 1,
++  actors:
++    kind === 'drop'
++      ? { player: dropRetain, creature: dropDespawn, npc: dropDespawn }
++      : { player: retain, creature: retain, npc: retain },
++});
++
++type Hook = (runtime: GameplayRuntime) => void;
++type TargetKind = 'player' | 'npc';
++type FixtureOptions = Readonly<{
++  targetKind?: TargetKind;
++  targetHealth?: number;
++  deathPolicy?: 'drop' | 'retain' | null;
++  authorized?: boolean;
++  rejectResolve?: boolean;
++  afterPrepared?: Hook;
++}>;
++
++function setup(options: FixtureOptions = {}) {
++  const targetKind = options.targetKind ?? 'npc';
++  const content = defineContentModule({
++    moduleId: 'sample:death-combat-content',
++    items: [
++      { id: 'sample:ore-a', name: 'Ore A', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:ore-b', name: 'Ore B', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:ore-c', name: 'Ore C', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      { id: 'sample:trophy', name: 'Trophy', itemType: 'resource', stackLimit: 64, capabilities: [] },
++      {
++        id: 'sample:visor',
++        name: 'Visor',
++        itemType: 'armor',
++        stackLimit: 1,
++        durability: { max: 40 },
++        capabilities: [{ type: 'armor', slot: 'helmet', points: 2 }],
++      },
++      {
++        id: 'sample:suit',
++        name: 'Suit',
++        itemType: 'armor',
++        stackLimit: 1,
++        durability: { max: 80 },
++        capabilities: [{ type: 'armor', slot: 'chestplate', points: 6 }],
++      },
++    ],
++    recipes: [],
++    meleeDefinitions: [
++      {
++        id: 'sample:strike',
++        range: 4,
++        steps: [{ damage: 10, windupSeconds: 0, hitSeconds: 0.1, recoverySeconds: 0.1 }],
++      },
++    ],
++    actorProfiles: [
++      {
++        archetype: 'night-stalker',
++        entityType: 'npc',
++        maxHealth: 20,
++        navigation: { speed: 1, perceptionRange: 8 },
++        meleeDefinitionId: 'sample:strike',
++        deathDrop: { itemId: 'sample:trophy', count: 1 },
++      },
++    ],
++    defaultPlayerMeleeDefinitionId: 'sample:strike',
++  });
++  const combat = defineCombatModule();
++  const observableCombat = Object.freeze({
++    ...combat,
++    descriptor: Object.freeze({
++      ...combat.descriptor,
++      permissions: Object.freeze([
++        ...(combat.descriptor.permissions ?? []),
++        { resource: 'seedlands.ruleset', operations: ['read' as const] },
++      ]),
++    }),
++  });
++  const modules = [
++    content,
++    defineRulesetModule({ id: 'sample:death-combat-rules', version: '1.0.0' }),
++    defineInventoryModule(),
++    defineInventoryActionsModule(),
++    observableCombat,
++    defineCombatRulesModule({
++      moduleId: 'sample:death-combat-rules',
++      profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
++    }),
++    ...(options.deathPolicy === null
++      ? []
++      : [
++          defineDeathInventoryPolicyModuleV1({
++            moduleId: 'sample:death-inventory-policy',
++            definition: policy(options.deathPolicy ?? 'drop'),
++          }),
++        ]),
++    ...(options.rejectResolve
++      ? [
++          {
++            descriptor: {
++              id: 'sample:reject-death-resolve',
++              version: '1.0.0',
++              permissions: [{ resource: 'seedlands.combat', operations: ['execute' as const] }],
++            },
++            register(api: Parameters<typeof content.register>[0]) {
++              api.registerRule({
++                id: 'sample:reject-death-resolve/after',
++                operationId: 'seedlands:resolve-combat',
++                stage: 'after',
++                apply() {
++                  return { reject: 'sample-death-rejected' };
++                },
++              });
++            },
++          },
++        ]
++      : []),
++  ];
++  const pack = definePack({ id: 'sample:death-combat', version: '1.0.0', kind: 'playbook', modules });
++  const composition = assembleWorldPacks(
++    [
++      {
++        ...pack,
++        integrity: {
++          algorithm: 'sha256',
++          manifestDigest: 'a'.repeat(64),
++          entryDigest: 'b'.repeat(64),
++          resources: [],
++        },
++      },
++    ],
++    { approvedPermissions: { [pack.manifest.id]: modules.flatMap((module) => module.descriptor.permissions ?? []) } },
++  );
++  const authority = createGameplayActorAuthority(composition.resources, { playerAlias: 'fighter' });
++  const holder: { runtime: GameplayRuntime | null } = { runtime: null };
++  let hookUsed = false;
++  const runtime = new GameplayRuntime({
++    composition,
++    ...(options.authorized === false
++      ? {}
++      : { moduleActorAuthority: authority, moduleSystemAuthority: createGameplaySystemAuthority(composition) }),
++    platform: {
++      ...testCorePlatform,
++      clone: <Value>(value: Value): Value => {
++        if (
++          holder.runtime &&
++          options.afterPrepared &&
++          !hookUsed &&
++          value &&
++          typeof value === 'object' &&
++          !Array.isArray(value) &&
++          (value as { success?: unknown }).success === true &&
++          (value as { outcome?: unknown }).outcome === 'hit'
++        ) {
++          hookUsed = true;
++          options.afterPrepared(holder.runtime);
++        }
++        return structuredClone(value);
++      },
++    },
++    getVoxel: () => 0,
++    getWorldTime: () => 12,
++    prepareVoxelEdit: () => {
++      throw new Error('Unexpected voxel edit.');
++    },
++  });
++  holder.runtime = runtime;
++  const attackerId = 'attacker';
++  const targetId = 'target';
++  if (targetKind === 'player') {
++    runtime.spawnAutonomous(
++      { id: attackerId, type: 'npc', archetype: 'night-stalker', position: [0, 0, 0] },
++      { archetype: 'night-stalker' },
++    );
++    runtime.spawnPlayer({ id: targetId, position: [0, 0, 1] });
++  } else {
++    runtime.spawnPlayer({ id: attackerId, position: [0, 0, 0] });
++    runtime.spawnAutonomous(
++      { id: targetId, type: 'npc', archetype: 'night-stalker', position: [0, 0, 1] },
++      { archetype: 'night-stalker' },
++    );
++  }
++  runtime.updateEntityWithoutSnapshot(targetId, { health: options.targetHealth ?? 5 });
++  const attack = () =>
++    targetKind === 'player'
++      ? runtime.simulation.requestActorCombat(attackerId, targetId, 'sample:strike')
++      : runtime.attackEntity(attackerId, targetId);
++  const bind = () => {
++    const actor = runtime.entities.get(attackerId)!;
++    const binding = authority.forActor(attackerId, actor.type)!;
++    return runtime.bindModuleOperations(binding.authorizer, {
++      moduleId: 'seedlands:combat-module',
++      principalId: binding.principalId,
++      originalActorId: attackerId,
++    });
++  };
++  return { runtime, composition, attackerId, targetId, attack, bind };
++}
++
++function seedOwned(runtime: GameplayRuntime, targetId = 'target') {
++  const actor = runtime.entities.actorStateAccess(targetId);
++  actor.inventory.add({ itemId: 'sample:ore-a', count: 2 });
++  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
++    version: 1,
++    revision: actor.inventoryCursor.revision + 1,
++    stack: { itemId: 'sample:ore-b', count: 1 },
++    origin: null,
++    craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++  });
++  actor.replaceArmor({ ...emptyArmor(), helmet: visor(1), chestplate: suit(5) });
++  if (runtime.entities.get(targetId)?.type === 'player')
++    runtime.entities.playerStateAccess(targetId).breakAction = {
++      position: [1, 2, 3],
++      voxel: 4,
++      elapsedSeconds: 0.5,
++      requiredSeconds: 1,
++    };
++  return runtime.entities.actorComponentSnapshot(targetId);
++}
++
++function directPending(fixture: ReturnType<typeof setup>) {
++  const execution = fixture.bind();
++  const facts: CommittedOperationFact[] = [];
++  execution.subscribe((fact) => facts.push(fact));
++  expect(
++    execution.invoke({
++      operationId: 'seedlands:request-combat',
++      target: { kind: 'entity', entityId: fixture.targetId },
++      input: { targetId: fixture.targetId },
++    }),
++  ).toMatchObject({ ok: true });
++  const pending = fixture.runtime.simulation.combat.peekPendingHits();
++  expect(pending).toHaveLength(1);
++  return {
++    execution,
++    facts,
++    dispose() {
++      execution.dispose();
++    },
++    resolve: () =>
++      execution.invoke({
++        operationId: 'seedlands:resolve-combat',
++        target: { kind: 'entity', entityId: fixture.targetId },
++        input: { token: pending[0]!.token },
++      }),
++  };
++}
++
++const entityState = (runtime: GameplayRuntime) => ({
++  entities: runtime.entities.exportComponentSnapshot(),
++  combat: runtime.simulation.combat.snapshot(),
++  gameplayRevision: runtime.gameplayRevision,
++});
++
++describe('registered Combat death inventory policy', () => {
++  it('settles a lethal player hit with post-hit armor and one shared revision', () => {
++    const fixture = setup({ targetKind: 'player', deathPolicy: 'drop' });
++    const before = seedOwned(fixture.runtime);
++    const healthBefore = fixture.runtime.entities.get(fixture.targetId)!.health!;
++    const pending = directPending(fixture);
++
++    const result = pending.resolve();
++    const target = fixture.runtime.entities.actorStateAccess(fixture.targetId);
++    const healthDelta = healthBefore - target.health;
++    expect(result).toMatchObject({ ok: true, value: { success: true, outcome: 'hit', damage: healthDelta } });
++    expect(target).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: before.inventoryRevision! + 1 });
++    expect(target.inventory.snapshot().every((slot) => slot === null)).toBe(true);
++    expect(target.inventoryCursor).toMatchObject({ stack: null, craftingGrid: [null, null, null, null] });
++    expect(target.armor).toEqual(emptyArmor());
++    expect(fixture.runtime.entities.playerStateAccess(fixture.targetId).breakAction).toBeNull();
++    expect(fixture.runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:ore-a', count: 2 },
++      { itemId: 'sample:ore-b', count: 1 },
++      { itemId: 'sample:ore-c', count: 1 },
++      suit(4),
++    ]);
++    expect(fixture.runtime.simulation.combat.snapshotFor(fixture.attackerId).lastResult).toMatchObject({
++      outcome: 'hit',
++      damage: healthDelta,
++    });
++    expect(pending.facts.at(-1)).toMatchObject({
++      operationId: 'seedlands:resolve-combat',
++      value: { success: true, outcome: 'hit', damage: healthDelta },
++    });
++    pending.dispose();
++  });
++
++  it('despawns a lethal NPC and appends its intrinsic drop exactly once', () => {
++    const fixture = setup({ deathPolicy: 'drop' });
++    seedOwned(fixture.runtime);
++    const healthBefore = fixture.runtime.entities.get(fixture.targetId)!.health!;
++    const pending = directPending(fixture);
++
++    expect(pending.resolve()).toMatchObject({
++      ok: true,
++      value: { success: true, outcome: 'hit', damage: healthBefore },
++    });
++    expect(fixture.runtime.entities.get(fixture.targetId)).toBeNull();
++    const dropped = fixture.runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack);
++    expect(dropped).toEqual([
++      { itemId: 'sample:ore-a', count: 2 },
++      { itemId: 'sample:ore-b', count: 1 },
++      { itemId: 'sample:ore-c', count: 1 },
++      suit(4),
++      { itemId: 'sample:trophy', count: 1 },
++    ]);
++    expect(fixture.attack().success).toBe(false);
++    fixture.runtime.advanceRules(1);
++    expect(fixture.runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual(dropped);
++    pending.dispose();
++  });
++
++  it('retains all containers while still committing player death and post-hit durability', () => {
++    const fixture = setup({ targetKind: 'player', deathPolicy: 'retain' });
++    const before = seedOwned(fixture.runtime);
++
++    expect(fixture.attack()).toMatchObject({ success: true, damage: 5 });
++    const target = fixture.runtime.entities.actorStateAccess(fixture.targetId);
++    expect(target).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: before.inventoryRevision! + 1 });
++    expect(target.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', count: 2 });
++    expect(target.inventoryCursor).toMatchObject({
++      stack: { itemId: 'sample:ore-b', count: 1 },
++      craftingGrid: [{ itemId: 'sample:ore-c', count: 1 }, null, null, null],
++    });
++    expect(target.armor).toEqual({ ...emptyArmor(), helmet: null, chestplate: suit(4) });
++    expect(fixture.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    expect(fixture.runtime.entities.playerStateAccess(fixture.targetId).breakAction).toBeNull();
++  });
++
++  it('retains a dead NPC when its composed actor policy selects retain', () => {
++    const fixture = setup({ deathPolicy: 'retain' });
++    const before = seedOwned(fixture.runtime);
++
++    expect(fixture.attack()).toMatchObject({ success: true, damage: 5 });
++    const target = fixture.runtime.entities.actorStateAccess(fixture.targetId);
++    expect(target).toMatchObject({ health: 0, lifecycle: 'dead', inventoryRevision: before.inventoryRevision! + 1 });
++    expect(target.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', count: 2 });
++    expect(target.armor).toEqual({ ...emptyArmor(), helmet: null, chestplate: suit(4) });
++    expect(fixture.runtime.entities.query({ type: 'world-item' }).map(({ stack }) => stack)).toEqual([
++      { itemId: 'sample:trophy', count: 1 },
++    ]);
++    expect(fixture.runtime.simulation.actorIds()).toContain(fixture.targetId);
++  });
++
++  it('rejects a composed lethal resolve without policy and leaves the pending frontier untouched', () => {
++    const fixture = setup({ deathPolicy: null });
++    seedOwned(fixture.runtime);
++    const pending = directPending(fixture);
++    const before = entityState(fixture.runtime);
++
++    expect(pending.resolve()).toEqual({
++      ok: false,
++      code: 'DEATH_INVENTORY_POLICY_UNAVAILABLE',
++      message: 'death-inventory-policy-unavailable',
++    });
++    expect(entityState(fixture.runtime)).toEqual(before);
++    expect(fixture.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    pending.dispose();
++  });
++
++  it('keeps nonfatal armor behavior when the composed policy capability is absent', () => {
++    const fixture = setup({ deathPolicy: null, targetHealth: 20 });
++    fixture.runtime.entities.actorStateAccess(fixture.targetId).replaceArmor({
++      ...emptyArmor(),
++      helmet: visor(3),
++    });
++    const beforeRevision = fixture.runtime.entities.actorStateAccess(fixture.targetId).inventoryRevision;
++
++    expect(fixture.attack()).toMatchObject({ success: true, damage: 9.2 });
++    expect(fixture.runtime.entities.get(fixture.targetId)?.health).toBe(10.8);
++    expect(fixture.runtime.entities.actorStateAccess(fixture.targetId).armor.helmet).toEqual(visor(2));
++    expect(fixture.runtime.entities.actorStateAccess(fixture.targetId).inventoryRevision).toBe(beforeRevision + 1);
++  });
++
++  it('does not settle death for invalid, unauthorized, or rule-cancelled attacks', () => {
++    const invalid = setup({ deathPolicy: 'drop' });
++    seedOwned(invalid.runtime);
++    const invalidBefore = invalid.runtime.entities.exportComponentSnapshot();
++    expect(invalid.runtime.attackEntity(invalid.attackerId, 'missing').success).toBe(false);
++    expect(invalid.runtime.entities.exportComponentSnapshot()).toEqual(invalidBefore);
++
++    const unauthorized = setup({ deathPolicy: 'drop', authorized: false });
++    seedOwned(unauthorized.runtime);
++    const unauthorizedBefore = unauthorized.runtime.createSnapshot();
++    expect(unauthorized.attack()).toEqual({ success: false, reason: 'combat-authority-missing' });
++    expect(unauthorized.runtime.createSnapshot()).toEqual(unauthorizedBefore);
++
++    const cancelled = setup({ deathPolicy: 'drop', rejectResolve: true });
++    seedOwned(cancelled.runtime);
++    const entityBefore = cancelled.runtime.entities.exportComponentSnapshot();
++    expect(cancelled.attack().success).toBe(true);
++    expect(cancelled.runtime.entities.exportComponentSnapshot()).toEqual(entityBefore);
++    expect(cancelled.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    expect(cancelled.runtime.simulation.combat.snapshotFor(cancelled.attackerId).lastResult).toMatchObject({
++      outcome: 'cancelled',
++      damage: 0,
++    });
++  });
++
++  it('rejects post-prepare actor component or lifetime drift without partial death writes', () => {
++    let concurrentComponents: ReturnType<GameplayRuntime['entities']['exportComponentSnapshot']> | undefined;
++    const changed = setup({
++      deathPolicy: 'drop',
++      afterPrepared(runtime) {
++        const components = runtime.entities.actorComponentSnapshot('target');
++        const mutation = prepareEntityMutation(runtime.entities, {
++          actors: [
++            {
++              reference: runtime.entities.createReference('target')!,
++              health: runtime.entities.get('target')!.health!,
++              components: {
++                ...components,
++                equipment: { ...components.equipment, armor: { ...emptyArmor(), helmet: visor(7) } },
++              },
++            },
++          ],
++        });
++        mutation.validate();
++        mutation.apply();
++        concurrentComponents = runtime.entities.exportComponentSnapshot();
++      },
++    });
++    seedOwned(changed.runtime);
++    const changedPending = directPending(changed);
++    expect(changedPending.resolve()).toMatchObject({ ok: false, code: 'OPERATION_FAILED' });
++    expect(changed.runtime.entities.exportComponentSnapshot()).toEqual(concurrentComponents);
++    expect(changed.runtime.simulation.combat.snapshotFor(changed.attackerId).lastResult).toBeNull();
++    expect(changed.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    changedPending.dispose();
++
++    let concurrentLifetime: ReturnType<GameplayRuntime['entities']['exportComponentSnapshot']> | undefined;
++    const lifetime = setup({
++      deathPolicy: 'drop',
++      afterPrepared(runtime) {
++        runtime.entities.restoreComponentSnapshot(runtime.entities.exportComponentSnapshot());
++        concurrentLifetime = runtime.entities.exportComponentSnapshot();
++      },
++    });
++    seedOwned(lifetime.runtime);
++    const lifetimePending = directPending(lifetime);
++    expect(lifetimePending.resolve()).toMatchObject({ ok: false, code: 'OPERATION_FAILED' });
++    expect(lifetime.runtime.entities.exportComponentSnapshot()).toEqual(concurrentLifetime);
++    expect(lifetime.runtime.simulation.combat.snapshotFor(lifetime.attackerId).lastResult).toBeNull();
++    expect(lifetime.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    lifetimePending.dispose();
++  });
++
++  it('rejects post-prepare effects drift without applying entity or combat changes', () => {
++    const fixture = setup({
++      deathPolicy: 'drop',
++      afterPrepared(runtime) {
++        runtime.simulation.recordAttacked('target', 'concurrent-attacker');
++      },
++    });
++    seedOwned(fixture.runtime);
++    const pending = directPending(fixture);
++    const entitiesBefore = fixture.runtime.entities.exportComponentSnapshot();
++
++    expect(pending.resolve()).toMatchObject({ ok: false, code: 'OPERATION_FAILED' });
++    expect(fixture.runtime.entities.exportComponentSnapshot()).toEqual(entitiesBefore);
++    expect(fixture.runtime.simulation.combat.snapshotFor(fixture.attackerId).lastResult).toBeNull();
++    expect(fixture.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    pending.dispose();
++  });
++
++  it('rejects death drop allocation exhaustion without entity or combat writes', () => {
++    const fixture = setup({ deathPolicy: 'drop' });
++    seedOwned(fixture.runtime);
++    const snapshot = fixture.runtime.createSnapshot();
++    snapshot.entityStore.sequence = Number.MAX_SAFE_INTEGER;
++    fixture.runtime.restoreSnapshot(snapshot);
++    const pending = directPending(fixture);
++    const before = entityState(fixture.runtime);
++
++    expect(pending.resolve()).toMatchObject({ ok: false, code: 'OPERATION_FAILED' });
++    expect(entityState(fixture.runtime)).toEqual(before);
++    expect(fixture.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++    pending.dispose();
++  });
++
++  it('keeps a composed lethal candidate detached when it is abandoned after validation', () => {
++    const fixture = setup({ targetKind: 'player', deathPolicy: 'drop' });
++    seedOwned(fixture.runtime);
++    const before = entityState(fixture.runtime);
++    const capability = resolveDeathInventoryPolicyCapabilityV1(fixture.composition);
++    expect(capability).not.toBeNull();
++
++    const candidate = prepareCombatDamage({
++      entities: fixture.runtime.entities,
++      targetId: fixture.targetId,
++      damage: 5,
++      armor: { ...emptyArmor(), chestplate: suit(4) },
++      deathInventory: { kind: 'composed', capability },
++      actorDeathDrop: () => null,
++    });
++    candidate.entity!.validate();
++
++    expect(entityState(fixture.runtime)).toEqual(before);
++    expect(fixture.runtime.entities.query({ type: 'world-item' })).toEqual([]);
++  });
++});

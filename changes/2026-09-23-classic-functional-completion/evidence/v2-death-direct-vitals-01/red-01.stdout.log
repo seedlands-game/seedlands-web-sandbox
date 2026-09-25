@@ -1,0 +1,90 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts (3 tests | 3 failed) 23ms
+     × drops all four owned containers with post-hit armor in one revision 18ms
+     × retains all containers but commits post-hit armor on death 2ms
+     × rejects lethal composed damage without a policy and preserves the full runtime 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > drops all four owned containers with post-hit armor in one revision
+AssertionError: expected { helmet: null, …(3) } to deeply equal { Object (helmet, chestplate, ...) }
+
+- Expected
++ Received
+
+  {
+    "boots": null,
+-   "chestplate": null,
++   "chestplate": {
++     "count": 1,
++     "instance": {
++       "durability": 4,
++     },
++     "itemId": "sample:suit",
++   },
+    "helmet": null,
+    "leggings": null,
+  }
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:108:25
+    106|     expect(actor.inventory.snapshot().every((slot) => slot === null)).…
+    107|     expect(actor.inventoryCursor).toMatchObject({ stack: null, craftin…
+    108|     expect(actor.armor).toEqual(emptyArmor());
+       |                         ^
+    109|     expect(runtime.entities.playerStateAccess('player').breakAction).t…
+    110|     expect(runtime.entities.query({ type: 'world-item' }).map(({ stack…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > retains all containers but commits post-hit armor on death
+AssertionError: expected null to deeply equal { itemId: 'sample:ore-a', count: 2 }
+
+- Expected:
+{
+  "count": 2,
+  "itemId": "sample:ore-a",
+}
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:125:37
+    123|     const actor = runtime.entities.actorStateAccess('player');
+    124|     expect(actor).toMatchObject({ health: 0, lifecycle: 'dead', invent…
+    125|     expect(actor.inventory.slot(0)).toEqual({ itemId: 'sample:ore-a', …
+       |                                     ^
+    126|     expect(actor.inventoryCursor).toMatchObject({
+    127|       stack: { itemId: 'sample:ore-b', count: 1 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/direct-vitals-death.test.ts > direct Vitals death inventory policy > rejects lethal composed damage without a policy and preserves the full runtime
+AssertionError: expected { success: true } to deeply equal { success: false, …(1) }
+
+- Expected
++ Received
+
+  {
+-   "reason": "death-inventory-policy-unavailable",
+-   "success": false,
++   "success": true,
+  }
+
+ ❯ packages/stdlib/tests/server/direct-vitals-death.test.ts:138:68
+    136|     const before = runtime.createSnapshot();
+    137|
+    138|     expect(runtime.applyDamage('hazard', 'player', 100, 'sample')).toE…
+       |                                                                    ^
+    139|       success: false,
+    140|       reason: 'death-inventory-policy-unavailable',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  23:46:09
+   Duration  886ms (transform 651ms, setup 0ms, import 784ms, tests 23ms, environment 0ms)
+

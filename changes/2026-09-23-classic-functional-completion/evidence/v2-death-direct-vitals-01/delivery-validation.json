@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-DEATH-DIRECT-VITALS-01",
+  "status": "DIRECT_PLAYER_VITALS_DEATH_GREEN",
+  "baseline": "9f5a6ff49cccb1e5ecb9fae9ae0ab9277f42769e",
+  "sourceManifestSha256": "e5dac755095dcacbc1105d1bee61ddaa0f62764c08540f4b413a8e4df7c9ceb9",
+  "publicDependencies": {
+    "deathInventorySettlementSha256": "976bd0df16e539897d990c96396a4f7b2af08aecdb1392e7eb453ab850933f2d",
+    "deathInventoryPolicySha256": "b4b20ee254098ab428d312718920ab5d79a51a83b100504b5ab29d80731da3c6",
+    "preparedDeathEffectsSha256": "84caec417143ab4bc52e8d7203cc6f6bc6fcc06a34a42265cfb3d96b07bc9ab7"
+  },
+  "red": {
+    "window": "v2-death-direct-vitals-red-01",
+    "status": "FAIL",
+    "files": 1,
+    "failed": 3,
+    "cause": "direct lethal Vitals ignored composed drop/retain policy and accepted missing capability"
+  },
+  "green": {
+    "window": "v2-death-direct-vitals-final-behavior-05",
+    "status": "PASS",
+    "files": 1,
+    "tests": 11,
+    "stdoutSha256": "cedf6bd729fa66ba2a5467b6841d4ae22451745787061fec506c505862c03930",
+    "receiptSha256": "e368304b7c8be3b316d07ee38ac833f001b6696ab82439c541b0d01cae3cd5b4"
+  },
+  "regressions": {
+    "stdlibWindow": "v2-death-direct-vitals-stdlib-regression-01",
+    "stdlibStatus": "PASS_2_FILES_15_TESTS",
+    "legacyPlayerWindow": "v2-death-direct-vitals-legacy-delivery",
+    "legacyPlayerStatus": "PASS_4_SKIPPED_1",
+    "survivalWindow": "v2-death-direct-vitals-survival-scoped-01",
+    "survivalStatus": "PASS_3_SKIPPED_8",
+    "classicArmorWindow": "v2-death-direct-vitals-classic-nonlethal-01",
+    "classicArmorStatus": "PASS_5_SKIPPED_1_CLASSIC_DEATH_POLICY_NOT_INSTALLED"
+  },
+  "static": {
+    "stdlibTypesWindow": "v2-death-direct-vitals-type-stdlib-delivery",
+    "stdlibTypesStatus": "PASS",
+    "rootTestTypesWindow": "v2-death-direct-vitals-type-root-delivery",
+    "rootTestTypesStatus": "PASS",
+    "classicTestTypesWindow": "v2-death-direct-vitals-type-classic-delivery",
+    "classicTestTypesStatus": "PASS",
+    "eslintWindow": "v2-death-direct-vitals-eslint-final-02",
+    "eslintStatus": "PASS",
+    "scopedDiffWindow": "v2-death-direct-vitals-diff-delivery-frozen",
+    "scopedDiffStatus": "PASS"
+  },
+  "remaining": [
+    "Classic death policy installation and product runtime wiring",
+    "registered Needs and non-player Needs/Autonomy death producers",
+    "build, browser, Cua, CI, save/restore composition, and complete V2 acceptance"
+  ]
+}
