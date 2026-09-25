@@ -592,3 +592,78 @@ c42cf2e2b2aa5bdafb3bb14d9aa29f90477c02c381e3c0d000b2f6ca1413e47e  build.log
 benchmark 残留进程。`/private/tmp/seedlands-v1-acceptance-46b81735` 与同一 dist 保留给 root 核验后交
 761 唯一 Browser-07；旧 `5d52330f`、`0d199371` 与 `23069d71` 树/dist 均保留。本阶段未运行
 browser、Cua、dev server、CI/review 或部署。
+
+## BUILD-09：Fixture epoch 同域修正后成功
+
+GIT-15 已提交并推送为 `06f42f5d0943c2f12a24264d9e5e607b22b33dee`。从该精确 SHA 新建
+`/private/tmp/seedlands-v1-acceptance-06f42f5d`；构建前 detached HEAD 匹配，tracked diff/index 为空且
+`apps/web/dist` 不存在。`node_modules` 与 `.pnpm-task-run-state-v1` 为真实目录；根与 package 级
+`@seedlands/*` 均经 `pwd -P` 解析到 BUILD-09 新树自身源码，第三方 `.pnpm` store 复用既有安装。
+构建前 identity：
+
+```text
+sourceSha=06f42f5d0943c2f12a24264d9e5e607b22b33dee
+sourceDigest=607294f043101061d632e0b669b9aafe367c68ea6dc67d9dc1037f37cc94c245
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+```
+
+唯一 build 命令：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- zsh -o pipefail -c 'pnpm build 2>&1 | tee /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v1-artifact-build-09/build.log'
+```
+
+结果：PASS。Pack build、Rust artifact 验证、SSG、Web typecheck 与 Vite production build 全部成功；
+Svelte 为 `0 errors / 0 warnings`。机器窗口 run
+`441c2a09-529f-4798-8fd7-4a1de8f2dec2`，`2026-09-25T04:59:33.904Z` 至
+`2026-09-25T04:59:58.154Z`，exit `0`。真实 stdout 已归档为 `build.log`。生成的 artifact identity：
+
+```text
+sourceSha=06f42f5d0943c2f12a24264d9e5e607b22b33dee
+sourceDigest=607294f043101061d632e0b669b9aafe367c68ea6dc67d9dc1037f37cc94c245
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e
+files=276
+builtAt=2026-09-25T04:59:57.103Z
+```
+
+artifact digest 与 BUILD-08 相同是因为 GIT-15 只改变测试和文档，生产 dist 字节未变；新的 sourceSha、
+sourceDigest、builtAt 与 receipt 仍绑定 GIT-15 精确源码。随后对同一树、同一 dist 只运行一次：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- zsh -o pipefail -c 'pnpm harness:artifact 2>&1 | tee /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v1-artifact-build-09/artifact-verify.log'
+```
+
+结果：PASS；机器窗口 run `08c829e7-ca35-4e28-a305-92d206b106cb`，
+`2026-09-25T05:00:47.168Z` 至 `2026-09-25T05:00:48.952Z`，exit `0`。全部 identity、
+`builtAt` 与 276 个盖章文件一致；磁盘共 277 个文件，另含 receipt 自身。
+`apps/web/dist/harness-artifact.json` SHA-256 为
+`6aa1a95de2f549dbf82186ca018a2bc1d272124e54269a11a99c00b33f4e9bd2`。关键映射与 BUILD-08 一致：
+
+```text
+3119e6f83c15f30191b067a3ce05d2f2e974fa6401e9fbcb715a2037262f10dc  index.html
+6f63394cb4d16293c319e0a88ba9ff2f0a928454af4cd752ffe0ac4ce5bfd26d  assets/authority-worker-R-urXYSz.js
+611c45804d9be51378388c8e7139620e2bbbeb089fe39cbf71792d712a9e7f45  assets/rust-kernels-scalar-hRRXiZem.wasm
+c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c  assets/rust-kernels-simd-cUjVQL8I.wasm
+863ae8eb9606583240207741f8b0515e6c40234d209524493dc283ccf012a99b  packs/packs.lock.json
+3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  packs/playbooks/classic/assets/audio/to-far-shores.mp3
+```
+
+Pack lock 媒体条目与 dist 文件均为 path
+`playbooks/classic/assets/audio/to-far-shores.mp3`、size `2976045`、contentType `audio/mpeg`、
+SHA-256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+BUILD-09 原始输出与 receipt 已归档到 `evidence/v1-artifact-build-09/`：
+
+```text
+7fa95203d326797124d30be0a8f905a1f8d2319e4268f0ec7fd3e1b299eede6a  build.log
+f68a51f2c7c5342a9b133610988547ec499792265bfd7d24d9f987be6e4ee154  build-receipt.json.log
+82e09a4b22398add16fbe04d26f63e4eb4b346bba7e125b5ff8f47b10383d752  artifact-verify.log
+0c1b3542438d2caa7af0e9863f572b0f3fc51444c8b1292c0a97708e08f1bded  artifact-verify-receipt.json.log
+6aa1a95de2f549dbf82186ca018a2bc1d272124e54269a11a99c00b33f4e9bd2  harness-artifact.json.log
+```
+
+验收树在 build 与 artifact 复验后仍 tracked/index clean，无 build、preview、Playwright、Chromium 或
+benchmark 残留进程。`/private/tmp/seedlands-v1-acceptance-06f42f5d` 与同一 dist 保留给 root 核验后交
+761 唯一 Browser-08；旧 `46b81735`、`5d52330f`、`0d199371` 与 `23069d71` 树/dist 均保留。本阶段
+未运行 browser、Cua、dev server、CI/review 或部署。
