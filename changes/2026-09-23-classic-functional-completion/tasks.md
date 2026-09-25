@@ -255,6 +255,13 @@ editable Prettier 与 scoped diff 均 PASS；代码/tests/contracts/spec 提交�
 当前 Browser/Cua/devserver/CI 未运行，death/durability-1/drop/respawn 均 `NOT OBSERVED`；铁甲四槽抽样不代表 16
 件护甲、194 项矩阵或完整 V2 GREEN。
 
+### V2-ARTIFACT-BUILD-04
+
+状态：PASS。已推送 source `00009bf26c821d115264d224899dafde0d6cc163` 的 clean detached tree 中，唯一
+`pnpm build` 与唯一 `pnpm harness:artifact` 均 PASS；sourceDigest `315820d6...2dff`、lockDigest
+`44db46fb...1169`、artifactDigest `fc7ac005...f6e2`，276 项 receipt map 与磁盘一致。tree/dist 保留供 root 后续唯一
+Browser；本阶段未运行 Browser/Cua/CI，不能外推为装备旅程或完整 V2 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

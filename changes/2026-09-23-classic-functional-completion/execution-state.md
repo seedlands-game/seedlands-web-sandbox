@@ -16,8 +16,11 @@ BUILD03 唯一 build/artifact verify 已 PASS，证据随独立 artifact evidenc
 当前 Equipment checkpoint：`V2-EQUIPMENT-HARNESS-ORACLE-01` 与
 `V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 已在 GIT28 detached staged tree 组合验证；observability `8/8`、scenario
 `7/7`、Web/Svelte/root/Classic test types 与目标静态均 PASS，原 oracle Classic-types 并行阻塞已关闭。代码提交
-`3df61d38b0b0de55c48ab709afd6315aa9f23ff2` 已本地生成，证据/state 尚待独立提交和 push。本阶段未运行
-Browser/Cua/devserver/CI；装备真实 Browser 旅程、death/durability-1/drop/respawn、16/194/full V2 仍未验收。
+`3df61d38b0b0de55c48ab709afd6315aa9f23ff2` 与证据/state 提交
+`00009bf26c821d115264d224899dafde0d6cc163` 已推送，local/upstream/origin/ls-remote 为 `0/0`。BUILD04 已从该
+source 的 clean detached tree 唯一 build 与唯一 artifact verify PASS；sourceDigest `315820d6...2dff`、artifactDigest
+`fc7ac005...f6e2`、276 项 map 与磁盘一致，artifact evidence 作为本阶段第三笔独立提交交付。本阶段未运行 Browser/Cua/devserver/CI；
+装备真实 Browser 旅程、death/durability-1/drop/respawn、16/194/full V2 仍未验收。
 
 ## 恢复规则
 
