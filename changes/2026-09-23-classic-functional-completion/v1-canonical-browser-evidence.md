@@ -176,6 +176,99 @@ seedlands.structure:execute
 
 ---
 
+# Browser-05 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-05`
+结论：**FAIL；C0-C3、V1 音频设置、水桶放 source、空桶收 source 与 Classic 视觉回归通过。随后在门放置前，创造飞行与 `walkTo(..., { jump: true })` 的落地等待条件冲突，门、媒体、C4/C5 和保存恢复均未触达。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-05 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-0d199371`
+- HEAD/source：`0d19937123506d5e6b30af8ad9ebdf40aad28509`
+- `git status --short`：运行前后均无输出。
+- source digest：`44a0e80f849cae44124228f464d6e7916801440aff2db6fd1cb84e95573cffb2`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`a91a3528abc9b8154f16e48fd0bf41be8c834bb3226e389fbb7550245b5a1f02`
+- artifact receipt SHA256：`e41beefb89468632986960b4e7adcca5218a7e15eed63bd43937f274271a8637`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt）；复用既有产物，未重建、未修改。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-05-0d199371 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T02:28:16.369Z` 至 `2026-09-25T02:30:56.127Z`。
+机器窗口：`319d5d90-396a-4e4d-84f9-caaccf4fdabb`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+Playwright 结果：1 failed，1 passed，1 skipped，共约 2.6 分钟；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.5 秒。
+- C1 PASS，约 17.6 秒。
+- C2 PASS，约 20.7 秒。
+- C3 PASS，约 15.8 秒。
+- V1 step 约 35.9 秒后失败。
+- Classic 视觉回归 PASS，约 31.5 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## V1 进展与首因
+
+本次已越过 Browser-04 的 fluid target 阻塞。`completeV1SliceBeforeSave()` 依次完成以下正式产品断言：
+
+1. 设置页仍有总音量、音乐、音效、环境四项，且旧文件上传入口不存在。
+2. 通过创造目录选择 `water-bucket`，真实瞄准 `[68,30,2]`、右键 adjacent `[68,31,2]`，权威/浏览器 voxel 变为 Water `8`，fluid cell 为 source。
+3. 通过创造目录选择空桶，真实瞄准 source 并右键，voxel 恢复 Air `0`，active hotbar item 保持 `bucket`，符合 creative 不消耗/不产生余物合同。
+
+失败发生在下一行 `v1-slice.ts:179` 的 `walkTo(page, door.approach, { jump: true })`，尚未选择或放置木门。现有 trace、receipt 与最终页面帧共同证明：
+
+1. `selectCreativeItem()` 为选择水桶而正式点击“切换创造模式”；产品同时启用 creative flight，并显示“创造模式 · 不受伤害”。
+2. 门路线 helper 仍按 `jump:true` 对 `Space` 做真实 key down/up；在飞行模式中 `Space` 是上升而非地面跳跃。
+3. 最终 x/z `[67.4773,0.4280]` 已满足门 approach `[67.5,0.5]`，但 player/server y 停在 `34.7000`，`serverPlayerVelocity=[0,0,0]`、`colliding=false`、`onGround=false`。
+4. `walkTo()` 在每次真实输入脉冲后要求 `acknowledgedInputSequence` 前进且 `onGround && !colliding`；创造飞行悬停不会重新落地，所以该 predicate 等待 20 秒后超时。
+5. 终态 `water.bodyFraction=0`、`swimming=false`、`wading=false`，故不是残留水体让玩家无法落地。
+
+因此首因分类为 **canonical route 的地面跳跃 helper 与已启用的创造飞行语义不兼容**。这不是门 runtime、门 geometry/collision、媒体或保存恢复的失败，因为对应动作均尚未发生。本租约不授权改场景、测试或产品，也不授权第二 attempt，因此仅保留证据并交接后续修复。
+
+## Browser-05 触达矩阵
+
+- C0-C3：**PASS**。
+- V1 四项音量与旧上传入口移除：**PASS**。
+- water-bucket 放 source：**PASS**；目标为 Water，fluid sidecar 为 source。
+- empty bucket 收 source：**PASS**；目标回到 Air，creative hotbar 仍为 bucket。
+- door 两格跨 Chunk、实际 mesh+epoch、关闭碰撞、打开穿越及上下 half toggle：**NOT REACHED**；失败发生在门 approach，木门尚未选择/放置。
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase：**NOT REACHED**。
+- C4 streaming：**NOT REACHED**。
+- C5 save/continue：**NOT REACHED**。
+- save-return-continue 后的新 epoch、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+- Classic 视觉回归：**PASS**。
+
+## Browser-05 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-05/`
+
+- `322cc3a21f502f3fd246b3169a753b26ec44f2284d21c08eacb822656b151770` `classic.json.log`
+- `734ea10e15da2203932d000953ed5260a6780f08b471d6c60361397de72a5854` `canonical-error-context.md.log`
+- 原始 trace SHA256 `977dcaa7b32e99010dd8c93d85469661c8aa95ad4c56a82412658a160ba32fee`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `7f9a76a214740e2318129589ffa02bfb50dada2f4747721cfe4265a4f6f61de2` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `72e77ce70169dcb49bcd589e008f5050aa8633826c9ecc229b087424450da1a1` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `37121cbc5571f35e528ce702e4f2bc97fd9b1b23351bd7986ad77881e8df59b2` `canonical-trace.zip.part-ac`（78915766 bytes）
+- `d8df0d0632e65266db12529f263f2ce71837cb0103225f8cb4c34c4cecfb063f` `failure-page.jpeg`；trace 中最后一个页面帧，显示创造模式、空桶选中与高处悬停。
+- `e41beefb89468632986960b4e7adcca5218a7e15eed63bd43937f274271a8637` `harness-artifact.json`
+- `a969ac79399721c1f904a692fdfb6a4a8d82737842694b6e681c496df1285978` `performance-window.json.log`
+- `5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110` `playwright-last-run.json.log`
+- `diagnosis.json` 的最终 SHA256 见阶段 checkpoint manifest。
+
+## Browser-05 运行后状态
+
+- `node scripts/harness/artifact.mjs` 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `0d19937123506d5e6b30af8ad9ebdf40aad28509`，`git status --short` 无输出，artifact receipt SHA256 仍为 `e41beef...1a8637`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；排除查询自身后，acceptance-tree、run-id、Chromium、Playwright 与 `vite preview` 进程复核输出 `NO_MATCHING_PROCESSES`。
+- Browser-05 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
 # Browser-04 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-04`

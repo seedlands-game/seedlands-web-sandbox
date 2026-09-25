@@ -138,6 +138,8 @@ V1 的 unit/integration GREEN 后立即串行生成一次临时 production artif
 
 V1 早期浏览器验收只通过现有 `?harness` BrowserProductHarness 增加三项只读 oracle：当前 Authority voxel geometry clone、postrender PlayCanvas material mesh 摘要、以及 Media controller projection/已转交 batch 与 GlobalAudio playing 的并列快照。它们没有写口、不是新 owner，不以 descriptor 证明渲染、不以 fact forward 证明 playing；完整签名、epoch 与唯一 scenario 约束见 `v1-harness-contract.md`。
 
+V1 canonical 旅程在创造目录取得并完成水桶放/收后，必须先通过正式背包 UI 切回生存模式，并从既有只读 snapshot 观测 `onGround && !colliding`，才可继续向门位置发送真实移动输入。Browser-05 窗口 `319d5d90-396a-4e4d-84f9-caaccf4fdabb` 是该顺序缺口的 RED：玩家已到门 approach 的 x/z，但创造飞行中的 `Space` 使其停在 y=34.7 且 `onGround=false`。本 fixture 修正不得使用 teleport、world command、直接 mode 调用、Harness 新写口、放宽 `walkTo` 落地条件、修改坐标/地形/超时或删减既有门、媒体、C4/C5 与保存恢复断言；静态检查只证明 fixture 接线完成，最终 GREEN 仍须新 identity artifact 上的唯一 canonical Browser 复验。
+
 每个 IMPLEMENT 先在实际 owner 取得 RED：registry/assembly；interact protocol/transaction；194-item no-unclassified matrix；装备与各物品族原子正反例；门/梯/轨/车；media state/pack digest/Web output；synthetic lighting/WebGL2 readback。sample:modular-world 必须是不加载 Classic 的实际替代配置。
 
 协调者串行运行 package.json 声明的 format/path/lint/typecheck、定向 owner tests、受影响 deterministic、Classic headless、一次 production build 和唯一 Chromium。当前 Cua/Jev 路由从真实键鼠验收全部物品/结构/载具旅程、保存重开、音频启停/失败与昼夜/林下/室内/遮挡/跨 Chunk 光照；runtime 调用、source grep、HTTP 200 或单图都不能替代产品证据。
