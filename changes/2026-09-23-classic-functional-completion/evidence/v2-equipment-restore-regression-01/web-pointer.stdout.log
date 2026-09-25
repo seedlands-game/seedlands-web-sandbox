@@ -1,0 +1,167 @@
+8:13:22 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-acceptance-50a1e6ec - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-acceptance-50a1e6ec
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts (9 tests | 9 failed) 5ms
+     × commits split, distribution, collection, hotbar exchange and stale denial against one stable revision 3ms
+     × crafts a real station result into an origin-free cursor and closes it into the bag 0ms
+     × uses the actor-owned 2x2 grid for personal crafting and restores it from a snapshot 0ms
+     × quick-moves to a station, takes from it without shared aliases, and batch crafts to the bag 0ms
+     × projects matched results and crafts into an empty or compatible cursor when the bag is full 0ms
+     × saves an owned cursor and drops it exactly once on player death before respawn 0ms
+     × preserves cursor ownership when an automatic pickup advances the inventory revision before close 0ms
+     × migrates a pre-cursor V4 actor facet without admitting malformed cursor state 0ms
+     × settles the cursor through the registered mode transition and rejects another bound actor 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > commits split, distribution, collection, hotbar exchange and stale denial against one stable revision
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:70:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > crafts a real station result into an origin-free cursor and closes it into the bag
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:106:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > uses the actor-owned 2x2 grid for personal crafting and restores it from a snapshot
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:147:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > quick-moves to a station, takes from it without shared aliases, and batch crafts to the bag
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:188:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > projects matched results and crafts into an empty or compatible cursor when the bag is full
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:240:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > saves an owned cursor and drops it exactly once on player death before respawn
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:290:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > preserves cursor ownership when an automatic pickup advances the inventory revision before close
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:319:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > migrates a pre-cursor V4 actor facet without admitting malformed cursor state
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:340:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > settles the cursor through the registered mode transition and rejects another bound actor
+TypeError: Pack integrity receipt is missing or adds resources: seedlands:overworld
+ ❯ validateIntegrity packages/stdlib/src/server/composition/assembly.ts:153:11
+    151|   const actual = integrity.resources.map((resource) => resource.path).…
+    152|   if (JSON.stringify(expected) !== JSON.stringify(actual))
+    153|     throw new TypeError(`Pack integrity receipt is missing or adds res…
+       |           ^
+    154|   for (const resource of integrity.resources)
+    155|     if (!SHA256.test(resource.digest)) throw new TypeError(`Resource d…
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:203:5
+ ❯ assembleOverworldPacks packages/stdlib/src/server/composition/gameplay-composition.ts:59:10
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:23:23
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:380:48
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed (9)
+   Start at  20:13:23
+   Duration  1.19s (transform 877ms, setup 0ms, import 1.10s, tests 5ms, environment 0ms)
+

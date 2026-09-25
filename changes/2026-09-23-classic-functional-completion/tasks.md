@@ -101,6 +101,32 @@ RED 保留。代码/测试/合同提交 `fe2fcc9f174848ef9d7419cb5df96209a2d2579
 `50a1e6ec72583ad4f5feef057a692709da577b19` 已推送并更新 PR #41。V2 BUILD01 的唯一 build 与 artifact
 复验均 PASS；BUILD01 evidence/state 已归档，本批以独立语义提交交付，远端身份在最终 checkpoint 读回。
 
+### V2-EQUIPMENT-RESTORE-REGRESSION-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 3h。只新增非 Classic restore 回归与
+change 内合同/证据，不修改 production 或 `spec.md`，不进入 761 的 registered combat armor 写域。done_when：
+已提交 core 的正式 pointer 状态经 V4 保存/恢复保持 bag、cursor/crafting、armor/durability/revision；成功
+restore 使旧 reference/access 失效，新 reference 可继续穿脱交换；缺 armor 兼容四空槽；wrong-slot/非法
+durability 原子拒绝。
+
+状态：CHECKPOINT_READY。最终新增 suite `1 file / 4 tests` PASS，stdlib/root test/Classic test types 与单文件
+lint/format/diff PASS；现有 Web pointer 9 项在 clean `50a1e6ec` tree 上仍 `9/9 FAIL`，全部阻断于 Classic
+Pack integrity fixture setup，未进入 pointer/restore 行为。本片未越域修复。761 I2.1c registered combat armor
+仍在进行。
+
+### V2-WEB-POINTER-FIXTURE-CLOSE-01 + GIT-22
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`。已授权 resources 单 hunk 使测试 receipt 跟随当前 Pack
+manifest，首个 integrity mismatch blocker 已关闭。随后的唯一 Web9 GREEN 尝试仍 `9/9 FAIL`，共同首因转为
+完整 Classic Media capability 缺少测试宿主 `getLoadedCell`，未进入 pointer 行为。该 seam 不在当前授权写范围；
+root 后续授权同源 `readCell/getLoadedCell` 后，Media blocker关闭，但下一次 Web9仍 `9/9 FAIL`于 Structure
+capability缺少 `prepareVoxelEdits`。root授权 strict fail-closed batch seam后，原 suite真实 `9/9 PASS`，且未触发
+voxel edit异常；root/Classic test types与fixture lint/format/diff PASS。测试/合同提交为
+`e6a25d5739608038657c093faa1eb99fcd4e7bea`；阶段状态 GREEN，GIT-22 evidence/state提交待完成。
+
+GIT-22 第二批只提交 restore/Web fixture evidence、两份 evidence 文档与本文件/执行状态；历史 restore
+manifest不改写，当前状态为本地 delivery ready，待自然 hooks 后 push/readback。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

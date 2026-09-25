@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-WEB-POINTER-FIXTURE-CLOSE-01",
+  "status": "GREEN",
+  "baseline": "e0594e0260b54274db1e570f632ae4a9b9042152",
+  "testTree": "/private/tmp/seedlands-v2-equipment-restore-e0594e02",
+  "fixtureSha256": "a67c6e01fcc4223b7b5961654e451cb3157fdd2bfc7e05df336bea2e027a21d9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "6f13ee9f0f5b6aa83fae035e0dca01a334fa7187e1c19dc1d82aaa9f0f59b5de"
+  },
+  "closedBlockers": [
+    {
+      "window": "v2-equipment-web-pointer-regression",
+      "reason": "Pack integrity receipt omitted the MP3 manifest resource",
+      "change": "derive dummy receipt paths from pack.manifest.resources"
+    },
+    {
+      "window": "v2-web-pointer-fixture-green",
+      "reason": "Registered Media host loaded-cell port was unavailable",
+      "change": "share one deterministic readCell between getVoxel and getLoadedCell"
+    },
+    {
+      "window": "v2-web-pointer-fixture-green2",
+      "reason": "Registered Structure host ports were unavailable",
+      "change": "declare a strict fail-closed prepareVoxelEdits seam that throws if invoked"
+    }
+  ],
+  "webPointerRegression": {
+    "window": "v2-web-pointer-fixture-green3",
+    "status": "PASS",
+    "exitCode": 0,
+    "files": 1,
+    "passed": 9,
+    "worldEditSeamsInvoked": false
+  },
+  "static": {
+    "rootTestTypes": { "window": "v2-web-pointer-root-test-types", "status": "PASS" },
+    "classicTestTypes": { "window": "v2-web-pointer-classic-test-types", "status": "PASS" },
+    "fixtureLintFormatDiff": { "window": "v2-web-pointer-static", "status": "PASS" }
+  },
+  "restoreEvidenceChanged": false,
+  "productionChanges": [],
+  "notRun": ["restore-tests", "stdlib-types", "build", "browser", "cua", "ci", "deploy"]
+}

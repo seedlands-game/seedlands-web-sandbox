@@ -1,0 +1,10 @@
+8:41:38 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-equipment-restore-e0594e02 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-equipment-restore-e0594e02
+
+
+ Test Files  1 passed (1)
+      Tests  9 passed (9)
+   Start at  20:41:38
+   Duration  1.34s (transform 837ms, setup 0ms, import 1.05s, tests 224ms, environment 0ms)
+
