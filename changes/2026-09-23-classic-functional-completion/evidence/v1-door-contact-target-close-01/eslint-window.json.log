@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "366efe5b-9fb8-44a5-90af-b58d57487072",
+  "pid": 87583,
+  "startedAt": "2026-09-25T07:21:02.485Z",
+  "windowId": "366efe5b-9fb8-44a5-90af-b58d57487072",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-door-contact-target-close-01/eslint-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T07:21:04.221Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T07:21:02.486Z",
+      "loadAverage": [
+        3.6015625,
+        3.583984375,
+        3.5234375
+      ],
+      "freeMemoryBytes": 951205888,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T07:21:04.219Z",
+      "loadAverage": [
+        3.6015625,
+        3.583984375,
+        3.5234375
+      ],
+      "freeMemoryBytes": 917864448,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "8dc009c8-28d8-440b-a9f1-fc26eeb3c221",
+  "pid": 87174,
+  "startedAt": "2026-09-25T07:20:36.816Z",
+  "windowId": "8dc009c8-28d8-440b-a9f1-fc26eeb3c221",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-door-contact-target-close-01/typecheck-classic-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T07:20:40.904Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T07:20:36.817Z",
+      "loadAverage": [
+        3.3994140625,
+        3.54931640625,
+        3.51123046875
+      ],
+      "freeMemoryBytes": 457687040,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T07:20:40.902Z",
+      "loadAverage": [
+        3.3671875,
+        3.5400390625,
+        3.5078125
+      ],
+      "freeMemoryBytes": 968540160,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
