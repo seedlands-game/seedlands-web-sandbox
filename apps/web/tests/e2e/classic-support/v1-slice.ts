@@ -1,19 +1,30 @@
 import { expect, type Page } from '@playwright/test';
+import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
 import { FaceMaterial, Voxel, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
-import type { HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../../../src/app/app-contracts';
+import type {
+  HarnessMediaSnapshot,
+  HarnessSnapshot,
+  RenderedMaterialMeshSummary,
+} from '../../../src/app/app-contracts';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 import { aimAtVoxelWithRealMouse } from './aim';
+import {
+  assessClosedDoorProbe,
+  createClosedDoorProbePlan,
+  type ClosedDoorProbeObservation,
+} from './door-collision-oracle';
 import {
   clickCanvasCenter,
   closeInventory,
   lockPointer,
-  snapshot,
+  moveMouseBy,
   voxelAt,
   waitForSnapshot,
   walkTo,
   type ClassicWindow,
 } from './harness';
 import { classicScenario, type Point } from './scenario';
+import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
 
 type DoorPair = readonly [number, number];
 
@@ -133,21 +144,82 @@ async function expectDoorMesh(page: Page, voxel: number, expectedThinAxis: 0 | 2
   return meshes[0]!;
 }
 
-async function expectClosedDoorBlocks(page: Page): Promise<void> {
+type DoorAuthorityObservation = ClosedDoorProbeObservation &
+  Readonly<{ viewAngles: readonly [number, number]; physicsHz: number }>;
+const CLOSED_DOOR_INPUT_BUDGET_MS = 1_250;
+
+const doorAuthorityObservation = async (page: Page): Promise<DoorAuthorityObservation> => {
+  const value = await page.evaluate(() => {
+    const harness = (window as unknown as { __seedlandsHarness?: { snapshot(): HarnessSnapshot } }).__seedlandsHarness;
+    const current = harness?.snapshot();
+    if (!current) return null;
+    return {
+      position: current.serverPlayerPosition,
+      acknowledgedInputSequence: current.authority.acknowledgedInputSequence,
+      physicsTick: current.authority.physicsTick,
+      physicsHz: current.authority.physicsHz,
+      viewAngles: current.viewAngles,
+      onGround: current.onGround,
+      colliding: current.colliding,
+    };
+  });
+  if (!value) throw new Error('Classic Authority observation is unavailable for the closed-door probe.');
+  return value;
+};
+
+async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promise<void> {
   const target = classicScenario.v1Slice.door.lower;
-  await aimAtVoxelWithRealMouse(page, target);
-  const before = (await snapshot(page))!;
+  expect(await doorPair(page)).toEqual(expectedDoor);
+  const descriptor = await voxelGeometry(page, expectedDoor[0]);
+  expect(descriptor?.collision).toHaveLength(1);
+  const body = bodyConfigFor('player').localAabb;
+  const playerHalfWidth = Math.max(-body.min.x, body.max.x, -body.min.z, body.max.z);
+  const initial = await doorAuthorityObservation(page);
+  const plan = createClosedDoorProbePlan({
+    door: target,
+    collision: descriptor!.collision[0]!,
+    playerPosition: initial.position,
+    playerHalfWidth,
+  });
+  await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80 });
+  await correctMouseToRoute({
+    target: plan.routeTarget,
+    direction: 'KeyW',
+    observe: async () => {
+      const current = await doorAuthorityObservation(page);
+      return { player: current.position, viewAngles: current.viewAngles };
+    },
+    move: (dx, dy) => moveMouseBy(page, dx, dy),
+  });
+  const before = await doorAuthorityObservation(page);
+  expect(await doorPair(page)).toEqual(expectedDoor);
+  expect(assessClosedDoorProbe(plan, before, [])).toEqual({ status: 'pending', reason: 'no-observations' });
+  expect(
+    Math.abs(horizontalMouseCorrectionToRoute(before.position, before.viewAngles[0], plan.routeTarget, 'KeyW')),
+  ).toBeLessThan(1);
+
+  const observations: DoorAuthorityObservation[] = [];
+  const maximumPhysicsTick = before.physicsTick + Math.ceil((before.physicsHz * CLOSED_DOOR_INPUT_BUDGET_MS) / 1_000);
+  const deadline = Date.now() + CLOSED_DOOR_INPUT_BUDGET_MS;
+  let assessment = assessClosedDoorProbe(plan, before, observations);
   await page.keyboard.down('KeyW');
   try {
-    await page.waitForTimeout(1_500);
+    while (
+      assessment.status === 'pending' &&
+      Date.now() < deadline &&
+      (observations.at(-1)?.physicsTick ?? before.physicsTick) < maximumPhysicsTick
+    ) {
+      const previousTick = observations.at(-1)?.physicsTick ?? before.physicsTick;
+      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+      const current = await doorAuthorityObservation(page);
+      if (current.physicsTick <= previousTick) continue;
+      observations.push(current);
+      assessment = assessClosedDoorProbe(plan, before, observations);
+    }
   } finally {
     await page.keyboard.up('KeyW');
   }
-  const blocked = await waitForSnapshot(
-    page,
-    (value) => value.authority.acknowledgedInputSequence > before.authority.acknowledgedInputSequence,
-  );
-  expect(blocked.player[0]).toBeLessThan(target[0] + 0.75);
+  expect(assessment).toEqual({ status: 'blocked' });
 }
 
 export async function expectV1AudioSettings(page: Page): Promise<void> {
@@ -187,7 +259,7 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   const closedMesh = await expectDoorMesh(page, placed[0], 0, worldEpoch);
   expect((await voxelGeometry(page, placed[0]))?.collision).toHaveLength(1);
   await switchToSurvival(page);
-  await expectClosedDoorBlocks(page);
+  await expectClosedDoorBlocks(page, placed);
 
   await aimAtVoxelWithRealMouse(page, door.lower);
   await clickCanvasCenter(page, 'right');
