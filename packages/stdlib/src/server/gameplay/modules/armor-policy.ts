@@ -2,6 +2,9 @@ export const ARMOR_MAX_POINTS = 20;
 export const ARMOR_SLOTS = ['helmet', 'chestplate', 'leggings', 'boots'] as const;
 export type ArmorSlot = (typeof ARMOR_SLOTS)[number];
 
+export const isArmorSlot = (value: unknown): value is ArmorSlot =>
+  typeof value === 'string' && (ARMOR_SLOTS as readonly string[]).includes(value);
+
 /**
  * Minecraft-style flat armor reduction: each point removes 4% of incoming damage,
  * capped at ARMOR_MAX_POINTS. Pure and detached; the vitals owner commits the result.

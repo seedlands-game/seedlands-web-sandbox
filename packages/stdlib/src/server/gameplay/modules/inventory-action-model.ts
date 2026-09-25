@@ -5,7 +5,12 @@ import type { InventorySlot } from '../inventory';
 import type { GameplayContent } from '../gameplay-content';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 import { applyCraftingMatch, shapelessCraftingProvider } from './crafting-provider';
-import { validateInventoryCursor, type InventoryCursorV1 } from './inventory-pointer-contract';
+import {
+  validateInventoryCursor,
+  validateInventoryEquipmentProjection,
+  type InventoryCursorV1,
+  type InventoryEquipmentProjectionV1,
+} from './inventory-pointer-contract';
 
 export const INVENTORY_ACTIONS_CAPABILITY = 'seedlands:inventory-actions';
 export const INVENTORY_ACTOR_COMPONENT = 'seedlands:inventory-actor';
@@ -25,7 +30,8 @@ const MAX_INVENTORY_CAPACITY = 64;
 const MAX_NEEDS_VALUE = 1_000_000;
 const MAX_WORLD_COORDINATE = 30_000_000;
 
-export type InventoryEquipmentProjection = Readonly<{ selectedSlot: number; hotbarSize: number }>;
+/** Compatibility alias; the versioned shape is owned by the pointer contract. */
+export type InventoryEquipmentProjection = InventoryEquipmentProjectionV1;
 export type InventoryNeedsProjection = Readonly<{
   hunger: number;
   maxHunger: number;
@@ -259,12 +265,7 @@ export function validateInventoryActorProjection(
       return stack;
     }),
   );
-  const equipment = actionData(value.equipment, ['selectedSlot', 'hotbarSize'], 'Inventory equipment projection');
-  if (
-    !safeInteger(equipment.hotbarSize, 1, slots.length) ||
-    !safeInteger(equipment.selectedSlot, 0, equipment.hotbarSize - 1)
-  )
-    throw new TypeError('Inventory equipment projection is invalid.');
+  const equipment = validateInventoryEquipmentProjection(value.equipment, items, slots.length);
   const needs = actionData(value.needs, ['hunger', 'maxHunger', 'meaning'], 'Inventory needs projection');
   if (
     !finite(needs.maxHunger, Number.EPSILON, MAX_NEEDS_VALUE) ||
@@ -288,7 +289,7 @@ export function validateInventoryActorProjection(
     reference,
     kind: value.kind as InventoryActorProjectionV1['kind'],
     slots,
-    equipment: Object.freeze({ selectedSlot: equipment.selectedSlot, hotbarSize: equipment.hotbarSize }),
+    equipment,
     lifecycle: value.lifecycle as InventoryActorProjectionV1['lifecycle'],
     needs: Object.freeze({
       hunger: needs.hunger,
@@ -402,6 +403,7 @@ function candidate<Kind extends InventoryActionKind, Args extends InventoryActio
     equipment: Object.freeze({
       selectedSlot: result.selectedSlot,
       hotbarSize: input.actor.equipment.hotbarSize,
+      armor: input.actor.equipment.armor,
     }),
     hunger,
     ...(input.health === undefined ? {} : { health: input.health }),

@@ -65,7 +65,11 @@ const actor = (count = 9) => ({
   reference: { entityId: 'alice', epoch: 1, lifetime: 1 },
   kind: 'player' as const,
   slots: [{ itemId: 'test:wood', count }, ...Array(23).fill(null)],
-  equipment: { selectedSlot: 0, hotbarSize: 8 },
+  equipment: {
+    selectedSlot: 0,
+    hotbarSize: 8,
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+  },
   lifecycle: 'alive' as const,
   needs: { hunger: 20, maxHunger: 20, meaning: 'satiety' as const },
   inventoryRevision: 4,
@@ -280,7 +284,11 @@ it('9槽布局可从背包末格交换到第9槽，旧8槽布局仍拒绝同一�
   const source = {
     ...actor(),
     slots: [...Array(35).fill(null), { itemId: 'test:wood', count: 3 }],
-    equipment: { selectedSlot: 0, hotbarSize: 9 },
+    equipment: {
+      selectedSlot: 0,
+      hotbarSize: 9,
+      armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+    },
   };
   const command = { kind: 'hotbar' as const, slot: { kind: 'inventory' as const, slot: 35 }, hotbarSlot: 8 };
   const next = buildInventoryPointerCandidate(content, { actor: source, input: input(command) });

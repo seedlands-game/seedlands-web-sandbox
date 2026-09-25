@@ -1,10 +1,13 @@
 import type { ModuleInvocationValue } from '../composition/contracts';
 import type { ModuleActorAuthority } from '../composition/gameplay-actor-authority';
 import type { EntityStore } from './entity-store';
+import type { InventorySlot } from './inventory';
 import type { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
 import {
   publicInventoryPointerFailureReason,
   type InventoryPointerInputV1,
+  validateInventoryCursor,
+  validateInventoryEquipmentProjection,
 } from './modules/inventory-pointer-contract';
 import { STATION_CRAFT_OPERATION, STATION_TRANSFER_OPERATION } from './modules/station-action-model';
 import {
@@ -13,6 +16,13 @@ import {
   stationRecipeFitsGrid,
 } from './modules/station-candidates';
 import type { GameplayContent } from './gameplay-content';
+const frozenSlot = (slot: InventorySlot): InventorySlot =>
+  slot
+    ? Object.freeze({
+        ...slot,
+        ...(slot.instance ? { instance: Object.freeze({ ...slot.instance }) } : {}),
+      })
+    : null;
 
 type RegisteredPointerRuntime = Readonly<{
   pointer(id: string, input: InventoryPointerInputV1): InventoryPointerExecutionResult;
@@ -22,7 +32,13 @@ type InventoryPointerExecutionResult =
 
 export function projectInventoryPointerView(entities: EntityStore, content: GameplayContent, id: string) {
   const actor = entities.actorStateAccess(id);
-  const grid = actor.inventoryCursor.craftingGrid;
+  const equipment = validateInventoryEquipmentProjection(
+    { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize, armor: actor.armor },
+    content.items,
+    actor.inventory.capacity,
+  );
+  const cursor = validateInventoryCursor(actor.inventoryCursor, content.items);
+  const grid = cursor.craftingGrid;
   const matchedCraftingRecipe = content.stations
     ?.listRecipes()
     .find(
@@ -32,15 +48,16 @@ export function projectInventoryPointerView(entities: EntityStore, content: Game
           ? matchesShapedStationRecipe(grid, recipe, content.items)
           : matchesShapelessStationRecipe(grid, recipe, content.items)),
     );
-  return {
+  return Object.freeze({
     version: 1 as const,
     actor: entities.createReference(id)!,
     revision: actor.inventoryRevision,
-    slots: actor.inventory.snapshot(),
+    slots: Object.freeze(actor.inventory.snapshot().map(frozenSlot)),
     hotbarSize: actor.hotbarSize,
-    cursor: actor.inventoryCursor,
+    armor: equipment.armor,
+    cursor,
     matchedCraftingRecipeIds: Object.freeze(matchedCraftingRecipe ? [matchedCraftingRecipe.id] : []),
-  };
+  });
 }
 
 export function executeInventoryPointer(

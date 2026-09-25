@@ -88,6 +88,12 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
     case 'inventory-pointer': {
+      if (
+        Object.keys(source).some(
+          (key) => !['type', 'actor', 'expectedInventoryRevision', 'station', 'command'].includes(key),
+        )
+      )
+        throw new TypeError('Inventory pointer action contains unknown fields.');
       const input = {
         actor: source.actor,
         expectedInventoryRevision: source.expectedInventoryRevision,
