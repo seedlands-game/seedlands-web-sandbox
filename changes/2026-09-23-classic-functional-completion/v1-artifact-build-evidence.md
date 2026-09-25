@@ -518,3 +518,77 @@ f3756709461bf8ddb6dc542171cba919bc9f997f8c9bb81586fad4a52668bef8  artifact-verif
 benchmark 残留进程。`/private/tmp/seedlands-v1-acceptance-5d52330f` 与同一 dist 保留给 root 后续唯一
 Browser-06；旧 `0d199371` 与 `23069d71` 树/dist 均保留。本阶段未运行 browser、Cua、dev server、
 CI/review 或部署。
+
+## BUILD-08：Structure 共享命中面后成功
+
+GIT-14 已提交并推送为 `46b8173538f7e162f79c16fc92864139b3bc24a8`。从该精确 SHA 新建
+`/private/tmp/seedlands-v1-acceptance-46b81735`；构建前 detached HEAD 匹配，tracked diff/index 为空且
+`apps/web/dist` 不存在。`node_modules` 与 `.pnpm-task-run-state-v1` 为真实目录；根与 package 级
+`@seedlands/*` 均经 `pwd -P` 解析到 BUILD-08 新树自身源码，第三方 `.pnpm` store 复用既有安装。
+构建前 identity：
+
+```text
+sourceSha=46b8173538f7e162f79c16fc92864139b3bc24a8
+sourceDigest=96532a3ecc82140d83d3d5c1b32c533d3f449d3c26269929295d8dfe7af717d9
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+```
+
+唯一 build 命令：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- zsh -o pipefail -c 'pnpm build 2>&1 | tee /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v1-artifact-build-08/build.log'
+```
+
+结果：PASS。Pack build、Rust artifact 验证、SSG、Web typecheck 与 Vite production build 全部成功；
+Svelte 为 `0 errors / 0 warnings`。机器窗口 run
+`ae91fc52-9f5e-4987-a1c6-468fc82ed249`，`2026-09-25T04:08:47.257Z` 至
+`2026-09-25T04:09:08.543Z`，exit `0`。真实 stdout 已归档为 `build.log`。生成的 artifact identity：
+
+```text
+sourceSha=46b8173538f7e162f79c16fc92864139b3bc24a8
+sourceDigest=96532a3ecc82140d83d3d5c1b32c533d3f449d3c26269929295d8dfe7af717d9
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e
+files=276
+builtAt=2026-09-25T04:09:07.618Z
+```
+
+同一树、同一 dist 随后只运行一次：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- zsh -o pipefail -c 'pnpm harness:artifact 2>&1 | tee /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v1-artifact-build-08/artifact-verify.log'
+```
+
+结果：PASS；机器窗口 run `675c46e5-ec92-42f8-a337-e3d2e314e83a`，
+`2026-09-25T04:09:54.453Z` 至 `2026-09-25T04:09:55.729Z`，exit `0`。全部 identity、
+`builtAt` 与 276 个盖章文件一致；磁盘共 277 个文件，另含 receipt 自身。
+`apps/web/dist/harness-artifact.json` SHA-256 为
+`78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259`。关键映射：
+
+```text
+3119e6f83c15f30191b067a3ce05d2f2e974fa6401e9fbcb715a2037262f10dc  index.html
+6f63394cb4d16293c319e0a88ba9ff2f0a928454af4cd752ffe0ac4ce5bfd26d  assets/authority-worker-R-urXYSz.js
+611c45804d9be51378388c8e7139620e2bbbeb089fe39cbf71792d712a9e7f45  assets/rust-kernels-scalar-hRRXiZem.wasm
+c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c  assets/rust-kernels-simd-cUjVQL8I.wasm
+863ae8eb9606583240207741f8b0515e6c40234d209524493dc283ccf012a99b  packs/packs.lock.json
+3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  packs/playbooks/classic/assets/audio/to-far-shores.mp3
+```
+
+Pack lock 媒体条目与 dist 文件均为 path
+`playbooks/classic/assets/audio/to-far-shores.mp3`、size `2976045`、contentType `audio/mpeg`、
+SHA-256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+BUILD-08 原始输出与 receipt 已归档到 `evidence/v1-artifact-build-08/`：
+
+```text
+c42cf2e2b2aa5bdafb3bb14d9aa29f90477c02c381e3c0d000b2f6ca1413e47e  build.log
+57727757533873f13d9d6dc41696d8a3ac3b12f4e26a1dacc6a74b7346680bfc  build-receipt.json.log
+9c0b675b539163702918882dc896432656e1b84675d98c3ac6f69b912fb90f96  artifact-verify.log
+8af543131e8123792c9288c6ddb13c71ac499f3b75253007f318dc6a779399b3  artifact-verify-receipt.json.log
+78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259  harness-artifact.json.log
+```
+
+验收树在 build 与 artifact 复验后仍 tracked/index clean，无 build、preview、Playwright、Chromium 或
+benchmark 残留进程。`/private/tmp/seedlands-v1-acceptance-46b81735` 与同一 dist 保留给 root 核验后交
+761 唯一 Browser-07；旧 `5d52330f`、`0d199371` 与 `23069d71` 树/dist 均保留。本阶段未运行
+browser、Cua、dev server、CI/review 或部署。
