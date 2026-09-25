@@ -134,10 +134,22 @@ registered combat armor transaction：ruleset产出正伤害后，以通用 armo
 armor在同一 prepared entity mutation提交。只提交冻结的两个生产文件、一个测试、spec/合同及对应 evidence/state；
 `armor-equipment.ts`仅复用。shared death第三项必须保持 `1 failed / 2 skipped`，不得提前进入I2.2。
 
-状态：LOCAL_DELIVERY_READY。GIT-22已提交推送并准出；GIT-23隔离树中的combat `8/8`、既有combat/damage
+状态：REMOTE_DELIVERED。GIT-22已提交推送并准出；GIT-23隔离树中的combat `8/8`、既有combat/damage
 `22/22`、frontier/effects `14/14`、Classic armor `6/6`与equipment组合 `43/43`均PASS，三类types和静态PASS；
-shared death保持 `1 failed / 2 skipped`。代码/测试/spec/合同已提交`067c87607de7d85dace165f81947f84290ed0231`，
-第二批只含evidence/state，待自然hooks与push/readback。
+shared death保持 `1 failed / 2 skipped`。代码/测试/spec/合同提交为`067c87607de7d85dace165f81947f84290ed0231`，
+evidence/state提交为`a39f7ba6d18b602305372093c43757be83a6125e`；local/upstream/origin/PR head 已读回一致。
+
+### V2-DEATH-POLICY-SPINE-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 5h。公共范围仅为无状态 death inventory
+policy capability/resolver、原始 source frontier 与统一 prepared mutation series participant；不安装 Classic、
+不接 Needs/Combat/Vitals/Autonomy producer、不修改 Web/spec/存档 schema。
+
+状态：LOCAL_DELIVERY_READY。root 已定向准出公共 checkpoint；真实 RED 证明旧单 participant 会接受 build 后 health-only stale；最终 non-Classic
+capability/source/series 与既有 equipment spine 为 `3 files / 25 tests` PASS，stdlib/root test types、定向
+ESLint/Prettier PASS。GIT-24 隔离树复验还包括 Classic test types 与 staged diff，代码/测试/合同已提交
+`364c6517848a0c1d03aed28b051a106820264b2f`；evidence/state 待第二笔提交。Classic policy、
+`death-inventory-policy-unavailable`、NPC intrinsic/despawn 与实际 producer 仍未接线，不宣称 death 或完整 V2 GREEN。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
