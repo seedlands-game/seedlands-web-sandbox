@@ -1,0 +1,40 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts (6 tests | 1 failed) 71ms
+     × applies non-Classic armor reduction and durability in the real registered resolve transaction 35ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > applies non-Classic armor reduction and durability in the real registered resolve transaction
+AssertionError: expected [] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "operationId": "seedlands:resolve-combat",
+  "value": {
+    "damage": 9.2,
+    "outcome": "hit",
+    "success": true,
+  },
+}
+
++ Received:
+[]
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:220:38
+    218|     expect(runtime.entities.get('target')?.health).toBe(10.8);
+    219|     expect(runtime.simulation.combat.snapshotFor('attacker').lastResul…
+    220|     expect(combatFacts.get(runtime)).toContainEqual(
+       |                                      ^
+    221|       expect.objectContaining({
+    222|         operationId: 'seedlands:resolve-combat',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  20:28:52
+   Duration  989ms (transform 694ms, setup 0ms, import 848ms, tests 71ms, environment 0ms)
+

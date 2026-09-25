@@ -1,0 +1,40 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts (7 tests | 1 failed) 55ms
+     × publishes a registered resolve fact whose damage equals the committed health delta 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > publishes a registered resolve fact whose damage equals the committed health delta
+AssertionError: expected [] to deep equally contain ObjectContaining{…}
+
+- Expected:
+ObjectContaining {
+  "operationId": "seedlands:resolve-combat",
+  "value": {
+    "damage": 9.2,
+    "outcome": "hit",
+    "success": true,
+  },
+}
+
++ Received:
+[]
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:280:21
+    278|       const healthDelta = healthBefore - runtime.entities.get('target'…
+    279|       expect(result).toMatchObject({ ok: true, value: { success: true,…
+    280|       expect(facts).toContainEqual(
+       |                     ^
+    281|         expect.objectContaining({
+    282|           operationId: 'seedlands:resolve-combat',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  20:32:14
+   Duration  904ms (transform 637ms, setup 0ms, import 772ms, tests 55ms, environment 0ms)
+
