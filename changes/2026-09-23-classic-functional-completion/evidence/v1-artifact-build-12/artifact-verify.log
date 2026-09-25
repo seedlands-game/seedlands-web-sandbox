@@ -1,0 +1,2 @@
+$ node scripts/harness/artifact.mjs
+{"status":"PASS","schemaVersion":1,"sourceSha":"6614a1f675c93043a19fe225acab5a382481ad13","sourceDigest":"384fffd9c685041e8780bb66fe544714c674418c44819b5999397bb34bc97dfa","lockDigest":"44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169","artifactDigest":"ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e","files":276,"builtAt":"2026-09-25T07:33:23.085Z"}

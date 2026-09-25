@@ -785,3 +785,63 @@ f5f175d1de7c079927bc5a26569be8b79bb39915e85477994843455d0c5b68ff  harness-artifa
 `/private/tmp/seedlands-v1-acceptance-9727dbb9` 与同一 dist 保留给 root 核验后交 761 唯一
 Browser-10；旧 `244b18e3`、`06f42f5d`、`46b81735`、`5d52330f`、`0d199371` 与
 `23069d71` 树/dist 均保留。本阶段未运行 browser、Cua、dev server、CI/review 或部署。
+
+## BUILD-12：门接触位目标修正后成功
+
+GIT-18 已提交并推送为 `6614a1f675c93043a19fe225acab5a382481ad13`。从该精确远端 SHA 新建
+`/private/tmp/seedlands-v1-acceptance-6614a1f6`；构建前 detached HEAD 匹配，tracked diff/index 为空且
+`apps/web/dist` 不存在。根与 Web workspace 的 `@seedlands/*` 均解析到新树自身源码；第三方
+`.pnpm` store 复用既有安装，`.pnpm-task-run-state-v1` 为真实目录。
+
+唯一 build 命令：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -c 'set -o pipefail; pnpm build 2>&1 | tee /private/tmp/seedlands-v1-acceptance-6614a1f6-build.log'
+```
+
+结果：PASS；Pack build、Rust artifact 验证、SSG、Web typecheck 与 Vite production build 全部成功，
+Svelte 为 `0 errors / 0 warnings`。机器窗口 `110e064e-a961-4b70-9b02-d142683f8bf3`，
+`2026-09-25T07:33:01.323Z` 至 `07:33:24.532Z`，exit `0`。生成身份：
+
+```text
+sourceSha=6614a1f675c93043a19fe225acab5a382481ad13
+sourceDigest=384fffd9c685041e8780bb66fe544714c674418c44819b5999397bb34bc97dfa
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e
+files=276
+builtAt=2026-09-25T07:33:23.085Z
+```
+
+artifact digest 与 BUILD-11 相同，因为 GIT-18 只改变 browser fixture 与证据；新的 source SHA、
+source digest、builtAt 与 receipt 仍绑定 GIT-18。随后在同一树、同一 dist 只运行一次：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -c 'set -o pipefail; pnpm harness:artifact 2>&1 | tee /private/tmp/seedlands-v1-acceptance-6614a1f6-artifact.log'
+```
+
+结果：PASS；机器窗口 `05042048-52c6-4d34-8ab2-8721d20faf32`，
+`2026-09-25T07:33:35.567Z` 至 `07:33:37.285Z`，exit `0`。两次输出的 identity、
+`builtAt` 与 276 个盖章文件一致；磁盘共 277 个文件，另含 receipt 自身。
+`apps/web/dist/harness-artifact.json` SHA-256 为
+`fddd6f3bd09102e329d387caa078c89c66915c5ba54be1bb31ec8f7026818db0`。
+
+Pack lock SHA-256 为 `863ae8eb9606583240207741f8b0515e6c40234d209524493dc283ccf012a99b`。
+媒体条目与 dist 文件均为 path `playbooks/classic/assets/audio/to-far-shores.mp3`、size `2976045`、
+contentType `audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+BUILD-12 原始输出与 receipt 已逐字节归档到 `evidence/v1-artifact-build-12/`：
+
+```text
+7979e09d4d2e5e5ec5401946d6028416458826604cb13448aabca1d899042902  build.log
+5950210c4b1743673d5f1370b163eed9057bf20b91b70064dc29598cb1ffbded  build-receipt.json.log
+21a3858e1e923c80d72a65c404e65721f17290b796371cbcf008fd8830e0eaa3  artifact-verify.log
+4ff95815bd17d0a29f0d8e4a7a8fb849c8a281387eaed8c2a732d2e613abbdf3  artifact-verify-receipt.json.log
+fddd6f3bd09102e329d387caa078c89c66915c5ba54be1bb31ec8f7026818db0  harness-artifact.json.log
+```
+
+验收树在 build 与 artifact 复验后仍 tracked/index clean，端口 4273 无监听。
+`/private/tmp/seedlands-v1-acceptance-6614a1f6` 与同一 dist 保留给 root 核验后交 761 唯一
+Browser-11；旧 `9727dbb9`、`244b18e3`、`06f42f5d`、`46b81735`、`5d52330f`、
+`0d199371` 与 `23069d71` 树/dist 均保留。本阶段未运行 browser、Cua、dev server、
+CI/review 或部署。
