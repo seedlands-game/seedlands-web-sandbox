@@ -1,6 +1,9 @@
 import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
-import type { AuthorityStationView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
-import { stationRecipeFitsGrid, type StationRecipe } from '@seedlands/stdlib/mod-api';
+import type {
+  AuthorityInventoryView,
+  AuthorityStationView,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { ARMOR_SLOTS, stationRecipeFitsGrid, type ArmorSlot, type StationRecipe } from '@seedlands/stdlib/mod-api';
 import { projectCombatUi, type CombatUiProjection } from './combat-ui-projector';
 import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
@@ -20,17 +23,14 @@ export type GameplayItemPresentation = Readonly<{
   stackLimit?: number;
   durability?: Readonly<{ current: number; max: number }>;
 }>;
+export type EquipmentItemPresentation = Readonly<Omit<GameplayItemPresentation, 'slot'> & { slot: ArmorSlot }>;
+export type GameplayEquipmentPresentation = Readonly<Record<ArmorSlot, EquipmentItemPresentation>>;
 
 export type GameplayUiSource = Readonly<{
   station?: AuthorityStationView | null;
   stationRecipes?: readonly StationRecipe[];
   revision: number;
-  inventoryIdentity?: string;
-  cursor?: Readonly<{
-    stack: GameplayUiSource['player']['inventory'][number];
-    craftingGrid: readonly GameplayUiSource['player']['inventory'][number][];
-  }>;
-  matchedCraftingRecipeIds?: readonly string[];
+  inventoryView: Pick<AuthorityInventoryView, 'actor' | 'armor' | 'cursor' | 'matchedCraftingRecipeIds'>;
   items?: readonly ItemDefinition[];
   recipes?: readonly Recipe[];
   player: Readonly<{
@@ -89,6 +89,7 @@ export type GameplayUiProjection = Readonly<{
         recipes: StationUiPresentation['recipes'];
       }>;
       inventoryIdentity: string;
+      equipment: GameplayEquipmentPresentation;
       lifecycle: 'alive' | 'dead';
       mode: ActorMode;
       flightEnabled: boolean;
@@ -146,6 +147,45 @@ const projectInventory = (
       : { slot, itemId: null, count: 0, name: '空槽位', edible: false };
   });
 
+const armorSlotNames: Readonly<Record<ArmorSlot, string>> = Object.freeze({
+  helmet: '头盔',
+  chestplate: '胸甲',
+  leggings: '护腿',
+  boots: '靴子',
+});
+
+const projectEquipment = (
+  armor: AuthorityInventoryView['armor'],
+  requireItem: (itemId: string) => ItemDefinition,
+): GameplayEquipmentPresentation =>
+  Object.freeze(
+    Object.fromEntries(
+      ARMOR_SLOTS.map((slot) => {
+        const stack = armor[slot];
+        if (!stack)
+          return [
+            slot,
+            Object.freeze({ slot, itemId: null, count: 0, name: `空${armorSlotNames[slot]}槽`, edible: false }),
+          ];
+        const definition = requireItem(stack.itemId);
+        return [
+          slot,
+          Object.freeze({
+            slot,
+            itemId: stack.itemId,
+            count: stack.count,
+            stackLimit: definition.stackLimit,
+            name: definition.name,
+            edible: definition.capabilities.some((capability) => capability.type === 'consume'),
+            ...(stack.instance && definition.durability
+              ? { durability: Object.freeze({ current: stack.instance.durability, max: definition.durability.max }) }
+              : {}),
+          }),
+        ];
+      }),
+    ) as Record<ArmorSlot, EquipmentItemPresentation>,
+  );
+
 const personalRecipePattern = (
   recipe: StationRecipe,
 ): readonly (Readonly<{
@@ -168,6 +208,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
   const items = itemResolver(source.items);
   const recipes = source.recipes ?? [];
   const inventory = projectInventory(source.player.inventory, source.player.inventory.length, items.require);
+  const equipment = projectEquipment(source.inventoryView.armor, items.require);
   const hotbarSize = source.player.hotbarSize ?? 8;
   const mode = source.player.mode?.value ?? 'survival';
   const flightEnabled = mode === 'creative' && Boolean(source.player.flight?.enabled);
@@ -198,7 +239,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
       recipe.kind === 'shapeless'
         ? recipe.inputs.map((item) => `${items.require(item.itemId).name} × ${item.count}`).join(' + ')
         : '按图放入合成区',
-    matchesGrid: source.matchedCraftingRecipeIds?.includes(recipe.id) ?? false,
+    matchesGrid: source.inventoryView.matchedCraftingRecipeIds.includes(recipe.id),
   }));
   const hud = reuse(
     {
@@ -231,10 +272,13 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
           (id) => items.require(id).name,
         ),
         inventoryOpen: source.inventoryOpen,
-        inventoryIdentity: source.inventoryIdentity ?? '',
-        cursor: source.cursor?.stack ? projectInventory([source.cursor.stack], 1, items.require)[0] : null,
+        inventoryIdentity: JSON.stringify(source.inventoryView.actor),
+        equipment,
+        cursor: source.inventoryView.cursor.stack
+          ? projectInventory([source.inventoryView.cursor.stack], 1, items.require)[0]
+          : null,
         personalCrafting: {
-          slots: projectInventory(source.cursor?.craftingGrid ?? [null, null, null, null], 4, items.require),
+          slots: projectInventory(source.inventoryView.cursor.craftingGrid, 4, items.require),
           recipes: personalRecipes,
         },
         lifecycle: source.player.lifecycle,

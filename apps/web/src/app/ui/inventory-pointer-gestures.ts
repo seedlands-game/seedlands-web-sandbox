@@ -1,18 +1,38 @@
+import { isArmorSlot, type InventoryPointerSlotRef } from '@seedlands/stdlib/mod-api';
+
 /** Input intentions only. Inventory contents always come from the authority response. */
-export type InventoryUiSlot = Readonly<{ kind: 'inventory' | 'crafting' | 'station'; slot: number }>;
+export type InventoryUiSlot = InventoryPointerSlotRef;
+export type InventoryUiBulkSlot = Exclude<InventoryUiSlot, { kind: 'equipment' }>;
 export type InventoryUiCommand =
   | Readonly<{ kind: 'click'; slot: InventoryUiSlot; button: 0 | 2 }>
-  | Readonly<{ kind: 'distribute'; slots: readonly InventoryUiSlot[]; button: 0 | 2 }>
+  | Readonly<{ kind: 'distribute'; slots: readonly InventoryUiBulkSlot[]; button: 0 | 2 }>
   | Readonly<{ kind: 'quick-move'; slot: InventoryUiSlot }>
-  | Readonly<{ kind: 'collect'; slot: InventoryUiSlot }>
+  | Readonly<{ kind: 'collect'; slot: InventoryUiBulkSlot }>
   | Readonly<{ kind: 'hotbar'; slot: InventoryUiSlot; hotbarSlot: number }>
   | Readonly<{ kind: 'craft'; batch: boolean }>
   | Readonly<{ kind: 'drop'; button: 0 | 2 }>
   | Readonly<{ kind: 'close' }>;
 
 export const inventorySlotKey = (slot: InventoryUiSlot) => `${slot.kind}:${slot.slot}`;
+export const isInventoryUiBulkSlot = (slot: InventoryUiSlot): slot is InventoryUiBulkSlot => slot.kind !== 'equipment';
+export function parseInventoryUiSlotAddress(value: string | undefined): InventoryUiSlot | null {
+  const parts = (value ?? '').split(':');
+  if (parts.length !== 2) return null;
+  const [kind, slot] = parts;
+  if ((kind === 'inventory' || kind === 'crafting' || kind === 'station') && /^\d+$/.test(slot!))
+    return { kind, slot: Number(slot) };
+  return kind === 'equipment' && isArmorSlot(slot) ? { kind, slot } : null;
+}
+export const inventoryGestureContextIdentity = (
+  input: Readonly<{
+    inventoryOpen: boolean;
+    mode: 'survival' | 'creative';
+    inventoryIdentity?: string;
+    stationId?: string;
+  }>,
+) => `${input.inventoryOpen}:${input.mode}:${input.inventoryIdentity ?? ''}:${input.stationId ?? ''}`;
 type Press = { slot: InventoryUiSlot; button: 0 | 2; shift: boolean; time: number };
-type Gesture = { source: InventoryUiSlot; button: 0 | 2; pickedUp: boolean; slots: InventoryUiSlot[] };
+type Gesture = { source: InventoryUiSlot; button: 0 | 2; pickedUp: boolean; slots: InventoryUiBulkSlot[] };
 
 export class InventoryPointerGestures {
   private queue = Promise.resolve();
@@ -23,7 +43,7 @@ export class InventoryPointerGestures {
   constructor(
     private readonly held: () => boolean,
     private readonly send: (command: InventoryUiCommand) => Promise<boolean>,
-    private readonly preview: (slots: readonly InventoryUiSlot[], button: 0 | 2) => void,
+    private readonly preview: (slots: readonly InventoryUiBulkSlot[], button: 0 | 2) => void,
   ) {}
 
   private enqueue(work: () => Promise<void> | void): void {
@@ -43,7 +63,13 @@ export class InventoryPointerGestures {
         return;
       }
       const key = inventorySlotKey(press.slot);
-      if (press.button === 0 && this.held() && this.lastPick?.key === key && press.time - this.lastPick.time < 300) {
+      if (
+        press.button === 0 &&
+        isInventoryUiBulkSlot(press.slot) &&
+        this.held() &&
+        this.lastPick?.key === key &&
+        press.time - this.lastPick.time < 300
+      ) {
         this.lastPick = null;
         await this.send({ kind: 'collect', slot: press.slot });
         return;
@@ -53,16 +79,21 @@ export class InventoryPointerGestures {
       if (pickedUp) {
         const ok = await this.send({ kind: 'click', slot: press.slot, button: press.button });
         if (!ok || !this.held() || generation !== this.generation) return;
-        this.lastPick = press.button === 0 ? { key, time: press.time } : null;
+        this.lastPick = press.button === 0 && isInventoryUiBulkSlot(press.slot) ? { key, time: press.time } : null;
       } else this.lastPick = null;
-      this.gesture = { source: press.slot, button: press.button, pickedUp, slots: [press.slot] };
+      this.gesture = {
+        source: press.slot,
+        button: press.button,
+        pickedUp,
+        slots: isInventoryUiBulkSlot(press.slot) ? [press.slot] : [],
+      };
     });
   }
 
   enter(slot: InventoryUiSlot): void {
     this.enqueue(() => {
       const gesture = this.gesture;
-      if (!gesture || gesture.pickedUp) return;
+      if (!gesture || gesture.pickedUp || !isInventoryUiBulkSlot(slot)) return;
       if (!gesture.slots.some((entry) => inventorySlotKey(entry) === inventorySlotKey(slot))) gesture.slots.push(slot);
       this.preview(gesture.slots, gesture.button);
     });

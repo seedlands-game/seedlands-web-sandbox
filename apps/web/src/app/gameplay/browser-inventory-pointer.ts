@@ -16,6 +16,18 @@ type Options = {
   succeeded: (message: string) => void;
 };
 
+const isEquipmentAddress = (value: unknown): boolean =>
+  Boolean(
+    value && typeof value === 'object' && !Array.isArray(value) && (value as { kind?: unknown }).kind === 'equipment',
+  );
+
+const unsupportedEquipmentBulkCommand = (command: unknown): boolean => {
+  if (!command || typeof command !== 'object' || Array.isArray(command)) return false;
+  const candidate = command as { kind?: unknown; slot?: unknown; slots?: unknown };
+  if (candidate.kind === 'collect') return isEquipmentAddress(candidate.slot);
+  return candidate.kind === 'distribute' && Array.isArray(candidate.slots) && candidate.slots.some(isEquipmentAddress);
+};
+
 /** Each queued intention uses a fresh revision but remains bound to its original actor/container. */
 export class BrowserInventoryPointer {
   private queue: Promise<unknown> = Promise.resolve();
@@ -26,6 +38,12 @@ export class BrowserInventoryPointer {
     const actor = this.options.view().inventory.actor;
     const stationIdentity = this.options.station()?.reference;
     const perform = async () => {
+      if (this.disposed) return false;
+      if (unsupportedEquipmentBulkCommand(command)) {
+        this.options.failed('操作未完成：装备槽不支持批量分配或收集；物品已保留');
+        this.options.refresh?.();
+        return false;
+      }
       let omitStation = false;
       for (let attempt = 0; attempt < 2; attempt++) {
         if (this.disposed) return false;

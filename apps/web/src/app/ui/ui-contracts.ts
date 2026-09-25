@@ -3,7 +3,7 @@ import type { StationUiPresentation } from './station-ui-projector';
 import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
-import type { GameplayItemPresentation } from './gameplay-ui-projector';
+import type { GameplayEquipmentPresentation, GameplayItemPresentation } from './gameplay-ui-projector';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 
@@ -46,6 +46,7 @@ export type ShellState = Readonly<{
       recipes: NonNullable<StationUiPresentation>['recipes'];
     }>;
     inventoryIdentity?: string;
+    equipment: GameplayEquipmentPresentation;
     lifecycle: 'alive' | 'dead';
     mode: ActorMode;
     flightEnabled: boolean;

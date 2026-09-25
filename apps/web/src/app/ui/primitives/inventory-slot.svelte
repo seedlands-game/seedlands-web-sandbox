@@ -1,6 +1,6 @@
 <script lang="ts">
   import ItemIcon from './item-icon.svelte';
-  import type { GameplayItemPresentation } from '../gameplay-ui-projector';
+  import type { EquipmentItemPresentation, GameplayItemPresentation } from '../gameplay-ui-projector';
   import type { InventoryUiSlot } from '../inventory-pointer-gestures';
   let {
     item,
@@ -14,7 +14,7 @@
     onenter,
     onactivate,
   }: {
-    item: GameplayItemPresentation;
+    item: GameplayItemPresentation | EquipmentItemPresentation;
     address: InventoryUiSlot;
     label?: string;
     shortcut?: number;
@@ -43,6 +43,7 @@
   data-slot={address.kind === 'inventory' ? address.slot : undefined}
   data-crafting-slot={address.kind === 'crafting' ? address.slot : undefined}
   data-station-slot={address.kind === 'station' ? address.slot : undefined}
+  data-equipment-slot={address.kind === 'equipment' ? address.slot : undefined}
   data-inventory-address={`${address.kind}:${address.slot}`}
   data-item={item.itemId ?? 'empty'}
   data-count={item.count}

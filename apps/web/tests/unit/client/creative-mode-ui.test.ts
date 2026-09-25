@@ -38,6 +38,18 @@ const source = () => ({
   revision: 9,
   items: customItems,
   recipes: customRecipes,
+  inventoryView: {
+    actor: { entityId: 'player', epoch: 1, lifetime: 1 },
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+    cursor: {
+      version: 1 as const,
+      revision: 0,
+      stack: null,
+      origin: null,
+      craftingGrid: [null, null, null, null],
+    },
+    matchedCraftingRecipeIds: [],
+  },
   player: {
     lifecycle: 'alive' as const,
     health: 7,
@@ -161,6 +173,7 @@ describe('new-world mode start request', () => {
       leaveWorld: vi.fn(async () => undefined),
       setPaused: vi.fn(),
       releaseInput: vi.fn(),
+      setMouseSensitivity: vi.fn(),
     } as unknown as Game;
     const audio = { unlock: vi.fn(async () => true) } as unknown as GlobalAudio;
     const application = new ApplicationShell(game, createUiBridge(), audio, {
