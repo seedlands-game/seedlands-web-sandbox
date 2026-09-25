@@ -94,3 +94,46 @@ builtAt=2026-09-25T14:30:17.636Z
 BUILD02 artifact 包含已提交 equipment UI、registered armor 与公共 death policy/source/series spine；仍未包含
 Classic death policy 安装、`death-inventory-policy-unavailable` producer reason、Combat/Vitals/Needs/Autonomy
 death producer 或 NPC intrinsic drops。未运行 Browser、Cua、CI、deploy 或 merge，构建通过不能替代真实装备旅程。
+
+## BUILD03：Classic Death + Registered Needs
+
+- 已推送 source SHA：`b2b07417ec01870c4ce20befdf29f433f26fc88d`；tree
+  `4b96f69d6cadb83e60b0eae23e9f37eea7bc7482`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-b2b07417`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 是该 tree 内真实目录。
+- 唯一 `pnpm build`：window `a5f25826-0c9d-4e28-8f38-2fc752f54145`，UTC
+  `2026-09-25T19:00:26.903Z` 至 `19:00:50.814Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte
+  types 与 Vite production build 均成功；Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `5bca9179-2047-42ae-ab5e-f54d2b5c4154`，UTC
+  `2026-09-25T19:01:05.466Z` 至 `19:01:07.392Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出的 identity 完全相同：
+
+```text
+sourceSha=b2b07417ec01870c4ce20befdf29f433f26fc88d
+sourceDigest=4e0e1af0636cdd3fa064201ba0701421f9fa292bfb52e19b68a963ead0471445
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=fee7cf82c0746cb1b7bedab9d7c4fe1c901f57f2a281ebc2a217cf40fa773a60
+files=276
+builtAt=2026-09-25T19:00:49.242Z
+```
+
+磁盘 `apps/web/dist` 共 277 个普通文件，其中 276 个是 receipt map 条目，另一个是 receipt 自身。首次离线 map
+脚本误按“SHA+路径”整行排序，导致 276 项顺序不同并由 `cmp` 拒绝；没有修改 dist，也没有重跑 build/verify。保留
+该 attempt-01 map/摘要后，最终改为先按路径排序再计算 SHA，`artifact-map.sha256.log` 与
+`dist-files.sha256.log` 逐字节一致，SHA-256 均为
+`650d7b11ba5ad48944687a14c925235cd57430c5e730426ba1f753e90e7d6c2e`。
+
+`harness-artifact.json` SHA-256 为
+`c2f14ef757be3721a6ae1371142e2c60284e652cb5511c17e8ca05c5c4f7d889`；dist `packs.lock.json` SHA-256 为
+`d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。生成 Pack
+manifest 确认唯一 `seedlands:overworld-death-inventory-policy` 提供 `seedlands:death-inventory-policy`，定义包含
+player retain 与 creature/npc despawn 策略。
+
+构建后 acceptance tree tracked diff/index 仍为空，端口 4273 无监听且本树残留进程为 0。该 tree/dist 按要求
+保留，旧两棵 V2 与九棵 V1 acceptance tree 均未清理。BUILD03 包含 GIT26/GIT27 的 Combat、direct Vitals、
+registered Needs、Classic death policy 与精确 V4 predecessor；未运行 Browser、Cua、CI、deploy 或 merge，不能据此
+宣称真实装备/死亡 UI/save、完整 194 矩阵或完整 V2 GREEN。

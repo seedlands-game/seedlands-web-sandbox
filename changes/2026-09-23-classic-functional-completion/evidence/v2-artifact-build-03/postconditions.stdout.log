@@ -1,0 +1,27 @@
+capturedAt=2026-09-25T19:05:06Z
+sourceSha=b2b07417ec01870c4ce20befdf29f433f26fc88d
+sourceTree=4b96f69d6cadb83e60b0eae23e9f37eea7bc7482
+trackedChanges=0
+
+indexClean=true
+rootStdlib=/private/tmp/seedlands-v2-acceptance-b2b07417/packages/stdlib
+stdlibKernel=/private/tmp/seedlands-v2-acceptance-b2b07417/packages/kernel
+classicStdlib=/private/tmp/seedlands-v2-acceptance-b2b07417/packages/stdlib
+webStdlib=/private/tmp/seedlands-v2-acceptance-b2b07417/packages/stdlib
+webClassic=/private/tmp/seedlands-v2-acceptance-b2b07417/playbooks/classic
+taskStateLocal=true
+distFilesIncludingReceipt=277
+
+port4273Listening=false
+acceptanceTreeProcesses=0
+
+artifact={"schemaVersion":1,"sourceSha":"b2b07417ec01870c4ce20befdf29f433f26fc88d","sourceDigest":"4e0e1af0636cdd3fa064201ba0701421f9fa292bfb52e19b68a963ead0471445","lockDigest":"44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169","artifactDigest":"fee7cf82c0746cb1b7bedab9d7c4fe1c901f57f2a281ebc2a217cf40fa773a60","builtAt":"2026-09-25T19:00:49.242Z","fileCount":276}
+artifactReceiptSha256=c2f14ef757be3721a6ae1371142e2c60284e652cb5511c17e8ca05c5c4f7d889
+packLockSha256=d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7
+mediaSource=2976045
+ bytes audio/mpeg
+mediaSourceSha256=3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9
+mediaDist=2976045
+ bytes audio/mpeg
+mediaDistSha256=3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9
+packLockMedia={"path":"playbooks/classic/assets/audio/to-far-shores.mp3","sha256":"3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9","size":2976045,"contentType":"audio/mpeg"}
