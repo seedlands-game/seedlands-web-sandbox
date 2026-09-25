@@ -1,0 +1,8 @@
+177a5e86e4140ed37ad2a0645fb48541a0fd60baa1eab494819eea94f418cacc  packages/stdlib/tests/server/registered-combat-armor.test.ts
+50ea84829c1c70fc4177ef59f14a95d7dea613ff576d7dfeeda3f7508021985d  changes/2026-09-23-classic-functional-completion/execution-state.md
+5380ab8f03a1163b22d6a1ceabe69923544de2bc574cd61ce196f3ed69ce28c3  packages/stdlib/src/server/gameplay/prepared-combat-damage.ts
+620bd8053aa5bf41df927f5f37209092a9b3453ae646e42a9f7e3ae6c68d9677  changes/2026-09-23-classic-functional-completion/tasks.md
+8fc213bf003777f45ba287af9456b3929685c07a80a58ea559cb6e66ca75c053  changes/2026-09-23-classic-functional-completion/equipment-combat-contract.md
+b62428f31f868dde0e7aa33ff7069ebfc201f8c4c05a4fa8494126d0472656d6  changes/2026-09-23-classic-functional-completion/equipment-combat-evidence.md
+c9639d1367fd22a4118db2c41a159307e8843f08ee90f5147247ccae1b14914e  changes/2026-09-23-classic-functional-completion/spec.md
+f20783c287fe01ea1b2a6da857cf126eb222d7eeb94e3fe1fff95a08c14365fa  packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts
