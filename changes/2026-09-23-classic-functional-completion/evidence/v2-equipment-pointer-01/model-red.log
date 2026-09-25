@@ -1,0 +1,137 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts (15 tests | 9 failed) 9ms
+     × equips and removes one helmet item without losing instance durability 3ms
+     × equips and removes one chestplate item without losing instance durability 0ms
+     × equips and removes one leggings item without losing instance durability 0ms
+     × equips and removes one boots item without losing instance durability 0ms
+     × atomically swaps occupied equipment and recursively freezes detached candidate state 0ms
+     × quick-moves armor into an empty matching slot before the existing bag partition 1ms
+     × quick-moves equipment into the bag and fails atomically when the bag is full 0ms
+     × hotbar-removes equipment but rejects swapping a non-armor item into that slot 0ms
+     × restores an equipment-origin cursor before bag settlement and keeps the full-bag drop fallback 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > equips and removes one helmet item without losing instance durability
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > equips and removes one chestplate item without losing instance durability
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > equips and removes one leggings item without losing instance durability
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > equips and removes one boots item without losing instance durability
+Error: invalid-pointer-slot
+ ❯ readInventoryPointerSlot packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts:27:39
+     25|   ref: InventoryPointerSlotRef,
+     26| ): InventorySlot {
+     27|   if (ref.kind === 'equipment') throw new Error('invalid-pointer-slot'…
+       |                                       ^
+     28|   const values =
+     29|     ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ?…
+ ❯ click packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:104:18
+ ❯ buildInventoryPointerCandidate packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:433:7
+ ❯ click packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:66:3
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:83:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > atomically swaps occupied equipment and recursively freezes detached candidate state
+Error: invalid-pointer-slot
+ ❯ readInventoryPointerSlot packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts:27:39
+     25|   ref: InventoryPointerSlotRef,
+     26| ): InventorySlot {
+     27|   if (ref.kind === 'equipment') throw new Error('invalid-pointer-slot'…
+       |                                       ^
+     28|   const values =
+     29|     ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ?…
+ ❯ click packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:104:18
+ ❯ buildInventoryPointerCandidate packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:433:7
+ ❯ click packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:66:3
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:108:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > quick-moves armor into an empty matching slot before the existing bag partition
+AssertionError: expected null to deeply equal { itemId: 'sample:suit', …(2) }
+
+- Expected:
+{
+  "count": 1,
+  "instance": {
+    "durability": 71,
+  },
+  "itemId": "sample:suit",
+}
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:137:47
+    135|       input: command(source, { kind: 'quick-move', slot: { kind: 'inve…
+    136|     });
+    137|     expect(result.equipment.armor.chestplate).toEqual(stack('sample:su…
+       |                                               ^
+    138|     expect(result.slots[1]).toBeNull();
+    139|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > quick-moves equipment into the bag and fails atomically when the bag is full
+Error: invalid-pointer-slot
+ ❯ readInventoryPointerSlot packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts:27:39
+     25|   ref: InventoryPointerSlotRef,
+     26| ): InventorySlot {
+     27|   if (ref.kind === 'equipment') throw new Error('invalid-pointer-slot'…
+       |                                       ^
+     28|   const values =
+     29|     ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ?…
+ ❯ quickMove packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:181:16
+ ❯ buildInventoryPointerCandidate packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:439:7
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:146:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > hotbar-removes equipment but rejects swapping a non-armor item into that slot
+Error: invalid-pointer-slot
+ ❯ readInventoryPointerSlot packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts:27:39
+     25|   ref: InventoryPointerSlotRef,
+     26| ): InventorySlot {
+     27|   if (ref.kind === 'equipment') throw new Error('invalid-pointer-slot'…
+       |                                       ^
+     28|   const values =
+     29|     ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ?…
+ ❯ hotbar packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:240:18
+ ❯ buildInventoryPointerCandidate packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts:446:7
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:169:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > restores an equipment-origin cursor before bag settlement and keeps the full-bag drop fallback
+AssertionError: expected null to deeply equal { itemId: 'sample:visor', …(2) }
+
+- Expected:
+{
+  "count": 1,
+  "instance": {
+    "durability": 37,
+  },
+  "itemId": "sample:visor",
+}
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:224:45
+    222|       input: command(returning, { kind: 'close' }),
+    223|     });
+    224|     expect(restored.equipment.armor.helmet).toEqual(stack('sample:viso…
+       |                                             ^
+    225|     expect(restored.cursor.stack).toBeNull();
+    226|     expect(restored.dropIntents).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 6 passed (15)
+   Start at  18:19:54
+   Duration  298ms (transform 172ms, setup 0ms, import 211ms, tests 9ms, environment 0ms)
+

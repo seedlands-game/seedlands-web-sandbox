@@ -1,0 +1,7 @@
+f6595154992988ed5e9fe000a8b94c58b475d9c94711d35a4eea94359647d90c  packages/stdlib/src/server/gameplay/prepared-entity-mutation.ts
+6b2463df8f3344043d1060b2233cad61b979070ab4c780ce568346d62714b23c  packages/stdlib/tests/server/prepared-entity-equipment-revision.test.ts
+9eca2126796a96fef869e1fccaef1ff051168021a8b149a091a4ab75a6320fbd  changes/2026-09-23-classic-functional-completion/equipment-revision-contract.md
+0d97f6910c7794f7688df35df050da9f12b40bffc51d9d9ff56b3bab28e8ccd3  changes/2026-09-23-classic-functional-completion/equipment-revision-evidence.md
+d78973acf79145925aefdd507dd45945805c2850b17d68db7d86b93bb612972a  changes/2026-09-23-classic-functional-completion/spec.md
+c1b5ab6d2d3fafc1f6c69a7c5151ec6d2a3942c6a279ec8d685fe7366bec27fa  changes/2026-09-23-classic-functional-completion/tasks.md
+97f1290682e2aa2d478d8a0beda968f86add2bc8b6f7022850f5280918a152b9  changes/2026-09-23-classic-functional-completion/execution-state.md

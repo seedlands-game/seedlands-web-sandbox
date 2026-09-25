@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git21-runtime-regressions",
+  "pid": 38774,
+  "startedAt": "2026-09-25T11:50:46.325Z",
+  "windowId": "git21-runtime-regressions",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-core-git-21/runtime-regressions-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T11:50:48.406Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T11:50:46.326Z",
+      "loadAverage": [
+        2.998046875,
+        2.9658203125,
+        3.12255859375
+      ],
+      "freeMemoryBytes": 335446016,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T11:50:48.405Z",
+      "loadAverage": [
+        2.91796875,
+        2.94970703125,
+        3.11572265625
+      ],
+      "freeMemoryBytes": 470728704,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

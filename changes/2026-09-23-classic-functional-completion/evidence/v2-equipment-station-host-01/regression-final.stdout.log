@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/gameplay-registered-stations.test.ts --maxWorkers=1
+7:05:08 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  19:05:08
+   Duration  1.25s (transform 919ms, setup 0ms, import 1.14s, tests 30ms, environment 0ms)
+

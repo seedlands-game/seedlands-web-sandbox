@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-spine-green-checkpoint",
+  "pid": 21895,
+  "startedAt": "2026-09-25T09:30:14.687Z",
+  "windowId": "v2-equipment-spine-green-checkpoint",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-spine-01/green-checkpoint-window.json",
+  "waitedMs": 2,
+  "endedAt": "2026-09-25T09:30:16.400Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T09:30:14.689Z",
+      "loadAverage": [
+        3.54150390625,
+        3.197265625,
+        3.2001953125
+      ],
+      "freeMemoryBytes": 1065140224,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T09:30:16.399Z",
+      "loadAverage": [
+        3.54150390625,
+        3.197265625,
+        3.2001953125
+      ],
+      "freeMemoryBytes": 1094090752,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

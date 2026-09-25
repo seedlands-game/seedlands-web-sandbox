@@ -86,6 +86,25 @@ TAKEOVER-01 公共实施负责人 / 唯一 Git writer：Paseo `954ef059-b17c-484
 - 四 equipment slots 纳入正式 inventory pointer transaction。Classic 冻结死亡时装备与 inventory/cursor 一起掉落并清空；失败不部分提交。
 - 既有农业、流体、投射物、物种、生活技能、导航、环境和 final-entity runtime 改收 policy/config/operation，不向 stdlib 增加 Classic switch。
 
+V2.0 公共 spine 冻结 `equipment-spine-contract.md`：复用 ECS actor 的唯一四槽 armor owner，扩展现有
+inventory-pointer target/origin、完整 actor/Authority/network projection 与纯 death inventory settlement
+候选/participant。该阶段只要求公共 copy/validate/projection 与候选接口 GREEN，并保留真实 registered
+equipment action、armor-only revision 及三条 death producer 的可执行 RED；不安装 Classic policy、不改
+combat armor 规则、不提前实现 UI。
+
+V2.1b revision 子片冻结 equipment-revision-contract.md：prepared entity mutation 以规范化后的四槽
+armor 与既有 inventory/cursor 共同决定单一 inventoryRevision；实质变化一次事务只加一，等价空槽、
+同值 clone、selectedSlot-only、拒绝与 stale 均不增加。本片不实现 equipment pointer、death 或 combat 行为。
+
+V2.1a-host 子片冻结 equipment-station-host-contract.md：station context 的 registered pointer host 必须把
+既有候选的完整 equipment 与 bag/cursor 放进同一 prepared actor replacement；纯 actor 变化不推进 station
+revision，失败不部分提交。该子片不改变 pointer 规则或 Classic 内容。
+
+GIT-21 组合门禁只集成已准出的 spine、pointer、revision 与 station host：重叠源码以各子片最终 delivery
+身份覆盖，`mod-api.ts` 仅取 equipment exports。隔离 staged tree 必须证明 pointer、revision、station 与公共
+copy/projection 合同 GREEN；共享 equipment 行为保持 `2 passed / 1 failed`，唯一 death settlement RED 留给
+I2.2。该组合准出不安装 death policy，不证明 UI、combat armor、V4 restore 或完整 V2。
+
 ### 结构、攀爬、路线和载具
 
 - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
@@ -172,6 +191,10 @@ Browser-12 唯一 canonical attempt（窗口 `2401a5ed-b68b-48c7-93f5-138046e962
 | 总计                                     | 不重复计算 A0 调查；含旧 reference 退场                                                |   38–58 / 85 PD | 124–190 / 256 h aggregate |
 
 估算置信度为低到中等（约 55%）：194 项多数复用已有后端，但公共 prepared transaction、vehicle position owner、Pack descriptor 和真实浏览器修复量尚未用 V1 实测校准。四 worker 并行、公共文件与测试/browser 串行时，当前关键路径正常 58–82h，保守 112h；按保守剩余量只加一次 20% buffer，建议连续墙钟 135h。V1 结束后用实际 changed files、RED/GREEN 往返、浏览器返工和 usage 重估，若偏差超过 25% 先更新本文再进入下一域。请求配置固定 provider=traex model=gpt-5.6-sol/max/xhigh thinking=xhigh。Paseo snapshot 完整 model ID 与 runtime 归一化 gpt-5.6-sol/thinking=xhigh 分开记录；max 未被 runtime 独立回显。tokens、credits/API 费率/美元、额度分母与占比均 unknown；不伪造、不创建 Goal、不因本次修订扩预算。
+
+GIT-21 Equipment Core 组合、推送与 V2 BUILD01 是已准出子片的窄交付增量：传统正常
+0.5–1 PD，AI 活跃正常 4–6h、保守 8h。该增量不改变上表完整产品总预算；credits、API 等价费用、
+费率、额度分母与占比仍为 unknown。
 
 ## 阶段与项目门禁
 

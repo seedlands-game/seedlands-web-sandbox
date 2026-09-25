@@ -1,0 +1,37 @@
+6:20:55 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts (3 tests | 1 failed | 2 skipped) 16ms
+     × equips a non-Classic registered visor through the real inventory pointer action 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > equips a non-Classic registered visor through the real inventory pointer action
+AssertionError: expected { success: false, …(1) } to deeply equal { success: true }
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "reason": "invalid-pointer-slot",
++   "success": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:99:20
+     97|     });
+     98|
+     99|     expect(result).toEqual({ success: true });
+       |                    ^
+    100|     expect(runtime.getInventoryPointerView('pilot').armor.helmet).toEq…
+    101|       itemId: 'sample:visor',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  18:20:55
+   Duration  1.26s (transform 932ms, setup 0ms, import 1.16s, tests 16ms, environment 0ms)
+

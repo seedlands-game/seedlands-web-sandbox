@@ -51,6 +51,55 @@ Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 2h。先冻结 `v1
 最终精确文件范围以 Paseo IMPLEMENT 消息为准；每条消息写明“你不是唯一编辑者，不回退他人改动”。
 V1.9 早期 canonical browser 门禁已通过；进入 V2 仍须 root 冻结 V2.0 的 equipment pointer target/projection 与 death prepared participant 公共合同。794 当前只读梳理，不是第二协调者，不得在该合同冻结前写 production。
 
+### V2-EQUIPMENT-SPINE-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 6h。公共范围仅为 inventory pointer
+equipment target/origin、四槽 actor/Authority/network projection、纯 death inventory settlement
+candidate/participant、必要 exports 与对应合同/RED。done_when：公共 copy/validate/projection 与 death
+candidate tests GREEN；非 Classic registered equipment action 和现有 death producer armor settlement 在行为
+期稳定 RED；stdlib/root/Classic test types、目标 lint/format/diff 通过。阶段不提交含预期 RED 的变更，
+不运行 build/browser/Cua/CI；I2.1/I2.1b/I2.1c/I2.2 由 root 后续独立派发。
+
+状态：CHECKPOINT_READY。green-final4 如实保留 27 passed / 1 failed，final5 对唯一受影响合同 suite 复验
+9/9；当前有效公共闭包为未受修改的 4 files / 19 tests + final5 的 1 file / 9 tests。equipment、armor-only
+revision 与 combat death settlement 保持 1 file / 3 tests 的可执行行为 RED。源码与证据未提交，等待 root
+独立审阅；详细窗口、后续私有写域和未验证边界见 equipment-spine-evidence.md。
+
+### V2-EQUIPMENT-REVISION-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 3h，与 761 的 I2.1a pointer 私有实现写路径互斥。仅修改
+prepared-entity-mutation.ts 与独立 revision 测试，按 equipment-revision-contract.md 闭合
+armor-only/shared revision。done_when：既有 RED 第二项转 GREEN；独立 armor-only、组合、durability、兼容空槽、
+no-op、selectedSlot、stale 与 overflow 测试通过；必要 types/lint/format/diff 通过。本片不提交或推送，等待
+root 与 I2.1a 组合准出。
+
+状态：CHECKPOINT_READY。独立 revision 矩阵 1 file / 12 tests、共享原 RED 第二项 1 passed / 2 skipped、
+既有 prepared mutation 回归 2 files / 14 tests 均 GREEN。最新 root test types 被 761 并发 pointer 文件的
+TS2367（最新位于 inventory-pointer-model.ts:190）阻断，本片未越权修改；其余结果、窗口与未运行项见
+equipment-revision-evidence.md。
+
+### V2-EQUIPMENT-STATION-HOST-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 4h。只修改 registered-station-runtime.ts 的
+equipment 提交 hunk、独立 station host 测试和 change 内文档/证据。真实 RED 已证明候选与操作成功后
+host 丢失 equipment；最小修复后非 Classic 四槽代表路径、revision/station revision、物品守恒、单次 fact、
+真实 cancellation 与 authorization/stale/capacity 原子反例 GREEN。761 的 pointer model/slot-state 写域保持互斥。
+
+### GIT-21-EQUIPMENT-CORE + V2-ARTIFACT-BUILD-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer，阶段上限 6h。先从
+`7030adac5ea234319bfe032185828287ee07b85d` 建立精确白名单隔离树，将 spine、pointer、revision 与 station
+host 的最终身份按覆盖顺序组合；`mod-api.ts` 只取 equipment exports。done_when：公共合同、pointer
+4 files / 35 tests、station 11、revision 12 与相关回归 GREEN；共享 RED 实跑 `2 passed / 1 failed` 且唯一
+death 缺口保留；三类 test types、staged TS lint、可编辑 format、scoped diff 和自然 hooks 通过。随后分两笔
+语义提交、push、更新 PR #41，并仅从已推送 SHA 建 clean detached tree，分别一次执行 build 与
+`harness:artifact`。本阶段不运行 Browser、Cua、CI，不接 death/UI/combat/V4。
+
+状态：CORE_VALIDATED。隔离树实际通过 spine `9/9`、pointer `35/35`、revision `12/12`、station host
+`11/11`、相关回归 `18/18` 与三类 test types/静态门禁；共享行为精确为 `2 passed / 1 failed`，唯一 death
+RED 保留。代码/测试/合同已自然提交为 `fe2fcc9f174848ef9d7419cb5df96209a2d25796`；证据/state 提交、push、
+PR readback 和 V2 BUILD01 待本阶段后续。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

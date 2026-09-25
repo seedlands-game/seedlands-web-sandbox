@@ -1,0 +1,6 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib/tests/server/registered-station-equipment-host.test.ts
+  92:3  error  'runtime' is never reassigned. Use 'const' instead  prefer-const
+
+✖ 1 problem (1 error, 0 warnings)
+

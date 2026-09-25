@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-spine-format-freeze",
+  "pid": 24237,
+  "startedAt": "2026-09-25T09:31:32.326Z",
+  "windowId": "v2-equipment-spine-format-freeze",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-spine-01/format-freeze-window.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T09:31:32.718Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T09:31:32.327Z",
+      "loadAverage": [
+        3.6162109375,
+        3.36865234375,
+        3.2666015625
+      ],
+      "freeMemoryBytes": 932413440,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T09:31:32.716Z",
+      "loadAverage": [
+        3.6162109375,
+        3.36865234375,
+        3.2666015625
+      ],
+      "freeMemoryBytes": 969048064,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

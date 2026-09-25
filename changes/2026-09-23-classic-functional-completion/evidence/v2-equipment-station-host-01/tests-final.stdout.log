@@ -1,0 +1,36 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-station-equipment-host.test.ts (11 tests | 1 failed) 49ms
+     × uses the real cancellation participant for active combat when the selected stack changes 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-station-equipment-host.test.ts > registered station equipment host > uses the real cancellation participant for active combat when the selected stack changes
+AssertionError: expected { success: false, …(1) } to match object { success: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-station-equipment-host.test.ts:344:7
+    342|         originalActor: { entityId: 'pilot', lifetime: actor.lifetime },
+    343|       }),
+    344|     ).toMatchObject({ success: true });
+       |       ^
+    345|     expect(runtime.simulation.combat.snapshotFor('pilot').active).not.…
+    346|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 passed (11)
+   Start at  19:02:57
+   Duration  889ms (transform 631ms, setup 0ms, import 765ms, tests 49ms, environment 0ms)
+

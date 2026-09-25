@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-spine-diff-check-final",
+  "pid": 30368,
+  "startedAt": "2026-09-25T09:36:43.556Z",
+  "windowId": "v2-equipment-spine-diff-check-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-spine-01/diff-check-final-window.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T09:36:43.581Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T09:36:43.557Z",
+      "loadAverage": [
+        4.3935546875,
+        3.73046875,
+        3.4482421875
+      ],
+      "freeMemoryBytes": 1061404672,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T09:36:43.579Z",
+      "loadAverage": [
+        4.3935546875,
+        3.73046875,
+        3.4482421875
+      ],
+      "freeMemoryBytes": 1062305792,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

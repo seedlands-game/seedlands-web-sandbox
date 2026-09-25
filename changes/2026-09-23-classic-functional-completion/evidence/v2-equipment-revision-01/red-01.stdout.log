@@ -1,0 +1,38 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts --maxWorkers=1 -t 'advances the shared inventory revision when only armor changes'
+6:17:19 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts (3 tests | 1 failed | 2 skipped) 10ms
+     × advances the shared inventory revision when only armor changes 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > advances the shared inventory revision when only armor changes
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:130:74
+    128|     prepared.validate();
+    129|     prepared.apply();
+    130|     expect(runtime.entities.actorStateAccess('pilot').inventoryRevisio…
+       |                                                                          ^
+    131|   });
+    132|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  18:17:19
+   Duration  1.20s (transform 900ms, setup 0ms, import 1.12s, tests 10ms, environment 0ms)
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts --maxWorkers=1 -t 'advances the shared inventory revision when only armor changes'`
+Exit status 1

@@ -1,0 +1,9 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts
+  525:1  error  File has too many lines (516). Maximum allowed is 500  max-lines
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib/src/server/protocol/authority-worker-protocol.ts
+  523:1  error  File has too many lines (502). Maximum allowed is 500  max-lines
+
+✖ 2 problems (2 errors, 0 warnings)
+

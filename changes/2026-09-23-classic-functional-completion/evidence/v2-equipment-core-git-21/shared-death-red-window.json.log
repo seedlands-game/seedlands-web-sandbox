@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git21-shared-death-red",
+  "pid": 38826,
+  "startedAt": "2026-09-25T11:51:01.378Z",
+  "windowId": "git21-shared-death-red",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-core-git-21/shared-death-red-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T11:51:02.933Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T11:51:01.379Z",
+      "loadAverage": [
+        2.7763671875,
+        2.91796875,
+        3.10205078125
+      ],
+      "freeMemoryBytes": 343588864,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T11:51:02.932Z",
+      "loadAverage": [
+        2.8740234375,
+        2.935546875,
+        3.10693359375
+      ],
+      "freeMemoryBytes": 453656576,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

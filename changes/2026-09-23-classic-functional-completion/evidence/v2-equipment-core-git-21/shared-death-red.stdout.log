@@ -1,0 +1,52 @@
+7:51:01 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git21-equipment - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git21-equipment
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts (3 tests | 1 failed) 20ms
+     × settles equipped armor through the existing combat death producer 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > settles equipped armor through the existing combat death producer
+AssertionError: expected { helmet: { …(3) }, …(3) } to deeply equal { Object (helmet, chestplate, ...) }
+
+- Expected
++ Received
+
+  {
+    "boots": null,
+-   "chestplate": null,
+-   "helmet": null,
++   "chestplate": {
++     "count": 1,
++     "instance": {
++       "durability": 5,
++     },
++     "itemId": "iron-chestplate",
++   },
++   "helmet": {
++     "count": 1,
++     "instance": {
++       "durability": 2,
++     },
++     "itemId": "iron-helmet",
++   },
+    "leggings": null,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:164:55
+    162|     result.entity!.apply();
+    163|
+    164|     expect(entities.actorStateAccess('target').armor).toEqual(emptyArm…
+       |                                                       ^
+    165|     expect(entities.query({ type: 'world-item' }).map((entry) => entry…
+    166|       { itemId: 'wood-block', count: 2 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  19:51:01
+   Duration  1.17s (transform 852ms, setup 0ms, import 1.06s, tests 20ms, environment 0ms)
+

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /private/tmp/seedlands-git21-equipment
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  19:50:03
+   Duration  293ms (transform 180ms, setup 0ms, import 219ms, tests 9ms, environment 0ms)
+
