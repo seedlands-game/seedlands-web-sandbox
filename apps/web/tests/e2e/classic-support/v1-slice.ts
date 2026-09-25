@@ -176,6 +176,8 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   await expect.poll(() => voxelAt(page, water.target)).toBe(Voxel.Air);
   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'bucket');
 
+  await switchToSurvival(page);
+  await waitForSnapshot(page, (value) => value.onGround && !value.colliding);
   await walkTo(page, door.approach, { jump: true });
   await selectCreativeItem(page, '木门', 'wooden-door');
   await placeSelected(page, door.support, door.lower);
