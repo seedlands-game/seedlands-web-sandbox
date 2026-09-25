@@ -47,13 +47,14 @@ const renderedMaterialMesh = (
   );
 const mediaSnapshot = (page: Page): Promise<HarnessMediaSnapshot | null> =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.mediaSnapshot() ?? null);
-const runtimeEpoch = (page: Page): Promise<string> =>
-  page.evaluate(async () => {
-    const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
-    if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
-    if (typeof result.data.epoch !== 'string') throw new Error('Classic runtime epoch is unavailable.');
-    return result.data.epoch;
-  });
+const runtimeEpoch = async (page: Page): Promise<string> => {
+  const media = await mediaSnapshot(page);
+  if (typeof media?.worldEpoch !== 'string' || media.worldEpoch.length === 0)
+    throw new Error('Classic Browser runtime epoch is unavailable.');
+  if (media.audio && media.audio.epoch !== media.worldEpoch)
+    throw new Error('Classic Browser audio epoch does not match the active runtime.');
+  return media.worldEpoch;
+};
 
 const doorPair = async (page: Page): Promise<DoorPair> => [
   (await voxelAt(page, classicScenario.v1Slice.door.lower)) ?? -1,
@@ -227,7 +228,7 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
     ]);
   media = await mediaSnapshot(page);
   expect(media?.lastForwardedBatch?.facts).toHaveLength(1);
-  expect(media?.worldEpoch).not.toBeNull();
+  expect(media?.worldEpoch).toBe(worldEpoch);
   await expect
     .poll(
       async () =>
@@ -239,12 +240,10 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   return { door: opened, mediaRevision: projection.revision, worldEpoch };
 }
 
-export async function verifyV1SliceAfterRestore(
-  page: Page,
-  before: V1SliceState,
-  restoredEpoch: string,
-): Promise<void> {
+export async function verifyV1SliceAfterRestore(page: Page, before: V1SliceState): Promise<void> {
   const { jukebox } = classicScenario.v1Slice;
+  const restoredEpoch = await runtimeEpoch(page);
+  expect(restoredEpoch).not.toBe(before.worldEpoch);
   await expect.poll(() => doorPair(page)).toEqual(before.door);
   let media = await mediaSnapshot(page);
   await expect

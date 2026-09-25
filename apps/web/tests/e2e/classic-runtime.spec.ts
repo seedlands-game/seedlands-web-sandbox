@@ -414,7 +414,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       return result.data;
     });
     expect(identityAfter.epoch).not.toBe(identityBefore.epoch);
-    await v1.verifyV1SliceAfterRestore(page, v1SliceState, String(identityAfter.epoch));
+    await v1.verifyV1SliceAfterRestore(page, v1SliceState);
     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {

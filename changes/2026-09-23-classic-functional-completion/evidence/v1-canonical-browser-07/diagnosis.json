@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-07-46b81735",
+  "status": "FAIL",
+  "sourceSha": "46b8173538f7e162f79c16fc92864139b3bc24a8",
+  "sourceDigest": "96532a3ecc82140d83d3d5c1b32c533d3f449d3c26269929295d8dfe7af717d9",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e",
+  "artifactReceiptSha256": "78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259",
+  "performanceWindowId": "e28f49a7-1346-4b0d-ae03-d324449ca752",
+  "commandExitCode": 1,
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1 },
+  "passed": [
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "v1-audio-settings",
+    "v1-water-bucket-place-source",
+    "v1-empty-bucket-collect-source",
+    "v1-route-mode-switch-and-grounded-approach",
+    "v1-door-two-voxel-commit",
+    "v1-door-geometry-descriptor",
+    "v1-door-two-chunk-closed-mesh-axis",
+    "classic-visual"
+  ],
+  "failedAt": "v1-door-mesh-epoch-oracle",
+  "notReached": [
+    "v1-door-per-mesh-vertex-index-epoch-assertions",
+    "v1-door-closed-collision",
+    "v1-door-toggle-open-traverse-half-toggle",
+    "v1-media-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 126,
+    "expectedByFixture": "seedlands:classic-canonical-runtime-v11:1:world:0",
+    "actualBrowserRuntimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "worldRevision": 142,
+    "lastCommitMutationCount": 2,
+    "lastCommitMeshChunkCount": 4,
+    "player": [67.44420623779297, 32.60000228881836, 0.49207794666290283],
+    "onGround": true,
+    "colliding": false
+  },
+  "diagnosis": {
+    "classification": "canonical-fixture-epoch-domain-mismatch",
+    "summary": "The fixture runtimeEpoch helper reads the developer world identity epoch (...:world:0), while the frozen Harness contract defines rendered mesh and media worldEpoch as the current Browser Authority runtimeEpoch (...:1). Both identities are valid but belong to different domains; comparing them is invalid.",
+    "productBoundary": "The two-voxel door commit, descriptor, and closed thin-axis meshes in both chunks passed before this oracle failed. Per-mesh vertex/index/epoch assertions, collision, toggles, media, C4/C5, and restore were not reached."
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "windowId": "9d4a2ab8-fd30-47db-b444-5cdc879b0048",
+    "files": 276,
+    "treeClean": true
+  },
+  "originalEvidenceSha256": {
+    "classicReceipt": "4810362ebdcb1f5df6b3adbd96a6cec962b592c3a4ea1f9acdfecf59037df8e1",
+    "errorContext": "b1133457838c5e10ff77ce23247e78545642ac8f9f92b348b698910f7d0f0d1f",
+    "trace": "cefdba6113f360990f1f4bbfc7a527cffa12049725ae0c7914648512dd6727ec",
+    "performanceWindow": "8b26fca2c415b76bf1657aca81e167068af8c344444105855bdaf2e997a4bbd9",
+    "failurePage": "0d28f42969d28741b727e3229e23d516c5299461cf753a41adadc9677d62a191",
+    "playwrightLastRun": "5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110"
+  }
+}
