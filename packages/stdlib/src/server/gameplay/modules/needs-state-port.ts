@@ -1,12 +1,23 @@
 import { isActorEntityType } from '../ecs-actor-state';
 import type { EntityStore } from '../entity-store';
 import type { RegisteredStatePort, ModStateAddress } from '../../composition/operation-contracts';
+import type { WorldComposition } from '../../composition/contracts';
 import {
   prepareEntityMutationSeries,
   type PreparedEntityMutationInput,
   type PreparedActorReplacement,
-  type PreparedWorldItemSpawn,
 } from '../prepared-entity-mutation';
+import {
+  buildDeathInventorySettlementCandidateV1,
+  prepareDeathInventorySettlementSeriesV1,
+  type DeathInventoryAdditionalActorReplacementV1,
+  type DeathInventorySettlementCandidateV1,
+  type DeathInventorySettlementPolicyV1,
+} from '../death-inventory-settlement';
+import {
+  resolveDeathInventoryPolicyCapabilityV1,
+  type DeathInventoryPolicyCapabilityV1,
+} from './death-inventory-policy-module';
 import {
   NEEDS_COMPONENT,
   NEEDS_PARTITIONS,
@@ -17,6 +28,22 @@ import {
 } from './needs-model';
 
 type PreparedEffect = Readonly<{ validate(): void; apply(): void }>;
+type NeedsDeathInventoryMode =
+  Readonly<{ kind: 'legacy' }> | Readonly<{ kind: 'composed'; capability: DeathInventoryPolicyCapabilityV1 | null }>;
+
+const LEGACY_PLAYER_DEATH_POLICY: DeathInventorySettlementPolicyV1 = Object.freeze({
+  inventory: 'drop',
+  cursor: 'retain',
+  crafting: 'retain',
+  armor: 'retain',
+  actor: 'retain',
+});
+
+export const resolveNeedsDeathInventoryMode = (composition?: WorldComposition): NeedsDeathInventoryMode =>
+  composition
+    ? { kind: 'composed', capability: resolveDeathInventoryPolicyCapabilityV1(composition) }
+    : { kind: 'legacy' };
+
 export function createNeedsStatePort(
   options: Readonly<{
     entities: EntityStore;
@@ -25,6 +52,7 @@ export function createNeedsStatePort(
     assertCanChange(): void;
     changed(): void;
     prepareDeaths(ids: readonly string[]): PreparedEffect;
+    deathInventory: NeedsDeathInventoryMode;
   }>,
 ): RegisteredStatePort {
   const partitionId = (address: ModStateAddress) => {
@@ -100,7 +128,8 @@ export function createNeedsStatePort(
       const original = entries();
       const seen = new Set<number>();
       const actors: PreparedActorReplacement[] = [],
-        spawns: PreparedWorldItemSpawn[] = [],
+        additionalActorReplacements: DeathInventoryAdditionalActorReplacementV1[] = [],
+        deathCandidates: DeathInventorySettlementCandidateV1[] = [],
         deaths: string[] = [];
       for (const write of writes) {
         const index = partitionId(write.address);
@@ -120,29 +149,52 @@ export function createNeedsStatePort(
           )
             return { ok: false, reason: 'needs-readonly-fields-changed' };
           if (JSON.stringify(previous) === JSON.stringify(next)) continue;
-          let components = options.entities.actorComponentSnapshot(previous.reference.entityId);
-          components = { ...components, needs: { ...next.needs }, lifecycle: next.lifecycle };
+          const sourceComponents = options.entities.actorComponentSnapshot(previous.reference.entityId);
+          let components = { ...sourceComponents, needs: { ...next.needs }, lifecycle: next.lifecycle };
           if (previous.lifecycle === 'alive' && next.lifecycle === 'dead') {
+            if (previous.kind !== 'player') return { ok: false, reason: 'needs-non-player-death-unsupported' };
+            const policy =
+              options.deathInventory.kind === 'legacy'
+                ? LEGACY_PLAYER_DEATH_POLICY
+                : options.deathInventory.capability?.policyFor('player');
+            if (!policy) return { ok: false, reason: 'death-inventory-policy-unavailable' };
+            if (policy.actor === 'despawn') return { ok: false, reason: 'needs-player-despawn-policy-unsupported' };
             deaths.push(previous.reference.entityId);
             const position = options.entities.get(previous.reference.entityId)!.position;
-            spawns.push(...components.inventory.flatMap((stack) => (stack ? [{ position, stack }] : [])));
             components = {
               ...components,
-              inventory: components.inventory.map(() => null),
               player: { ...components.player!, breakAction: null },
             };
+            deathCandidates.push(
+              buildDeathInventorySettlementCandidateV1({
+                source: {
+                  actorReference: previous.reference,
+                  health: previous.health,
+                  components: sourceComponents,
+                },
+                position,
+                settlementComponents: components,
+                policy,
+              }),
+            );
+            continue;
           }
-          actors.push({ reference: previous.reference, health: next.health, components });
+          const replacement = { reference: previous.reference, health: next.health, components };
+          actors.push(replacement);
+          additionalActorReplacements.push({
+            source: { actorReference: previous.reference, health: previous.health, components: sourceComponents },
+            replacement,
+          });
         }
       }
-      if (!actors.length) return { ok: true, revision };
+      if (!actors.length && !deathCandidates.length) return { ok: true, revision };
       options.assertCanChange();
-      const segments: PreparedEntityMutationInput[] = [];
-      for (let start = 0; start < actors.length; start += 128)
-        segments.push({ actors: actors.slice(start, start + 128) });
-      for (let start = 0; start < spawns.length; start += 128)
-        segments.push({ spawns: spawns.slice(start, start + 128) });
-      const entity = prepareEntityMutationSeries(options.entities, segments);
+      const entity = deathCandidates.length
+        ? prepareDeathInventorySettlementSeriesV1(options.entities, {
+            candidates: deathCandidates,
+            additionalActorReplacements,
+          })
+        : prepareEntityMutationSeries(options.entities, actorSegments(actors));
       const effects = deaths.length ? options.prepareDeaths(deaths) : null;
       entity.validate();
       effects?.validate();
@@ -152,4 +204,10 @@ export function createNeedsStatePort(
       return { ok: true, revision: options.revision() };
     },
   };
+}
+
+function actorSegments(actors: readonly PreparedActorReplacement[]): PreparedEntityMutationInput[] {
+  const segments: PreparedEntityMutationInput[] = [];
+  for (let start = 0; start < actors.length; start += 128) segments.push({ actors: actors.slice(start, start + 128) });
+  return segments;
 }

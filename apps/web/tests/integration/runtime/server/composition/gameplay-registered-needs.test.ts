@@ -37,7 +37,7 @@ function setup(needs: boolean) {
     : [];
   const modules = classicGameplayDomainModules(
     [
-      ...(needs ? ['test:needs-rules'] : []),
+      ...(needs ? ['test:needs-rules', 'seedlands:overworld-death-inventory-policy'] : []),
       'seedlands:mode-module',
       'seedlands:overworld-combat-rules',
       'seedlands:inventory-actions-module',

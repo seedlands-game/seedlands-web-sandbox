@@ -134,6 +134,13 @@ settlement 进入同一 prepared entity participant；不再在成功后另写 a
 `death-inventory-policy-unavailable` 且零提交；nonfatal 正常，uncomposed legacy 显式保留。本片只处理 player
 direct damage/legacy needs facade，不改 registered combat、Needs schedule、非 player producer 或 Classic policy。
 
+V2 registered Needs death 子片冻结 `death-needs-contract.md`：Needs port 从当前 composition 显式接收一次解析的
+death policy mode。无死亡批次维持既有单一 entity series；只允许 player `alive→dead` 进入 policy candidate，有死亡
+时全部 survivor replacement 与 death candidate 必须进入同一次 public mixed settlement series，并与一次
+`prepareDeaths(ids)` effects 在任何 apply 前全部 validate。composed 缺 policy 首次致死整批返回
+`death-inventory-policy-unavailable`；player despawn 在没有 prepared membership owner 前稳定 fail-closed，不遗留
+`GameplayRuntime.players`。本片不改变非 player health/lifecycle、Classic policy、Vitals/Combat 或 Autonomy owner。
+
 ### 结构、攀爬、路线和载具
 
 - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
