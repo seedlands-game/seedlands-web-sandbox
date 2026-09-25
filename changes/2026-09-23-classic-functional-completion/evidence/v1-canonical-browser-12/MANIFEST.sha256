@@ -17,6 +17,11 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-0
 569a2ecdc49af3f3b04087a668fafa82154f379af1f9aa2b49923dfaf52cd37d  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-format-write-window.json.log
 7d696f1c38d0c70198af4c4bb2b66fad44cbebcee94b05ecceadd175f7af3a14  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-prettier-window.json.log
 17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-prettier.log
+7c142f376f67b35af9c26f97d5cb5d38271a2d1c3a383b8ea88283d9176c806c  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-state-diff-window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-state-diff.log
+fb7f0294614cd89c35519f650e9f86fe193084ec0ae3d48acd498cbee6b57b08  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-state-format-write-window.json.log
+ae530444afe61c11a1c148b8d1ef0cf5b1e9ec399a51ae4fcc9affd9ccc7be42  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-state-prettier-window.json.log
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/git20-state-prettier.log
 551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/harness-artifact.json
 d0a5b5896d92c875b39f4b5d11dd764e50d2afc20923cc5436ceaace4d814af7  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/performance-window.json.log
 91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903  changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-12/playwright-last-run.json.log
