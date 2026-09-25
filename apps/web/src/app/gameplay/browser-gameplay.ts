@@ -31,6 +31,7 @@ import {
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
 import { performVoxelTargetInteraction } from '../player/secondary-interaction';
+import { canTargetFluidSource } from './fluid-source-target-selection';
 import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
@@ -106,9 +107,10 @@ export class BrowserGameplay {
   }
   // prettier-ignore
   setAimTarget(target: VoxelTarget | null): void { this.aimTarget = target?.inRange ? target : null; }
-  aimedVoxelTargetForHarness(): Pick<VoxelTarget, 'position' | 'adjacent'> | null {
-    return this.aimTarget ? { position: this.aimTarget.position, adjacent: this.aimTarget.adjacent } : null;
-  }
+  // prettier-ignore
+  canTargetFluidSource(): boolean { return canTargetFluidSource(this.options.authority.gameplay); }
+  // prettier-ignore
+  aimedVoxelTargetForHarness(): Pick<VoxelTarget, 'position' | 'adjacent'> | null { return this.aimTarget ? { position: this.aimTarget.position, adjacent: this.aimTarget.adjacent } : null; }
   prepareMeleeShowcase(): Promise<void> {
     return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
       .catch((error: unknown) => {

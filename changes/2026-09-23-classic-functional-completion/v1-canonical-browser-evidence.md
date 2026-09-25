@@ -176,6 +176,94 @@ seedlands.structure:execute
 
 ---
 
+# Browser-04 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-04`
+结论：**FAIL；C0-C3 与 Classic 视觉回归通过，首个 V1 water-bucket 动作仍被 Authority 以 `blocked` 拒绝。Browser-03 的脚位 origin 缺口已关闭，本次暴露的是 solid hit center LOS 的第二个几何问题。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-04 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-23069d71`
+- HEAD/source：`23069d710086597964e0976dd6228ca4f7b1bb79`
+- `git status --short`：运行前后均无输出。
+- artifact digest：`1df45ffb2a7a95b4cd02375b6b1e92a3fe92d701636f19fecd01e15127df918e`
+- artifact receipt SHA256：`9fd52ead183af6487030fb24b6f522a84e45e46d08a335cad88f94b2aa00a1b8`
+- dist：276 个文件；复用既有产物，未重建、未修改。
+- 公共 dispatcher origin 修复文件 SHA256：`5d0e61e339297314e0342a17fa4b32191b3384ff4b16c601e9e678056659cd0a`。
+- fluid host origin 修复文件 SHA256：`89421e4f4be44d0a18e22965f73745dffb3a4f905ca1c1b61765a178eede062f`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-04-23069d71 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-24T23:06:54.252Z` 至 `2026-09-24T23:09:09.134Z`。
+机器窗口：`f8c8c820-8145-49b9-bffe-a83f52203fca`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+Playwright 结果：1 failed，1 passed，1 skipped；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.5 秒。
+- C1 PASS，约 18.7 秒。
+- C2 PASS，约 22.1 秒。
+- C3 PASS，约 15.8 秒。
+- V1 步骤约 12.8 秒后在第一条 water-bucket 动作失败。
+- Classic 视觉回归 PASS，约 30.7 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## Water-bucket 结果与首因
+
+真实浏览器链已到达创造目录选择、瞄准与 canvas 右键：active hotbar item 为 `water-bucket`，target card 为 hit `[68,30,2]`，其正交 adjacent 为 `[68,31,2]`。右键后 UI 明确显示 `无法交互 · blocked`；`apps/web/tests/e2e/classic-support/v1-slice.ts:171` 在 5 秒内持续读到 Air `0`，未得到 Water `8`。失败 receipt 为：
+
+- camera/player `[65.34008026123047,32.60000228881836,2.6025679111480713]`；
+- `serverPlayerPosition=[65.34008376511767,32.600001,2.602567930028762]`，该 Harness 字段已包含 `PLAYER_FEET_OFFSET=1.6`，对应 Authority body 约为 `[65.34008376511767,31.000001,2.602567930028762]`；
+- `interactionAttempts=11`、`worldRevision=14`、`commitSequence=48937`、`actionCompletionCount=12`、`actionFailureCount=0`。
+
+本 artifact 已包含 dispatcher 与 fluid host 的可信眼位 origin 修复，因此这不是 Browser-03 的旧脚位问题。现有 trace 与只读源码重放把剩余拒绝收敛到 hit LOS 的终点语义：
+
+1. dispatcher 从服务端可信眼位向 solid hit voxel **中心** `[68.5,30.5,2.5]` 追踪。
+2. 该线段会采样相邻 floor Stone `[67,30,2]`，因此得到 `blocked`。
+3. 由正交 `hit -> adjacent` 推导的共享面中心 `[68.5,31,2.5]`，以及 adjacent center `[68.5,31.5,2.5]`，均不穿过该 floor。
+4. 客户端协议只提交整数 hit/adjacent，不提交 camera、yaw、operationId、itemId 或不可信精确命中点。
+
+因此当前首因分类为 **solid hit center LOS 与有效暴露面不一致**。后续最窄安全修复应由服务端从已校验的正交 hit/adjacent delta 推导共享面中心作为 hit 可见性终点，同时继续保留 adjacent-center LOS、Manhattan 邻接、半径、授权、选择新鲜度与隔墙拒绝。此处仅记录诊断，不表示修复或产品通过。
+
+## Browser-04 V1 触达矩阵
+
+- C0-C3：**PASS**。
+- Classic 视觉回归：**PASS**。
+- water-bucket 放 source：**FAIL at first V1 action**；真实 select/aim/right-click 已发生，Authority 返回 `blocked`，目标保持 Air。
+- empty bucket 收 source：**NOT REACHED**。
+- door 两格跨 Chunk、实际 mesh+epoch、关闭碰撞、打开穿越及上下 half toggle：**NOT REACHED**。
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase：**NOT REACHED**。
+- C4 streaming 与 C5 save/continue：**NOT REACHED**。
+- save-return-continue 后的新 epoch、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+
+## Browser-04 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-04/`
+
+- `169e6670bda5fc440fe1769f6c8375f40966ec279e07caac0f89e63657457c09` `classic.json.log`
+- `5537a948f745541a108a24064b6c402683da83915d2729b02a7f53a420143385` `canonical-error-context.md.log`
+- 原始 trace SHA256 `0368e687a480be80c7ac0c1874df005c60359b13f9cda3c60ba19b99dbee19cd`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `10b87883df87f2ae8c7164851ba0a8be3cbb513f696559def503739b2da4d647` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `1bfd2cbb559218b7bfcc0b066908fef5c6dcdb3b02b94f310229529fdba7c065` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `8f93862599bc68803d93493c5d48b0c26d54101db762c71e4ed9bf0513ac574e` `canonical-trace.zip.part-ac`（33643417 bytes）
+- `9fd52ead183af6487030fb24b6f522a84e45e46d08a335cad88f94b2aa00a1b8` `harness-artifact.json`
+- `5fa808bf046bd4c606b329fd5411df6473443da37a933927a75907e02803259a` `performance-window.json.log`
+- `diagnosis.json` 的最终 SHA256 见阶段 checkpoint manifest。
+
+## Browser-04 运行后状态
+
+- `harness:classic` 失败后 artifact 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `23069d710086597964e0976dd6228ca4f7b1bb79`，`git status --short` 无输出，artifact receipt SHA256 仍为 `9fd52ead...00a1b8`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；排除查询进程自身后的 acceptance-tree、Chromium、Playwright 与 `vite preview` 进程复核输出 `NO_MATCHING_PROCESSES`。
+- Browser-04 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
 # Browser-03 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-03`

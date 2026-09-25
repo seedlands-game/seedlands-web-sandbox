@@ -24,6 +24,7 @@ export const classicItemInteractionModules = [
       trigger: 'voxel' as const,
       operationId: classicFluidContainerOperationId,
       presentationKey: `seedlands:${itemId}`,
+      ...(itemId === 'bucket' ? { voxelHitPolicy: 'fluid-source' as const } : {}),
     })),
   }),
 ] as const;
