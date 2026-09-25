@@ -11,6 +11,9 @@ import { aimAtVoxelWithRealMouse } from './aim';
 import {
   assessClosedDoorProbe,
   createClosedDoorProbePlan,
+  doorEntryAdjacent,
+  isOutsideDoorTargetOnEntrySide,
+  type ClosedDoorProbePlan,
   type ClosedDoorProbeObservation,
 } from './door-collision-oracle';
 import {
@@ -167,7 +170,7 @@ const doorAuthorityObservation = async (page: Page): Promise<DoorAuthorityObserv
   return value;
 };
 
-async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promise<void> {
+async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promise<ClosedDoorProbePlan> {
   const target = classicScenario.v1Slice.door.lower;
   expect(await doorPair(page)).toEqual(expectedDoor);
   const descriptor = await voxelGeometry(page, expectedDoor[0]);
@@ -220,6 +223,7 @@ async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promi
     await page.keyboard.up('KeyW');
   }
   expect(assessment).toEqual({ status: 'blocked' });
+  return plan;
 }
 
 export async function expectV1AudioSettings(page: Page): Promise<void> {
@@ -259,10 +263,22 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   const closedMesh = await expectDoorMesh(page, placed[0], 0, worldEpoch);
   expect((await voxelGeometry(page, placed[0]))?.collision).toHaveLength(1);
   await switchToSurvival(page);
-  await expectClosedDoorBlocks(page, placed);
+  const closedDoorPlan = await expectClosedDoorBlocks(page, placed);
 
-  // The collision probe ends with the camera inside the upper door cell, which is the visible target here.
-  await aimAtVoxelWithRealMouse(page, door.upper);
+  const retreated = await walkTo(page, closedDoorPlan.approach, {
+    key: 'KeyS',
+    tolerance: 0.06,
+    corridorTolerance: 0.08,
+    pulseMs: 80,
+  });
+  const authorityRetreated = await doorAuthorityObservation(page);
+  expect(await doorPair(page)).toEqual(placed);
+  expect(retreated.onGround && !retreated.colliding).toBe(true);
+  expect(authorityRetreated.onGround && !authorityRetreated.colliding).toBe(true);
+  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, retreated.player)).toBe(true);
+  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, authorityRetreated.position)).toBe(true);
+  const entryAdjacent = doorEntryAdjacent(closedDoorPlan, door.upper);
+  await aimAtVoxelWithRealMouse(page, door.upper, entryAdjacent);
   await clickCanvasCenter(page, 'right');
   await expect.poll(() => doorPair(page)).not.toEqual(placed);
   const opened = await doorPair(page);
