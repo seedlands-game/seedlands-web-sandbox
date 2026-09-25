@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-22-RESTORE-REGRESSION",
+  "status": "READY_FOR_EVIDENCE_COMMIT",
+  "baseline": "e0594e0260b54274db1e570f632ae4a9b9042152",
+  "testsAndContractsCommit": "e6a25d5739608038657c093faa1eb99fcd4e7bea",
+  "testsAndContractsTree": "728f4861dbb8c67d27d680bd434dbb439d7a481c",
+  "testsAndContractsPatchSha256": "d387aedf5a737e8b0c4cb8f4bca3c5f96dbff4102f060fbfb01bedab880fb225",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "0f66cfa301fbae8ddadd80e72864e8c8e05978e54ca7bca4b1214e85fe2eda01"
+  },
+  "committedFiles": {
+    "apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts": "a67c6e01fcc4223b7b5961654e451cb3157fdd2bfc7e05df336bea2e027a21d9",
+    "packages/stdlib/tests/server/equipment-pointer-restore.test.ts": "bd1fad4b683c3f52bf42df32973f6a08d4697be9ec71ade6bf31658580920ab5",
+    "changes/2026-09-23-classic-functional-completion/equipment-restore-contract.md": "8ab253ffb59b82fc89229b08499fd36d946e5dc4ed4d932e5195481aa3c2945c",
+    "changes/2026-09-23-classic-functional-completion/equipment-web-pointer-fixture-contract.md": "013cbabdad3fc6e83a0c307348e4151c196b0c6a7f8eb912321d91fe9a39ce62"
+  },
+  "evidenceSnapshots": {
+    "restore": {
+      "manifestSha256": "46da1b6e59b37bd4f7328b43d5e8cf9d44def097435039c78bda363be44ba175",
+      "sourceManifestSha256": "f6cd49c2c0b2b6ae6e438eaa588ced5e1c31a3822a51aa83fbe7d7777ccd4e85",
+      "deliverySha256": "804d015bca58a684a1d8593b856bc9536b49095d823a41fb23db90c4b9fe1891"
+    },
+    "webFixture": {
+      "manifestSha256": "8715c546d8f92ee79502a26c0f9cd6b09ed76ef8c44ed80f2df1918a5405aeb2",
+      "sourceManifestSha256": "6f13ee9f0f5b6aa83fae035e0dca01a334fa7187e1c19dc1d82aaa9f0f59b5de",
+      "deliverySha256": "5c1e13a14e8c6a45adc82bf371b13af09407f450f5fc42fe8cd5b18cb6d64df8"
+    }
+  },
+  "validation": {
+    "restore": "1 file / 4 tests PASS",
+    "webPointer": "1 file / 9 tests PASS",
+    "rootTestTypes": "PASS",
+    "classicTestTypes": "PASS",
+    "fixtureLintFormatDiff": "PASS"
+  },
+  "productionChanges": [],
+  "excluded": [
+    "spec.md",
+    "registered combat armor",
+    "mod-api.ts",
+    "Pack",
+    "Lighting",
+    "transport",
+    "README",
+    "package.json",
+    "CI"
+  ],
+  "notRun": ["build", "browser", "cua", "ci", "deploy", "merge"]
+}

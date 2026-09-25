@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-RESTORE-REGRESSION-01",
+  "status": "RESTORE_GREEN_WEB_FIXTURE_BLOCKED",
+  "baseline": "e0594e0260b54274db1e570f632ae4a9b9042152",
+  "testTree": "/private/tmp/seedlands-v2-equipment-restore-e0594e02",
+  "files": {
+    "packages/stdlib/tests/server/equipment-pointer-restore.test.ts": "bd1fad4b683c3f52bf42df32973f6a08d4697be9ec71ade6bf31658580920ab5",
+    "changes/2026-09-23-classic-functional-completion/equipment-restore-contract.md": "8ab253ffb59b82fc89229b08499fd36d946e5dc4ed4d932e5195481aa3c2945c"
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "f6cd49c2c0b2b6ae6e438eaa588ced5e1c31a3822a51aa83fbe7d7777ccd4e85"
+  },
+  "webPointerRegression": {
+    "window": "v2-equipment-web-pointer-regression",
+    "status": "BLOCKED_IN_SETUP",
+    "exitCode": 1,
+    "files": 1,
+    "failed": 9,
+    "reason": "Classic Pack integrity receipt is missing or adds resources before pointer behavior executes"
+  },
+  "restoreTests": {
+    "window": "v2-equipment-restore-tests-final2",
+    "status": "PASS",
+    "files": 1,
+    "passed": 4
+  },
+  "static": {
+    "stdlibTypes": { "window": "v2-equipment-restore-stdlib-types", "status": "PASS" },
+    "rootTestTypes": {
+      "window": "v2-equipment-restore-root-test-types-final",
+      "status": "PASS"
+    },
+    "classicTestTypes": {
+      "window": "v2-equipment-restore-classic-test-types",
+      "status": "PASS"
+    },
+    "testLintFormatDiff": { "window": "v2-equipment-restore-static-final", "status": "PASS" }
+  },
+  "productionChanges": [],
+  "testTreePreserved": true,
+  "acceptanceTreeModified": false,
+  "notRun": ["build", "browser", "cua", "ci", "git-stage", "git-commit", "git-push"]
+}

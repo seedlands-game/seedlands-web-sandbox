@@ -1,0 +1,26 @@
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-equipment-restore-e0594e02
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-restore.test.ts (4 tests | 1 failed) 49ms
+     × round-trips bag, cursor, crafting and durable armor, invalidates old handles, then keeps pointer revisions linear 33ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-restore.test.ts > equipment pointer V4 restore > round-trips bag, cursor, crafting and durable armor, invalidates old handles, then keeps pointer revisions linear
+TypeError: Cannot assign to read only property 'durability' of object '#<Object>'
+ ❯ packages/stdlib/tests/server/equipment-pointer-restore.test.ts:190:51
+    188|     };
+    189|     mutableSaved.inventory[2]!.count = 9;
+    190|     mutableSaved.equipment.armor.helmet!.instance.durability = 1;
+       |                                                   ^
+    191|     expect(target.runtime.getInventoryPointerView('pilot').slots[2]).t…
+    192|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 3 passed (4)
+   Start at  20:19:45
+   Duration  947ms (transform 675ms, setup 0ms, import 820ms, tests 49ms, environment 0ms)
+
