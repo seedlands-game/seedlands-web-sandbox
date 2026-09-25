@@ -1,0 +1,16 @@
+apps/web/src/app/gameplay/browser-gameplay.ts 66ms (unchanged)
+apps/web/src/app/gameplay/browser-inventory-pointer.ts 10ms (unchanged)
+apps/web/src/app/ui/gameplay-ui-projector.ts 18ms (unchanged)
+apps/web/src/app/ui/inventory-crafting.svelte 84ms (unchanged)
+apps/web/src/app/ui/inventory-pointer-gestures.ts 6ms (unchanged)
+apps/web/src/app/ui/primitives/inventory-slot.svelte 13ms (unchanged)
+apps/web/src/app/ui/ui-bridge.ts 12ms (unchanged)
+apps/web/src/app/ui/ui-contracts.ts 4ms (unchanged)
+apps/web/tests/unit/app/gameplay-ui-projection.test.ts 8ms (unchanged)
+apps/web/tests/unit/client/browser-inventory-pointer.test.ts 12ms
+apps/web/tests/unit/client/inventory-crafting-ui.test.ts 4ms
+apps/web/tests/unit/client/creative-mode-ui.test.ts 5ms (unchanged)
+apps/web/tests/unit/client/creative-station-ui.test.ts 2ms (unchanged)
+apps/web/tests/unit/client/inventory-pointer-gestures.test.ts 6ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 54ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-web-ui-contract.md 5ms (unchanged)

@@ -1,0 +1,29 @@
+9:48:00 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/client/browser-inventory-pointer.test.ts (13 tests | 2 failed) 7ms
+   × 仅关闭在 stale-inventory-revision 后以新版本最多重试一次 2ms
+   × 仅关闭在 stale-station-reference 后以新版本最多重试一次 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/client/browser-inventory-pointer.test.ts > 仅关闭在 stale-inventory-revision 后以新版本最多重试一次
+ FAIL  |@seedlands/web| apps/web/tests/unit/client/browser-inventory-pointer.test.ts > 仅关闭在 stale-station-reference 后以新版本最多重试一次
+AssertionError: expected "vi.fn()" to be called once, but got 2 times
+ ❯ apps/web/tests/unit/client/browser-inventory-pointer.test.ts:329:20
+    327|     expect(deny).toHaveBeenCalledTimes(2);
+    328|     expect(changed).not.toHaveBeenCalled();
+    329|     expect(failed).toHaveBeenCalledOnce();
+       |                    ^
+    330|   },
+    331| );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 31 passed (33)
+   Start at  21:48:00
+   Duration  2.18s (transform 1.20s, setup 0ms, import 1.78s, tests 31ms, environment 0ms)
+
