@@ -1,0 +1,12 @@
+f6af1ffafbb4c5e997bc7297e2ac8b0cc2ba25b1a781f879e7c9dd04698bd470  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/SOURCE-MANIFEST.sha256
+97ce89ea528f129ca4de0c978f8e37406186dd87181eb5613dbe21833e1f6adb  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/artifact-map.sha256.log
+bf45e24fb6fca63fe643437daf266ae25bf20be8f569be348b5be6b5849c1853  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/artifact-window.json.log
+48a3845546335c557edbb6b1fbe9d0f3cb475f88140ab0790df35c116a421b0e  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/artifact.stdout.log
+edf5a87a32bfcbf591d2e35ad6020c78fbe42bbcf390280834258f7b917600ec  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/build-window.json.log
+b1d9df8e6a62ed149664f12687237442b12e9d98daa3d2e478ec93529b7b15d4  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/build.stdout.log
+97f65ee747189b977420db592db2d7b72debe10405c15ca1abf912862b83e0f0  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/delivery-validation.json
+97ce89ea528f129ca4de0c978f8e37406186dd87181eb5613dbe21833e1f6adb  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/dist-files.sha256.log
+edb9f0ee460a15d249d6169dbb9f89d71033661c2ea794a780103716abff897b  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/docs-format-window.json.log
+f403420366889a0f617006029790d89fa1fea88493c8c7c1cf3a97c28b985187  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/docs-format.stdout.log
+aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/harness-artifact.json.log
+8323361d20d2f7d781408186d58cbecac728c2c5103bf12b47be2fe10c502887  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/postconditions.stdout.log
