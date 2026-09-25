@@ -1,12 +1,8 @@
 import type { Page } from '@playwright/test';
 import { snapshot } from './harness';
 import { moveMouseBy } from './mouse-input';
+import { matchesVoxelAim, mouseCorrectionToPoint, voxelAimPoint } from './target-aim';
 import type { Point } from './scenario';
-
-const MOUSE_SENSITIVITY_DEGREES = 0.13;
-const MAX_HORIZONTAL_STEP = 80;
-
-type TargetCardPoint = Readonly<[number, number, number]>;
 
 export type RealMouseAimEvidence = Readonly<{
   target: Point;
@@ -15,24 +11,6 @@ export type RealMouseAimEvidence = Readonly<{
   attempts: number;
   mouseDelta: Readonly<{ x: number; y: number }>;
 }>;
-
-const normalizeDegrees = (value: number) => {
-  let normalized = value % 360;
-  if (normalized > 180) normalized -= 360;
-  if (normalized < -180) normalized += 360;
-  return normalized;
-};
-
-const parseTargetCard = (value: string | null): TargetCardPoint | null => {
-  const point = value?.split(',').map(Number);
-  return point?.length === 3 && point.every(Number.isFinite) ? ([point[0]!, point[1]!, point[2]!] as const) : null;
-};
-
-const voxelCenterYaw = (player: Point, point: TargetCardPoint) =>
-  (Math.atan2(-(point[0] + 0.5 - player[0]), -(point[2] + 0.5 - player[2])) * 180) / Math.PI;
-
-const horizontalDistance = (player: Point, point: TargetCardPoint) =>
-  Math.hypot(point[0] + 0.5 - player[0], point[2] + 0.5 - player[2]);
 
 /**
  * Reacquires a voxel after a fresh controller is created by save/continue.
@@ -45,23 +23,25 @@ export async function aimAtVoxelWithRealMouse(
   adjacent?: Point,
 ): Promise<RealMouseAimEvidence> {
   const expected = target.join(',');
+  const aimPoint = voxelAimPoint(target, adjacent);
   const history: Array<string | null> = [];
   let firstObserved: string | null | undefined;
   let totalX = 0;
   let totalY = 0;
 
   for (let attempt = 1; attempt <= 180; attempt += 1) {
-    const [observed, playerSnapshot, aimed] = await Promise.all([
-      page.evaluate(() => document.querySelector('#target-card')?.getAttribute('data-target') ?? null),
+    const [observation, playerSnapshot] = await Promise.all([
+      page.evaluate(() => ({
+        targetCard: document.querySelector('#target-card')?.getAttribute('data-target') ?? null,
+        aimed: (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.aimedVoxelTarget(),
+      })),
       snapshot(page),
-      page.evaluate(() =>
-        (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.aimedVoxelTarget(),
-      ),
     ]);
+    const { targetCard: observed, aimed } = observation;
     if (firstObserved === undefined) firstObserved = observed;
     history.push(observed);
     if (history.length > 12) history.shift();
-    if (observed === expected && (!adjacent || aimed?.adjacent?.every((value, axis) => value === adjacent[axis])))
+    if (observed === expected && matchesVoxelAim(aimed, target, adjacent))
       return {
         target,
         firstObserved: firstObserved ?? null,
@@ -70,27 +50,9 @@ export async function aimAtVoxelWithRealMouse(
         mouseDelta: { x: totalX, y: totalY },
       };
 
-    const point = parseTargetCard(observed);
-    let dx = 0;
-    let dy = 0;
-    if (!point || !playerSnapshot) {
-      dy = 12;
-    } else {
-      const targetYaw = voxelCenterYaw(playerSnapshot.player, target);
-      const observedYaw = voxelCenterYaw(playerSnapshot.player, point);
-      const yawError = normalizeDegrees(targetYaw - observedYaw);
-      if (Math.abs(yawError) > 2.5) {
-        dx = Math.max(-MAX_HORIZONTAL_STEP, Math.min(MAX_HORIZONTAL_STEP, -yawError / MOUSE_SENSITIVITY_DEGREES));
-      } else if (point[1] < target[1]) {
-        dy = -6;
-      } else if (point[1] > target[1]) {
-        dy = 6;
-      } else {
-        const targetDistance = horizontalDistance(playerSnapshot.player, target);
-        const observedDistance = horizontalDistance(playerSnapshot.player, point);
-        dy = observedDistance > targetDistance ? 4 : -4;
-      }
-    }
+    const { dx, dy } = playerSnapshot
+      ? mouseCorrectionToPoint(playerSnapshot.player, playerSnapshot.viewAngles, aimPoint)
+      : { dx: 0, dy: 12 };
     await moveMouseBy(page, dx, dy);
     totalX += dx;
     totalY += dy;

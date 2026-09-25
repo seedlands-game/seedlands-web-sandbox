@@ -144,6 +144,8 @@ Browser-06 source `5d52330fa58d315e9e10b1298e1bdc65e2321898`、artifact `a91a352
 
 Browser-07 窗口 `e28f49a7-1346-4b0d-ae03-d324449ca752` 已证明两格门提交、descriptor 与双 Chunk 闭门薄轴 mesh 到达，但 fixture 错把 developer world owner epoch `…:world:0` 当作 Browser Authority runtime epoch `…:1`。V1 pre-save mesh/media 与 post-restore media 必须从既有 `mediaSnapshot().worldEpoch` 取得一次严格非空的同域 baseline；存在 audio snapshot 时 `audio.epoch` 必须精确相等。恢复后 runtime baseline 必须不同于 pre-save baseline，同时保留 developer `world.identity()` 前后不等的独立换代断言及所有 media revision、resumePending、last batch、audio phase、mesh vertex/index/epoch 断言。不得截断字符串、剥后缀、硬编码 scenario epoch、每次从被测 mesh 重取期望值、降级为仅非空或新增 production API；静态完成不等于 Browser GREEN，仍须新 artifact 上的唯一 Browser-08。
 
+Browser-08 窗口 `8c83c1ed-9482-464c-a2b0-89f70e52b78e` 已完成完整门旅程，但在唱片机 support `[76,30,2]` 的真实鼠标瞄准中耗尽 180 次校正，末尾 target-card 在 `[75,30,2]` 与 `[75,30,3]` 间振荡且尚未发送右键。V1 fixture 的瞄准闭环必须以现有只读 `snapshot.player`（已经是 camera/eye）和 `snapshot.viewAngles` 为误差基准，复用有界角度校正；有 adjacent 时从正交 hit/adjacent 推导命中侧共享面内点，无 adjacent 时保持 voxel center。成功仍要求同次观察的 target-card 精确 target 与 Harness aimed target 精确 target，并在有 adjacent 时要求 adjacent 精确相等。不得增加 180 次预算、timeout、随机搜索、坐标/approach、写 Harness 或旁路真实 PointerLock；确定性控制测试与静态检查不替代新 artifact 上的唯一 Browser-09。
+
 每个 IMPLEMENT 先在实际 owner 取得 RED：registry/assembly；interact protocol/transaction；194-item no-unclassified matrix；装备与各物品族原子正反例；门/梯/轨/车；media state/pack digest/Web output；synthetic lighting/WebGL2 readback。sample:modular-world 必须是不加载 Classic 的实际替代配置。
 
 协调者串行运行 package.json 声明的 format/path/lint/typecheck、定向 owner tests、受影响 deterministic、Classic headless、一次 production build 和唯一 Chromium。当前 Cua/Jev 路由从真实键鼠验收全部物品/结构/载具旅程、保存重开、音频启停/失败与昼夜/林下/室内/遮挡/跨 Chunk 光照；runtime 调用、source grep、HTTP 200 或单图都不能替代产品证据。

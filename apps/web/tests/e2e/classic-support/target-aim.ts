@@ -11,6 +11,29 @@ const normalizeDegrees = (value: number) => {
 };
 
 const clampStep = (value: number) => Math.max(-MAX_MOUSE_STEP, Math.min(MAX_MOUSE_STEP, value));
+const FACE_INTERIOR_EPSILON = 1e-6;
+
+type VoxelAimObservation = Readonly<{ position: Point; adjacent: Point | null }>;
+
+const samePoint = (left: Point, right: Point) => left.every((value, axis) => value === right[axis]);
+
+export function voxelAimPoint(target: Point, adjacent?: Point): Point {
+  if (![...target, ...(adjacent ?? [])].every((value) => Number.isFinite(value) && Number.isInteger(value)))
+    throw new TypeError('Voxel aim coordinates must be finite integers.');
+  if (!adjacent) return [target[0] + 0.5, target[1] + 0.5, target[2] + 0.5];
+  const distance = target.reduce((sum, value, axis) => sum + Math.abs(value - adjacent[axis]), 0);
+  if (distance !== 1) throw new TypeError('Voxel aim target and adjacent cell must be orthogonally adjacent.');
+  return [
+    target[0] + 0.5 + (adjacent[0] - target[0]) * (0.5 - FACE_INTERIOR_EPSILON),
+    target[1] + 0.5 + (adjacent[1] - target[1]) * (0.5 - FACE_INTERIOR_EPSILON),
+    target[2] + 0.5 + (adjacent[2] - target[2]) * (0.5 - FACE_INTERIOR_EPSILON),
+  ];
+}
+
+export function matchesVoxelAim(observed: VoxelAimObservation | null, target: Point, adjacent?: Point): boolean {
+  if (!observed || !samePoint(observed.position, target)) return false;
+  return adjacent === undefined ? true : observed.adjacent !== null && samePoint(observed.adjacent, adjacent);
+}
 
 export const voxelInteractionDistance = (player: Point, target: Point) =>
   Math.hypot(target[0] + 0.5 - player[0], target[1] + 0.5 - player[1], target[2] + 0.5 - player[2]);

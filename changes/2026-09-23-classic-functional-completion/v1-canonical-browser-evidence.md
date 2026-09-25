@@ -267,6 +267,105 @@ Browser-05 的路线缺口已由真实产品行为关闭：水桶放/收断言�
 
 ---
 
+# Browser-08 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-08`
+结论：**FAIL；fixture epoch 身份域修复已使完整木门旅程通过。随后玩家走到唱片机位置并选中 jukebox，但真实鼠标瞄准在相邻地板格间振荡，未发送 jukebox 右键；媒体、C4/C5 与保存恢复未触达。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-08 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-06f42f5d`
+- HEAD/source：`06f42f5d0943c2f12a24264d9e5e607b22b33dee`
+- `git status --short`：运行前后均无输出。
+- source digest：`607294f043101061d632e0b669b9aafe367c68ea6dc67d9dc1037f37cc94c245`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`
+- artifact receipt SHA256：`6aa1a95de2f549dbf82186ca018a2bc1d272124e54269a11a99c00b33f4e9bd2`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt）；未重建、未修改。
+- 两份 fixture SHA256：`v1-slice.ts` 为 `88b960730997418fb0a7cce8057b6b8c067b7c57e39225197bf0b7cddba08ddc`，`classic-runtime.spec.ts` 为 `3acb6e8bc9df85de32924ee9a9290b8e8c276c9a433d0e869ed07873242e00e0`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-08-06f42f5d node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T05:08:11.975Z` 至 `2026-09-25T05:11:26.509Z`。
+机器窗口：`8c83c1ed-9482-464c-a2b0-89f70e52b78e`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+最终 runner exec event 记录同一 argv/cwd、duration 194.455 秒、exit 1。Playwright 结果：1 failed，1 passed，1 skipped，共约 3.1 分钟；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.9 秒。
+- C1 PASS，约 17.5 秒。
+- C2 PASS，约 23.6 秒。
+- C3 PASS，约 17.2 秒。
+- V1 step 约 58.5 秒后在 jukebox support 瞄准失败。
+- Classic 视觉回归 PASS，约 33.2 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## 门 GREEN 与首因
+
+Browser-07 的 epoch fixture 缺口已关闭。本次同域 baseline 让 closed/open mesh 的 exact epoch、vertex/index 与 media baseline 校验继续执行，并完成完整门旅程：
+
+- 水桶放 source、空桶收 source、正式 UI 切生存和门 approach 均通过；
+- 木门两格原子提交、descriptor、两个 Chunk 的闭门 mesh 薄轴、每个 mesh 的 vertex/index/runtime epoch 均通过；
+- closed collision 存在，真实前进输入被门阻挡；
+- lower half 右键打开后两格状态同步变化、collision 为空、mesh 薄轴旋转且 Chunk revision 前进；
+- 玩家真实穿过打开的门；upper half 右键关闭、lower half 再次右键打开均通过。
+
+终态 `worldRevision=145`，与放置后的 revision 142 再增加三次 toggle 一致。随后玩家到达 jukebox approach `[73.5,2.5]`，最终位置 `[73.7430,32.6000,2.7646]`、`onGround=true`、`colliding=false`，并通过正式创造目录选中 jukebox。
+
+首个失败发生在 `placeSelected()` 的 `aimAtVoxelWithRealMouse(page, [76,30,2], [76,31,2])` 内，尚未调用 `clickCanvasCenter`：helper 用真实 Pointer Lock mouse 最多校正 180 次，但最后观测持续在 `[75,30,2]` 与 `[75,30,3]` 间振荡，从未重新取得 support `[76,30,2]`，最终由 `aim.ts:99` 抛错。失败页也显示 jukebox 已选中且准星落在邻近地面。
+
+因此本次首因分类为 **canonical fixture 的真实鼠标瞄准收敛失败**，不是 jukebox 或 media 生产失败；没有 jukebox 右键、voxel 提交、record insert、fact、projection 或 audio 结果可供判断。本租约不授权修改 fixture 或第二次 attempt，只保留原始证据交 root 裁决。
+
+## Browser-08 触达矩阵
+
+- C0-C3：**PASS**。
+- V1 四项音量与旧上传入口移除：**PASS**。
+- water-bucket 放 source、empty bucket 收 source：**PASS**。
+- 正式 UI 切回生存、落地、真实门 approach：**PASS**。
+- 门两格原子提交、descriptor、双 Chunk mesh vertex/index/exact runtime epoch：**PASS**。
+- closed collision、lower half 打开、打开 mesh 旋转、真实穿越、upper half 关闭、lower half 再打开：**PASS**。
+- jukebox approach 与正式创造目录选中：**PASS**。
+- jukebox 瞄准：**FAIL**；未发送右键。
+- jukebox 放置、record-13 insert、fact/projection/audio：**NOT REACHED**。
+- C4 streaming：**NOT REACHED**。
+- C5 save/continue：**NOT REACHED**。
+- restore 后新 runtime epoch 与 developer identity 各自换代、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+- Classic 视觉回归：**PASS**。
+
+## Browser-08 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-08/`
+
+- `0d6fbd6d89dcdf7c09559688bca7f47f40a3dfff70d6c1900594184989b43ee8` `classic.json.log`
+- `d8302ce9b6fa5f171f5d996dea077ea3d7f81d58c39c1cf228565fc71bd9ecb4` `canonical-error-context.md.log`
+- 原始 trace SHA256 `c44963dfd3d562a69b36e5ec0011fd32e4a99b623d34c931562d8ee38bc776cc`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `303293e409205dc73c18c5715585e27ad13d5350e71d425d09cba83bfac2a451` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `ffb0a43d1628d4a7fc74d1aad2f0584f59bf7aef0edc07095944eb024d826b92` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `74597b582c1ee58c4e60942f8cdd020f4be09e8a74a8578ab6b88db6ee74c7ed` `canonical-trace.zip.part-ac`（80000000 bytes）
+  - `c0ed8b04395f92fde0b016a24a6c8ba2a8e62492329ae2336a41a90af20ff618` `canonical-trace.zip.part-ad`（53161054 bytes）
+- `7c35fa0a3bb40a88f9bc6f202c0cb91d4e07501e2413cace03b66ccc933c9518` `failure-page.jpeg`；显示 jukebox 已选中、准星位于邻近地板。
+- `6aa1a95de2f549dbf82186ca018a2bc1d272124e54269a11a99c00b33f4e9bd2` `harness-artifact.json`
+- `f9a447eb98548ae134839d5c63090734b6b31390b850218f77c22b4dfbb78fe8` `performance-window.json.log`
+- `5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110` `playwright-last-run.json.log`
+- `runner-output.jsonl`：仅包含 session `23823` 的七个原始终端 chunk；最终 SHA256 见 checkpoint manifest。
+- `runner-exec-event.json.log`：唯一 Harness argv/cwd/duration/exit 的平台原始事件；最终 SHA256 见 checkpoint manifest。
+- `artifact-postcheck-window.json.log`：锁内 artifact 后验校验窗口；最终 SHA256 见 checkpoint manifest。
+- `diagnosis.json`：机器可读触达矩阵与首因；最终 SHA256 见 checkpoint manifest。
+
+## Browser-08 运行后状态
+
+- 锁内 `node scripts/harness/artifact.mjs` 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `06f42f5d0943c2f12a24264d9e5e607b22b33dee`，`git status --short` 无输出，artifact receipt SHA256 仍为 `6aa1a95d...f4e9bd2`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；按可执行名过滤 Chromium、Playwright 与 `vite preview` 的进程复核输出 `NO_BROWSER_OR_PREVIEW_PROCESSES`。
+- Browser-08 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
 # Browser-07 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-07`
