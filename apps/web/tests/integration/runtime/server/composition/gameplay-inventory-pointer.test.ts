@@ -27,20 +27,28 @@ function setup() {
         algorithm: 'sha256',
         manifestDigest: 'a'.repeat(64),
         entryDigest: 'b'.repeat(64),
-        resources: [{ path: 'playbooks/classic/presentation.json', digest: 'c'.repeat(64) }],
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
       },
     },
   ]);
   const actorAuthority = createGameplayActorAuthority(composition.resources, { playerAlias: 'human' });
+  const readCell = ([x, y, z]: readonly [number, number, number]) => ({
+    voxel: x === 2 && y === 0 && z === 0 ? 11 : 0,
+    fluid: 0,
+  });
   const world = new GameplayRuntime({
     composition,
     moduleActorAuthority: actorAuthority,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
-    getVoxel: ([x, y, z]) => (x === 2 && y === 0 && z === 0 ? 11 : 0),
+    getVoxel: (position) => readCell(position).voxel,
+    getLoadedCell: readCell,
     getWorldTime: () => 9,
     prepareVoxelEdit: () => {
       throw new Error('unexpected voxel edit');
+    },
+    prepareVoxelEdits: () => {
+      throw new Error('unexpected voxel edit batch');
     },
   });
   world.spawnPlayer({ id: 'alice', position: [0.5, 0, 0.5] });
