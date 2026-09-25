@@ -16,6 +16,7 @@ import {
 } from '../../composition/execution-origin';
 import type { WorldModuleBinding } from '../../commands/module-command';
 import type { CombatRequestResult, PreparedCombatMutation } from '../combat-runtime';
+import { prepareArmorDamage } from '../armor-equipment';
 import { prepareCombatDamage } from '../prepared-combat-damage';
 import type { PreparedEntityMutation } from '../prepared-entity-mutation';
 import type { ActionRuntime } from '../../simulation/action-runtime';
@@ -221,12 +222,18 @@ export class RegisteredCombatRuntime {
     if (!entities.resolveReference(pending.actorIdentity) || !entities.resolveReference(pending.targetIdentity))
       throw new TypeError('Combat pending lifetime is stale.');
     const reason = this.environment.hitFailure(candidate.actorId, candidate.targetId, pending.definitionId);
+    const target = entities.actorStateAccess(candidate.targetId);
+    const armor =
+      !reason && candidate.damage > 0 && target.mode === 'survival'
+        ? prepareArmorDamage(target, this.options.content.items, candidate.damage)
+        : null;
     const damage = reason
       ? { damage: 0, entity: null, deaths: [], removals: [] }
       : prepareCombatDamage({
           entities,
           targetId: candidate.targetId,
-          damage: candidate.damage,
+          damage: armor?.damage ?? candidate.damage,
+          ...(armor ? { armor: armor.armor } : {}),
           actorDeathDrop: (id) => simulation().actorDeathDrop(id),
         });
     const plan = combat.prepareMutation({

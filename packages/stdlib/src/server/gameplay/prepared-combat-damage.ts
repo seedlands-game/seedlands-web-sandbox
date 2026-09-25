@@ -1,3 +1,4 @@
+import type { ArmorEquipment } from './ecs-actor-armor-state';
 import { isActorEntityType } from './ecs-actor-state';
 import type { EntityStore } from './entity-store';
 import type { ItemStack } from './item-registry';
@@ -10,6 +11,7 @@ export function prepareCombatDamage(
     entities: EntityStore;
     targetId: string;
     damage: number;
+    armor?: ArmorEquipment;
     actorDeathDrop(id: string): ItemStack | null;
   }>,
 ) {
@@ -33,18 +35,21 @@ export function prepareCombatDamage(
     const drop = options.actorDeathDrop(target.id);
     if (drop) stacks.push(drop);
   }
+  const armored = options.armor
+    ? { ...components, equipment: { ...components.equipment, armor: options.armor } }
+    : components;
   const next =
     health === 0 && target.type === 'player'
       ? {
-          ...components,
+          ...armored,
           lifecycle: 'dead' as const,
-          inventory: components.inventory.map(() => null),
+          inventory: armored.inventory.map(() => null),
           inventoryCursor: interactionItems.some(Boolean)
-            ? { ...emptyInventoryCursor(), revision: (components.inventoryCursor?.revision ?? 0) + 1 }
-            : components.inventoryCursor,
-          player: { ...components.player!, breakAction: null },
+            ? { ...emptyInventoryCursor(), revision: (armored.inventoryCursor?.revision ?? 0) + 1 }
+            : armored.inventoryCursor,
+          player: { ...armored.player!, breakAction: null },
         }
-      : components;
+      : armored;
   const entity = prepareEntityMutation(options.entities, {
     ...(removals.length ? { despawns: [reference] } : { actors: [{ reference, health, components: next }] }),
     spawns: stacks.map((stack) => ({ position: target.position, stack })),
