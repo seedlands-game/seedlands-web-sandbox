@@ -267,6 +267,212 @@ Browser-05 的路线缺口已由真实产品行为关闭：水桶放/收断言�
 
 ---
 
+# Browser-07 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-07`
+结论：**FAIL；Structure shared-face 修复已使木门完成两格原子提交，并产生两个 Chunk 的闭门薄轴 mesh。首个失败是 canonical fixture 把 developer world owner epoch 与 Browser Authority runtime epoch 当成同一身份比较；碰撞/toggle、媒体、C4/C5 与保存恢复尚未触达。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-07 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-46b81735`
+- HEAD/source：`46b8173538f7e162f79c16fc92864139b3bc24a8`
+- `git status --short`：运行前后均无输出。
+- source digest：`96532a3ecc82140d83d3d5c1b32c533d3f449d3c26269929295d8dfe7af717d9`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`
+- artifact receipt SHA256：`78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt）；未重建、未修改。
+- Pack lock SHA256：`863ae8eb9606583240207741f8b0515e6c40234d209524493dc283ccf012a99b`。
+- MP3：2976045 bytes、`audio/mpeg`、SHA256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-07-46b81735 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T04:17:17.773Z` 至 `2026-09-25T04:19:43.946Z`。
+机器窗口：`e28f49a7-1346-4b0d-ae03-d324449ca752`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+最终 runner exec event 记录同一 argv/cwd、duration 146.113 秒、exit 1。Playwright 结果：1 failed，1 passed，1 skipped，共约 2.4 分钟；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.5 秒。
+- C1 PASS，约 17.8 秒。
+- C2 PASS，约 21.1 秒。
+- C3 PASS，约 16.4 秒。
+- V1 step 约 21.5 秒后在门 mesh epoch oracle 失败。
+- Classic 视觉回归 PASS，约 31.7 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## 门进展与首因
+
+Browser-06 的 Structure hit LOS 阻塞已关闭。正式旅程完成水桶放/收、UI 切生存、落地和门 approach 后，真实选择 wooden-door 并右键：
+
+- door pair storage ID 范围断言通过，两格均为合法门 variant；
+- `worldRevision` 从 Browser-06 同边界的 141 前进到 142；
+- `lastCommitMutationCount=2`，证明本次世界提交包含两格；
+- geometry descriptor 存在、非 full-face occluder、恰有一个 box；
+- lower/upper 分属两个 Chunk，两个 `FaceMaterial.WoodenDoor` postrender mesh 都存在且闭门薄轴均为 X 轴。
+
+随后 `v1-slice.ts:126` 在进入 per-mesh 循环前比较 epoch 失败：fixture 预期 `seedlands:classic-canonical-runtime-v11:1:world:0`，Harness media snapshot 返回 `seedlands:classic-canonical-runtime-v11:1`。只读合同与源码确认：
+
+1. `v1-harness-contract.md` 冻结 mesh/media `worldEpoch` 由 Browser Harness 组合层取当前 Authority `runtimeEpoch`，用于阻止旧 renderer/media owner 冒充当前世界。
+2. Browser Authority 初次 runtime epoch 为 session epoch `…:1`；`game.ts` 用同值绑定 rendered world 与 media。
+3. fixture 的 `runtimeEpoch()` 实际调用 `__seedlandsHarness.world.identity()`，得到 developer world/persistence owner epoch `…:world:0`。
+4. 两个值都合法，但属于不同身份域，不能直接相等比较。当前实际 mesh/media epoch 与冻结 Harness 合同一致，因此首因是 **canonical fixture epoch-domain mismatch**，不是 renderer/media stale 绑定。
+
+本租约不授权改测试或再跑；后续最窄修复应让 canonical fixture 从同一 Browser Authority/runtime 观察面取得期望 epoch，或把已返回的当前 mesh/media epoch 作为同域基线，并继续验证 restore 后 epoch 必须变化。不得删掉 epoch 断言、改成仅非空或拿 developer world owner epoch冒充 runtime epoch。
+
+## Browser-07 触达矩阵
+
+- C0-C3：**PASS**。
+- V1 四项音量与旧上传入口移除：**PASS**。
+- water-bucket 放 source：**PASS**。
+- empty bucket 收 source：**PASS**。
+- 正式 UI 切回生存、落地、真实门 approach：**PASS**。
+- 木门两格原子提交：**PASS**；world revision `+1`，本次 mutation count 为 2。
+- 门 geometry descriptor 与两个 Chunk 的闭门薄轴 mesh：**PASS**。
+- 每个 mesh 的 vertex/index/epoch 断言：**NOT REACHED**；在进入循环前的 media worldEpoch 比较失败。
+- 关闭门 collision、开门/toggle/穿越、upper/lower half：**NOT REACHED**。
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase：**NOT REACHED**。
+- C4 streaming：**NOT REACHED**。
+- C5 save/continue：**NOT REACHED**。
+- save-return-continue 后的新 epoch、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+- Classic 视觉回归：**PASS**。
+
+## Browser-07 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-07/`
+
+- `4810362ebdcb1f5df6b3adbd96a6cec962b592c3a4ea1f9acdfecf59037df8e1` `classic.json.log`
+- `b1133457838c5e10ff77ce23247e78545642ac8f9f92b348b698910f7d0f0d1f` `canonical-error-context.md.log`
+- 原始 trace SHA256 `cefdba6113f360990f1f4bbfc7a527cffa12049725ae0c7914648512dd6727ec`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `46539d2fec26abe7655be36121b3bf916b6903327e385f8bfc489310cab1b78b` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `adedd31ac1bb789fc41255c2967b2387f9679dd427f7a923805ffc9f1ab913fc` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `fae18b3e21201cd308edf794e4ee883f68e1e4f9b05f1ea673ee93c75d255413` `canonical-trace.zip.part-ac`（40427454 bytes）
+- `0d28f42969d28741b727e3229e23d516c5299461cf753a41adadc9677d62a191` `failure-page.jpeg`；Playwright 失败后暂停菜单页面，不作为 epoch 根因的独立证明。
+- `78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259` `harness-artifact.json`
+- `8b26fca2c415b76bf1657aca81e167068af8c344444105855bdaf2e997a4bbd9` `performance-window.json.log`
+- `5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110` `playwright-last-run.json.log`
+- `runner-output.jsonl`：仅包含 session `34037` 的五个原始终端 chunk；最终 SHA256 见 checkpoint manifest。
+- `runner-exec-event.json.log`：唯一 Harness argv/cwd/duration/exit 的平台原始事件；最终 SHA256 见 checkpoint manifest。
+- `artifact-postcheck-window.json.log`：锁内 artifact 后验校验窗口；最终 SHA256 见 checkpoint manifest。
+- `diagnosis.json`：机器可读触达矩阵与身份域诊断；最终 SHA256 见 checkpoint manifest。
+
+## Browser-07 运行后状态
+
+- 锁内 `node scripts/harness/artifact.mjs` 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `46b8173538f7e162f79c16fc92864139b3bc24a8`，`git status --short` 无输出，artifact receipt SHA256 仍为 `78f2ce23...c253259`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；按可执行名过滤 Chromium、Playwright 与 `vite preview` 的进程复核输出 `NO_BROWSER_OR_PREVIEW_PROCESSES`。
+- Browser-07 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
+# Browser-07 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-07`
+结论：**FAIL；Structure shared-face 修复已使木门完成两格原子提交，并产生两个 Chunk 的闭门薄轴 mesh。首个失败是 canonical fixture 把 developer world owner epoch 与 Browser Authority runtime epoch 当成同一身份比较；碰撞/toggle、媒体、C4/C5 与保存恢复尚未触达。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-07 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-46b81735`
+- HEAD/source：`46b8173538f7e162f79c16fc92864139b3bc24a8`
+- `git status --short`：运行前后均无输出。
+- source digest：`96532a3ecc82140d83d3d5c1b32c533d3f449d3c26269929295d8dfe7af717d9`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`
+- artifact receipt SHA256：`78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt）；未重建、未修改。
+- Pack lock SHA256：`863ae8eb9606583240207741f8b0515e6c40234d209524493dc283ccf012a99b`。
+- MP3：2976045 bytes、`audio/mpeg`、SHA256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-07-46b81735 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T04:17:17.773Z` 至 `2026-09-25T04:19:43.946Z`。
+机器窗口：`e28f49a7-1346-4b0d-ae03-d324449ca752`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+最终 runner exec event 记录同一 argv/cwd、duration 146.113 秒、exit 1。Playwright 结果：1 failed，1 passed，1 skipped，共约 2.4 分钟；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.5 秒。
+- C1 PASS，约 17.8 秒。
+- C2 PASS，约 21.1 秒。
+- C3 PASS，约 16.4 秒。
+- V1 step 约 21.5 秒后在门 mesh epoch oracle 失败。
+- Classic 视觉回归 PASS，约 31.7 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## 门进展与首因
+
+Browser-06 的 Structure hit LOS 阻塞已关闭。正式旅程完成水桶放/收、UI 切生存、落地和门 approach 后，真实选择 wooden-door 并右键：
+
+- door pair storage ID 范围断言通过，两格均为合法门 variant；
+- `worldRevision` 从 Browser-06 同边界的 141 前进到 142；
+- `lastCommitMutationCount=2`，证明本次世界提交包含两格；
+- geometry descriptor 存在、非 full-face occluder、恰有一个 box；
+- lower/upper 分属两个 Chunk，两个 `FaceMaterial.WoodenDoor` postrender mesh 都存在且闭门薄轴均为 X 轴。
+
+随后 `v1-slice.ts:126` 在进入 per-mesh 循环前比较 epoch 失败：fixture 预期 `seedlands:classic-canonical-runtime-v11:1:world:0`，Harness media snapshot 返回 `seedlands:classic-canonical-runtime-v11:1`。只读合同与源码确认：
+
+1. `v1-harness-contract.md` 冻结 mesh/media `worldEpoch` 由 Browser Harness 组合层取当前 Authority `runtimeEpoch`，用于阻止旧 renderer/media owner 冒充当前世界。
+2. Browser Authority 初次 runtime epoch 为 session epoch `…:1`；`game.ts` 用同值绑定 rendered world 与 media。
+3. fixture 的 `runtimeEpoch()` 实际调用 `__seedlandsHarness.world.identity()`，得到 developer world/persistence owner epoch `…:world:0`。
+4. 两个值都合法，但属于不同身份域，不能直接相等比较。当前实际 mesh/media epoch 与冻结 Harness 合同一致，因此首因是 **canonical fixture epoch-domain mismatch**，不是 renderer/media stale 绑定。
+
+本租约不授权改测试或再跑；后续最窄修复应让 canonical fixture 从同一 Browser Authority/runtime 观察面取得期望 epoch，或把已返回的当前 mesh/media epoch 作为同域基线，并继续验证 restore 后 epoch 必须变化。不得删掉 epoch 断言、改成仅非空或拿 developer world owner epoch冒充 runtime epoch。
+
+## Browser-07 触达矩阵
+
+- C0-C3：**PASS**。
+- V1 四项音量与旧上传入口移除：**PASS**。
+- water-bucket 放 source：**PASS**。
+- empty bucket 收 source：**PASS**。
+- 正式 UI 切回生存、落地、真实门 approach：**PASS**。
+- 木门两格原子提交：**PASS**；world revision `+1`，本次 mutation count 为 2。
+- 门 geometry descriptor 与两个 Chunk 的闭门薄轴 mesh：**PASS**。
+- 每个 mesh 的 vertex/index/epoch 断言：**NOT REACHED**；在进入循环前的 media worldEpoch 比较失败。
+- 关闭门 collision、开门/toggle/穿越、upper/lower half：**NOT REACHED**。
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase：**NOT REACHED**。
+- C4 streaming：**NOT REACHED**。
+- C5 save/continue：**NOT REACHED**。
+- save-return-continue 后的新 epoch、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+- Classic 视觉回归：**PASS**。
+
+## Browser-07 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-07/`
+
+- `4810362ebdcb1f5df6b3adbd96a6cec962b592c3a4ea1f9acdfecf59037df8e1` `classic.json.log`
+- `b1133457838c5e10ff77ce23247e78545642ac8f9f92b348b698910f7d0f0d1f` `canonical-error-context.md.log`
+- 原始 trace SHA256 `cefdba6113f360990f1f4bbfc7a527cffa12049725ae0c7914648512dd6727ec`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `46539d2fec26abe7655be36121b3bf916b6903327e385f8bfc489310cab1b78b` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `adedd31ac1bb789fc41255c2967b2387f9679dd427f7a923805ffc9f1ab913fc` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `fae18b3e21201cd308edf794e4ee883f68e1e4f9b05f1ea673ee93c75d255413` `canonical-trace.zip.part-ac`（40427454 bytes）
+- `0d28f42969d28741b727e3229e23d516c5299461cf753a41adadc9677d62a191` `failure-page.jpeg`；Playwright 失败后暂停菜单页面，不作为 epoch 根因的独立证明。
+- `78f2ce2396d8bc8314dd048d491e3b5dd4191f5a2d2ef04bd6c9aa752c253259` `harness-artifact.json`
+- `8b26fca2c415b76bf1657aca81e167068af8c344444105855bdaf2e997a4bbd9` `performance-window.json.log`
+- `5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110` `playwright-last-run.json.log`
+- `runner-output.jsonl`：仅包含 session `34037` 的五个原始终端 chunk；最终 SHA256 见 checkpoint manifest。
+- `runner-exec-event.json.log`：唯一 Harness argv/cwd/duration/exit 的平台原始事件；最终 SHA256 见 checkpoint manifest。
+- `artifact-postcheck-window.json.log`：锁内 artifact 后验校验窗口；最终 SHA256 见 checkpoint manifest。
+- `diagnosis.json`：机器可读触达矩阵与身份域诊断；最终 SHA256 见 checkpoint manifest。
+
+## Browser-07 运行后状态
+
+- 锁内 `node scripts/harness/artifact.mjs` 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移。
+- 运行后 HEAD 仍为 `46b8173538f7e162f79c16fc92864139b3bc24a8`，`git status --short` 无输出，artifact receipt SHA256 仍为 `78f2ce23...c253259`。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；按可执行名过滤 Chromium、Playwright 与 `vite preview` 的进程复核输出 `NO_BROWSER_OR_PREVIEW_PROCESSES`。
+- Browser-07 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
 # Browser-05 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-05`
