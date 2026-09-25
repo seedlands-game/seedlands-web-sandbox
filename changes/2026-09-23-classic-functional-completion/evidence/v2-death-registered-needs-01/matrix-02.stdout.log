@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts (12 tests | 1 failed) 79ms
+     × preflights more than 128 drops and rejects the final allocator slot without partial writes 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > preflights more than 128 drops and rejects the final allocator slot without partial writes
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:422:41
+    420|     const before = worldState(world);
+    421|
+    422|     expect(() => world.advanceRules(1)).toThrow(/capacity|exhausted/i);
+       |                                         ^
+    423|     expect(worldState(world)).toEqual(before);
+    424|     expect(world.entities.query({ type: 'world-item' })).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 passed (12)
+   Start at  01:09:23
+   Duration  968ms (transform 673ms, setup 0ms, import 817ms, tests 79ms, environment 0ms)
+

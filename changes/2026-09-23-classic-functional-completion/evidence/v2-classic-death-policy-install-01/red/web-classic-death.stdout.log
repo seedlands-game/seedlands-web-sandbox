@@ -1,0 +1,32 @@
+1:04:55 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts (6 tests | 1 failed) 60ms
+   × Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts > Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player
+TypeError: Registered Media host loaded-cell port is unavailable.
+ ❯ createRegisteredGameplayMedia packages/stdlib/src/server/gameplay/gameplay-media-runtime.ts:31:47
+     29|   const enabled = options.composition?.definitionMap.capabilities.some…
+     30|   if (!enabled) return null;
+     31|   if (!options.callbacks.getLoadedCell) throw new TypeError('Registere…
+       |                                               ^
+     32|   const composition = options.composition!;
+     33|   const content = gameplayContentFromComposition(composition);
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:83:17
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:163:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ createFullClassicWorld apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts:38:10
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts:121:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 14 passed (15)
+   Start at  01:04:55
+   Duration  1.74s (transform 889ms, setup 0ms, import 1.29s, tests 303ms, environment 0ms)
+

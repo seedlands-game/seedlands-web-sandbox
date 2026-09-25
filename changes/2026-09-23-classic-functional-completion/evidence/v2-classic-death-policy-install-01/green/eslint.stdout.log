@@ -1,0 +1,9 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts
+  524:1  error  File has too many lines (545). Maximum allowed is 500  max-lines
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/playbooks/classic/src/pre-death-v4-composition-identity.ts
+  503:1  error  File has too many lines (2544). Maximum allowed is 500  max-lines
+
+✖ 2 problems (2 errors, 0 warnings)
+

@@ -1,0 +1,6 @@
+368c3eec38a448413f34c09f02e33cecac593413f89a686c001ccad8e5735161  packages/stdlib/src/server/gameplay/modules/needs-state-port.ts
+28ad1c64ac43bc2fef0da3c061a0eb5b32f3ea73e42445566d3e2dff093890db  packages/stdlib/src/server/gameplay/gameplay-runtime.ts
+784b0422203c42e3e5cea1a403fb58d67aba014888e105e42a44525a38b60b2b  packages/stdlib/tests/server/registered-needs-death.test.ts
+f5e5bd314c1070a092cebe2a2eba4a5dcdb9f2d0bcf38ceda87770002a6b26da  changes/2026-09-23-classic-functional-completion/spec.md
+9a47178e3606716b0a711ca11eca03a011afc6610ea7b46d42ec5c30b623adac  changes/2026-09-23-classic-functional-completion/death-needs-contract.md
+1e85f43d006914d219a5d600f91250a143f7d8500c78b90234a21b283fbbb90e  changes/2026-09-23-classic-functional-completion/death-needs-evidence.md

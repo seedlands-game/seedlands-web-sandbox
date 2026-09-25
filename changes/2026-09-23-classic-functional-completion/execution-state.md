@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-25T16:42:00Z
+更新时间：2026-09-25T18:47:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -9,6 +9,10 @@
 唯一 Git writer：Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e`
 
 Goal：未创建；本轮未提供 token budget。
+
+当前 Git/Docs checkpoint：`GIT-27-CLASSIC-DEATH-AND-NEEDS` 为 `READY_FOR_PUSH`，已生成代码提交
+`c3ba7ea9fa83522ee1927791efa2add719980797`，detached staged tree 行为 `79/79` 与四类 types/static 均 PASS；
+三片 evidence/state 纳入独立第二笔提交，尚未 push/更新 PR。BUILD03、Browser/Cua/CI/deploy 均未运行。
 
 ## 恢复规则
 
@@ -34,7 +38,8 @@ Goal：未创建；本轮未提供 token budget。
 | Owner                       | 阶段                               | agent/进程句柄                               | 期限/状态                  | 当前事实                                                                                                                                                                                                                                   |
 | --------------------------- | ---------------------------------- | -------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | root `4decc58...`           | 总负责人                           | Paseo `4decc58b-bca7-4d00-a0ca-392fc5532f10` | 持续                       | 唯一决策、派工、建模、准出和 worker 回报接收者；临时接管本文件后交回唯一 Git writer                                                                                                                                                        |
-| Git/Docs `954ef...`         | `GIT-26-DEATH-PRODUCERS-AND-MIXED` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | READY_FOR_PUSH             | 三片均经root独立准出；代码提交`74628290...6dc40`，隔离tree目标GREEN与types/static通过；证据/state随第二笔语义提交交付。Classic/Needs未接；两项冻结expected RED保留；当前artifact仍为BUILD02，不含本批death代码                             |
+| Git/Docs `954ef...`         | `GIT-26-DEATH-PRODUCERS-AND-MIXED` | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | REMOTE_DELIVERED           | 代码提交`74628290...6dc40`、证据提交`5fcdc1df...10708`；root 已核 local/ls-remote/PR 与 SOURCE/MANIFEST。Classic/Needs当批未接；当前artifact仍为BUILD02，不含本批death代码                                                                 |
+| Git/Docs `954ef...`         | `GIT-27-CLASSIC-DEATH-AND-NEEDS`   | Paseo `954ef059-b17c-4842-bf46-5ebc1807b38e` | READY_FOR_PUSH             | 代码提交`c3ba7ea9...80797`；隔离 staged tree 的7组行为共`79/79`、四类types/ESLint/Prettier/scoped diff均PASS；证据/state纳入第二笔提交，push/PR和BUILD03待完成。其他dirty保持排除。                                                        |
 | Browser 12（V1.9）          | `V1-CANONICAL-BROWSER-12`          | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | PASS，lease已释放          | source=`87e64e0b...`、artifact=`ea44e007...dd0e`；单attempt、C0-C5与完整V1水桶/门/唱片机/save旅程PASS，pageErrors/failedResponses空；non-Classic skip，Cua/听觉未运行                                                                      |
 | Browser 11（历史）          | `V1-CANONICAL-BROWSER-11`          | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | source=`6614a1f6...`、artifact=`ea44e007...dd0e`；closed probe PASS，upper target与真实右键发生，但origin-cell ray给出adjacent null，Web pre-Authority fallback；open/jukebox/Media/C4/C5/save NOT REACHED                                 |
 | Browser 10（历史）          | `V1-CANONICAL-BROWSER-10`          | Paseo `761fb4f2-9bc7-48bb-8520-0cf639839357` | attempt已结束，lease已释放 | source=`9727dbb9...`、artifact=`ea44e007...dd0e`；closed正交Authority碰撞PASS；接触位强制lower重瞄失败，interactionAttempts=13未增且未toggle；open/jukebox/Media/C4/C5/save NOT REACHED                                                    |

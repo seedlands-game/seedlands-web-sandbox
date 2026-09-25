@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "cd497808-8e4e-4b6d-8675-413d25b1cb86",
+  "pid": 58040,
+  "startedAt": "2026-09-25T18:42:27.115Z",
+  "windowId": "cd497808-8e4e-4b6d-8675-413d25b1cb86",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-27-classic-death-and-needs/classic-lineage.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T18:42:28.199Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T18:42:27.116Z",
+      "loadAverage": [
+        2.67626953125,
+        3.28662109375,
+        3.25927734375
+      ],
+      "freeMemoryBytes": 711311360,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T18:42:28.198Z",
+      "loadAverage": [
+        2.6220703125,
+        3.26513671875,
+        3.25146484375
+      ],
+      "freeMemoryBytes": 690520064,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

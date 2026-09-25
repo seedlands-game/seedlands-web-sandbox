@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts (12 tests | 1 failed | 11 skipped) 27ms
+     × preflights more than 128 drops and rejects the final allocator slot without partial writes 26ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > preflights more than 128 drops and rejects the final allocator slot without partial writes
+AssertionError: expected 100 to be 148 // Object.is equality
+
+- Expected
++ Received
+
+- 148
++ 100
+
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:429:23
+    427|       0,
+    428|     );
+    429|     expect(dropCount).toBe(148);
+       |                       ^
+    430|     const exhausted = world.createSnapshot();
+    431|     exhausted.entityStore.lifetimeHighWater = Number.MAX_SAFE_INTEGER …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  01:10:54
+   Duration  883ms (transform 647ms, setup 0ms, import 784ms, tests 27ms, environment 0ms)
+
