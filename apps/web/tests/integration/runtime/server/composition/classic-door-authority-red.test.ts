@@ -13,6 +13,43 @@ import {
 } from './classic-door-authority-fixture';
 
 describe('V1.4 final Authority RED for the Classic two-part door', () => {
+  it('places the Browser-06 door from the trusted body position without crossing the adjacent floor', async () => {
+    const runtime = await create(undefined, [67.35381531679855, 31.000001, 0.6452957045056721]);
+    await load(runtime, [
+      { x: 69, y: 30, z: 0, value: Voxel.Stone },
+      { x: 70, y: 30, z: 0, value: Voxel.Stone },
+      { x: 70, y: 31, z: 0, value: Voxel.Air },
+      { x: 70, y: 32, z: 0, value: Voxel.Air },
+    ]);
+    runtime.server.giveItem(runtime.playerId, { itemId: 'wooden-door', count: 1 });
+    runtime.takeCommits();
+    const before = {
+      inventory: runtime.server.getInventory(runtime.playerId),
+      inventoryRevision: runtime.server.getInventoryPointerView(runtime.playerId).revision,
+      worldRevision: runtime.server.worldRevision,
+      gameplayRevision: runtime.server.gameplayRevision,
+      commitSequence: runtime.server.commitSequence,
+    };
+
+    const response = await runtime.performAction(interact(runtime, [70, 30, 0], [70, 31, 0]));
+
+    expect(response.result).toMatchObject({ success: true, handled: true });
+    expect(response.commits).toHaveLength(1);
+    expect(response.commits[0]?.structuralChange?.mutationCount).toBe(2);
+    const expected = classicWoodenDoorDefinition.states.find(({ id }) => id === 'east-closed')!;
+    expect([runtime.server.getVoxel(70, 31, 0), runtime.server.getVoxel(70, 32, 0)]).toEqual([
+      expected.variants.lower,
+      expected.variants.upper,
+    ]);
+    expect(runtime.server.getInventory(runtime.playerId).slots.every((slot) => slot?.itemId !== 'wooden-door')).toBe(
+      true,
+    );
+    expect(runtime.server.getInventoryPointerView(runtime.playerId).revision).toBe(before.inventoryRevision + 1);
+    expect(runtime.server.worldRevision).toBe(before.worldRevision + 1);
+    expect(runtime.server.gameplayRevision).toBe(before.gameplayRevision + 1);
+    expect(runtime.server.commitSequence).toBe(before.commitSequence + 2);
+  });
+
   it('places the initial door as one authoritative two-cell structure commit', async () => {
     const runtime = await create();
     await load(runtime, [

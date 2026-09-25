@@ -3,7 +3,7 @@ import type { ContentItemIdentityResolver } from '../../composition/content-item
 import type { ItemInteractionExpectedSelectionV1, ItemInteractionTarget } from './item-interaction-module';
 import { structureFootprintV1, type ResolvedStructureV1, type StructurePositionV1 } from './structure-definition';
 import type { StructureDefinitionRegistryV1 } from './structure-definition-module';
-import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelAdjacentFacePoint, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 
 export type InteractionIntentV1 = 'use' | 'alternate';
@@ -296,7 +296,7 @@ export function dispatchStructureTargetFirstV1(
     resolved.status === 'resolved' && resolved.kind === 'existing'
       ? new Set(resolved.structure.parts.map((part) => key(part.position)))
       : undefined;
-  const hitVisibility = traceVoxelRay(voxelCenter([...hit]), origin, (x, y, z) =>
+  const hitVisibility = traceVoxelRay(voxelAdjacentFacePoint(hit, adjacent), origin, (x, y, z) =>
     ownCells?.has(key([x, y, z])) ? 0 : options.getVoxel([x, y, z]),
   );
   if (hitVisibility !== 'clear')

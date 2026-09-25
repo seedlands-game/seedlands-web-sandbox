@@ -1,7 +1,7 @@
 import type { FluidCell } from '../../fluid/fluid-cell';
 import type { VoxelSemanticsDefinition } from '../../../world/voxel-semantics';
 import type { EntityLifetimeReference } from '../ecs-entity-owner';
-import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelAdjacentFacePoint, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 import type {
   ModDefinitionCatalog,
@@ -72,18 +72,6 @@ type ItemInteractionRuntimeOptions = Readonly<{
 
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
 const PRESENTATION_KEY = /^[a-z0-9][a-z0-9._:-]{0,127}$/;
-const FACE_INTERIOR_EPSILON = 1e-6;
-
-const adjacentFacePoint = (
-  hit: readonly [number, number, number],
-  adjacent: readonly [number, number, number],
-): [number, number, number] =>
-  hit.map((coordinate, axis) => coordinate + 0.5 + (adjacent[axis] - coordinate) * (0.5 + FACE_INTERIOR_EPSILON)) as [
-    number,
-    number,
-    number,
-  ];
-
 function hasExecutePermission(module: ReturnType<ModDefinitionCatalog['module']>, resource: string): boolean {
   return Boolean(
     module?.permissions.some(
@@ -350,7 +338,7 @@ export function dispatchItemInteraction(
     if (!semantics.targetable && !(fluid?.source === true && fluid.level === 8))
       return { success: false as const, reason: 'invalid-target' };
     const visibility = traceVoxelRay(
-      adjacentFacePoint(target.hit, target.adjacent),
+      voxelAdjacentFacePoint(target.hit, target.adjacent),
       origin,
       (x, y, z) => options.getVoxel([x, y, z]),
       (voxel) => options.getVoxelSemantics(voxel)?.solid ?? true,
