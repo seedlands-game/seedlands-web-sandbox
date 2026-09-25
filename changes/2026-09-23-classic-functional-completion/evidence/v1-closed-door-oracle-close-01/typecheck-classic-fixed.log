@@ -1,0 +1,4 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/v1-slice.ts(153,25): error TS2339: Property 'serverPlayerPosition' does not exist on type 'Readonly<{ player: Point; viewAngles: readonly [number, number]; streamCenter: readonly [number, number]; loadedChunks: number; renderedChunks: number; onGround: boolean; colliding: boolean; interactionAttempts: number; ... 14 more ...; visualEffects: Readonly<...>; }>'.
+apps/web/tests/e2e/classic-support/v1-slice.ts(156,36): error TS2339: Property 'physicsHz' does not exist on type 'Readonly<{ physicsTick: number; acknowledgedInputSequence: number; commitSequence: number; residency: Readonly<{ evictionCount: number; residentCount: number; dirtyCount: number; }> | null; }>'.
+[ELIFECYCLE] Command failed with exit code 2.

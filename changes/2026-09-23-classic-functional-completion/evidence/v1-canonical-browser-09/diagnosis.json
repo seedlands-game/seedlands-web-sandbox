@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-09-244b18e3",
+  "status": "FAIL",
+  "sourceSha": "244b18e311c2091ab4bd03082aa02deee1a9c09f",
+  "sourceDigest": "78246a53f8f391e5aa4d1a4aeccc1318de26325909b96a544cb5a041eefe5f02",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e",
+  "artifactReceiptSha256": "bcd6f60bba3091dfd40e5aad90d98224198c2037b4dfd5aae2ad4418938140a2",
+  "performanceWindowId": "c95e4fa0-e195-4c43-88e5-1f011dbee53e",
+  "startedAt": "2026-09-25T05:56:53.068Z",
+  "endedAt": "2026-09-25T05:59:25.453Z",
+  "commandExitCode": 1,
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1, "retries": 0 },
+  "passed": [
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "v1-audio-settings",
+    "v1-water-bucket-place-source",
+    "v1-empty-bucket-collect-source",
+    "v1-route-mode-switch-and-grounded-approach",
+    "v1-door-two-voxel-commit",
+    "v1-door-closed-mesh-epoch-vertices-indices",
+    "v1-door-closed-collision-descriptor",
+    "v1-door-support-and-lower-real-mouse-aim",
+    "classic-visual"
+  ],
+  "failedAt": "v1-door-closed-collision-route-oracle",
+  "notReached": [
+    "v1-door-open-toggle-mesh-and-no-collision",
+    "v1-door-open-traverse",
+    "v1-door-upper-and-lower-half-toggle",
+    "v1-jukebox-real-mouse-aim-and-place",
+    "v1-record-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 150,
+    "expectedPlayerXBelow": 70.75,
+    "observedPlayerX": 71.343017578125,
+    "doorLower": [70, 31, 0],
+    "doorVoxel": 93,
+    "doorCollision": { "min": [0.8125, 0, 0], "max": [1, 1, 1] },
+    "playerHalfWidth": 0.32,
+    "before": {
+      "player": [68.46858978271484, 32.599998474121094, -0.44895458221435547],
+      "serverPlayerPosition": [68.46859339486005, 32.6, -0.4489545940748269],
+      "viewAngles": [-107.93999999999998, -35.50000000000001],
+      "onGround": true,
+      "colliding": false,
+      "acknowledgedInputSequence": 5549
+    },
+    "afterInput": {
+      "player": [71.343017578125, 32.599998474121094, 1.6440354585647583],
+      "serverPlayerPosition": [71.12895363774116, 32.6, 1.5747307585831414],
+      "onGround": true,
+      "colliding": false,
+      "acknowledgedInputSequence": 5640
+    },
+    "collisionTrajectory": {
+      "stoppedX": 70.49249948474204,
+      "zWhileStoppedFrom": 0.7199951193123576,
+      "zWhileStoppedThrough": 1.32061353847437,
+      "expectedStopXFromDoorAndPlayerAabb": 70.4925
+    }
+  },
+  "diagnosis": {
+    "classification": "canonical-fixture-door-collision-route-oracle",
+    "summary": "The closed east-facing door collision stopped authoritative X movement at the exact door-plane/player-AABB contact while the held-W view direction continued moving the player along +Z. Once the player moved beyond the finite door edge, X movement resumed and the one-axis final-position assertion failed.",
+    "productBoundary": "This run proves that the registered closed-door descriptor and collision participated in authoritative movement. It does not prove the full closed-door traversal oracle, open/toggle behavior, jukebox aim, media, C4/C5, or save/restore. The next change must make the fixture attempt a bounded perpendicular crossing or observe the collision stop before a side escape without weakening the product collision contract."
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "windowId": "36b570b8-dd76-4662-ab24-1d8fad8368ec",
+    "files": 276,
+    "diskFilesIncludingReceipt": 277,
+    "treeClean": true
+  }
+}

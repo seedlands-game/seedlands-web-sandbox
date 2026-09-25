@@ -1,0 +1,242 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: apps/web/tests/e2e/classic-runtime.spec.ts >> Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景
+- Location: apps/web/tests/e2e/classic-runtime.spec.ts:72:1
+
+# Error details
+
+```
+Error: expect(received).toBeLessThan(expected)
+
+Expected: < 70.75
+Received:   71.343017578125
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main:
+    - dialog "暂停游戏" [ref=e4]:
+      - paragraph [ref=e5]: A MOMENT OF STILLNESS
+      - heading "旅途暂歇" [level=2] [ref=e6]
+      - paragraph [ref=e7]: 世界正在等待你
+      - generic [ref=e8]:
+        - button "继续游戏" [active] [ref=e9] [cursor=pointer]
+        - button "设置" [ref=e10] [cursor=pointer]
+        - button "操作指南" [ref=e11] [cursor=pointer]
+        - button "保存并返回主菜单" [ref=e12] [cursor=pointer]
+```
+
+# Test source
+
+```ts
+  50  | const runtimeEpoch = async (page: Page): Promise<string> => {
+  51  |   const media = await mediaSnapshot(page);
+  52  |   if (typeof media?.worldEpoch !== 'string' || media.worldEpoch.length === 0)
+  53  |     throw new Error('Classic Browser runtime epoch is unavailable.');
+  54  |   if (media.audio && media.audio.epoch !== media.worldEpoch)
+  55  |     throw new Error('Classic Browser audio epoch does not match the active runtime.');
+  56  |   return media.worldEpoch;
+  57  | };
+  58  | 
+  59  | const doorPair = async (page: Page): Promise<DoorPair> => [
+  60  |   (await voxelAt(page, classicScenario.v1Slice.door.lower)) ?? -1,
+  61  |   (await voxelAt(page, classicScenario.v1Slice.door.upper)) ?? -1,
+  62  | ];
+  63  | 
+  64  | export function expectV1DoorEvidence(entries: readonly VoxelEvidence[], expected: DoorPair): void {
+  65  |   const { lower, upper } = classicScenario.v1Slice.door;
+  66  |   const voxelAtPosition = (target: Point) =>
+  67  |     entries.find(({ position }) => position.every((coordinate, axis) => coordinate === target[axis]))?.voxel;
+  68  |   expect([voxelAtPosition(lower), voxelAtPosition(upper)]).toEqual(expected);
+  69  | }
+  70  | 
+  71  | async function selectCreativeItem(page: Page, name: string, itemId: string): Promise<void> {
+  72  |   await page.keyboard.press('KeyE');
+  73  |   const survival = page.getByRole('dialog', { name: '背包与合成' });
+  74  |   const catalog = page.getByRole('dialog', { name: '创造内容目录' });
+  75  |   if (await survival.isVisible()) await survival.getByRole('button', { name: '切换创造模式', exact: true }).click();
+  76  |   await expect(catalog).toBeVisible();
+  77  |   await catalog.locator('#creative-item-filter').fill(name);
+  78  |   await catalog.getByRole('button', { name: new RegExp(`^将${name}放入创造快捷栏 `) }).click();
+  79  |   await closeInventory(page);
+  80  |   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', itemId);
+  81  | }
+  82  | 
+  83  | async function clearCreativeItem(page: Page): Promise<void> {
+  84  |   await page.keyboard.press('KeyE');
+  85  |   const survival = page.getByRole('dialog', { name: '背包与合成' });
+  86  |   const catalog = page.getByRole('dialog', { name: '创造内容目录' });
+  87  |   if (await survival.isVisible()) await survival.getByRole('button', { name: '切换创造模式', exact: true }).click();
+  88  |   await expect(catalog).toBeVisible();
+  89  |   await catalog.getByRole('button', { name: /^清空创造快捷栏 / }).click();
+  90  |   await closeInventory(page);
+  91  |   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'empty');
+  92  | }
+  93  | 
+  94  | async function switchToSurvival(page: Page): Promise<void> {
+  95  |   await page.keyboard.press('KeyE');
+  96  |   const catalog = page.getByRole('dialog', { name: '创造内容目录' });
+  97  |   await expect(catalog).toBeVisible();
+  98  |   await catalog.getByRole('button', { name: '切换生存模式', exact: true }).click();
+  99  |   await expect(page.getByRole('dialog', { name: '背包与合成' })).toBeVisible();
+  100 |   await closeInventory(page);
+  101 | }
+  102 | 
+  103 | async function placeSelected(page: Page, support: Point, target: Point): Promise<void> {
+  104 |   await aimAtVoxelWithRealMouse(page, support, target);
+  105 |   await clickCanvasCenter(page, 'right');
+  106 | }
+  107 | 
+  108 | const thinAxis = (minimum: readonly number[], maximum: readonly number[]) =>
+  109 |   maximum.map((value, axis) => value - minimum[axis]!).findIndex((extent) => extent <= 3 / 16 + 0.001);
+  110 | 
+  111 | async function expectDoorMesh(page: Page, voxel: number, expectedThinAxis: 0 | 2, expectedEpoch: string) {
+  112 |   const descriptor = await voxelGeometry(page, voxel);
+  113 |   expect(descriptor).not.toBeNull();
+  114 |   expect(descriptor?.occludesFullFace).toBe(false);
+  115 |   expect(descriptor?.boxes).toHaveLength(1);
+  116 |   expect(thinAxis(descriptor!.boxes[0]!.min, descriptor!.boxes[0]!.max)).toBe(expectedThinAxis);
+  117 | 
+  118 |   const chunks = [classicScenario.v1Slice.door.lower, classicScenario.v1Slice.door.upper].map(chunkOf);
+  119 |   let meshes = await Promise.all(chunks.map((chunk) => renderedMaterialMesh(page, chunk, FaceMaterial.WoodenDoor)));
+  120 |   await expect
+  121 |     .poll(async () => {
+  122 |       meshes = await Promise.all(chunks.map((chunk) => renderedMaterialMesh(page, chunk, FaceMaterial.WoodenDoor)));
+  123 |       return meshes.map((mesh) => (mesh ? thinAxis(mesh.min, mesh.max) : -1));
+  124 |     })
+  125 |     .toEqual([expectedThinAxis, expectedThinAxis]);
+  126 |   const currentEpoch = (await mediaSnapshot(page))?.worldEpoch;
+  127 |   expect(currentEpoch).toBe(expectedEpoch);
+  128 |   for (const mesh of meshes) {
+  129 |     expect(mesh?.vertexCount).toBeGreaterThan(0);
+  130 |     expect(mesh?.indexCount).toBeGreaterThan(0);
+  131 |     expect(mesh?.worldEpoch).toBe(expectedEpoch);
+  132 |   }
+  133 |   return meshes[0]!;
+  134 | }
+  135 | 
+  136 | async function expectClosedDoorBlocks(page: Page): Promise<void> {
+  137 |   const target = classicScenario.v1Slice.door.lower;
+  138 |   await aimAtVoxelWithRealMouse(page, target);
+  139 |   const before = (await snapshot(page))!;
+  140 |   await page.keyboard.down('KeyW');
+  141 |   try {
+  142 |     await page.waitForTimeout(1_500);
+  143 |   } finally {
+  144 |     await page.keyboard.up('KeyW');
+  145 |   }
+  146 |   const blocked = await waitForSnapshot(
+  147 |     page,
+  148 |     (value) => value.authority.acknowledgedInputSequence > before.authority.acknowledgedInputSequence,
+  149 |   );
+> 150 |   expect(blocked.player[0]).toBeLessThan(target[0] + 0.75);
+      |                             ^ Error: expect(received).toBeLessThan(expected)
+  151 | }
+  152 | 
+  153 | export async function expectV1AudioSettings(page: Page): Promise<void> {
+  154 |   await page.keyboard.press('Escape');
+  155 |   await page.getByRole('button', { name: '设置', exact: true }).click();
+  156 |   const settings = page.getByRole('dialog', { name: '设置' });
+  157 |   for (const label of ['总音量', '音乐音量', '音效音量', '环境音量'])
+  158 |     await expect(settings.getByLabel(label)).toHaveCount(1);
+  159 |   await expect(settings.locator('input[type="file"]')).toHaveCount(0);
+  160 |   await settings.getByRole('button', { name: '返回', exact: true }).click();
+  161 |   await page.getByRole('button', { name: '继续游戏', exact: true }).click();
+  162 |   await lockPointer(page);
+  163 | }
+  164 | 
+  165 | export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceState> {
+  166 |   const { water, door, jukebox } = classicScenario.v1Slice;
+  167 |   const worldEpoch = await runtimeEpoch(page);
+  168 | 
+  169 |   await walkTo(page, water.approach, { key: 'KeyS', jump: true });
+  170 |   await selectCreativeItem(page, '水桶', 'water-bucket');
+  171 |   await placeSelected(page, water.support, water.target);
+  172 |   await expect.poll(() => voxelAt(page, water.target)).toBe(Voxel.Water);
+  173 |   await expect.poll(() => fluidCellAt(page, water.target)).toMatchObject({ source: true });
+  174 |   await selectCreativeItem(page, '桶', 'bucket');
+  175 |   await aimAtVoxelWithRealMouse(page, water.target);
+  176 |   await clickCanvasCenter(page, 'right');
+  177 |   await expect.poll(() => voxelAt(page, water.target)).toBe(Voxel.Air);
+  178 |   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'bucket');
+  179 | 
+  180 |   await switchToSurvival(page);
+  181 |   await waitForSnapshot(page, (value) => value.onGround && !value.colliding);
+  182 |   await walkTo(page, door.approach, { jump: true });
+  183 |   await selectCreativeItem(page, '木门', 'wooden-door');
+  184 |   await placeSelected(page, door.support, door.lower);
+  185 |   await expect.poll(async () => (await doorPair(page)).every((voxel) => voxel >= 89 && voxel <= 104)).toBe(true);
+  186 |   const placed = await doorPair(page);
+  187 |   const closedMesh = await expectDoorMesh(page, placed[0], 0, worldEpoch);
+  188 |   expect((await voxelGeometry(page, placed[0]))?.collision).toHaveLength(1);
+  189 |   await switchToSurvival(page);
+  190 |   await expectClosedDoorBlocks(page);
+  191 | 
+  192 |   await aimAtVoxelWithRealMouse(page, door.lower);
+  193 |   await clickCanvasCenter(page, 'right');
+  194 |   await expect.poll(() => doorPair(page)).not.toEqual(placed);
+  195 |   const opened = await doorPair(page);
+  196 |   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
+  197 |   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
+  198 |   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
+  199 |   await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], { jump: true });
+  200 | 
+  201 |   await aimAtVoxelWithRealMouse(page, door.upper);
+  202 |   await clickCanvasCenter(page, 'right');
+  203 |   await expect.poll(() => doorPair(page)).toEqual(placed);
+  204 |   await aimAtVoxelWithRealMouse(page, door.lower);
+  205 |   await clickCanvasCenter(page, 'right');
+  206 |   await expect.poll(() => doorPair(page)).toEqual(opened);
+  207 | 
+  208 |   await walkTo(page, jukebox.approach, { jump: true });
+  209 |   await selectCreativeItem(page, '唱片机', 'jukebox');
+  210 |   await placeSelected(page, jukebox.support, jukebox.target);
+  211 |   await expect.poll(() => voxelAt(page, jukebox.target)).toBe(Voxel.Jukebox);
+  212 |   await selectCreativeItem(page, '唱片 13', 'record-13');
+  213 |   await aimAtVoxelWithRealMouse(page, jukebox.target);
+  214 |   await clickCanvasCenter(page, 'right');
+  215 | 
+  216 |   let media = await mediaSnapshot(page);
+  217 |   await expect
+  218 |     .poll(async () => {
+  219 |       media = await mediaSnapshot(page);
+  220 |       return media?.projection.find(({ device }) => device.position.join(',') === jukebox.target.join(','));
+  221 |     })
+  222 |     .toMatchObject({ slot: { itemId: 'seedlands:record-13' }, playing: true, resumePending: false });
+  223 |   const projection = media!.projection.find(({ device }) => device.position.join(',') === jukebox.target.join(','))!;
+  224 |   await expect
+  225 |     .poll(async () => (await mediaSnapshot(page))?.lastForwardedBatch?.facts)
+  226 |     .toMatchObject([
+  227 |       { kind: 'insert-and-activate', device: { position: jukebox.target }, revision: projection.revision },
+  228 |     ]);
+  229 |   media = await mediaSnapshot(page);
+  230 |   expect(media?.lastForwardedBatch?.facts).toHaveLength(1);
+  231 |   expect(media?.worldEpoch).toBe(worldEpoch);
+  232 |   await expect
+  233 |     .poll(
+  234 |       async () =>
+  235 |         (await mediaSnapshot(page))?.audio?.instances.find(({ key }) => key.includes(jukebox.target.join(',')))?.phase,
+  236 |     )
+  237 |     .toBe('playing');
+  238 |   await switchToSurvival(page);
+  239 | 
+  240 |   return { door: opened, mediaRevision: projection.revision, worldEpoch };
+  241 | }
+  242 | 
+  243 | export async function verifyV1SliceAfterRestore(page: Page, before: V1SliceState): Promise<void> {
+  244 |   const { jukebox } = classicScenario.v1Slice;
+  245 |   const restoredEpoch = await runtimeEpoch(page);
+  246 |   expect(restoredEpoch).not.toBe(before.worldEpoch);
+  247 |   await expect.poll(() => doorPair(page)).toEqual(before.door);
+  248 |   let media = await mediaSnapshot(page);
+  249 |   await expect
+  250 |     .poll(async () => {
+```
