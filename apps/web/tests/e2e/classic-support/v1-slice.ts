@@ -261,7 +261,8 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   await switchToSurvival(page);
   await expectClosedDoorBlocks(page, placed);
 
-  await aimAtVoxelWithRealMouse(page, door.lower);
+  // The collision probe ends with the camera inside the upper door cell, which is the visible target here.
+  await aimAtVoxelWithRealMouse(page, door.upper);
   await clickCanvasCenter(page, 'right');
   await expect.poll(() => doorPair(page)).not.toEqual(placed);
   const opened = await doorPair(page);

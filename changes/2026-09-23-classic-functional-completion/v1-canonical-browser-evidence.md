@@ -176,6 +176,89 @@ seedlands.structure:execute
 
 ---
 
+# Browser-10 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-10`
+
+结论：**FAIL；Browser-09 的 closed-door 斜向绕边 oracle 问题已在真实 Authority 正交推进中关闭，随后 fixture 在门接触面试图重新瞄准 lower half 时始终命中 upper half，未发送 toggle 右键；jukebox/media/C4/C5/save 未触达。**
+
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，`retries=0`。
+
+## Browser-10 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-9727dbb9`
+- HEAD/source：`9727dbb985d68e4e427759871f097abf43a8809e`
+- source digest：`36d6de793361f23867dcff467f660d91f8752b871c32ee3db25248566bb5c0a2`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e`
+- artifact receipt SHA256：`f5f175d1de7c079927bc5a26569be8b79bb39915e85477994843455d0c5b68ff`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt），无 symlink；未重建、未修改。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-10-9727dbb9 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T07:07:05.931Z` 至 `2026-09-25T07:10:05.327Z`。
+
+机器窗口：`af18e91d-2d06-48f5-8350-1b95eadbe25d`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+
+Playwright 结果：`1 failed / 1 passed / 1 skipped`，单 worker、单 Chromium、无 retry、无第二 Harness 调用。Classic receipt 的 `attempts` 数组记录主旅程与未选的 non-Classic scenario，不是 retry 计数。
+
+- C0 PASS，3.6 秒。
+- C1 PASS，17.8 秒。
+- C2 PASS，20.5 秒。
+- C3 PASS，16.5 秒。
+- V1 step 在 54.0 秒处失败；Playwright 列表中的 step 标题不表示整段通过。
+- Classic 视觉回归 PASS，31.5 秒。
+- non-Classic smoke 按既有条件 skipped。
+
+## 闭门 Oracle GREEN 与后续首因
+
+本轮在失败前已通过正式 UI/PointerLock 路径完成四项音量和旧 file upload 移除检查、water-bucket 放 source、empty bucket 收 source、正式 UI 切生存并落地、走到门位、门 support+adjacent 瞄准、两格原子放置、closed descriptor 与双 Chunk postrender mesh/epoch/vertex/index。
+
+新 closed-door oracle 已用真实输入通过：fixture 先将 Authority 位置对齐门中线，用 PointerLock 将 `W` 对准门法向，再在 fresh ack 和 safe corridor 内推进到接触面并持续至少 6 个 Authority ticks 不穿透。完成后 player/server 仍为 `[70.49250030517578,32.599998474121094,0.4989718496799469]` / `[70.49249900119875,32.6,0.4989718402279727]`，与 voxel `93` 的接触面一致。Browser-09 的斜向绕边 oracle 缺口因此已在 browser 实际关闭。
+
+随后流程仍处于该接触位，eye y=`32.6` 位于 upper voxel `[70,32,0]` 内，却调用无 adjacent 的 `aimAtVoxelWithRealMouse(page, door.lower)`。该 center-based 瞄准在 180 次校正后的最后 12 次 target-card 全部为 upper `[70,32,0]`，最终 view 为 `[-97.8,-88]`；从未返回 lower，因此后续 `clickCanvasCenter(..., 'right')` 没有执行，`interactionAttempts` 保持 `13`。
+
+首因分类为 **canonical fixture 在门接触面从 upper cell 重新获取 lower half 的不可见目标**，而不是 Structure toggle 或 Authority 失败：本轮根本没有发送 toggle 动作。最窄后续是复用已经可 target 的 upper half 发送首次 toggle，或先用真实移动退回 lower 可见位；仍必须保留 exact target readback 和真实 PointerLock/右键，不应修改 production 或放宽 oracle。
+
+## Browser-10 触达矩阵
+
+- C0-C3：**PASS**。
+- Classic 视觉回归：**PASS**。
+- V1 四项音量与旧 file upload 移除：**PASS**。
+- water-bucket 放 source / empty bucket 收 source：**PASS / PASS**。
+- 正式 UI 切生存、落地无碰撞、真实走到门：**PASS**。
+- 木门 support+adjacent 真实 PointerLock 瞄准、两格原子放置、closed descriptor、双 Chunk mesh+epoch/vertex/index：**PASS**。
+- 新 closed-door 正交 Authority 推进、safe corridor、fresh ack、6-tick 持续阻挡：**PASS**。
+- 接触面上重新瞄准 lower half：**FAIL**；只观察到 upper half，未发送右键。
+- 开门 toggle/mesh/no-collision、穿越、上下 half toggle：**NOT REACHED**。
+- jukebox 的 Browser-08 特定瞄准、放置、record-13 fact/projection/headless audio：**NOT REACHED**。
+- C4 streaming、C5 save-return-continue、developer/runtime 各自 epoch 换代、resume/eject/audio cleanup：**NOT REACHED**。
+
+## Browser-10 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-10/`
+
+- `classic.json.log` / `classic-runtime-failure.json.log`：Harness 原始 receipt 与 trace 内自动附加的失败快照。
+- `performance-window.json.log`：原始机器窗口 receipt，window/run ID 为 `af18e91d-2d06-48f5-8350-1b95eadbe25d`。
+- `runner-exec-event.json.log` / `runner-output.jsonl`：从本次 Trae 会话按精确 call id 机械抽取的 argv/cwd/exit 事件与 6 段原始 tool output。
+- 原始 trace SHA256 为 `3b15e827788d179c863f2e1e943e0eef9f16c052de6b0f69a66334d7326d25e1`，244108063 bytes；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组。
+- `failure-page.jpeg` 是 trace 最后一帧；`failure-page-source.txt` 保留原始 trace entry 名。
+- `harness-artifact.json`、`playwright-last-run.json.log`、`canonical-error-context.md.log` 和 `diagnosis.json` 均已保留；精确分片与全部 SHA256 见 checkpoint manifest。
+
+## Browser-10 运行后状态
+
+- 锁内 `pnpm harness:artifact` 后验 PASS：窗口 `21e64b1e-0841-4861-b97e-1a3d661156ec`，source/lock/276-file map/artifact digest 无漂移。
+- 运行后 HEAD 仍为 `9727dbb985d68e4e427759871f097abf43a8809e`，`git status --short` 无输出，artifact receipt SHA256 仍为 `f5f175d1de7c079927bc5a26569be8b79bb39915e85477994843455d0c5b68ff`。
+- 本章与 `diagnosis.json` 的 evidence-inclusive Prettier 终检窗口 `99b15b04-bfea-44d8-be90-d9595a9c2ded` PASS；累计报告 tracked diff 窗口 `5fd2eee7-de22-4e7d-a482-c69b8e2cfcee` PASS；新 diagnosis 的 no-index diff 窗口 `294b5a09-1cdd-49d1-aa7b-2695757906f7` PASS。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；排除查询自身后，9727 验收树、run ID、Playwright、headless Chromium 和 `vite preview` 无匹配进程；benchmark lock 不存在。
+- Browser-10 唯一浏览器租约在归档与资源核验后释放。没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git/index/push、部署、全局配置或 source/test/dist 修改。
+
+---
+
 # Browser-09 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-09`
