@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-28-EQUIPMENT-JOURNEY",
+  "status": "READY_FOR_PUSH",
+  "baseline": "484ddf39d7e3bb881dd3d3cbaec775bd091c220d",
+  "sourceCommit": "3df61d38b0b0de55c48ab709afd6315aa9f23ff2",
+  "sourceTree": "af5d38d992419b187b3ac8930ab2ecc9b22b08aa",
+  "stagedPatchSha256": "af5a1a7b2abc8391f89261fc4dc6ff57a39b036dad7919c174ff3e7385fc04eb",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "67994c3515a7d59c8aa62f59c520db0710822aac00f843cf173fd004afc47f98"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 19,
+    "sha256": "6c6c08ddf3c6be9612543066380a6142154e902a36925ba16cda2f8e0d46313f",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "frozenSlices": {
+    "equipmentHarnessOracle": {
+      "sourceManifestSha256": "961b6090670451f1c51c02e737e0c5b24a4e989aa35bf31cc041a39113d20aff",
+      "evidenceManifestSha256": "87a404ee7cbd922a64c41b7e3916b0b601aa05d19d979ab5218cd6c42ec05e50",
+      "deliverySha256": "c6c226093f86fd9f8042dd5d56908a9051560dab82e23b20e6723196576ed24a",
+      "sourceEntries": 9,
+      "evidenceEntries": 63,
+      "supersededMutableMetadata": [
+        "changes/2026-09-23-classic-functional-completion/tasks.md",
+        "changes/2026-09-23-classic-functional-completion/execution-state.md"
+      ]
+    },
+    "canonicalEquipmentFixtureOriginal": {
+      "sourceManifestSha256": "74ffab1a4d8fbe191dd3164935e519da41ae82721f3974c16c8c6ce1d3780051",
+      "evidenceManifestSha256": "30bea97d0a8549ee9e4f79bd9649637d08c12369f9a61dd92ec748ee1e491138",
+      "deliverySha256": "0a2eadc77f3d709517bbd6052f46b2a4326856a0133a97dcd574087a4f621f9d",
+      "sourceEntries": 10,
+      "evidenceEntries": 91,
+      "stillCurrentEntries": [
+        "playbooks/classic/scenarios/canonical-runtime-v11.json",
+        "apps/web/tests/e2e/classic-support/scenario.ts",
+        "apps/web/tests/e2e/classic-support/harness.ts"
+      ],
+      "supersededEntries": 7,
+      "supersededBy": "V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02"
+    },
+    "canonicalEquipmentFixtureClose02": {
+      "sourceManifestSha256": "a1a68f4ec9e59eebad89156ae6ee5e8b3bf9a2bcb5cd4ef6f35f2a3faf6b29ec",
+      "evidenceManifestSha256": "c74195f62bca4ee99201f737d2e62f448ab15627571cadd936ee4b75a1da3c70",
+      "deliverySha256": "fa974177a41541565b954ab7374b544841e309e875b650dfc2578f3ea9d0d3fc",
+      "sourceEntries": 7,
+      "evidenceEntries": 33,
+      "validatedEntries": 7,
+      "priorReleaseBytePreserved": true
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git28-equipment",
+    "head": "484ddf39d7e3bb881dd3d3cbaec775bd091c220d",
+    "stagedPaths": 14,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "combinedOracleAndScenario": {
+      "window": "ba12a19a-0aca-4464-88c0-4b19ebc09a73",
+      "status": "PASS_2_FILES_15_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "cc729b200229d85ca057bd19a6b76ed80d66f5ccae8ae877f518b1bcbbd461dd",
+      "receiptSha256": "0dc9d74628be227dd5f9c015a9da30ac5a1c2703867b20bfd63fbb11a5502aa8"
+    }
+  },
+  "static": {
+    "webTypes": {
+      "window": "538fdcd1-95d2-4940-b14e-d1b30e9c1050",
+      "status": "PASS",
+      "stdoutSha256": "fb2d83cf73ec8f95aba29a4dc7031255a25e57feb682d89996e097d78184463e",
+      "receiptSha256": "d3d8418f9a695d2ee261c869e5239f18d5e528962e8620c428a8b35947848a48"
+    },
+    "rootTestTypes": {
+      "window": "a38ffa76-ed93-4853-a3c1-f18435a00883",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "e6a115ae8fe48666235e4bfd8ff5e5e1f26c28f0dcc73583f437e563bf10633d"
+    },
+    "classicTestTypes": {
+      "window": "a7bfe086-1518-467d-962d-014b315ac98d",
+      "status": "PASS_CLOSES_ORACLE_EXTERNAL_BLOCK",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "3e652430e530c4cb7cd8976fc12fc8b84428a560190f1c6d96dfad73a4341cc7"
+    },
+    "stagedEslint": {
+      "window": "be4b01cc-cc88-46e6-8c83-c42c42285c34",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "c974b35c697ad0ba268fe52765d446bdbb57251e1e533996ef9edf6f15642636"
+    },
+    "editableFormat": {
+      "window": "0bb615df-b8c3-4710-9032-ba7d95b7f3e6",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "e91ab1012d712dda1d76dd9dc4e3257c4c706f2c90b055295ed1648b854c3207"
+    },
+    "scopedDiff": {
+      "window": "1435ac75-e96c-4448-bd96-aaac017c481b",
+      "status": "PASS_14_PATHS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "79d7dc2dcbd3308a589ef0225d8be9d8b98cbf9c505b12f56bc9a074e43b053e"
+    },
+    "metadataFormat": {
+      "window": "bed9ef0c-37c0-4ff6-b626-1549974720a0",
+      "status": "PASS",
+      "stdoutSha256": "e52feb3737ba6694e36828a962b65bbb1ae7968e09d02558de4c64e702fd74aa",
+      "receiptSha256": "c30dd86f39d1c94bbb6d231c4695d5b4446f1e5310123a2daad4a5f0d650f77c"
+    }
+  },
+  "browserAcceptance": {
+    "status": "NOT_RUN",
+    "equipmentJourney": "NOT_OBSERVED",
+    "deathDurabilityMinusOneDropRespawn": "NOT_OBSERVED",
+    "armorVariants": "4 iron slots sampled; not the 16-item armor matrix",
+    "registeredMatrix": "not the 194-item completion matrix",
+    "fullV2": "NOT_VERIFIED"
+  },
+  "longTermDocs": {
+    "updated": false,
+    "reason": "This change adds a read-only BrowserProductHarness projection and canonical fixture without changing ownership or protocol boundaries."
+  },
+  "preservedDirty": [
+    "Lighting",
+    "transport/climb/stateful-block",
+    "README/package/CI",
+    "browser reports",
+    "unrelated changes directories"
+  ],
+  "notRun": ["build", "artifact", "browser", "cua", "devserver", "ci", "deploy", "merge"]
+}

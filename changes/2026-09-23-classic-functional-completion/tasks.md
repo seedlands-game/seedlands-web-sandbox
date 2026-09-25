@@ -233,6 +233,28 @@ artifact evidence 待独立提交。
 `44db46fb...1169`、artifactDigest `fee7cf82...3a60`、276 项 file map 与磁盘一致。生成 Pack 已包含唯一 Classic
 death policy capability。当前 artifact 仍未运行 Browser/Cua/CI，真实死亡 UI/save 与完整 V2 不据此准出。
 
+### V2-EQUIPMENT-HARNESS-ORACLE-01
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 4h。只扩展 BrowserProductHarness 的只读
+equipment oracle，不改协议、权威 owner、持久化、动作或 761 的 scenario/e2e/spec。
+
+状态：GIT28_COMBINED_STATIC_GREEN。`equipmentSnapshot()` 从同一 ready authority client/epoch/gameplay
+对象复制 actor、bag、四槽 armor、cursor、player health/lifecycle 与 nullable armorPoints；完成复制后再次校验三重
+身份，换代则 fail closed 为 null。最终 observability `8/8`、Web/Svelte types、root test types、目标 ESLint、Prettier、
+scoped diff 均 PASS。原 Classic test types 并行阻塞已由 `V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 关闭，并在
+GIT28 detached staged tree 与 fixture 组合复验 PASS；Browser/Cua/CI 尚未运行。
+
+### V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02 / GIT-28-EQUIPMENT-JOURNEY
+
+状态：LOCAL_CODE_COMMIT_READY。fixture 的 survival walk -> creative UI placement -> survival fresh physics/grounded、
+equipment-origin close 同 runtime/actor 与 revision+1、C5 实际保存前 equipment baseline 已由独立阶段定向准出。GIT28
+在 HEAD `484ddf39d7e3bb881dd3d3cbaec775bd091c220d` 加精确 14 路径 staged patch 的 detached tree 中验证：
+observability `8/8` + scenario `7/7`、Web/Svelte types、root test types、Classic test types、staged TS ESLint、
+editable Prettier 与 scoped diff 均 PASS；代码/tests/contracts/spec 提交为
+`3df61d38b0b0de55c48ab709afd6315aa9f23ff2`。历史 oracle Classic-types FAIL 不改写，由本组合新证据说明阻塞关闭。
+当前 Browser/Cua/devserver/CI 未运行，death/durability-1/drop/respawn 均 `NOT OBSERVED`；铁甲四槽抽样不代表 16
+件护甲、194 项矩阵或完整 V2 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

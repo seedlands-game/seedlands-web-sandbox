@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-25T19:06:00Z
+更新时间：2026-09-25T22:00:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -13,6 +13,11 @@ Goal：未创建；本轮未提供 token budget。
 当前 Git/Docs checkpoint：`GIT-27-CLASSIC-DEATH-AND-NEEDS` 已远端交付，代码提交
 `c3ba7ea9fa83522ee1927791efa2add719980797`、证据提交 `b2b07417ec01870c4ce20befdf29f433f26fc88d`。
 BUILD03 唯一 build/artifact verify 已 PASS，证据随独立 artifact evidence 提交交付；Browser/Cua/CI/deploy 均未运行。
+当前 Equipment checkpoint：`V2-EQUIPMENT-HARNESS-ORACLE-01` 与
+`V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 已在 GIT28 detached staged tree 组合验证；observability `8/8`、scenario
+`7/7`、Web/Svelte/root/Classic test types 与目标静态均 PASS，原 oracle Classic-types 并行阻塞已关闭。代码提交
+`3df61d38b0b0de55c48ab709afd6315aa9f23ff2` 已本地生成，证据/state 尚待独立提交和 push。本阶段未运行
+Browser/Cua/devserver/CI；装备真实 Browser 旅程、death/durability-1/drop/respawn、16/194/full V2 仍未验收。
 
 ## 恢复规则
 

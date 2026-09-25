@@ -1,0 +1,14 @@
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web
+Getting Svelte diagnostics...
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/src/app/gameplay/game-harness-observability.ts:17:46
+Error: Cannot find module '@seedlands/stdlib/server/gameplay/modules/inventory-pointer-contract' or its corresponding type declarations. 
+import type { InventorySlot } from '@seedlands/stdlib/server/gameplay/inventory';
+import type { InventoryCursorOriginV1 } from '@seedlands/stdlib/server/gameplay/modules/inventory-pointer-contract';
+
+====================================
+svelte-check found 1 error and 0 warnings in 1 file
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 typecheck: `svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit`
+Exit status 1

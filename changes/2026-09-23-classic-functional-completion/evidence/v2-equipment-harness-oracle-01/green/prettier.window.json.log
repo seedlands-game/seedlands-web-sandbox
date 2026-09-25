@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "c5b492a9-77ff-47cc-a37f-b982e1ed22b7",
+  "pid": 42014,
+  "startedAt": "2026-09-25T20:16:09.775Z",
+  "windowId": "c5b492a9-77ff-47cc-a37f-b982e1ed22b7",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-harness-oracle-01/green/prettier.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T20:16:10.191Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T20:16:09.776Z",
+      "loadAverage": [
+        2.9990234375,
+        3.51953125,
+        3.2451171875
+      ],
+      "freeMemoryBytes": 864141312,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T20:16:10.189Z",
+      "loadAverage": [
+        2.9990234375,
+        3.51953125,
+        3.2451171875
+      ],
+      "freeMemoryBytes": 888504320,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

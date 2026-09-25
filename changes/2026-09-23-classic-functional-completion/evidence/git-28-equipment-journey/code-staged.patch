@@ -1,0 +1,1738 @@
+diff --git a/apps/web/src/app/app-contracts.ts b/apps/web/src/app/app-contracts.ts
+index 0666aa394a7413edcfec7778e52a4969ab27cd48..22f2be8b56e94eaffa8f1e4e03cc454963bc288f 100644
+--- a/apps/web/src/app/app-contracts.ts
++++ b/apps/web/src/app/app-contracts.ts
+@@ -17,7 +17,11 @@ import type { AuthorityResidencyDiagnostics } from '@seedlands/stdlib/server/aut
+ import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+ import type { RenderedMaterialMeshSummary as WorldRenderedMaterialMeshSummary } from './world/world-runtime';
+ import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
+-import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
++import type {
++  AuthorityGameplayView,
++  AuthorityInventoryView,
++  MediaPlaybackCommittedBatchV1,
++} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+ import type { WorldMediaRuntimeSnapshot } from './audio/world-media-runtime';
+ 
+ export type MeshPart = MeshData;
+@@ -31,6 +35,18 @@ export type HarnessMediaSnapshot = Readonly<{
+   audio: WorldMediaRuntimeSnapshot | null;
+ }>;
+ 
++export type HarnessEquipmentSnapshot = Readonly<{
++  runtimeEpoch: string;
++  gameplayRevision: number;
++  actor: AuthorityInventoryView['actor'];
++  inventoryRevision: number;
++  slots: AuthorityInventoryView['slots'];
++  armor: AuthorityInventoryView['armor'];
++  cursor: AuthorityInventoryView['cursor'];
++  player: Readonly<Pick<AuthorityGameplayView['player'], 'health' | 'lifecycle'>>;
++  armorPoints: number | null;
++}>;
++
+ export type WorkerResult = {
+   kind: 'mesh-result';
+   taskId: number;
+diff --git a/apps/web/src/app/gameplay/game-harness-contract.ts b/apps/web/src/app/gameplay/game-harness-contract.ts
+index 4dd3d0e4c4daca0ce1211a1f3c923ab5b41b2e92..277fe809f0c8f2e16dd18429ed9c90f308713644 100644
+--- a/apps/web/src/app/gameplay/game-harness-contract.ts
++++ b/apps/web/src/app/gameplay/game-harness-contract.ts
+@@ -4,6 +4,7 @@ import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-ha
+ import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
+ import type {
+   HarnessSnapshot,
++  HarnessEquipmentSnapshot,
+   HarnessMediaSnapshot,
+   LifecycleSnapshot,
+   RenderedMaterialMeshSummary,
+@@ -55,6 +56,7 @@ export type HarnessApi = {
+     material: FaceMaterialId,
+   ) => RenderedMaterialMeshSummary | null;
+   mediaSnapshot: () => HarnessMediaSnapshot;
++  equipmentSnapshot: () => HarnessEquipmentSnapshot | null;
+   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
+   flushSave: () => Promise<void>;
+   blockLogicWorker: (ms: number) => Promise<void>;
+diff --git a/apps/web/src/app/gameplay/game-harness-observability.ts b/apps/web/src/app/gameplay/game-harness-observability.ts
+index 10407ed04d10e141fcb565cb9f1b4cac1a3eb816..ea528f2b67d1c7d36c7081e284fed81ccd2734bb 100644
+--- a/apps/web/src/app/gameplay/game-harness-observability.ts
++++ b/apps/web/src/app/gameplay/game-harness-observability.ts
+@@ -8,13 +8,19 @@ import {
+   cloneMediaPlaybackProjectionsV1,
+ } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+ import type { GameMediaControllerSnapshot } from '../audio/game-media-controller';
+-import type { HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../app-contracts';
++import type { HarnessEquipmentSnapshot, HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../app-contracts';
+ import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+ import type { HarnessApi } from './game-harness-contract';
+ import type { RenderedMaterialMeshSummary as WorldRenderedMaterialMeshSummary } from '../world/world-runtime';
++import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
++import type { AuthorityInventoryView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
++
++type HarnessAuthority = Readonly<
++  Pick<BrowserAuthorityClient, 'isReady' | 'runtimeEpoch' | 'gameplay' | 'voxelGeometry'>
++>;
+ 
+ export type HarnessObservabilityBindings = Readonly<{
+-  authority: () => Readonly<{ runtimeEpoch: string; voxelGeometry?: VoxelGeometryRegistryV1 }> | null;
++  authority: () => HarnessAuthority | null;
+   renderedMaterialMesh: (
+     cx: number,
+     cy: number,
+@@ -26,7 +32,57 @@ export type HarnessObservabilityBindings = Readonly<{
+   audio: () => HarnessMediaSnapshot['audio'];
+ }>;
+ 
+-type HarnessObservabilityApi = Pick<HarnessApi, 'getVoxelGeometry' | 'getRenderedMaterialMesh' | 'mediaSnapshot'>;
++type HarnessObservabilityApi = Pick<
++  HarnessApi,
++  'getVoxelGeometry' | 'getRenderedMaterialMesh' | 'mediaSnapshot' | 'equipmentSnapshot'
++>;
++
++const cloneFrozenStack = (stack: AuthorityInventoryView['slots'][number]): AuthorityInventoryView['slots'][number] =>
++  stack
++    ? Object.freeze({
++        itemId: stack.itemId,
++        count: stack.count,
++        ...(stack.instance ? { instance: Object.freeze({ durability: stack.instance.durability }) } : {}),
++      })
++    : null;
++
++const cloneFrozenOrigin = (
++  origin: AuthorityInventoryView['cursor']['origin'],
++): AuthorityInventoryView['cursor']['origin'] =>
++  origin
++    ? Object.freeze(
++        origin.kind === 'station' ? { ...origin, reference: Object.freeze({ ...origin.reference }) } : { ...origin },
++      )
++    : null;
++
++const cloneHarnessEquipmentSnapshot = (
++  runtimeEpoch: string,
++  gameplay: HarnessAuthority['gameplay'],
++): HarnessEquipmentSnapshot => {
++  const inventory = gameplay.inventory;
++  return Object.freeze({
++    runtimeEpoch,
++    gameplayRevision: gameplay.gameplayRevision,
++    actor: Object.freeze({ ...inventory.actor }),
++    inventoryRevision: inventory.revision,
++    slots: Object.freeze(inventory.slots.map(cloneFrozenStack)),
++    armor: Object.freeze({
++      helmet: cloneFrozenStack(inventory.armor.helmet),
++      chestplate: cloneFrozenStack(inventory.armor.chestplate),
++      leggings: cloneFrozenStack(inventory.armor.leggings),
++      boots: cloneFrozenStack(inventory.armor.boots),
++    }),
++    cursor: Object.freeze({
++      version: inventory.cursor.version,
++      revision: inventory.cursor.revision,
++      stack: cloneFrozenStack(inventory.cursor.stack),
++      origin: cloneFrozenOrigin(inventory.cursor.origin),
++      craftingGrid: Object.freeze(inventory.cursor.craftingGrid.map(cloneFrozenStack)),
++    }),
++    player: Object.freeze({ health: gameplay.player.health, lifecycle: gameplay.player.lifecycle }),
++    armorPoints: gameplay.armorPoints ?? null,
++  });
++};
+ 
+ const cloneHarnessVoxelGeometry = (
+   registry: VoxelGeometryRegistryV1 | undefined,
+@@ -89,5 +145,21 @@ export function createHarnessObservability(bindings: HarnessObservabilityBinding
+       return cloneRenderedMaterialMesh(summary, worldEpoch);
+     },
+     mediaSnapshot: () => cloneHarnessMediaSnapshot(bindings.media(), bindings.audio()),
++    equipmentSnapshot: (): HarnessEquipmentSnapshot | null => {
++      const authority = bindings.authority();
++      if (!authority?.isReady) return null;
++      const runtimeEpoch = authority.runtimeEpoch;
++      if (!runtimeEpoch) return null;
++      const gameplay = authority.gameplay;
++      const snapshot = cloneHarnessEquipmentSnapshot(runtimeEpoch, gameplay);
++      if (
++        bindings.authority() !== authority ||
++        !authority.isReady ||
++        authority.runtimeEpoch !== runtimeEpoch ||
++        authority.gameplay !== gameplay
++      )
++        return null;
++      return snapshot;
++    },
+   });
+ }
+diff --git a/apps/web/tests/e2e/classic-runtime.spec.ts b/apps/web/tests/e2e/classic-runtime.spec.ts
+index 8e77137bf84fda81790c928661d4428883553efb..d9d61eac555dd26cf2dd92de22191193bd7893bb 100644
+--- a/apps/web/tests/e2e/classic-runtime.spec.ts
++++ b/apps/web/tests/e2e/classic-runtime.spec.ts
+@@ -36,10 +36,11 @@ import {
+   type ClassicStage as Stage,
+   type ClassicStageResult as StageResult,
+ } from './classic-support/evidence';
+-import { classicScenario, type Point } from './classic-support/scenario';
++import { classicPersistedPositions, classicScenario, type Point } from './classic-support/scenario';
+ import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
+ import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
+ import * as v1 from './classic-support/v1-slice';
++import * as equipment from './classic-support/equipment-journey';
+ import {
+   equipFromInventory,
+   inventorySignature,
+@@ -305,6 +306,10 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
+     await v1.expectV1AudioSettings(page);
+     v1SliceState = await v1.completeV1SliceBeforeSave(page);
+   });
++  const equipmentJourney = await test.step('V2 真实资源链与背包手势完成四槽装备矩阵', () =>
++    equipment.completeEquipmentJourneyBeforeSave(page, (value) => {
++      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', { v2Equipment: value });
++    }));
+ 
+   let routeTrace!: ChromeTrace;
+   let sampleCompletedAt!: string;
+@@ -372,33 +377,23 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
+   });
+ 
+   await test.step('C5 正式保存返回、同上下文继续并再次交互', async () => {
+-    const persistedPositions = [
+-      classicScenario.route.buildTarget,
+-      classicScenario.route.stationTarget,
+-      classicScenario.v1Slice.door.lower,
+-      classicScenario.v1Slice.door.upper,
+-      classicScenario.v1Slice.jukebox.target,
+-    ] as const;
++    const persistedPositions = classicPersistedPositions;
+     const stateBeforeSave = await playerState(page);
++    const equipmentBeforeSave = await equipment.expectEquipmentReadyForSave(page, equipmentJourney);
+     const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
+     const checkpointBefore = await checkpointVoxels(page, persistedPositions);
+     const derivedBefore = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
+-    restoreEvidence = {
+-      before: {
+-        authority: authorityBefore,
+-        checkpoint: checkpointBefore,
+-        derived: derivedBefore,
+-      },
+-    };
++    restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', {
++      authority: authorityBefore,
++      checkpoint: checkpointBefore,
++      derived: derivedBefore,
++      v2EquipmentPreSave: equipmentBeforeSave,
++    });
+     expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
+     expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
+     v1.expectV1DoorEvidence(authorityBefore, v1SliceState.door);
+     v1.expectV1DoorEvidence(checkpointBefore, v1SliceState.door);
+-    const identityBefore = await page.evaluate(async () => {
+-      const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
+-      if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
+-      return result.data;
+-    });
++    const developerEpochBefore = await equipment.developerWorldEpoch(page);
+     await page.keyboard.press('Escape');
+     await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
+     await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
+@@ -408,18 +403,18 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
+       (value) => value.onGround && !value.colliding && value.workers.authority === 1,
+       30_000,
+     );
+-    const identityAfter = await page.evaluate(async () => {
+-      const result = await (window as unknown as ClassicWindow).__seedlandsHarness!.world.identity();
+-      if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
+-      return result.data;
+-    });
+-    expect(identityAfter.epoch).not.toBe(identityBefore.epoch);
++    const developerEpochAfter = await equipment.developerWorldEpoch(page);
++    expect(developerEpochAfter).not.toBe(developerEpochBefore);
+     await v1.verifyV1SliceAfterRestore(page, v1SliceState);
++    const restoredEquipment = await equipment.verifyEquipmentJourneyAfterRestore(page, equipmentBeforeSave, (value) => {
++      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { v2Equipment: value });
++    });
+     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
+     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
+     restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+       authority: authorityAfter,
+       derivedInitial: derivedAfterInitial,
++      v2Equipment: restoredEquipment,
+     });
+     expect(observedVoxel(authorityAfter, classicScenario.route.buildTarget)).toBe(16);
+     v1.expectV1DoorEvidence(authorityAfter, v1SliceState.door);
+@@ -472,8 +467,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
+         'Save and return created a fresh epoch, restored build/workbench/inventory state, reacquired and reopened the station through visible target-card readback plus real mouse input, and accepted a new real movement input.',
+     };
+     stageSamples.C5 = (await snapshot(page))!;
+-    const preRestoreTrace = traceEpoch(routeTrace, identityBefore.epoch, 'C0-C4');
+-    const postRestoreTrace = traceEpoch(await performanceTrace(page), identityAfter.epoch, 'C5');
++    const preRestoreTrace = traceEpoch(routeTrace, developerEpochBefore, 'C0-C4');
++    const postRestoreTrace = traceEpoch(await performanceTrace(page), developerEpochAfter, 'C5');
+     routeTrace = { traceEvents: [...preRestoreTrace.traceEvents, ...postRestoreTrace.traceEvents] };
+     sampleCompletedAt = new Date().toISOString();
+   });
+diff --git a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..e90399e866622d622960f2fefa2ebe66c2a97746
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+@@ -0,0 +1,397 @@
++import { expect, type Locator, type Page } from '@playwright/test';
++import type { HarnessEquipmentSnapshot } from '../../../src/app/app-contracts';
++import { aimAtVoxelWithRealMouse } from './aim';
++import { expectPresentedDropOrPickup } from './drops';
++import {
++  clickCanvasCenter,
++  closeInventory,
++  inventory,
++  mineVoxel,
++  playerState,
++  snapshot,
++  voxelAt,
++  waitForSnapshot,
++  walkTo,
++} from './harness';
++import { itemCount } from './journey';
++import { classicScenario, type V2EquipmentResource } from './scenario';
++
++export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
++export type V2EquipmentJourneyEvidence = Readonly<{
++  phase:
++    | 'started'
++    | 'resources-placed'
++    | 'wood'
++    | 'wood-pickaxe'
++    | 'stone'
++    | 'stone-pickaxe'
++    | 'iron'
++    | 'crafted'
++    | 'equipped'
++    | 'ready-to-save';
++  steps: readonly EquipmentStepEvidence[];
++  snapshot: HarnessEquipmentSnapshot;
++}>;
++export type RecordEquipmentEvidence = (value: V2EquipmentJourneyEvidence) => void;
++
++export const armorIds = Object.freeze({
++  helmet: 'iron-helmet',
++  chestplate: 'iron-chestplate',
++  leggings: 'iron-leggings',
++  boots: 'iron-boots',
++});
++const creativeNames = Object.freeze({ 'wood-block': '原木', 'stone-block': '石块', 'iron-block': '铁块' });
++
++export const sameActor = (left: HarnessEquipmentSnapshot['actor'], right: HarnessEquipmentSnapshot['actor']) =>
++  left.entityId === right.entityId && left.epoch === right.epoch && left.lifetime === right.lifetime;
++
++const equipmentSnapshot = (page: Page): Promise<HarnessEquipmentSnapshot | null> =>
++  page.evaluate(
++    () => (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness?.equipmentSnapshot() ?? null,
++  );
++
++export const requireEquipmentSnapshot = async (page: Page): Promise<HarnessEquipmentSnapshot> => {
++  const current = await equipmentSnapshot(page);
++  if (!current) throw new Error('Current Authority equipment snapshot is unavailable.');
++  return current;
++};
++
++export async function waitForEquipmentSnapshot(
++  page: Page,
++  predicate: (value: HarnessEquipmentSnapshot) => boolean,
++): Promise<HarnessEquipmentSnapshot> {
++  let matched: HarnessEquipmentSnapshot | null = null;
++  await expect
++    .poll(async () => {
++      const current = await equipmentSnapshot(page);
++      if (!current || !predicate(current)) return false;
++      matched = current;
++      return true;
++    })
++    .toBe(true);
++  return matched!;
++}
++
++export const itemTotal = (snapshot: HarnessEquipmentSnapshot, itemId: string) =>
++  [...snapshot.slots, ...Object.values(snapshot.armor), snapshot.cursor.stack, ...snapshot.cursor.craftingGrid].reduce(
++    (total, stack) => total + (stack?.itemId === itemId ? stack.count : 0),
++    0,
++  );
++
++export const equipmentStep = (step: string, snapshot: HarnessEquipmentSnapshot): EquipmentStepEvidence => ({
++  step,
++  snapshot,
++});
++
++export function expectFullIronArmor(snapshot: HarnessEquipmentSnapshot): void {
++  expect(snapshot.armorPoints).toBe(15);
++  for (const [slot, itemId] of Object.entries(armorIds) as Array<[keyof typeof armorIds, string]>)
++    expect(snapshot.armor[slot]).toEqual({ itemId, count: 1, instance: { durability: 165 } });
++}
++
++export const inventoryState = (snapshot: HarnessEquipmentSnapshot) => ({
++  runtimeEpoch: snapshot.runtimeEpoch,
++  actor: snapshot.actor,
++  inventoryRevision: snapshot.inventoryRevision,
++  slots: snapshot.slots,
++  armor: snapshot.armor,
++  cursor: snapshot.cursor,
++});
++
++export async function committedPointer(
++  page: Page,
++  action: () => Promise<void>,
++  predicate: (value: HarnessEquipmentSnapshot) => boolean,
++): Promise<HarnessEquipmentSnapshot> {
++  const before = await requireEquipmentSnapshot(page);
++  await action();
++  return waitForEquipmentSnapshot(
++    page,
++    (value) =>
++      value.runtimeEpoch === before.runtimeEpoch &&
++      sameActor(value.actor, before.actor) &&
++      value.inventoryRevision === before.inventoryRevision + 1 &&
++      predicate(value),
++  );
++}
++
++export const bagItem = (panel: Locator, itemId: string) =>
++  panel.locator(`[data-inventory-address^="inventory:"][data-item="${itemId}"]`).first();
++const bagAddress = (panel: Locator, slot: number) => panel.locator(`[data-inventory-address="inventory:${slot}"]`);
++const stationAddress = (panel: Locator, slot: number) => panel.locator(`[data-inventory-address="station:${slot}"]`);
++export const equipmentAddress = (panel: Locator, slot: keyof typeof armorIds) =>
++  panel.locator(`[data-equipment-slot="${slot}"]`);
++
++async function moveBagItemToFirstHotbar(page: Page, panel: Locator, itemId: string): Promise<void> {
++  const source = bagItem(panel, itemId);
++  await expect(source).toBeVisible();
++  const sourceSlot = Number(await source.getAttribute('data-slot'));
++  if (!Number.isSafeInteger(sourceSlot)) throw new Error(`Inventory slot for ${itemId} has no stable address.`);
++  if (sourceSlot === 0) return;
++  await committedPointer(
++    page,
++    async () => {
++      await source.hover();
++      await page.keyboard.press('Digit1');
++    },
++    (value) => value.slots[0]?.itemId === itemId,
++  );
++}
++
++export async function expectEquipmentDom(
++  page: Page,
++  panel: Locator,
++  snapshot: HarnessEquipmentSnapshot,
++): Promise<void> {
++  for (const [slot, itemId] of Object.entries(armorIds) as Array<[keyof typeof armorIds, string]>) {
++    const cell = equipmentAddress(panel, slot);
++    await expect(cell).toHaveAttribute('data-item', snapshot.armor[slot]?.itemId ?? 'empty');
++    if (snapshot.armor[slot]?.itemId === itemId)
++      await expect(cell).toHaveAttribute(
++        'aria-label',
++        new RegExp(`耐久 ${snapshot.armor[slot]!.instance!.durability}/165`),
++      );
++  }
++  const cursor = snapshot.cursor.stack;
++  if (cursor) {
++    await expect(page.locator('[data-inventory-cursor]')).toHaveAttribute('data-item', cursor.itemId);
++    await expect(page.locator('[data-inventory-cursor]')).toHaveAttribute('data-count', String(cursor.count));
++  } else await expect(page.locator('[data-inventory-cursor]')).toHaveCount(0);
++}
++
++async function selectCreativeItem(page: Page, itemId: keyof typeof creativeNames): Promise<void> {
++  await page.keyboard.press('KeyE');
++  const survival = page.getByRole('dialog', { name: '背包与合成' });
++  if (await survival.isVisible()) await survival.getByRole('button', { name: '切换创造模式', exact: true }).click();
++  const catalog = page.getByRole('dialog', { name: '创造内容目录' });
++  await expect(catalog).toBeVisible();
++  const name = creativeNames[itemId];
++  await catalog.locator('#creative-item-filter').fill(name);
++  await catalog.getByRole('button', { name: new RegExp(`^将${name}放入创造快捷栏 `) }).click();
++  await closeInventory(page);
++  await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', itemId);
++}
++
++async function switchToSurvival(page: Page): Promise<void> {
++  await page.keyboard.press('KeyE');
++  const catalog = page.getByRole('dialog', { name: '创造内容目录' });
++  await expect(catalog).toBeVisible();
++  await catalog.getByRole('button', { name: '切换生存模式', exact: true }).click();
++  await expect(page.getByRole('dialog', { name: '背包与合成' })).toBeVisible();
++  await closeInventory(page);
++}
++
++async function placeWorkbench(page: Page): Promise<void> {
++  const { workbench } = classicScenario.v2Equipment;
++  const panel = await inventory(page);
++  await moveBagItemToFirstHotbar(page, panel, 'workbench');
++  await expect(panel.locator('[data-slot="0"]')).toHaveAttribute('data-item', 'workbench');
++  await closeInventory(page);
++  await page.keyboard.press('Digit1');
++  await walkTo(page, workbench.approach, { jump: true });
++  await aimAtVoxelWithRealMouse(page, workbench.support, workbench.target);
++  await clickCanvasCenter(page, 'right');
++  await expect.poll(() => voxelAt(page, workbench.target)).toBe(11);
++}
++
++async function placeResourceStrip(page: Page): Promise<void> {
++  for (const resource of classicScenario.v2Equipment.resourceStrip) {
++    await walkTo(page, resource.approach, { jump: true });
++    await selectCreativeItem(page, resource.itemId);
++    await aimAtVoxelWithRealMouse(page, resource.support, resource.target);
++    await clickCanvasCenter(page, 'right');
++    await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel);
++    const beforeSurvival = await snapshot(page);
++    if (!beforeSurvival) throw new Error('Classic snapshot is unavailable before returning to survival.');
++    await switchToSurvival(page);
++    await waitForSnapshot(
++      page,
++      (value) =>
++        value.authority.physicsTick > beforeSurvival.authority.physicsTick && value.onGround && !value.colliding,
++    );
++  }
++}
++
++async function mineResources(page: Page, resources: readonly V2EquipmentResource[]): Promise<void> {
++  for (const resource of resources) {
++    const before = itemCount(await playerState(page), resource.dropItemId);
++    await walkTo(page, resource.approach, { jump: true });
++    await mineVoxel(page, resource.target);
++    await expectPresentedDropOrPickup(page, resource.dropItemId, before);
++    await walkTo(page, [resource.target[0] + 0.5, resource.target[2] + 0.5], { jump: true });
++    await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
++  }
++}
++
++async function openWorkbench(page: Page): Promise<Locator> {
++  const workbench = classicScenario.v2Equipment.workbench;
++  await walkTo(page, workbench.approach, { jump: true });
++  await aimAtVoxelWithRealMouse(page, workbench.target);
++  await clickCanvasCenter(page, 'right');
++  const panel = page.getByRole('dialog', { name: '工作台' });
++  await expect(panel).toBeVisible();
++  return panel;
++}
++
++async function placeOneEach(page: Page, panel: Locator, itemId: string, targetSlots: readonly number[]): Promise<void> {
++  const source = bagItem(panel, itemId);
++  await expect(source).toBeVisible();
++  const sourceSlot = Number(await source.getAttribute('data-slot'));
++  const sourceCount = Number(await source.getAttribute('data-count'));
++  if (!Number.isSafeInteger(sourceSlot) || !Number.isSafeInteger(sourceCount) || sourceCount < targetSlots.length)
++    throw new Error(`Insufficient ${itemId} for canonical equipment crafting.`);
++  await committedPointer(
++    page,
++    () => source.click(),
++    (value) => value.cursor.stack?.itemId === itemId,
++  );
++  for (const target of targetSlots)
++    await committedPointer(
++      page,
++      () => stationAddress(panel, target).click({ button: 'right' }),
++      (value) => value.cursor.stack === null || value.cursor.stack.itemId === itemId,
++    );
++  if (sourceCount > targetSlots.length)
++    await committedPointer(
++      page,
++      () => bagAddress(panel, sourceSlot).click(),
++      (value) => value.cursor.stack === null,
++    );
++}
++
++async function placeWholeStack(page: Page, panel: Locator, itemId: string, targetSlot: number): Promise<void> {
++  const source = bagItem(panel, itemId);
++  await expect(source).toBeVisible();
++  await committedPointer(
++    page,
++    () => source.click(),
++    (value) => value.cursor.stack?.itemId === itemId,
++  );
++  await committedPointer(
++    page,
++    () => stationAddress(panel, targetSlot).click(),
++    (value) => value.cursor.stack === null,
++  );
++}
++
++async function takeCraftResult(page: Page, panel: Locator, itemId: string): Promise<void> {
++  const result = panel.locator('[data-craft-result]');
++  await expect(result).toHaveAttribute('data-item', itemId);
++  await committedPointer(
++    page,
++    () => result.click({ modifiers: ['Shift'] }),
++    (value) => value.slots.some((stack) => stack?.itemId === itemId),
++  );
++  await expect(result).toHaveAttribute('data-item', 'empty');
++}
++
++async function craftPickaxe(
++  page: Page,
++  materialId: 'plank' | 'cobblestone',
++  outputId: 'wood-pickaxe' | 'stone-pickaxe',
++): Promise<void> {
++  const panel = await openWorkbench(page);
++  await placeOneEach(page, panel, materialId, [0, 1, 2]);
++  await placeOneEach(page, panel, 'stick', [4, 7]);
++  await takeCraftResult(page, panel, outputId);
++  await closeInventory(page);
++  const inventoryPanel = await inventory(page);
++  await moveBagItemToFirstHotbar(page, inventoryPanel, outputId);
++  await expect(inventoryPanel.locator('[data-slot="0"]')).toHaveAttribute('data-item', outputId);
++  await closeInventory(page);
++  await page.keyboard.press('Digit1');
++  expect((await playerState(page)).selectedSlot).toBe(0);
++}
++
++async function craftArmor(page: Page): Promise<void> {
++  const panel = await openWorkbench(page);
++  await placeWholeStack(page, panel, 'iron-block', 0);
++  await takeCraftResult(page, panel, 'iron-ingot');
++  for (const [itemId, count] of [
++    ['iron-helmet', 5],
++    ['iron-chestplate', 8],
++    ['iron-leggings', 7],
++    ['iron-boots', 4],
++    ['iron-helmet', 5],
++  ] as const) {
++    await placeOneEach(
++      page,
++      panel,
++      'iron-ingot',
++      Array.from({ length: count }, (_, slot) => slot),
++    );
++    await takeCraftResult(page, panel, itemId);
++  }
++  await closeInventory(page);
++}
++
++export async function prepareCraftedIronArmor(
++  page: Page,
++  record: RecordEquipmentEvidence,
++  steps: EquipmentStepEvidence[],
++): Promise<HarnessEquipmentSnapshot> {
++  const started = await requireEquipmentSnapshot(page);
++  record({ phase: 'started', steps: [], snapshot: started });
++  await placeWorkbench(page);
++  await placeResourceStrip(page);
++  let current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('resources-placed', current));
++  record({ phase: 'resources-placed', steps: [...steps], snapshot: current });
++
++  const resources = classicScenario.v2Equipment.resourceStrip;
++  await mineResources(
++    page,
++    resources.filter(({ itemId }) => itemId === 'wood-block'),
++  );
++  current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('wood-collected', current));
++  record({ phase: 'wood', steps: [...steps], snapshot: current });
++  const panel = await openWorkbench(page);
++  await placeWholeStack(page, panel, 'wood-block', 0);
++  await takeCraftResult(page, panel, 'plank');
++  await placeOneEach(page, panel, 'plank', [0, 1]);
++  await takeCraftResult(page, panel, 'stick');
++  await closeInventory(page);
++  await craftPickaxe(page, 'plank', 'wood-pickaxe');
++  current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('wood-pickaxe-equipped', current));
++  record({ phase: 'wood-pickaxe', steps: [...steps], snapshot: current });
++
++  await mineResources(
++    page,
++    resources.filter(({ itemId }) => itemId === 'stone-block'),
++  );
++  current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('stone-collected', current));
++  record({ phase: 'stone', steps: [...steps], snapshot: current });
++  await craftPickaxe(page, 'cobblestone', 'stone-pickaxe');
++  current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('stone-pickaxe-equipped', current));
++  record({ phase: 'stone-pickaxe', steps: [...steps], snapshot: current });
++
++  await mineResources(
++    page,
++    resources.filter(({ itemId }) => itemId === 'iron-block'),
++  );
++  current = await requireEquipmentSnapshot(page);
++  steps.push(equipmentStep('iron-blocks-collected', current));
++  record({ phase: 'iron', steps: [...steps], snapshot: current });
++  await craftArmor(page);
++  current = await requireEquipmentSnapshot(page);
++  for (const itemId of Object.values(armorIds)) expect(itemTotal(current, itemId)).toBeGreaterThanOrEqual(1);
++  expect(itemTotal(current, armorIds.helmet)).toBe(2);
++  steps.push(equipmentStep('five-iron-armor-crafted', current));
++  record({ phase: 'crafted', steps: [...steps], snapshot: current });
++  return current;
++}
++
++export async function reclaimEquipmentWorkbench(page: Page): Promise<void> {
++  const { workbench } = classicScenario.v2Equipment;
++  const before = itemCount(await playerState(page), 'workbench');
++  await walkTo(page, workbench.approach, { jump: true });
++  await mineVoxel(page, workbench.target);
++  await expectPresentedDropOrPickup(page, 'workbench', before);
++  await walkTo(page, [workbench.target[0] + 0.5, workbench.target[2] + 0.5], { jump: true });
++  await expect.poll(async () => itemCount(await playerState(page), 'workbench')).toBeGreaterThan(before);
++  await expect.poll(() => voxelAt(page, workbench.target)).toBe(0);
++}
+diff --git a/apps/web/tests/e2e/classic-support/equipment-journey.ts b/apps/web/tests/e2e/classic-support/equipment-journey.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..69510c1e1e4cef279b858287b82d20315f51b81a
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-journey.ts
+@@ -0,0 +1,227 @@
++import { expect, type Page } from '@playwright/test';
++import type { HarnessEquipmentSnapshot } from '../../../src/app/app-contracts';
++import { closeInventory, inventory, voxelAt } from './harness';
++import { classicScenario } from './scenario';
++import {
++  armorIds,
++  bagItem,
++  committedPointer,
++  equipmentAddress,
++  equipmentStep,
++  expectEquipmentDom,
++  expectFullIronArmor,
++  inventoryState,
++  itemTotal,
++  prepareCraftedIronArmor,
++  reclaimEquipmentWorkbench,
++  requireEquipmentSnapshot,
++  sameActor,
++  waitForEquipmentSnapshot,
++  type EquipmentStepEvidence,
++  type RecordEquipmentEvidence,
++  type V2EquipmentJourneyEvidence,
++} from './equipment-journey-support';
++
++export type { V2EquipmentJourneyEvidence } from './equipment-journey-support';
++export type V2EquipmentJourneyState = Readonly<{
++  beforeSave: HarnessEquipmentSnapshot;
++  evidence: V2EquipmentJourneyEvidence;
++}>;
++
++async function exerciseEquipmentUi(page: Page, record: RecordEquipmentEvidence, steps: EquipmentStepEvidence[]) {
++  const panel = await inventory(page);
++  const pickedHelmet = await committedPointer(
++    page,
++    () => bagItem(panel, armorIds.helmet).click(),
++    (value) => value.cursor.stack?.itemId === armorIds.helmet,
++  );
++  const helmet = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'helmet').click(),
++    (value) => value.cursor.stack === null && value.armor.helmet?.itemId === armorIds.helmet,
++  );
++  expect(pickedHelmet.inventoryRevision).toBeLessThan(helmet.inventoryRevision);
++  steps.push(equipmentStep('helmet-click', helmet));
++  record({ phase: 'equipped', steps: [...steps], snapshot: helmet });
++
++  let current = helmet;
++  for (const slot of ['chestplate', 'leggings', 'boots'] as const) {
++    current = await committedPointer(
++      page,
++      () => bagItem(panel, armorIds[slot]).click({ modifiers: ['Shift'] }),
++      (value) => value.armor[slot]?.itemId === armorIds[slot],
++    );
++    steps.push(equipmentStep(`${slot}-quick-move`, current));
++    record({ phase: 'equipped', steps: [...steps], snapshot: current });
++  }
++  expectFullIronArmor(current);
++  await expectEquipmentDom(page, panel, current);
++
++  const holdingExtra = await committedPointer(
++    page,
++    () => bagItem(panel, armorIds.helmet).click(),
++    (value) => value.cursor.stack?.itemId === armorIds.helmet,
++  );
++  await equipmentAddress(panel, 'chestplate').click();
++  const feedback = page.locator('#interaction-feedback');
++  await expect(feedback).toHaveAttribute('data-tone', 'error');
++  await expect(feedback).toContainText('操作未完成');
++  const rejectedWrongSlot = await requireEquipmentSnapshot(page);
++  expect(inventoryState(rejectedWrongSlot)).toEqual(inventoryState(holdingExtra));
++  await expectEquipmentDom(page, panel, rejectedWrongSlot);
++  steps.push(equipmentStep('wrong-slot-zero-change', rejectedWrongSlot));
++  record({ phase: 'equipped', steps: [...steps], snapshot: rejectedWrongSlot });
++
++  const helmetTotal = itemTotal(holdingExtra, armorIds.helmet);
++  current = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'helmet').click(),
++    (value) =>
++      value.cursor.stack?.itemId === armorIds.helmet &&
++      value.cursor.origin?.kind === 'equipment' &&
++      value.cursor.origin.slot === 'helmet',
++  );
++  expect(itemTotal(current, armorIds.helmet)).toBe(helmetTotal);
++  steps.push(equipmentStep('occupied-helmet-swap', current));
++  record({ phase: 'equipped', steps: [...steps], snapshot: current });
++
++  const empty = panel.locator('[data-inventory-address^="inventory:"][data-item="empty"]').first();
++  const storedSwap = await committedPointer(
++    page,
++    () => empty.click(),
++    (value) => value.cursor.stack === null,
++  );
++  const detachedChestplate = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'chestplate').click(),
++    (value) => value.armor.chestplate === null && value.cursor.stack?.itemId === armorIds.chestplate,
++  );
++  const emptyAfterDetach = panel.locator('[data-inventory-address^="inventory:"][data-item="empty"]').first();
++  const storedChestplate = await committedPointer(
++    page,
++    () => emptyAfterDetach.click(),
++    (value) => value.cursor.stack === null,
++  );
++  current = await committedPointer(
++    page,
++    () => bagItem(panel, armorIds.chestplate).click({ modifiers: ['Shift'] }),
++    (value) => value.armor.chestplate?.itemId === armorIds.chestplate,
++  );
++  for (const [step, snapshot] of [
++    ['swapped-helmet-stored', storedSwap],
++    ['chestplate-detached', detachedChestplate],
++    ['chestplate-stored', storedChestplate],
++    ['chestplate-quick-move', current],
++  ] as const) {
++    steps.push(equipmentStep(step, snapshot));
++    record({ phase: 'equipped', steps: [...steps], snapshot });
++  }
++
++  current = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'boots').click(),
++    (value) => value.armor.boots === null && value.cursor.origin?.kind === 'equipment',
++  );
++  const beforeClose = current;
++  await closeInventory(page);
++  current = await waitForEquipmentSnapshot(
++    page,
++    (value) =>
++      value.runtimeEpoch === beforeClose.runtimeEpoch &&
++      sameActor(value.actor, beforeClose.actor) &&
++      value.inventoryRevision === beforeClose.inventoryRevision + 1 &&
++      value.cursor.stack === null &&
++      value.armor.boots?.itemId === armorIds.boots,
++  );
++  steps.push(equipmentStep('equipment-origin-close', current));
++  expectFullIronArmor(current);
++  record({ phase: 'equipped', steps: [...steps], snapshot: current });
++  return current;
++}
++
++export async function completeEquipmentJourneyBeforeSave(
++  page: Page,
++  record: RecordEquipmentEvidence,
++): Promise<V2EquipmentJourneyState> {
++  const steps: EquipmentStepEvidence[] = [];
++  await prepareCraftedIronArmor(page, record, steps);
++  const equipped = await exerciseEquipmentUi(page, record, steps);
++  const panel = await inventory(page);
++  await expectEquipmentDom(page, panel, equipped);
++  await closeInventory(page);
++  await reclaimEquipmentWorkbench(page);
++
++  const beforeSave = await requireEquipmentSnapshot(page);
++  expectFullIronArmor(beforeSave);
++  expect(beforeSave.cursor.stack).toBeNull();
++  steps.push(equipmentStep('workbench-reclaimed', beforeSave));
++  const evidence = { phase: 'ready-to-save' as const, steps: [...steps], snapshot: beforeSave };
++  record(evidence);
++  return { beforeSave, evidence };
++}
++
++export async function verifyEquipmentJourneyAfterRestore(
++  page: Page,
++  before: HarnessEquipmentSnapshot,
++  record: (
++    value: Readonly<{
++      phase: 'restored' | 'detached' | 'continued';
++      snapshot: HarnessEquipmentSnapshot;
++      restored?: HarnessEquipmentSnapshot;
++    }>,
++  ) => void,
++): Promise<Readonly<{ restored: HarnessEquipmentSnapshot; continued: HarnessEquipmentSnapshot }>> {
++  const restored = await waitForEquipmentSnapshot(
++    page,
++    (value) => value.runtimeEpoch !== before.runtimeEpoch && value.actor.epoch !== before.actor.epoch,
++  );
++  record({ phase: 'restored', snapshot: restored });
++  expect(restored.actor.entityId).toBe(before.actor.entityId);
++  expect(restored.actor.lifetime).toBe(before.actor.lifetime);
++  expect(restored.inventoryRevision).toBe(before.inventoryRevision);
++  expect(restored.slots).toEqual(before.slots);
++  expect(restored.armor).toEqual(before.armor);
++  expect(restored.cursor).toEqual(before.cursor);
++  expect(restored.player).toEqual(before.player);
++  expect(restored.armorPoints).toBe(before.armorPoints);
++  expectFullIronArmor(restored);
++  const panel = await inventory(page);
++  await expectEquipmentDom(page, panel, restored);
++  const detached = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'helmet').click(),
++    (value) => value.armor.helmet === null && value.cursor.stack?.itemId === armorIds.helmet,
++  );
++  record({ phase: 'detached', snapshot: detached, restored });
++  const reequipped = await committedPointer(
++    page,
++    () => equipmentAddress(panel, 'helmet').click(),
++    (value) => value.armor.helmet?.itemId === armorIds.helmet && value.cursor.stack === null,
++  );
++  record({ phase: 'continued', snapshot: reequipped, restored });
++  expect(detached.actor).toEqual(restored.actor);
++  expect(reequipped.inventoryRevision).toBe(restored.inventoryRevision + 2);
++  expect(reequipped.armor).toEqual(restored.armor);
++  await expectEquipmentDom(page, panel, reequipped);
++  await closeInventory(page);
++  return { restored, continued: reequipped };
++}
++
++export async function expectEquipmentReadyForSave(
++  page: Page,
++  journey: V2EquipmentJourneyState,
++): Promise<HarnessEquipmentSnapshot> {
++  const current = await requireEquipmentSnapshot(page);
++  expect(inventoryState(current)).toEqual(inventoryState(journey.beforeSave));
++  expect(current.armorPoints).toBe(journey.beforeSave.armorPoints);
++  expect(await voxelAt(page, classicScenario.v2Equipment.workbench.target)).toBe(0);
++  return current;
++}
++
++export async function developerWorldEpoch(page: Page): Promise<unknown> {
++  const result = await page.evaluate(async () =>
++    (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.world.identity(),
++  );
++  if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
++  return result.data.epoch;
++}
+diff --git a/apps/web/tests/e2e/classic-support/harness.ts b/apps/web/tests/e2e/classic-support/harness.ts
+index 031a134760cca0ff79608babbffe2130d00dbe7c..4fbe1aae8bd8bf08400faf3b073284f899193438 100644
+--- a/apps/web/tests/e2e/classic-support/harness.ts
++++ b/apps/web/tests/e2e/classic-support/harness.ts
+@@ -12,7 +12,11 @@ import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection }
+ import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
+ import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
+ import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+-import type { HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../../../src/app/app-contracts';
++import type {
++  HarnessEquipmentSnapshot,
++  HarnessMediaSnapshot,
++  RenderedMaterialMeshSummary,
++} from '../../../src/app/app-contracts';
+ import type { GlobalAudio } from '../../../src/app/audio/global-audio';
+ export { clickCanvasCenter, lockPointer, moveMouseBy } from './mouse-input';
+ 
+@@ -139,6 +143,7 @@ export type HarnessApi = {
+   getVoxelGeometry(voxel: number): VoxelGeometryDefinitionV1 | null;
+   getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId): RenderedMaterialMeshSummary | null; // prettier-ignore
+   mediaSnapshot(): HarnessMediaSnapshot;
++  equipmentSnapshot(): HarnessEquipmentSnapshot | null;
+   flushSave(): Promise<void>;
+   beginPerformanceScenario(name: string): string;
+   exportPerformanceTrace(): ChromeTrace;
+diff --git a/apps/web/tests/e2e/classic-support/scenario.test.ts b/apps/web/tests/e2e/classic-support/scenario.test.ts
+index e3ab601c7230b9d72632df14acfa9789f30e875f..77010c037cb02173d96239190800df0153f33b18 100644
+--- a/apps/web/tests/e2e/classic-support/scenario.test.ts
++++ b/apps/web/tests/e2e/classic-support/scenario.test.ts
+@@ -1,8 +1,11 @@
+ import { readFileSync } from 'node:fs';
+ import { describe, expect, it } from 'vitest';
++import { overworldBlocks } from '../../../../../playbooks/classic/src/blocks';
++import { overworldItems } from '../../../../../playbooks/classic/src/items';
++import { overworldCraftingRecipes } from '../../../../../playbooks/classic/src/stations';
+ import { classicScenario } from './scenario';
+ 
+-describe('Classic canonical V1 scenario contract', () => {
++describe('Classic canonical scenario contract', () => {
+   it('moves the complete canonical lane down by 29 blocks without changing its x/z route', () => {
+     expect(classicScenario.initialState.floor).toEqual({ from: [-4, 30, -3], to: [224, 30, 3], voxel: 3 });
+     expect(classicScenario.initialState.air).toEqual({ from: [-4, 31, -3], to: [224, 37, 3], voxel: 0 });
+@@ -52,12 +55,129 @@ describe('Classic canonical V1 scenario contract', () => {
+     expect([...stages].sort()).toEqual(['C0', 'C1', 'C2', 'C3', 'C4', 'C5']);
+   });
+ 
+-  it('keeps post-baseline V1 actions on product input instead of Harness mutation ports', () => {
++  it('freezes a non-overlapping V2 equipment resource strip in the existing corridor', () => {
++    const resources = classicScenario.v2Equipment.resourceStrip;
++    expect(resources.map(({ itemId }) => itemId).sort()).toEqual([
++      'iron-block',
++      'iron-block',
++      'iron-block',
++      'iron-block',
++      'stone-block',
++      'stone-block',
++      'stone-block',
++      'wood-block',
++      'wood-block',
++      'wood-block',
++    ]);
++    expect(resources.map(({ target }) => target)).toEqual(
++      Array.from({ length: 10 }, (_, index) => [80 + index * 2, 31, 2]),
++    );
++    expect(classicScenario.v2Equipment.workbench).toEqual({
++      support: [78, 30, -2],
++      target: [78, 31, -2],
++      approach: [78.5, 0.5],
++    });
++    expect(new Set(resources.map(({ target }) => target.join(',')))).toHaveProperty('size', resources.length);
++    for (const resource of resources) {
++      expect(resource.support).toEqual([resource.target[0], 30, resource.target[2]]);
++      expect(resource.target[1]).toBe(31);
++      expect(resource.approach[0]).toBe(resource.target[0] + 0.5);
++      expect(resource.approach[1]).toBe(resource.target[2] - 2.5);
++      expect(resource.target[0]).toBeGreaterThanOrEqual(classicScenario.initialState.floor.from[0]);
++      expect(resource.target[0]).toBeLessThanOrEqual(classicScenario.initialState.floor.to[0]);
++      expect(resource.target[2]).toBeGreaterThanOrEqual(classicScenario.initialState.floor.from[2]);
++      expect(resource.target[2]).toBeLessThanOrEqual(classicScenario.initialState.floor.to[2]);
++    }
++
++    const protectedPositions = [
++      ...classicScenario.initialState.resourceVoxels.map(({ position }) => position),
++      classicScenario.route.buildTarget,
++      classicScenario.route.stationTarget,
++      classicScenario.v1Slice.water.target,
++      classicScenario.v1Slice.door.lower,
++      classicScenario.v1Slice.door.upper,
++      classicScenario.v1Slice.jukebox.target,
++    ].map((point) => point.join(','));
++    expect(
++      resources.map(({ target }) => target.join(',')).filter((point) => protectedPositions.includes(point)),
++    ).toEqual([]);
++    expect(protectedPositions).not.toContain(classicScenario.v2Equipment.workbench.target.join(','));
++    expect(resources.map(({ target }) => target.join(','))).not.toContain(
++      classicScenario.v2Equipment.workbench.target.join(','),
++    );
++  });
++
++  it('derives the V2 equipment material budget from registered Classic definitions', () => {
++    const items = new Map(overworldItems.map((item) => [item.id, item] as const));
++    const blocks = new Map(overworldBlocks.map((block) => [block.voxel, block] as const));
++    const recipes = new Map(overworldCraftingRecipes.map((recipe) => [recipe.id, recipe] as const));
++    const resources = classicScenario.v2Equipment.resourceStrip;
++    const recipeInputCount = (recipeId: string, itemId: string) => {
++      const recipe = recipes.get(recipeId);
++      if (!recipe) throw new Error(`Missing Classic recipe ${recipeId}.`);
++      const inputs = recipe.kind === 'shaped' ? recipe.pattern.filter((stack) => stack !== null) : recipe.inputs;
++      return inputs.reduce((total, stack) => total + (stack.itemId === itemId ? stack.count : 0), 0);
++    };
++
++    for (const resource of resources) {
++      expect(items.get(resource.itemId)?.capabilities).toContainEqual({ type: 'place', voxel: resource.voxel });
++      expect(blocks.get(resource.voxel)?.drop).toEqual({ itemId: resource.dropItemId, count: 1 });
++    }
++    expect(blocks.get(3)?.minimumTier).toBe(1);
++    expect(blocks.get(21)?.minimumTier).toBe(2);
++    expect(items.get('wood-pickaxe')?.capabilities).toContainEqual(
++      expect.objectContaining({ type: 'mine', tool: 'pickaxe', tier: 1 }),
++    );
++    expect(items.get('stone-pickaxe')?.capabilities).toContainEqual(
++      expect.objectContaining({ type: 'mine', tool: 'pickaxe', tier: 2 }),
++    );
++    expect(recipes.get('planks')).toMatchObject({
++      inputs: [{ itemId: 'wood-block', count: 1 }],
++      outputs: [{ itemId: 'plank', count: 4 }],
++    });
++    expect(recipes.get('sticks')).toMatchObject({
++      outputs: [{ itemId: 'stick', count: 4 }],
++    });
++    expect(recipes.get('iron-block-unpack')).toMatchObject({
++      inputs: [{ itemId: 'iron-block', count: 1 }],
++      outputs: [{ itemId: 'iron-ingot', count: 9 }],
++    });
++    expect(recipeInputCount('wood-pickaxe', 'plank')).toBe(3);
++    expect(recipeInputCount('wood-pickaxe', 'stick')).toBe(2);
++    expect(recipeInputCount('stone-pickaxe', 'cobblestone')).toBe(3);
++    expect(recipeInputCount('stone-pickaxe', 'stick')).toBe(2);
++    const armorCosts = ['iron-helmet', 'iron-chestplate', 'iron-leggings', 'iron-boots', 'iron-helmet'].map((id) =>
++      recipeInputCount(id, 'iron-ingot'),
++    );
++    expect(armorCosts).toEqual([5, 8, 7, 4, 5]);
++    for (const [slot, itemId, points] of [
++      ['helmet', 'iron-helmet', 2],
++      ['chestplate', 'iron-chestplate', 6],
++      ['leggings', 'iron-leggings', 5],
++      ['boots', 'iron-boots', 2],
++    ] as const) {
++      expect(items.get(itemId)).toMatchObject({
++        stackLimit: 1,
++        durability: { max: 165 },
++        capabilities: [{ type: 'armor', slot, points }],
++      });
++      expect(recipes.get(itemId)?.outputs).toEqual([{ itemId, count: 1, instance: { durability: 165 } }]);
++    }
++    expect(armorCosts.reduce((total, count) => total + count, 0)).toBeLessThanOrEqual(4 * 9);
++    expect(
++      3 * 4 - recipeInputCount('sticks', 'plank') - recipeInputCount('wood-pickaxe', 'plank'),
++    ).toBeGreaterThanOrEqual(0);
++    expect(4 * 9 - armorCosts.reduce((total, count) => total + count, 0)).toBe(7);
++  });
++
++  it('keeps post-baseline canonical actions on product input instead of Harness mutation ports', () => {
+     const specSource = readFileSync(new URL('../classic-runtime.spec.ts', import.meta.url), 'utf8');
+     const helperSource = readFileSync(new URL('./v1-slice.ts', import.meta.url), 'utf8');
++    const equipmentSource = readFileSync(new URL('./equipment-journey.ts', import.meta.url), 'utf8');
++    const equipmentSupportSource = readFileSync(new URL('./equipment-journey-support.ts', import.meta.url), 'utf8');
+     const baselineOffset = specSource.indexOf('const baseline = await waitForSnapshot');
+     expect(baselineOffset).toBeGreaterThan(0);
+-    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}`;
++    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}\n${equipmentSource}\n${equipmentSupportSource}`;
+     for (const forbidden of [
+       '.fillWorld(',
+       '.setVoxelAt(',
+@@ -74,4 +194,40 @@ describe('Classic canonical V1 scenario contract', () => {
+     ])
+       expect(productJourney, `post-baseline journey contains ${forbidden}`).not.toContain(forbidden);
+   });
++
++  it('keeps equipment placement, close settlement, and pre-save evidence on fresh runtime state', () => {
++    const specSource = readFileSync(new URL('../classic-runtime.spec.ts', import.meta.url), 'utf8');
++    const equipmentSource = readFileSync(new URL('./equipment-journey.ts', import.meta.url), 'utf8');
++    const supportSource = readFileSync(new URL('./equipment-journey-support.ts', import.meta.url), 'utf8');
++    const placement = supportSource.slice(
++      supportSource.indexOf('async function placeResourceStrip'),
++      supportSource.indexOf('async function mineResources'),
++    );
++    const walk = placement.indexOf('await walkTo(page, resource.approach, { jump: true })');
++    const select = placement.indexOf('await selectCreativeItem(page, resource.itemId)');
++    const placed = placement.indexOf('await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel)');
++    const survival = placement.indexOf('await switchToSurvival(page)');
++    const freshTick = placement.indexOf('value.authority.physicsTick > beforeSurvival.authority.physicsTick');
++    const grounded = placement.indexOf('value.onGround && !value.colliding');
++    expect([walk, select, placed, survival, freshTick, grounded].every((offset) => offset >= 0)).toBe(true);
++    expect(walk).toBeLessThan(select);
++    expect(select).toBeLessThan(placed);
++    expect(placed).toBeLessThan(survival);
++    expect(survival).toBeLessThan(freshTick);
++    expect(survival).toBeLessThan(grounded);
++    expect(placement).not.toContain('let selected');
++
++    const closeSettlement = equipmentSource.slice(
++      equipmentSource.indexOf('const beforeClose = current'),
++      equipmentSource.indexOf("steps.push(equipmentStep('equipment-origin-close'"),
++    );
++    expect(closeSettlement).toContain('value.runtimeEpoch === beforeClose.runtimeEpoch');
++    expect(closeSettlement).toContain('sameActor(value.actor, beforeClose.actor)');
++
++    const preSave = specSource.slice(
++      specSource.indexOf('const equipmentBeforeSave ='),
++      specSource.indexOf('expect(observedVoxel(authorityBefore'),
++    );
++    expect(preSave).toContain('v2EquipmentPreSave: equipmentBeforeSave');
++  });
+ });
+diff --git a/apps/web/tests/e2e/classic-support/scenario.ts b/apps/web/tests/e2e/classic-support/scenario.ts
+index 1e1126bc2347de6879d7cf68894970f9d7e7b2ea..0031c07b2a45cc56fcc99889bf0b39dcc0bb9792 100644
+--- a/apps/web/tests/e2e/classic-support/scenario.ts
++++ b/apps/web/tests/e2e/classic-support/scenario.ts
+@@ -3,6 +3,12 @@ import { readFileSync } from 'node:fs';
+ export type Point = readonly [number, number, number];
+ export type RoutePoint = readonly [number, number];
+ export type V1Placement = Readonly<{ support: Point; target: Point; approach: RoutePoint }>;
++export type V2EquipmentResource = V1Placement &
++  Readonly<{
++    itemId: 'wood-block' | 'stone-block' | 'iron-block';
++    dropItemId: 'wood-block' | 'cobblestone' | 'iron-block';
++    voxel: number;
++  }>;
+ 
+ export type ClassicScenario = Readonly<{
+   schemaVersion: 1;
+@@ -38,6 +44,10 @@ export type ClassicScenario = Readonly<{
+     door: Readonly<{ support: Point; lower: Point; upper: Point; approach: RoutePoint }>;
+     jukebox: V1Placement;
+   }>;
++  v2Equipment: Readonly<{
++    resourceStrip: readonly V2EquipmentResource[];
++    workbench: V1Placement;
++  }>;
+   faultDesign: Readonly<Record<string, string>>;
+   coverage: Readonly<{
+     included: readonly string[];
+@@ -57,3 +67,11 @@ export const classicScenario = JSON.parse(readFileSync(scenarioUrl, 'utf8')) as
+ 
+ if (classicScenario.schemaVersion !== 1 || classicScenario.scenarioId !== 'classic-canonical-runtime-v11')
+   throw new Error('Unsupported Classic canonical scenario.');
++
++export const classicPersistedPositions = Object.freeze([
++  classicScenario.route.buildTarget,
++  classicScenario.route.stationTarget,
++  classicScenario.v1Slice.door.lower,
++  classicScenario.v1Slice.door.upper,
++  classicScenario.v1Slice.jukebox.target,
++]);
+diff --git a/apps/web/tests/unit/app/game-harness-observability.test.ts b/apps/web/tests/unit/app/game-harness-observability.test.ts
+index 690d7eb6038453bff9d296de52242bf88bac4d20..dcb014778c22c6eac390fe0c75ad4ad42b6f8830 100644
+--- a/apps/web/tests/unit/app/game-harness-observability.test.ts
++++ b/apps/web/tests/unit/app/game-harness-observability.test.ts
+@@ -1,7 +1,11 @@
+ import { describe, expect, it, vi } from 'vitest';
+ import { createVoxelGeometryRegistryV1, type MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
+ import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+-import { createHarnessObservability } from '../../../src/app/gameplay/game-harness-observability';
++import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
++import {
++  createHarnessObservability,
++  type HarnessObservabilityBindings,
++} from '../../../src/app/gameplay/game-harness-observability';
+ 
+ const geometry = createVoxelGeometryRegistryV1([
+   {
+@@ -41,11 +45,96 @@ const batch: MediaPlaybackCommittedBatchV1 = {
+   ],
+ };
+ 
++const gameplayView = (
++  options: Readonly<{ health?: number; firstItemId?: string; armorPoints?: number | null }> = {},
++): AuthorityGameplayView => ({
++  gameplayRevision: 11,
++  gameplayTime: 7,
++  player: {
++    entityId: 'player-1',
++    spawnPosition: [0, 2, 0],
++    health: options.health ?? 17,
++    maxHealth: 20,
++    hunger: 14,
++    maxHunger: 20,
++    lifecycle: 'alive',
++    inventory: [],
++    selectedSlot: 0,
++    hotbarSize: 9,
++    attackCooldownSeconds: 0,
++    hungerAccumulator: 0,
++    healingAccumulator: 0,
++    starvationAccumulator: 0,
++    breakAction: null,
++  },
++  entities: [],
++  actors: [],
++  inventory: {
++    version: 1,
++    actor: { entityId: 'player-1', epoch: 2, lifetime: 7 },
++    revision: 13,
++    slots: [{ itemId: options.firstItemId ?? 'sample:pickaxe', count: 1, instance: { durability: 8 } }, null],
++    hotbarSize: 2,
++    armor: {
++      helmet: { itemId: 'sample:helmet', count: 1, instance: { durability: 4 } },
++      chestplate: { itemId: 'sample:chestplate', count: 1, instance: { durability: 9 } },
++      leggings: { itemId: 'sample:leggings', count: 1, instance: { durability: 7 } },
++      boots: { itemId: 'sample:boots', count: 1, instance: { durability: 3 } },
++    },
++    cursor: {
++      version: 1,
++      revision: 5,
++      stack: { itemId: 'sample:cursor', count: 1, instance: { durability: 2 } },
++      origin: {
++        kind: 'station',
++        reference: { entityId: 'bench-1', epoch: 2, lifetime: 9 },
++        slot: 3,
++      },
++      craftingGrid: [{ itemId: 'sample:craft', count: 1, instance: { durability: 6 } }, null, null, null],
++    },
++    matchedCraftingRecipeIds: [],
++  },
++  craftableRecipeIds: [],
++  ...(options.armorPoints === null ? {} : { armorPoints: options.armorPoints ?? 17 }),
++  metrics: {
++    entityCount: 1,
++    worldItemCount: 0,
++    creatureCount: 0,
++    npcCount: 0,
++    nearbyVisitedBucketCount: 0,
++    nearbyCandidateCount: 0,
++    nearbyReturnedCount: 0,
++    inventoryOperationCount: 0,
++    gameplayEventCount: 0,
++    snapshotBytes: 0,
++    retainedActorCount: 0,
++    activeActorCount: 0,
++    behaviorEvaluationCount: 0,
++    navigationPlanCount: 0,
++    navigationExpandedNodeCount: 0,
++    pathRecomputeCount: 0,
++    actionCompletionCount: 0,
++    actionFailureCount: 0,
++    actionInterruptionCount: 0,
++    perceptionLineOfSightCheckCount: 0,
++    simulationTime: 0,
++  },
++});
++
+ const bindings = () => {
+   let authorityEpoch = 'world:2';
++  let authorityReady = true;
++  let authorityGameplay = gameplayView();
++  let authorityValue: NonNullable<ReturnType<HarnessObservabilityBindings['authority']>> | null;
+   let renderedWorldEpoch: string | null = 'world:2';
+   let authorityGeometry = geometry;
+   const authority = {
++    get isReady() {
++      return authorityReady;
++    },
++    get gameplay() {
++      return authorityGameplay;
++    },
+     get voxelGeometry() {
+       return authorityGeometry;
+     },
+@@ -53,6 +142,7 @@ const bindings = () => {
+       return authorityEpoch;
+     },
+   };
++  authorityValue = authority;
+   const rendered = {
+     chunkKey: '0,0,0',
+     chunkRevision: 7,
+@@ -65,7 +155,7 @@ const bindings = () => {
+   let renderedSummary: typeof rendered | null = rendered;
+   return {
+     developerWorld: () => ({}),
+-    authority: () => authority,
++    authority: () => authorityValue,
+     world: () => null,
+     renderedMaterialMesh: vi.fn(() => renderedSummary),
+     renderedWorldEpoch: () => renderedWorldEpoch,
+@@ -76,6 +166,9 @@ const bindings = () => {
+       error: null,
+     }),
+     setAuthorityEpoch: (value: string) => (authorityEpoch = value),
++    setAuthorityReady: (value: boolean) => (authorityReady = value),
++    setAuthorityGameplay: (value: AuthorityGameplayView) => (authorityGameplay = value),
++    setAuthority: (value: typeof authority | null) => (authorityValue = value),
+     setAuthorityGeometry: (value: typeof geometry) => (authorityGeometry = value),
+     setRenderedWorldEpoch: (value: string | null) => (renderedWorldEpoch = value),
+     setRenderedSummary: (value: typeof rendered | null) => (renderedSummary = value),
+@@ -161,4 +254,175 @@ describe('BrowserProductHarness V1 read-only observability', () => {
+       audio: null,
+     });
+   });
++
++  it('returns a detached recursively frozen equipment projection with all four slots and cursor origin', () => {
++    const current = bindings();
++    const api = createHarnessObservability(current);
++    const source = current.authority()!.gameplay;
++    const snapshot = api.equipmentSnapshot();
++
++    expect(snapshot).toEqual({
++      runtimeEpoch: 'world:2',
++      gameplayRevision: 11,
++      actor: { entityId: 'player-1', epoch: 2, lifetime: 7 },
++      inventoryRevision: 13,
++      slots: [{ itemId: 'sample:pickaxe', count: 1, instance: { durability: 8 } }, null],
++      armor: {
++        helmet: { itemId: 'sample:helmet', count: 1, instance: { durability: 4 } },
++        chestplate: { itemId: 'sample:chestplate', count: 1, instance: { durability: 9 } },
++        leggings: { itemId: 'sample:leggings', count: 1, instance: { durability: 7 } },
++        boots: { itemId: 'sample:boots', count: 1, instance: { durability: 3 } },
++      },
++      cursor: {
++        version: 1,
++        revision: 5,
++        stack: { itemId: 'sample:cursor', count: 1, instance: { durability: 2 } },
++        origin: { kind: 'station', reference: { entityId: 'bench-1', epoch: 2, lifetime: 9 }, slot: 3 },
++        craftingGrid: [{ itemId: 'sample:craft', count: 1, instance: { durability: 6 } }, null, null, null],
++      },
++      player: { health: 17, lifecycle: 'alive' },
++      armorPoints: 17,
++    });
++    expect(snapshot?.actor).not.toBe(source.inventory.actor);
++    expect(snapshot?.slots).not.toBe(source.inventory.slots);
++    expect(snapshot?.slots[0]).not.toBe(source.inventory.slots[0]);
++    expect(snapshot?.slots[0]?.instance).not.toBe(source.inventory.slots[0]?.instance);
++    expect(snapshot?.armor).not.toBe(source.inventory.armor);
++    expect(snapshot?.armor.helmet).not.toBe(source.inventory.armor.helmet);
++    expect(snapshot?.armor.helmet?.instance).not.toBe(source.inventory.armor.helmet?.instance);
++    expect(snapshot?.cursor).not.toBe(source.inventory.cursor);
++    expect(snapshot?.cursor.stack).not.toBe(source.inventory.cursor.stack);
++    expect(snapshot?.cursor.stack?.instance).not.toBe(source.inventory.cursor.stack?.instance);
++    expect(snapshot?.cursor.origin).not.toBe(source.inventory.cursor.origin);
++    if (snapshot?.cursor.origin?.kind === 'station' && source.inventory.cursor.origin?.kind === 'station')
++      expect(snapshot.cursor.origin.reference).not.toBe(source.inventory.cursor.origin.reference);
++    expect(snapshot?.cursor.craftingGrid[0]).not.toBe(source.inventory.cursor.craftingGrid[0]);
++    expect(snapshot?.cursor.craftingGrid[0]?.instance).not.toBe(source.inventory.cursor.craftingGrid[0]?.instance);
++    expect(Object.isFrozen(snapshot)).toBe(true);
++    expect(Object.isFrozen(snapshot?.actor)).toBe(true);
++    expect(Object.isFrozen(snapshot?.slots)).toBe(true);
++    expect(Object.isFrozen(snapshot?.slots[0]?.instance)).toBe(true);
++    expect(Object.isFrozen(snapshot?.armor)).toBe(true);
++    expect(Object.values(snapshot?.armor ?? {}).every((slot) => !slot || Object.isFrozen(slot))).toBe(true);
++    expect(Object.values(snapshot?.armor ?? {}).every((slot) => !slot || Object.isFrozen(slot.instance))).toBe(true);
++    expect(Object.isFrozen(snapshot?.cursor)).toBe(true);
++    expect(Object.isFrozen(snapshot?.cursor.stack)).toBe(true);
++    expect(Object.isFrozen(snapshot?.cursor.stack?.instance)).toBe(true);
++    expect(Object.isFrozen(snapshot?.cursor.origin)).toBe(true);
++    expect(snapshot?.cursor.origin?.kind !== 'station' || Object.isFrozen(snapshot.cursor.origin.reference)).toBe(true);
++    expect(Object.isFrozen(snapshot?.cursor.craftingGrid)).toBe(true);
++    expect(snapshot?.cursor.craftingGrid.every((slot) => !slot || Object.isFrozen(slot))).toBe(true);
++    expect(snapshot?.cursor.craftingGrid.every((slot) => !slot?.instance || Object.isFrozen(slot.instance))).toBe(true);
++    expect(Object.isFrozen(snapshot?.player)).toBe(true);
++
++    Object.assign(source.inventory.actor, { epoch: 99 });
++    Object.assign(source.inventory.slots[0]!.instance!, { durability: 1 });
++    Object.assign(source.inventory.armor.helmet!.instance!, { durability: 1 });
++    Object.assign(source.inventory.cursor.origin!, { slot: 8 });
++    Object.assign(source.inventory.cursor.craftingGrid[0]!.instance!, { durability: 1 });
++    Object.assign(source.player, { health: 1 });
++    expect(snapshot?.actor.epoch).toBe(2);
++    expect(snapshot?.slots[0]?.instance?.durability).toBe(8);
++    expect(snapshot?.armor.helmet?.instance?.durability).toBe(4);
++    expect(snapshot?.cursor.origin).toMatchObject({ slot: 3 });
++    expect(snapshot?.cursor.craftingGrid[0]?.instance?.durability).toBe(6);
++    expect(snapshot?.player.health).toBe(17);
++  });
++
++  it('returns null when Authority is missing, not ready, or has no runtime epoch', () => {
++    const current = bindings();
++    const api = createHarnessObservability(current);
++    current.setAuthority(null);
++    expect(api.equipmentSnapshot()).toBeNull();
++
++    let notReadyGameplayReads = 0;
++    current.setAuthority({
++      isReady: false,
++      runtimeEpoch: 'world:2',
++      voxelGeometry: geometry,
++      get gameplay() {
++        notReadyGameplayReads += 1;
++        throw new Error('Authority gameplay view is not ready.');
++      },
++    });
++    expect(api.equipmentSnapshot()).toBeNull();
++    expect(notReadyGameplayReads).toBe(0);
++
++    let emptyEpochGameplayReads = 0;
++    current.setAuthority({
++      isReady: true,
++      runtimeEpoch: '',
++      voxelGeometry: geometry,
++      get gameplay() {
++        emptyEpochGameplayReads += 1;
++        throw new Error('An empty epoch must be rejected before gameplay is read.');
++      },
++    });
++    expect(api.equipmentSnapshot()).toBeNull();
++    expect(emptyEpochGameplayReads).toBe(0);
++  });
++
++  it('returns null when the client, epoch, or gameplay object changes during one observation', () => {
++    const clientChanged = bindings();
++    const firstClient = clientChanged.authority()!;
++    const secondClient = bindings().authority()!;
++    let clientReads = 0;
++    expect(
++      createHarnessObservability({
++        ...clientChanged,
++        authority: () => (++clientReads === 1 ? firstClient : secondClient),
++      }).equipmentSnapshot(),
++    ).toBeNull();
++    expect(clientReads).toBe(2);
++
++    const epochView = gameplayView();
++    let epochReads = 0;
++    const changingEpoch = {
++      isReady: true,
++      gameplay: epochView,
++      voxelGeometry: geometry,
++      get runtimeEpoch() {
++        return ++epochReads === 1 ? 'world:2' : 'world:3';
++      },
++    };
++    expect(
++      createHarnessObservability({ ...bindings(), authority: () => changingEpoch }).equipmentSnapshot(),
++    ).toBeNull();
++    expect(epochReads).toBe(2);
++
++    const firstGameplay = gameplayView();
++    const secondGameplay = gameplayView({ health: 9 });
++    let gameplayReads = 0;
++    const changingGameplay = {
++      isReady: true,
++      runtimeEpoch: 'world:2',
++      voxelGeometry: geometry,
++      get gameplay() {
++        return ++gameplayReads === 1 ? firstGameplay : secondGameplay;
++      },
++    };
++    expect(
++      createHarnessObservability({ ...bindings(), authority: () => changingGameplay }).equipmentSnapshot(),
++    ).toBeNull();
++    expect(gameplayReads).toBe(2);
++  });
++
++  it('returns current data after an epoch change without reusing an older snapshot', () => {
++    const current = bindings();
++    const api = createHarnessObservability(current);
++    const first = api.equipmentSnapshot();
++    const next = gameplayView({ health: 9, firstItemId: 'sample:new', armorPoints: null });
++    current.setAuthorityEpoch('world:3');
++    current.setAuthorityGameplay(next);
++    const second = api.equipmentSnapshot();
++
++    expect(first).toMatchObject({ runtimeEpoch: 'world:2', armorPoints: 17 });
++    expect(second).toMatchObject({
++      runtimeEpoch: 'world:3',
++      slots: [{ itemId: 'sample:new', count: 1 }, null],
++      player: { health: 9, lifecycle: 'alive' },
++      armorPoints: null,
++    });
++    expect(second).not.toBe(first);
++  });
+ });
+diff --git a/changes/2026-09-23-classic-functional-completion/equipment-harness-contract.md b/changes/2026-09-23-classic-functional-completion/equipment-harness-contract.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..1b2498810ba9a32cb142541e54fd3d31e00967ad
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/equipment-harness-contract.md
+@@ -0,0 +1,42 @@
++# V2 Equipment Harness Oracle 合同
++
++阶段：`V2-EQUIPMENT-HARNESS-ORACLE-01`
++状态：接口冻结；行为 RED 待执行。
++
++## Owner 与接口
++
++- Web `BrowserProductHarness` 新增唯一只读入口 `equipmentSnapshot(): HarnessEquipmentSnapshot | null`。类型定义在
++  `apps/web/src/app/app-contracts.ts`，只复用公开 `AuthorityInventoryView` 与 `AuthorityGameplayView` 字段，不新增协议、
++  权威 owner、动作或持久化字段。
++- 固定字段为：`runtimeEpoch`、`gameplayRevision`、`actor`、`inventoryRevision`、`slots`、`armor`、`cursor`、
++  `player.health/lifecycle`、`armorPoints`。Authority 未提供 armorPoints 时显式返回 `null`，不伪装为 0。
++- 四个 armor slot 由通用 Authority inventory projection 提供；Harness 不识别 Classic item ID，不从 checkpoint、DOM、
++  HUD 或本地 UI 状态重建装备。非 Classic world 只要提供同一 Authority 投影即可消费该 oracle。
++
++## 同轮新鲜度与复制
++
++- 每次调用先取得当前 `BrowserAuthorityClient`。无 client、`isReady=false` 或空 `runtimeEpoch` 时返回 `null`，避免访问
++  尚未就绪时会抛错的 `gameplay` getter；不使用广域 `catch` 吞掉真实内部错误。
++- 固定同一 client、runtimeEpoch 和同一个 gameplay 对象后，只从该对象复制所有字段。完成复制后重新确认
++  `bindings.authority()` 仍是同一 client、client 仍 ready、runtimeEpoch 未变且 `client.gameplay` 仍是同一对象；任一变化
++  立即返回 `null`，不循环重试。
++- actor reference、slots、每个 stack/instance、四槽 armor、cursor stack/origin（含 station reference）、craftingGrid 与
++  player 子对象全部脱离源引用并递归冻结。旧 epoch 的已返回对象可由测试持有；下一次调用必须读取当前 client/epoch/
++  gameplay，不能返回缓存旧世界。
++
++## 失败、兼容与验收
++
++- `null` 仅表示当前没有稳定可观察的 ready Authority snapshot；oracle 不触发重试、恢复、保存或 Authority action。
++- 既有 geometry、rendered mesh 与 media observability API 行为保持不变，现有 4 个测试继续通过。
++- RED 必须可收集且由临时 `equipmentSnapshot: () => null` 触发行为断言失败，不以缺失 import/类型失败代替。GREEN 覆盖
++  mutable source 脱别名、递归冻结、四槽 durability、station cursor origin、missing/not-ready/empty epoch、同轮 client/
++  epoch/gameplay 替换 fail closed，以及新 epoch 新数据。
++- 最终运行目标 unit tests、Web/Svelte types、root/Classic test types、精确 ESLint、可编辑文件 Prettier 与 scoped diff。
++  不运行 build、Browser、Cua、CI、Git 或部署；oracle GREEN 不等于真实装备旅程 GREEN。
++
++## 预算与文档
++
++- 传统工程量 `0.5-1 PD`；AI 连续墙钟预计 `2-3h`，120% 保守预算 `3.6h`，硬上限 `4h`。
++- credits、API 等价费用、费率、当前额度分母及占比均为 `unknown`。
++- 长期 docs 不更新：本片没有改变 Authority/Web/Harness owner 边界，只为已冻结装备投影增加当前 change 的只读验收
++  观察口。
+diff --git a/changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md b/changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3609ce11e16a6ca52115df1c37a87f5ce308266f
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md
+@@ -0,0 +1,74 @@
++# V2 Canonical Equipment Journey 合同
++
++阶段：`V2-CANONICAL-EQUIPMENT-FIXTURE-01 / V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02`
++状态：fixture 收口中；确定性与静态验证不替代新 artifact 上的唯一 Browser 验收。
++
++## Close-02 收口
++
++- Browser-05 已证明 creative flight 下用 `walkTo(..., { jump: true })` 会在 grounded freshness 条件失败。资源带每一格
++  都必须先在 survival 沿既定 approach 真实行走，再经正式 UI 切 creative、选择并放置；voxel readback 后立即经 UI
++  切回 survival，并等待 Authority physics tick 前进且 `onGround && !colliding`，才可前往下一格。坐标、timeout、
++  瞄准预算和单一路线不变。
++- equipment-origin close settlement 除 revision、cursor 与 boots 外，必须保持关闭前的 runtime epoch 与 actor
++  entity/epoch/lifetime，不能让另一 world/actor 上碰巧相同的 revision 满足等待条件。
++- C5 在执行保存前取得的 `equipmentBeforeSave` 必须写入既有 `restoreEvidence.before.v2EquipmentPreSave`，恢复严格比较
++  也继续使用这一对象；C4 前的 `before.v2Equipment` 分步证据保留，不覆盖 steps。
++
++## 行为边界
++
++- 唯一 canonical Playwright 旅程继续使用 `classic-runtime.spec.ts` 和 `canonical-runtime-v11.json`，不增加
++  第二条 browser 路线、retry、随机 fallback 或 timeout。V2 装备步骤插在完整 V1 水桶、门、唱片机完成后和 C4
++  streaming 前；原 C0-C5、V1 media/door 与 save-return-continue 断言不得删除、放宽或重排。
++- 创造目录只选择 creative hotbar，不写 survival inventory。固定资源带由真实 UI 在创造模式放置 3 个原木、3 个
++  石块和 4 个铁块；切回生存后，只通过真实 Pointer Lock、鼠标采集、键盘移动拾取和正式背包/工作台 UI
++  获得材料与装备。禁止 Harness 世界写口、生产 action 函数、命令壳、teleport 或 setView。
++- 固定资源闭包为：3 原木产生 12 木板并提供木镐所需木板/木棍；3 石块产生 3 圆石并提供石镐；4 铁块
++  经真实配方拆分为 36 铁锭。四件铁甲与额外铁头盔共需 29 铁锭。资源位置必须位于既有平坦 corridor，
++  support/target/approach 全部显式声明且不与 C0-C5、门、唱片机或工作台坐标冲突。坐标可达性只由后续
++  Browser 证明。
++- 工作台使用 C3 已真实取得并回收的同一物品；V2 合成结束后再次真实拆除和拾回，使 C5 继续要求
++  `stationTarget` 为空且背包内有工作台。
++
++## 装备矩阵
++
++1. 普通 click 将铁头盔从 bag 经 cursor 穿入 helmet；Shift-click 将胸甲、护腿、靴子 quick-move 到对应空槽。
++2. 额外铁头盔进入 cursor 后点击已占 chestplate，必须显示既有失败反馈；同一次 committed oracle 的 slots、
++   cursor、armor 与 inventoryRevision 必须完全不变。
++3. 同一 cursor 点击已占 helmet 完成原子交换；因两件头盔同 ID/同耐久，不声称存在 item instance ID，只以
++   cursor origin、revision 与 bag/cursor/armor 总数守恒证明交换。
++4. 至少一次 equipment -> bag 脱下和 bag -> equipment Shift quick-move 穿回；最后拿起一件 equipment 后通过
++   真实“关闭背包”结算，cursor 必须为空且物品回到合法原槽。
++5. 每个动作完成都等待新的只读 Authority equipment snapshot，并核对应 DOM；不得以 ghost preview、旧对象、
++   固定 sleep、input ack 或计数增长冒充提交。
++
++## 只读观察与恢复
++
++- fixture 只消费 `HarnessApi.equipmentSnapshot(): HarnessEquipmentSnapshot | null`。该接口由独立 owner 提供，字段
++  固定为 runtimeEpoch、gameplayRevision、actor、inventoryRevision、slots、armor、cursor、player health/lifecycle 与
++  armorPoints。fixture 不复制 DTO，也不增加写口。
++- oracle 必须来自同一个当前 `BrowserAuthorityClient.gameplay` 对象，深复制并冻结所有引用、slot、instance、armor、
++  cursor origin/crafting grid；client、runtimeEpoch 或 gameplay identity 在复制期间变化时返回 null。
++- C5 pre-save 在原有 world/inventory baseline 旁记录完整 equipment baseline。恢复后先保留原 V1 media/door
++  校验，再要求 runtimeEpoch 和 actor epoch 换代、actor entityId 不变，且 inventoryRevision、slots、armor、cursor
++  与 durability 精确恢复；随后用新 actor projection 完成一次真实脱/穿并观察 revision 前进。旧 actor ref 只用于
++  不等比较，不发送伪造 stale action。
++
++## 明确未覆盖
++
++- 本旅程仅抽样铁甲四槽和同种头盔交换，不代表 16 件 armor 变体或 194 项完整矩阵。
++- 当前 canonical 没有无需 Harness/admin 写状态即可确定触发致死的真实键鼠路线。实战 durability 损耗、死亡
++  掉落、death overlay 与 respawn 在本阶段及后续 equipment Browser 中均记为 `NOT OBSERVED`；确定性 server
++  测试不能冒充 Browser 证据。
++- 木剑体验场会内部执行 fill/teleport/heal/spawn/apply-damage，不得用作本旅程死亡入口。
++
++## RED、准出与预算
++
++- 确定性 RED 只覆盖 scenario 尚无 `v2Equipment`、10 个资源 target 的唯一性/不冲突，以及基于真实 Classic
++  item/block/recipe 定义的资源闭包。post-baseline source policy 同时扫描 equipment helper，拒绝 Harness 写口和
++  admin command。不得复制现有 pointer 33 项行为矩阵。
++- fixture 完成线：上述测试、Classic/root test types、定向 lint/format/diff 通过；原 V1/C0-C5 断言与 evidence
++  schema 保持。真实 GREEN 仅能来自 954 提交、重建新身份 artifact 后由 root 授予的唯一 canonical Browser。
++- 预算：AI 活跃 4-5 小时，保守 120% 上限 6 小时；传统 1-1.5 PD。credits、API 等价费用、费率、当前额度
++  分母与占比均 unknown。
++- Close-02 是同一阶段的有界修复，AI 活跃上限 2 小时，不重算完整 V2 预算；credits、API 等价费用、费率、
++  当前额度分母与占比仍为 unknown。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 081ac27fdb83351245012853ed97397169c398b5..52a379d119cf3f69dcb6f4729b866e2b576ade96 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -120,6 +120,23 @@ equipment 当目标，collect 不以 equipment 为 source。每个出队动作
+ 绑定发起时 actor/station identity；失败不写 UI 第二状态或伪造装备。纯 creative catalog 不自行开放装备权限。
+ 本片不改变 stdlib/protocol/Classic content、combat/death policy、坐标、timeout 或 Harness。
+ 
++V2 canonical equipment fixture 子片冻结 `equipment-journey-contract.md`：在完整 V1 后、C4 前，以真实 UI
++创造放置固定 3 原木、3 石块、4 铁块资源带，再切回生存经真实采集、拾取、合成取得四件铁甲与额外头盔；
++覆盖四槽 click/Shift quick-move、错槽完整零变、occupied swap、脱穿与关闭结算。C5 在原 V1 media/门恢复
++校验后，使用同一 Authority 的窄只读 equipment snapshot 验证 runtime/actor 双身份换代及 bag/cursor/armor/
++durability/revision 精确恢复，再以新 identity 继续一次真实 pointer 操作。不得以 creative catalog 直接给物、
++Harness 写状态、生产 action、teleport/setView、随机 fallback、第二路线或新增 timeout 代替玩家路径。当前
++canonical 无确定纯键鼠致死入口，因此实战耐久、死亡掉落与重生 Browser 证据保持 `NOT OBSERVED`；本 smoke
++不代表 16 件护甲或 194 项矩阵全部完成。
++
++V2 canonical equipment fixture Close-02 修复三个已定位的夹具缺口：固定资源带的每一格必须先在 survival
++沿同一 approach 真实行走，再经正式 UI 切 creative 选择/放置，并在 voxel readback 后切回 survival 等待 Authority
++physics tick 前进且 grounded/non-colliding；equipment-origin close 的提交等待必须保持 runtime epoch 与 actor
++identity；C5 必须把 C4
++之后、实际保存前的 equipment snapshot 以 `before.v2EquipmentPreSave` 写入既有 restore evidence，恢复比较使用同一
++baseline。不得修改坐标、timeout、瞄准预算、V1 路线或生产 oracle；本收口仍不提供 Browser、实战耐久、死亡掉落
++或重生证据。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
+diff --git a/playbooks/classic/scenarios/canonical-runtime-v11.json b/playbooks/classic/scenarios/canonical-runtime-v11.json
+index e3932125ff1f40fbf0410b05fe80e22ec16c6524..742c059286566e74a5ffe2c34f3dfcc6afe04d04 100644
+--- a/playbooks/classic/scenarios/canonical-runtime-v11.json
++++ b/playbooks/classic/scenarios/canonical-runtime-v11.json
+@@ -43,6 +43,91 @@
+     "door": { "support": [70, 30, 0], "lower": [70, 31, 0], "upper": [70, 32, 0], "approach": [67.5, 0.5] },
+     "jukebox": { "support": [76, 30, 2], "target": [76, 31, 2], "approach": [73.5, 2.5] }
+   },
++  "v2Equipment": {
++    "resourceStrip": [
++      {
++        "itemId": "wood-block",
++        "dropItemId": "wood-block",
++        "voxel": 4,
++        "support": [80, 30, 2],
++        "target": [80, 31, 2],
++        "approach": [80.5, -0.5]
++      },
++      {
++        "itemId": "wood-block",
++        "dropItemId": "wood-block",
++        "voxel": 4,
++        "support": [82, 30, 2],
++        "target": [82, 31, 2],
++        "approach": [82.5, -0.5]
++      },
++      {
++        "itemId": "wood-block",
++        "dropItemId": "wood-block",
++        "voxel": 4,
++        "support": [84, 30, 2],
++        "target": [84, 31, 2],
++        "approach": [84.5, -0.5]
++      },
++      {
++        "itemId": "stone-block",
++        "dropItemId": "cobblestone",
++        "voxel": 3,
++        "support": [86, 30, 2],
++        "target": [86, 31, 2],
++        "approach": [86.5, -0.5]
++      },
++      {
++        "itemId": "stone-block",
++        "dropItemId": "cobblestone",
++        "voxel": 3,
++        "support": [88, 30, 2],
++        "target": [88, 31, 2],
++        "approach": [88.5, -0.5]
++      },
++      {
++        "itemId": "stone-block",
++        "dropItemId": "cobblestone",
++        "voxel": 3,
++        "support": [90, 30, 2],
++        "target": [90, 31, 2],
++        "approach": [90.5, -0.5]
++      },
++      {
++        "itemId": "iron-block",
++        "dropItemId": "iron-block",
++        "voxel": 21,
++        "support": [92, 30, 2],
++        "target": [92, 31, 2],
++        "approach": [92.5, -0.5]
++      },
++      {
++        "itemId": "iron-block",
++        "dropItemId": "iron-block",
++        "voxel": 21,
++        "support": [94, 30, 2],
++        "target": [94, 31, 2],
++        "approach": [94.5, -0.5]
++      },
++      {
++        "itemId": "iron-block",
++        "dropItemId": "iron-block",
++        "voxel": 21,
++        "support": [96, 30, 2],
++        "target": [96, 31, 2],
++        "approach": [96.5, -0.5]
++      },
++      {
++        "itemId": "iron-block",
++        "dropItemId": "iron-block",
++        "voxel": 21,
++        "support": [98, 30, 2],
++        "target": [98, 31, 2],
++        "approach": [98.5, -0.5]
++      }
++    ],
++    "workbench": { "support": [78, 30, -2], "target": [78, 31, -2], "approach": [78.5, 0.5] }
++  },
+   "faultDesign": {
+     "wrongPlaybook": "C0 rejects a loaded identity or Pack asset other than Classic.",
+     "inputBypass": "C1 requires Pointer Lock plus acknowledged keyboard input and an authority trajectory crossing a Chunk boundary.",
+@@ -59,6 +144,7 @@
+       "mining drop pickup inventory and personal crafting",
+       "placement food existing combat and workbench runtime",
+       "creative bucket source round-trip two-Chunk wooden door and jukebox record lifecycle",
++      "survival acquisition crafting and pointer interaction for four iron armor slots",
+       "streaming resource release and rebuild",
+       "save return continue and post-restore interaction",
+       "Worker Wasm WebGL2 mesh and telemetry correlation"

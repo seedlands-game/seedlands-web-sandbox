@@ -1,0 +1,5 @@
+apps/web/tests/e2e/classic-support/harness.ts(171,80): error TS2339: Property 'equipmentSnapshot' does not exist on type 'HarnessApi'.
+apps/web/tests/e2e/classic-support/scenario.test.ts(129,32): error TS2339: Property 'inputs' does not exist on type 'StationRecipe'.
+  Property 'inputs' does not exist on type 'Readonly<{ kind: "shaped"; id: string; pattern: readonly InventorySlot[]; outputs: readonly Readonly<ItemStack>[]; }>'.
+apps/web/tests/e2e/classic-support/scenario.test.ts(129,47): error TS7006: Parameter 'total' implicitly has an 'any' type.
+apps/web/tests/e2e/classic-support/scenario.test.ts(129,54): error TS7006: Parameter 'stack' implicitly has an 'any' type.

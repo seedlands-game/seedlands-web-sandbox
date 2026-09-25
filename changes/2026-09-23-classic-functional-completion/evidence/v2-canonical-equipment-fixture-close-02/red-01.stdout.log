@@ -1,0 +1,34 @@
+5:43:52 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests | 1 failed) 9ms
+     × keeps equipment placement, close settlement, and pre-save evidence on fresh runtime state 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts > Classic canonical scenario contract > keeps equipment placement, close settlement, and pre-save evidence on fresh runtime state
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ apps/web/tests/e2e/classic-support/scenario.test.ts:211:87
+    209|     const survival = placement.indexOf('await switchToSurvival(page)');
+    210|     const grounded = placement.indexOf('value.onGround && !value.colli…
+    211|     expect([walk, select, placed, survival, grounded].every((offset) =…
+       |                                                                                       ^
+    212|     expect(walk).toBeLessThan(select);
+    213|     expect(select).toBeLessThan(placed);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  05:43:52
+   Duration  621ms (transform 429ms, setup 0ms, import 519ms, tests 9ms, environment 0ms)
+

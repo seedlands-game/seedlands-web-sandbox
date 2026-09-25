@@ -1,0 +1,7 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-runtime.spec.ts
+  310:3  error  'equipmentJourney' is never reassigned. Use 'const' instead  prefer-const
+  522:1  error  File has too many lines (508). Maximum allowed is 500        max-lines
+
+✖ 2 problems (2 errors, 0 warnings)
+
