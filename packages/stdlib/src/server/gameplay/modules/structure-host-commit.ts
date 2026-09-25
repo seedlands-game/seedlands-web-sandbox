@@ -14,7 +14,7 @@ import type { EntityStore } from '../entity-store';
 import { createInventoryCandidate } from './inventory-api';
 import type { InventorySlot } from '../inventory';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
-import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { playerInteractionOrigin, positionsInRange, voxelAdjacentFacePoint, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 import {
   STRUCTURE_BREAK_OPERATION,
@@ -153,10 +153,11 @@ function assertReachable(
   ownCells: ReadonlySet<string>,
 ): void {
   const origin = playerInteractionOrigin(actorPosition);
-  for (const position of [target.hit, target.adjacent]) {
+  for (const position of [target.hit, target.adjacent])
     if (!positionsInRange(origin, voxelCenter([...position]), 5)) throw new Error('out-of-range');
+  for (const endpoint of [voxelAdjacentFacePoint(target.hit, target.adjacent), voxelCenter([...target.adjacent])]) {
     const visibility = traceVoxelRay(
-      voxelCenter([...position]),
+      endpoint,
       origin,
       (x, y, z) => (ownCells.has(positionKey([x, y, z])) ? 0 : readCell([x, y, z])?.voxel),
       (voxel) => semantics.get(voxel)?.solid ?? false,

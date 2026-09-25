@@ -176,6 +176,97 @@ seedlands.structure:execute
 
 ---
 
+# Browser-06 正式验收追加
+
+阶段：`V1-CANONICAL-BROWSER-06`
+结论：**FAIL；Browser-05 的模式/落地路线 RED 已关闭，水桶放/收后正式切回生存、落地且无碰撞，并真实走到门位置。木门选择与右键已发生，但 Structure target-first dispatcher 仍以 solid support center 做 LOS，返回 `blocked`，两格门未提交。**
+浏览器租约：本阶段唯一 Playwright/Chromium owner；只执行一次正式 attempt，没有重试。
+
+## Browser-06 身份与命令
+
+- 保留干净树：`/private/tmp/seedlands-v1-acceptance-5d52330f`
+- HEAD/source：`5d52330fa58d315e9e10b1298e1bdc65e2321898`
+- `git status --short`：运行前后均无输出。
+- source digest：`a0775d3e5cc3747f5bd34fea09b3a1c40dc117e41c88beb7117d1a72888fb7e9`
+- lock digest：`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`
+- artifact digest：`a91a3528abc9b8154f16e48fd0bf41be8c834bb3226e389fbb7550245b5a1f02`
+- artifact receipt SHA256：`5f55da779eb0365b78dc67ac6c34c633f4e82143dbf3d065e340eb5a031a7756`
+- dist：276 个 stamped 文件，磁盘共 277 个文件（含 receipt）；未重建、未修改。
+- route-mode fixture SHA256：`caff0d9b46387e0e24b169c8d8362153c2d61ad35434637e2bd9aacd4a1699c6`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v1-canonical-browser-06-5d52330f node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+时间：`2026-09-25T03:03:27.691Z` 至 `2026-09-25T03:05:55.024Z`。
+机器窗口：`e9b56811-33d6-4f8d-aefc-036a17d076e0`，`waitedMs=1`，`exitCode=1`，`measurement.status=NOT_RECORDED`。
+Playwright 结果：1 failed，1 passed，1 skipped，共约 2.4 分钟；没有 retry、第二次 Harness 调用或第二条浏览器线路。
+
+- C0 PASS，约 3.9 秒。
+- C1 PASS，约 17.8 秒。
+- C2 PASS，约 20.9 秒。
+- C3 PASS，约 17.0 秒。
+- V1 step 约 22.7 秒后在门 pair 断言失败。
+- Classic 视觉回归 PASS，约 31.2 秒。
+- 非 Classic smoke 按既有条件 skipped。
+
+## Route-mode GREEN 与门首因
+
+Browser-05 的路线缺口已由真实产品行为关闭：水桶放/收断言完成后，trace 记录正式 UI 点击“切换生存模式”；snapshot 随后达到 `onGround=true && colliding=false`，真实 `walkTo` 把玩家移动到 door approach。失败终态玩家为 `[67.3538,32.6000,0.6453]`，服务端位置 `[67.3538,32.600001,0.6453]`，速度为零、落地且无碰撞。
+
+随后 trace 证明：
+
+1. 正式背包 UI 再次切到创造模式，选择 `wooden-door`，active hotbar 校验通过。
+2. 真实鼠标将 target 调整到 support `[70,30,0]`，adjacent 为 `[70,31,0]`，并发生 canvas 右键。
+3. UI 明确显示 `无法交互 · blocked`；`worldRevision` 保持 141，两格 `[70,31,0]` / `[70,32,0]` 在 5 秒内没有进入门 storage ID 89..104。
+4. `structure-target-dispatch.ts` 从 support center `[70.5,30.5,0.5]` 向可信眼位追踪。按 `voxel-ray.ts` 的 1/8-block 采样和本次服务端位置确定性重放，路径依次经过 `[69,30,0]`、`[69,31,0]`、`[68,31,0]`、`[68,32,0]`；canonical floor 将 `[69,30,0]` 固定为 Stone 3，因此 dispatcher 在 invoke registered Structure operation 前返回 `blocked`。
+5. adjacent center `[70.5,31.5,0.5]` 到眼位只经过 `[69,31,0]`、`[68,32,0]`，均为空。该差异与 fluid/item 路径已采用 shared-face endpoint 解决的 Browser-04 几何问题同型。
+
+因此本次实际首个拒绝位于 **Structure target-first dispatcher 的 hit-center LOS**。`structure-host-commit.ts` 的提交前重验证也仍使用 hit/adjacent center；后续修复必须在 dispatcher 与 host 两层统一由已校验的正交 hit/adjacent 推导 shared face endpoint，同时保留 adjacent-center LOS、Manhattan 邻接、距离、授权、selection freshness、support、occupancy 与墙阻挡，不能只修前门让 host 再拒绝。本阶段只记录诊断，不改生产或测试。
+
+## Browser-06 触达矩阵
+
+- C0-C3：**PASS**。
+- V1 四项音量与旧上传入口移除：**PASS**。
+- water-bucket 放 source：**PASS**。
+- empty bucket 收 source：**PASS**。
+- 正式 UI 切回生存、`onGround && !colliding`、真实门 approach：**PASS**；Browser-05 RED 已关闭。
+- 木门选择、瞄准与真实右键：**PASS as input reachability**；Authority 返回 `blocked`，无世界提交。
+- 门两格原子放置、mesh+epoch、关闭碰撞、打开穿越及上下 half toggle：**FAIL at placement / remainder NOT REACHED**。
+- jukebox/record-13 的单次 fact、projection 与真实 audio phase：**NOT REACHED**。
+- C4 streaming：**NOT REACHED**。
+- C5 save/continue：**NOT REACHED**。
+- save-return-continue 后的新 epoch、门/slot、resumePending、无旧 fact：**NOT REACHED**。
+- 真实 gesture 续播、eject stop、离开世界 audio 清理：**NOT REACHED**。
+- Classic 视觉回归：**PASS**。
+
+## Browser-06 原始证据
+
+目录：`changes/2026-09-23-classic-functional-completion/evidence/v1-canonical-browser-06/`
+
+- `7b66aea9c5a4c64c1674b1db1afa0834917bdd0e0e1660a086687f8d8f7410fd` `classic.json.log`
+- `6b19d2d8e479f5de4a3198d5e97c154318771e6de1e6850e635aa29c492f2394` `canonical-error-context.md.log`
+- 原始 trace SHA256 `391cc2feb90c5cc9dafed2f2f24f31f5272adbebecf2684fcf82f5815473b84d`；按文件名字节序执行 `cat canonical-trace.zip.part-* > canonical-trace.zip` 可无损重组：
+  - `a3428a6b55be60cc063d05cb2ecc891a7f30f5d4c767c3da2f17cf705ffb60f0` `canonical-trace.zip.part-aa`（80000000 bytes）
+  - `f454ea3fd11e334ddffe382a5e9ae6b4a2682861bfa3fe6ccc1e93a0e33569bc` `canonical-trace.zip.part-ab`（80000000 bytes）
+  - `957f4e7ab4d92b8f99f2c9f912815639cd3ed9f8481c605eb9be5d42033a3575` `canonical-trace.zip.part-ac`（42566366 bytes）
+- `5f157c6dae31e6db51febe4d09e7b0314b8519b24c29d1bb75bf289e9d6b9eb3` `failure-page.jpeg`；显示木门已选中、准星位于地面 support。
+- `5f55da779eb0365b78dc67ac6c34c633f4e82143dbf3d065e340eb5a031a7756` `harness-artifact.json`
+- `0026c444dd0ee940c4f4a5a2cc0e5e1c2b40be16471214841ee64f2dcf956b25` `performance-window.json.log`
+- `5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110` `playwright-last-run.json.log`
+- `diagnosis.json` 的最终 SHA256 见阶段 checkpoint manifest。
+
+## Browser-06 运行后状态
+
+- `node scripts/harness/artifact.mjs` 后验校验 PASS：source、lock、276-file map 与 artifact digest 均未漂移；运行后 HEAD 仍为 `5d52330fa58d315e9e10b1298e1bdc65e2321898`，`git status --short` 无输出。
+- `lsof -nP -iTCP:4273 -sTCP:LISTEN` 无输出；排除查询自身后，acceptance-tree、run-id、Chromium、Playwright 与 `vite preview` 进程复核输出 `NO_MATCHING_PROCESSES`。
+- Browser-06 唯一浏览器租约在归档与上述清理核验后释放。
+- 没有启动 Cua、第二浏览器路线或第二 attempt；没有 build、CI、Git commit/push、部署、依赖安装、全局配置或 production/test/dist 修改。
+
+---
+
 # Browser-05 正式验收追加
 
 阶段：`V1-CANONICAL-BROWSER-05`

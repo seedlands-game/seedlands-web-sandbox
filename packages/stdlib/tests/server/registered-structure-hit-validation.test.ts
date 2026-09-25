@@ -28,6 +28,58 @@ const expectNoTransactionWrites = (
 };
 
 describe('registered Structure hit validation', () => {
+  it('accepts the Browser-06 exposed support face through the direct registered host', () => {
+    const world = createStructureRuntimeFixture();
+    world.server.edit(69, 30, 0, Voxel.Stone);
+    world.server.edit(70, 30, 0, Voxel.Stone);
+    world.server.edit(70, 31, 0, Voxel.Air);
+    world.server.edit(70, 32, 0, Voxel.Air);
+    world.entities.update('alice', { position: [67.35381531679855, 31.000001, 0.6452957045056721] });
+    world.runtime.takeCommits();
+    const before = {
+      worldRevision: world.server.worldRevision,
+      gameplayRevision: world.gameplayRevision(),
+      inventoryRevision: world.actor.inventoryRevision,
+      slots: world.actor.inventory.snapshot(),
+      entities: world.entities.query(),
+      removalApplies: world.removalApplyCount(),
+      cancellationApplies: world.cancellationApplyCount(),
+    };
+
+    const result = placeStructure(world, [70, 30, 0], [70, 31, 0]);
+    expect(result, JSON.stringify(result)).toMatchObject({
+      ok: true,
+      value: { kind: 'place', definitionId: 'fixture:gate' },
+    });
+    expect(world.server.getVoxel(70, 31, 0)).not.toBe(Voxel.Air);
+    expect(world.server.getVoxel(70, 32, 0)).not.toBe(Voxel.Air);
+    expect(world.server.worldRevision).toBe(before.worldRevision + 1);
+    expect(world.gameplayRevision()).toBe(before.gameplayRevision + 1);
+    expect(world.actor.inventoryRevision).toBe(before.inventoryRevision + 1);
+    expect(world.actor.inventory.slot(0)).toEqual({ itemId: 'gate', count: 1 });
+    expect(world.removalApplyCount()).toBe(before.removalApplies);
+    expect(world.cancellationApplyCount()).toBe(before.cancellationApplies + 1);
+    expect(world.runtime.takeCommits()).toHaveLength(1);
+    expect(world.takeFactBatches()).toHaveLength(1);
+  });
+
+  it('rechecks the exposed face at final validation and rejects a new wall without owner writes', () => {
+    const overrides = new Map<string, Readonly<{ voxel: number; fluid: number }>>();
+    const world = createStructureRuntimeFixture({
+      cellOverrides: overrides,
+      beforeWorldPrepare() {
+        overrides.set('1,31,1', { voxel: Voxel.Stone, fluid: 0 });
+      },
+    });
+    world.runtime.takeCommits();
+    const before = unchanged(world);
+
+    const result = placeStructure(world);
+    expect(result, JSON.stringify(result)).toMatchObject({ ok: false, message: 'blocked' });
+
+    expectNoTransactionWrites(world, before);
+  });
+
   it.each([
     ['air', { voxel: Voxel.Air, fluid: 0 }, /targetable/i],
     ['loaded non-targetable', { voxel: Voxel.Glass, fluid: 0 }, /targetable/i],
