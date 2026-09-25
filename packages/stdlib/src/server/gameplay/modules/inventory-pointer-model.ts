@@ -11,13 +11,22 @@ import {
 import {
   validateInventoryCursor,
   validateInventoryPointerInput,
-  type InventoryCursorOriginV1,
   type InventoryPointerActorProjectionV1,
   type InventoryPointerCandidateV1,
   type InventoryPointerCommand,
   type InventoryPointerSlotRef,
   type InventoryPointerStationProjectionV1,
+  validateInventoryEquipmentProjection,
 } from './inventory-pointer-contract';
+import {
+  frozenInventoryPointerEquipment,
+  inventoryPointerOrigin,
+  inventoryPointerQuickMoveDestinations,
+  mutableInventoryPointerEquipment,
+  readInventoryPointerSlot,
+  writeInventoryPointerSlot,
+  type MutableInventoryPointerState,
+} from './inventory-pointer-slot-state';
 export * from './inventory-pointer-contract';
 export { settleInventoryCursor, type SettledInventoryCursorV1 } from './inventory-cursor-settlement';
 import { settleInventoryCursor } from './inventory-cursor-settlement';
@@ -35,16 +44,7 @@ function frozenStack(stack: Readonly<ItemStack> | null): InventorySlot {
     : null;
 }
 
-type MutableState = {
-  slots: InventorySlot[];
-  craftingSlots: InventorySlot[];
-  cursorStack: InventorySlot;
-  cursorOrigin: InventoryCursorOriginV1 | null;
-  station: StationComponentV1 | null;
-  stationSlots: InventorySlot[] | null;
-  drops: ItemStack[];
-  crafted: number;
-};
+type MutableState = MutableInventoryPointerState;
 
 function stationSlots(component: StationComponentV1): InventorySlot[] {
   return component.kind === 'workbench'
@@ -52,29 +52,6 @@ function stationSlots(component: StationComponentV1): InventorySlot[] {
     : component.kind === 'chest'
       ? [...component.slots]
       : [component.furnace.input, component.furnace.fuel, component.furnace.output];
-}
-
-function current(state: MutableState, ref: InventoryPointerSlotRef): InventorySlot {
-  const values =
-    ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ? state.craftingSlots : state.stationSlots;
-  if (!values || ref.slot >= values.length) throw new Error('invalid-pointer-slot');
-  return values[ref.slot] ?? null;
-}
-
-function write(state: MutableState, ref: InventoryPointerSlotRef, value: InventorySlot): void {
-  const values =
-    ref.kind === 'inventory' ? state.slots : ref.kind === 'crafting' ? state.craftingSlots : state.stationSlots;
-  if (!values || ref.slot >= values.length) throw new Error('invalid-pointer-slot');
-  values[ref.slot] = value ? { ...value, ...(value.instance ? { instance: { ...value.instance } } : {}) } : null;
-}
-
-function originFor(
-  ref: InventoryPointerSlotRef,
-  station: InventoryPointerStationProjectionV1 | undefined,
-): InventoryCursorOriginV1 {
-  return ref.kind === 'station'
-    ? Object.freeze({ kind: 'station', reference: Object.freeze({ ...station!.reference }), slot: ref.slot })
-    : Object.freeze({ kind: ref.kind, slot: ref.slot });
 }
 
 function canPlaceStation(
@@ -100,6 +77,8 @@ function assertCanPlace(
 ): void {
   if (ref.kind === 'station' && (!state.station || !canPlaceStation(content, state.station, ref.slot, stack)))
     throw new Error('invalid-station-slot');
+  if (ref.kind === 'equipment' && content.items.capability(stack.itemId, 'armor')?.slot !== ref.slot)
+    throw new Error('invalid-pointer-slot');
 }
 
 function capacity(items: ItemDefinitionRegistry, target: InventorySlot, stack: ItemStack): number {
@@ -111,11 +90,12 @@ function put(content: GameplayContent, state: MutableState, ref: InventoryPointe
   const stack = state.cursorStack;
   if (!stack) return 0;
   assertCanPlace(content, state, ref, stack);
-  const target = current(state, ref);
+  const target = readInventoryPointerSlot(state, ref);
   if (target && !sameItemStackIdentity(target, stack)) throw new Error('destination-occupied');
-  const moved = Math.min(count, stack.count, Math.max(0, capacity(content.items, target, stack)));
+  const available = ref.kind === 'equipment' ? (target ? 0 : 1) : capacity(content.items, target, stack);
+  const moved = Math.min(count, stack.count, Math.max(0, available));
   if (moved === 0) return 0;
-  write(state, ref, { ...stack, count: (target?.count ?? 0) + moved });
+  writeInventoryPointerSlot(state, ref, { ...stack, count: (target?.count ?? 0) + moved });
   state.cursorStack = stack.count === moved ? null : { ...stack, count: stack.count - moved };
   if (!state.cursorStack) state.cursorOrigin = null;
   return moved;
@@ -127,25 +107,29 @@ function click(
   station: InventoryPointerStationProjectionV1 | undefined,
   command: Extract<InventoryPointerCommand, { kind: 'click' }>,
 ): void {
-  const target = current(state, command.slot);
+  const target = readInventoryPointerSlot(state, command.slot);
   if (!state.cursorStack) {
     if (!target) throw new Error('empty-source-slot');
     const count = command.button === 0 ? target.count : Math.ceil(target.count / 2);
     state.cursorStack = { ...target, count };
-    state.cursorOrigin = originFor(command.slot, station);
-    write(state, command.slot, count === target.count ? null : { ...target, count: target.count - count });
+    state.cursorOrigin = inventoryPointerOrigin(command.slot, station);
+    writeInventoryPointerSlot(
+      state,
+      command.slot,
+      count === target.count ? null : { ...target, count: target.count - count },
+    );
     return;
   }
-  if (!target || sameItemStackIdentity(target, state.cursorStack)) {
+  if (!target || (command.slot.kind !== 'equipment' && sameItemStackIdentity(target, state.cursorStack))) {
     const moved = put(content, state, command.slot, command.button === 0 ? state.cursorStack.count : 1);
     if (!moved) throw new Error('destination-full');
     return;
   }
   assertCanPlace(content, state, command.slot, state.cursorStack);
   const previous = state.cursorStack;
-  write(state, command.slot, previous);
+  writeInventoryPointerSlot(state, command.slot, previous);
   state.cursorStack = target;
-  state.cursorOrigin = originFor(command.slot, station);
+  state.cursorOrigin = inventoryPointerOrigin(command.slot, station);
 }
 
 function distribute(
@@ -154,15 +138,16 @@ function distribute(
   command: Extract<InventoryPointerCommand, { kind: 'distribute' }>,
 ): void {
   if (!state.cursorStack) throw new Error('cursor-empty');
+  if (command.targets.some((target) => target.kind === 'equipment')) throw new Error('invalid-pointer-slot');
   const unique: InventoryPointerSlotRef[] = [];
   const seen = new Set<string>();
   for (const ref of command.targets) {
     const key = `${ref.kind}:${ref.slot}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    current(state, ref);
+    readInventoryPointerSlot(state, ref);
     assertCanPlace(content, state, ref, state.cursorStack);
-    const target = current(state, ref);
+    const target = readInventoryPointerSlot(state, ref);
     if (target && !sameItemStackIdentity(target, state.cursorStack)) throw new Error('destination-occupied');
     unique.push(ref);
   }
@@ -176,22 +161,6 @@ function distribute(
   if (!moved) throw new Error('destination-full');
 }
 
-function destinations(
-  actor: InventoryPointerActorProjectionV1,
-  station: MutableState['station'],
-  source: InventoryPointerSlotRef,
-): InventoryPointerSlotRef[] {
-  if (station) {
-    if (source.kind === 'station') return actor.slots.map((_, slot) => ({ kind: 'inventory' as const, slot }));
-    return stationSlots(station).map((_, slot) => ({ kind: 'station' as const, slot }));
-  }
-  if (source.kind === 'crafting') return actor.slots.map((_, slot) => ({ kind: 'inventory' as const, slot }));
-  if (source.kind !== 'inventory') throw new Error('station-context-required');
-  const start = source.slot < actor.equipment.hotbarSize ? actor.equipment.hotbarSize : 0;
-  const end = source.slot < actor.equipment.hotbarSize ? actor.slots.length : actor.equipment.hotbarSize;
-  return Array.from({ length: end - start }, (_, offset) => ({ kind: 'inventory' as const, slot: start + offset }));
-}
-
 function quickMove(
   content: GameplayContent,
   actor: InventoryPointerActorProjectionV1,
@@ -199,26 +168,34 @@ function quickMove(
   command: Extract<InventoryPointerCommand, { kind: 'quick-move' }>,
 ): void {
   if (state.cursorStack) throw new Error('cursor-not-empty');
-  let source = current(state, command.slot);
+  let source = readInventoryPointerSlot(state, command.slot);
   if (!source) throw new Error('empty-source-slot');
-  const targets = destinations(actor, state.station, command.slot);
+  const targets = inventoryPointerQuickMoveDestinations(content.items, actor, state, command.slot, source);
   let moved = 0;
+  const equipmentTarget = targets.find((target) => target.kind === 'equipment');
+  if (equipmentTarget) {
+    assertCanPlace(content, state, equipmentTarget, source);
+    writeInventoryPointerSlot(state, equipmentTarget, { ...source, count: 1 });
+    source = source.count === 1 ? null : { ...source, count: source.count - 1 };
+    moved = 1;
+  }
   for (const emptyPass of [false, true]) {
     for (const ref of targets) {
       if (!source) break;
+      if (ref.kind === 'equipment') continue;
       if (ref.kind === command.slot.kind && ref.slot === command.slot.slot) continue;
       if (ref.kind === 'station' && !canPlaceStation(content, state.station!, ref.slot, source)) continue;
-      const target = current(state, ref);
+      const target = readInventoryPointerSlot(state, ref);
       if ((emptyPass && target) || (!emptyPass && (!target || !sameItemStackIdentity(target, source)))) continue;
       const count = Math.min(source.count, Math.max(0, capacity(content.items, target, source)));
       if (!count) continue;
-      write(state, ref, { ...source, count: (target?.count ?? 0) + count });
+      writeInventoryPointerSlot(state, ref, { ...source, count: (target?.count ?? 0) + count });
       source = source.count === count ? null : { ...source, count: source.count - count };
       moved += count;
     }
   }
   if (!moved) throw new Error('destination-full');
-  write(state, command.slot, source);
+  writeInventoryPointerSlot(state, command.slot, source);
 }
 
 function collect(
@@ -226,9 +203,10 @@ function collect(
   state: MutableState,
   command: Extract<InventoryPointerCommand, { kind: 'collect' }>,
 ): void {
+  if (command.slot.kind === 'equipment') throw new Error('invalid-pointer-slot');
   const cursor = state.cursorStack;
   if (!cursor) throw new Error('cursor-empty');
-  const seed = current(state, command.slot);
+  const seed = readInventoryPointerSlot(state, command.slot);
   if (seed && !sameItemStackIdentity(seed, cursor)) throw new Error('collect-identity-mismatch');
   let count = cursor.count;
   const limit = content.items.require(cursor.itemId).stackLimit;
@@ -239,11 +217,11 @@ function collect(
   ];
   for (const ref of refs) {
     if (count >= limit) break;
-    const stack = current(state, ref);
+    const stack = readInventoryPointerSlot(state, ref);
     if (!stack || !sameItemStackIdentity(stack, cursor)) continue;
     const taken = Math.min(stack.count, limit - count);
     count += taken;
-    write(state, ref, stack.count === taken ? null : { ...stack, count: stack.count - taken });
+    writeInventoryPointerSlot(state, ref, stack.count === taken ? null : { ...stack, count: stack.count - taken });
   }
   if (count === cursor.count) throw new Error('no-collectable-items');
   state.cursorStack = { ...cursor, count };
@@ -258,13 +236,14 @@ function hotbar(
   if (command.hotbarSlot >= state.slots.length) throw new Error('invalid-hotbar-slot');
   const hotbarRef = { kind: 'inventory' as const, slot: command.hotbarSlot };
   if (command.slot.kind === 'inventory' && command.slot.slot === command.hotbarSlot) throw new Error('same-slot');
-  const source = current(state, command.slot);
-  const target = current(state, hotbarRef);
+  const source = readInventoryPointerSlot(state, command.slot);
+  const target = readInventoryPointerSlot(state, hotbarRef);
   if (target && command.slot.kind === 'station') assertCanPlace(content, state, command.slot, target);
+  if (target && command.slot.kind === 'equipment') assertCanPlace(content, state, command.slot, target);
   if (command.slot.kind === 'station' && state.station?.kind === 'furnace' && command.slot.slot === 2 && target)
     throw new Error('furnace-output-is-read-only');
-  write(state, command.slot, target);
-  write(state, hotbarRef, source);
+  writeInventoryPointerSlot(state, command.slot, target);
+  writeInventoryPointerSlot(state, hotbarRef, source);
 }
 
 function matchingRecipe(content: GameplayContent, grid: readonly InventorySlot[]) {
@@ -342,7 +321,7 @@ function close(
       // Exact-origin settlement is allowed for a furnace output that was just taken.
       const count = Math.min(state.cursorStack.count, capacity(content.items, target, state.cursorStack));
       if (count > 0) {
-        write(
+        writeInventoryPointerSlot(
           state,
           { kind: 'station', slot: origin.slot },
           { ...state.cursorStack, count: (target?.count ?? 0) + count },
@@ -352,6 +331,8 @@ function close(
         if (!state.cursorStack) state.cursorOrigin = null;
       }
     }
+  } else if (state.cursorStack && origin?.kind === 'equipment' && !state.equipment.armor[origin.slot]) {
+    put(content, state, { kind: 'equipment', slot: origin.slot }, state.cursorStack.count);
   }
   const settled = settleInventoryCursor(content.items, state.slots, {
     version: 1,
@@ -411,6 +392,8 @@ export function buildInventoryPointerCandidate(
   if (!integer(actor.inventoryRevision) || actor.inventoryRevision >= Number.MAX_SAFE_INTEGER)
     throw new RangeError('Inventory revision exhausted.');
   const cursor = validateInventoryCursor(actor.cursor, content.items);
+  if (cursor.origin?.kind === 'equipment' && cursor.stack?.count !== 1) throw new Error('invalid-pointer-slot');
+  const equipment = validateInventoryEquipmentProjection(actor.equipment, content.items, actor.slots.length);
   const station = request.station;
   if (Boolean(input.station) !== Boolean(station)) throw new Error('station-context-mismatch');
   if (station) {
@@ -434,6 +417,7 @@ export function buildInventoryPointerCandidate(
       ? { ...cursor.stack, ...(cursor.stack.instance ? { instance: { ...cursor.stack.instance } } : {}) }
       : null,
     cursorOrigin: cursor.origin,
+    equipment: mutableInventoryPointerEquipment(equipment),
     station: station?.component ?? null,
     stationSlots: station ? stationSlots(station.component) : null,
     drops: [],
@@ -444,6 +428,7 @@ export function buildInventoryPointerCandidate(
     state.craftingSlots,
     state.cursorStack,
     state.cursorOrigin,
+    state.equipment,
     state.stationSlots,
   ]);
   switch (input.command.kind) {
@@ -481,7 +466,14 @@ export function buildInventoryPointerCandidate(
   }
   const changed =
     before !==
-    JSON.stringify([state.slots, state.craftingSlots, state.cursorStack, state.cursorOrigin, state.stationSlots]);
+    JSON.stringify([
+      state.slots,
+      state.craftingSlots,
+      state.cursorStack,
+      state.cursorOrigin,
+      state.equipment,
+      state.stationSlots,
+    ]);
   if (changed && cursor.revision >= Number.MAX_SAFE_INTEGER)
     throw new RangeError('Inventory cursor revision exhausted.');
   const nextStation =
@@ -514,6 +506,7 @@ export function buildInventoryPointerCandidate(
     inventoryRevision,
     slots: Object.freeze(state.slots.map(frozenStack)),
     cursor: nextCursor,
+    equipment: frozenInventoryPointerEquipment(state.equipment),
     stationReference: station?.reference ?? null,
     station: nextStation,
     dropIntents: Object.freeze(state.drops.map((stack) => frozenStack(stack)!)),

@@ -23,7 +23,11 @@ const actor = (health: number) => ({
   reference: { entityId: 'alice', epoch: 1, lifetime: 1 },
   kind: 'player',
   slots: [{ itemId: 'test:apple', count: 1 }, null],
-  equipment: { selectedSlot: 0, hotbarSize: 2 },
+  equipment: {
+    selectedSlot: 0,
+    hotbarSize: 2,
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+  },
   lifecycle: 'alive',
   needs: { hunger: 20, maxHunger: 20, meaning: 'satiety' },
   vitals: { health, maxHealth: 20 },

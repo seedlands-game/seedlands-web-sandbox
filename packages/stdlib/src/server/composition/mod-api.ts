@@ -205,6 +205,16 @@ export type {
 } from '../gameplay/modules/structure-multi-edit-model';
 
 export { defineModeModule } from '../gameplay/modules/mode-module';
+export { ARMOR_SLOTS, isArmorSlot } from '../gameplay/modules/armor-policy';
+export type { ArmorSlot } from '../gameplay/modules/armor-policy';
+export type {
+  InventoryCursorOriginV1,
+  InventoryCursorV1,
+  InventoryEquipmentProjectionV1,
+  InventoryPointerCandidateV1,
+  InventoryPointerInputV1,
+  InventoryPointerSlotRef,
+} from '../gameplay/modules/inventory-pointer-contract';
 
 export { defineRulesetModule } from '../gameplay/modules/ruleset-module';
 export type { WorldRulesetDefinition, WorldRulesetV1 } from '../gameplay/modules/ruleset-module';

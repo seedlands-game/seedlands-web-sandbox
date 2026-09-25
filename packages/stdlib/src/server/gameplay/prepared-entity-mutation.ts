@@ -4,6 +4,7 @@ import type { EcsEntityOwner, EcsPosition, EntityLifetimeReference } from './ecs
 import type { StationComponentV1, StationKind } from './ecs-station-state';
 import type { EntitySpawn, EntityStore, GameplayEntity } from './entity-store';
 import type { ItemStack } from './item-registry';
+import { ARMOR_SLOTS } from './modules/armor-policy';
 
 export type PreparedActorReplacement = Readonly<{
   reference: EntityLifetimeReference;
@@ -73,6 +74,16 @@ export type PreparedEntityMutationHost = Readonly<{
 }>;
 
 const sameSnapshot = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
+const armorInteractionSnapshot = (components: ActorComponentSnapshot) =>
+  ARMOR_SLOTS.map((slot) => {
+    const stack = components.equipment?.armor?.[slot];
+    return stack ? [stack.itemId, stack.count, stack.instance?.durability ?? null] : null;
+  });
+const inventoryInteractionSnapshot = (components: ActorComponentSnapshot) => [
+  components.inventory,
+  components.inventoryCursor,
+  armorInteractionSnapshot(components),
+];
 
 function copyPosition(value: readonly number[] | undefined, field: string): EcsPosition | undefined {
   if (value === undefined) return undefined;
@@ -178,8 +189,8 @@ function prepareMutation(
       throw new TypeError('Prepared actor health and lifecycle do not match.');
     const previous = capturedOwner.actorComponentSnapshot(entity.id);
     const interactionChanged = !sameSnapshot(
-      [previous.inventory, previous.inventoryCursor],
-      [candidate.components.inventory, candidate.components.inventoryCursor],
+      inventoryInteractionSnapshot(previous),
+      inventoryInteractionSnapshot(candidate.components),
     );
     const previousInventoryRevision = previous.inventoryRevision ?? 0;
     if (interactionChanged && previousInventoryRevision >= Number.MAX_SAFE_INTEGER)

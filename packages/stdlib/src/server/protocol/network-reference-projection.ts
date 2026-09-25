@@ -8,6 +8,7 @@ import {
   type GameplayCombatReference,
   type GameplayEntityReference,
   type GameplayInventorySlotReference,
+  type GameplayItemStackReference,
   type GameplayPlayerReference,
   type GameplayViewReference,
   type PlayerCorrectionReference,
@@ -16,6 +17,7 @@ import {
 } from './network-reference-projection-types';
 import { canonicalReferenceInteger } from './network-reference-integer';
 import { isActorArchetype } from '../gameplay/ecs-entity-owner';
+import { ARMOR_SLOTS } from '../gameplay/modules/armor-policy';
 
 export { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 export type * from './network-reference-projection-types';
@@ -88,15 +90,46 @@ export function projectPlayerCorrectionReference(snapshot: AuthoritySnapshot): P
   };
 }
 
-const projectInventory = (inventory: AuthorityGameplayView['player']['inventory']): GameplayInventorySlotReference[] =>
-  inventory.map((slot, index) => {
-    if (slot === null) return null;
-    return {
-      slot: canonicalReferenceInteger(index),
-      itemId: assertText(slot.itemId, `inventory[${index}].itemId`),
-      count: assertNonNegativeInteger(slot.count, `inventory[${index}].count`),
-    };
+const projectStack = (
+  stack: NonNullable<AuthorityGameplayView['inventory']['slots'][number]>,
+  field: string,
+): GameplayItemStackReference =>
+  Object.freeze({
+    itemId: assertText(stack.itemId, `${field}.itemId`),
+    count: assertNonNegativeInteger(stack.count, `${field}.count`),
+    ...(stack.instance
+      ? {
+          instance: Object.freeze({
+            durability: assertNonNegativeInteger(stack.instance.durability, `${field}.durability`),
+          }),
+        }
+      : {}),
   });
+const projectInventory = (
+  inventory: AuthorityGameplayView['inventory']['slots'],
+): readonly GameplayInventorySlotReference[] =>
+  Object.freeze(
+    inventory.map((slot, index) => {
+      if (slot === null) return null;
+      return Object.freeze({
+        slot: canonicalReferenceInteger(index),
+        ...projectStack(slot, `inventory[${index}]`),
+      });
+    }),
+  );
+const projectArmor = (armor: AuthorityGameplayView['inventory']['armor']) => {
+  if (
+    !armor ||
+    Reflect.ownKeys(armor).some((slot) => typeof slot !== 'string' || !ARMOR_SLOTS.includes(slot as never)) ||
+    ARMOR_SLOTS.some((slot) => !Object.hasOwn(armor, slot))
+  )
+    throw new TypeError('gameplay.inventory.armor must contain exactly four armor slots.');
+  return Object.freeze(
+    Object.fromEntries(
+      ARMOR_SLOTS.map((slot) => [slot, armor[slot] ? projectStack(armor[slot]!, `armor.${slot}`) : null]),
+    ),
+  ) as import('./network-reference-projection-types').GameplayEquipmentReference;
+};
 const projectBreakAction = (value: AuthorityGameplayView['player']['breakAction']): GameplayBreakActionReference => {
   if (!value) return null;
   return {
@@ -161,7 +194,10 @@ export const projectCombatReference = (
     lastResult,
   };
 };
-const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerReference => {
+const projectPlayer = (
+  value: AuthorityGameplayView['player'],
+  inventory: AuthorityGameplayView['inventory'],
+): GameplayPlayerReference => {
   const combat = projectCombatReference(value.combat);
   return {
     entityId: assertText(value.entityId, 'gameplay.player.entityId'),
@@ -170,7 +206,8 @@ const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerRe
     hunger: assertFinite(value.hunger, 'gameplay.player.hunger'),
     maxHunger: assertFinite(value.maxHunger, 'gameplay.player.maxHunger'),
     lifecycle: value.lifecycle,
-    inventory: projectInventory(value.inventory),
+    inventory: projectInventory(inventory.slots),
+    armor: projectArmor(inventory.armor),
     selectedSlot: assertNonNegativeInteger(value.selectedSlot, 'gameplay.player.selectedSlot'),
     hotbarSize: assertNonNegativeInteger(value.hotbarSize, 'gameplay.player.hotbarSize'),
     breakAction: projectBreakAction(value.breakAction),
@@ -244,7 +281,7 @@ export function projectGameplayViewReference(
     snapshotWorldRevision,
     gameplayRevision,
     gameplayTime: view.gameplayTime,
-    player: projectPlayer(view.player),
+    player: projectPlayer(view.player, view.inventory),
     craftableRecipeIds: [...craftableRecipeIds],
     entities,
   };

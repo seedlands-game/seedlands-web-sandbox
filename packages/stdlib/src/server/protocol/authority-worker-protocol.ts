@@ -1,10 +1,9 @@
-import type { EntityLifetimeReference } from '../gameplay/entity-store';
+import type { EntityLifetimeReference, GameplayEntity } from '../gameplay/entity-store';
 import type { StationComponentV1 } from '../gameplay/ecs-station-state';
 import type { StationRecipe } from '../gameplay/modules/station-candidates';
 import type { ItemDefinition } from '../gameplay/item-registry';
 import type { Recipe } from '../gameplay/recipe-registry';
 import type { AuthoritySnapshot } from '../authority/authority-session';
-import type { GameplayEntity } from '../gameplay/entity-store';
 import type { PlayerSnapshot } from '../gameplay/player-state';
 import type { ActorState } from '../simulation/actor-state';
 import type { CommandResult, CommandSource, ServerCommand } from '../commands/command-contract';
@@ -81,6 +80,7 @@ export type AuthorityInventoryView = Readonly<{
   revision: number;
   slots: readonly InventorySlot[];
   hotbarSize: number;
+  armor: Readonly<Record<import('../gameplay/modules/armor-policy').ArmorSlot, InventorySlot>>;
   cursor: InventoryCursorV1;
   matchedCraftingRecipeIds: readonly string[];
 }>;
