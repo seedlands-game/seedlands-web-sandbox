@@ -216,10 +216,15 @@ describe('death inventory settlement contract', () => {
   it('builds one stable detached drop intent per occupied bag, cursor, crafting, and armor source', () => {
     const entities = populated();
     const components = structuredClone(entities.actorComponentSnapshot('actor'));
+    const sourceComponents = structuredClone(entities.actorComponentSnapshot('actor'));
     const candidate = buildDeathInventorySettlementCandidateV1({
-      actorReference: entities.createReference('actor')!,
+      source: {
+        actorReference: entities.createReference('actor')!,
+        health: entities.get('actor')!.health!,
+        components: sourceComponents,
+      },
       position: [2, 3, 4],
-      components,
+      settlementComponents: components,
       policy: dropAll,
     });
     components.inventory[0]!.count = 1;
@@ -249,10 +254,15 @@ describe('death inventory settlement contract', () => {
   it('commits the actor replacement and all drops through one prepared participant', () => {
     const entities = populated();
     const beforeRevision = entities.actorStateAccess('actor').inventoryRevision;
+    const components = entities.actorComponentSnapshot('actor');
     const candidate = buildDeathInventorySettlementCandidateV1({
-      actorReference: entities.createReference('actor')!,
+      source: {
+        actorReference: entities.createReference('actor')!,
+        health: entities.get('actor')!.health!,
+        components,
+      },
       position: [2, 3, 4],
-      components: entities.actorComponentSnapshot('actor'),
+      settlementComponents: components,
       policy: dropAll,
     });
     const participant = prepareDeathInventorySettlementParticipantV1(entities, candidate);
@@ -271,10 +281,15 @@ describe('death inventory settlement contract', () => {
 
   it('rejects a stale prepared participant without changing actor or creating drops', () => {
     const entities = populated();
+    const components = entities.actorComponentSnapshot('actor');
     const candidate = buildDeathInventorySettlementCandidateV1({
-      actorReference: entities.createReference('actor')!,
+      source: {
+        actorReference: entities.createReference('actor')!,
+        health: entities.get('actor')!.health!,
+        components,
+      },
       position: [2, 3, 4],
-      components: entities.actorComponentSnapshot('actor'),
+      settlementComponents: components,
       policy: dropAll,
     });
     const participant = prepareDeathInventorySettlementParticipantV1(entities, candidate);
@@ -287,16 +302,21 @@ describe('death inventory settlement contract', () => {
 
   it('rejects a candidate whose actor inventory revision changed before participant preparation', () => {
     const entities = populated();
+    const components = entities.actorComponentSnapshot('actor');
     const candidate = buildDeathInventorySettlementCandidateV1({
-      actorReference: entities.createReference('actor')!,
+      source: {
+        actorReference: entities.createReference('actor')!,
+        health: entities.get('actor')!.health!,
+        components,
+      },
       position: [2, 3, 4],
-      components: entities.actorComponentSnapshot('actor'),
+      settlementComponents: components,
       policy: dropAll,
     });
     const actor = entities.actorStateAccess('actor');
     actor.replaceInventoryInteraction(actor.inventoryRevision + 1, actor.inventoryCursor);
     const changed = entities.exportComponentSnapshot();
-    expect(() => prepareDeathInventorySettlementParticipantV1(entities, candidate)).toThrow(/revision.*stale/i);
+    expect(() => prepareDeathInventorySettlementParticipantV1(entities, candidate)).toThrow(/component.*stale/i);
     expect(entities.exportComponentSnapshot()).toEqual(changed);
     expect(entities.query({ type: 'world-item' })).toEqual([]);
   });
@@ -308,10 +328,15 @@ describe('death inventory settlement contract', () => {
     const snapshot = entities.exportComponentSnapshot();
     entities.restoreComponentSnapshot({ ...snapshot, lifetimeHighWater: Number.MAX_SAFE_INTEGER });
     const before = entities.exportComponentSnapshot();
+    const components = entities.actorComponentSnapshot('actor');
     const candidate = buildDeathInventorySettlementCandidateV1({
-      actorReference: entities.createReference('actor')!,
+      source: {
+        actorReference: entities.createReference('actor')!,
+        health: entities.get('actor')!.health!,
+        components,
+      },
       position: [2, 3, 4],
-      components: entities.actorComponentSnapshot('actor'),
+      settlementComponents: components,
       policy: dropAll,
     });
     expect(() => prepareDeathInventorySettlementParticipantV1(entities, candidate)).toThrow(/capacity|exhausted/i);
