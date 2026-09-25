@@ -105,6 +105,14 @@ GIT-21 组合门禁只集成已准出的 spine、pointer、revision 与 station 
 copy/projection 合同 GREEN；共享 equipment 行为保持 `2 passed / 1 failed`，唯一 death settlement RED 留给
 I2.2。该组合准出不安装 death policy，不证明 UI、combat armor、V4 restore 或完整 V2。
 
+V2.1c combat 子片冻结 `equipment-combat-contract.md`：registered combat 在既有 ruleset 产出合法正伤害且
+目标为 survival 时，按命中前四槽通用 `armor` capability 计算减伤，并让每件带 durability 的已装备物品
+承受一次损耗；health 与完整 armor replacement 由同一 prepared entity transaction 提交。破损物品在本次
+命中仍贡献减伤后清槽，armor 实质变化只使共享 `inventoryRevision` 增加一次并使旧 pointer stale。miss、
+零伤害、creative 免疫、无效目标、授权拒绝、prepare 后 actor component/lifetime stale 与放弃候选均不得
+部分写 health、armor、revision 或 committed fact。该子片不改变 ruleset/difficulty/death settlement、公共
+协议、Classic ID、UI 或存档格式；真实 death armor 清算仍保留给 I2.2。
+
 ### 结构、攀爬、路线和载具
 
 - StructureDefinitionRegistryV1 声明 part offset/role、state voxel variants、transition、支撑/碰撞和单次 drop owner。多格 voxelEdits 稳定排序；准备全部 Chunk，await 后重算，再一次提交 world/inventory/state/drop/receipt。
