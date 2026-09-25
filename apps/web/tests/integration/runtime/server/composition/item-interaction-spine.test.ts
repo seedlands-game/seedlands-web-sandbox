@@ -1,5 +1,7 @@
 import { expect, it } from 'vitest';
 import {
+  defineContentModule,
+  defineInventoryModule,
   defineItemInteractionModule,
   definePack,
   type ItemInteractionDefinition,
@@ -67,6 +69,48 @@ const assembleFixture = (
                   operations: ['execute'],
                 },
               ],
+      }),
+    ],
+  });
+  const verified = artifact(candidate);
+  return assembleProductPacks([verified], { approvedPlaybook: approved(verified) });
+};
+
+const assembleFluidPolicyFixture = (input: Readonly<{ fluid: 'empty' | 'water'; trigger?: 'self' | 'voxel' }>) => {
+  const candidate = definePack({
+    id: 'sample:fluid-policy-fixture',
+    version: '1.0.0',
+    kind: 'playbook',
+    modules: [
+      defineContentModule({
+        moduleId: 'sample:fluid-policy-content',
+        items: [
+          {
+            id: 'sample:container',
+            name: 'Container',
+            itemType: 'resource',
+            stackLimit: 1,
+            capabilities: [{ type: 'fluid-container', fluid: input.fluid }],
+          },
+        ],
+        recipes: [],
+        meleeDefinitions: [],
+      }),
+      defineInventoryModule(),
+      handler(),
+      defineItemInteractionModule({
+        moduleId: 'sample:fluid-policy-interactions',
+        permissions: [{ resource: 'seedlands.inventory', operations: ['execute'] }],
+        definitions: [
+          {
+            id: 'sample:fluid-policy-binding',
+            selector: { itemId: 'sample:container' },
+            trigger: input.trigger ?? 'voxel',
+            operationId: 'sample:fixture-operation',
+            presentationKey: 'sample:fluid-policy',
+            voxelHitPolicy: 'fluid-source',
+          },
+        ],
       }),
     ],
   });
@@ -213,4 +257,56 @@ it.each([
   ['system operation', [binding()], { system: true }, /actor-executable/i],
 ] as const)('rejects %s while freezing item interactions', (_name, definitions, options, message) => {
   expect(() => assembleFixture(definitions, options)).toThrow(message);
+});
+
+it('freezes fluid-source only for voxel interactions selected by an empty fluid container', () => {
+  expect(
+    assembleFluidPolicyFixture({ fluid: 'empty' })
+      .capability<import('@seedlands/stdlib/mod-api').ItemInteractionRegistryV1>('seedlands:item-interactions')
+      .list(),
+  ).toEqual([
+    expect.objectContaining({
+      definition: expect.objectContaining({ voxelHitPolicy: 'fluid-source' }),
+      itemId: 'sample:container',
+    }),
+  ]);
+  expect(() => assembleFluidPolicyFixture({ fluid: 'water' })).toThrow(/empty fluid-container/i);
+  expect(() => assembleFluidPolicyFixture({ fluid: 'empty', trigger: 'self' })).toThrow(/voxel.*policy/i);
+  expect(() =>
+    defineItemInteractionModule({
+      moduleId: 'sample:invalid-fluid-policy',
+      definitions: [
+        {
+          ...binding({ trigger: 'voxel' }),
+          voxelHitPolicy: 'client-choice',
+        } as unknown as ItemInteractionDefinition,
+      ],
+    }),
+  ).toThrow(/voxel hit policy/i);
+});
+
+it('rejects extra fields and accessors instead of copying untrusted interaction definitions', () => {
+  expect(() =>
+    defineItemInteractionModule({
+      moduleId: 'sample:extra-field-interaction',
+      definitions: [{ ...binding(), extra: true } as unknown as ItemInteractionDefinition],
+    }),
+  ).toThrow(/fields/i);
+
+  let accessed = false;
+  const accessor = { ...binding({ trigger: 'voxel' }) } as Record<string, unknown>;
+  Object.defineProperty(accessor, 'voxelHitPolicy', {
+    enumerable: true,
+    get() {
+      accessed = true;
+      return 'fluid-source';
+    },
+  });
+  expect(() =>
+    defineItemInteractionModule({
+      moduleId: 'sample:accessor-interaction',
+      definitions: [accessor as unknown as ItemInteractionDefinition],
+    }),
+  ).toThrow(/fields/i);
+  expect(accessed).toBe(false);
 });

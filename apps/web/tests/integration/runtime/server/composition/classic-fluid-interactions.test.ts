@@ -33,8 +33,8 @@ const createAt = (initialPlayerBodyPosition: [number, number, number]) =>
     ...classicOptions(),
     worldgenProvider: classicWorldgenProvider,
     platform: testCorePlatform,
-    epoch: 'classic-fluid-browser-03',
-    seedText: 'classic-fluid-browser-03',
+    epoch: 'classic-fluid-browser-04',
+    seedText: 'classic-fluid-browser-04',
     initialWorldTime: 8,
     startTimeMs: 0,
     initialPlayerBodyPosition,
@@ -116,6 +116,14 @@ const invokeFluidDirect = (runtime: Runtime, hit: [number, number, number], adja
   });
 
 describe('Classic fluid interactions through Authority', () => {
+  it('installs source targeting only for the empty Classic bucket binding', async () => {
+    const runtime = await create();
+    const interactions = ['bucket', 'water-bucket', 'lava-bucket'].map((itemId) =>
+      runtime.server.resolveItemInteraction(itemId, 'voxel'),
+    );
+    expect(interactions.map((entry) => entry?.definition.voxelHitPolicy ?? null)).toEqual(['fluid-source', null, null]);
+  });
+
   it('revalidates a direct fluid operation from the trusted eye origin at the five-block boundary', async () => {
     const runtime = await createAt([0.5, 0, 0.5]);
     await load(runtime, [
@@ -178,48 +186,61 @@ describe('Classic fluid interactions through Authority', () => {
     expect(runtime.takeCommits()).toEqual([]);
   });
 
-  it('round-trips a Water source from the Browser-03 trusted eye origin without mutating creative inventory', async () => {
-    const runtime = await createAt([65.95881945378738, 32.600001, 2.4981569866156805]);
-    await load(runtime, [
-      { x: 68, y: 30, z: 2, value: Voxel.Stone },
-      { x: 68, y: 31, z: 2, value: Voxel.Air },
-      { x: 67, y: 30, z: 2, value: Voxel.Stone },
-      { x: 67, y: 31, z: 2, value: Voxel.Air },
-      { x: 66, y: 31, z: 2, value: Voxel.Air },
-      { x: 66, y: 32, z: 2, value: Voxel.Air },
-    ]);
-    expect(invokeMode(runtime, 'seedlands:set-mode', { mode: 'creative' })).toMatchObject({ ok: true });
-    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'water-bucket' })).toMatchObject({
-      ok: true,
-    });
-    const beforeInventory = runtime.server.getInventoryPointerView(runtime.playerId);
-    const beforeWorldRevision = runtime.server.worldRevision;
-    const beforeGameplayRevision = runtime.server.gameplayRevision;
+  it.each([
+    [Voxel.Water, 'water-bucket'],
+    [Voxel.Lava, 'lava-bucket'],
+  ] as const)(
+    'round-trips Browser-04 source voxel %s from the trusted body position with one commit per action',
+    async (voxel, filledItemId) => {
+      const runtime = await createAt([65.34008376511767, 31.000001, 2.602567930028762]);
+      await load(runtime, [
+        { x: 68, y: 30, z: 2, value: Voxel.Stone },
+        { x: 68, y: 31, z: 2, value: Voxel.Air },
+        { x: 67, y: 30, z: 2, value: Voxel.Stone },
+        { x: 67, y: 31, z: 2, value: Voxel.Air },
+        { x: 66, y: 31, z: 2, value: Voxel.Air },
+        { x: 66, y: 32, z: 2, value: Voxel.Air },
+      ]);
+      expect(invokeMode(runtime, 'seedlands:set-mode', { mode: 'creative' })).toMatchObject({ ok: true });
+      expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: filledItemId })).toMatchObject({
+        ok: true,
+      });
+      runtime.takeCommits();
+      const beforeInventory = runtime.server.getInventoryPointerView(runtime.playerId);
+      const beforeWorldRevision = runtime.server.worldRevision;
+      const beforeGameplayRevision = runtime.server.gameplayRevision;
+      const beforeCommitSequence = runtime.server.commitSequence;
 
-    const response = await runtime.performAction(action(runtime, [68, 30, 2], [68, 31, 2]));
+      const response = await runtime.performAction(action(runtime, [68, 30, 2], [68, 31, 2]));
 
-    expect(response.result).toMatchObject({ success: true, handled: true });
-    expect(runtime.server.getVoxel(68, 31, 2)).toBe(Voxel.Water);
-    expect(runtime.server.getFluidCell(68, 31, 2)).toMatchObject({ level: 8, source: true });
-    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforeInventory);
-    expect(runtime.server.worldRevision).toBe(beforeWorldRevision + 1);
-    expect(runtime.server.gameplayRevision).toBe(beforeGameplayRevision + 1);
+      expect(response.result).toMatchObject({ success: true, handled: true });
+      expect(response.commits).toHaveLength(1);
+      expect(runtime.server.getVoxel(68, 31, 2)).toBe(voxel);
+      expect(runtime.server.getFluidCell(68, 31, 2)).toMatchObject({ level: 8, source: true });
+      expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforeInventory);
+      expect(runtime.server.worldRevision).toBe(beforeWorldRevision + 1);
+      expect(runtime.server.gameplayRevision).toBe(beforeGameplayRevision + 1);
+      expect(runtime.server.commitSequence).toBe(beforeCommitSequence + 2);
 
-    expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'bucket' })).toMatchObject({
-      ok: true,
-    });
-    const beforePickupInventory = runtime.server.getInventoryPointerView(runtime.playerId);
-    const beforePickupWorldRevision = runtime.server.worldRevision;
-    const beforePickupGameplayRevision = runtime.server.gameplayRevision;
-    const pickup = await runtime.performAction(action(runtime, [68, 31, 2], [67, 31, 2]));
+      expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 0, itemId: 'bucket' })).toMatchObject({
+        ok: true,
+      });
+      const beforePickupInventory = runtime.server.getInventoryPointerView(runtime.playerId);
+      const beforePickupWorldRevision = runtime.server.worldRevision;
+      const beforePickupGameplayRevision = runtime.server.gameplayRevision;
+      const beforePickupCommitSequence = runtime.server.commitSequence;
+      const pickup = await runtime.performAction(action(runtime, [68, 31, 2], [67, 31, 2]));
 
-    expect(pickup.result).toMatchObject({ success: true, handled: true });
-    expect(runtime.server.getVoxel(68, 31, 2)).toBe(Voxel.Air);
-    expect(runtime.server.getFluidCell(68, 31, 2)).toBeNull();
-    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforePickupInventory);
-    expect(runtime.server.worldRevision).toBe(beforePickupWorldRevision + 1);
-    expect(runtime.server.gameplayRevision).toBe(beforePickupGameplayRevision + 1);
-  });
+      expect(pickup.result).toMatchObject({ success: true, handled: true });
+      expect(pickup.commits).toHaveLength(1);
+      expect(runtime.server.getVoxel(68, 31, 2)).toBe(Voxel.Air);
+      expect(runtime.server.getFluidCell(68, 31, 2)).toBeNull();
+      expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(beforePickupInventory);
+      expect(runtime.server.worldRevision).toBe(beforePickupWorldRevision + 1);
+      expect(runtime.server.gameplayRevision).toBe(beforePickupGameplayRevision + 1);
+      expect(runtime.server.commitSequence).toBe(beforePickupCommitSequence + 2);
+    },
+  );
 
   it.each([
     [Voxel.Water, 'water-bucket'],
@@ -272,12 +293,17 @@ describe('Classic fluid interactions through Authority', () => {
         expect(invokeMode(runtime, 'seedlands:set-creative-catalog', { slot: 1, itemId: 'lava-bucket' })).toMatchObject(
           { ok: true },
         );
+      runtime.takeCommits();
       const before = runtime.server.getInventoryPointerView(runtime.playerId);
-      const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision];
-      expect((await runtime.performAction(request)).result).toEqual({ success: false, reason: 'stale-selection' });
+      const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence];
+      const response = await runtime.performAction(request);
+      expect(response.result).toEqual({ success: false, reason: 'stale-selection' });
+      expect(response.commits).toEqual([]);
       expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(before);
       expect(runtime.server.getVoxel(1, 60, 0)).toBe(Voxel.Air);
-      expect([runtime.server.worldRevision, runtime.server.gameplayRevision]).toEqual(revisions);
+      expect([runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence]).toEqual(
+        revisions,
+      );
     },
   );
 
@@ -313,11 +339,16 @@ describe('Classic fluid interactions through Authority', () => {
     ]);
     runtime.server.giveItem(runtime.playerId, { itemId: 'water-bucket', count: 1 });
     const unchanged = async (request: AuthorityAction, reason: string) => {
+      runtime.takeCommits();
       const inventory = runtime.server.getInventoryPointerView(runtime.playerId);
-      const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision];
-      expect((await runtime.performAction(request)).result).toEqual({ success: false, reason });
+      const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence];
+      const response = await runtime.performAction(request);
+      expect(response.result).toEqual({ success: false, reason });
+      expect(response.commits).toEqual([]);
       expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(inventory);
-      expect([runtime.server.worldRevision, runtime.server.gameplayRevision]).toEqual(revisions);
+      expect([runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence]).toEqual(
+        revisions,
+      );
     };
     await unchanged(action(runtime, [1, 59, 0], [1, 60, 0]), 'target-occupied');
     runtime.server.removeItem(runtime.playerId, { itemId: 'water-bucket', count: 1 });
@@ -339,14 +370,16 @@ describe('Classic fluid interactions through Authority', () => {
     runtime.server.giveItem(runtime.playerId, { itemId: 'water-bucket', count: 1 });
     runtime.takeCommits();
     const before = runtime.server.getInventoryPointerView(runtime.playerId);
-    const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision];
+    const revisions = [runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence];
     const response = await runtime.performAction(action(runtime, [1, 59, 0], [1, 60, 0]));
 
     expect(response.result).toEqual({ success: false, reason: 'world-not-changed' });
     expect(response.commits).toEqual([]);
     expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(before);
     expect(runtime.server.getVoxel(1, 60, 0)).toBe(Voxel.Water);
-    expect([runtime.server.worldRevision, runtime.server.gameplayRevision]).toEqual(revisions);
+    expect([runtime.server.worldRevision, runtime.server.gameplayRevision, runtime.server.commitSequence]).toEqual(
+      revisions,
+    );
   });
 
   it('keeps the prepared target and inventory unchanged when an external world commit makes it stale', async () => {

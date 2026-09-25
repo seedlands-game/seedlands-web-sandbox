@@ -65,6 +65,7 @@ export function createGamePlayerController(options: Options): PlayerController {
     onSelectHotbarSlot: options.actions.selectHotbarSlot,
     onAttackTarget: (origin, direction, maxDistance) =>
       gameplay()?.attackTarget(origin, direction, maxDistance) ?? false,
+    canTargetFluidSource: () => gameplay()?.canTargetFluidSource() ?? false,
     isCreativeMode: () => options.authority.gameplay.player.mode?.value === 'creative',
     onAimTarget: (target) => gameplay()?.setAimTarget(target),
     onBeginBreak: (position) => gameplay()?.beginBreak(position),

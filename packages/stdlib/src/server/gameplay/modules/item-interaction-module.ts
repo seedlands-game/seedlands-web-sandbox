@@ -1,8 +1,11 @@
+import type { FluidCell } from '../../fluid/fluid-cell';
+import type { VoxelSemanticsDefinition } from '../../../world/voxel-semantics';
 import type { EntityLifetimeReference } from '../ecs-entity-owner';
 import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
 import type {
   ModDefinitionCatalog,
+  ModItemDefinition,
   ModModule,
   ModRegistrationIdentity,
   ModulePermission,
@@ -34,6 +37,7 @@ export type ItemInteractionDefinition = Readonly<{
   trigger: ItemInteractionTrigger;
   operationId: string;
   presentationKey: string;
+  voxelHitPolicy?: 'fluid-source';
 }>;
 export type ResolvedItemInteraction = Readonly<{
   definition: ItemInteractionDefinition;
@@ -62,10 +66,23 @@ type ItemInteractionRuntimeOptions = Readonly<{
   resolveInteraction(itemId: string, trigger: ItemInteractionTrigger): ResolvedItemInteraction | null;
   invokeActor(request: RegisteredOperationRequest): RegisteredOperationResult;
   getVoxel(position: [number, number, number]): number | undefined;
+  getVoxelSemantics(voxel: number): VoxelSemanticsDefinition | undefined;
+  getFluidCell(position: [number, number, number]): FluidCell | null;
 }>;
 
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
 const PRESENTATION_KEY = /^[a-z0-9][a-z0-9._:-]{0,127}$/;
+const FACE_INTERIOR_EPSILON = 1e-6;
+
+const adjacentFacePoint = (
+  hit: readonly [number, number, number],
+  adjacent: readonly [number, number, number],
+): [number, number, number] =>
+  hit.map((coordinate, axis) => coordinate + 0.5 + (adjacent[axis] - coordinate) * (0.5 + FACE_INTERIOR_EPSILON)) as [
+    number,
+    number,
+    number,
+  ];
 
 function hasExecutePermission(module: ReturnType<ModDefinitionCatalog['module']>, resource: string): boolean {
   return Boolean(
@@ -76,21 +93,59 @@ function hasExecutePermission(module: ReturnType<ModDefinitionCatalog['module']>
 }
 
 function snapshotDefinition(raw: ItemInteractionDefinition): ItemInteractionDefinition {
-  if (!raw || typeof raw !== 'object' || !NAMESPACE_ID.test(raw.id))
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new TypeError('Item interaction id is invalid.');
+  const descriptors = Object.getOwnPropertyDescriptors(raw);
+  const required = ['id', 'selector', 'trigger', 'operationId', 'presentationKey'] as const;
+  const keys = Reflect.ownKeys(descriptors);
+  if (
+    keys.some((key) => typeof key !== 'string' || ![...required, 'voxelHitPolicy'].includes(key)) ||
+    !required.every((key) => {
+      const descriptor = descriptors[key];
+      return descriptor?.enumerable === true && 'value' in descriptor;
+    }) ||
+    (descriptors.voxelHitPolicy !== undefined &&
+      (!descriptors.voxelHitPolicy.enumerable || !('value' in descriptors.voxelHitPolicy)))
+  )
+    throw new TypeError('Item interaction definition fields are invalid.');
+  const source = Object.fromEntries(
+    Object.entries(descriptors).map(([key, descriptor]) => [
+      key,
+      (descriptor as PropertyDescriptor & { value: unknown }).value,
+    ]),
+  ) as Record<string, unknown>;
+  if (typeof source.id !== 'string' || !NAMESPACE_ID.test(source.id))
     throw new TypeError('Item interaction id is invalid.');
-  if (!raw.selector || typeof raw.selector !== 'object' || !NAMESPACE_ID.test(raw.selector.itemId))
-    throw new TypeError(`Item interaction selector is invalid: ${raw.id}`);
-  if (!['self', 'voxel', 'entity'].includes(raw.trigger))
-    throw new TypeError(`Item interaction trigger is invalid: ${raw.id}`);
-  if (!NAMESPACE_ID.test(raw.operationId)) throw new TypeError(`Item interaction operation is invalid: ${raw.id}`);
-  if (!PRESENTATION_KEY.test(raw.presentationKey))
-    throw new TypeError(`Item interaction presentation key is invalid: ${raw.id}`);
+  if (!source.selector || typeof source.selector !== 'object' || Array.isArray(source.selector))
+    throw new TypeError('Item interaction selector is invalid: ' + source.id);
+  const selectorDescriptors = Object.getOwnPropertyDescriptors(source.selector);
+  const selectorKeys = Reflect.ownKeys(selectorDescriptors);
+  const itemIdDescriptor = selectorDescriptors.itemId;
+  if (
+    selectorKeys.length !== 1 ||
+    selectorKeys[0] !== 'itemId' ||
+    itemIdDescriptor?.enumerable !== true ||
+    !('value' in itemIdDescriptor) ||
+    typeof itemIdDescriptor.value !== 'string' ||
+    !NAMESPACE_ID.test(itemIdDescriptor.value)
+  )
+    throw new TypeError('Item interaction selector is invalid: ' + source.id);
+  if (typeof source.trigger !== 'string' || !['self', 'voxel', 'entity'].includes(source.trigger))
+    throw new TypeError('Item interaction trigger is invalid: ' + source.id);
+  if (typeof source.operationId !== 'string' || !NAMESPACE_ID.test(source.operationId))
+    throw new TypeError('Item interaction operation is invalid: ' + source.id);
+  if (typeof source.presentationKey !== 'string' || !PRESENTATION_KEY.test(source.presentationKey))
+    throw new TypeError('Item interaction presentation key is invalid: ' + source.id);
+  if (source.voxelHitPolicy !== undefined && source.voxelHitPolicy !== 'fluid-source')
+    throw new TypeError('Item interaction voxel hit policy is invalid: ' + source.id);
+  if (source.voxelHitPolicy !== undefined && source.trigger !== 'voxel')
+    throw new TypeError('Item interaction voxel hit policy requires a voxel trigger: ' + source.id);
   return Object.freeze({
-    id: raw.id,
-    selector: Object.freeze({ itemId: raw.selector.itemId }),
-    trigger: raw.trigger,
-    operationId: raw.operationId,
-    presentationKey: raw.presentationKey,
+    id: source.id,
+    selector: Object.freeze({ itemId: itemIdDescriptor.value }),
+    trigger: source.trigger as ItemInteractionTrigger,
+    operationId: source.operationId,
+    presentationKey: source.presentationKey,
+    ...(source.voxelHitPolicy ? { voxelHitPolicy: source.voxelHitPolicy } : {}),
   });
 }
 
@@ -177,13 +232,23 @@ function createItemInteractionRegistry() {
       selectors.add(selector);
       registered.set(definition.id, Object.freeze({ identity: Object.freeze({ ...identity }), definition }));
     },
-    freeze(definitions: ModDefinitionCatalog, items: readonly Readonly<{ id: string; storageId?: string }>[]) {
+    freeze(definitions: ModDefinitionCatalog, items: readonly ModItemDefinition[]) {
       if (resolved) throw new TypeError('Item interaction registry is already frozen.');
       const byId = new Map(items.map((item) => [item.id, item]));
       const next: ResolvedItemInteraction[] = [];
       for (const { identity, definition } of registered.values()) {
         const item = byId.get(definition.selector.itemId);
         if (!item) throw new TypeError(`Item interaction references unknown item: ${definition.selector.itemId}`);
+        if (
+          definition.voxelHitPolicy === 'fluid-source' &&
+          !item.capabilities?.some(
+            (capability) => capability.type === 'fluid-container' && capability.fluid === 'empty',
+          )
+        )
+          throw new TypeError(
+            'Item interaction fluid-source policy requires an empty fluid-container item: ' +
+              definition.selector.itemId,
+          );
         const operation = definitions.operation(definition.operationId);
         if (!operation) throw new TypeError(`Item interaction operation is missing: ${definition.operationId}`);
         if (operation.executionKind !== 'actor')
@@ -275,11 +340,28 @@ export function dispatchItemInteraction(
       !positionsInRange(origin, voxelCenter([...target.adjacent]), 5)
     )
       return { success: false as const, reason: 'out-of-range' };
-    const visibility = traceVoxelRay(voxelCenter([...target.hit]), origin, (x, y, z) => options.getVoxel([x, y, z]));
+    const hitVoxel = options.getVoxel([...target.hit]);
+    const adjacentVoxel = options.getVoxel([...target.adjacent]);
+    if (hitVoxel === undefined || adjacentVoxel === undefined)
+      return { success: false as const, reason: 'chunk-unavailable' };
+    const semantics = options.getVoxelSemantics(hitVoxel);
+    if (!semantics) return { success: false as const, reason: 'invalid-target' };
+    const fluid = binding.definition.voxelHitPolicy === 'fluid-source' ? options.getFluidCell([...target.hit]) : null;
+    if (!semantics.targetable && !(fluid?.source === true && fluid.level === 8))
+      return { success: false as const, reason: 'invalid-target' };
+    const visibility = traceVoxelRay(
+      adjacentFacePoint(target.hit, target.adjacent),
+      origin,
+      (x, y, z) => options.getVoxel([x, y, z]),
+      (voxel) => options.getVoxelSemantics(voxel)?.solid ?? true,
+    );
     if (visibility !== 'clear')
       return { success: false as const, reason: visibility === 'unavailable' ? 'chunk-unavailable' : 'blocked' };
-    const adjacentVisibility = traceVoxelRay(voxelCenter([...target.adjacent]), origin, (x, y, z) =>
-      options.getVoxel([x, y, z]),
+    const adjacentVisibility = traceVoxelRay(
+      voxelCenter([...target.adjacent]),
+      origin,
+      (x, y, z) => options.getVoxel([x, y, z]),
+      (voxel) => options.getVoxelSemantics(voxel)?.solid ?? true,
     );
     if (adjacentVisibility !== 'clear')
       return {

@@ -19,6 +19,7 @@ import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
 import { performSecondaryInteraction } from './secondary-interaction';
 import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
+import { createFluidAwareTargetPredicate } from './fluid-source-target';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -121,7 +122,7 @@ export class PlayerController {
       [position.x, position.y, position.z],
       [direction.x, direction.y, direction.z],
       (x, y, z) => world.getVoxel(x, y, z),
-      (voxel) => world.authority.voxelSemantics.get(voxel)?.targetable ?? false,
+      createFluidAwareTargetPredicate(world, this.options.canTargetFluidSource),
     );
   }
 

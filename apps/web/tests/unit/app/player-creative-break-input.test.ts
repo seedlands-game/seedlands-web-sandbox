@@ -43,9 +43,16 @@ function installPlayerInput(options: {
     physicsHz: 60,
     authority: { epoch: 'test', snapshot: () => null, sendInput: vi.fn(), setPlayerPosition: vi.fn() },
     getWorld: () => ({
+      authority: {
+        voxelSemantics: {
+          get: (voxel: number) =>
+            voxel === Voxel.Stone ? { targetable: true } : voxel === Voxel.Air ? { targetable: false } : undefined,
+        },
+      },
       getVoxel: (x: number, y: number, z: number) => (x === 0 && y === 0 && z === targetZ ? Voxel.Stone : Voxel.Air),
       getFluidCell: () => null,
     }),
+    canTargetFluidSource: () => false,
     telemetry: {
       beginSpan: vi.fn(),
       endSpan: vi.fn(),
