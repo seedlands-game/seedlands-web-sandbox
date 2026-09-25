@@ -1,13 +1,20 @@
 import { expect, it } from 'vitest';
 import {
+  assembleOverworldPacks,
+  createGameplayActorAuthority,
+  createGameplaySystemAuthority,
+} from '@seedlands/stdlib/host';
+import { definePack } from '@seedlands/stdlib/mod-api';
+import {
   classicContent,
   getItemDefinition,
   Inventory,
   craftRecipe,
   GameplayRuntime,
 } from '../../../../fixtures/classic/content';
-import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
+import { classicGameplayDomainModules, classicGameplayDomainOptions } from './classic-gameplay-domain-options';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import {
   armorDamageReduction,
   ARMOR_MAX_POINTS,
@@ -20,6 +27,42 @@ const pieces = [
   { id: 'iron-chestplate', slot: 'chestplate', material: 'iron-ingot', points: 6 },
   { id: 'diamond-chestplate', slot: 'chestplate', material: 'diamond', points: 8 },
 ] as const;
+
+const createFullClassicWorld = () => {
+  const deathModuleId = 'seedlands:overworld-death-inventory-policy';
+  const selected = definePack({
+    id: pack.manifest.id,
+    version: pack.manifest.version,
+    kind: pack.manifest.kind,
+    entry: pack.manifest.entry,
+    modules: classicGameplayDomainModules([
+      'seedlands:overworld-content',
+      ...(pack.modules.some(({ descriptor }) => descriptor.id === deathModuleId) ? [deathModuleId] : []),
+    ]),
+  });
+  const composition = assembleOverworldPacks([
+    {
+      ...selected,
+      integrity: {
+        algorithm: 'sha256',
+        manifestDigest: 'a'.repeat(64),
+        entryDigest: 'b'.repeat(64),
+        resources: [],
+      },
+    },
+  ]);
+  return new GameplayRuntime({
+    composition,
+    moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'test-player' }),
+    moduleSystemAuthority: createGameplaySystemAuthority(composition),
+    platform: testCorePlatform,
+    getWorldTime: () => 12,
+    getVoxel: () => 0,
+    prepareVoxelEdit: () => {
+      throw new Error('unexpected');
+    },
+  });
+};
 
 it('护甲物品注册为可穿戴且带防护点数与耐久', () => {
   for (const piece of pieces) {
@@ -90,23 +133,48 @@ it('创造模式免伤不磨损护甲，非法伤害保持旧失败语义', () =
   expect(world.applyDamage('test', 'player', -1, 'combat')).toEqual({ success: false, reason: 'invalid-damage' });
 });
 
-it('死亡目标拒绝重复伤害且不磨损护甲', () => {
-  const world = new GameplayRuntime({
-    ...classicGameplayDomainOptions(),
-    platform: testCorePlatform,
-    getWorldTime: () => 12,
-    getVoxel: () => 0,
-    prepareVoxelEdit: () => {
-      throw new Error('unexpected');
-    },
-  });
+it('Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player', () => {
+  const world = createFullClassicWorld();
   world.spawnPlayer({ id: 'player', position: [0, 1, 0] });
   world.giveItem('player', { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } });
-  world.equipSelectedArmor('player');
-  world.applyDamage('test', 'player', 100, 'test');
-  const before = world.entities.actorStateAccess('player').armor;
+  expect(world.equipSelectedArmor('player')).toMatchObject({ success: true });
+  world.giveItem('player', { itemId: 'berry', count: 2 });
+  const actor = world.entities.actorStateAccess('player');
+  actor.replaceInventoryInteraction(actor.inventoryRevision + 1, {
+    version: 1,
+    revision: 1,
+    stack: { itemId: 'coal', count: 1 },
+    origin: { kind: 'inventory', slot: 0 },
+    craftingGrid: [{ itemId: 'plank', count: 1 }, null, null, null],
+  });
+  const beforeRevision = actor.inventoryRevision;
+  expect(world.applyDamage('test', 'player', 100, 'test')).toEqual({ success: true });
+  expect(world.getEntity('player')).toMatchObject({ type: 'player', health: 0 });
+  expect(world.getInventory('player').slots.every((slot) => slot === null)).toBe(true);
+  expect(world.getInventoryPointerView('player').cursor).toMatchObject({
+    stack: null,
+    craftingGrid: [null, null, null, null],
+  });
+  expect(world.entities.actorStateAccess('player').armor).toEqual({
+    helmet: null,
+    chestplate: null,
+    leggings: null,
+    boots: null,
+  });
+  expect(world.entities.actorStateAccess('player').inventoryRevision).toBe(beforeRevision + 1);
+  const settledDrops = world.queryEntities({ type: 'world-item' });
+  expect(settledDrops).toHaveLength(4);
+  expect(settledDrops.map(({ stack }) => stack)).toEqual(
+    expect.arrayContaining([
+      { itemId: 'berry', count: 2 },
+      { itemId: 'coal', count: 1 },
+      { itemId: 'plank', count: 1 },
+      { itemId: 'iron-helmet', count: 1, instance: { durability: 1 } },
+    ]),
+  );
+  const drops = world.queryEntities({ type: 'world-item' });
   expect(world.applyDamage('test', 'player', 1, 'test')).toEqual({ success: false, reason: 'player-dead' });
-  expect(world.entities.actorStateAccess('player').armor).toEqual(before);
+  expect(world.queryEntities({ type: 'world-item' })).toEqual(drops);
 });
 
 it('护甲按点数线性减伤，封顶且不为负，空护甲不减伤', () => {

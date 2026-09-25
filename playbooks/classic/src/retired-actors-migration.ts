@@ -22,6 +22,8 @@ const MEDIA_OPERATION_IDS = new Set([
   'seedlands:media-stop',
   'seedlands:media-switch',
 ]);
+const DEATH_POLICY_MODULE_ID = 'seedlands:overworld-death-inventory-policy';
+const DEATH_POLICY_CAPABILITY_ID = 'seedlands:death-inventory-policy';
 type RecordValue = Record<string, unknown>;
 
 const record = (value: unknown): RecordValue | null =>
@@ -106,8 +108,8 @@ const isPreMediaClassicSource = (snapshot: RecordValue, targetComposition: unkno
     ],
     definitionMap: {
       ...definitionMap,
-      modules: modules.filter(({ id }) => id !== MEDIA_MODULE_ID),
-      capabilities: capabilities.filter(({ id }) => id !== MEDIA_CAPABILITY_ID),
+      modules: modules.filter(({ id }) => id !== MEDIA_MODULE_ID && id !== DEATH_POLICY_MODULE_ID),
+      capabilities: capabilities.filter(({ id }) => id !== MEDIA_CAPABILITY_ID && id !== DEATH_POLICY_CAPABILITY_ID),
       resources: resources.filter(({ id }) => id !== MEDIA_RESOURCE_ID),
       stateCodecs: stateCodecs.filter(({ id }) => id !== MEDIA_STATE_ID),
       operations: operations.filter(({ id }) => !MEDIA_OPERATION_IDS.has(String(id))),

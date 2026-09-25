@@ -10,7 +10,7 @@ import type { RegisteredCombatRuntime } from './modules/registered-combat-runtim
 import type { RegisteredFeedingRuntime } from './modules/registered-feeding-runtime';
 import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
 import { NEEDS_COMPONENT } from './modules/needs-model';
-import { createNeedsStatePort } from './modules/needs-state-port';
+import { createNeedsStatePort, resolveNeedsDeathInventoryMode } from './modules/needs-state-port';
 import { createGameplayModuleSchedule } from './modules/gameplay-module-schedule';
 import { createWorldRulesetState } from './modules/world-ruleset-state';
 import { ModeRuntime } from './modules/mode-runtime';
@@ -210,6 +210,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
         assertCanChange: () => this.assertRevisionCapacity(),
         changed: () => this.touch(),
         prepareDeaths: (ids) => this.simulation.prepareDeaths(ids),
+        deathInventory: resolveNeedsDeathInventoryMode(callbacks.composition),
       }),
       mode: createModeStatePort(this.entities, this.modes, () => this.kernelState.gameplayRevision),
     });

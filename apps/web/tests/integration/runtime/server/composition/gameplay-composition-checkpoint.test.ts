@@ -32,7 +32,6 @@ const MEDIA_OPERATION_IDS = new Set([
   'seedlands:media-stop',
   'seedlands:media-switch',
 ]);
-
 function prechangeClassicIdentity(): CompositionCheckpointIdentity {
   const composition = JSON.parse(
     readFileSync(new URL('../../../../fixtures/npc/main-composition.json', import.meta.url), 'utf8'),
@@ -65,8 +64,12 @@ function preMediaClassicIdentity(current: CompositionCheckpointIdentity): Compos
     ],
     definitionMap: {
       ...current.definitionMap,
-      modules: current.definitionMap.modules.filter(({ id }) => id !== 'seedlands:overworld-media'),
-      capabilities: current.definitionMap.capabilities.filter(({ id }) => id !== 'seedlands:media-playback'),
+      modules: current.definitionMap.modules.filter(
+        ({ id }) => id !== 'seedlands:overworld-media' && id !== 'seedlands:overworld-death-inventory-policy',
+      ),
+      capabilities: current.definitionMap.capabilities.filter(
+        ({ id }) => id !== 'seedlands:media-playback' && id !== 'seedlands:death-inventory-policy',
+      ),
       resources: current.definitionMap.resources.filter(({ id }) => id !== 'seedlands.media-playback'),
       stateCodecs: current.definitionMap.stateCodecs.filter(({ id }) => id !== 'seedlands:media-playback-device'),
       operations: current.definitionMap.operations.filter(({ id }) => !MEDIA_OPERATION_IDS.has(id)),

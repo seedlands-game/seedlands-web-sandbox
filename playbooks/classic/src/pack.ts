@@ -32,6 +32,7 @@ import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
 import { classicStructureDefinitionModule } from './structures';
 import { classicStructureActionsModule } from './structure-actions';
 import { classicMedia } from './media';
+import { classicDeathInventoryPolicyModule } from './death-inventory-policy';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -102,6 +103,7 @@ export const pack = definePack({
     classicStructureDefinitionModule,
     classicStructureActionsModule,
     defineMediaPlaybackModuleV1({ moduleId: 'seedlands:overworld-media', definition: classicMedia }),
+    classicDeathInventoryPolicyModule,
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
