@@ -481,7 +481,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
       this.content.items,
       actorId,
       amount,
-      (adjusted) => this.vitals.applyDamage(actorId, playerId, adjusted, cause),
+      (adjusted, armor) => this.vitals.applyDamage(actorId, playerId, adjusted, cause, armor),
     );
   equipSelectedArmor = (playerId: string) =>
     equipArmor(this.entities.actorStateAccess(playerId), this.content.items, () => this.touch());

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { definePack, type ModModule } from '@seedlands/stdlib/mod-api';
+import { defineDeathInventoryPolicyModuleV1, definePack, type ModModule } from '@seedlands/stdlib/mod-api';
 import {
   assembleWorldPacks,
   createGameplaySystemAuthority,
@@ -23,15 +23,27 @@ function setup(
   alias = 'test-player',
   allowOrigins: boolean | (() => boolean) = true,
 ) {
+  const deathPolicy = defineDeathInventoryPolicyModuleV1({
+    moduleId: 'test:registered-combat-death-policy',
+    definition: {
+      version: 1,
+      actors: {
+        player: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' },
+        creature: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
+        npc: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
+      },
+    },
+  });
+  const extensions = withCombat ? [deathPolicy, ...extra] : extra;
   const modules = [
     ...classicGameplayDomainModules(
       [
         'seedlands:inventory-actions-module',
         'seedlands:mode-module',
         ...(withCombat ? ['seedlands:overworld-combat-rules'] : []),
-        ...extra.map((module) => module.descriptor.id),
+        ...extensions.map((module) => module.descriptor.id),
       ],
-      extra,
+      extensions,
     ),
   ];
   const selected = definePack({ id: 'test:no-combat', version: '1.0.0', kind: 'playbook', modules });

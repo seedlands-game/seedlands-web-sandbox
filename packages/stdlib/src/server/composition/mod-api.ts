@@ -224,6 +224,7 @@ export {
   prepareDeathInventorySettlementSeriesV1,
 } from '../gameplay/death-inventory-settlement';
 export type {
+  DeathInventoryAdditionalActorReplacementV1,
   DeathInventoryDropIntentV1,
   DeathInventoryDropSourceV1,
   DeathInventoryIntrinsicDropV1,

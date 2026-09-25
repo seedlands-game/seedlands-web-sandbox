@@ -413,6 +413,7 @@ describe('registered Combat armor transaction', () => {
       targetId: 'target',
       damage: 9.2,
       armor: { ...emptyArmor(), helmet: armor('sample:visor', 2) },
+      deathInventory: { kind: 'legacy' },
       actorDeathDrop: () => null,
     });
     candidate.entity!.validate();
@@ -425,6 +426,7 @@ describe('registered Combat armor transaction', () => {
       targetId: 'target',
       damage: 9.2,
       armor: { ...emptyArmor(), helmet: armor('sample:visor', 2) },
+      deathInventory: { kind: 'legacy' },
       actorDeathDrop: () => null,
     });
     lifetime.entities.restoreComponentSnapshot(lifetime.entities.exportComponentSnapshot());

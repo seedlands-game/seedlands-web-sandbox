@@ -157,7 +157,13 @@ describe('V2 equipment behavior RED', () => {
       helmet: { itemId: 'iron-helmet', count: 1, instance: { durability: 2 } },
       chestplate: { itemId: 'iron-chestplate', count: 1, instance: { durability: 5 } },
     });
-    const result = prepareCombatDamage({ entities, targetId: 'target', damage: 3, actorDeathDrop: () => null });
+    const result = prepareCombatDamage({
+      entities,
+      targetId: 'target',
+      damage: 3,
+      deathInventory: { kind: 'legacy' },
+      actorDeathDrop: () => null,
+    });
     result.entity!.validate();
     result.entity!.apply();
 

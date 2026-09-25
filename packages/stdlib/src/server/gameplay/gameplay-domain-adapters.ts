@@ -6,6 +6,7 @@ import type { GameplayContent } from './gameplay-content';
 import type { GameplayCallbacks } from './gameplay-runtime-contracts';
 import type { PlayerState } from './player-state';
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
+import { resolveDeathInventoryPolicyCapabilityV1 } from './modules/death-inventory-policy-module';
 
 /** Existing domain facades share the same instance owners, including uncomposed test hosts. */
 export function createGameplayDomainAdapters(
@@ -20,6 +21,12 @@ export function createGameplayDomainAdapters(
   }>,
 ) {
   const { entities, content, callbacks, player, simulation, assertCanChange, changed } = options;
+  const deathInventory = callbacks.composition
+    ? {
+        kind: 'composed' as const,
+        capability: resolveDeathInventoryPolicyCapabilityV1(callbacks.composition),
+      }
+    : { kind: 'legacy' as const };
   const inventory = new ActorInventoryRuntime({
     actor: (id) => entities.actorStateAccess(id),
     recipes: content.recipes,
@@ -34,10 +41,8 @@ export function createGameplayDomainAdapters(
   const vitals = new ActorVitalsRuntime({
     player: player,
     assertCanChange: assertCanChange,
-    assertCanCancelCombat: (id) => simulation().assertCanCancelCombat(id),
-    cancelCombat: (id) => {
-      simulation().cancelCombat(id, 'attacker-dead');
-    },
+    prepareDeaths: (ids) => simulation().prepareDeaths(ids),
+    deathInventory,
     touch: (event) => changed(false, event),
     entities: entities,
   });
