@@ -1,0 +1,34 @@
+4:09:33 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (17 tests | 1 failed) 7ms
+     × keeps strict upper and lower faces observable from the existing post-traverse side 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > keeps strict upper and lower faces observable from the existing post-traverse side
+AssertionError: expected 14 to be 180 // Object.is equality
+
+- Expected
++ Received
+
+- 180
++ 14
+
+ ❯ apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts:221:33
+    219|
+    220|     const lowerCenter = convergeDoorAim(afterTraverse, [-90, -20], doo…
+    221|     expect(lowerCenter.attempt).toBe(180);
+       |                                 ^
+    222|     expect(lowerCenter.observed).toMatchObject({ position: upper });
+    223|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  16:09:33
+   Duration  164ms (transform 66ms, setup 0ms, import 82ms, tests 7ms, environment 0ms)
+

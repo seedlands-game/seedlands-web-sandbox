@@ -1,13 +1,21 @@
 import { describe, expect, it } from 'vitest';
 import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
 import { sweepBodyThroughWorld } from '@seedlands/stdlib/physics/geometry';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { traceVoxelTarget, type VoxelTarget } from '../../../src/client/presentation/voxel-target';
 import {
   assessClosedDoorProbe,
   createClosedDoorProbePlan,
+  doorEntryAdjacent,
+  isOutsideDoorTargetOnEntrySide,
   type ClosedDoorProbeObservation,
 } from './door-collision-oracle';
+import { matchesVoxelAim, mouseCorrectionToPoint, voxelAimPoint } from './target-aim';
+import { reachedRouteTarget } from './route-progress';
+import type { Point } from './scenario';
 
 const door = [70, 31, 0] as const;
+const browser11DoorPair = [93, 94] as const;
 const collision = { min: [0.8125, 0, 0] as const, max: [1, 1, 1] as const };
 const playerConfig = bodyConfigFor('player');
 const playerHalfWidth = Math.max(
@@ -40,6 +48,53 @@ const observation = (
   onGround: true,
   colliding: false,
 });
+const directionForView = ([yaw, pitch]: readonly [number, number]): [number, number, number] => {
+  const yawRadians = (yaw * Math.PI) / 180;
+  const pitchRadians = (pitch * Math.PI) / 180;
+  const horizontal = Math.cos(pitchRadians);
+  return [-Math.sin(yawRadians) * horizontal, Math.sin(pitchRadians), -Math.cos(yawRadians) * horizontal];
+};
+const applyCorrection = (
+  view: readonly [number, number],
+  correction: Readonly<{ dx: number; dy: number }>,
+): readonly [number, number] => [view[0] - correction.dx * 0.13, view[1] - correction.dy * 0.13];
+const twoCellDoorTarget = (player: Point, view: readonly [number, number], lower: Point): VoxelTarget | null =>
+  traceVoxelTarget(
+    [...player],
+    directionForView(view),
+    (x, y, z) =>
+      x === lower[0] && z === lower[2] && y === lower[1]
+        ? browser11DoorPair[0]
+        : x === lower[0] && z === lower[2] && y === lower[1] + 1
+          ? browser11DoorPair[1]
+          : Voxel.Air,
+    (voxel) => browser11DoorPair.includes(voxel as (typeof browser11DoorPair)[number]),
+  );
+const convergeDoorAim = (
+  player: Point,
+  initialView: readonly [number, number],
+  lower: Point,
+  target: Point,
+  adjacent?: Point,
+) => {
+  let view = initialView;
+  for (let attempt = 1; attempt <= 180; attempt += 1) {
+    const observed = twoCellDoorTarget(player, view, lower);
+    if (matchesVoxelAim(observed, target, adjacent)) return { attempt, observed };
+    view = applyCorrection(view, mouseCorrectionToPoint(player, view, voxelAimPoint(target, adjacent)));
+  }
+  return { attempt: 180, observed: twoCellDoorTarget(player, view, lower) };
+};
+const playerAtApproach = (
+  currentPlan: ReturnType<typeof createClosedDoorProbePlan>,
+  normalError = 0,
+  lateralError = 0,
+): Point => {
+  const player: [number, number, number] = [currentPlan.approach[0], 32.6, currentPlan.approach[1]];
+  player[currentPlan.normalAxis] += normalError;
+  player[currentPlan.lateralAxis] += lateralError;
+  return player;
+};
 
 describe('Classic closed-door collision oracle', () => {
   it('derives a centered orthogonal route from the actual door collision box', () => {
@@ -97,6 +152,81 @@ describe('Classic closed-door collision oracle', () => {
     expect(zNormal.approach[1]).toBeCloseTo(2.68);
     expect(zNormal.routeTarget[0]).toBeCloseTo(3.5);
     expect(zNormal.routeTarget[1]).toBeCloseTo(4.68);
+  });
+
+  it('requires leaving the Browser-11 target cell before a strict upper entry face can be observed', () => {
+    const upper: Point = [70, 32, 0];
+    const adjacent = doorEntryAdjacent(plan, upper);
+    const browser11Eye: Point = [70.49249900007506, 32.6, 0.49733905377911297];
+    const contact = twoCellDoorTarget(browser11Eye, [-90.12999999999998, -27.44], door);
+
+    expect(contact).toMatchObject({ position: upper, adjacent: null });
+    expect(matchesVoxelAim(contact, upper)).toBe(true);
+    expect(matchesVoxelAim(contact, upper, adjacent)).toBe(false);
+
+    const result = convergeDoorAim(playerAtApproach(plan), [-90.13, -27.44], door, upper, adjacent);
+    expect(result.attempt).toBeLessThanOrEqual(180);
+    expect(result.observed).toMatchObject({ position: upper, adjacent });
+    expect(isOutsideDoorTargetOnEntrySide(plan, upper, playerAtApproach(plan))).toBe(true);
+    expect(isOutsideDoorTargetOnEntrySide(plan, upper, browser11Eye)).toBe(false);
+  });
+
+  it.each([
+    { collision: { min: [0.8125, 0, 0] as const, max: [1, 1, 1] as const }, player: [67, 32.6, 0.5] as Point },
+    { collision: { min: [0.8125, 0, 0] as const, max: [1, 1, 1] as const }, player: [74, 32.6, 0.5] as Point },
+    { collision: { min: [0, 0, 0.8125] as const, max: [1, 1, 1] as const }, player: [70.5, 32.6, -3] as Point },
+    { collision: { min: [0, 0, 0.8125] as const, max: [1, 1, 1] as const }, player: [70.5, 32.6, 4] as Point },
+  ])('derives and reaches the near-side entry face for $player', ({ collision, player }) => {
+    const directionalPlan = createClosedDoorProbePlan({ door, collision, playerPosition: player, playerHalfWidth });
+    const upper: Point = [door[0], door[1] + 1, door[2]];
+    const adjacent = doorEntryAdjacent(directionalPlan, upper);
+
+    for (const [normalError, lateralError] of [
+      [-0.04, -0.04],
+      [0.04, 0.04],
+    ] as const) {
+      const approach = playerAtApproach(directionalPlan, normalError, lateralError);
+      expect(reachedRouteTarget(approach, directionalPlan.approach, 'KeyS', 0.06, 0.08)).toBe(true);
+      const result = convergeDoorAim(approach, [179, 35], door, upper, adjacent);
+      expect(result.attempt).toBeLessThanOrEqual(180);
+      expect(result.observed).toMatchObject({ position: upper, adjacent });
+      expect(isOutsideDoorTargetOnEntrySide(directionalPlan, upper, approach)).toBe(true);
+    }
+  });
+
+  it('covers the canonical KeyS crossed-target corridor boundary used by the retreat', () => {
+    const approach = playerAtApproach(plan, -0.001, 0.079);
+    expect(reachedRouteTarget(approach, plan.approach, 'KeyS', 0.06, 0.08)).toBe(true);
+    const upper: Point = [door[0], door[1] + 1, door[2]];
+    const adjacent = doorEntryAdjacent(plan, upper);
+    const result = convergeDoorAim(approach, [-90.13, -27.44], door, upper, adjacent);
+    expect(result.attempt).toBeLessThanOrEqual(180);
+    expect(result.observed).toMatchObject({ position: upper, adjacent });
+  });
+
+  it('keeps strict upper and lower faces observable from the existing post-traverse side', () => {
+    const afterTraverse: Point = [door[0] + 1.5, 32.6, door[2] + 0.5];
+    const farSidePlan = createClosedDoorProbePlan({
+      door,
+      collision,
+      playerPosition: afterTraverse,
+      playerHalfWidth,
+    });
+    const upper: Point = [door[0], door[1] + 1, door[2]];
+    const upperCenter = convergeDoorAim(afterTraverse, [-90, -20], door, upper);
+    expect(upperCenter.attempt).toBeLessThanOrEqual(180);
+    expect(upperCenter.observed).toMatchObject({ position: upper, adjacent: [71, 32, 0] });
+
+    const lowerCenter = convergeDoorAim(afterTraverse, [-90, -20], door, door);
+    expect(lowerCenter.attempt).toBeLessThanOrEqual(180);
+    expect(lowerCenter.observed).toMatchObject({ position: door, adjacent: [71, 31, 0] });
+
+    for (const target of [upper, door]) {
+      const adjacent = doorEntryAdjacent(farSidePlan, target);
+      const result = convergeDoorAim(afterTraverse, [-90, -20], door, target, adjacent);
+      expect(result.attempt).toBeLessThanOrEqual(180);
+      expect(result.observed).toMatchObject({ position: target, adjacent });
+    }
   });
 
   it('accepts fresh orthogonal progress that reaches and remains at the derived contact plane', () => {

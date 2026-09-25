@@ -81,6 +81,20 @@ export function createClosedDoorProbePlan(
   });
 }
 
+export function doorEntryAdjacent(plan: ClosedDoorProbePlan, target: Point): Point {
+  if (!finitePoint(target) || !target.every(Number.isInteger))
+    throw new TypeError('Door entry target must contain finite integer coordinates.');
+  const adjacent = [...target] as [number, number, number];
+  adjacent[plan.normalAxis] -= plan.direction;
+  return Object.freeze(adjacent);
+}
+
+export function isOutsideDoorTargetOnEntrySide(plan: ClosedDoorProbePlan, target: Point, position: Point): boolean {
+  if (!finitePoint(target) || !finitePoint(position)) return false;
+  const nearBoundary = target[plan.normalAxis] + (plan.direction === 1 ? 0 : 1);
+  return plan.direction * (position[plan.normalAxis] - nearBoundary) < 0;
+}
+
 export function assessClosedDoorProbe(
   plan: ClosedDoorProbePlan,
   before: ClosedDoorProbeObservation,

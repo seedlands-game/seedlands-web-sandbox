@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-DOOR-ENTRY-FACE-CLOSE-01",
+  "status": "FIXTURE_STATIC_PASS_BROWSER_NOT_RUN",
+  "browser11Red": {
+    "windowId": "192d22bd-b0b2-4290-bfbf-3de62e2c9b86",
+    "diagnosisSha256": "e6765a285c05266a421105194b9692a88d2b58394af2f19fad8edb0f69e9274c"
+  },
+  "deterministicRed": {
+    "windowId": "ce11103b-fb6d-4f2f-9364-85aa9582eb5c",
+    "exitCode": 1,
+    "testsPassed": 10,
+    "testsFailed": 6
+  },
+  "deterministicGreen": {
+    "windowId": "b7efa66f-5f6f-46f7-9ef6-1e249f3e6d70",
+    "exitCode": 0,
+    "filesPassed": 3,
+    "testsPassed": 30
+  },
+  "validationWindows": {
+    "classicTestTypecheck": "bec008f6-6ada-42b8-be94-e7f8a17bfecb",
+    "rootTestTypecheck": "56923204-7be9-4b30-8989-84bcf8526eea",
+    "eslint": "d6cb16b1-4b66-43ca-88a8-582a8bdd4c69"
+  },
+  "files": {
+    "apps/web/tests/e2e/classic-support/v1-slice.ts": "af17d799bcbe18dd7daf53183e457af36c263fdbcc3acd4bf51443c1954e60e3",
+    "apps/web/tests/e2e/classic-support/door-collision-oracle.ts": "93c3f0fcc4372442cb83cfde30427673fe1230ad9ec0094ac178f2310add7a2c",
+    "apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts": "291c8f045c9a81208318af9937cd9e8da44a20e230ca2fd9f9c3dceac618170a",
+    "changes/2026-09-23-classic-functional-completion/spec.md": "f9c2933792a0f599e811bca9a580f1a594890e90c32460a264edc0b06a0cc9e4",
+    "changes/2026-09-23-classic-functional-completion/door-entry-face-contract.md": "067aade6570270af83768e69823f45916f277b2b6f3624a8b3310e5c133bbb1c"
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci"]
+}
