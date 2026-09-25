@@ -145,11 +145,23 @@ Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，阶段上限 5h。公共范围�
 policy capability/resolver、原始 source frontier 与统一 prepared mutation series participant；不安装 Classic、
 不接 Needs/Combat/Vitals/Autonomy producer、不修改 Web/spec/存档 schema。
 
-状态：LOCAL_DELIVERY_READY。root 已定向准出公共 checkpoint；真实 RED 证明旧单 participant 会接受 build 后 health-only stale；最终 non-Classic
+状态：REMOTE_DELIVERED。root 已定向准出公共 checkpoint；真实 RED 证明旧单 participant 会接受 build 后 health-only stale；最终 non-Classic
 capability/source/series 与既有 equipment spine 为 `3 files / 25 tests` PASS，stdlib/root test types、定向
-ESLint/Prettier PASS。GIT-24 隔离树复验还包括 Classic test types 与 staged diff，代码/测试/合同已提交
-`364c6517848a0c1d03aed28b051a106820264b2f`；evidence/state 待第二笔提交。Classic policy、
+ESLint/Prettier PASS。GIT-24 隔离树复验还包括 Classic test types 与 staged diff，代码/测试/合同提交
+`364c6517848a0c1d03aed28b051a106820264b2f`、evidence/state 提交
+`1f0dda0023fb68185ff2ad2a57a9e4aa01ec15ca`，local/upstream/origin/PR head 已读回一致。Classic policy、
 `death-inventory-policy-unavailable`、NPC intrinsic/despawn 与实际 producer 仍未接线，不宣称 death 或完整 V2 GREEN。
+
+### GIT-25-EQUIPMENT-WEB-UI + V2-ARTIFACT-BUILD-02
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer，阶段上限 6h。集成 root 已准出的
+Web equipment presentation 与 pointer queue：只提交 CLOSE-02 SOURCE 的 18 项、两份 UI evidence 目录和
+本批 metadata/state；不接 death producer，不运行 Browser/Cua/CI/deploy。
+
+状态：LOCAL_DELIVERY_READY。精确 staged tree 的 UI/queue `33/33`、creative-mode/UI bridge `10/10`、
+Web/Svelte、root test、Classic test types、staged ESLint、format、scoped diff 均 PASS。代码/测试/spec/合同已提交
+`ff17b4cc14d6650fe2156e559883c824464f5b5d`；evidence/state 待第二笔提交。真实浏览器装备旅程与 death producer
+仍未准出；BUILD02 必须从推送后的 source SHA 单独生成。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 

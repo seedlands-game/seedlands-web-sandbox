@@ -1,0 +1,28 @@
+9:36:06 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/client/creative-mode-ui.test.ts (4 tests | 1 failed) 6ms
+     × keeps the requested mode through the low-core confirmation path 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/client/creative-mode-ui.test.ts > new-world mode start request > keeps the requested mode through the low-core confirmation path
+TypeError: game.setMouseSensitivity is not a function
+ ❯ new ApplicationShell apps/web/src/app/application-shell.ts:99:10
+     97|       /* 使用默认。 */
+     98|     }
+     99|     game.setMouseSensitivity(this.mouseSensitivity);
+       |          ^
+    100|     this.controller = new ShellController({
+    101|       start: async (seed, quality, openMode) => {
+ ❯ apps/web/tests/unit/client/creative-mode-ui.test.ts:167:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 9 passed (10)
+   Start at  21:36:06
+   Duration  686ms (transform 427ms, setup 0ms, import 523ms, tests 10ms, environment 0ms)
+

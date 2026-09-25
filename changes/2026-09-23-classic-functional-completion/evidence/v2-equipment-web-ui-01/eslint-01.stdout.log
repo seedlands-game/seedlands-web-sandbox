@@ -1,0 +1,9 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/src/app/gameplay/browser-gameplay.ts
+  548:1  error  File has too many lines (501). Maximum allowed is 500  max-lines
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/src/app/ui/inventory-crafting.svelte
+  508:1  error  File has too many lines (523). Maximum allowed is 500  max-lines
+
+✖ 2 problems (2 errors, 0 warnings)
+
