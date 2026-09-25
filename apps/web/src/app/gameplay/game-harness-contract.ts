@@ -4,6 +4,7 @@ import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-ha
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
 import type {
   HarnessSnapshot,
+  HarnessEquipmentSnapshot,
   HarnessMediaSnapshot,
   LifecycleSnapshot,
   RenderedMaterialMeshSummary,
@@ -55,6 +56,7 @@ export type HarnessApi = {
     material: FaceMaterialId,
   ) => RenderedMaterialMeshSummary | null;
   mediaSnapshot: () => HarnessMediaSnapshot;
+  equipmentSnapshot: () => HarnessEquipmentSnapshot | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
   blockLogicWorker: (ms: number) => Promise<void>;

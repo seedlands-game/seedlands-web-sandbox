@@ -12,7 +12,11 @@ import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } 
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
-import type { HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../../../src/app/app-contracts';
+import type {
+  HarnessEquipmentSnapshot,
+  HarnessMediaSnapshot,
+  RenderedMaterialMeshSummary,
+} from '../../../src/app/app-contracts';
 import type { GlobalAudio } from '../../../src/app/audio/global-audio';
 export { clickCanvasCenter, lockPointer, moveMouseBy } from './mouse-input';
 
@@ -139,6 +143,7 @@ export type HarnessApi = {
   getVoxelGeometry(voxel: number): VoxelGeometryDefinitionV1 | null;
   getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId): RenderedMaterialMeshSummary | null; // prettier-ignore
   mediaSnapshot(): HarnessMediaSnapshot;
+  equipmentSnapshot(): HarnessEquipmentSnapshot | null;
   flushSave(): Promise<void>;
   beginPerformanceScenario(name: string): string;
   exportPerformanceTrace(): ChromeTrace;
