@@ -1,0 +1,10 @@
+6cd7df6451b96f995f1eb412c1a29b209574b9bc013dc0fcab295e0514a58320  playbooks/classic/scenarios/canonical-runtime-v11.json
+a25ef6f214337513f86918f39c77249165b00e7eb2ca5fe044fb02eb968d3559  apps/web/tests/e2e/classic-support/scenario.ts
+f26f456accbadf79a92bbfd573723f6e79433134862c0f8d3f145b8b1e2440bf  apps/web/tests/e2e/classic-support/scenario.test.ts
+a6fb622ea7565494662392b2ee68698b3259c0513bc90a70745c6dce55a6fcc3  apps/web/tests/e2e/classic-support/harness.ts
+c9ce7092db3586fe85d45c1d05f2e55021daace2f320b4d3c589360ecfa67deb  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+4f786c80ceafb65d366366902cc19c56fadd2bebe9488b719c80440525e6d0ee  apps/web/tests/e2e/classic-support/equipment-journey.ts
+6435f70cf747d5a18efe9e1d5b3c39f611ecfc2dd940f786ac8db570fe2bcd53  apps/web/tests/e2e/classic-runtime.spec.ts
+cd24df851da5f1306680b07805b182a01f84a28f9fb319dfad4a5c552e5be603  changes/2026-09-23-classic-functional-completion/spec.md
+d45f3c7b641c10df7c086f8f063280b65d0c8606c6838d7377ea7acee8e601d7  changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md
+ee71811105e288fdec50d54ce8140ebc5d1d3da5fe27fff0d94ed2e606139900  changes/2026-09-23-classic-functional-completion/equipment-journey-evidence.md

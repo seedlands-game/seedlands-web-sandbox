@@ -1,0 +1,147 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/game-harness-observability.test.ts --maxWorkers=1
+4:08:43 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts (8 tests | 2 failed) 7ms
+     × returns a detached recursively frozen equipment projection with all four slots and cursor origin 3ms
+     × returns current data after an epoch change without reusing an older snapshot 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts > BrowserProductHarness V1 read-only observability > returns a detached recursively frozen equipment projection with all four slots and cursor origin
+AssertionError: expected null to deeply equal { runtimeEpoch: 'world:2', …(8) }
+
+- Expected:
+{
+  "actor": {
+    "entityId": "player-1",
+    "epoch": 2,
+    "lifetime": 7,
+  },
+  "armor": {
+    "boots": {
+      "count": 1,
+      "instance": {
+        "durability": 3,
+      },
+      "itemId": "sample:boots",
+    },
+    "chestplate": {
+      "count": 1,
+      "instance": {
+        "durability": 9,
+      },
+      "itemId": "sample:chestplate",
+    },
+    "helmet": {
+      "count": 1,
+      "instance": {
+        "durability": 4,
+      },
+      "itemId": "sample:helmet",
+    },
+    "leggings": {
+      "count": 1,
+      "instance": {
+        "durability": 7,
+      },
+      "itemId": "sample:leggings",
+    },
+  },
+  "armorPoints": 17,
+  "cursor": {
+    "craftingGrid": [
+      {
+        "count": 1,
+        "instance": {
+          "durability": 6,
+        },
+        "itemId": "sample:craft",
+      },
+      null,
+      null,
+      null,
+    ],
+    "origin": {
+      "kind": "station",
+      "reference": {
+        "entityId": "bench-1",
+        "epoch": 2,
+        "lifetime": 9,
+      },
+      "slot": 3,
+    },
+    "revision": 5,
+    "stack": {
+      "count": 1,
+      "instance": {
+        "durability": 2,
+      },
+      "itemId": "sample:cursor",
+    },
+    "version": 1,
+  },
+  "gameplayRevision": 11,
+  "inventoryRevision": 13,
+  "player": {
+    "health": 17,
+    "lifecycle": "alive",
+  },
+  "runtimeEpoch": "world:2",
+  "slots": [
+    {
+      "count": 1,
+      "instance": {
+        "durability": 8,
+      },
+      "itemId": "sample:pickaxe",
+    },
+    null,
+  ],
+}
+
++ Received:
+null
+
+ ❯ apps/web/tests/unit/app/game-harness-observability.test.ts:264:22
+    262|     const snapshot = api.equipmentSnapshot();
+    263|
+    264|     expect(snapshot).toEqual({
+       |                      ^
+    265|       runtimeEpoch: 'world:2',
+    266|       gameplayRevision: 11,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts > BrowserProductHarness V1 read-only observability > returns current data after an epoch change without reusing an older snapshot
+AssertionError: expected null to match object { runtimeEpoch: 'world:2', …(1) }
+
+- Expected:
+{
+  "armorPoints": 17,
+  "runtimeEpoch": "world:2",
+}
+
++ Received:
+null
+
+ ❯ apps/web/tests/unit/app/game-harness-observability.test.ts:381:19
+    379|     const second = api.equipmentSnapshot();
+    380|
+    381|     expect(first).toMatchObject({ runtimeEpoch: 'world:2', armorPoints…
+       |                   ^
+    382|     expect(second).toMatchObject({
+    383|       runtimeEpoch: 'world:3',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  04:08:43
+   Duration  594ms (transform 419ms, setup 0ms, import 504ms, tests 7ms, environment 0ms)
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/game-harness-observability.test.ts --maxWorkers=1`
+Exit status 1

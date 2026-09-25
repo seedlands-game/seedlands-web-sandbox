@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02",
+  "status": "FIXTURE_CLOSE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "484ddf39d7e3bb881dd3d3cbaec775bd091c220d",
+  "metadata": {
+    "sourceManifestEntries": 7,
+    "evidenceManifestEntries": 33,
+    "evidenceManifestExcludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "a1a68f4ec9e59eebad89156ae6ee5e8b3bf9a2bcb5cd4ef6f35f2a3faf6b29ec",
+    "validatedEntries": 7
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 33,
+    "sha256": "c74195f62bca4ee99201f737d2e62f448ab15627571cadd936ee4b75a1da3c70",
+    "validatedEntries": 33
+  },
+  "priorReleaseByteEqual": {
+    "sourceManifestSha256": "74ffab1a4d8fbe191dd3164935e519da41ae82721f3974c16c8c6ce1d3780051",
+    "evidenceManifestSha256": "30bea97d0a8549ee9e4f79bd9649637d08c12369f9a61dd92ec748ee1e491138",
+    "deliveryValidationSha256": "0a2eadc77f3d709517bbd6052f46b2a4326856a0133a97dcd574087a4f621f9d",
+    "contractSha256": "d45f3c7b641c10df7c086f8f063280b65d0c8606c6838d7377ea7acee8e601d7",
+    "evidenceSha256": "ee71811105e288fdec50d54ce8140ebc5d1d3da5fe27fff0d94ed2e606139900"
+  },
+  "red": {
+    "window": "v2-canonical-equipment-fixture-close-02-red-01",
+    "status": "EXPECTED_FAIL",
+    "files": 1,
+    "passed": 6,
+    "failed": 1,
+    "reason": "The old resource placement loop had no per-resource post-survival grounded readback and retained creative-first movement.",
+    "stdoutSha256": "c7115448132fb47a802c071f7d83c96a84d515255b071cf3c0be515ce7216468",
+    "receiptSha256": "0f06f703f89d842e3e0910a7ca2129b83e1b711ebd7a99a21a416fff4bf89634"
+  },
+  "preservedFailure": {
+    "window": "v2-canonical-equipment-fixture-close-02-classic-types",
+    "status": "FAIL",
+    "reason": "The first implementation referenced the existing sameActor helper without importing it.",
+    "stdoutSha256": "c8e826a11d2c1b1c024cda2ae291221893e8c3abef303c6ee2813b4ffe6695d3",
+    "receiptSha256": "99c78030c278447c77d2960cff55e415f086c232792fd5e92910467a54490437"
+  },
+  "final": {
+    "window": "v2-canonical-equipment-fixture-close-02-final-02",
+    "status": "PASS",
+    "startedAt": "2026-09-25T21:47:21.146Z",
+    "endedAt": "2026-09-25T21:47:32.397Z",
+    "scenarioFiles": 1,
+    "scenarioTests": 7,
+    "classicTestTypes": "PASS",
+    "rootTestTypes": "PASS",
+    "eslint": "PASS",
+    "formatAndScopedDiff": "PASS",
+    "stdoutSha256": "39e2006a4bf6da3d23e2a55a899ebf93558617a11c6ba90644dacaadb82b880a",
+    "receiptSha256": "16be51ed25aa7bb2574e1275ab6221d5762216bc528624dc6ad8865278ad701f",
+    "metadataFormatWindow": "v2-canonical-equipment-fixture-close-02-metadata-format",
+    "metadataFormatStatus": "PASS",
+    "metadataFormatStdoutSha256": "a9d5089f32df4b0994ee5ec05f12f04ae28105c65772348dd7df69dd2f09d3ba",
+    "metadataFormatReceiptSha256": "e48725c8cc2e77628fe5219aedad87651416ed6d7cc412650928f4ed514a51e2"
+  },
+  "boundaries": {
+    "resourceCoordinatesChanged": false,
+    "resourceCountsChanged": false,
+    "timeoutChanged": false,
+    "aimBudgetChanged": false,
+    "authorityWritesAdded": false,
+    "v1AssertionsRemoved": false,
+    "browserValidated": false,
+    "deathDurabilityDropRespawnObserved": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "No long-term owner or public contract changed; this closure only fixes canonical fixture ordering, freshness, and evidence capture."
+  },
+  "notRun": [
+    "equipment harness observability tests",
+    "server behavior tests",
+    "build",
+    "browser",
+    "cua",
+    "devserver",
+    "ci",
+    "git-stage",
+    "git-commit",
+    "git-push",
+    "deploy"
+  ]
+}

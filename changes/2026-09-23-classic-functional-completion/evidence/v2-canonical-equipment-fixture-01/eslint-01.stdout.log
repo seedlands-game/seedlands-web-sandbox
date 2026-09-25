@@ -1,0 +1,14 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-runtime.spec.ts
+  521:1  error  File has too many lines (516). Maximum allowed is 500  max-lines
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/equipment-journey.ts
+  363:3  error  The value assigned to 'current' is not used in subsequent statements  no-useless-assignment
+  368:3  error  The value assigned to 'current' is not used in subsequent statements  no-useless-assignment
+  374:3  error  The value assigned to 'current' is not used in subsequent statements  no-useless-assignment
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/harness.ts
+  522:1  error  File has too many lines (509). Maximum allowed is 500  max-lines
+
+✖ 5 problems (5 errors, 0 warnings)
+

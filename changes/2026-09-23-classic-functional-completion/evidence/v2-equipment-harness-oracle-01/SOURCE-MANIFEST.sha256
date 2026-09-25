@@ -1,0 +1,9 @@
+924e45602c973dd4d00dfad0d1b9d03bb6b971a797d96a63b6d375b65004b054  apps/web/src/app/app-contracts.ts
+14757fb1d47325603678b5e017f891f4d01e46accad3a55d47b84e1679069ab4  apps/web/src/app/game-harness.ts
+d5034d968692329fe94bc1040332c040b1a61858076c5d44d1bcf73352da313b  apps/web/src/app/gameplay/game-harness-contract.ts
+06fc51dfdf8beed8f42a272b0a64180a78f46bf1608c3dca46276d431ee1eedd  apps/web/src/app/gameplay/game-harness-observability.ts
+8a81523c362f7c18ecf40c01e5b7396aaae1d8cff113787b0402fef04eb3625f  apps/web/tests/unit/app/game-harness-observability.test.ts
+ff5cecb6b71cd37fab9275654fb889f22eee4f824208dbee43e63415a38c20a8  changes/2026-09-23-classic-functional-completion/equipment-harness-contract.md
+561d46b1dab9a086c3e4f4708fcebc899bc713cb5ac14d885e4703dba56aef8b  changes/2026-09-23-classic-functional-completion/equipment-harness-evidence.md
+1d9bf68bf1aafa54a3f57bf75bad99b35d9027bbd16464be8d1a7bdcc70bbd83  changes/2026-09-23-classic-functional-completion/tasks.md
+c6544087b1ac18635209fe357cdec7938756e680667957674746563670986c0d  changes/2026-09-23-classic-functional-completion/execution-state.md
