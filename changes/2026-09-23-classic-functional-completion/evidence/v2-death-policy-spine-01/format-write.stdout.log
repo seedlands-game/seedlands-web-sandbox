@@ -1,0 +1,6 @@
+packages/stdlib/src/server/gameplay/death-inventory-settlement.ts 53ms
+packages/stdlib/src/server/gameplay/modules/death-inventory-policy-module.ts 7ms
+packages/stdlib/tests/server/death-inventory-policy-module.test.ts 8ms
+packages/stdlib/tests/server/death-inventory-settlement-series.test.ts 19ms
+packages/stdlib/tests/server/equipment-spine-contract.test.ts 16ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-policy-contract.md 20ms (unchanged)
