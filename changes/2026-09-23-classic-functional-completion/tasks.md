@@ -326,6 +326,13 @@ V2 walk options 固定为 `jump=false`，CLOSE05 用真实 input stream/buffer/p
 GIT32 在 HEAD `ba5ea556...` 加精确 6 路径 staged patch 的 detached tree 验证 5 files / 40 tests、Classic/root test
 types、4 TS ESLint、6 路径 Prettier 与 scoped diff 均 PASS；代码/tests/spec/contract 提交为
 `a1ebf10856cc57c1b0d75a33b2f7accc9528ba4e`。Browser17/build/Cua/CI 未运行；可控 60Hz 测试不保证 Browser 墙钟。
+
+### V2-ARTIFACT-BUILD-08
+
+状态：PASS。已推送 source `cb4941bfd1801422802463bc7bbc41dd7d8e9484` 的 clean detached tree 中，唯一
+`pnpm build` 与唯一 `pnpm harness:artifact` 均 PASS；sourceDigest `ec6301ae...9a17`、lockDigest
+`44db46fb...1169`、artifactDigest `f6f1ea67...cfa4`，276 项 receipt map 与磁盘一致且与 BUILD07 相同。tree/dist 保留
+供 root 后续唯一 Browser17；本阶段未运行 Browser/Cua/CI，不外推为资源采集、装备旅程或产品 GREEN。
 首次未发布 evidence commit `a402b016...` 因 Browser16 六个分片超过 GitHub 100 MB 限制被 `GH001` 拒绝，远端未
 移动；本地 backup ref 保留原提交。经授权仅 amend 该 evidence commit，把同一 774153112 bytes / SHA256
 `5ce02c71...aab41` 的 trace 重切为 15 个最大 50 MiB 分片；未重跑 Browser 或更改其 FAIL 结论。
