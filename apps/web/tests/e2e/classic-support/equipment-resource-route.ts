@@ -25,15 +25,19 @@ export type EquipmentRouteSnapshot = Readonly<{
 }>;
 
 export type EquipmentRouteObstacle = Readonly<{ position: Point }>;
+export type EquipmentRouteWaitResult = Readonly<{
+  kind: 'arrival' | 'drift';
+  snapshot: EquipmentRouteSnapshot;
+}>;
 export type EquipmentRouteDriver = Readonly<{
   now(): number;
   observe(): Promise<EquipmentRouteSnapshot | null>;
   walk(direction: RouteDirection, timeoutMs: number): Promise<EquipmentRouteSnapshot>;
-  waitForArrival(
+  waitForProgress(
     baseline: EquipmentRouteSnapshot,
     direction: RouteDirection,
     timeoutMs: number,
-  ): Promise<EquipmentRouteSnapshot>;
+  ): Promise<EquipmentRouteWaitResult>;
 }>;
 
 export const equipmentRouteDirection = (position: Point, target: RoutePoint): RouteDirection =>
@@ -84,6 +88,34 @@ export function matchesEquipmentRouteArrival(
   );
 }
 
+export function classifyEquipmentRouteWait(
+  baseline: EquipmentRouteSnapshot,
+  current: EquipmentRouteSnapshot,
+  target: RoutePoint,
+  direction: RouteDirection,
+): EquipmentRouteWaitResult | null {
+  if (matchesEquipmentRouteArrival(baseline, current, target, direction)) return { kind: 'arrival', snapshot: current };
+  if (
+    !current.onGround ||
+    current.colliding ||
+    current.authority.physicsTick <= baseline.authority.physicsTick ||
+    current.authority.acknowledgedInputSequence < baseline.authority.acknowledgedInputSequence
+  )
+    return null;
+  if (
+    !isInsideEquipmentRouteNeighborhood(current.player, target) ||
+    !reachedRouteTarget(
+      current.player,
+      target,
+      direction,
+      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
+      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
+    )
+  )
+    return { kind: 'drift', snapshot: current };
+  return null;
+}
+
 export async function followEquipmentRoute(
   target: RoutePoint,
   driver: EquipmentRouteDriver,
@@ -110,11 +142,14 @@ export async function followEquipmentRoute(
     ) {
       const remaining = Math.min(20_000, deadline - driver.now());
       if (remaining <= 0) break;
-      const matched = await driver.waitForArrival(baseline, direction, remaining);
+      const result = await driver.waitForProgress(walked, direction, remaining);
       if (driver.now() >= deadline) break;
-      if (!matchesEquipmentRouteArrival(baseline, matched, target, direction))
+      const classified = classifyEquipmentRouteWait(walked, result.snapshot, target, direction);
+      if (!classified || classified.kind !== result.kind)
         throw new Error('Equipment route wait returned a non-matching snapshot.');
-      return matched;
+      if (result.kind === 'arrival') return result.snapshot;
+      baseline = result.snapshot;
+      continue;
     }
     baseline = walked;
   }

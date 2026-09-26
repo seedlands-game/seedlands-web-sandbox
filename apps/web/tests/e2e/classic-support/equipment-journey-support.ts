@@ -17,12 +17,12 @@ import { itemCount } from './journey';
 import { classicScenario, type V2EquipmentResource } from './scenario';
 import {
   equipmentResourcePickup,
+  classifyEquipmentRouteWait,
   followEquipmentRoute,
   equipmentWorkbenchCorridor,
   equipmentWorkbenchMiningApproach,
   EQUIPMENT_RESOURCE_WALK_OPTIONS,
   isEquipmentMiningReady,
-  matchesEquipmentRouteArrival,
 } from './equipment-resource-route';
 
 export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
@@ -195,8 +195,20 @@ async function walkEquipmentRoute(page: Page, target: readonly [number, number])
     now: Date.now,
     observe: () => snapshot(page),
     walk: (key, timeout) => walkTo(page, target, { key, timeout, ...EQUIPMENT_RESOURCE_WALK_OPTIONS }),
-    waitForArrival: (baseline, key, timeout) =>
-      waitForSnapshot(page, (current) => matchesEquipmentRouteArrival(baseline, current, target, key), timeout),
+    waitForProgress: async (baseline, key, timeout) => {
+      let kind: 'arrival' | 'drift' | null = null;
+      const current = await waitForSnapshot(
+        page,
+        (snapshot) => {
+          const result = classifyEquipmentRouteWait(baseline, snapshot, target, key);
+          kind = result?.kind ?? null;
+          return result !== null;
+        },
+        timeout,
+      );
+      if (!kind) throw new Error('Equipment route wait resolved without an arrival or drift result.');
+      return { kind, snapshot: current };
+    },
   });
 }
 
