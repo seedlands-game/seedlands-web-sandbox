@@ -28,6 +28,7 @@ const routeSnapshot = (position: Point, physicsTick: number, ack: number, server
   authority: { physicsTick, acknowledgedInputSequence: ack },
 });
 const obstacle = (placement: Readonly<{ target: Point }>) => ({ position: placement.target });
+const arrival = (snapshot: ReturnType<typeof routeSnapshot>) => ({ kind: 'arrival' as const, snapshot });
 
 describe('Classic V2 equipment resource route', () => {
   it('does not let the default eastbound crossing rule accept an east-to-west transition', () => {
@@ -134,7 +135,7 @@ describe('Classic V2 equipment resource route', () => {
         now += 1000;
         return walks.length === 1 ? overshot : corrected;
       },
-      waitForArrival: async () => {
+      waitForProgress: async () => {
         throw new Error('Overshot positions must be corrected with real input instead of stationary waiting.');
       },
     });
@@ -159,9 +160,9 @@ describe('Classic V2 equipment resource route', () => {
         now += 30000;
         return serverLag;
       },
-      waitForArrival: async (_currentBaseline, _direction, timeout) => {
+      waitForProgress: async (_currentBaseline, _direction, timeout) => {
         waits.push(timeout);
-        return matched;
+        return arrival(matched);
       },
     });
 
@@ -198,10 +199,10 @@ describe('Classic V2 equipment resource route', () => {
           current = serverOutside;
           return current;
         },
-        waitForArrival: async (_currentBaseline, direction, timeout) => {
+        waitForProgress: async (_currentBaseline, direction, timeout) => {
           waits.push({ direction, timeout });
           current = matched;
-          return current;
+          return arrival(current);
         },
       });
 
@@ -226,9 +227,9 @@ describe('Classic V2 equipment resource route', () => {
           now += 1000;
           return serverOutside;
         },
-        waitForArrival: async () => {
+        waitForProgress: async () => {
           waits += 1;
-          return { ...serverOutside, authority: { ...serverOutside.authority, physicsTick: 102 } };
+          return arrival({ ...serverOutside, authority: { ...serverOutside.authority, physicsTick: 102 } });
         },
       }),
     ).rejects.toThrow('Equipment route wait returned a non-matching snapshot.');
@@ -250,10 +251,10 @@ describe('Classic V2 equipment resource route', () => {
           now += 30000;
           return serverOutside;
         },
-        waitForArrival: async (_currentBaseline, _direction, timeout) => {
+        waitForProgress: async (_currentBaseline, _direction, timeout) => {
           waits.push(timeout);
           now += timeout;
-          return matched;
+          return arrival(matched);
         },
       }),
     ).rejects.toThrow('Equipment route timed out');
@@ -274,7 +275,7 @@ describe('Classic V2 equipment resource route', () => {
         now += 1000;
         return walks.length === 1 ? beforeCrossing : matched;
       },
-      waitForArrival: async () => {
+      waitForProgress: async () => {
         throw new Error('A client that has not crossed must continue through the real walk driver.');
       },
     });
@@ -295,7 +296,7 @@ describe('Classic V2 equipment resource route', () => {
           now += 45_001;
           return matched;
         },
-        waitForArrival: async () => matched,
+        waitForProgress: async () => arrival(matched),
       }),
     ).rejects.toThrow('Equipment route timed out');
   });

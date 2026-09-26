@@ -223,6 +223,7 @@ describe('Classic canonical scenario contract', () => {
       supportSource.indexOf('async function walkToEquipmentWorkbench'),
     );
     expect(equipmentWalk).toContain('...EQUIPMENT_RESOURCE_WALK_OPTIONS');
+    expect(equipmentWalk).toContain('classifyEquipmentRouteWait(baseline, snapshot, target, key)');
     expect(equipmentWalk).not.toContain('jump: true');
 
     const closeSettlement = equipmentSource.slice(

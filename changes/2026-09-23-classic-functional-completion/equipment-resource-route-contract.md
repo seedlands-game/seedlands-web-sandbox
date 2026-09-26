@@ -1,9 +1,23 @@
 # V2 装备资源安全走廊合同
 
-阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05`
+阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05 / V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06`
 
-状态：Close-05 测试模型、确定性与静态验证完成；Close-04 实现保持不变，Browser-16 保持 FAIL，
-Browser-17 未授权。
+状态：Close-06 fixture controller、确定性与静态验证完成；Browser-17 保持 FAIL，Browser-18 未授权。
+
+## Close-06 arrival drift 闭环
+
+- Browser-17 在第二个 iron approach `[94.5,-0.5]` 的 `waitForArrival` 失败。walked snapshot 的 client
+  `[94.459671,-0.505328]` 已到位，server z=`-0.308819` 尚迟到；server 后续到达 z≈`-0.505328` 时 client 已漂至
+  z≈`-0.636522`，最终双方稳定 z≈`-0.654540`，20 秒内没有 strict 双投影同轮 arrival。
+- wait 的 freshness baseline 必须是刚返回的 walked snapshot，不是 pre-walk baseline。共享分类 helper 只返回三态：
+  strict full arrival 为 `arrival`；fresh tick、ack 不倒退、client ready 且 client 自身离开有限邻域或不再满足原 direction
+  crossing 为 `drift`；其他样本返回 `null` 并继续等待。stale、ack 回退、ungrounded/colliding 不得触发纠偏。
+- controller 收到 `drift` 后只使用最新 client 位置对同一 waypoint 重算 `KeyW/KeyS` 并继续真实 walk。client 仍到位
+  而仅 server 迟到时继续原 bounded read-only wait，不用 server 选方向，不发零输入 walk。
+- 私有 driver callback 命名为 `waitForProgress`，返回 `arrival | drift` discriminant；这不是生产/public API 扩展。
+- wait、drift correction 和后续 walk 全部计入首次建立的 45 秒 deadline；每个 wait 仍为 `min(20s, remaining)`，
+  await 返回后仍检查 deadline。不得捕获 timeout 后盲重试，不新增第二路线、随机 fallback、容差或预算。
+- `.06/.08/±.45`、80ms、grounded `jump=false`、scenario 坐标、52-leg 几何与 full-arrival 双投影合同保持。
 
 ## Close-05 release/consume 测试合同
 

@@ -197,6 +197,14 @@ equipment route 的既有固定平面 route 因此必须以 `jump=false` 调用�
 `InputCommandBuffer.consumeForTick()` 确认该 release sequence 且 `stepBody` grounded 后才可开始下一 pulse；不得连续
 签发 pressed command、直接 reset buffer、手工置 grounded，或用 issued sequence 代替 Authority consumed ack。固定 60Hz
 测试时钟只是可控调度合同，不作为浏览器墙钟或性能保证。
+Browser-17 在第 8 格 resource approach `[94.5,-0.5]` 暴露 arrival wait 闭环缺口：walk 返回时 client 已进入有限
+邻域，但 server 尚未进入 corridor；server 追平前一 client 位置时 client 又因残余速度漂出 corridor，旧 wait 仍只寻找
+strict full arrival，最终耗尽 20 秒。wait 必须从刚返回的 walked snapshot 绑定 fresh tick/ack，并用同一公开 fixture helper
+分类：strict full arrival 立即成功；fresh、ack 不倒退、client ready 且 client 已离开有限邻域或不再满足原 direction
+crossing 时显式返回 drift；client 仍到位而仅 server 迟到时继续只读等待。controller 只在 drift 时以最新 client snapshot
+为 baseline，对同一 waypoint 重算 `KeyW/KeyS` 并恢复真实 walk。所有 wait/correction 继续共享原 45 秒 deadline，单次
+wait 上限 20 秒，`.06/.08/±.45`、80ms、grounded `jump=false`、路线与 scenario 坐标不变。stale、ack 回退、未 ready
+样本不能触发 arrival 或 drift；不得捕获 timeout 后盲重试、用 server 选方向或扩容差/预算。
 
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
