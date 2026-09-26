@@ -1,0 +1,5 @@
+5ef00971760e65ce79cacfba3a8afa3d9f9621e4880a5469f3e61da0d14b1edd  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+9964aeca6cc0b4cbe679cbc1f4f446b78d6ab98b8204dc085eb30585ad1fa381  apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+b5279ae37dfa435a04b832d7a47f6132bad4cd774293a13b401c420ad7f469ce  changes/2026-09-23-classic-functional-completion/spec.md
+0ad1ffbed816b49883469eaf40863b5d5c0e4645f69682bc9cf3a9e84521de92  changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+6ad32f315278fd405783e9519890e5c23244945ab5fcf93c019015e035c5dffd  changes/2026-09-23-classic-functional-completion/equipment-resource-route-evidence.md

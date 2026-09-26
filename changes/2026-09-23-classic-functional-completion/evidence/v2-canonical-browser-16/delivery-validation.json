@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-16",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-16-65938068",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-65938068",
+  "sourceSha": "659380680628520f6b662b66129a594f5001b612",
+  "treeSha": "b7996a7004e7bc9894a051cfedc161b34cbf443b",
+  "sourceDigest": "c79b1bf7019ef3b4d5ca44b3dad0ca19e3280eaf57fd6bd9cc97ebbe5af0345c",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca",
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "builtAt": "2026-09-26T03:53:19.146Z",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "0a95a3a3beba42a8498bfc93b4f014bbcb44333ebbc9ef9104aaa9a154b0ccc3",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 52,
+    "sha256": "6bed019c398ed1da459979863c3a58d2c1d3c47deb96def35d983dc1ac38c2aa",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "window": {
+    "id": "da2aac87-8432-4039-b0ea-a404f803e6fe",
+    "status": "FAIL",
+    "startedAt": "2026-09-26T04:09:20.018Z",
+    "endedAt": "2026-09-26T04:17:03.079Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "2b793b0536c1142f16e858a9a29473e55c4f64db5a0d6c572f45e9fcc034aab6"
+  },
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1, "workers": 1, "retries": 0, "canonicalMainAttempts": 1 },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_RESOURCES_PLACED_BEFORE_WOOD_BATCH",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED",
+    "visual": "PASS",
+    "nonClassicSmoke": "SKIPPED"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v2-pre-wood-corridor-route-stalled",
+    "target": [78.5, -0.5],
+    "sourceLocation": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:242",
+    "lastRecordedV2Phase": "resources-placed",
+    "authorityInputAcknowledged": true,
+    "trajectoryNetXProgress": -1.35,
+    "trajectoryTailX": 85.832521192864,
+    "blockingVoxelOrCollisionNormalRecorded": false,
+    "diagnosisSha256": "c4859132c2b78a77709298b357f359f980508c64d64d3d7b41edf4f7983fda92"
+  },
+  "v2Evidence": {
+    "phase": "resources-placed",
+    "steps": ["resources-placed"],
+    "armorSlotsAllEmpty": true,
+    "cursorStackEmpty": true,
+    "woodMiningReached": false,
+    "equipmentPointerReached": false,
+    "beforeV2EquipmentPreSaveReached": false,
+    "close03ServerOnlyWaitObserved": false
+  },
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "trace": {
+    "sizeBytes": 774153112,
+    "parts": 15,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "reassemblyValidated": true,
+    "packagingSupersedesRejectedCommit": "a402b01623354a5c78e41260354a0fdd7c35394c"
+  },
+  "runnerArchive": {
+    "outputRecords": 14,
+    "execLifecycleRecords": 2,
+    "terminalInteractionRecords": 13,
+    "processId": "18806"
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-16-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-26T04:23:19.665Z",
+    "endedAt": "2026-09-26T04:23:22.472Z",
+    "files": 276,
+    "receiptSha256": "749c006a39b0610209056f887d9318293aab0372dd9fc8955d7eb8591be8f07f",
+    "stdoutSha256": "314085b8b8408af2a4b2422bcb59497cbb773094fbb33b4221260b6b464d6e2b"
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256": "629b009b188497638587d4299e6c1c33cd7788214029191dbca91d537c0f0952",
+    "formatWindow": "v2-canonical-browser-16-report-format",
+    "formatReceiptSha256": "cef83e24225e80df882d601e08081e89c573217b3b75332251649294857a7612",
+    "formatStdoutSha256": "37d1d6be1752b321ac215350ac64399954154f01a04c76d022e3b0060f886876",
+    "metadataFinalWindow": "v2-canonical-browser-16-metadata-final",
+    "metadataFinalStatus": "PASS",
+    "metadataFinalReceiptSha256": "1bc252428f40596874a080d88c11b4e6332081f3b49e7a6eb591cd528a0bf022",
+    "metadataFinalStdoutSha256": "bea6d054a82692d9b8e163fcdb20320f9123327e43a08003ae38c92fd33225fd"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "postconditionsSha256": "378af9cc0bf14148e878e83419ad0e2177b5fecb5fcc40ccc58eef06e85dd768"
+  },
+  "packagingSupersession": {
+    "reason": "GitHub GH001 rejected the unpublished evidence commit because the original six parts exceeded 100 MB.",
+    "backupRef": "refs/task-backups/git32-evidence-a402b016",
+    "oldCommit": "a402b01623354a5c78e41260354a0fdd7c35394c",
+    "oldParts": 6,
+    "newParts": 15,
+    "oldManifestSha256": "9fb56fd43e08f7761a578eadb804a86b5037fcc1b5d42fbc14f782d83ba97aa4",
+    "newManifestSha256": "6bed019c398ed1da459979863c3a58d2c1d3c47deb96def35d983dc1ac38c2aa",
+    "newTracePartsSha256": "0a3d879d2a015139b1b68a7874a6f01016b3d78e73f3c3edd94c7a9050b382a1",
+    "packagingFinalWindow": "03268e8d-0306-4ca2-a1a7-0952cc4807ee",
+    "packagingFinalReceiptSha256": "ef879cafc886280f553cd9debaf535cfd9d0d6f2ea9f5f7df8a2d1f1cb83653b",
+    "fullTraceSha256Unchanged": true,
+    "browserRunRepeated": false,
+    "browserResultChanged": false
+  },
+  "notRun": ["build", "second-browser-attempt", "cua", "ci", "git", "deploy", "merge"]
+}

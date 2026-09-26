@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-26T03:43:00Z
+更新时间：2026-09-26T05:36:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -47,6 +47,17 @@ artifact evidence 作为本阶段第三笔独立提交交付。Browser15/Cua/dev
 source 的 clean detached tree 完成唯一 build 与唯一 artifact verify：sourceDigest `c79b1bf7...345c`、
 artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致；artifact evidence 作为本阶段第三笔独立提交交付。
 Browser16/Cua/devserver/CI 仍未运行。
+当前 Equipment grounded route checkpoint：GIT31 与 BUILD07 已远端交付至
+`ba5ea55627da8f87caa700ecd43df525aaee6f61`。Browser16 完整 V1 与 V2 `resources-placed` 真实通过；完整 trace 证明
+53/53 个 `KeyS+Space` pulse 持续负向前进，总计 12.63055m，旧尾窗“停滞/仅 1.35m”结论已勘误。实际因每次 jump
+后等待 grounded 使 19.963m leg 耗尽 45 秒；采矿、equipment pointer、C4、C5 未触达且 lease 已释放。
+`V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04/05` 已由 root 定向准出；GIT32 detached staged tree 的 5 files / 40 tests、
+Classic/root test types 与目标静态均 PASS，代码提交 `a1ebf10856cc57c1b0d75a33b2f7accc9528ba4e` 已本地生成，
+evidence/state 尚待独立提交和 push。Browser17 未运行。
+首次未发布 evidence commit `a402b01623354a5c78e41260354a0fdd7c35394c` 因 Browser16 六个 trace 分片超过
+GitHub 100 MB 限制被 `GH001` 拒绝，远端未移动；本地 `refs/task-backups/git32-evidence-a402b016` 保留原提交。
+经 root 授权仅 amend 该 evidence commit，将同一 774153112 bytes / SHA256 `5ce02c71...aab41` 的 trace 无损重切为
+15 个最大 50 MiB 分片。Browser16 未重跑，代码提交与已发布历史均未重写。
 
 ## 恢复规则
 

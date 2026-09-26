@@ -1,0 +1,6 @@
+51b14b608f4948b638a47a6b9be914836f5e7f1eced7a3f24d3571f1620b804f  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+9964aeca6cc0b4cbe679cbc1f4f446b78d6ab98b8204dc085eb30585ad1fa381  apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+5ef00971760e65ce79cacfba3a8afa3d9f9621e4880a5469f3e61da0d14b1edd  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+587c3aa8ba6eb030dace9ab469db38a3298932a3423d35d67ee23c2e199ee906  apps/web/tests/e2e/classic-support/scenario.test.ts
+0ad1ffbed816b49883469eaf40863b5d5c0e4645f69682bc9cf3a9e84521de92  changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+b5279ae37dfa435a04b832d7a47f6132bad4cd774293a13b401c420ad7f469ce  changes/2026-09-23-classic-functional-completion/spec.md

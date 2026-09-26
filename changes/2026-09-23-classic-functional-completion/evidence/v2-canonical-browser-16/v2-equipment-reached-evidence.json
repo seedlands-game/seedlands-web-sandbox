@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "runId": "v2-canonical-browser-16-65938068",
+  "receiptStatus": "FAIL",
+  "phase": "resources-placed",
+  "steps": ["resources-placed"],
+  "snapshot": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 135390,
+    "actor": { "entityId": "player-1", "epoch": 1, "lifetime": 1 },
+    "inventoryRevision": 36,
+    "armor": { "helmet": null, "chestplate": null, "leggings": null, "boots": null },
+    "cursor": { "revision": 26, "stack": null, "origin": null },
+    "armorPoints": 0
+  },
+  "reached": [
+    "workbench-placed-through-real-ui-and-input",
+    "three-wood-three-stone-four-iron-resource-voxels-placed-through-real-ui-and-input",
+    "resources-placed-equipment-snapshot-recorded"
+  ],
+  "failed": ["pre-wood-batch-common-corridor-return-to-78.5-minus0.5"],
+  "notReached": [
+    "wood-mining-and-pickup",
+    "wood-pickaxe-crafting",
+    "stone-mining-and-pickup",
+    "stone-pickaxe-crafting",
+    "iron-mining-and-pickup",
+    "iron-block-unpack",
+    "five-iron-armor-crafting",
+    "four-slot-pointer-matrix",
+    "wrong-slot-committed-no-change",
+    "same-helmet-swap",
+    "equipment-detach-reattach-close",
+    "workbench-reclaimed",
+    "before-v2EquipmentPreSave",
+    "equipment-restore-and-new-epoch-pointer"
+  ]
+}

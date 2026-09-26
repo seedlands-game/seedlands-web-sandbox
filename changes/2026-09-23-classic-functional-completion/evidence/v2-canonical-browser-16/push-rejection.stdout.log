@@ -1,0 +1,12 @@
+remote: warning: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-af is 98.29 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: error: Trace: 755ad6ea990d2f53534a2205913db75a0ccfeafd7d464872429cd46b9568ff57
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-ab is 128.00 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-ac is 128.00 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-ad is 128.00 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-ae is 128.00 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: File changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/canonical-trace.zip.part-aa is 128.00 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+To https://github.com/seedlands-game/seedlands-web-sandbox.git
+ ! [remote rejected]   feat/classic-beta173-playable -> feat/classic-beta173-playable (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/seedlands-game/seedlands-web-sandbox.git'

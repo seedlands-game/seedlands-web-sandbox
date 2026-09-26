@@ -1,0 +1,27 @@
+12:57:33 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests | 1 failed) 41ms
+     × keeps the longest Browser-16 leg grounded and reachable inside the existing 45 second budget 39ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts > Classic V2 equipment grounded route > keeps the longest Browser-16 leg grounded and reachable inside the existing 45 second budget
+AssertionError: expected 13.950000000000529 to be greater than or equal to 19.9630739258
+ ❯ apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts:124:33
+    122|
+    123|     const configured = simulateProductionGroundRoute(EQUIPMENT_RESOURC…
+    124|     expect(configured.distance).toBeGreaterThanOrEqual(LONGEST_BROWSER…
+       |                                 ^
+    125|     expect(configured.elapsedMs).toBeLessThanOrEqual(45_000);
+    126|     expect(configured.grounded).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  12:57:33
+   Duration  179ms (transform 54ms, setup 0ms, import 67ms, tests 41ms, environment 0ms)
+

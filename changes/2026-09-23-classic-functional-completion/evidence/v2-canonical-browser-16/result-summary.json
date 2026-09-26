@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-16",
+  "runId": "v2-canonical-browser-16-65938068",
+  "status": "FAIL",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-65938068",
+  "sourceSha": "659380680628520f6b662b66129a594f5001b612",
+  "treeSha": "b7996a7004e7bc9894a051cfedc161b34cbf443b",
+  "sourceDigest": "c79b1bf7019ef3b4d5ca44b3dad0ca19e3280eaf57fd6bd9cc97ebbe5af0345c",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca",
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "builtAt": "2026-09-26T03:53:19.146Z",
+  "performanceWindowId": "da2aac87-8432-4039-b0ea-a404f803e6fe",
+  "startedAt": "2026-09-26T04:09:20.018Z",
+  "endedAt": "2026-09-26T04:17:03.079Z",
+  "commandExitCode": 1,
+  "measurementStatus": "NOT_RECORDED",
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1, "workers": 1, "retries": 0, "canonicalMainAttempts": 1 },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_RESOURCES_PLACED_BEFORE_WOOD_BATCH",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED",
+    "visual": "PASS",
+    "nonClassicSmoke": "SKIPPED"
+  },
+  "v1Reached": [
+    "water-source-place-and-collect",
+    "door-entry-and-exit-readiness",
+    "door-upper-close-and-lower-exit-face-reopen",
+    "jukebox-record-fact-projection-and-headless-audio"
+  ],
+  "v2Reached": ["workbench-placed", "ten-resource-strip-voxels-placed", "resources-placed-equipment-snapshot-recorded"],
+  "notReached": [
+    "wood-stone-iron-mining-and-pickup",
+    "wood-and-stone-pickaxe-crafting",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "C4",
+    "C5",
+    "before-v2EquipmentPreSave",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "equipment-restore-and-new-epoch-pointer"
+  ],
+  "notObserved": [
+    "close03-server-only-projection-wait",
+    "equipment-durability-loss",
+    "death",
+    "equipment-drop",
+    "respawn",
+    "human-audible-audio",
+    "Cua",
+    "performance"
+  ],
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "trace": {
+    "sizeBytes": 774153112,
+    "parts": 15,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "reassemblyValidated": true,
+    "packagingSupersedesRejectedCommit": "a402b01623354a5c78e41260354a0fdd7c35394c"
+  },
+  "runnerArchive": {
+    "outputRecords": 14,
+    "execLifecycleRecords": 2,
+    "terminalInteractionRecords": 13,
+    "processId": "18806"
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-16-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-26T04:23:19.665Z",
+    "endedAt": "2026-09-26T04:23:22.472Z",
+    "files": 276,
+    "artifactReceiptSha256": "b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca",
+    "windowReceiptSha256": "749c006a39b0610209056f887d9318293aab0372dd9fc8955d7eb8591be8f07f",
+    "stdoutSha256": "314085b8b8408af2a4b2422bcb59497cbb773094fbb33b4221260b6b464d6e2b"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true
+  }
+}

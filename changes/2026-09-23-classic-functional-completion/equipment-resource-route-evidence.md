@@ -120,3 +120,59 @@ readiness 与方向 crossing；等待未追平抛错，deadline 恰好耗尽也�
 本片预计 AI 活跃不超过 1.5 小时，传统工作量约 0.25-0.5 PD；credits、API 等价费用、费率、额度分母与占比
 unknown。不改变 owner、公开协议或架构，长期 docs baseline 不更新。真实 Browser 动态 server 投影追平、采矿、拾取和
 后续装备旅程仍未观察，Browser-16 仍须 root 另行授权。
+
+## Close-04 Grounded Route
+
+Browser-16 trace 的失败 leg 以 `test.trace` 中 `330729.270..373286.246ms` 的 53 个 `KeyS` down 事件为边界，
+并从 `0-trace.trace` 选择每次 keyup 后、下一 pulse 前首个 grounded/non-colliding snapshot。53/53 个 matched server x
+都严格小于上一项：baseline `98.4630739258`，末项 `85.8325211929`，总位移 `-12.6305527329m`。代表 pulse 1/2/3、
+26/27/53 的事件、client/server、tick/ack 与视角记录在本片 `browser16-input-trace-summary.json`。pulse 按键保持
+`82.748..91.688ms`，起点间隔 `751.243..900.944ms`；因此旧报告由 Authority 尾部 256 样本得出的“1.35m 后停滞”
+被本节明确 supersede。Browser-16 的 FAIL、实际未到 waypoint、未触达采矿/装备等事实不变。
+
+行为 RED 保留三轮：首轮还暴露测试 leg 计数误写（2 failed）；修正后仅 `jump=true` 配置失败（1 failed）；最终
+RED 将当前生产 options 送入真实 `PlayerInputStream -> InputCommandBuffer -> stepBody`，45 秒只推进 `13.95m`，低于
+固定最长 leg `19.9630739258m`，而同文件的完整平面/障碍几何合同通过。实现只新增共享 V2 walk options 并把
+`jump` 设为 `false`，consumer 仍调用原 `walkTo`，其坐标、方向、`.06/.08/.45`、80ms、20s、45s 均未改变。首个
+GREEN 为 `1 file / 2 tests PASS`。
+
+几何用例枚举 V1 jukebox approach 到 V2 corridor 的交接，以及 workbench 放置/打开/回收、10 格资源放置、wood/stone/
+iron 三批 corridor、清空格 pickup/retreat 共 52 个冻结 leg；使用 scenario 的连续 floor、真实 player half-width 与当时
+未清 obstacle 集验证完整包络。确定性 A/B 不是 Browser 性能测量，也不证明 Browser-17、采矿、合成或装备旅程通过。
+最终 affected 窗口为 `5 files / 40 tests PASS`；最终 Classic test types、root test types、目标 ESLint 与
+Prettier/scoped diff 均 PASS，全部通过默认 benchmark machine lock、Vitest `maxWorkers=1` 串行执行。Browser/build/
+devserver/Cua/CI/Git/index/push/deploy 均未运行。
+本片预计 AI 活跃不超过 2 小时、硬上限 3 小时，传统工作量约 0.25-0.5 PD；credits、API 等价费用、费率、额度
+分母与占比 unknown。未改变长期 owner、公共协议或架构，因此长期 docs baseline 不更新。
+
+## Close-05 Release/consume 测试收口
+
+root 复核发现 Close-04 的测试调度在 ground 分支同 tick 结束 waiting 并启动下一 pulse，因此连续签发 pressed command，
+没有模拟真实 `keyup -> neutral input -> Authority consume -> grounded readback`。CLOSE-04 实现保持原字节，本轮只修测试与
+证据。RED `v2-equipment-grounded-route-close-05-red` 为 `1 failed / 1 passed`，精确失败是
+`configured.issued.neutral === 0`；wrapper 使用 bash `pipefail`，exit code 为 1。
+
+GREEN 模型每个 pulse 先经 `PlayerInputStream.sample` 发送 pressed command；80ms 后只调用一次
+`PlayerInputStream.release()`，把 neutral command 送入 `InputCommandBuffer`，然后停止签发新 command，直到该 release
+sequence 被 `consumeForTick` 实际确认且 `stepBody` grounded。测试记录每个 pulse 的最后 consumed pressed sequence 与
+neutral sequence，断言二者均存在、`pressed < neutral < 下一 pressed`，并同时覆盖 jump=true 45 秒不可达和正式
+jump=false 同预算可达。首个实现因 pending input lead 将上一 neutral 错配给下一 pressed 而失败，原始 `green` 回执保留；
+改为等待本 pulse 的具体 neutral sequence 后，`green-02` 为 `1 file / 2 tests PASS`。该模型使用固定 60Hz 可控 poll cadence，
+只证明调度合同，不声称浏览器墙钟或 Browser-17 GREEN。
+
+收口中继续加强两侧 pulse 的 consumed state 后，`green-03` 暴露 45 秒边界前已启动的末个 pulse 尚未完成 release
+消费便停止的测试缺口（`1 failed / 1 passed`）。模型改为不再启动新 pulse，但允许已启动 pulse 在既有 20 秒单次上限内
+完成 release/consume/grounded，再由总 elapsed 判定 45 秒路线成功；`green-04` 与最终 `green-final` 均为
+`1 file / 2 tests PASS`。最终 affected 为 `5 files / 40 tests PASS`，Classic test types、root test types、单测试
+ESLint 和 Prettier/scoped diff 均 PASS，所有命令使用默认 benchmark machine lock、Vitest `maxWorkers=1`。
+Browser/build/devserver/Cua/CI/Git/index/push/deploy 均未运行。
+
+## GIT32 未发布证据包装恢复
+
+首次 evidence commit `a402b01623354a5c78e41260354a0fdd7c35394c` 包含六个超过 GitHub 100 MB 限制的
+Browser-16 trace 分片，push 被 `GH001` 拒绝；远端保持 `ba5ea55627da8f87caa700ecd43df525aaee6f61`。该未发布
+commit 由本地 `refs/task-backups/git32-evidence-a402b016` 保留且不推送。经 root 授权，仅重写这一 evidence commit：
+旧 6 片先按顺序流式核对为 774153112 bytes、SHA256
+`5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41`，再无损重切为 `trace-50m/` 下 15 片，
+单片最大 52428800 bytes，重组后的长度与 SHA 完全相同。旧 MANIFEST、delivery、trace parts 清单和重组记录原字节
+保存在 `prior-packaging/`；Browser 未重跑，CLOSE04/05 raw 与 Browser-16 FAIL 结论不变。
