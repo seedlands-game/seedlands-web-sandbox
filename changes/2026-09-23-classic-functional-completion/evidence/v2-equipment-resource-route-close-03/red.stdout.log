@@ -1,0 +1,84 @@
+11:28:12 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests | 5 failed) 9ms
+     × waits for server x=79 without issuing a zero-input walk after the client arrives 2ms
+     × waits for server x=82.5 without issuing a zero-input walk after the client arrives 0ms
+     × fails when the bounded wait does not bring the server projection into the finite neighborhood 2ms
+     × charges a server-only projection wait to the same route deadline 1ms
+     × keeps walking when the client is finite but has not crossed in the active direction 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > waits for server x=79 without issuing a zero-input walk after the client arrives
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > waits for server x=82.5 without issuing a zero-input walk after the client arrives
+Error: Equipment route timed out before 80.5,-0.5.
+ ❯ followEquipmentRoute apps/web/tests/e2e/classic-support/equipment-resource-route.ts:120:9
+    118|     baseline = walked;
+    119|   }
+    120|   throw new Error(`Equipment route timed out before ${target.join(',')…
+       |         ^
+    121| }
+    122|
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:182:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > fails when the bounded wait does not bring the server projection into the finite neighborhood
+AssertionError: expected [Function] to throw error including 'Equipment route wait returned a non-m…' but got 'Equipment route timed out before 80.5…'
+
+Expected: "Equipment route wait returned a non-matching snapshot."
+Received: "Equipment route timed out before 80.5,-0.5."
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:234:5
+    232|         },
+    233|       }),
+    234|     ).rejects.toThrow('Equipment route wait returned a non-matching sn…
+       |     ^
+    235|     expect(walks).toBe(1);
+    236|     expect(waits).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > charges a server-only projection wait to the same route deadline
+AssertionError: expected [] to deeply equal [ 15000 ]
+
+- Expected
++ Received
+
+- [
+-   15000,
+- ]
++ []
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:260:19
+    258|       }),
+    259|     ).rejects.toThrow('Equipment route timed out');
+    260|     expect(waits).toEqual([15000]);
+       |                   ^
+    261|   });
+    262|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > keeps walking when the client is finite but has not crossed in the active direction
+Error: A client that has not crossed must continue through the real walk driver.
+ ❯ Object.waitForArrival apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:278:15
+    276|       },
+    277|       waitForArrival: async () => {
+    278|         throw new Error('A client that has not crossed must continue t…
+       |               ^
+    279|       },
+    280|     });
+ ❯ followEquipmentRoute apps/web/tests/e2e/classic-support/equipment-resource-route.ts:112:36
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:269:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 13 passed (18)
+   Start at  11:28:12
+   Duration  149ms (transform 43ms, setup 0ms, import 54ms, tests 9ms, environment 0ms)
+

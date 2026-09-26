@@ -1,5 +1,72 @@
 # V2 Canonical Browser 证据
 
+## Browser-15 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-15`
+
+结论：**FAIL。V1 门同轮 readiness 与 lower exit-face 已在本次真实产品旅程中通过；V2 只完成固定资源带放置，
+首个原木的采矿辅助走位被已放置资源阻挡，尚未发送采矿输入。** Classic 视觉测试独立通过。本结果不证明完整 V2、
+16 件护甲、194 项矩阵、Cua、人类听觉或性能。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-25adda5b`，HEAD/source
+`25adda5becbcab339a8364bbd23ac86ace3d8d8e`，tree `0acd81acafa1f60f477925483102f115699fa5f4`；
+source/lock/artifact digest 分别为
+`74752aed3e6df9973b3e70e26fe2cb1d1566c56b469e1da9a404777452c1e3a4`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`。artifact receipt SHA256 为
+`e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106fee45d`，builtAt
+`2026-09-26T01:43:48.170Z`，dist 为 276 个盖章文件/277 个磁盘文件，无 symlink。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-15-25adda5b node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+机器窗口/run ID `129ac7e8-effb-44a0-a011-3a8f56076510`，UTC
+`2026-09-26T02:04:29.646Z` 至 `2026-09-26T02:09:17.707Z`，`waitedMs=1`、`exitCode=1`、
+`measurement.status=NOT_RECORDED`。Playwright 单 worker/单 Chromium/`retries=0`，结果
+`1 failed / 1 passed / 1 skipped`；canonical 主测试只有 attempt 0。
+
+V1 test step 真实完成，因而同轮 readiness 的 client ready、client/server 完整 voxel entry/exit 边界、fresh
+physics tick 与 ack 不倒退条件，以及随后 upper 关闭、lower+exit adjacent 严格同轮目标、真实右键重开、
+jukebox/record/media 均越过此前阻断点。这只证明一次 Harness snapshot 内的 client/server 投影满足合同，不称为
+Authority 独立 readiness 或跨 owner 原子事务。
+
+V2 已经用正式 UI 与真实输入放置 workbench 和 3 原木、3 石块、4 铁块，receipt 的唯一 V2 step 为
+`resources-placed`。随后首个原木 target `[80,31,2]` 进入 `mineVoxel`；因当前位置不在 2.5-4.5 距离范围，helper
+推导 approach `[77.2,2.5]` 并选择 `KeyS`。已放置的原木位于 player 与该 approach 的直线路径上；trace 中 fresh ack
+的 KeyS 脉冲把 x 从约 `83.60` 推到 `81.32` 后不再减少，而 z 继续漂到约 `2.50`，最终耗尽既有 15 秒 helper
+route budget。失败前没有进入 voxel aim，也没有发送 left mouse down，因此不能称 Authority mining 拒绝或装备 pointer 失败。
+最窄后续由 root 另行冻结 V2 资源采集 approach/路线；不得据此修改通用 `walkTo` 或增加 timeout。
+
+| 域                                                                            | Browser-15 结果                       |
+| ----------------------------------------------------------------------------- | ------------------------------------- |
+| C0-C3                                                                         | PASS；Harness receipt 明确记录        |
+| V1 水桶、门 entry/exit readiness、upper/lower/exit-face、jukebox/record/media | PASS；完整 test step 已返回           |
+| V2 workbench 与 10 格资源放置                                                 | PASS；receipt 记录 `resources-placed` |
+| 首个原木采矿辅助走位                                                          | FAIL；尚未发送采矿输入                |
+| 木/石镐、其余采集、iron unpack、五件铁甲合成                                  | NOT REACHED                           |
+| 四槽 click/Shift、wrong-slot、swap、脱穿、close settlement                    | NOT REACHED                           |
+| C4、C5、`before.v2EquipmentPreSave`、restore/双 epoch/新 ref                  | NOT REACHED                           |
+| Classic 视觉 v3                                                               | PASS，31.2 秒                         |
+| non-Classic smoke                                                             | SKIPPED                               |
+| death、durability-1、drop、respawn                                            | NOT OBSERVED                          |
+| Cua、人类听觉                                                                 | NOT RUN                               |
+| 性能                                                                          | NOT MEASURED                          |
+
+失败 attachment 不含 pageErrors/failedResponses 字段，二者记为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。原始 trace 为 413834226 bytes，SHA256
+`e123610dcb014804b9b4f2ce6de96ce5a887f002a99bd65911e13a113097d612`；四片重组已验证。失败 attachment 的
+client/server 位置为 `[81.31999969482422,32.599998474121094,2.495638370513916]` 与
+`[81.3200007042292,32.6,2.495638381730721]`；其中 `onGround=false` 是 afterEach failure attachment 状态，
+不倒填为 15 秒 deadline 精确瞬间。
+
+锁内 `harness:artifact` 后验窗口 `v2-canonical-browser-15-artifact-postcheck` 为 PASS，同
+source/lock/artifact digest 与 276-file map。runner 结束后验收树 tracked/index clean，4273 无监听，owned
+Playwright/Chromium/preview 为 0，benchmark lock absent；本 tree/dist 与旧验收树均保留。本轮未修改
+source/test/scenario/dist，也未 build、第二 attempt、Cua、CI、Git/index、push、deploy 或 merge。Browser lease 在证据封存后释放。
+
 ## Browser-14 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-14`

@@ -1,0 +1,7 @@
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts 55ms (unchanged)
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts 14ms (unchanged)
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts 12ms (unchanged)
+apps/web/tests/e2e/classic-support/scenario.test.ts 16ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 57ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md 7ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-resource-route-evidence.md 5ms (unchanged)
