@@ -39,6 +39,14 @@ export type ClosedDoorProbeAssessment =
       reason: 'body-not-ready' | 'not-before-door' | 'outside-safe-corridor' | 'crossed-contact-plane';
     }>;
 
+export type DoorRouteReadinessSnapshot = Readonly<{
+  player: Point;
+  serverPlayerPosition: Point;
+  onGround: boolean;
+  colliding: boolean;
+  authority: Readonly<{ physicsTick: number; acknowledgedInputSequence: number }>;
+}>;
+
 const horizontalCoordinate = (point: Point, axis: HorizontalAxis) => point[axis];
 const routePoint = (normalAxis: HorizontalAxis, normal: number, lateral: number): RoutePoint =>
   normalAxis === 0 ? [normal, lateral] : [lateral, normal];
@@ -107,6 +115,24 @@ export function isOutsideDoorTargetOnExitSide(plan: ClosedDoorProbePlan, target:
   if (!finitePoint(target) || !finitePoint(position)) return false;
   const exitBoundary = target[plan.normalAxis] + (plan.direction === 1 ? 1 : 0);
   return plan.direction * (position[plan.normalAxis] - exitBoundary) > 0;
+}
+
+export function matchesDoorRouteReadinessSnapshot(
+  plan: ClosedDoorProbePlan,
+  target: Point,
+  side: 'entry' | 'exit',
+  baseline: DoorRouteReadinessSnapshot,
+  current: DoorRouteReadinessSnapshot,
+): boolean {
+  const isOutside = side === 'entry' ? isOutsideDoorTargetOnEntrySide : isOutsideDoorTargetOnExitSide;
+  return (
+    current.onGround &&
+    !current.colliding &&
+    current.authority.physicsTick > baseline.authority.physicsTick &&
+    current.authority.acknowledgedInputSequence >= baseline.authority.acknowledgedInputSequence &&
+    isOutside(plan, target, current.player) &&
+    isOutside(plan, target, current.serverPlayerPosition)
+  );
 }
 
 export function assessClosedDoorProbe(

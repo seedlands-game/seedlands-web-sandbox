@@ -15,6 +15,7 @@ import {
   doorExitAdjacent,
   isOutsideDoorTargetOnEntrySide,
   isOutsideDoorTargetOnExitSide,
+  matchesDoorRouteReadinessSnapshot,
   type ClosedDoorProbePlan,
   type ClosedDoorProbeObservation,
 } from './door-collision-oracle';
@@ -267,18 +268,19 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   await switchToSurvival(page);
   const closedDoorPlan = await expectClosedDoorBlocks(page, placed);
 
-  const retreated = await walkTo(page, closedDoorPlan.approach, {
+  const retreatBaseline = await walkTo(page, closedDoorPlan.approach, {
     key: 'KeyS',
     tolerance: 0.06,
     corridorTolerance: 0.08,
     pulseMs: 80,
   });
-  const authorityRetreated = await doorAuthorityObservation(page);
+  const retreated = await waitForSnapshot(page, (current) =>
+    matchesDoorRouteReadinessSnapshot(closedDoorPlan, door.upper, 'entry', retreatBaseline, current),
+  );
   expect(await doorPair(page)).toEqual(placed);
   expect(retreated.onGround && !retreated.colliding).toBe(true);
-  expect(authorityRetreated.onGround && !authorityRetreated.colliding).toBe(true);
   expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, retreated.player)).toBe(true);
-  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, authorityRetreated.position)).toBe(true);
+  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, retreated.serverPlayerPosition)).toBe(true);
   const entryAdjacent = doorEntryAdjacent(closedDoorPlan, door.upper);
   await aimAtVoxelWithRealMouse(page, door.upper, entryAdjacent);
   await clickCanvasCenter(page, 'right');
@@ -287,17 +289,18 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
-  const traversed = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
+  const traverseBaseline = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
     jump: true,
     tolerance: 0.06,
     corridorTolerance: 0.08,
     pulseMs: 80,
   });
-  const authorityTraversed = await doorAuthorityObservation(page);
+  const traversed = await waitForSnapshot(page, (current) =>
+    matchesDoorRouteReadinessSnapshot(closedDoorPlan, door.lower, 'exit', traverseBaseline, current),
+  );
   expect(traversed.onGround && !traversed.colliding).toBe(true);
-  expect(authorityTraversed.onGround && !authorityTraversed.colliding).toBe(true);
   expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.player)).toBe(true);
-  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, authorityTraversed.position)).toBe(true);
+  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.serverPlayerPosition)).toBe(true);
 
   await aimAtVoxelWithRealMouse(page, door.upper);
   await clickCanvasCenter(page, 'right');
