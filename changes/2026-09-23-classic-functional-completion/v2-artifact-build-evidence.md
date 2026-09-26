@@ -236,3 +236,34 @@ receipt SHA-256 为 `e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106f
 构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD06、5 棵旧 V2 与九棵 V1 tree/dist
 全部保留。BUILD06 未运行 Browser15、Cua、devserver、CI、deploy 或 merge；不能据此宣称 readiness 的真实 Browser
 路径、lower exit-face、V2 equipment journey 或产品 GREEN。
+
+## BUILD07：Equipment Resource Route Fixture
+
+- 已推送 source SHA：`659380680628520f6b662b66129a594f5001b612`；tree
+  `b7996a7004e7bc9894a051cfedc161b34cbf443b`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-65938068`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `478f5a8d-44c6-4e26-81d2-96c16fb6621e`，UTC
+  `2026-09-26T03:52:53.579Z` 至 `03:53:21.227Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `cc1d251c-cdc8-4dce-b8a9-fd5c67f3bf64`，UTC
+  `2026-09-26T03:53:41.857Z` 至 `03:53:44.266Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c79b1bf7019ef3b4d5ca44b3dad0ca19e3280eaf57fd6bd9cc97ebbe5af0345c`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-26T03:53:19.146Z`。BUILD07 与 BUILD06 的 map 只有三个文件不同：`overworld.mjs` 仅是 esbuild 输入路径
+注释从主工作树绝对路径变为 tree-local 相对路径，`host-admissions.json` 与 `packs.lock.json` 是该 entry digest 的派生更新；
+不据此声称玩法生产行为变化。
+
+receipt SHA-256 为 `b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；dist 共 277
+个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD07、六棵旧 V2 与九棵 V1 tree/dist
+全部保留。BUILD07 未运行 Browser16、Cua、devserver、CI、deploy 或 merge；不能据此宣称资源安全走廊的真实 Browser
+动态可达、采矿拾取、equipment pointer/C4/C5 或产品 GREEN。

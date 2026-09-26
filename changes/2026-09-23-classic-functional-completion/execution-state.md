@@ -42,7 +42,11 @@ artifact evidence 作为本阶段第三笔独立提交交付。Browser15/Cua/dev
 首个原木采矿前的辅助走位失败，采矿输入未发送，equipment pointer、C4、C5 未触达，lease 已释放。
 `V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01/02/03` 已由 root 定向准出；GIT31 detached staged tree 的 4 files /
 38 tests、Classic/root test types 与目标静态均 PASS，代码提交
-`7cb4ed9f6850ea173c721316c1113b7caffc1400` 已本地生成，evidence/state 尚待独立提交和 push。Browser16 未运行。
+`7cb4ed9f6850ea173c721316c1113b7caffc1400` 与 evidence/state 提交
+`659380680628520f6b662b66129a594f5001b612` 均已推送，local/upstream/origin/ls-remote 为 `0/0`。BUILD07 已从该
+source 的 clean detached tree 完成唯一 build 与唯一 artifact verify：sourceDigest `c79b1bf7...345c`、
+artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致；artifact evidence 作为本阶段第三笔独立提交交付。
+Browser16/Cua/devserver/CI 仍未运行。
 
 ## 恢复规则
 
