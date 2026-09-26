@@ -283,13 +283,21 @@ Browser14；本阶段未运行 Browser/Cua/CI，不外推为门出口或装备�
 
 ### V1-DOOR-READINESS-SNAPSHOT-CLOSE-01 / GIT-30-DOOR-READINESS-SNAPSHOT
 
-状态：LOCAL_CODE_COMMIT_READY。Browser14 唯一 canonical attempt `f7a53699-300d-429c-a308-8c48399036df` 在
+状态：REMOTE_DELIVERED。Browser14 唯一 canonical attempt `f7a53699-300d-429c-a308-8c48399036df` 在
 upper 再关闭前被非同轮 readiness resample 阻断，lower exit-face 和 V2 全部 `NOT REACHED`，唯一 lease 已释放；
 该结果不说明 Authority readiness、Structure 拒绝或 V2 defect。Readiness closure 让 entry/exit 各以对应
 `walkTo` 返回 snapshot 为 baseline，并由一次 `waitForSnapshot` 返回满足 client ready、client/server 双位置越过完整
 voxel、tick 前进和 ack 不倒退的同一对象。GIT30 在 HEAD `ccb600c3...` 加精确 6 路径 staged patch 的 detached tree
 验证 5 files / 41 tests、Classic/root test types、4 TS ESLint、6 路径 Prettier 与 scoped diff 均 PASS；代码/tests/spec/
-contract 提交为 `3ad45a9d1d5abeb12f0213a01d7d3a4b1a974cbb`。Browser15/build/Cua/CI 未运行；静态准出不等于产品复验。
+contract 提交为 `3ad45a9d1d5abeb12f0213a01d7d3a4b1a974cbb`，evidence/state 提交为
+`25adda5becbcab339a8364bbd23ac86ace3d8d8e`，均已推送。Browser15/Cua/CI 未运行；静态准出不等于产品复验。
+
+### V2-ARTIFACT-BUILD-06
+
+状态：PASS。已推送 source `25adda5becbcab339a8364bbd23ac86ace3d8d8e` 的 clean detached tree 中，唯一
+`pnpm build` 与唯一 `pnpm harness:artifact` 均 PASS；sourceDigest `74752aed...e3a4`、lockDigest
+`44db46fb...1169`、artifactDigest `fc7ac005...f6e2`，276 项 receipt map 与磁盘一致。tree/dist 保留供 root 后续唯一
+Browser15；本阶段未运行 Browser/Cua/CI，不外推为 readiness、门出口或装备产品 GREEN。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 

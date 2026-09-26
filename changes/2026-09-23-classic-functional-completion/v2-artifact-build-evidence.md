@@ -207,3 +207,32 @@ tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD05、4
 BUILD05 未运行 Browser14、Cua、devserver、CI、deploy 或 merge。它不改变 Browser13 的失败事实，也不能证明门出口
 face 的真实 Browser 路径、V2 equipment journey、death/durability-1/drop/respawn、16 件护甲、194 项矩阵或完整 V2
 GREEN。
+
+## BUILD06：Door Readiness Snapshot Fixture
+
+- 已推送 source SHA：`25adda5becbcab339a8364bbd23ac86ace3d8d8e`；tree
+  `0acd81acafa1f60f477925483102f115699fa5f4`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-25adda5b`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `b367f88c-ac5a-4cec-8eb6-04c056a46e3e`，UTC
+  `2026-09-26T01:43:26.696Z` 至 `01:43:50.017Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `5ca07110-d217-4e4c-acb7-0122c824e9b1`，UTC
+  `2026-09-26T01:44:10.341Z` 至 `01:44:12.538Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`74752aed3e6df9973b3e70e26fe2cb1d1566c56b469e1da9a404777452c1e3a4`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`，276 项，builtAt
+`2026-09-26T01:43:48.170Z`。Readiness 仅修改测试/fixture，因此 artifact digest 与 BUILD04/05 相同；source
+identity 已换代。
+
+receipt SHA-256 为 `e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106fee45d`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731`；dist 共 277
+个普通文件。`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。
+源与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD06、5 棵旧 V2 与九棵 V1 tree/dist
+全部保留。BUILD06 未运行 Browser15、Cua、devserver、CI、deploy 或 merge；不能据此宣称 readiness 的真实 Browser
+路径、lower exit-face、V2 equipment journey 或产品 GREEN。

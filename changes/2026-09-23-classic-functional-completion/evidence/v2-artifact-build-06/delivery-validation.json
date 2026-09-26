@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-06",
+  "status": "PASS",
+  "sourceSha": "25adda5becbcab339a8364bbd23ac86ace3d8d8e",
+  "sourceTree": "0acd81acafa1f60f477925483102f115699fa5f4",
+  "sourceDigest": "74752aed3e6df9973b3e70e26fe2cb1d1566c56b469e1da9a404777452c1e3a4",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2",
+  "builtAt": "2026-09-26T01:43:48.170Z",
+  "artifactFiles": 276,
+  "distFilesIncludingReceipt": 277,
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-25adda5b",
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReused": true,
+    "taskStateInsideAcceptanceTree": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "argv": ["pnpm", "build"],
+    "window": "b367f88c-ac5a-4cec-8eb6-04c056a46e3e",
+    "startedAt": "2026-09-26T01:43:26.696Z",
+    "endedAt": "2026-09-26T01:43:50.017Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "35a5a8ed7a7c7f7ccb504cd2f663a69f50ed856c16135da5f40d9d763582cd88",
+    "receiptSha256": "4837a4b56fe63a0edacef7ee4188c29a61b5136fdf936b88825edc8cd1fc348d"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "argv": ["pnpm", "harness:artifact"],
+    "window": "5ca07110-d217-4e4c-acb7-0122c824e9b1",
+    "startedAt": "2026-09-26T01:44:10.341Z",
+    "endedAt": "2026-09-26T01:44:12.538Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "79cc3e1f459e08cf51f6a0b3a8c4b4209af0e05da4aab11d35573834da771079",
+    "receiptSha256": "6a38e0f34a332eeacd8484c23fb6ef2574686b2a04f781e4725c6113ce44f7d0"
+  },
+  "artifactReceiptSha256": "e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106fee45d",
+  "artifactMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "diskFileMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "artifactMapMatchesDisk": true,
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "6ad5b209c6d46ea412e2071fa22649f753c634a6ca47a2470898510cc046af92"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 13,
+    "sha256": "aa8be07a74b96caf0b243366f0023a77236a1ba6c8b426989c0cda08c49927ad",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "metadataFormat": {
+    "window": "c04f4f9a-020e-41cf-bdae-6093f751a4f6",
+    "status": "PASS",
+    "stdoutSha256": "c892bfe7562062fc08d20aaa78f52de0a1d4b5a400ec08c59d99acd9142dddb9",
+    "receiptSha256": "bb79dca22d58f01d3169ca9773cb685f1399e61ef67069456700e1b30af478e5"
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "c8e23f6dbc31f009a26bce7f96e5bde2b112bd303bcce861615764b7d764c98c",
+    "acceptanceTreePreserved": true,
+    "v2AcceptanceTreesPreserved": 6,
+    "v1AcceptanceTreesPreserved": 9
+  },
+  "artifactDigestRelation": {
+    "sameAsBuild04And05": true,
+    "reason": "GIT30 changes only the canonical test fixture and documentation; source identity still advances."
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "browser15Run": false,
+    "browser14LowerExitFaceReached": false,
+    "v2ReachedInBrowser14": false,
+    "productGreenClaimed": false
+  },
+  "notRun": ["browser15", "cua", "devserver", "ci", "deploy", "merge"]
+}

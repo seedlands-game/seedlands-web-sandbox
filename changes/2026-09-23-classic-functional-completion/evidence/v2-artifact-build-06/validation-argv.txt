@@ -1,0 +1,9 @@
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-25adda5b
+Source SHA: 25adda5becbcab339a8364bbd23ac86ace3d8d8e
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-25adda5b/.pnpm-task-run-state-v1
+
+SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/build.stdout.log'
+SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-verify.stdout.log'
+
+Post-build read-only collection copied apps/web/dist/harness-artifact.json byte-for-byte, projected its sorted .files map, independently hashed the same 276 disk files sorted by relative path with /usr/bin/shasum, compared both maps byte-for-byte, and recorded clean tree/index, internal package paths, task state, port 4273, process count, packs.lock, and MP3 bytes/MIME/SHA.
