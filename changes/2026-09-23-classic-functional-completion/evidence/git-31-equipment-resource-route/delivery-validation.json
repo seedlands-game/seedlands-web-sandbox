@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-31-EQUIPMENT-RESOURCE-ROUTE",
+  "status": "READY_FOR_PUSH",
+  "baseline": "4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0",
+  "sourceCommit": "7cb4ed9f6850ea173c721316c1113b7caffc1400",
+  "sourceTree": "ea2a082ada5f036196896cbae803b05d8b8a1437",
+  "stagedPatchSha256": "cd494c462e42c4515af735847911d272b8a56cf93d2051f50c3a19a6b15b3282",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "0a95a3a3beba42a8498bfc93b4f014bbcb44333ebbc9ef9104aaa9a154b0ccc3"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 21,
+    "sha256": "5a5e6bf27fb40d0813a46f783ace279ab35fc64fbd99b759bc5f5f1af590161f",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "frozenInputs": {
+    "close03": {
+      "sourceManifestSha256": "2c8242cd90f9d0c17cfbc6c706cad3e3f84ecdeefa2c3dbb6486c00487eda6a2",
+      "sourceEntries": 5,
+      "validatedEntries": 5,
+      "evidenceManifestSha256": "9109e1a2619b6e2b134a7318ca8f0a52f5c3360cd53afce4b620be9d107fe451",
+      "evidenceEntries": 31,
+      "validatedEvidenceEntries": 31,
+      "deliverySha256": "2d426e4d07f0a7b40dba19f9077257c5393009cc861bd02afdbd78d91a1b9451"
+    },
+    "close02": {
+      "sourceManifestSha256": "86d8bf8cb8bc0a71a9ba1f88f23e70601d3fbb5af2ac52e03c46c2d2534e096f",
+      "evidenceManifestSha256": "71dbd6384a88d7c04cd2accb0f11351565c4e329732363a52e1beac28ad8dd86",
+      "deliverySha256": "5dac8f08a698b76629ae046175e373f37e8cbbca9bcc2110484a50fbb377218c",
+      "currentPathsStillOwned": [
+        "apps/web/tests/e2e/classic-support/equipment-journey-support.ts",
+        "apps/web/tests/e2e/classic-support/scenario.test.ts"
+      ],
+      "otherFiveEntriesSupersededByClose03": true,
+      "priorReleaseContractSha256": "8dd14cbacf71563fb07048b5c11f6207aa91fc094087254c99449d9d79680289",
+      "priorReleaseEvidenceSha256": "271f73c4f8d9414eef9a50d51119805b0960fb7b6027dfa200c1f7314604379f"
+    },
+    "close01": {
+      "sourceManifestSha256": "92cde4c820d88c822fced9e9e40e0f90165d982f4aad1ae26f6b49ab098674b3",
+      "evidenceManifestSha256": "bb776cbb6075907973a5398d77f7e84234cd1a4383863920d88a9a5cadd7b904",
+      "deliverySha256": "4a76cdfdef669f38f2866edd0531ca6c785e99d9073af57d28cd463fb1518c6c",
+      "validatedFromClose02PriorRelease": true
+    },
+    "browser15": {
+      "sourceManifestSha256": "e69257a830358ac2c123285947ca71c38e7c54c3990e49e81f8eda140c08a1a9",
+      "sourceEntries": 21,
+      "validatedAgainst": "/private/tmp/seedlands-v2-acceptance-25adda5b",
+      "evidenceManifestSha256": "f94d0cc93936a6c4cb580696063a3901a7ad09a8ec244066c34246ed2ce839d5",
+      "evidenceEntries": 33,
+      "deliverySha256": "34d5986e1b96cd3dfda336ad183b60a7b46c928525ba916c544ab90fedf3028e",
+      "diagnosisSha256": "63737b8c650e6d7652a01166e87413fde750115d1752b3e9b62d1651e6882eb8",
+      "reportSha256": "d6f344fb78cab9cda78044aecaa726f10a92eb3c71620d82e55b3f60a8bcd9f1",
+      "traceParts": 4,
+      "traceBytes": 413834226,
+      "traceSha256": "e123610dcb014804b9b4f2ce6de96ce5a887f002a99bd65911e13a113097d612",
+      "status": "FAIL_AFTER_RESOURCES_PLACED",
+      "v1Completed": true,
+      "miningInputSent": false,
+      "equipmentPointerReached": false,
+      "c4Reached": false,
+      "c5Reached": false
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git31-equipment-resource-route",
+    "head": "4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0",
+    "stagedPaths": 6,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "affectedResourceRouteClosure": {
+      "window": "43bfe31a-2c59-4b4f-8c93-053b20c6a218",
+      "status": "PASS_4_FILES_38_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "9935558dbfeafe4ab30a64fc198e6bac03546bc926d32dce07d50912f759c1e6",
+      "receiptSha256": "731220f608d82b1ef4a121d0eb88bebba5aefb335c6d32c0cc24f305944d99d3"
+    }
+  },
+  "static": {
+    "classicTestTypes": {
+      "window": "95b3b4b5-290f-4988-aaca-7b93acca6e9f",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "22f471d2db145d2075cc888d7057c906d3112252d218118684c40a5f0fd35166"
+    },
+    "rootTestTypes": {
+      "window": "3ea93760-7922-4b35-b611-1a523f3ae8ec",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "7a96eb4490f5f1e0c467450f62bf0411cb32737d8fb877dca46bc3dceb4313ce"
+    },
+    "stagedEslint": {
+      "window": "705d4154-3d6c-4cb2-b584-e8cbf476d2fa",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "6dae578471cc0b9356ef10484c46ad240b2e6df6b5adf94c33197c1916018c9b"
+    },
+    "editableFormat": {
+      "window": "cfe1927c-c2ec-4302-8664-33377c464ddb",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "9206facc94af3488b5e09ae104f750a82e9a5177e1d53443d82a7bf50c4fd87c"
+    },
+    "scopedDiff": {
+      "window": "7945241e-ea55-4be0-9b9d-d123995ad44e",
+      "status": "PASS_6_PATHS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "b0cd3a19e16d9b653308b82055fa559a64ef915bafd7595ac046a90bddbbb1b0"
+    },
+    "metadataFormat": {
+      "window": "dc109ac6-0135-42c7-a53b-391370d4e53b",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "dc553eaf5172660824bba2c3de0775946047622bf159e3ea905bb1b00b189cfe"
+    },
+    "metadataFinal": {
+      "window": "03c55318-fd16-4bf0-b141-85ce6266abf7",
+      "status": "PASS",
+      "stdoutSha256": "acb73889ef8aba881445a6ec44aa5373f7a56aae1ddc5ecc3f61d2ff704c20da",
+      "receiptSha256": "bdc44a6da2ad9bdd34d9710274122c6d4d9917b71433da6133ab23bd2b5ff866"
+    }
+  },
+  "semantics": {
+    "routeOwner": "v2-canonical-fixture-consumer",
+    "directionUsesClientOnly": true,
+    "clientOutsideOrNotCrossedUsesWalk": true,
+    "serverOnlyOutsideUsesReadOnlyWait": true,
+    "sharedDeadlineMs": 45000,
+    "singleWaitCapMs": 20000,
+    "arrivalMaxXError": 0.45,
+    "arrivalMaxZErrorExclusive": 0.08,
+    "productionChanged": false
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser16Run": false,
+    "browser15StatusChanged": false,
+    "genericWalkChanged": false,
+    "genericHarnessChanged": false,
+    "scenarioJsonChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The change only corrects the V2 canonical fixture route and changes no owner or public protocol boundary."
+  },
+  "notRun": ["build", "artifact", "browser16", "cua", "devserver", "ci", "deploy", "merge"]
+}

@@ -1,0 +1,3 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts(12,3): error TS6133: 'EQUIPMENT_ROUTE_MAX_X_ERROR' is declared but its value is never read.
+[ELIFECYCLE] Command failed with exit code 2.

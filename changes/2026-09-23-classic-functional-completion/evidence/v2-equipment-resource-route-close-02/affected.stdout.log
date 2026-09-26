@@ -1,0 +1,10 @@
+10:58:16 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  4 passed (4)
+      Tests  32 passed (32)
+   Start at  10:58:16
+   Duration  937ms (transform 481ms, setup 0ms, import 601ms, tests 15ms, environment 0ms)
+

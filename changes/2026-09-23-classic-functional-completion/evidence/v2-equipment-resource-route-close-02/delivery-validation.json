@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "86d8bf8cb8bc0a71a9ba1f88f23e70601d3fbb5af2ac52e03c46c2d2534e096f",
+    "validatedEntries": 7
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 75,
+    "sha256": "71dbd6384a88d7c04cd2accb0f11351565c4e329732363a52e1beac28ad8dd86",
+    "validatedEntries": 75,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "priorRelease": {
+    "byteEqual": true,
+    "sourceManifestSha256": "92cde4c820d88c822fced9e9e40e0f90165d982f4aad1ae26f6b49ab098674b3",
+    "evidenceManifestSha256": "bb776cbb6075907973a5398d77f7e84234cd1a4383863920d88a9a5cadd7b904",
+    "deliverySha256": "4a76cdfdef669f38f2866edd0531ca6c785e99d9073af57d28cd463fb1518c6c",
+    "contractSha256": "26d77e51d231ea57092642c453eb50bf1f3f3b3c0f7b848acba34152211d7ee0",
+    "evidenceSha256": "3e577a3ea5001d9710464f583dae7826ccaa2c1d15ae9edf7dd6e9c2f5e88028"
+  },
+  "finiteArrival": {
+    "maxXError": 0.45,
+    "corridorTolerance": 0.08,
+    "pulseMs": 80,
+    "maxPulseTravelAtPlayerSpeed": 0.36,
+    "nextResourceExpandedAabbClearance": 0.73,
+    "clientAndServerEachBounded": true,
+    "positiveAndNegativeDirectionsCovered": true
+  },
+  "sharedDeadline": {
+    "totalMs": 45000,
+    "pollCapMs": 20000,
+    "remainingPassedToEachWalk": true,
+    "remainingPassedToPoll": true,
+    "postAwaitDeadlineChecked": true,
+    "outOfDomainUsesRealInputCorrection": true,
+    "randomFallbackAdded": false
+  },
+  "geometry": {
+    "playerHalfWidth": 0.32,
+    "browser15DiagonalBlocked": true,
+    "entireNeighborhoodEnvelopeChecked": true,
+    "resources": 10,
+    "batches": ["wood", "stone", "iron"],
+    "pickupRetreatCovered": true,
+    "workbenchRoundTripCovered": true
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-resource-route-close-02-red",
+      "status": "EXPECTED_FAIL",
+      "passed": 9,
+      "failed": 3,
+      "reason": "The old predicate accepted positive and negative far overshoots, so the wrapper returned after one walk instead of issuing the opposite-key correction.",
+      "stdoutSha256": "96ac965e8e2f431bd2b05263f5a983322cfd484a572419521e605545677addcd",
+      "receiptSha256": "28b109e2d2ab8dcd0b53e9b322a054e7959a6853d4fbc237dbb47b46f8ae0c18"
+    },
+    "green": {
+      "window": "v2-equipment-resource-route-close-02-green-02",
+      "status": "PASS",
+      "files": 1,
+      "tests": 13,
+      "stdoutSha256": "96fda59e720cc7b5857794879a070735b760264884a8a70ec54c304666231312",
+      "receiptSha256": "3fad6fe04bc282b057d336643eada25a97b102be8b6c9096c392bd2a03d90a8e"
+    },
+    "finalAffected": {
+      "window": "v2-equipment-resource-route-close-02-affected-05",
+      "status": "PASS",
+      "files": 4,
+      "tests": 35,
+      "maxWorkers": 1,
+      "stdoutSha256": "b50b049c140ca4d844d98dcd3df4052664cbd5f053d54e2e37e0823790d40f04",
+      "receiptSha256": "21e099e81e2dd50c3a5b55b1ef745a91445d6e8898d2f75104989755054a0975"
+    },
+    "finalClassicTypes": {
+      "window": "v2-equipment-resource-route-close-02-classic-types-05",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "6a4853d6372252041927d91d50e7bd372d7cd61588702c7fb56760eb9823497d"
+    },
+    "finalRootTypes": {
+      "window": "v2-equipment-resource-route-close-02-root-types-05",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "a10db723bc21e4e3705a808d02617ac1cfacc47edbcfbb4eb06d2e85a4cda6fd"
+    },
+    "finalEslint": {
+      "window": "v2-equipment-resource-route-close-02-eslint-05",
+      "status": "PASS",
+      "files": 4,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "eea7daed5ca8e37f1bd7c38d5877974d283913ac3fdc1cf27b1bb29405479764"
+    },
+    "finalStatic": {
+      "window": "v2-equipment-resource-route-close-02-static-05",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "0c0720004ce2a3f930183fb17cf7f1ff876c9ef11967f91e20f1ada9dc3eb657"
+    },
+    "evidenceFinal": {
+      "window": "v2-equipment-resource-route-close-02-evidence-final-03",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "ea02f09eb018ba07aa954f882aa3b5e0bdb2089d3e725af45c5c090e16d47287"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-resource-route-close-02-metadata-format-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "121aafe898008067fae056ac54d3c2d5d0e8ce9e09225ab9d14ef575b5869770"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser16Authorized": false,
+    "scenarioCoordinatesChanged": false,
+    "genericWalkToChanged": false,
+    "genericRouteProgressChanged": false,
+    "productionChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure only bounds a canonical fixture route and does not change owner, protocol, or architecture boundaries."
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}

@@ -1,0 +1,10 @@
+11:40:15 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git31-equipment-resource-route - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git31-equipment-resource-route
+
+
+ Test Files  4 passed (4)
+      Tests  38 passed (38)
+   Start at  11:40:15
+   Duration  917ms (transform 480ms, setup 0ms, import 606ms, tests 17ms, environment 0ms)
+

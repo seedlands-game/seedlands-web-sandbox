@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-26T00:09:00Z
+更新时间：2026-09-26T03:43:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -37,6 +37,12 @@ tree 的 5 files / 41 tests、Classic/root test types 与目标静态均 PASS，
 BUILD06 已从 GIT30 远端 source `25adda5becbcab339a8364bbd23ac86ace3d8d8e` 的 clean detached tree 完成唯一 build
 与唯一 artifact verify：sourceDigest `74752aed...e3a4`、artifactDigest `fc7ac005...f6e2`、276 项 map 与磁盘一致；
 artifact evidence 作为本阶段第三笔独立提交交付。Browser15/Cua/devserver/CI 仍未运行。
+当前 Equipment resource route checkpoint：GIT30 与 BUILD06 已远端交付至
+`4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0`。Browser15 完整 V1 真实通过并完成 V2 `resources-placed`，
+首个原木采矿前的辅助走位失败，采矿输入未发送，equipment pointer、C4、C5 未触达，lease 已释放。
+`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01/02/03` 已由 root 定向准出；GIT31 detached staged tree 的 4 files /
+38 tests、Classic/root test types 与目标静态均 PASS，代码提交
+`7cb4ed9f6850ea173c721316c1113b7caffc1400` 已本地生成，evidence/state 尚待独立提交和 push。Browser16 未运行。
 
 ## 恢复规则
 
