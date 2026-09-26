@@ -1,0 +1,15 @@
+--- /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-map.sha256.log	2026-09-26 09:44:46
++++ /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-07/artifact-map.sha256.log	2026-09-26 11:55:07
+@@ -268,9 +268,9 @@
+ 231fbfd32798685f15b1c5fe83c7e31cecc43f80cb5760b8de3f1ad7a7308db1  models/classic/wolf.png
+ df3ac5b3a8c0df440e0600799e64247f246379605c3aae4fe4ee5ec23c62a32b  models/classic/zombie.glb
+ 9a2ab70cd20c4680886c096067aa9135524ec77992956e7ede4a267238138f2d  models/classic/zombie.png
+-9a83037f2043be31a923b1babfb0542ce3f81d28803647b04672465aef50f681  packs/host-admissions.json
++a12a3fe8336a0fcdeb359c817fa1e5441de72548127c895e0e5ca55d70f7ab17  packs/host-admissions.json
+ 0e49413440e666eacb2223a87981aa1d9085bb029d8787ebae155eb5db8cc5ac  packs/overworld.manifest.json
+-dc63d82cbdab095af9c3c49411f3fd5adc7f51bc870517800cd77aa3f8861205  packs/overworld.mjs
+-d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7  packs/packs.lock.json
++f1ab2b68bfc0ca9c1e945a554dbc539ae6c6034411a1917083795e155010cd7b  packs/overworld.mjs
++f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f  packs/packs.lock.json
+ 3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  packs/playbooks/classic/assets/audio/to-far-shores.mp3
+ a1e379e5e8a9d5f5d41ef7ce204863af0d0cfe41b9e3081e138d87d2517d9f5b  packs/playbooks/classic/presentation.json

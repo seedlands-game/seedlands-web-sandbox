@@ -1,0 +1,9 @@
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-65938068
+Source SHA: 659380680628520f6b662b66129a594f5001b612
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-65938068/.pnpm-task-run-state-v1
+
+SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-07/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-07/build.stdout.log'
+SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-07/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-07/artifact-verify.stdout.log'
+
+Post-build collection generated the sorted receipt map and independently hashed the same 276 dist files, compared them byte-for-byte, compared BUILD07's map against BUILD06, and read tree/index, internal package links, task state, port 4273, residual process count, packs.lock, and MP3 bytes/MIME/SHA without running build or artifact again.
