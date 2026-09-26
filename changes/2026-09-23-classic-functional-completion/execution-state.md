@@ -53,7 +53,10 @@ Browser16/Cua/devserver/CI 仍未运行。
 后等待 grounded 使 19.963m leg 耗尽 45 秒；采矿、equipment pointer、C4、C5 未触达且 lease 已释放。
 `V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04/05` 已由 root 定向准出；GIT32 detached staged tree 的 5 files / 40 tests、
 Classic/root test types 与目标静态均 PASS，代码提交 `a1ebf10856cc57c1b0d75a33b2f7accc9528ba4e` 已本地生成，
-evidence/state 尚待独立提交和 push。Browser17 未运行。
+evidence/state 已 amend 为 `cb4941bfd1801422802463bc7bbc41dd7d8e9484` 并推送；旧未发布 `a402b016...` 由
+task-owned backup ref 保留且不推送。BUILD08 已从该 source 的 clean detached tree 完成唯一 build 与唯一 artifact
+verify：sourceDigest `ec6301ae...9a17`、artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致；artifact evidence
+作为本阶段第三笔独立提交交付。Browser17/Cua/devserver/CI 仍未运行。
 首次未发布 evidence commit `a402b01623354a5c78e41260354a0fdd7c35394c` 因 Browser16 六个 trace 分片超过
 GitHub 100 MB 限制被 `GH001` 拒绝，远端未移动；本地 `refs/task-backups/git32-evidence-a402b016` 保留原提交。
 经 root 授权仅 amend 该 evidence commit，将同一 774153112 bytes / SHA256 `5ce02c71...aab41` 的 trace 无损重切为
