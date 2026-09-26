@@ -24,7 +24,11 @@ source 的 clean detached tree 唯一 build 与唯一 artifact verify PASS；sou
 当前 Door exit checkpoint：Browser13 在 upper 关闭后被 lower-center 不可见的 fixture 边界阻断，lower click 未发送，
 V2 全部 `NOT REACHED` 且唯一 lease 已释放。`V1-DOOR-EXIT-FACE-CLOSE-01/02` 已由 root 定向准出，GIT29 的
 4 files / 38 tests、Classic/root test types 与目标静态在 detached staged tree 全部 PASS；代码提交
-`f5747f4944efa5cc28bf0e656a5efef748b0d584` 已本地生成，证据/state 尚待独立提交和 push。Browser14 未运行。
+`f5747f4944efa5cc28bf0e656a5efef748b0d584` 与 evidence/state 提交
+`0a0a63188805f0a7d96221a841e2b6292fa97205` 均已推送，local/upstream/origin/ls-remote 为 `0/0`。Browser14 未运行。
+BUILD05 已从 GIT29 远端 source `0a0a63188805f0a7d96221a841e2b6292fa97205` 的 clean detached tree 完成唯一 build
+与唯一 artifact verify：sourceDigest `c86e6471...4bc2`、artifactDigest `fc7ac005...f6e2`、276 项 map 与磁盘一致；
+artifact evidence 作为本阶段第三笔独立提交交付。Browser14/Cua/devserver/CI 仍未运行。
 
 ## 恢复规则
 
