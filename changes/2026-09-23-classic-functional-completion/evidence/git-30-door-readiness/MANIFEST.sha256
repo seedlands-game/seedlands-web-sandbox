@@ -1,0 +1,17 @@
+3d9a28d4b18e5f71d2c1fce96ba3dd13a921dad9d76f36700c72ceb4c00ee219  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/SOURCE-MANIFEST.sha256
+8eb2e8420e98a19be71514661e9d827060e2708cb6b0d193554643218b987818  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/affected-tests.stdout.log
+f44d40e3693f04396e1126fa55a1052d21e6caa77b65553fbade36e889f1cdfc  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/affected-tests.window.json.log
+d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/classic-test-types.stdout.log
+81833711f3caefdf40a3653bbcb95f15fcb93f14f32a2eed3e64223406ab77b8  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/classic-test-types.window.json.log
+935458e6fc316dfc0367f738fb378743f71214c4d472513e657735d52844a67e  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/code-staged.patch
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/editable-format.stdout.log
+53e9120160b5d78ec9525bfa730caf88c6e350c893941e691dbe44ae0222165a  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/editable-format.window.json.log
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/metadata-format.stdout.log
+5ce61171155828f50c551d09d76d09bea6b0e2fb191f89aaccf71cebf6cca43d  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/metadata-format.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/root-test-types.stdout.log
+d1dff58948ca5372e2e85f678ca9b4babb0e492af0820a45642cc9a441d669c1  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/root-test-types.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/scoped-diff.stdout.log
+49b0409bd14e481aa2e4fc837317c8a6a0d828e64c6f0745585142735d84eb77  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/scoped-diff.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/staged-eslint.stdout.log
+540178faae4581c64b565dbd3df2cf2b1d984af4f1469d0bd01a7cc41b1b01ca  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/staged-eslint.window.json.log
+6b6e63fbd6fa4b3bfe9bc49819af5882dc7173de1c0d30cf600c932cd415ef61  changes/2026-09-23-classic-functional-completion/evidence/git-30-door-readiness/validation-argv.txt

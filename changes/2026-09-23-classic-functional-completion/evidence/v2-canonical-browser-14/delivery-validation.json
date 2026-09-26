@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-14",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-14-0a0a6318",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-0a0a6318",
+  "sourceSha": "0a0a63188805f0a7d96221a841e2b6292fa97205",
+  "treeSha": "ab92a25e22c025d65a4948e469ededf29a6e4c71",
+  "sourceDigest": "c86e64716b9bd29f79bcf7897437342f97766faaa110907fd12046f9e0f64bc2",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2",
+  "artifactReceiptSha256": "869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1",
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 19,
+    "sha256": "17851cefd9d2c629dba81e4a4e943f0ccca30ba12c70729fdb7d9475de6fa5a4",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 33,
+    "sha256": "9211d4d4765ab0147a4197bbabe925c4f48e19c79950db1b0b6de2189c6c2d1b",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "window": {
+    "id": "f7a53699-300d-429c-a308-8c48399036df",
+    "status": "FAIL",
+    "startedAt": "2026-09-26T00:47:25.998Z",
+    "endedAt": "2026-09-26T00:50:04.147Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "4b603d0c1e46624b5b9b98f6c36a9a7236a8ca14707d6ef58bee14ff53c76a8e"
+  },
+  "playwright": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 1,
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1
+  },
+  "failure": {
+    "classification": "canonical-fixture-non-atomic-post-traverse-readiness-resample",
+    "failedAt": "v1-door-post-traverse-second-readiness-snapshot",
+    "sourceLocation": "apps/web/tests/e2e/classic-support/v1-slice.ts:298",
+    "clientPosition": [71.60638427734375, 32.60000228881836, 0.5013126730918884],
+    "serverPosition": [71.60638694230313, 32.600001, 0.5013126463361098],
+    "completeVoxelExitBoundary": 71,
+    "secondSnapshotIndividualFalseField": "NOT_RECORDED",
+    "authoritySpecificReadinessObserved": false,
+    "lowerExitFaceAimReached": false,
+    "lowerReopenClickSent": false,
+    "diagnosisSha256": "c0fbef61c89865a6fd289be6f2a36a86d2f2c81a9ef2c9a7e907e0e81a7fc438"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "FAIL",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED",
+    "visual": "PASS",
+    "nonClassicSmoke": "SKIPPED"
+  },
+  "restoreEvidence": null,
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "trace": {
+    "sizeBytes": 227649859,
+    "parts": 5,
+    "sha256": "ca42ad29f2a3a003cba16ace578a987ec7ffea283802d70ba7bc22227e3d1aa5",
+    "reassemblyValidated": true
+  },
+  "runnerArchive": {
+    "outputRecords": 6,
+    "execLifecycleRecords": 2,
+    "terminalInteractionRecords": 5,
+    "processId": "72318"
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-14-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-26T00:52:39.991Z",
+    "endedAt": "2026-09-26T00:52:42.444Z",
+    "files": 276,
+    "artifactReceiptSha256": "869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1",
+    "windowReceiptSha256": "e97bcaf83d77ed2361d49706a3457b8a2b27d6531a913e70f02e78b56865fd1c",
+    "stdoutSha256": "3f027fbbb6144e39d1e2fdd06c43441675b4c1bec68b3e9769dfb70e02f03eca"
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256": "86742f34024d54d9c111b179a38ae592d99a61f3731be86bcb6610fe00be3af5",
+    "formatWindow": "v2-canonical-browser-14-report-format",
+    "formatReceiptSha256": "946348da64b003ffdd52c39f1dad7ea246d0fe7eaeefdfcb5ebb982174fdc5ad",
+    "formatStdoutSha256": "cfc44c1e97d48260a44d8aebe63e83f0ff1ec950e61cc463a914242fbda28e0a",
+    "metadataFinalWindow": "v2-canonical-browser-14-metadata-final",
+    "metadataFinalStatus": "PASS",
+    "metadataFinalReceiptSha256": "48c4dd78d44486b4548abae6e4ce2ac8c67b9acd5f62d88040fcf916477c276b",
+    "metadataFinalStdoutSha256": "f4c850ac09c9272a9a3200c0c80c2ac30d5e1a2bffbf395efd9af3cd5e0103c1",
+    "finalResourceCheckSha256": "10dbf21663a3e0e4fa79e424c105082b40bc4596e4c886058eb612316805fe0d"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true
+  },
+  "notReached": [
+    "v1-door-upper-close-and-lower-exit-face-reopen",
+    "v1-jukebox-record-media",
+    "v2-resource-mining-crafting-and-equipment",
+    "C4",
+    "C5",
+    "save-return-continue-and-equipment-restore"
+  ],
+  "notObserved": [
+    "equipment-durability-loss",
+    "death",
+    "equipment-drop",
+    "respawn",
+    "Cua",
+    "human-audible-audio",
+    "performance"
+  ],
+  "notRun": ["build", "second-browser-attempt", "cua", "ci", "git", "deploy", "merge"]
+}

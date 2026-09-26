@@ -1,5 +1,71 @@
 # V2 Canonical Browser 证据
 
+## Browser-14 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-14`
+
+结论：**FAIL。Browser-13 的 lower-center 遮挡尚未进入验证；唯一 canonical attempt 在同一 V1 门穿越后的第二次
+readiness 采样失败，V2 全部未触达。** Classic 视觉测试独立通过。本结果不替代 Cua、人类听觉或性能验收。
+
+验收树为 `/private/tmp/seedlands-v2-acceptance-0a0a6318`，HEAD/source
+`0a0a63188805f0a7d96221a841e2b6292fa97205`，tree `ab92a25e22c025d65a4948e469ededf29a6e4c71`；
+source/lock/artifact digest 分别为
+`c86e64716b9bd29f79bcf7897437342f97766faaa110907fd12046f9e0f64bc2`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`。artifact receipt SHA256 为
+`869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1`，builtAt
+`2026-09-26T00:17:03.654Z`，dist 为 276 个盖章文件/277 个磁盘文件，无 symlink。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-14-0a0a6318 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+机器窗口/run ID `f7a53699-300d-429c-a308-8c48399036df`，UTC
+`2026-09-26T00:47:25.998Z` 至 `2026-09-26T00:50:04.147Z`，`waitedMs=1`、`exitCode=1`、
+`measurement.status=NOT_RECORDED`。Playwright 单 worker/单 Chromium/`retries=0`，结果
+`1 failed / 1 passed / 1 skipped`；canonical 主测试只有 attempt 0。
+
+失败在 `v1-slice.ts:298`：收紧后的真实 `walkTo` 已返回一个 `onGround && !colliding` snapshot，fixture
+立即调用 `doorAuthorityObservation` 再采样并断言相同布尔组合，该次结果为 false。该 helper 只有 position 来自
+`serverPlayerPosition`，`onGround/colliding` 仍来自同一个顶层 client snapshot，故不能描述为 Authority 与 client
+分歧。trace 未序列化第二次采样中具体哪个布尔为 false；约 10ms 后 failure attachment 又为
+`onGround=true, colliding=false`。失败快照 client/server 位置分别为
+`[71.60638427734375,32.60000228881836,0.5013126730918884]` 与
+`[71.60638694230313,32.600001,0.5013126463361098]`，两者均已越过完整门体素的 `x=71` 出口边界。
+
+首因分类为 **fixture 在真实跳跃移动后对瞬时 readiness 做非原子重复采样**。失败发生在 upper 再关闭之前，因此
+lower exit-face aim/click 尚未执行，也没有 Authority lower toggle 可供评价。最窄后续应由 root 另行冻结：复用
+`walkTo` 已返回且已校验的 client readiness，同时用紧随其后的 snapshot 只读取 Authority position；或等待一个
+fresh stable snapshot 后一次性读取 position/readiness。不得放宽完整 voxel 出口断言、改变路线/预算或重跑本次。
+
+| 域                                                                              | Browser-14 结果                     |
+| ------------------------------------------------------------------------------- | ----------------------------------- |
+| C0-C3                                                                           | PASS；Harness receipt 明确记录      |
+| V1 音量、水桶、门放置、closed probe、首次打开、open mesh/no-collision、真实穿门 | PASS；失败行之前完成                |
+| 穿门后第二次 readiness snapshot                                                 | FAIL；具体瞬时 false 字段未记录     |
+| upper 再关闭、lower exit-face aim/click/reopen                                  | NOT REACHED                         |
+| jukebox/record/media                                                            | NOT REACHED                         |
+| V2 resource strip、采矿拾取、合成、装备矩阵                                     | NOT REACHED                         |
+| C4、C5、`before.v2EquipmentPreSave`、restore/双 epoch/新 ref 脱穿               | NOT REACHED；`restoreEvidence=null` |
+| Classic 视觉 v3                                                                 | PASS，32.0 秒                       |
+| non-Classic smoke                                                               | SKIPPED                             |
+| death、durability-1、drop、respawn                                              | NOT OBSERVED                        |
+| Cua、人类听觉                                                                   | NOT RUN                             |
+| 性能                                                                            | NOT MEASURED                        |
+
+失败 attachment 不含 pageErrors/failedResponses 字段，二者记为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。原始 trace 为 227649859 bytes，SHA256
+`ca42ad29f2a3a003cba16ace578a987ec7ffea283802d70ba7bc22227e3d1aa5`；五片重组已验证。runner 原始 6 个输出块、
+2 条 exec lifecycle 和 5 条 terminal interaction 均按 process `72318` 机械归档。
+
+锁内 `harness:artifact` 后验窗口 `v2-canonical-browser-14-artifact-postcheck` 为 PASS，UTC
+`2026-09-26T00:52:39.991Z` 至 `2026-09-26T00:52:42.444Z`，同 source/lock/artifact digest 与 276-file map。
+最终验收树 tracked/index clean，4273 无监听，本树 owned Playwright/Chromium/preview 为 0，benchmark lock absent；
+本 tree/dist 与其他验收树均保留。本轮未修改 source/test/scenario/dist，也未 build、第二 attempt、Cua、CI、Git/index、
+push、deploy 或 merge。Browser lease 在证据封存后释放。
+
 ## Browser-13 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-13`

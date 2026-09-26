@@ -1,0 +1,266 @@
+diff --git a/apps/web/tests/e2e/classic-support/door-collision-oracle.ts b/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+index 0fdb7da943652caa3ca94038d0560a2424fec136..1b425a2c2d627b978d7295a979450fca47ead83c 100644
+--- a/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
++++ b/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+@@ -39,6 +39,14 @@ export type ClosedDoorProbeAssessment =
+       reason: 'body-not-ready' | 'not-before-door' | 'outside-safe-corridor' | 'crossed-contact-plane';
+     }>;
+ 
++export type DoorRouteReadinessSnapshot = Readonly<{
++  player: Point;
++  serverPlayerPosition: Point;
++  onGround: boolean;
++  colliding: boolean;
++  authority: Readonly<{ physicsTick: number; acknowledgedInputSequence: number }>;
++}>;
++
+ const horizontalCoordinate = (point: Point, axis: HorizontalAxis) => point[axis];
+ const routePoint = (normalAxis: HorizontalAxis, normal: number, lateral: number): RoutePoint =>
+   normalAxis === 0 ? [normal, lateral] : [lateral, normal];
+@@ -109,6 +117,24 @@ export function isOutsideDoorTargetOnExitSide(plan: ClosedDoorProbePlan, target:
+   return plan.direction * (position[plan.normalAxis] - exitBoundary) > 0;
+ }
+ 
++export function matchesDoorRouteReadinessSnapshot(
++  plan: ClosedDoorProbePlan,
++  target: Point,
++  side: 'entry' | 'exit',
++  baseline: DoorRouteReadinessSnapshot,
++  current: DoorRouteReadinessSnapshot,
++): boolean {
++  const isOutside = side === 'entry' ? isOutsideDoorTargetOnEntrySide : isOutsideDoorTargetOnExitSide;
++  return (
++    current.onGround &&
++    !current.colliding &&
++    current.authority.physicsTick > baseline.authority.physicsTick &&
++    current.authority.acknowledgedInputSequence >= baseline.authority.acknowledgedInputSequence &&
++    isOutside(plan, target, current.player) &&
++    isOutside(plan, target, current.serverPlayerPosition)
++  );
++}
++
+ export function assessClosedDoorProbe(
+   plan: ClosedDoorProbePlan,
+   before: ClosedDoorProbeObservation,
+diff --git a/apps/web/tests/e2e/classic-support/door-readiness.test.ts b/apps/web/tests/e2e/classic-support/door-readiness.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..d07c51b77056cf2188de71d1fc6a7b1ff7d3b237
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/door-readiness.test.ts
+@@ -0,0 +1,74 @@
++import { describe, expect, it } from 'vitest';
++import {
++  createClosedDoorProbePlan,
++  isOutsideDoorTargetOnEntrySide,
++  isOutsideDoorTargetOnExitSide,
++  matchesDoorRouteReadinessSnapshot,
++  type ClosedDoorProbePlan,
++} from './door-collision-oracle';
++import type { Point } from './scenario';
++
++type Snapshot = Readonly<{
++  player: Point;
++  serverPlayerPosition: Point;
++  onGround: boolean;
++  colliding: boolean;
++  authority: Readonly<{ physicsTick: number; acknowledgedInputSequence: number }>;
++}>;
++
++const lower: Point = [70, 31, 0];
++const plan: ClosedDoorProbePlan = createClosedDoorProbePlan({
++  door: lower,
++  collision: { min: [0.8125, 0, 0], max: [1, 1, 1] },
++  playerPosition: [67, 32.6, 0.5],
++  playerHalfWidth: 0.32,
++});
++const snapshot = (
++  playerX: number,
++  serverX: number,
++  physicsTick: number,
++  acknowledgedInputSequence: number,
++  ready = true,
++): Snapshot => ({
++  player: [playerX, 32.6, 0.5],
++  serverPlayerPosition: [serverX, 32.600001, 0.5],
++  onGround: ready,
++  colliding: !ready,
++  authority: { physicsTick, acknowledgedInputSequence },
++});
++
++describe('Classic door route readiness snapshot', () => {
++  it.each([
++    { side: 'entry' as const, target: [70, 32, 0] as Point, outside: 69.49, inside: 70.01 },
++    { side: 'exit' as const, target: lower, outside: 71.5, inside: 70.99 },
++  ])(
++    'matches one fresh ready $side snapshot with both projections beyond the full voxel',
++    ({ side, target, outside, inside }) => {
++      const baseline = snapshot(outside, outside, 100, 50);
++      const samples = [
++        snapshot(outside, outside, 100, 50),
++        snapshot(outside, outside, 101, 50, false),
++        snapshot(outside, inside, 102, 50),
++        snapshot(inside, outside, 103, 50),
++        snapshot(outside, outside, 104, 49),
++        snapshot(outside + (side === 'exit' ? 0.10638427734375 : -0.1), outside, 105, 50),
++      ];
++
++      const matches = samples.map((current) =>
++        matchesDoorRouteReadinessSnapshot(plan, target, side, baseline, current),
++      );
++      const matched = samples.find((current) =>
++        matchesDoorRouteReadinessSnapshot(plan, target, side, baseline, current),
++      );
++
++      expect(matches).toEqual([false, false, false, false, false, true]);
++      expect(matched).toBe(samples[5]);
++      expect(matched).toEqual(samples[5]);
++    },
++  );
++
++  it('uses the same complete-voxel boundary contract for entry and exit', () => {
++    expect(isOutsideDoorTargetOnEntrySide(plan, [70, 32, 0], [69.49, 32.6, 0.5])).toBe(true);
++    expect(isOutsideDoorTargetOnExitSide(plan, lower, [71.5, 32.6, 0.5])).toBe(true);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/harness.ts b/apps/web/tests/e2e/classic-support/harness.ts
+index 4fbe1aae8bd8bf08400faf3b073284f899193438..ab7958adc5cebd98aeeaf851bf14800307cb92ec 100644
+--- a/apps/web/tests/e2e/classic-support/harness.ts
++++ b/apps/web/tests/e2e/classic-support/harness.ts
+@@ -46,6 +46,7 @@ export type CharacterObservation = Readonly<{
+ // prettier-ignore
+ export type ClassicSnapshot = Readonly<{
+   player: Point;
++  serverPlayerPosition: Point;
+   viewAngles: readonly [number, number];
+   streamCenter: readonly [number, number];
+   loadedChunks: number; renderedChunks: number;
+diff --git a/apps/web/tests/e2e/classic-support/v1-slice.ts b/apps/web/tests/e2e/classic-support/v1-slice.ts
+index 3757530aed7cfe2e4221e9fdaf678e98583b5ae4..2ec01a4892ccb5a1b6de4f8c431e3075c1ac4a4a 100644
+--- a/apps/web/tests/e2e/classic-support/v1-slice.ts
++++ b/apps/web/tests/e2e/classic-support/v1-slice.ts
+@@ -15,6 +15,7 @@ import {
+   doorExitAdjacent,
+   isOutsideDoorTargetOnEntrySide,
+   isOutsideDoorTargetOnExitSide,
++  matchesDoorRouteReadinessSnapshot,
+   type ClosedDoorProbePlan,
+   type ClosedDoorProbeObservation,
+ } from './door-collision-oracle';
+@@ -267,18 +268,19 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
+   await switchToSurvival(page);
+   const closedDoorPlan = await expectClosedDoorBlocks(page, placed);
+ 
+-  const retreated = await walkTo(page, closedDoorPlan.approach, {
++  const retreatBaseline = await walkTo(page, closedDoorPlan.approach, {
+     key: 'KeyS',
+     tolerance: 0.06,
+     corridorTolerance: 0.08,
+     pulseMs: 80,
+   });
+-  const authorityRetreated = await doorAuthorityObservation(page);
++  const retreated = await waitForSnapshot(page, (current) =>
++    matchesDoorRouteReadinessSnapshot(closedDoorPlan, door.upper, 'entry', retreatBaseline, current),
++  );
+   expect(await doorPair(page)).toEqual(placed);
+   expect(retreated.onGround && !retreated.colliding).toBe(true);
+-  expect(authorityRetreated.onGround && !authorityRetreated.colliding).toBe(true);
+   expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, retreated.player)).toBe(true);
+-  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, authorityRetreated.position)).toBe(true);
++  expect(isOutsideDoorTargetOnEntrySide(closedDoorPlan, door.upper, retreated.serverPlayerPosition)).toBe(true);
+   const entryAdjacent = doorEntryAdjacent(closedDoorPlan, door.upper);
+   await aimAtVoxelWithRealMouse(page, door.upper, entryAdjacent);
+   await clickCanvasCenter(page, 'right');
+@@ -287,17 +289,18 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
+   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
+   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
+   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
+-  const traversed = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
++  const traverseBaseline = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
+     jump: true,
+     tolerance: 0.06,
+     corridorTolerance: 0.08,
+     pulseMs: 80,
+   });
+-  const authorityTraversed = await doorAuthorityObservation(page);
++  const traversed = await waitForSnapshot(page, (current) =>
++    matchesDoorRouteReadinessSnapshot(closedDoorPlan, door.lower, 'exit', traverseBaseline, current),
++  );
+   expect(traversed.onGround && !traversed.colliding).toBe(true);
+-  expect(authorityTraversed.onGround && !authorityTraversed.colliding).toBe(true);
+   expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.player)).toBe(true);
+-  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, authorityTraversed.position)).toBe(true);
++  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.serverPlayerPosition)).toBe(true);
+ 
+   await aimAtVoxelWithRealMouse(page, door.upper);
+   await clickCanvasCenter(page, 'right');
+diff --git a/changes/2026-09-23-classic-functional-completion/door-readiness-contract.md b/changes/2026-09-23-classic-functional-completion/door-readiness-contract.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..b66d9ebfe9d769ed9a4c33eb6f574dabda836263
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/door-readiness-contract.md
+@@ -0,0 +1,43 @@
++# V1 门同轮 readiness snapshot 合同
++
++阶段：`V1-DOOR-READINESS-SNAPSHOT-CLOSE-01`
++
++状态：待完成 fixture、确定性与静态验证；Browser-14 保持 FAIL，Browser-15 未授权。
++
++## Browser-14 RED
++
++- 唯一窗口 `f7a53699-300d-429c-a308-8c48399036df` 在 `v1-slice.ts:298` 失败。此前 `walkTo` 已返回一个
++  fresh、`onGround && !colliding` 的 snapshot，fixture 随即调用 `doorAuthorityObservation` 取得另一个 snapshot，
++  再断言该组合条件。
++- `doorAuthorityObservation` 仅把 position 取自同轮 `serverPlayerPosition`；`onGround/colliding` 仍是 client 字段，
++  不能称为 Authority readiness。trace 没有序列化失败轮中哪个布尔为 false；稍后 attachment 的 true/false 组合
++  不能倒填失败轮。
++- 失败轮前已经完成真实穿门，但 upper 再关闭、lower exit-face aim/click 均未触达；Browser-13 根因未获产品复验，
++  V2 全部 `NOT REACHED`。
++
++## 可验证行为
++
++1. entry retreat 与 exit traverse 各自先保存本轮 `walkTo` 返回的 snapshot 作为 baseline；不得把不同路线或旧轮次
++   的 tick/ack 当 baseline。
++2. 复用既有 `waitForSnapshot` 的 20 秒上限，等待一个同时满足全部条件并由该函数 structured-clone 返回的 snapshot：
++   client `onGround && !colliding`；client `player` 与同轮 `serverPlayerPosition` 都严格越过 entry/exit 对应的完整门
++   target voxel 边界；`authority.physicsTick > baseline.authority.physicsTick`；
++   `authority.acknowledgedInputSequence >= baseline.authority.acknowledgedInputSequence`。不要求没有新输入时 ack `+1`。
++3. 匹配后所有 readiness、client position 与 server position 断言只读该匹配 snapshot；不得立即再采样并把字段拼成
++   单次证据。单 snapshot 只表示一次 Harness 观察中的 client/server 投影，不表示两个 owner 的原子事务，也不提供
++   独立 Authority grounded/colliding。
++4. 确定性序列至少包含 ready 但旧 tick、fresh 但未 ready、仅 client 越界、仅 server 越界、ack 倒退，以及最终
++   fresh+ready+双位置越界。只有最终样本匹配，且返回对象保留该样本的同一组字段；entry 与 exit 使用同一合同。
++5. 既有 Browser-13 eye/view、三个 `.06/.08` 到达域 position 和 strict lower+exit adjacent 180 次内收敛测试保持。
++
++## 范围、预算与停止线
++
++- 只修改 `v1-slice.ts`、同职责 `door-collision-oracle.ts`、必要定向测试和 `harness.ts` 的 `ClassicSnapshot`
++  只读字段声明；不修改 `snapshot`、`walkTo`、`waitForSnapshot` 运行逻辑、生产 observability/public protocol、
++  route/aim/mouse/scenario 或 V2 fixture。
++- 不增加 720 秒 canonical、45 秒 walk、20 秒 polling 或 180 次 aim 预算；不 sleep、fallback、随机路线或重试。
++- 原 closed probe、upper/lower/exit adjacent、pair/open mesh/collision/fresh ack、V1 Media、V2 与 C0-C5 顺序均保留。
++- 本阶段上限 3 小时（硬上限 6 小时），传统工作量约 0.25-0.5 PD；AI credits、API 等价费用、费率、额度分母
++  与占比 unknown，不伪造。
++- 本片不改变长期 owner、公开协议或架构，长期 docs baseline 不更新。确定性/static GREEN 不是 Browser GREEN；
++  Browser-15 必须由 root 在新 identity 后另行授权。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index d1c2b1c75fd4ed9427fd317937c0297ed49f0f59..b6986717a5202ae98bf35dd55002c207090f1141 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -146,6 +146,17 @@ target voxel 出口边界后，保留 upper 真实关闭，再以 lower+exit adj
+ 不得增加路线、timeout、180 aim 预算或修改生产 ray/aim；V2、Media 与 C0-C5 顺序不变，确定性/static GREEN 不等于
+ Browser GREEN。
+ 
++Browser-14 唯一 canonical attempt（窗口 `f7a53699-300d-429c-a308-8c48399036df`）在 lower exit-face
++尚未触达前失败：收紧路线的 `walkTo` 已返回一个满足 fresh ack、grounded 且 non-colliding 的 snapshot，fixture
++随即再次采样，并把该新 snapshot 的 client `onGround/colliding` 当作 Authority readiness 断言。第二次采样的组合条件
++瞬时为 false；trace 未记录具体哪个字段为 false，稍后 failure attachment 又恢复为 `onGround=true`、
++`colliding=false`，不得倒填或猜测失败瞬间。门 entry retreat 与 exit traverse 必须各以对应 `walkTo` 返回 snapshot
++作为 tick/ack baseline，再用既有 `waitForSnapshot` 等待并返回同一个 snapshot：该 snapshot 的 client 必须 grounded、
++non-colliding，client player 与同轮 `serverPlayerPosition` 必须同时越过既有完整门体素边界，physics tick 必须严格前进，
++ack 只需不倒退。成功后的 readiness 与双位置证据只能读取这个匹配 snapshot；这仍只是同一次观察中的 client/server
++投影，不是两 owner 原子事务或独立 Authority readiness。不得增加 timeout、路线、aim 预算、Browser attempt，或修改
++`walkTo`/Harness runtime/生产 observability；lower exit-face、V1 Media、V2、C0-C5 顺序与断言保持。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
