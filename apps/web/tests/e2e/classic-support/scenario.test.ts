@@ -218,6 +218,13 @@ describe('Classic canonical scenario contract', () => {
     expect(survival).toBeLessThan(grounded);
     expect(placement).not.toContain('let selected');
 
+    const equipmentWalk = supportSource.slice(
+      supportSource.indexOf('async function walkEquipmentRoute'),
+      supportSource.indexOf('async function walkToEquipmentWorkbench'),
+    );
+    expect(equipmentWalk).toContain('...EQUIPMENT_RESOURCE_WALK_OPTIONS');
+    expect(equipmentWalk).not.toContain('jump: true');
+
     const closeSettlement = equipmentSource.slice(
       equipmentSource.indexOf('const beforeClose = current'),
       equipmentSource.indexOf("steps.push(equipmentStep('equipment-origin-close'"),

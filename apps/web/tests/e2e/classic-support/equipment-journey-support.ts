@@ -20,7 +20,7 @@ import {
   followEquipmentRoute,
   equipmentWorkbenchCorridor,
   equipmentWorkbenchMiningApproach,
-  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
+  EQUIPMENT_RESOURCE_WALK_OPTIONS,
   isEquipmentMiningReady,
   matchesEquipmentRouteArrival,
 } from './equipment-resource-route';
@@ -194,7 +194,7 @@ async function walkEquipmentRoute(page: Page, target: readonly [number, number])
   return followEquipmentRoute(target, {
     now: Date.now,
     observe: () => snapshot(page),
-    walk: (key, timeout) => walkTo(page, target, { key, jump: true, timeout, ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS }),
+    walk: (key, timeout) => walkTo(page, target, { key, timeout, ...EQUIPMENT_RESOURCE_WALK_OPTIONS }),
     waitForArrival: (baseline, key, timeout) =>
       waitForSnapshot(page, (current) => matchesEquipmentRouteArrival(baseline, current, target, key), timeout),
   });

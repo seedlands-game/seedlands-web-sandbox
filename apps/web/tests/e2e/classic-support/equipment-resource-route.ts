@@ -7,6 +7,10 @@ export const EQUIPMENT_RESOURCE_ROUTE_OPTIONS = Object.freeze({
   corridorTolerance: 0.08,
   pulseMs: 80,
 });
+export const EQUIPMENT_RESOURCE_WALK_OPTIONS = Object.freeze({
+  ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
+  jump: false,
+});
 export const EQUIPMENT_ROUTE_TIMEOUT_MS = 45_000;
 // Matches mineVoxel's existing approach tolerance, contains one 80ms pulse (max 0.36m),
 // and leaves 0.73m before the next resource's player-expanded AABB.
