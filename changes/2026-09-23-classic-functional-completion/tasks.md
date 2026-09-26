@@ -246,14 +246,15 @@ GIT28 detached staged tree 与 fixture 组合复验 PASS；Browser/Cua/CI 尚未
 
 ### V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02 / GIT-28-EQUIPMENT-JOURNEY
 
-状态：LOCAL_CODE_COMMIT_READY。fixture 的 survival walk -> creative UI placement -> survival fresh physics/grounded、
+状态：REMOTE_DELIVERED。fixture 的 survival walk -> creative UI placement -> survival fresh physics/grounded、
 equipment-origin close 同 runtime/actor 与 revision+1、C5 实际保存前 equipment baseline 已由独立阶段定向准出。GIT28
 在 HEAD `484ddf39d7e3bb881dd3d3cbaec775bd091c220d` 加精确 14 路径 staged patch 的 detached tree 中验证：
 observability `8/8` + scenario `7/7`、Web/Svelte types、root test types、Classic test types、staged TS ESLint、
 editable Prettier 与 scoped diff 均 PASS；代码/tests/contracts/spec 提交为
 `3df61d38b0b0de55c48ab709afd6315aa9f23ff2`。历史 oracle Classic-types FAIL 不改写，由本组合新证据说明阻塞关闭。
 当前 Browser/Cua/devserver/CI 未运行，death/durability-1/drop/respawn 均 `NOT OBSERVED`；铁甲四槽抽样不代表 16
-件护甲、194 项矩阵或完整 V2 GREEN。
+件护甲、194 项矩阵或完整 V2 GREEN。GIT28 证据/state 提交 `00009bf26c821d115264d224899dafde0d6cc163`、
+BUILD04 evidence 提交 `a47d50c1a2c10f97952c454bb1b58b3a4a373af5` 均已推送。
 
 ### V2-ARTIFACT-BUILD-04
 
@@ -261,6 +262,16 @@ editable Prettier 与 scoped diff 均 PASS；代码/tests/contracts/spec 提交�
 `pnpm build` 与唯一 `pnpm harness:artifact` 均 PASS；sourceDigest `315820d6...2dff`、lockDigest
 `44db46fb...1169`、artifactDigest `fc7ac005...f6e2`，276 项 receipt map 与磁盘一致。tree/dist 保留供 root 后续唯一
 Browser；本阶段未运行 Browser/Cua/CI，不能外推为装备旅程或完整 V2 GREEN。
+
+### V1-DOOR-EXIT-FACE-CLOSE-01/02 / GIT-29-DOOR-EXIT-FACE
+
+状态：LOCAL_CODE_COMMIT_READY。Browser13 唯一 canonical attempt `ca001977-b334-4fbc-962f-254c2bc44a46` 在 V2
+前失败：upper 关闭后，真实 eye 指向 lower center 的 180 次校正持续命中 upper，lower click 未发送；V2 全部
+`NOT REACHED`，lease 已释放。ExitFace C1 从同一 door collision plan 推导出口侧 adjacent，并将原 traverse 落点参数收紧
+为 `.06/.08/80ms`；C2 补齐三个到达点的生产 raycast 收敛反例。GIT29 在 HEAD `a47d50c1...` 加精确 6 路径
+staged patch 的 detached tree 中验证 4 files / 38 tests、Classic/root test types、4 TS ESLint、6 路径 Prettier 与
+scoped diff 均 PASS；代码/tests/spec/contract 提交为 `f5747f4944efa5cc28bf0e656a5efef748b0d584`。Browser14、
+build、Cua、CI 未运行；本阶段不宣称 Structure 拒绝、V2 defect 或产品 GREEN。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v1-door-exit-face-close-01-final",
+  "pid": 21058,
+  "startedAt": "2026-09-25T23:46:32.036Z",
+  "windowId": "v1-door-exit-face-close-01-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-door-exit-face-close-01/final-window.json.log",
+  "waitedMs": 2,
+  "endedAt": "2026-09-25T23:46:36.732Z",
+  "exitCode": 2,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T23:46:32.038Z",
+      "loadAverage": [
+        4.2021484375,
+        4.09423828125,
+        3.8388671875
+      ],
+      "freeMemoryBytes": 327483392,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T23:46:36.730Z",
+      "loadAverage": [
+        4.025390625,
+        4.05908203125,
+        3.82763671875
+      ],
+      "freeMemoryBytes": 931250176,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

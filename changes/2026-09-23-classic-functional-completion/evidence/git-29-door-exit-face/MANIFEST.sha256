@@ -1,0 +1,17 @@
+3eedf40e38eeae43ac2b6e488d5e902bbb13131898baf4b46182e0d3ab0b06f1  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/SOURCE-MANIFEST.sha256
+6c946127d95a631d4209288c231f19f4b5cadb9b9f4b39e2088e003b85efb878  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/affected-tests.stdout.log
+52f44cab2a17b8b0eb6f9497d114c325c20f2dbecf5f1e9a2c4963d4fed583c1  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/affected-tests.window.json.log
+d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/classic-test-types.stdout.log
+c72b8e54d7ebf5d160c32f0d708e30c84b8a4fcf05c24e19421b0c23f7fbe0a9  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/classic-test-types.window.json.log
+340523ee9b55a8f22fc71090e7c6385c05a8ae34e56ed3df99879b2e2b4a6268  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/code-staged.patch
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/editable-format.stdout.log
+4088e1af224d522cc4d79ee8bedc7522881dd242d97e29d1ac17787dbd0ae46d  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/editable-format.window.json.log
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/metadata-format.stdout.log
+75f7e5b5d700bb06106d08c141a09860575aa12fa1aa5a9c46d4c5e6ca0a88fb  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/metadata-format.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/root-test-types.stdout.log
+1268906eb0c0ac5db3b5a464005d23c67077b6131a585347438875a9093497d6  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/root-test-types.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/scoped-diff.stdout.log
+31ca03933bfc207e502164e73e0b5f045fa451a2830dfc1c6432147587f0b677  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/scoped-diff.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/staged-eslint.stdout.log
+949c361903c6658cd2ca9fad693c82e4f167dab93c9ce59583d995f32c4fef62  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/staged-eslint.window.json.log
+e083f8855eed7a4451539d69bc4f6e68e0dcf1e132b950a0f65426ec98b41b63  changes/2026-09-23-classic-functional-completion/evidence/git-29-door-exit-face/validation-argv.txt

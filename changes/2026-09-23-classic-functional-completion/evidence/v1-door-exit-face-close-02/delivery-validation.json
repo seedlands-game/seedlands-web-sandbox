@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-DOOR-EXIT-FACE-CLOSE-02",
+  "status": "DETERMINISTIC_STATIC_GREEN",
+  "baseline": "a47d50c1a2c10f97952c454bb1b58b3a4a373af5",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "9a7de7cd5963012cd9136151b79eef1ca59196bfcc2c8baf343afc124b1a5097",
+    "validatedEntries": 3
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 23,
+    "sha256": "a8d564cb9257a64e8bb9e267f19926d2ede4de03f5fcf8e1d2346da4ae11d729",
+    "validatedEntries": 23,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "priorReleaseByteEqual": {
+    "sourceManifestSha256": "aa321327f5ac6fab03d4cd05f23f365901001966ecbb9d90ec63eb423adc7aac",
+    "evidenceManifestSha256": "f57f863466ba273abce67768b4029600f4dc12987a1d2307692c02694662e578",
+    "deliveryValidationSha256": "f2f327ae0b7c851b01cc7f3472f3c134294774794d7744db6a647948ea970559",
+    "contractSha256": "d73f1058614f3184b03eee9f773f6414dc886218173042f08f20eb2fb8d793ae",
+    "evidenceSha256": "1f866defb0188d0f4f3e9b2e95dcabcc7053926e7e416b1d0f649791fe79ef63"
+  },
+  "change": {
+    "test": "apps/web/tests/e2e/classic-support/door-exit-face.test.ts",
+    "summary": "Each of the three tightened-route positions now runs the existing convergence loop from the Browser-13 view and requires exact lower target plus exact exit adjacent within 180 corrections.",
+    "routeChanged": false,
+    "budgetChanged": false,
+    "simulationChanged": false,
+    "productionChanged": false
+  },
+  "validation": {
+    "affected": {
+      "window": "v1-door-exit-face-close-02-affected",
+      "status": "PASS",
+      "files": 4,
+      "tests": 38,
+      "maxWorkers": 1,
+      "stdoutSha256": "4b939df38a8813f987b407b277fe080e41b3e32c99edf318e8d5e7692b4de43b",
+      "receiptSha256": "5ee25a84d066756c8bea00395e9cc07ac9cd4c1e1cfbb0e6a7d63b48fbb27dfb"
+    },
+    "classicTestTypes": {
+      "window": "v1-door-exit-face-close-02-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "4c74d81c296bb8609167cc57e687f13e448a752adc4e3e3a748b3517571141ff"
+    },
+    "rootTestTypes": {
+      "window": "v1-door-exit-face-close-02-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "84250117a7ceb119087f96950f2d8f08817d0cafc306fa3d87724c8f2adcc8d6"
+    },
+    "eslint": {
+      "window": "v1-door-exit-face-close-02-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "8e02760436f1ab07097a060ed78ae714fcfea7260eed0f8fd63d54443dca8d41"
+    },
+    "formatAndDiff": {
+      "window": "v1-door-exit-face-close-02-static",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "ef560c8c4cd05b0c3f24bf64e200fb629b55850b06fee03981a1f096069bfcce"
+    },
+    "metadataFormat": {
+      "window": "v1-door-exit-face-close-02-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "c2230992a66d00670a6f5d50187c63a5431435d7ed56ae8013e708f8312924e4",
+      "receiptSha256": "f122450c90c20ab60de9da79449c60f1a07ed26b20ed3ac6d41e00a5a875d477"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "buildRun": false,
+    "productionChanged": false,
+    "deathDurabilityDropRespawnObserved": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure only strengthens a deterministic fixture test and does not change public ownership or architecture."
+  },
+  "notRun": ["observability", "server suites", "browser", "build", "cua", "devserver", "ci", "git", "deploy"]
+}
