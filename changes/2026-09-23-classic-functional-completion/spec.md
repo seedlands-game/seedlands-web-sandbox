@@ -137,6 +137,15 @@ identity；C5 必须把 C4
 baseline。不得修改坐标、timeout、瞄准预算、V1 路线或生产 oracle；本收口仍不提供 Browser、实战耐久、死亡掉落
 或重生证据。
 
+Browser-13 在 V2 前暴露 V1 门出口侧 lower center 被 upper 遮挡：真实 eye
+`[71.475830078125,32.60000228881836,0.502830982208252]` 指向 lower center 的射线在门东侧平面仍位于 upper
+voxel，180 次校正只能观察 `[70,32,0]`，lower click 未发送。V1 door exit face 子片必须复用同一
+`ClosedDoorProbePlan.normalAxis/direction` 推导出口侧正交 adjacent；穿门仍走原 `[lower.x+1.5,lower.z+0.5]`
+目标，但使用已审阅的 `.06/.08/80ms` 参数，并在真实 client/Authority 均 grounded、non-colliding 且越过完整
+target voxel 出口边界后，保留 upper 真实关闭，再以 lower+exit adjacent 的同轮 exact target/face 读回发送右键。
+不得增加路线、timeout、180 aim 预算或修改生产 ray/aim；V2、Media 与 C0-C5 顺序不变，确定性/static GREEN 不等于
+Browser GREEN。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

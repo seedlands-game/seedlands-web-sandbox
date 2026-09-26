@@ -204,26 +204,26 @@ describe('Classic closed-door collision oracle', () => {
     expect(result.observed).toMatchObject({ position: upper, adjacent });
   });
 
-  it('keeps strict upper and lower faces observable from the existing post-traverse side', () => {
-    const afterTraverse: Point = [door[0] + 1.5, 32.6, door[2] + 0.5];
+  it('keeps strict upper and lower faces observable from the ideal post-traverse point', () => {
+    const idealPostTraverse: Point = [door[0] + 1.5, 32.6, door[2] + 0.5];
     const farSidePlan = createClosedDoorProbePlan({
       door,
       collision,
-      playerPosition: afterTraverse,
+      playerPosition: idealPostTraverse,
       playerHalfWidth,
     });
     const upper: Point = [door[0], door[1] + 1, door[2]];
-    const upperCenter = convergeDoorAim(afterTraverse, [-90, -20], door, upper);
+    const upperCenter = convergeDoorAim(idealPostTraverse, [-90, -20], door, upper);
     expect(upperCenter.attempt).toBeLessThanOrEqual(180);
     expect(upperCenter.observed).toMatchObject({ position: upper, adjacent: [71, 32, 0] });
 
-    const lowerCenter = convergeDoorAim(afterTraverse, [-90, -20], door, door);
+    const lowerCenter = convergeDoorAim(idealPostTraverse, [-90, -20], door, door);
     expect(lowerCenter.attempt).toBeLessThanOrEqual(180);
     expect(lowerCenter.observed).toMatchObject({ position: door, adjacent: [71, 31, 0] });
 
     for (const target of [upper, door]) {
       const adjacent = doorEntryAdjacent(farSidePlan, target);
-      const result = convergeDoorAim(afterTraverse, [-90, -20], door, target, adjacent);
+      const result = convergeDoorAim(idealPostTraverse, [-90, -20], door, target, adjacent);
       expect(result.attempt).toBeLessThanOrEqual(180);
       expect(result.observed).toMatchObject({ position: target, adjacent });
     }

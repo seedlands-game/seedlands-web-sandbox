@@ -12,7 +12,9 @@ import {
   assessClosedDoorProbe,
   createClosedDoorProbePlan,
   doorEntryAdjacent,
+  doorExitAdjacent,
   isOutsideDoorTargetOnEntrySide,
+  isOutsideDoorTargetOnExitSide,
   type ClosedDoorProbePlan,
   type ClosedDoorProbeObservation,
 } from './door-collision-oracle';
@@ -285,12 +287,23 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
-  await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], { jump: true });
+  const traversed = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
+    jump: true,
+    tolerance: 0.06,
+    corridorTolerance: 0.08,
+    pulseMs: 80,
+  });
+  const authorityTraversed = await doorAuthorityObservation(page);
+  expect(traversed.onGround && !traversed.colliding).toBe(true);
+  expect(authorityTraversed.onGround && !authorityTraversed.colliding).toBe(true);
+  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.player)).toBe(true);
+  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, authorityTraversed.position)).toBe(true);
 
   await aimAtVoxelWithRealMouse(page, door.upper);
   await clickCanvasCenter(page, 'right');
   await expect.poll(() => doorPair(page)).toEqual(placed);
-  await aimAtVoxelWithRealMouse(page, door.lower);
+  const exitAdjacent = doorExitAdjacent(closedDoorPlan, door.lower);
+  await aimAtVoxelWithRealMouse(page, door.lower, exitAdjacent);
   await clickCanvasCenter(page, 'right');
   await expect.poll(() => doorPair(page)).toEqual(opened);
 
