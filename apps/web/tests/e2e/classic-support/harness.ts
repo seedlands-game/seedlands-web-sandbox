@@ -46,6 +46,7 @@ export type CharacterObservation = Readonly<{
 // prettier-ignore
 export type ClassicSnapshot = Readonly<{
   player: Point;
+  serverPlayerPosition: Point;
   viewAngles: readonly [number, number];
   streamCenter: readonly [number, number];
   loadedChunks: number; renderedChunks: number;

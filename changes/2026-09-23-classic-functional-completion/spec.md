@@ -146,6 +146,17 @@ target voxel 出口边界后，保留 upper 真实关闭，再以 lower+exit adj
 不得增加路线、timeout、180 aim 预算或修改生产 ray/aim；V2、Media 与 C0-C5 顺序不变，确定性/static GREEN 不等于
 Browser GREEN。
 
+Browser-14 唯一 canonical attempt（窗口 `f7a53699-300d-429c-a308-8c48399036df`）在 lower exit-face
+尚未触达前失败：收紧路线的 `walkTo` 已返回一个满足 fresh ack、grounded 且 non-colliding 的 snapshot，fixture
+随即再次采样，并把该新 snapshot 的 client `onGround/colliding` 当作 Authority readiness 断言。第二次采样的组合条件
+瞬时为 false；trace 未记录具体哪个字段为 false，稍后 failure attachment 又恢复为 `onGround=true`、
+`colliding=false`，不得倒填或猜测失败瞬间。门 entry retreat 与 exit traverse 必须各以对应 `walkTo` 返回 snapshot
+作为 tick/ack baseline，再用既有 `waitForSnapshot` 等待并返回同一个 snapshot：该 snapshot 的 client 必须 grounded、
+non-colliding，client player 与同轮 `serverPlayerPosition` 必须同时越过既有完整门体素边界，physics tick 必须严格前进，
+ack 只需不倒退。成功后的 readiness 与双位置证据只能读取这个匹配 snapshot；这仍只是同一次观察中的 client/server
+投影，不是两 owner 原子事务或独立 Authority readiness。不得增加 timeout、路线、aim 预算、Browser attempt，或修改
+`walkTo`/Harness runtime/生产 observability；lower exit-face、V1 Media、V2、C0-C5 顺序与断言保持。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
