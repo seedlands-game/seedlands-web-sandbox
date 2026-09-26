@@ -174,3 +174,36 @@ builtAt=2026-09-25T22:06:39.842Z
 BUILD03、BUILD02、BUILD01 与九棵 V1 acceptance tree 均未清理。BUILD04 包含 equipment oracle 与 canonical fixture，
 但未运行 Browser、Cua、CI、deploy 或 merge；不能据此宣称真实 equipment journey、death/durability-1/drop/respawn、
 16 件护甲、194 项矩阵或完整 V2 GREEN。
+
+## BUILD05：Door Exit Face Fixture
+
+- 已推送 source SHA：`0a0a63188805f0a7d96221a841e2b6292fa97205`；tree
+  `ab92a25e22c025d65a4948e469ededf29a6e4c71`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-0a0a6318`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `12d64223-ca76-490c-9b7c-057ce47de71c`，UTC
+  `2026-09-26T00:16:42.589Z` 至 `00:17:05.396Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `76f7a9d0-b0ac-4844-947d-ba058156922d`，UTC
+  `2026-09-26T00:17:18.562Z` 至 `00:17:20.638Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c86e64716b9bd29f79bcf7897437342f97766faaa110907fd12046f9e0f64bc2`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`，276 项，builtAt
+`2026-09-26T00:17:03.654Z`。ExitFace 仅修改测试/fixture，因此 artifact digest 与 BUILD04 相同；source identity 已换代。
+
+receipt SHA-256 为 `869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731`；dist 共 277
+个普通文件。首次磁盘 map 命令误用 zsh 特殊变量 `path`，覆盖 `PATH` 并使 `/usr/bin/shasum` 查找失败，得到空文件；
+该结果原样保留为 `dist-files-attempt-01.sha256.log`，随后改用 `entry` 与绝对 `/usr/bin/shasum` 正确采集，未改 artifact、
+未重跑 build/verify。
+
+`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。构建后 tree
+tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD05、4 棵旧 V2 与九棵 V1 tree/dist 全部保留。
+
+BUILD05 未运行 Browser14、Cua、devserver、CI、deploy 或 merge。它不改变 Browser13 的失败事实，也不能证明门出口
+face 的真实 Browser 路径、V2 equipment journey、death/durability-1/drop/respawn、16 件护甲、194 项矩阵或完整 V2
+GREEN。

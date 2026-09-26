@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-05",
+  "status": "PASS",
+  "sourceSha": "0a0a63188805f0a7d96221a841e2b6292fa97205",
+  "sourceTree": "ab92a25e22c025d65a4948e469ededf29a6e4c71",
+  "sourceDigest": "c86e64716b9bd29f79bcf7897437342f97766faaa110907fd12046f9e0f64bc2",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2",
+  "builtAt": "2026-09-26T00:17:03.654Z",
+  "artifactFiles": 276,
+  "distFilesIncludingReceipt": 277,
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-0a0a6318",
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReused": true,
+    "taskStateInsideAcceptanceTree": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "argv": ["pnpm", "build"],
+    "window": "12d64223-ca76-490c-9b7c-057ce47de71c",
+    "startedAt": "2026-09-26T00:16:42.589Z",
+    "endedAt": "2026-09-26T00:17:05.396Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "df4f637ebb0868051339e81e20961662750fd4e5558c64983501e964c10de2dd",
+    "receiptSha256": "61f73a72c22fe67ed0c8c6bd3e982b84c42d43099e776a53284163c057cb2f30"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "argv": ["pnpm", "harness:artifact"],
+    "window": "76f7a9d0-b0ac-4844-947d-ba058156922d",
+    "startedAt": "2026-09-26T00:17:18.562Z",
+    "endedAt": "2026-09-26T00:17:20.638Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "3f027fbbb6144e39d1e2fdd06c43441675b4c1bec68b3e9769dfb70e02f03eca",
+    "receiptSha256": "d5d04da965c067b087add06104d8818a5bc895924383c8e83fee3926d12f7315"
+  },
+  "artifactReceiptSha256": "869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1",
+  "artifactMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "diskFileMapSha256": "9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731",
+  "artifactMapMatchesDisk": true,
+  "diskMapDiagnostic": {
+    "status": "CORRECTED_WITHOUT_REBUILD",
+    "reason": "The first command used zsh special variable path, replacing PATH and preventing shasum lookup.",
+    "attemptFile": "dist-files-attempt-01.sha256.log",
+    "attemptSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifactMutated": false,
+    "buildRerun": false,
+    "artifactVerificationRerun": false
+  },
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "0a50d0b289d45b926ea16580ba65d7038cbba738169007c4e5afc8aadddba529"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "eeeb849c61584da3d4e8eeb4476edcfc05f4519c1dbc8c4cafa6bf273783c424",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "metadataFormat": {
+    "window": "3c27e21f-51d5-4e0b-960b-a005a57a4849",
+    "status": "PASS",
+    "stdoutSha256": "6066d9c7e47c2e3fae188ff0eebf164b82521ddeb31f67e737d24ea4485c7f31",
+    "receiptSha256": "52b9433b35db91546c789a41eb9cd75243cdafd3f88198c50115cc5c0f85ea07"
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "daa2855e6917217ca079973f6087e85913c8c68dad99a37f331b2c9678713a52",
+    "acceptanceTreePreserved": true,
+    "v2AcceptanceTreesPreserved": 5,
+    "v1AcceptanceTreesPreserved": 9
+  },
+  "includedChanges": ["door-exit-adjacent-fixture", "full-voxel-exit-boundary", "browser13-exact-failure-evidence"],
+  "boundaries": {
+    "productionChanged": false,
+    "browser14Run": false,
+    "v2ReachedInBrowser13": false,
+    "structureDefectClaimed": false,
+    "productGreenClaimed": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The change is a local canonical fixture correction without ownership or protocol changes."
+  },
+  "notRun": ["browser14", "cua", "devserver", "ci", "deploy", "merge"]
+}
