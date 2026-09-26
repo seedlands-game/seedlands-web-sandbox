@@ -157,6 +157,33 @@ ack 只需不倒退。成功后的 readiness 与双位置证据只能读取这�
 投影，不是两 owner 原子事务或独立 Authority readiness。不得增加 timeout、路线、aim 预算、Browser attempt，或修改
 `walkTo`/Harness runtime/生产 observability；lower exit-face、V1 Media、V2、C0-C5 顺序与断言保持。
 
+Browser-15 唯一 canonical attempt（窗口 `129ac7e8-effb-44a0-a011-3a8f56076510`）已让完整 V1 test step
+真实返回，并通过 10 格 V2 resource strip 放置；随后首个原木采集前，`mineResources` 从 strip 东端以默认 `KeyW`
+走向西端 `resource.approach`，被 `reachedRouteTarget` 的方向性越界规则提前接受。`mineVoxel` 因仍离 target 太远而
+推导西侧 `[77.2,2.5]` 补位，直线路径经过已放置资源；真实 `KeyS` 脉冲把 player x 推到约 `81.32` 后沿资源
+侧面漂移并耗尽既有 15 秒 route budget，尚未进入 aim 或 left mouse down。V2 resource route 子片必须只在 V2
+fixture consumer 内使用固定外侧 corridor（现有 approach z=`-0.5`）和按当前 snapshot x 方向选择的 `KeyW/KeyS`：
+每个资源先从 corridor 到声明 approach，采矿前同轮 client/server 均须到达窄 `.06/.08` 域、client grounded 且
+non-colliding、physics tick 前进、ack 不倒退，且双方到 target center 的距离都在既有 `2.5..4.5`；采矿/拾取后
+沿已清空格退回同一 approach 再横移。workbench 往返也经同一 corridor waypoint。不得改 scenario 坐标、通用
+`walkTo`/`mineVoxel`、路线/aim 算法或任何 timeout；V1、V2 pointer、C0-C5 与 restore 顺序不变。
+
+V2 resource route Close-02 进一步拒绝 `reachedRouteTarget` 穿越方向上的无界 acceptance：client 与
+`serverPlayerPosition` 都必须位于 waypoint x 的 `±0.45m` 有限邻域，且 z 继续满足 `<0.08m` corridor。`0.45m`
+与既有 `mineVoxel` approach tolerance 一致，覆盖 80ms pulse 在 player 最大 4.5m/s 下的 0.36m 位移，并在 2m
+resource 间距与 player half-width `0.32m` 下为下一 resource 的扩张 AABB 留出 0.73m。若一次 `walkTo` 越过有限域，
+V2 wrapper 必须在同一固定 waypoint 上根据新 snapshot 重算 `KeyW/KeyS` 并继续真实输入纠正；所有微段和最多
+20 秒的 readiness poll 共用原 45 秒 deadline。测试必须覆盖 client/server 各自远越界、Browser-15 斜线和整个有限
+邻域的膨胀 AABB 安全，不能只验证理想端点。路线、scenario、通用算法与预算保持。
+
+V2 resource route Close-03 修正 Close-02 对真实 driver 的过宽假设：`walkTo` 的循环与按键只由 client player 的
+`reachedRouteTarget` 驱动，不能用 server projection 选择方向或假定再次调用 `walkTo` 会推动 server。方向始终由最新
+client position 决定；client 仍在有限域外，或虽在有限域内但尚未完成当前方向 crossing 时，才对同一 waypoint 继续
+真实 `walkTo`。client 已在有限域且完成 crossing、仅 server 尚未进入有限域时，必须在同一 45 秒总 deadline 内经
+既有只读 `waitForSnapshot` 等待双方严格 arrival 合同，单次等待最多 `min(20s, remaining)`；未追平或耗尽 deadline
+稳定失败，不发送无效纠偏输入、不 fallback。Close-02 的双方有限域、fresh tick、ack 不倒退、client readiness、完整
+邻域 AABB、路线与预算均保持。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
