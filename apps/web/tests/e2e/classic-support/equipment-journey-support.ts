@@ -15,6 +15,15 @@ import {
 } from './harness';
 import { itemCount } from './journey';
 import { classicScenario, type V2EquipmentResource } from './scenario';
+import {
+  equipmentResourcePickup,
+  followEquipmentRoute,
+  equipmentWorkbenchCorridor,
+  equipmentWorkbenchMiningApproach,
+  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
+  isEquipmentMiningReady,
+  matchesEquipmentRouteArrival,
+} from './equipment-resource-route';
 
 export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
 export type V2EquipmentJourneyEvidence = Readonly<{
@@ -181,6 +190,22 @@ async function switchToSurvival(page: Page): Promise<void> {
   await closeInventory(page);
 }
 
+async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
+  return followEquipmentRoute(target, {
+    now: Date.now,
+    observe: () => snapshot(page),
+    walk: (key, timeout) => walkTo(page, target, { key, jump: true, timeout, ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS }),
+    waitForArrival: (baseline, key, timeout) =>
+      waitForSnapshot(page, (current) => matchesEquipmentRouteArrival(baseline, current, target, key), timeout),
+  });
+}
+
+async function walkToEquipmentWorkbench(page: Page) {
+  const { workbench } = classicScenario.v2Equipment;
+  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(workbench.approach));
+  return walkEquipmentRoute(page, workbench.approach);
+}
+
 async function placeWorkbench(page: Page): Promise<void> {
   const { workbench } = classicScenario.v2Equipment;
   const panel = await inventory(page);
@@ -188,15 +213,16 @@ async function placeWorkbench(page: Page): Promise<void> {
   await expect(panel.locator('[data-slot="0"]')).toHaveAttribute('data-item', 'workbench');
   await closeInventory(page);
   await page.keyboard.press('Digit1');
-  await walkTo(page, workbench.approach, { jump: true });
+  await walkToEquipmentWorkbench(page);
   await aimAtVoxelWithRealMouse(page, workbench.support, workbench.target);
   await clickCanvasCenter(page, 'right');
   await expect.poll(() => voxelAt(page, workbench.target)).toBe(11);
 }
 
 async function placeResourceStrip(page: Page): Promise<void> {
+  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
   for (const resource of classicScenario.v2Equipment.resourceStrip) {
-    await walkTo(page, resource.approach, { jump: true });
+    await walkEquipmentRoute(page, resource.approach);
     await selectCreativeItem(page, resource.itemId);
     await aimAtVoxelWithRealMouse(page, resource.support, resource.target);
     await clickCanvasCenter(page, 'right');
@@ -213,19 +239,23 @@ async function placeResourceStrip(page: Page): Promise<void> {
 }
 
 async function mineResources(page: Page, resources: readonly V2EquipmentResource[]): Promise<void> {
+  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
   for (const resource of resources) {
     const before = itemCount(await playerState(page), resource.dropItemId);
-    await walkTo(page, resource.approach, { jump: true });
+    const approach = await walkEquipmentRoute(page, resource.approach);
+    if (!isEquipmentMiningReady(approach, resource.target))
+      throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
     await mineVoxel(page, resource.target);
     await expectPresentedDropOrPickup(page, resource.dropItemId, before);
-    await walkTo(page, [resource.target[0] + 0.5, resource.target[2] + 0.5], { jump: true });
+    await walkEquipmentRoute(page, equipmentResourcePickup(resource));
     await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
+    await walkEquipmentRoute(page, resource.approach);
   }
 }
 
 async function openWorkbench(page: Page): Promise<Locator> {
   const workbench = classicScenario.v2Equipment.workbench;
-  await walkTo(page, workbench.approach, { jump: true });
+  await walkToEquipmentWorkbench(page);
   await aimAtVoxelWithRealMouse(page, workbench.target);
   await clickCanvasCenter(page, 'right');
   const panel = page.getByRole('dialog', { name: '工作台' });
@@ -388,10 +418,13 @@ export async function prepareCraftedIronArmor(
 export async function reclaimEquipmentWorkbench(page: Page): Promise<void> {
   const { workbench } = classicScenario.v2Equipment;
   const before = itemCount(await playerState(page), 'workbench');
-  await walkTo(page, workbench.approach, { jump: true });
+  await walkToEquipmentWorkbench(page);
+  const miningApproach = await walkEquipmentRoute(page, equipmentWorkbenchMiningApproach(workbench));
+  if (!isEquipmentMiningReady(miningApproach, workbench.target))
+    throw new Error(`Equipment workbench approach is outside mining range for ${workbench.target.join(',')}.`);
   await mineVoxel(page, workbench.target);
   await expectPresentedDropOrPickup(page, 'workbench', before);
-  await walkTo(page, [workbench.target[0] + 0.5, workbench.target[2] + 0.5], { jump: true });
+  await walkEquipmentRoute(page, equipmentResourcePickup(workbench));
   await expect.poll(async () => itemCount(await playerState(page), 'workbench')).toBeGreaterThan(before);
   await expect.poll(() => voxelAt(page, workbench.target)).toBe(0);
 }

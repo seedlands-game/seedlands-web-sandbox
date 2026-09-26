@@ -175,9 +175,10 @@ describe('Classic canonical scenario contract', () => {
     const helperSource = readFileSync(new URL('./v1-slice.ts', import.meta.url), 'utf8');
     const equipmentSource = readFileSync(new URL('./equipment-journey.ts', import.meta.url), 'utf8');
     const equipmentSupportSource = readFileSync(new URL('./equipment-journey-support.ts', import.meta.url), 'utf8');
+    const equipmentRouteSource = readFileSync(new URL('./equipment-resource-route.ts', import.meta.url), 'utf8');
     const baselineOffset = specSource.indexOf('const baseline = await waitForSnapshot');
     expect(baselineOffset).toBeGreaterThan(0);
-    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}\n${equipmentSource}\n${equipmentSupportSource}`;
+    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}\n${equipmentSource}\n${equipmentSupportSource}\n${equipmentRouteSource}`;
     for (const forbidden of [
       '.fillWorld(',
       '.setVoxelAt(',
@@ -203,7 +204,7 @@ describe('Classic canonical scenario contract', () => {
       supportSource.indexOf('async function placeResourceStrip'),
       supportSource.indexOf('async function mineResources'),
     );
-    const walk = placement.indexOf('await walkTo(page, resource.approach, { jump: true })');
+    const walk = placement.indexOf('await walkEquipmentRoute(page, resource.approach)');
     const select = placement.indexOf('await selectCreativeItem(page, resource.itemId)');
     const placed = placement.indexOf('await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel)');
     const survival = placement.indexOf('await switchToSurvival(page)');
