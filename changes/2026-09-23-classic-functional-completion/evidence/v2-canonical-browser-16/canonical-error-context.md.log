@@ -1,0 +1,239 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: apps/web/tests/e2e/classic-runtime.spec.ts >> Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景
+- Location: apps/web/tests/e2e/classic-runtime.spec.ts:73:1
+
+# Error details
+
+```
+Error: Real input route timed out before 78.5,-0.5.
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main:
+    - dialog "暂停游戏" [ref=e4]:
+      - paragraph [ref=e5]: A MOMENT OF STILLNESS
+      - heading "旅途暂歇" [level=2] [ref=e6]
+      - paragraph [ref=e7]: 世界正在等待你
+      - generic [ref=e8]:
+        - button "继续游戏" [active] [ref=e9] [cursor=pointer]
+        - button "设置" [ref=e10] [cursor=pointer]
+        - button "操作指南" [ref=e11] [cursor=pointer]
+        - button "保存并返回主菜单" [ref=e12] [cursor=pointer]
+```
+
+# Test source
+
+```ts
+  185 |     .poll(
+  186 |       async () => {
+  187 |         const current = await snapshot(page);
+  188 |         if (!current || !predicate(current)) return false;
+  189 |         matched = structuredClone(current);
+  190 |         return true;
+  191 |       },
+  192 |       { timeout, intervals: [16, 32, 64, 100] },
+  193 |     )
+  194 |     .toBe(true);
+  195 |   return matched!;
+  196 | }
+  197 | 
+  198 | export const performanceTrace = (page: Page): Promise<ChromeTrace> => page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.exportPerformanceTrace()); // prettier-ignore
+  199 | 
+  200 | export async function prepareInitialState(
+  201 |   page: Page,
+  202 |   scenario: ClassicScenario,
+  203 | ): Promise<{
+  204 |   hostileId: string;
+  205 |   identity: Record<string, unknown>;
+  206 | }> {
+  207 |   await prepareFixtureChunks(page, scenario);
+  208 |   return page.evaluate(async (scenario) => {
+  209 |     const unwrap = <T>(result: HarnessResult<T>, operation: string): T => {
+  210 |       if (!result.ok) throw new Error(`${operation}: ${result.error.code}: ${result.error.message}`);
+  211 |       return result.data;
+  212 |     };
+  213 |     const harness = (window as unknown as ClassicWindow).__seedlandsHarness;
+  214 |     if (!harness) throw new Error('Classic Harness is unavailable.');
+  215 |     const requireWorldEdit = (result: WorldCommitProjection | undefined, operation: string) => {
+  216 |       if (!result) throw new Error(`${operation} failed: unavailable.`);
+  217 |       if (result.reason) throw new Error(`${operation} failed: ${result.reason}.`);
+  218 |     };
+  219 |     unwrap(await harness.world.clock({ kind: 'pause' }), 'pause');
+  220 |     const nearby = unwrap(await harness.world.command({ type: 'query-nearby', radius: 512 }), 'query-nearby');
+  221 |     const entities = (
+  222 |       (nearby as { data?: { entities?: Array<{ id: string; type: string }> } }).data?.entities ?? []
+  223 |     ).filter(({ type }) => type !== 'player');
+  224 |     for (const entity of entities)
+  225 |       unwrap(await harness.world.command({ type: 'despawn-entity', entityId: entity.id }), `despawn ${entity.id}`);
+  226 |     const playerState = unwrap(await harness.world.command({ type: 'query-player-state' }), 'query player state') as {
+  227 |       data?: { player?: { inventory?: Array<{ itemId: string; count: number } | null> } };
+  228 |     };
+  229 |     for (const item of playerState.data?.player?.inventory ?? []) {
+  230 |       if (item)
+  231 |         unwrap(
+  232 |           await harness.world.command({ type: 'remove-item', itemId: item.itemId, count: item.count }),
+  233 |           `remove initial ${item.itemId}`,
+  234 |         );
+  235 |     }
+  236 |     requireWorldEdit(await harness.fillWorld(scenario.initialState.floor), 'fixture floor');
+  237 |     requireWorldEdit(await harness.fillWorld(scenario.initialState.air), 'fixture air');
+  238 |     for (const resource of scenario.initialState.resourceVoxels)
+  239 |       requireWorldEdit(await harness.setVoxelAt(...resource.position, resource.voxel), `fixture ${resource.itemId}`);
+  240 |     unwrap(
+  241 |       await harness.world.command({ type: 'teleport', position: scenario.initialState.player }),
+  242 |       'initial player position',
+  243 |     );
+  244 |     await harness.setWorldTime(scenario.initialState.worldTime);
+  245 |     for (let remaining = scenario.initialState.hungerAdvanceMs; remaining > 0; remaining -= 60_000)
+  246 |       unwrap(await harness.world.clock({ kind: 'advance', elapsedMs: Math.min(remaining, 60_000) }), 'hunger setup');
+  247 |     unwrap(await harness.world.command({ type: 'apply-damage', amount: 6 }), 'initial injured player');
+  248 |     const hostile = unwrap(
+  249 |       await harness.world.command({
+  250 |         type: 'spawn-creature',
+  251 |         id: scenario.initialState.hostile.id,
+  252 |         position: scenario.initialState.hostile.position,
+  253 |       }),
+  254 |       'hostile setup',
+  255 |     ) as { data?: { entity?: { id?: string } } };
+  256 |     const hostileId = hostile.data?.entity?.id;
+  257 |     if (!hostileId) throw new Error('Classic hostile setup returned no entity.');
+  258 |     harness.setView(scenario.initialState.view.yaw, scenario.initialState.view.pitch);
+  259 |     await harness.flushSave();
+  260 |     unwrap(await harness.world.clock({ kind: 'run' }), 'run');
+  261 |     const identity = unwrap(await harness.world.identity(), 'identity');
+  262 |     return { hostileId, identity };
+  263 |   }, scenario);
+  264 | }
+  265 | 
+  266 | export async function walkTo(
+  267 |   page: Page,
+  268 |   target: RoutePoint,
+  269 |   options: Readonly<{
+  270 |     key?: 'KeyW' | 'KeyS';
+  271 |     jump?: boolean;
+  272 |     tolerance?: number;
+  273 |     corridorTolerance?: number;
+  274 |     timeout?: number;
+  275 |     pulseMs?: number;
+  276 |   }> = {},
+  277 | ): Promise<ClassicSnapshot> {
+  278 |   const key = options.key ?? 'KeyW';
+  279 |   const tolerance = options.tolerance ?? 0.65;
+  280 |   const corridorTolerance = options.corridorTolerance ?? 1.5;
+  281 |   const deadline = Date.now() + (options.timeout ?? 45_000);
+  282 |   let current = await snapshot(page);
+  283 |   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+  284 |   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+> 285 |     if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
+      |                                       ^ Error: Real input route timed out before 78.5,-0.5.
+  286 |     await correctMouseToRoute({
+  287 |       target,
+  288 |       direction: key,
+  289 |       observe: () => snapshot(page),
+  290 |       move: (dx, dy) => moveMouseBy(page, dx, dy),
+  291 |     });
+  292 |     const segmentStart = current;
+  293 |     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
+  294 |     await page.keyboard.down(key);
+  295 |     if (options.jump) await page.keyboard.down('Space');
+  296 |     try {
+  297 |       // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
+  298 |       await new Promise<void>((resolve) => setTimeout(resolve, options.pulseMs ?? 300));
+  299 |     } finally {
+  300 |       await page.keyboard.up(key);
+  301 |       if (options.jump) await page.keyboard.up('Space');
+  302 |     }
+  303 |     current = await waitForSnapshot(
+  304 |       page,
+  305 |       (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding,
+  306 |       20_000,
+  307 |     );
+  308 |     if (current.player[1] < segmentStart.player[1] - 2)
+  309 |       throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);
+  310 |   }
+  311 |   return current;
+  312 | }
+  313 | 
+  314 | export async function adjustPitchToTarget(page: Page, target: Point): Promise<void> {
+  315 |   const history: Array<string | null> = [];
+  316 |   for (let attempt = 0; attempt < 180; attempt += 1) {
+  317 |     const observed = await page.evaluate(
+  318 |       () => document.querySelector('#target-card')?.getAttribute('data-target') ?? null,
+  319 |     );
+  320 |     history.push(observed);
+  321 |     if (history.length > 12) history.shift();
+  322 |     if (observed === target.join(',')) return;
+  323 |     const point = observed?.split(',').map(Number);
+  324 |     const validPoint = point && point.length === 3 && point.every((value) => Number.isFinite(value));
+  325 |     if (validPoint) {
+  326 |       const moveDown = point[1]! > target[1] || (point[1] === target[1] && point[0]! > target[0]);
+  327 |       await moveMouseBy(page, 0, moveDown ? 6 : -6);
+  328 |       continue;
+  329 |     }
+  330 |     const current = await snapshot(page);
+  331 |     if (!current) continue;
+  332 |     const correction = mouseCorrectionToVoxel(current.player, current.viewAngles, target);
+  333 |     await moveMouseBy(page, correction.dx, correction.dy);
+  334 |   }
+  335 |   throw new Error(`Real mouse input could not aim at ${target.join(',')}; last targets=${JSON.stringify(history)}.`);
+  336 | }
+  337 | 
+  338 | export async function mineVoxel(page: Page, target: Point): Promise<void> {
+  339 |   let current = await snapshot(page);
+  340 |   if (!current) throw new Error('Classic snapshot is unavailable before mining.');
+  341 |   const distance = voxelInteractionDistance(current.player, target);
+  342 |   if (distance < 2.5 || distance > 4.5) {
+  343 |     const approach: RoutePoint = [target[0] - 2.8, target[2] + 0.5];
+  344 |     await walkTo(page, approach, {
+  345 |       key: current.player[0] <= approach[0] ? 'KeyW' : 'KeyS',
+  346 |       tolerance: 0.45,
+  347 |       timeout: 15_000,
+  348 |       pulseMs: 100,
+  349 |     });
+  350 |     current = await snapshot(page);
+  351 |     if (!current || voxelInteractionDistance(current.player, target) > 5)
+  352 |       throw new Error(`Mining target ${target.join(',')} remains out of range.`);
+  353 |   }
+  354 |   await ensurePointerLock(page);
+  355 |   await adjustPitchToTarget(page, target);
+  356 |   const attemptsBefore = (await snapshot(page))?.interactionAttempts ?? 0;
+  357 |   await page.mouse.down({ button: 'left' });
+  358 |   try {
+  359 |     await waitForSnapshot(page, (value) => value.interactionAttempts > attemptsBefore, 8_000);
+  360 |     try {
+  361 |       await expect
+  362 |         .poll(
+  363 |           () =>
+  364 |             page.evaluate(
+  365 |               (target) => (window as unknown as ClassicWindow).__seedlandsHarness?.getVoxelAt?.(...target),
+  366 |               target,
+  367 |             ),
+  368 |           {
+  369 |             timeout: 8_000,
+  370 |             intervals: [16, 32, 64],
+  371 |           },
+  372 |         )
+  373 |         .toBe(0);
+  374 |     } catch (error) {
+  375 |       const diagnostic = await page.evaluate(async () => {
+  376 |         const harness = (window as unknown as ClassicWindow).__seedlandsHarness!;
+  377 |         const [player, action] = await Promise.all([
+  378 |           harness.world.command({ type: 'query-player-state' }),
+  379 |           harness.world.command({ type: 'query-action' }),
+  380 |         ]);
+  381 |         return {
+  382 |           target: document.querySelector('#target-card')?.getAttribute('data-target') ?? null,
+  383 |           feedback: document.querySelector('[role="status"][aria-label="交互反馈"]')?.textContent ?? null,
+  384 |           player,
+  385 |           action,
+```

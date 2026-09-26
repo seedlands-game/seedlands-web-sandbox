@@ -1,0 +1,32 @@
+V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04
+baseline=ba5ea55627da8f87caa700ecd43df525aaee6f61
+
+red
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-red SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- sh -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red.stdout.log'
+
+red-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-red-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- sh -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red-02.stdout.log'
+
+red-03
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-red-03 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red-03-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- sh -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/red-03.stdout.log'
+
+green
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-green SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/green-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- sh -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/green.stdout.log'
+
+format-write
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-format-write SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/format-write-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec prettier --write <CLOSE-04 owned files> 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/format-write.stdout.log'
+
+final-affected
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-final-affected SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-affected-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-affected.stdout.log'
+
+final-classic-types
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-final-classic-types SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-classic-types-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm typecheck:classic 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-classic-types.stdout.log'
+
+final-root-types
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-final-root-types SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-root-types-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec tsc -p tsconfig.test.json --noEmit 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-root-types.stdout.log'
+
+final-eslint
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-final-eslint SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-eslint-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec eslint apps/web/tests/e2e/classic-support/equipment-journey-support.ts apps/web/tests/e2e/classic-support/equipment-resource-route.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-eslint.stdout.log'
+
+final-static
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-grounded-route-close-04-final-static SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-grounded-route-close-04/final-static-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; prettier --check and scoped git diff --check for CLOSE-04 owned files'

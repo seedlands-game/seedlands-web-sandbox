@@ -301,12 +301,13 @@ Browser15；本阶段未运行 Browser/Cua/CI，不外推为 readiness、门出�
 
 ### V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01/02/03 / GIT-31-EQUIPMENT-RESOURCE-ROUTE
 
-状态：LOCAL_CODE_COMMIT_READY。Browser15 唯一 canonical attempt 已完成完整 V1 test step 和 V2 十格资源放置，
+状态：REMOTE_DELIVERED。Browser15 唯一 canonical attempt 已完成完整 V1 test step 和 V2 十格资源放置，
 随后首个原木的采矿辅助走位被已放置资源阻挡；采矿输入尚未发送，equipment pointer、C4、C5 均未触达，lease 已释放。
 Close-03 在 V2 fixture consumer 内固定安全走廊，以 client 选择方向和纠偏；client 已到而 server projection 落后时只读
 等待，全部 leg 共用 45 秒 deadline。GIT31 在 HEAD `4e78e142...` 加精确 6 路径 staged patch 的 detached tree 验证
 4 files / 38 tests、Classic/root test types、4 TS ESLint、6 路径 Prettier 与 scoped diff 均 PASS；代码/tests/spec/contract
-提交为 `7cb4ed9f6850ea173c721316c1113b7caffc1400`。Browser16/build/Cua/CI 未运行；fixture/static GREEN 不等于
+提交为 `7cb4ed9f6850ea173c721316c1113b7caffc1400`，evidence/state 提交为
+`659380680628520f6b662b66129a594f5001b612`，均已推送。Browser16 已运行并保持 FAIL；fixture/static GREEN 不等于
 资源采集、装备指针或产品 GREEN。
 
 ### V2-ARTIFACT-BUILD-07
@@ -315,6 +316,19 @@ Close-03 在 V2 fixture consumer 内固定安全走廊，以 client 选择方向
 `pnpm build` 与唯一 `pnpm harness:artifact` 均 PASS；sourceDigest `c79b1bf7...345c`、lockDigest
 `44db46fb...1169`、artifactDigest `f6f1ea67...cfa4`，276 项 receipt map 与磁盘一致。tree/dist 保留供 root 后续唯一
 Browser16；本阶段未运行 Browser/Cua/CI，不外推为资源采集、装备旅程或产品 GREEN。
+
+### V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04/05 / GIT-32-EQUIPMENT-GROUNDED-ROUTE
+
+状态：LOCAL_CODE_COMMIT_READY。Browser16 完整 V1 与 V2 `resources-placed` 真实通过；失败 leg 的完整轨迹从 x=98.463
+前进到 85.8325，53/53 个 `KeyS+Space` pulse 都负向前进，旧“停滞/仅 1.35m”诊断被勘误。实际为每次 jump 后等待
+grounded 的约 818ms 平均周期使固定 19.963m leg 耗尽 45 秒；采矿、equipment pointer、C4、C5 未触达。CLOSE04 只将
+V2 walk options 固定为 `jump=false`，CLOSE05 用真实 input stream/buffer/physics 及 release-consume-grounded 顺序补强测试。
+GIT32 在 HEAD `ba5ea556...` 加精确 6 路径 staged patch 的 detached tree 验证 5 files / 40 tests、Classic/root test
+types、4 TS ESLint、6 路径 Prettier 与 scoped diff 均 PASS；代码/tests/spec/contract 提交为
+`a1ebf10856cc57c1b0d75a33b2f7accc9528ba4e`。Browser17/build/Cua/CI 未运行；可控 60Hz 测试不保证 Browser 墙钟。
+首次未发布 evidence commit `a402b016...` 因 Browser16 六个分片超过 GitHub 100 MB 限制被 `GH001` 拒绝，远端未
+移动；本地 backup ref 保留原提交。经授权仅 amend 该 evidence commit，把同一 774153112 bytes / SHA256
+`5ce02c71...aab41` 的 trace 重切为 15 个最大 50 MiB 分片；未重跑 Browser 或更改其 FAIL 结论。
 
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 

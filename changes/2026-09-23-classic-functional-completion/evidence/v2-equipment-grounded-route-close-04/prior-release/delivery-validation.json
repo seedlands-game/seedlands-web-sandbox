@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "2c8242cd90f9d0c17cfbc6c706cad3e3f84ecdeefa2c3dbb6486c00487eda6a2",
+    "validatedEntries": 5
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 31,
+    "sha256": "9109e1a2619b6e2b134a7318ca8f0a52f5c3360cd53afce4b620be9d107fe451",
+    "validatedEntries": 31,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02",
+    "byteEqual": true,
+    "sourceManifestSha256": "86d8bf8cb8bc0a71a9ba1f88f23e70601d3fbb5af2ac52e03c46c2d2534e096f",
+    "evidenceManifestSha256": "71dbd6384a88d7c04cd2accb0f11351565c4e329732363a52e1beac28ad8dd86",
+    "deliverySha256": "5dac8f08a698b76629ae046175e373f37e8cbbca9bcc2110484a50fbb377218c",
+    "contractSha256": "8dd14cbacf71563fb07048b5c11f6207aa91fc094087254c99449d9d79680289",
+    "evidenceSha256": "271f73c4f8d9414eef9a50d51119805b0960fb7b6027dfa200c1f7314604379f"
+  },
+  "driverContract": {
+    "movementOwner": "client-player",
+    "directionUsesClientOnly": true,
+    "clientOutsideOrNotCrossedUsesWalk": true,
+    "serverOnlyOutsideUsesReadOnlyWait": true,
+    "serverProjectionIsNotDirectlyDriven": true,
+    "arrivalPredicateRelaxed": false,
+    "randomFallbackAdded": false
+  },
+  "sharedDeadline": {
+    "totalMs": 45000,
+    "pollCapMs": 20000,
+    "remainingPassedToEachWalk": true,
+    "remainingPassedToPoll": true,
+    "deadlineExhaustionFails": true
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-resource-route-close-03-red",
+      "status": "EXPECTED_FAIL",
+      "passed": 13,
+      "failed": 5,
+      "reason": "The prior wrapper used server position to select a second walk even though real walkTo immediately returns without input once the client has reached the target.",
+      "stdoutSha256": "b7f836fa4c42502735e570be8c21ebc5de6b57043273d105cf67b8d029874855",
+      "receiptSha256": "897831aba5980ad5714f29ef957ace6b23b81759108cf7404bb665f96dbe6b63"
+    },
+    "green": {
+      "window": "v2-equipment-resource-route-close-03-green",
+      "status": "PASS",
+      "files": 1,
+      "tests": 18,
+      "stdoutSha256": "96680eae6ce98e02fff88fcaf9f0d112bf973d271f8629546f4f04c73cf797c3",
+      "receiptSha256": "e6fbb84445ec2d4c88362b1d9c2126e64c9e287abc0638f919613a335ffac2e6"
+    },
+    "affected": {
+      "window": "v2-equipment-resource-route-close-03-affected",
+      "status": "PASS",
+      "files": 4,
+      "tests": 38,
+      "maxWorkers": 1,
+      "stdoutSha256": "88cc22dcb43b769bb3e04520f924bc1cfcff98b64872a8d441c7d4a26c1c4316",
+      "receiptSha256": "bacbb507e2a25da436773fd060b30cd24d62e843ac5401219773ed00215c8c3a"
+    },
+    "classicTypes": {
+      "window": "v2-equipment-resource-route-close-03-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "6c62f68a06a4ff3bd7614677839e925f75b4d41e57167721e90b3336338bb4be"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-resource-route-close-03-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "0f18bb6d7a37d8076862b164835a12a65f726e202b6a3a73c0bcd0565cfd9d83"
+    },
+    "eslint": {
+      "window": "v2-equipment-resource-route-close-03-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "3a5b7c6f56f025b84fa8600abbf7edb3b5d516747b776fa578cfc0a7241c2176"
+    },
+    "static": {
+      "window": "v2-equipment-resource-route-close-03-static",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "a4e204186b61742228db731c82fd957abf7d3905f14e11698a955e444e7d3af6"
+    },
+    "evidenceFinal": {
+      "window": "v2-equipment-resource-route-close-03-evidence-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "26cbc7cfedf28e71a3ae4adc6dd1e4257f2e721468b17f110d9bf9e5916c2e9c"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-resource-route-close-03-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "62b4373cb14f2d688c592c0fb2dc05a9889e459fa09a48e0fbbdbb4c761c7185"
+    },
+    "metadataFinal": {
+      "window": "v2-equipment-resource-route-close-03-metadata-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "63f9d4b648a7bb4e64536a36db9059e081954e7374dcaa5412d53886d7400d90"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser16Authorized": false,
+    "scenarioChanged": false,
+    "supportConsumerChanged": false,
+    "genericWalkToChanged": false,
+    "genericRouteProgressChanged": false,
+    "productionChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure corrects only the canonical fixture driver's client/server projection handling and changes no owner, protocol, or architecture boundary."
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}

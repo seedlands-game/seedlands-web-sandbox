@@ -1,5 +1,97 @@
 # V2 Canonical Browser 证据
 
+## Browser-16 输入轨迹勘误（CLOSE-04）
+
+后续对同一原始 trace 的完整失败 leg 流式提取否定了下方 Browser-16 初步段中的“先有 1.35m 净进展后停滞”：
+从 server `[98.4630739258,32.6,-0.5003726519]` 到 `[85.8325211929,32.7366676667,-0.5109755188]`，
+53/53 个 `KeyS+Space` pulse 的匹配落地 snapshot 都产生负向 x 位移，总计 `12.6305527329m`。下方 `1.35m` 是
+failure attachment 内 256-sample Authority 尾窗的覆盖范围，不能外推为完整 leg。
+
+trace 同时显示按键约保持 `82.748..91.688ms`，但因每次 jump 后等待 grounded，pulse 起点间隔为
+`751.243..900.944ms`；首次 pulse 前还发生约 2.45s 的 PointerLock/视角校正。故 Browser-16 可证结论是：方向输入
+持续到达并推进，但 `KeyS+Space` 的落地等待节奏使固定 `19.9630739258m` leg 未能在 45 秒内完成；不是停滞、
+server lag 或资源碰撞。Browser-16 仍为 FAIL，采矿以后仍 NOT REACHED。本勘误不改其 raw、SOURCE/MANIFEST 或历史
+正文，只 supersede 该诊断句；精确六个代表 pulse 与 53 pulse 汇总在 CLOSE-04 新证据目录。
+
+## Browser-16 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-16`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实通过；V2 只完成 workbench 和 10 格资源带放置，在首个 wood
+batch 进入资源循环前返回 workbench corridor `[78.5,-0.5]` 时耗尽 45 秒真实输入路线。** Classic 视觉测试独立
+通过。本结果不证明采矿、合成、装备 pointer、C4/C5、保存恢复、16 件护甲、194 项矩阵、Cua、人类听觉或性能。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-65938068`，HEAD/source
+`659380680628520f6b662b66129a594f5001b612`，tree `b7996a7004e7bc9894a051cfedc161b34cbf443b`；
+source/lock/artifact digest 为
+`c79b1bf7019ef3b4d5ca44b3dad0ca19e3280eaf57fd6bd9cc97ebbe5af0345c`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca`，builtAt
+`2026-09-26T03:53:19.146Z`，dist 为 276 个盖章文件/277 个磁盘文件且无 symlink。Pack lock 与 MP3 SHA256
+分别为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`、
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-16-65938068 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+机器窗口 `da2aac87-8432-4039-b0ea-a404f803e6fe`，UTC `2026-09-26T04:09:20.018Z` 至
+`2026-09-26T04:17:03.079Z`，`waitedMs=1`、`exitCode=1`、`measurement.status=NOT_RECORDED`。
+Playwright 单 worker/单 Chromium/`retries=0`，结果 `1 failed / 1 passed / 1 skipped`；canonical 主测试只有
+attempt 0，没有第二 attempt。
+
+V1 test step 真实完成，覆盖本次水桶放收、门 entry/exit readiness、upper 关闭、lower+exit face 重开和
+jukebox/record/media；这仍只是既有只读投影合同，不称 Authority readiness 或跨 owner 原子事务。V2 receipt 最后且
+唯一 phase 为 `resources-placed`，armor 四槽为空、cursor 为空；随后 `mineResources:242` 尚未进入首个 wood
+循环，就先走公共 workbench corridor waypoint `[78.5,-0.5]` 并失败。因此 wood/stone/iron 采集、两把镐、
+iron unpack、五件铁甲与所有 equipment pointer 手势均 NOT REACHED，不能按 Playwright step 标题倒填为通过。
+
+trace 显示该 corridor leg 持续发送真实 `KeyS+Space`。Authority 256-sample trajectory 从
+`[87.18252119286404,33.625001,-0.5097974215475533]` 前进到
+`[85.832521192864,32.600001,-0.5109755187512944]`，之后多个跳跃周期 x 保持
+`85.832521192864`；failure attachment 的 client/server 位置一致，ack 为 `17784`、grounded true、colliding
+false、velocity `[0,0,0]`。可证明真实输入已到达 Authority 且先有 1.35m 净进展后停滞，但 attachment/trace
+未序列化阻挡 voxel、碰撞法线或逐脉冲 matched snapshot，不能进一步断言是已知资源碰撞、server lag 或产品移动缺陷。
+最后帧显示平整 corridor，已放资源位于 z=2；不得复用 Browser-15 的资源阻挡归因。
+
+Close-03 的 server-only projection bounded-wait 分支本次未触达：失败时 client 自身仍远离 waypoint，处于真实
+`walkTo` 阶段。最窄后续应先由 root 冻结同一 leg 的确定性 fixture 诊断，记录每个真实 pulse 的方向、matched
+client/server 位置、tick/ack 与附近只读 voxel，再决定路线建模；不得先增 timeout、随机 fallback 或修改通用
+`walkTo`。
+
+| 域                                                                  | Browser-16 结果                       |
+| ------------------------------------------------------------------- | ------------------------------------- |
+| C0-C3                                                               | PASS；receipt 明确记录                |
+| V1 水桶、门 readiness/upper/lower/exit-face、jukebox/record/media   | PASS；完整 test step 已返回           |
+| V2 workbench 与 10 格资源放置                                       | PASS；receipt 记录 `resources-placed` |
+| 首个 wood batch 前 corridor 回程                                    | FAIL；真实输入已 ack 后路线停滞       |
+| wood/stone/iron 采矿拾取、两把镐、iron unpack、五件铁甲             | NOT REACHED                           |
+| 四槽 click/Shift、wrong-slot、swap、脱穿、close settlement          | NOT REACHED                           |
+| C4、C5、`before.v2EquipmentPreSave`、save/restore、双 epoch、新 ref | NOT REACHED                           |
+| Classic 视觉 v3                                                     | PASS，31.5 秒                         |
+| non-Classic smoke                                                   | SKIPPED                               |
+| Close-03 server-only projection wait                                | NOT OBSERVED                          |
+| death、durability-1、drop、respawn                                  | NOT OBSERVED                          |
+| Cua、人类听觉                                                       | NOT RUN                               |
+| 性能                                                                | NOT MEASURED                          |
+
+失败 attachment schema 不含 pageErrors/failedResponses，二者为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。trace 为 774153112 bytes，SHA256
+`5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41`。未发布 evidence commit
+`a402b016...` 的六个 128 MiB/末片约 98 MiB 分片被 GitHub `GH001` 拒绝；旧包装元数据原字节归档在
+`prior-packaging/`，旧 commit 由本地 `refs/task-backups/git32-evidence-a402b016` 保留且不推送。当前 `trace-50m/`
+含 15 个最大 50 MiB 的新分片，流式重组仍为同一 774153112 bytes/SHA，Browser 未重跑且 FAIL 结论不变。runner 原始
+14 个输出记录、2 条 exec lifecycle 与 13 次 terminal interaction 按 process `18806` 归档。
+
+锁内 `harness:artifact` 后验窗口 `v2-canonical-browser-16-artifact-postcheck` PASS，UTC
+`2026-09-26T04:23:19.665Z` 至 `2026-09-26T04:23:22.472Z`，同 source/lock/artifact digest 与
+276-file map。后验验收树 tracked/index clean，4273 无监听，本树 Playwright/Chromium/preview 为 0，benchmark lock
+absent；本 tree/dist 与旧验收树保留。本轮未修改 source/test/scenario/dist，也未 build、第二 attempt、Cua、CI、
+Git/index、push、deploy 或 merge。Browser lease 在证据封存后释放。
+
 ## Browser-15 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-15`

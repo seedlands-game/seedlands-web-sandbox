@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "94a56e6589eb497f5de06b4f9197bd86fbbe4c5636b634a868c05194f61100cc",
+    "validatedEntries": 14
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 47,
+    "sha256": "09f4ac5446d038d05180632a8cd98a774eb5a6c7c121eaca4383fd6751d8866e",
+    "validatedEntries": 47,
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "manifest-selfcheck.stdout.log",
+      "manifest-selfcheck-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03",
+    "byteEqual": true,
+    "sourceManifestSha256": "2c8242cd90f9d0c17cfbc6c706cad3e3f84ecdeefa2c3dbb6486c00487eda6a2",
+    "evidenceManifestSha256": "9109e1a2619b6e2b134a7318ca8f0a52f5c3360cd53afce4b620be9d107fe451",
+    "deliverySha256": "2d426e4d07f0a7b40dba19f9077257c5393009cc861bd02afdbd78d91a1b9451",
+    "contractSha256": "0ad1ffbed816b49883469eaf40863b5d5c0e4645f69682bc9cf3a9e84521de92",
+    "evidenceSha256": "6ad32f315278fd405783e9519890e5c23244945ab5fcf93c019015e035c5dffd",
+    "browserReportSha256": "163074e0a2749c26b870baee6fa62ce373db2def9a9f3ca2249f1db08d6cd123"
+  },
+  "browser16Correction": {
+    "traceSha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "pulses": 53,
+    "pulsesWithStrictNegativeServerDeltaX": 53,
+    "totalServerDeltaX": -12.630552732903752,
+    "oldTailWindowMeters": 1.35,
+    "oldStallConclusionSuperseded": true,
+    "browser16ResultChanged": false
+  },
+  "fixtureContract": {
+    "jump": false,
+    "coordinatesChanged": false,
+    "genericWalkToChanged": false,
+    "genericRouteProgressChanged": false,
+    "pulseMs": 80,
+    "routeDeadlineMs": 45000,
+    "pollCapMs": 20000,
+    "arrivalMaxXError": 0.45,
+    "floorAndObstacleLegsChecked": 52
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-grounded-route-close-04-red-03",
+      "status": "EXPECTED_FAIL",
+      "files": 1,
+      "passed": 1,
+      "failed": 1,
+      "reason": "Production V2 options still enabled jump; the PlayerInputStream to InputCommandBuffer to stepBody model covered only 13.95m of the fixed 19.9630739258m leg in 45 seconds.",
+      "stdoutSha256": "a804f12602e4ed85d15756753cc9f92cc3a28df37cf44fbba3936834c0d83fc8",
+      "receiptSha256": "dddbb2f7a75d6c8296a76495fe3f514c5abe79110b73030e839e33618449ce2f",
+      "wrapperExitStatusCaveat": "The wrapper receipt says PASS because the first red commands used sh without pipefail; the retained Vitest stdout is the authoritative expected-failure record."
+    },
+    "green": {
+      "window": "v2-equipment-grounded-route-close-04-green",
+      "status": "PASS",
+      "files": 1,
+      "tests": 2,
+      "stdoutSha256": "e1150f1c316dcc844ce3371cd4af091c1b5368af1128175f1830f5443681852e",
+      "receiptSha256": "00eabbb87873e4911421b16e484e45d50c21e8ffadde1eafd0654d4e055a7d36"
+    },
+    "affected": {
+      "window": "v2-equipment-grounded-route-close-04-final-affected",
+      "status": "PASS",
+      "files": 5,
+      "tests": 40,
+      "maxWorkers": 1,
+      "stdoutSha256": "b943cdad109c1761b1272620d55bb3112503d7143d6e5a32a048eb5f4f860418",
+      "receiptSha256": "e843a3ecf93dc74685d579b31b1be109c99edd4f3642c13bb1d6c50b3b772991"
+    },
+    "classicTypes": {
+      "window": "v2-equipment-grounded-route-close-04-final-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "43aaff123d46cdce320803620be9a800793f540ef999a8e8c80221ccf8a77c0f"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-grounded-route-close-04-final-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "df8427bd896162a26c88d29f2dcfca329b325493da7f5ba1d2d0dead1d66c486"
+    },
+    "eslint": {
+      "window": "v2-equipment-grounded-route-close-04-final-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "f4d25ee5d349fcb89692ec4af70ba03f27bef1385d54418eb82b19ffdd8592be"
+    },
+    "static": {
+      "window": "v2-equipment-grounded-route-close-04-final-static",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "613b0394bd6a73bb228632b43b394b31da519c3293caf0a5dca1b43ec612d0b7"
+    },
+    "evidenceFinal": {
+      "window": "v2-equipment-grounded-route-close-04-evidence-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "55a3968d9a54160fbae806a92caffe499e0f9ab92c076d25cf1f9bf8e0c03dd9"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser16StillFail": true,
+    "browser17Authorized": false,
+    "scenarioChanged": false,
+    "productionChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure changes only a canonical fixture input option and adds deterministic evidence; no owner, public protocol, or architecture boundary changes."
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}
