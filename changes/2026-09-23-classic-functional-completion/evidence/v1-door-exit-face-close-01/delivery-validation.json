@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-DOOR-EXIT-FACE-CLOSE-01",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "a47d50c1a2c10f97952c454bb1b58b3a4a373af5",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "aa321327f5ac6fab03d4cd05f23f365901001966ecbb9d90ec63eb423adc7aac",
+    "validatedEntries": 7
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 20,
+    "sha256": "f57f863466ba273abce67768b4029600f4dc12987a1d2307692c02694662e578",
+    "validatedEntries": 20,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "browser13Red": {
+    "window": "ca001977-b334-4fbc-962f-254c2bc44a46",
+    "diagnosisSha256": "a8677c5125f34e3e6b2fc15260096b57a451300dffcb42966b8d8eb616b2b5fd",
+    "expectedLower": [70, 31, 0],
+    "observedUpper": [70, 32, 0],
+    "lowerClickSent": false
+  },
+  "red": {
+    "window": "v1-door-exit-face-close-01-red",
+    "status": "EXPECTED_FAIL",
+    "files": 1,
+    "passed": 0,
+    "failed": 1,
+    "stdoutSha256": "68266d3f7a88bdb94a0634abdc7a2f86d97c1d7775b852902c29e0ea6ad58314",
+    "receiptSha256": "4d566cf044831dc291bc2b3b5bf8ca12f7791002feb019adfef1db253805c15f"
+  },
+  "preservedFailure": {
+    "window": "v1-door-exit-face-close-01-final",
+    "status": "FAIL",
+    "reason": "New test helper returned readonly Point where production traceVoxelTarget requires a mutable tuple.",
+    "stdoutSha256": "ed13b0e50c8cbafdf1cbc1b85c4ffe1ec380fc78680dbd64b85dbabe7c18e005",
+    "receiptSha256": "04ae7252d492e0151a7a4174412b55b19676b52b0aec83c5966f7e8cc83e0d84"
+  },
+  "final": {
+    "window": "v1-door-exit-face-close-01-final-04",
+    "status": "PASS",
+    "startedAt": "2026-09-25T23:49:53.038Z",
+    "endedAt": "2026-09-25T23:50:02.953Z",
+    "files": 4,
+    "tests": 38,
+    "classicTestTypes": "PASS",
+    "rootTestTypes": "PASS",
+    "eslint": "PASS",
+    "formatAndScopedDiff": "PASS",
+    "stdoutSha256": "b4e0fb26ae3960193b62646903e2cd95e38da610b735923a34c5e1697dd788a2",
+    "receiptSha256": "826c3422d200dcbed7f31399ba424a802bd8a61cbefe5f78fd6b3bddd8212fb3",
+    "metadataFormatWindow": "v1-door-exit-face-close-01-metadata-format",
+    "metadataFormatStatus": "PASS",
+    "metadataFormatStdoutSha256": "d75de60c41579369869920c72fa2765a2f05cd290ceb61f5ee631b86578bdcf2",
+    "metadataFormatReceiptSha256": "003648f0f5a0faf5055c5194a591ba269698ef26be18eeb23a9cbed77ee31514"
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "aimControllerChanged": false,
+    "scenarioChanged": false,
+    "coordinatesChanged": false,
+    "timeoutChanged": false,
+    "aimBudgetChanged": false,
+    "browserValidated": false,
+    "deathDurabilityDropRespawnObserved": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This is a local canonical fixture correction and does not change public ownership or architecture."
+  },
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "git", "deploy"]
+}

@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-25T22:00:00Z
+更新时间：2026-09-26T00:09:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -21,6 +21,10 @@ BUILD03 唯一 build/artifact verify 已 PASS，证据随独立 artifact evidenc
 source 的 clean detached tree 唯一 build 与唯一 artifact verify PASS；sourceDigest `315820d6...2dff`、artifactDigest
 `fc7ac005...f6e2`、276 项 map 与磁盘一致，artifact evidence 作为本阶段第三笔独立提交交付。本阶段未运行 Browser/Cua/devserver/CI；
 装备真实 Browser 旅程、death/durability-1/drop/respawn、16/194/full V2 仍未验收。
+当前 Door exit checkpoint：Browser13 在 upper 关闭后被 lower-center 不可见的 fixture 边界阻断，lower click 未发送，
+V2 全部 `NOT REACHED` 且唯一 lease 已释放。`V1-DOOR-EXIT-FACE-CLOSE-01/02` 已由 root 定向准出，GIT29 的
+4 files / 38 tests、Classic/root test types 与目标静态在 detached staged tree 全部 PASS；代码提交
+`f5747f4944efa5cc28bf0e656a5efef748b0d584` 已本地生成，证据/state 尚待独立提交和 push。Browser14 未运行。
 
 ## 恢复规则
 

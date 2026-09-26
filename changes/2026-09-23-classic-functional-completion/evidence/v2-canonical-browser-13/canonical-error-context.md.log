@@ -1,0 +1,101 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: apps/web/tests/e2e/classic-runtime.spec.ts >> Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景
+- Location: apps/web/tests/e2e/classic-runtime.spec.ts:73:1
+
+# Error details
+
+```
+Error: Real mouse input could not reacquire 70,31,0; last targets=["70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0"].
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main:
+    - dialog "暂停游戏" [ref=e4]:
+      - paragraph [ref=e5]: A MOMENT OF STILLNESS
+      - heading "旅途暂歇" [level=2] [ref=e6]
+      - paragraph [ref=e7]: 世界正在等待你
+      - generic [ref=e8]:
+        - button "继续游戏" [active] [ref=e9] [cursor=pointer]
+        - button "设置" [ref=e10] [cursor=pointer]
+        - button "操作指南" [ref=e11] [cursor=pointer]
+        - button "保存并返回主菜单" [ref=e12] [cursor=pointer]
+```
+
+# Test source
+
+```ts
+  1  | import type { Page } from '@playwright/test';
+  2  | import { snapshot } from './harness';
+  3  | import { moveMouseBy } from './mouse-input';
+  4  | import { matchesVoxelAim, mouseCorrectionToPoint, voxelAimPoint } from './target-aim';
+  5  | import type { Point } from './scenario';
+  6  | 
+  7  | export type RealMouseAimEvidence = Readonly<{
+  8  |   target: Point;
+  9  |   firstObserved: string | null;
+  10 |   finalObserved: string;
+  11 |   attempts: number;
+  12 |   mouseDelta: Readonly<{ x: number; y: number }>;
+  13 | }>;
+  14 | 
+  15 | /**
+  16 |  * Reacquires a voxel after a fresh controller is created by save/continue.
+  17 |  * Every view change is Pointer Lock mouse input; the target card is the visible
+  18 |  * readback used to decide the next bounded correction.
+  19 |  */
+  20 | export async function aimAtVoxelWithRealMouse(
+  21 |   page: Page,
+  22 |   target: Point,
+  23 |   adjacent?: Point,
+  24 | ): Promise<RealMouseAimEvidence> {
+  25 |   const expected = target.join(',');
+  26 |   const aimPoint = voxelAimPoint(target, adjacent);
+  27 |   const history: Array<string | null> = [];
+  28 |   let firstObserved: string | null | undefined;
+  29 |   let totalX = 0;
+  30 |   let totalY = 0;
+  31 | 
+  32 |   for (let attempt = 1; attempt <= 180; attempt += 1) {
+  33 |     const [observation, playerSnapshot] = await Promise.all([
+  34 |       page.evaluate(() => ({
+  35 |         targetCard: document.querySelector('#target-card')?.getAttribute('data-target') ?? null,
+  36 |         aimed: (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.aimedVoxelTarget(),
+  37 |       })),
+  38 |       snapshot(page),
+  39 |     ]);
+  40 |     const { targetCard: observed, aimed } = observation;
+  41 |     if (firstObserved === undefined) firstObserved = observed;
+  42 |     history.push(observed);
+  43 |     if (history.length > 12) history.shift();
+  44 |     if (observed === expected && matchesVoxelAim(aimed, target, adjacent))
+  45 |       return {
+  46 |         target,
+  47 |         firstObserved: firstObserved ?? null,
+  48 |         finalObserved: observed,
+  49 |         attempts: attempt,
+  50 |         mouseDelta: { x: totalX, y: totalY },
+  51 |       };
+  52 | 
+  53 |     const { dx, dy } = playerSnapshot
+  54 |       ? mouseCorrectionToPoint(playerSnapshot.player, playerSnapshot.viewAngles, aimPoint)
+  55 |       : { dx: 0, dy: 12 };
+  56 |     await moveMouseBy(page, dx, dy);
+  57 |     totalX += dx;
+  58 |     totalY += dy;
+  59 |   }
+  60 | 
+> 61 |   throw new Error(`Real mouse input could not reacquire ${expected}; last targets=${JSON.stringify(history)}.`);
+     |         ^ Error: Real mouse input could not reacquire 70,31,0; last targets=["70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0","70,32,0"].
+  62 | }
+  63 | 
+```

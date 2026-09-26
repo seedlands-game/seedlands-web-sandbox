@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v1-door-exit-face-close-01-red",
+  "pid": 20052,
+  "startedAt": "2026-09-25T23:44:14.238Z",
+  "windowId": "v1-door-exit-face-close-01-red",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-door-exit-face-close-01/red-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T23:44:15.478Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T23:44:14.239Z",
+      "loadAverage": [
+        4.30615234375,
+        4.2431640625,
+        3.85400390625
+      ],
+      "freeMemoryBytes": 557940736,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T23:44:15.477Z",
+      "loadAverage": [
+        4.30615234375,
+        4.2431640625,
+        3.85400390625
+      ],
+      "freeMemoryBytes": 357449728,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
