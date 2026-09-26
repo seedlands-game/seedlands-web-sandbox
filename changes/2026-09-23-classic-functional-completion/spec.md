@@ -184,6 +184,20 @@ client position 决定；client 仍在有限域外，或虽在有限域内但尚
 稳定失败，不发送无效纠偏输入、不 fallback。Close-02 的双方有限域、fresh tick、ack 不倒退、client readiness、完整
 邻域 AABB、路线与预算均保持。
 
+Browser-16 的完整 trace 纠正初步诊断：失败 leg 从 server x=`98.4630739258` 到 `85.8325211929`，53/53 个
+`KeyS+Space` pulse 的匹配落地 snapshot 均产生负向位移，总计 `12.6305527329m`；Authority 尾部 256 样本只覆盖
+末段 `1.35m`，不能据此称此前停滞。真实问题是每次约 85ms 输入后都等待完整跳跃落地，使 pulse 起点间隔约
+`751..901ms`，加上初始约 2.45s 视角校正后，固定 `19.9630739258m` leg 无法在既有 45 秒预算内完成。V2
+equipment route 的既有固定平面 route 因此必须以 `jump=false` 调用通用 `walkTo`；坐标、方向、`.06/.08/.45`、
+80ms pulse、20s poll、45s deadline 与通用 driver 均不变。确定性测试必须经 `PlayerInputStream`、
+`InputCommandBuffer` 和 `stepBody` 对照 jump/ground 行为，并验证 V1→V2 交接、workbench 放置/打开/回收、资源放置、
+三批采集和 pickup/retreat 的全部固定 leg 由 scenario floor 支撑且不穿未清障碍。该测试只证明 fixture/物理模型合同，
+不证明新 Browser 旅程通过。
+测试模型中的每个 80ms pulse 还必须显式经 `PlayerInputStream.release()` 发出 neutral command，并等
+`InputCommandBuffer.consumeForTick()` 确认该 release sequence 且 `stepBody` grounded 后才可开始下一 pulse；不得连续
+签发 pressed command、直接 reset buffer、手工置 grounded，或用 issued sequence 代替 Authority consumed ack。固定 60Hz
+测试时钟只是可控调度合同，不作为浏览器墙钟或性能保证。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

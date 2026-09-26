@@ -1,8 +1,41 @@
 # V2 装备资源安全走廊合同
 
-阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03`
+阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05`
 
-状态：fixture、确定性与静态验证完成；Browser-15 保持 FAIL，Browser-16 未授权。
+状态：Close-05 测试模型、确定性与静态验证完成；Close-04 实现保持不变，Browser-16 保持 FAIL，
+Browser-17 未授权。
+
+## Close-05 release/consume 测试合同
+
+- Close-04 的旧测试在 `jump=false` 下同 tick 结束 waiting 并立即开始下一 pulse，实际没有签发 neutral command；不能
+  据此称为 80ms down/up pulse 模型。该缺口只影响测试证据，不改变已准出的 V2 fixture 实现。
+- 每个 pulse 在 pressed phase 后必须调用生产 `PlayerInputStream.release()` 一次，把返回 command 推入真实
+  `InputCommandBuffer`；随后不得签发下一 pressed command，直到 `consumeForTick()` 的 acknowledged sequence 已达到该
+  release sequence 且生产 `stepBody` 返回 grounded。
+- 测试必须观察 consumed pressed state 含负向水平输入、consumed neutral state 为零水平/零 vertical intent/
+  `jumpHeld=false`，并证明每个 pulse 都满足 `pressedSequence < neutralSequence < nextPressedSequence`。不能直接 clear/reset
+  buffer、手工设置 grounded 或把 issued sequence 当 ack。
+- 固定 60Hz 是测试的可控 poll cadence；80ms pulse、单 pulse 20s 上限与路线 45s 成功 deadline 保持。测试允许在 45s
+  边界前已开始的最后 pulse 完成 release/consume/grounded，以复现真实 `walkTo` 的当前 pulse 清理；是否在 45s 内完成
+  路线仍由返回 elapsed 判定。该模型不构成浏览器墙钟保证。
+
+## Close-04 平地路线输入
+
+- Browser-16 完整失败 leg 不是停滞：server x 从 `98.4630739258` 连续降到 `85.8325211929`，53/53 个
+  `KeyS+Space` pulse 的匹配落地 snapshot 都有负向位移，总进展 `12.6305527329m`。旧 256-sample 尾窗只显示
+  `1.35m`，本节 supersede 该旧诊断，不改 Browser-16 FAIL 与原始证据。
+- 每个约 85ms 的按键 pulse 因 `jump=true` 后必须等待 grounded，pulse 起点实际相隔约 `751..901ms`；初始视角校正
+  约 2.45s，固定最长 leg 为 `19.9630739258m`，因此原 45 秒预算不足。不得以 ack 增长解释为停滞或输入丢失。
+- `walkEquipmentRoute` 只把传给既有 `walkTo` 的 `jump` 固定为 `false`。方向、坐标、`.06/.08/.45`、80ms pulse、
+  20s poll、共享 45s deadline、arrival predicate 与通用 `walkTo` 均不变；不增加第二路线或 fallback。
+- scenario floor 是 x=`[-4,225]`、z=`[-3,4]`、顶面 y=`31` 的连续平面。player half-width=`0.32`；V1 jukebox
+  approach 到 V2、workbench 放置/打开/回收、10 格资源放置、三批 corridor、清空格 pickup/retreat 的全部固定 leg
+  都必须在完整 `±0.45/<0.08` 到达包络下保持 floor 支撑，并按当时未清 voxel 集验证 AABB 净空。
+- 确定性 A/B 使用生产 `PlayerInputStream -> InputCommandBuffer -> stepBody` 链和真实 player body config；它只证明
+  每个 80ms pressed phase 后必须经 `PlayerInputStream.release()` 发出 neutral command，并等待该 sequence 被
+  `InputCommandBuffer.consumeForTick()` 确认且 `stepBody` 返回 grounded，才开始下一 pulse。issued sequence 不能冒充
+  acknowledged sequence，不能直接 reset buffer 或手工设置 grounded。该可控 60Hz poll 调度只证明平地输入/物理与
+  fixture 几何合同，不是浏览器调度或性能保证，也不保证 Browser-17 通过。
 
 ## Close-03 真实 driver 语义
 
