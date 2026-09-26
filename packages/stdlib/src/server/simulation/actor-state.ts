@@ -16,6 +16,7 @@ export type ActorPersistentGoal = Readonly<{
 export type ActorState = {
   entityId: string;
   archetype: ActorArchetype;
+  disposition?: 'passive' | 'neutral' | 'hostile';
   hunger: number;
   behavior: ActorBehavior;
   targetEntityId: string | null;
@@ -31,6 +32,9 @@ export type ActorState = {
   /** Derived marker that behavior control owns this actor's decisions. */
   behaviorTreeOwned?: true;
 };
+export const actorDisposition = (actor: Pick<ActorState, 'archetype' | 'disposition'>) =>
+  actor.disposition ??
+  (actor.archetype === 'night-stalker' ? 'hostile' : actor.archetype === 'settler' ? 'neutral' : 'passive');
 
 export type ActorRegistration = {
   archetype: ActorArchetype;
@@ -61,15 +65,39 @@ export type SimulationSnapshot = {
 export const MAX_RETAINED_ACTORS = 512;
 export const ACTIVE_RADIUS_SQUARED = 48 ** 2;
 export const STEP_SECONDS = 0.1;
-export const speedByArchetype: Readonly<Record<ActorArchetype, number>> = {
+export const speedByArchetype: Readonly<Partial<Record<ActorArchetype, number>>> = {
   grazer: 1.6,
   'night-stalker': 2.2,
   settler: 1.4,
+  chicken: 1.8,
+  cow: 2,
+  pig: 2,
+  'pig-zombie': 2.3,
+  sheep: 2,
+  squid: 1.4,
+  wolf: 2.4,
+  zombie: 2.3,
+  skeleton: 2.4,
+  spider: 2.8,
+  creeper: 2.3,
+  slime: 2,
 };
-export const rangeByArchetype: Readonly<Record<ActorArchetype, number>> = {
+export const rangeByArchetype: Readonly<Partial<Record<ActorArchetype, number>>> = {
   grazer: 10,
   'night-stalker': 12,
   settler: 10,
+  chicken: 8,
+  cow: 10,
+  pig: 10,
+  'pig-zombie': 12,
+  sheep: 10,
+  squid: 8,
+  wolf: 12,
+  zombie: 12,
+  skeleton: 16,
+  spider: 12,
+  creeper: 12,
+  slime: 10,
 };
 export const cloneActor = (actor: ActorState, attackCooldownSeconds?: number): ActorState => {
   const cloned = { ...actor };

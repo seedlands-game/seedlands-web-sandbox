@@ -31,32 +31,47 @@ export function settleInventoryCursor(
 ): SettledInventoryCursorV1 {
   const cursor = validateInventoryCursor(rawCursor, items);
   const inventory = new Inventory(slots.length, slots, items).snapshot();
-  let stack = cursor.stack
-    ? { ...cursor.stack, ...(cursor.stack.instance ? { instance: { ...cursor.stack.instance } } : {}) }
-    : null;
-  if (!stack)
+  const pending = [cursor.stack, ...cursor.craftingGrid].flatMap((entry) =>
+    entry ? [{ ...entry, ...(entry.instance ? { instance: { ...entry.instance } } : {}) }] : [],
+  );
+  if (!pending.length)
     return Object.freeze({ slots: Object.freeze(inventory.map(frozenStack)), cursor, dropIntents: Object.freeze([]) });
   if (cursor.revision >= Number.MAX_SAFE_INTEGER) throw new RangeError('Inventory cursor revision exhausted.');
-  const place = (slot: number) => {
-    if (!stack) return;
+  const place = (stack: ItemStack, slot: number): ItemStack | null => {
     const target = inventory[slot];
-    if (target && !sameItemStackIdentity(target, stack)) return;
+    if (target && !sameItemStackIdentity(target, stack)) return stack;
     const moved = Math.min(stack.count, Math.max(0, capacity(items, target, stack)));
-    if (!moved) return;
+    if (!moved) return stack;
     inventory[slot] = { ...stack, count: (target?.count ?? 0) + moved };
-    stack = stack.count === moved ? null : { ...stack, count: stack.count - moved };
+    return stack.count === moved ? null : { ...stack, count: stack.count - moved };
   };
-  if (cursor.origin?.kind === 'inventory' && cursor.origin.slot < inventory.length) place(cursor.origin.slot);
-  for (const emptyPass of [false, true])
-    for (let slot = 0; slot < inventory.length && stack; slot += 1) {
-      const target = inventory[slot];
-      if ((emptyPass && target) || (!emptyPass && !target)) continue;
-      place(slot);
-    }
-  const dropIntents = stack ? [frozenStack(stack)!] : [];
+  const drops: ItemStack[] = [];
+  for (const [pendingIndex, pendingStack] of pending.entries()) {
+    let stack: ItemStack | null = pendingStack;
+    if (
+      pendingIndex === 0 &&
+      cursor.stack &&
+      cursor.origin?.kind === 'inventory' &&
+      cursor.origin.slot < inventory.length
+    )
+      stack = place(stack, cursor.origin.slot);
+    for (const emptyPass of [false, true])
+      for (let slot = 0; slot < inventory.length && stack; slot += 1) {
+        const target = inventory[slot];
+        if ((emptyPass && target) || (!emptyPass && !target)) continue;
+        stack = place(stack, slot);
+      }
+    if (stack) drops.push(stack);
+  }
   return Object.freeze({
     slots: Object.freeze(inventory.map(frozenStack)),
-    cursor: Object.freeze({ version: 1, revision: cursor.revision + 1, stack: null, origin: null }),
-    dropIntents: Object.freeze(dropIntents),
+    cursor: Object.freeze({
+      version: 1,
+      revision: cursor.revision + 1,
+      stack: null,
+      origin: null,
+      craftingGrid: Object.freeze([null, null, null, null]),
+    }),
+    dropIntents: Object.freeze(drops.map((stack) => frozenStack(stack)!)),
   });
 }

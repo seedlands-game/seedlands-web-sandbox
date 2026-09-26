@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "97686996-bc36-4017-80c9-acad8335c86a",
+  "pid": 52577,
+  "startedAt": "2026-09-25T13:33:38.306Z",
+  "windowId": "97686996-bc36-4017-80c9-acad8335c86a",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-policy-spine-01/red-health-stale-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T13:33:39.017Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T13:33:38.307Z",
+      "loadAverage": [
+        4.07080078125,
+        3.48095703125,
+        3.236328125
+      ],
+      "freeMemoryBytes": 430981120,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T13:33:39.015Z",
+      "loadAverage": [
+        4.07080078125,
+        3.48095703125,
+        3.236328125
+      ],
+      "freeMemoryBytes": 488636416,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

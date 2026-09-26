@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "db88bfa9-a39a-4a54-90ab-bf361c20c52b",
+  "pid": 84753,
+  "startedAt": "2026-09-25T14:03:12.044Z",
+  "windowId": "db88bfa9-a39a-4a54-90ab-bf361c20c52b",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-24-death-policy-spine/eslint-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T14:03:14.097Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T14:03:12.045Z",
+      "loadAverage": [
+        4.43310546875,
+        3.81103515625,
+        3.5283203125
+      ],
+      "freeMemoryBytes": 943521792,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:03:14.096Z",
+      "loadAverage": [
+        4.43310546875,
+        3.81103515625,
+        3.5283203125
+      ],
+      "freeMemoryBytes": 909754368,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

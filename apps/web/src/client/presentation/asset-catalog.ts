@@ -4,17 +4,163 @@ import type { Asset, ItemAssetBinding } from './asset-types';
 import { nativeToolAssets } from './asset-tool-sources';
 import { builtinVisualAssets } from './visual-asset-catalog';
 import { requireClassicItemDefinition } from './classic-item-registry';
+import { dyeItemNames, woolItemNames } from './dye-item-assets';
 
 const nativeItemAssets = [...nativeToolAssets, ...progressionItemAssets];
 
 // Explicit first-party bindings. Coverage against the authoritative item registry is tested.
 const items = [
+  ...dyeItemNames,
   ['dirt-block', '泥土块'],
   ['stone-block', '石块'],
   ['wood-block', '原木'],
   ['sand-block', '沙块'],
   ['berry', '浆果'],
   ['plank', '木板'],
+  ['cobblestone', '圆石'],
+  ['glass', '玻璃'],
+  ['charcoal', '木炭'],
+  ['gold-ore', '金矿石'],
+  ['diamond-ore', '钻石矿石'],
+  ['iron-block', '铁块'],
+  ['gold-block', '金块'],
+  ['diamond-block', '钻石块'],
+  ['gold-ingot', '金锭'],
+  ['diamond', '钻石'],
+  ['apple', '苹果'],
+  ['bread', '面包'],
+  ['raw-porkchop', '生猪排'],
+  ['cooked-porkchop', '熟猪排'],
+  ['raw-fish', '生鱼'],
+  ['cooked-fish', '熟鱼'],
+  ['wheat', '小麦'],
+  ['wheat-seeds', '小麦种子'],
+  ['leather', '皮革'],
+  ['bowl', '碗'],
+  ['bucket', '桶'],
+  ['water-bucket', '水桶'],
+  ['shears', '剪刀'],
+  ['minecart', '矿车'],
+  ['chest-minecart', '运输矿车'],
+  ['furnace-minecart', '动力矿车'],
+  ['boat', '船'],
+  ['bow', '弓'],
+  ['arrow', '箭'],
+  ['string', '线'],
+  ['feather', '羽毛'],
+  ['flint', '燧石'],
+  ['wool', '羊毛'],
+  ['ink-sac', '墨囊'],
+  ['rotten-flesh', '腐肉'],
+  ['bone', '骨头'],
+  ['gunpowder', '火药'],
+  ['slimeball', '黏液球'],
+  ['bed', '床'],
+  ['saddle', '鞍'],
+  ['milk-bucket', '奶桶'],
+  ['egg', '鸡蛋'],
+  ['fishing-rod', '钓鱼竿'],
+  ['lava-bucket', '熔岩桶'],
+  ['obsidian', '黑曜石'],
+  ['tnt', 'TNT'],
+  ['sapling', '树苗'],
+  ['flower', '花'],
+  ['mushroom', '蘑菇'],
+  ['sugar-cane', '甘蔗'],
+  ['cactus', '仙人掌'],
+  ['rail', '铁轨'],
+  ['powered-rail', '动力铁轨'],
+  ['detector-rail', '探测铁轨'],
+  ['paper', '纸'],
+  ['redstone-dust', '红石粉'],
+  ['compass', '指南针'],
+  ['clock', '时钟'],
+  ['map', '地图'],
+  ['flint-and-steel', '打火石'],
+  ['mushroom-stew', '蘑菇煲'],
+  ['painting', '画'],
+  ['golden-apple', '金苹果'],
+  ['sign', '告示牌'],
+  ['wooden-door', '木门'],
+  ['snowball', '雪球'],
+  ['brick', '红砖'],
+  ['clay', '黏土'],
+  ['book', '书'],
+  ['sugar', '糖'],
+  ['cake', '蛋糕'],
+  ['dead-bush', '枯灌木'],
+  ['wool-block', '羊毛块'],
+  ['red-flower', '红花'],
+  ['red-mushroom', '红蘑菇'],
+  ['bricks', '砖块'],
+  ['bookshelf', '书架'],
+  ['mossy-cobblestone', '苔石'],
+  ['note-block', '音符盒'],
+  ['jukebox', '唱片机'],
+  ['pumpkin', '南瓜'],
+  ['jack-o-lantern', '南瓜灯'],
+  ['trapdoor', '活板门'],
+  ['lit-furnace', '燃烧熔炉'],
+  ['redstone-ore', '红石矿'],
+  ['lit-redstone-ore', '发光红石矿'],
+  ['sandstone-slab', '砂岩半砖'],
+  ['wood-slab', '木半砖'],
+  ...woolItemNames,
+  ['cookie', '曲奇'],
+  ['cocoa-beans', '可可豆'],
+  ['record-13', '唱片 13'],
+  ['record-cat', '唱片 Cat'],
+  ['gravel', '砂砾'],
+  ['lapis-ore', '青金石矿石'],
+  ['clay-block', '黏土块'],
+  ['ice', '冰'],
+  ['snow-block', '雪块'],
+  ['lapis-block', '青金石块'],
+  ['slab', '半砖'],
+  ['wood-stairs', '木楼梯'],
+  ['cobblestone-stairs', '圆石楼梯'],
+  ['ladder', '梯子'],
+  ['torch', '火把'],
+  ['fence', '栅栏'],
+  ['leather-helmet', '皮革头盔'],
+  ['leather-chestplate', '皮革胸甲'],
+  ['leather-leggings', '皮革护腿'],
+  ['leather-boots', '皮革靴子'],
+  ['iron-helmet', '铁头盔'],
+  ['iron-chestplate', '铁胸甲'],
+  ['iron-leggings', '铁护腿'],
+  ['iron-boots', '铁靴子'],
+  ['gold-helmet', '金头盔'],
+  ['gold-chestplate', '金胸甲'],
+  ['gold-leggings', '金护腿'],
+  ['gold-boots', '金靴子'],
+  ['diamond-helmet', '钻石头盔'],
+  ['diamond-chestplate', '钻石胸甲'],
+  ['diamond-leggings', '钻石护腿'],
+  ['diamond-boots', '钻石靴子'],
+  ['sandstone', '砂岩'],
+  ['stone-bricks', '石砖'],
+  ['gold-pickaxe', '金镐'],
+  ['diamond-pickaxe', '钻石镐'],
+  ['stone-axe', '石斧'],
+  ['iron-axe', '铁斧'],
+  ['gold-axe', '金斧'],
+  ['diamond-axe', '钻石斧'],
+  ['stone-sword', '石剑'],
+  ['iron-sword', '铁剑'],
+  ['gold-sword', '金剑'],
+  ['diamond-sword', '钻石剑'],
+  ['wood-shovel', '木锹'],
+  ['stone-shovel', '石锹'],
+  ['iron-shovel', '铁锹'],
+  ['gold-shovel', '金锹'],
+  ['diamond-shovel', '钻石锹'],
+  ['wood-hoe', '木锄'],
+  ['stone-hoe', '石锄'],
+  ['iron-hoe', '铁锄'],
+  ['gold-hoe', '金锄'],
+  ['diamond-hoe', '钻石锄'],
+  ['stick', '木棍'],
   ['wood-axe', '木斧'],
   ['wood-sword', '木剑'],
   ['stone-pickaxe', '石镐'],
@@ -24,7 +170,7 @@ const items = [
   ['chest', '箱子'],
   ['furnace', '炉体'],
   ['coal', '煤'],
-  ['raw-iron', '粗铁'],
+  ['raw-iron', '铁矿石'],
   ['iron-ingot', '铁锭'],
   ['wood-pickaxe', '木镐'],
   ['iron-pickaxe', '铁镐'],
@@ -76,19 +222,31 @@ export const builtinAssets: Asset[] = [
         itemId: id,
         materialIds: (() => {
           const voxel = requireClassicItemDefinition(id).placesVoxel;
-          const placed = builtinVisualAssets.find(
-            (asset) => asset.type === 'builtin-voxel-model' && asset.payload.voxelId === voxel,
-          );
+          const placed =
+            voxel === undefined
+              ? undefined
+              : builtinVisualAssets.find(
+                  (asset) => asset.type === 'builtin-voxel-model' && asset.payload.voxelId === voxel,
+                );
           return placed?.type === 'builtin-voxel-model'
             ? placed.payload.materialIds
-            : itemMaterials[id].map((key) => `seedlands:material/model/${key}`);
+            : (
+                itemMaterials[id] ??
+                (() => {
+                  throw new Error(`Missing builtin item material mapping: ${id}`);
+                })()
+              ).map((key) => `seedlands:material/model/${key}`);
         })(),
       },
     })),
 ];
 export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]) => {
   const modelId = `builtin:model:${itemId}`;
-  const model = nativeItemAssets.find((asset) => asset.id === modelId);
+  const definition = requireClassicItemDefinition(itemId);
+  const model =
+    definition.placesVoxel === undefined || itemId.endsWith('-wool')
+      ? nativeItemAssets.find((asset) => asset.id === modelId)
+      : undefined;
   return {
     itemId,
     name,
@@ -96,7 +254,76 @@ export const builtinItemBindings: ItemAssetBinding[] = items.map(([itemId, name]
     iconId:
       model?.type === 'extruded-pixel-model'
         ? model.payload.textureId
-        : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
+        : definition.placesVoxel !== undefined
+          ? `builtin:image:${itemId}`
+          : itemId === 'raw-iron'
+            ? 'seedlands:texture/terrain/iron-ore'
+            : itemId === 'clay-block'
+              ? 'seedlands:texture/terrain/clay'
+              : itemId === 'sandstone-slab'
+                ? 'seedlands:texture/terrain/sandstone'
+                : itemId === 'wood-slab'
+                  ? 'seedlands:texture/terrain/wood-stairs'
+                  : itemId === 'wool-block'
+                    ? 'seedlands:texture/terrain/wool'
+                    : itemId.endsWith('-wool')
+                      ? 'builtin:texture:wool:detail'
+                      : [
+                            'cobblestone',
+                            'glass',
+                            'gold-ore',
+                            'diamond-ore',
+                            'iron-block',
+                            'gold-block',
+                            'diamond-block',
+                            'sandstone',
+                            'stone-bricks',
+                            'obsidian',
+                            'tnt',
+                            'sapling',
+                            'flower',
+                            'mushroom',
+                            'sugar-cane',
+                            'cactus',
+                            'rail',
+                            'powered-rail',
+                            'detector-rail',
+                            'gravel',
+                            'lapis-ore',
+                            'clay-block',
+                            'ice',
+                            'snow-block',
+                            'lapis-block',
+                            'slab',
+                            'wood-stairs',
+                            'cobblestone-stairs',
+                            'wooden-door',
+                            'ladder',
+                            'torch',
+                            'bed',
+                            'sign',
+                            'fence',
+                            'cake',
+                            'dead-bush',
+                            'wool-block',
+                            'red-flower',
+                            'red-mushroom',
+                            'bricks',
+                            'bookshelf',
+                            'mossy-cobblestone',
+                            'note-block',
+                            'jukebox',
+                            'pumpkin',
+                            'jack-o-lantern',
+                            'trapdoor',
+                            'lit-furnace',
+                            'redstone-ore',
+                            'lit-redstone-ore',
+                            'sandstone-slab',
+                            'wood-slab',
+                          ].includes(itemId)
+                        ? 'seedlands:texture/terrain/' + itemId
+                        : `builtin:image:${itemId === 'glowstone-block' ? 'lantern' : itemId}`,
   };
 });
 export const builtinBinding = (itemId: string) => builtinItemBindings.find((b) => b.itemId === itemId);

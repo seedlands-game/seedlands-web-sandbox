@@ -18,8 +18,21 @@ describe('detached Combat damage candidate', () => {
   it('keeps player death and drops detached until apply', () => {
     const entities = setup('player');
     entities.actorStateAccess('target').inventory.add({ itemId: 'wood-block', count: 2 });
+    entities.actorStateAccess('target').replaceInventoryInteraction(1, {
+      version: 1,
+      revision: 1,
+      stack: null,
+      origin: null,
+      craftingGrid: [{ itemId: 'wood-block', count: 1 }, null, null, null],
+    });
     const before = entities.exportComponentSnapshot();
-    const result = prepareCombatDamage({ entities, targetId: 'target', damage: 9, actorDeathDrop: () => null });
+    const result = prepareCombatDamage({
+      entities,
+      targetId: 'target',
+      damage: 9,
+      deathInventory: { kind: 'legacy' },
+      actorDeathDrop: () => null,
+    });
     expect(result.damage).toBe(3);
     expect(result.deaths).toEqual(['target']);
     expect(result.removals).toEqual([]);
@@ -35,6 +48,7 @@ describe('detached Combat damage candidate', () => {
     ).toBe(true);
     expect(entities.query({ type: 'world-item' }).map((item) => item.stack)).toEqual([
       { itemId: 'wood-block', count: 2 },
+      { itemId: 'wood-block', count: 1 },
     ]);
   });
   it('prepares NPC inventory and archetype drops before despawn', () => {
@@ -44,6 +58,7 @@ describe('detached Combat damage candidate', () => {
       entities,
       targetId: 'target',
       damage: 3,
+      deathInventory: { kind: 'legacy' },
       actorDeathDrop: () => ({ itemId: 'berry', count: 2 }),
     });
     expect(entities.get('target')).not.toBeNull();
@@ -64,18 +79,22 @@ describe('detached Combat damage candidate', () => {
         entities,
         targetId: 'target',
         damage: 3,
+        deathInventory: { kind: 'legacy' },
         actorDeathDrop: () => {
           throw new Error('drop-definition-failed');
         },
       }),
     ).toThrow('drop-definition-failed');
     expect(entities.exportComponentSnapshot()).toEqual(before);
-    expect(prepareCombatDamage({ entities, targetId: 'target', damage: 0, actorDeathDrop: () => null })).toMatchObject({
-      damage: 0,
-      entity: null,
-      deaths: [],
-      removals: [],
-    });
+    expect(
+      prepareCombatDamage({
+        entities,
+        targetId: 'target',
+        damage: 0,
+        deathInventory: { kind: 'legacy' },
+        actorDeathDrop: () => null,
+      }),
+    ).toMatchObject({ damage: 0, entity: null, deaths: [], removals: [] });
     expect(entities.exportComponentSnapshot()).toEqual(before);
   });
 });

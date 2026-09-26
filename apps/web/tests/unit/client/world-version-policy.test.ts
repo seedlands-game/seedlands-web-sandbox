@@ -45,6 +45,12 @@ const coexist = [2, 3, 4].map((generatorVersion) => ({
 it.each([2, 3])('当前V4下显式选择V%i，不改选其他并存版本', (version) => {
   expect(selectWorldGeneratorVersion(coexist, 'same', 4, `continue-v${version}` as WorldOpenMode)).toBe(version);
 });
+
+it('允许世界目录按精确受支持版本继续，并拒绝不存在版本', () => {
+  const worlds = [{ worldId: 'seedlands:g10:same', seedText: 'same', generatorVersion: 10, updatedAt: 1 }];
+  expect(selectWorldGeneratorVersion(worlds, 'same', 10, 'continue-v10')).toBe(10);
+  expect(() => selectWorldGeneratorVersion(worlds, 'same', 10, 'continue-v9')).toThrow(/v9/);
+});
 it.each([2, 3])('指定V%i缺失时失败，不回退或新建当前世界', (version) => {
   expect(() =>
     selectWorldGeneratorVersion(

@@ -149,6 +149,29 @@ describe('Game Logic Worker 的纯意图计算', () => {
     });
   });
 
+  it('按 profile 派生 disposition 让新增敌对物种索敌、被动物种避敌', () => {
+    const player = entity({ id: 'player', bodyKind: 'player', position: [4, 1, 2.5] });
+    const zombie = entity({ id: 'zombie', bodyKind: 'zombie', position: [2.5, 1, 2.5], health: 20 });
+    const cow = entity({ id: 'cow', bodyKind: 'cow', position: [6, 1, 2.5], health: 10 });
+    const zombieState = actor({ entityId: 'zombie', archetype: 'zombie', disposition: 'hostile' });
+    const cowState = actor({ entityId: 'cow', archetype: 'cow', disposition: 'passive' });
+    const night = decideLogicIntents(
+      observation(
+        [
+          { state: zombieState, identityRevision: 1 },
+          { state: cowState, identityRevision: 1 },
+        ],
+        [zombie, cow, player],
+        undefined,
+        22,
+      ),
+    );
+    expect(night.intents.find((intent) => intent.entityId === 'zombie')).toMatchObject({
+      action: { type: 'attack', targetId: 'player' },
+    });
+    expect(night.intents.find((intent) => intent.entityId === 'cow')).toMatchObject({ action: { type: 'move-to' } });
+  });
+
   it('保留 Authority 记录的受击逃跑状态，并生成远离攻击者的意图', () => {
     const grazer = entity({ position: [8.5, 1, 2.5] });
     const attacker = entity({ id: 'player', bodyKind: 'player', position: [6.5, 1, 2.5] });

@@ -1,0 +1,97 @@
+{
+  "M01-02": {
+    "expected": "每个结果绑定 profile/scenario/reference-set 版本、source/lock/Pack/资源摘要、OS/Node/浏览器/真实后端、seed/初态/RNG/tick 输入与权威状态；缺任一身份即 BLOCKED。",
+    "negative": "修改产物或后端身份后复用旧 receipt 必须拒绝。",
+    "source": "harness-acceptance.md"
+  },
+  "M01-03": {
+    "expected": "97 方块、106 非方块物品、30 实体/派生态、150 工作台配方、10 熔炼、129 机制父项和 618 有限变体逐 ID 可追溯；8 个开放状态族单独审核；做/存/排不混算。",
+    "negative": "删去任一固定 ID、改变范围却不升版本或把排除项计作已实现必须失败。",
+    "source": "harness-acceptance.md"
+  },
+  "M01-04": {
+    "expected": "红石电路、多维度、联机及其直接依赖以明确负例排除；原版贴图、音效、字体、源码不进入产品；来源/expected/范围改变须升级版本并重审。",
+    "negative": "完整黑曜石框架点火生成传送门、红石粉铺线成功或原版资产进入产品包必须失败。",
+    "source": "spec.md"
+  },
+  "M24-04": {
+    "expected": "99 个纳入的非方块物品按元数据状态有原创图标与持物映射，缩放后保持像素边界和透明排序，资源摘要可审；共用图集管线单独验收。",
+    "negative": "缺图、错误元数据图标、模糊采样或排除物品从普通生存进入必须失败。",
+    "source": "experience-reference.md"
+  },
+  "M30-01": {
+    "expected": "原创方块材质遵循约 16×16 像素密度、清晰最近邻边界、低多边形体素轮廓和同年代色板/明暗语法；每个纳入状态有映射。",
+    "negative": "高分辨平滑/PBR 风格、缺材质或错状态材质被风格门禁拒绝。",
+    "source": "experience-reference.md"
+  },
+  "M30-04": {
+    "expected": "每个纳入内容记录原创资产生成/编辑/许可来源；两名用户指定评审者逐项签署像素密度、色板、轮廓、动画、UI 与天气昼夜氛围，任一必要项不等效则不通过。",
+    "negative": "原版资产混入、未记录来源或总体平均分掩盖单项失败必须拒绝。",
+    "source": "experience-reference.md"
+  },
+  "M32-02": {
+    "expected": "步行、挖掘、放置、环境等纳入事件有原创声音和材质/空间/增益映射，事件与权威动作同 trace；原版录音不作为交付资产。",
+    "negative": "错材质、缺声、重复同 tick 叠音或原版样本混入必须失败。",
+    "source": "experience-reference.md"
+  },
+  "M32-04": {
+    "expected": "背景音乐、唱片与静默期有版本化触发/随机候选规则和原创曲目来源；固定 RNG 的事件检查与独立听感盲审分开记录。",
+    "negative": "无故连续播放、错误唱片、漏静默、原版音频混入或无人工签署不得通过。",
+    "source": "experience-reference.md"
+  },
+  "M34-01": {
+    "expected": "每个纳入 case 的来源、初态、RNG、逐 tick 输入、字段级 expected、边界负例和版本固定；原版程序不是运行时 oracle，Seedlands 输出不能反推 expected。",
+    "negative": "未审核来源、夹具待定或拿本次 Seedlands 运行结果回填原版 expected 不得标 REFERENCE_READY。",
+    "source": "case-design.md"
+  },
+  "M34-02": {
+    "expected": "Kernel/stdlib 的最低充分确定性行为测试与未来 Classic owner 测试按真实选择计划执行，报告 source SHA、被选文件、通过/失败/跳过，静态门禁和行为结论分层。",
+    "negative": "todo、skip、flaky、无测试、错误 owner 或仅静态检查绿色不得计作玩法 PASS。",
+    "source": "../../docs/ci-testing.md"
+  },
+  "M34-03": {
+    "expected": "唯一生产 BrowserProductHarness 从同一 head SHA 的同一 dist 驱动 P0–P5，真实键鼠输入，经权威提交和 postrender 读回；P5 关闭浏览器后用同一持久化 profile 和 origin 重开，验证 IndexedDB 存档。",
+    "negative": "重建 dist、开发服务器/命令捷径代操作、仅 input ack 或 HTTP 200 必须拒绝。",
+    "source": "harness-acceptance.md"
+  },
+  "M34-04": {
+    "expected": "视觉/音频原始证据与 run/source/scenario 身份绑定；独立原创资源逐内容经指定评审者盲测签署，自动检查与人审结果分别报告。",
+    "negative": "旧截图、其他 SHA、未经授权的原版素材或自动测试替代人审不得通过。",
+    "source": "experience-reference.md"
+  },
+  "M35-01": {
+    "expected": "性能目标须在用户审核的实体设备/OS/驱动/分辨率/视距/场景上预注册正确性、帧时、输入延迟、内存指标和停止阈值；当前设备与阈值 NOT_SET，不得宣称达标。",
+    "negative": "使用 hosted CI 耗时、旧机器样本或未固定 GPU 作为低配性能 PASS 必须拒绝。",
+    "source": "../../docs/performance-execution.md"
+  },
+  "M35-02": {
+    "expected": "区块、光照、流体、AI、渲染热点在独占窗口分项测量 bytes/频率/生命周期/延迟；先 A/A 量噪声并保留原始样本。",
+    "negative": "并发负载、无 A/A 或只报核函数倍率而不计准备/传输/整帧不得作为性能证据。",
+    "source": "../../docs/development-governance.md"
+  },
+  "M35-03": {
+    "expected": "每个优化先固定 A/B、主次指标、否决线和停止线，平衡交错比较；共存候选再做组合端到端对照，玩法正确性不可退化。",
+    "negative": "未预注册就放宽阈值、多个维度同时变更却声称单因素收益或回归仍采用必须失败。",
+    "source": "../../docs/development-governance.md"
+  },
+  "M36-01": {
+    "expected": "每个实施单元记录需求 ID、状态 owner、预计/实际 diff、RED/GREEN 与跨层证据；Kernel 未获独立审批时零生产改动，stdlib 警告和 Playbook 正常项分开登记。",
+    "negative": "未审批 Kernel diff、Web 补丁绕过权威状态或问题跨层却只记一行必须阻断。",
+    "source": "boundary-ledger.md"
+  },
+  "M36-02": {
+    "expected": "设计、代码、玩法、资源/版权与安全审核保留各自证据和 reviewer；原版资源/代码不进入产品，来源许可证不能由第三方自称直接推定。",
+    "negative": "自动静态绿当做人审、重构仓库自称 MIT 当作 Mojang 授权或泄漏原版资产必须失败。",
+    "source": "reference-provenance-audit.md"
+  },
+  "M36-03": {
+    "expected": "按项目治理保存版本化 spec、任务状态、估算重估、交付快照和 PR/CI 当前 SHA 读回；实施准出与发布/合并分开。",
+    "negative": "无变更合同、拿旧 SHA 的 CI 冒充新版本或自动合并不得通过。",
+    "source": "../../docs/development-governance.md"
+  },
+  "M36-04": {
+    "expected": "新增边缘反例、来源冲突和范围变化进入可追踪队列，更新 case/变体分母、版本、预算并重审；整份合同未关前不得局部放行开工。",
+    "negative": "悄悄删行、把 REFERENCE_GAP 改成 N/A 或仅以小切面通过宣布全量 READY 必须失败。",
+    "source": "contract-audit.md"
+  }
+}

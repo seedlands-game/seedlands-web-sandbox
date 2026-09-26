@@ -1,0 +1,17 @@
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts 59ms (unchanged)
+apps/web/tests/e2e/classic-support/scenario.test.ts 21ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 56ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md 7ms (unchanged)
+5:47:22 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  05:47:22
+   Duration  614ms (transform 423ms, setup 0ms, import 513ms, tests 6ms, environment 0ms)
+
+$ tsc -p tsconfig.classic-tests.json --noEmit
+Checking formatting...
+All matched files use Prettier code style!

@@ -1,0 +1,56 @@
+1:12:09 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts (10 tests | 2 failed) 309ms
+     × preflights all partition deaths and leaves ECS and Combat unchanged on the last drop allocation failure 69ms
+     × commits starvation death and cancels an incoming combat action in the same prepared effects 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts > registered Needs is the real composed consumer > preflights all partition deaths and leaves ECS and Combat unchanged on the last drop allocation failure
+AssertionError: expected [Function] to throw error matching /sequence.*exhausted/i but got 'Module lifecycle failed: seedlands:ad…'
+
+- Expected:
+/sequence.*exhausted/i
+
++ Received:
+"Module lifecycle failed: seedlands:advance-needs: STATE_CONFLICT: death-inventory-policy-unavailable"
+
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts:255:41
+    253|     const before = world.entities.exportComponentSnapshot();
+    254|     const combat = world.simulation.combat.snapshot();
+    255|     expect(() => world.advanceRules(1)).toThrow(/sequence.*exhausted/i…
+       |                                         ^
+    256|     expect(world.entities.exportComponentSnapshot()).toEqual(before);
+    257|     expect(world.simulation.combat.snapshot()).toEqual(combat);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts > registered Needs is the real composed consumer > commits starvation death and cancels an incoming combat action in the same prepared effects
+Error: Module lifecycle failed: seedlands:advance-needs: STATE_CONFLICT: death-inventory-policy-unavailable
+ ❯ invoke packages/stdlib/src/server/composition/module-lifecycle.ts:115:27
+    113|       busy = false;
+    114|     }
+    115|     if (!result.ok) throw new Error(`Module lifecycle failed: ${operat…
+       |                           ^
+    116|   };
+    117|   const stopActive = () => {
+ ❯ Object.advance packages/stdlib/src/server/composition/module-lifecycle.ts:255:37
+ ❯ Object.advance packages/stdlib/src/server/gameplay/modules/gameplay-module-schedule.ts:93:19
+ ❯ packages/stdlib/src/server/gameplay/gameplay-runtime-lifecycle.ts:128:57
+ ❯ advanceGameplayClock packages/stdlib/src/server/gameplay/gameplay-clock.ts:11:5
+ ❯ advanceGameplayRules packages/stdlib/src/server/gameplay/gameplay-runtime-lifecycle.ts:125:3
+ ❯ advanceGameplayWithEnvironment packages/stdlib/src/server/gameplay/gameplay-environment-coordinator.ts:92:20
+ ❯ Object.advance packages/stdlib/src/server/gameplay/gameplay-environment-coordinator.ts:123:20
+ ❯ GameplayRuntime.advanceRules packages/stdlib/src/server/gameplay/gameplay-runtime.ts:512:96
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-registered-needs.test.ts:270:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 8 passed (10)
+   Start at  01:12:09
+   Duration  1.49s (transform 890ms, setup 0ms, import 1.11s, tests 309ms, environment 0ms)
+

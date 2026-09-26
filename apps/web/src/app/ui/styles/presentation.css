@@ -19,62 +19,25 @@
   font-weight: 600;
 }
 
-#hotbar {
-  gap: 6px;
-  padding: 6px;
-  border: 8px solid transparent;
-  border-image: url('/assets/ui/obsidian-brass-panel.png') 140 fill / 14px / 0 stretch;
-  border-radius: 0;
-  background: var(--ui-surface-strong);
-  backdrop-filter: none;
-}
-
-#ui .game-slot {
-  background: #1a2020;
-  border-color: var(--ui-border-quiet);
-  color: var(--ui-color-content-muted);
-}
-
-#ui .game-slot.active,
-#ui .game-slot[aria-pressed='true'] {
-  color: var(--ui-color-content);
-  border: 2px solid #d6a74f;
-  background: #483a20;
-  box-shadow:
-    inset 0 0 0 1px rgb(242 212 145 / 40%),
-    0 0 8px rgb(202 152 61 / 18%);
-  transform: none;
-}
-
-.slot-swatch {
-  border-radius: 1px;
-}
-
-.slot-key {
-  color: var(--ui-color-content-muted);
-  border-radius: 1px;
-  font-weight: 500;
-}
-
 #ui .map-toggle {
   min-height: 34px;
   width: auto;
   border-image: none;
-  border: 1px solid var(--ui-border);
-  background: rgb(17 22 24 / 90%);
+  border: 2px solid #222;
+  background: #6d6d6d;
 }
 
 #macro-map {
-  border-color: var(--ui-border-quiet);
+  border-color: #202020;
   border-radius: 0;
 }
 
 #debug {
-  color: #d9dfd7;
+  color: #eee;
   border-image: none;
-  border: 1px solid var(--ui-border-quiet);
-  border-radius: 2px;
-  background: rgb(13 19 21 / 90%);
+  border: 2px solid #202020;
+  border-radius: 0;
+  background: #4d4d4d;
 }
 
 #debug-command-shell {
@@ -98,7 +61,7 @@
 }
 
 .debug-command-entry code {
-  color: var(--ui-color-brass-light);
+  color: #fff;
 }
 
 #help {

@@ -102,4 +102,6 @@ Vitest 证明纯逻辑、数据、算法和确定性不变量；Playwright 证�
 
 ## 交付
 
+自 2026-09-23 起，后续功能更新在验收、提交、推送及 PR 更新后，默认继续交付 Cloudflare Pages 的同仓 PR preview：复用通过 Chromium 验收的同一生产 artifact，使用 pr-<PR号> 预览分支，并读回 deployment id、唯一 URL、稳定别名、commit/source/artifact 身份及页面、Worker、Wasm、Pack 和本次新增资源的可访问性。HTTP 200 不能替代玩法验收。该默认授权不包含 production main 部署、DNS/域名、权限或凭据变更，也不允许绕过独立 deployment owner 的未完成迁移；实际部署前必须 live check 平台状态，失败或权限不足时记录准确阻塞，不用旧链接或本地 build 冒充更新。
+
 确认在明确功能分支后，只暂存本 change 的文件，使用语义化本地 commit；按已授权的 PR 交接推送、创建或更新 PR，读回远端 SHA、source/target、URL 与当前 gate 快照后即交棒。人类审核仍待完成，尚未结束的 CI 如实记录；单个 `MERGEABLE` 字段不代表所有门禁通过。后续 CI、合并冲突和 readiness 由用户单独发起，不在原实现任务中常驻等待或自动修复。历史 evidence 不因目录/API 演进而静默改写。具体源码职责与可执行 ESLint 规则见[目录规范](repository-structure.md)。

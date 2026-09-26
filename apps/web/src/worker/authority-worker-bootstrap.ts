@@ -3,6 +3,7 @@ import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/serv
 import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
 import type { StarterEcologyConfiguration } from '@seedlands/stdlib/server/gameplay/actor-profile';
 import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import type { VoxelSemanticsDefinition } from '@seedlands/stdlib/world/voxel-semantics';
 
 export const decodeAuthorityBootstrapResult = (
   message: Extract<AuthorityRequest, { kind: 'authority-bootstrap-result' }>,
@@ -40,6 +41,7 @@ export class AuthorityWorkerBootstrap {
     generatorVersion: number,
     provider: KernelWorldgenProviderIdentity,
     starterEcology: StarterEcologyConfiguration | null,
+    voxelSemantics: readonly VoxelSemanticsDefinition[],
   ): Promise<AuthorityInitialWorldBootstrap> {
     if (this.pending) return Promise.reject(new Error('Authority bootstrap generation is already pending.'));
     const requestId = ++this.sequence;
@@ -55,6 +57,7 @@ export class AuthorityWorkerBootstrap {
       generatorVersion,
       provider,
       starterEcology,
+      voxelSemantics,
     });
     return promise;
   }

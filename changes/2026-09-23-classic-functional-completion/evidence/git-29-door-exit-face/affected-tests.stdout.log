@@ -1,0 +1,10 @@
+8:05:31 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git29-door-exit-face - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git29-door-exit-face
+
+
+ Test Files  4 passed (4)
+      Tests  38 passed (38)
+   Start at  08:05:31
+   Duration  443ms (transform 85ms, setup 0ms, import 134ms, tests 14ms, environment 0ms)
+

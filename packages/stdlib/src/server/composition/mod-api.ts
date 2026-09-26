@@ -20,6 +20,7 @@ export type {
   ModModule,
   ModModuleDescriptor,
   ModRecipeDefinition,
+  ModVoxelDefinition,
   ModRegistrationFacade,
   ModDefinitionCatalog,
   ModuleInvocation,
@@ -29,6 +30,7 @@ export type {
   PackDependency,
   PackKind,
   PackManifest,
+  PackPresentationReference,
   PackDefinition,
   ProviderSelection,
   ModRegistrationIdentity,
@@ -65,6 +67,20 @@ export type {
 
 export { defineInventoryModule } from '../gameplay/modules/inventory-module';
 export { defineContentModule } from '../gameplay/modules/content-module';
+export {
+  defineGameplaySnapshotPredecessorsV1,
+  defineGameplaySnapshotMigrationModule,
+  GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+  matchesGameplaySnapshotPredecessorV1,
+} from '../gameplay/gameplay-snapshot-migration';
+export type {
+  LegacyGameplaySnapshotVersion,
+  GameplaySnapshotPredecessorV1,
+  GameplaySnapshotMigration,
+  GameplaySnapshotMigrationContext,
+  GameplaySnapshotMigrationReport,
+} from '../gameplay/gameplay-snapshot-migration';
+export type { CompositionCheckpointIdentity } from './checkpoint-identity';
 export { defineStandardWorldgenModule, WORLDGEN_PROVIDER_CAPABILITY } from '../worldgen/standard-worldgen-module';
 export type { StandardWorldgenProvider } from '../worldgen/standard-worldgen-module';
 export type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
@@ -91,8 +107,140 @@ export type {
 export { createInventoryCandidate } from '../gameplay/modules/inventory-api';
 export type { ItemDefinitionRegistry, ItemDefinitionInput, ItemStack } from '../gameplay/item-registry';
 export type { Recipe } from '../gameplay/recipe-registry';
+export { createVoxelGeometryRegistryV1 } from '../../world/voxel-geometry';
+export type {
+  VoxelGeometryBoxV1,
+  VoxelGeometryDefinitionV1,
+  VoxelGeometryRegistryV1,
+  VoxelGeometryVectorV1,
+  VoxelRenderBoxV1,
+} from '../../world/voxel-geometry';
+export {
+  defineVoxelGeometryModule,
+  voxelGeometryForComposition,
+  VOXEL_GEOMETRY_CAPABILITY,
+} from '../gameplay/modules/voxel-geometry-module';
+export type { VoxelGeometryModuleOptionsV1 } from '../gameplay/modules/voxel-geometry-module';
+export {
+  defineStructureActionsModuleV1,
+  STRUCTURE_ACTIONS_CAPABILITY,
+  STRUCTURE_ACTOR_COMPONENT,
+  STRUCTURE_BREAK_OPERATION,
+  STRUCTURE_PLACE_OPERATION,
+  STRUCTURE_RESOURCE,
+  STRUCTURE_TOGGLE_OPERATION,
+  STRUCTURE_VOXEL_COMPONENT,
+} from '../gameplay/modules/structure-actions-module';
+export type { StructureActionPolicyV1 } from '../gameplay/modules/structure-actions-module';
+export {
+  defineMediaPlaybackModuleV1,
+  MEDIA_PLAYBACK_CAPABILITY,
+  MEDIA_PLAYBACK_COMPONENT,
+  MEDIA_PLAYBACK_RESOURCE,
+  MEDIA_INSERT_OPERATION,
+  MEDIA_INSERT_AND_ACTIVATE_OPERATION,
+  MEDIA_EJECT_OPERATION,
+  MEDIA_ACTIVATE_OPERATION,
+  MEDIA_STOP_OPERATION,
+  MEDIA_SWITCH_OPERATION,
+} from '../gameplay/modules/media-playback-module';
+export type { MediaPlaybackModuleDefinitionV1 } from '../gameplay/modules/media-playback-module';
+export type {
+  MediaDeviceInstanceV1,
+  MediaPlaybackFactV1,
+  MediaPlaybackProjectionV1,
+  MediaResourceReferenceV1,
+} from '../gameplay/modules/media-playback-model';
+export { defineItemInteractionModule, ITEM_INTERACTION_CAPABILITY } from '../gameplay/modules/item-interaction-module';
+export type {
+  ItemInteractionDefinition,
+  ItemInteractionRegistryV1,
+  ItemInteractionTarget,
+  ItemInteractionTrigger,
+} from '../gameplay/modules/item-interaction-module';
+export { defineFluidContainerInteractionModule } from '../gameplay/modules/fluid-container-interaction';
+export type { FluidContainerInteractionConfig } from '../gameplay/modules/fluid-container-interaction';
+export {
+  defineStructureDefinitionV1,
+  resolveStructureRootV1,
+  structureFootprintV1,
+  transitionStructureStateV1,
+} from '../gameplay/modules/structure-definition';
+export type {
+  ResolvedStructureV1,
+  StructureCellReaderV1,
+  StructureDefinitionInputV1,
+  StructureDefinitionV1,
+  StructureFootprintPartV1,
+  StructureOffsetV1,
+  StructurePartDefinitionV1,
+  StructureLegacyStateDefinitionV1,
+  StructurePositionV1,
+  StructureStateDefinitionV1,
+  StructureTransitionDefinitionV1,
+} from '../gameplay/modules/structure-definition';
+export {
+  createStructureDefinitionRegistryV1,
+  defineStructureDefinitionModule,
+  STRUCTURE_DEFINITIONS_CAPABILITY,
+} from '../gameplay/modules/structure-definition-module';
+export type {
+  StructureDefinitionModuleOptions,
+  StructureDefinitionRegistryV1,
+  StructureVariantResolutionV1,
+} from '../gameplay/modules/structure-definition-module';
+export {
+  assertStructureMultiEditReadsV1,
+  buildStructurePlacementCandidateV1,
+  buildStructureTransitionCandidateV1,
+  prepareStructureMultiEditParticipantV1,
+  validateStructureMultiEditCandidateV1,
+} from '../gameplay/modules/structure-multi-edit-model';
+export type {
+  PreparedStructureMultiEditParticipantV1,
+  PreparedStructureVoxelBatchV1,
+  StructureMultiEditCandidateV1,
+  StructureMultiEditHostV1,
+  StructureVoxelEditCandidateV1,
+} from '../gameplay/modules/structure-multi-edit-model';
 
 export { defineModeModule } from '../gameplay/modules/mode-module';
+export { ARMOR_SLOTS, isArmorSlot } from '../gameplay/modules/armor-policy';
+export type { ArmorSlot } from '../gameplay/modules/armor-policy';
+export {
+  DEATH_INVENTORY_POLICY_CAPABILITY,
+  defineDeathInventoryPolicyModuleV1,
+  resolveDeathInventoryPolicyCapabilityV1,
+} from '../gameplay/modules/death-inventory-policy-module';
+export type {
+  ActorDeathPolicyKindV1,
+  DeathInventoryPolicyCapabilityV1,
+  DeathInventoryPolicyDefinitionV1,
+} from '../gameplay/modules/death-inventory-policy-module';
+export {
+  buildDeathInventorySettlementCandidateV1,
+  freezeDeathInventorySettlementPolicyV1,
+  prepareDeathInventorySettlementParticipantV1,
+  prepareDeathInventorySettlementSeriesV1,
+} from '../gameplay/death-inventory-settlement';
+export type {
+  DeathInventoryAdditionalActorReplacementV1,
+  DeathInventoryDropIntentV1,
+  DeathInventoryDropSourceV1,
+  DeathInventoryIntrinsicDropV1,
+  DeathInventorySettlementCandidateV1,
+  DeathInventorySettlementDispositionV1,
+  DeathInventorySettlementPolicyV1,
+  DeathInventorySettlementSourceV1,
+} from '../gameplay/death-inventory-settlement';
+export type {
+  InventoryCursorOriginV1,
+  InventoryCursorV1,
+  InventoryEquipmentProjectionV1,
+  InventoryPointerCandidateV1,
+  InventoryPointerInputV1,
+  InventoryPointerSlotRef,
+} from '../gameplay/modules/inventory-pointer-contract';
 
 export { defineRulesetModule } from '../gameplay/modules/ruleset-module';
 export type { WorldRulesetDefinition, WorldRulesetV1 } from '../gameplay/modules/ruleset-module';
@@ -114,6 +262,7 @@ export {
   buildBlockAdvanceUpdates,
 } from '../gameplay/modules/block-actions-module';
 export type { VoxelGameplayDefinition } from '../gameplay/voxel-gameplay';
+export type { VoxelSemanticsDefinition, VoxelSemanticsRegistry } from '../../world/voxel-semantics';
 export type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 export { defineBlockRulesModule } from '../gameplay/modules/block-rules-module';
 export * from '../gameplay/modules/block-action-model';
@@ -132,6 +281,7 @@ export type {
   ShapedStationRecipe,
   ShapelessStationRecipe,
 } from '../gameplay/modules/station-candidates';
+export { stationRecipeFitsGrid } from '../gameplay/modules/station-candidates';
 export type { FurnaceRecipe, FurnaceFuel, FurnaceSnapshotV1 } from '../gameplay/modules/furnace-candidates';
 
 export { defineStationActionsModule } from '../gameplay/modules/station-actions-module';

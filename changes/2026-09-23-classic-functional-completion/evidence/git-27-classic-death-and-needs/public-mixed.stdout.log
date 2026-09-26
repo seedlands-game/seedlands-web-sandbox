@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /private/tmp/seedlands-git27-death
+
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  02:41:55
+   Duration  265ms (transform 144ms, setup 0ms, import 175ms, tests 22ms, environment 0ms)
+

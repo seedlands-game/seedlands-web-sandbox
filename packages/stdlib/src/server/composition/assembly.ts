@@ -8,6 +8,7 @@ import {
   type WorldResourceRegistration,
 } from '../harness/world-authorization';
 import type * as Contract from './contracts';
+import { definePackDefinition, normalizeModuleDescriptor } from './pack-definition';
 
 const SHA256 = /^[a-f0-9]{64}$/i;
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
@@ -16,7 +17,6 @@ const EXACT_VERSION =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 const OPERATIONS: readonly WorldOperation[] = ['read', 'execute', 'write', 'control', 'export', 'restore'];
 
-const freezeArray = <Value>(values: readonly Value[]): readonly Value[] => Object.freeze([...values]);
 const contractKey = (contract: Contract.CapabilityContract) => `${contract.id}@${contract.version}`;
 const selectionKey = (selection: Contract.ProviderSelection) => `${selection.capability}\0${selection.moduleId}`;
 const codeUnitCompare = (left: string, right: string): number => (left < right ? -1 : left > right ? 1 : 0);
@@ -44,34 +44,6 @@ const assertVersion = (version: string, kind: string): void => {
   if (!EXACT_VERSION.test(version))
     throw new TypeError(`${kind} version must use the initial exact-version contract: ${version || '<empty>'}`);
 };
-
-const freezePermission = (permission: Contract.ModulePermission): Contract.ModulePermission =>
-  Object.freeze({ resource: permission.resource, operations: Object.freeze([...permission.operations]) });
-
-const normalizeDescriptor = (descriptor: Contract.ModModuleDescriptor): Contract.ModModuleDescriptor =>
-  Object.freeze({
-    id: descriptor.id,
-    version: descriptor.version,
-    ...(descriptor.provides
-      ? { provides: Object.freeze(descriptor.provides.map((entry) => Object.freeze({ ...entry }))) }
-      : {}),
-    ...(descriptor.requires
-      ? { requires: Object.freeze(descriptor.requires.map((entry) => Object.freeze({ ...entry }))) }
-      : {}),
-    ...(descriptor.replaces
-      ? { replaces: Object.freeze(descriptor.replaces.map((entry) => Object.freeze({ ...entry }))) }
-      : {}),
-    ...(descriptor.resources
-      ? {
-          resources: Object.freeze(
-            descriptor.resources.map((entry) =>
-              Object.freeze({ id: entry.id, operations: Object.freeze([...entry.operations]) }),
-            ),
-          ),
-        }
-      : {}),
-    ...(descriptor.permissions ? { permissions: Object.freeze(descriptor.permissions.map(freezePermission)) } : {}),
-  });
 
 const assertUnique = (values: readonly string[], label: string): void => {
   const seen = new Set<string>();
@@ -153,6 +125,11 @@ const validateManifest = (manifest: Contract.PackManifest): void => {
   assertUnique(manifest.resources ?? [], `${manifest.id} resource artifact`);
   for (const path of manifest.resources ?? [])
     if (!path.trim()) throw new TypeError('Resource path must not be empty.');
+  if (manifest.presentation) {
+    if (!manifest.presentation.path.trim()) throw new TypeError('Pack presentation path must not be empty.');
+    if (!(manifest.resources ?? []).includes(manifest.presentation.path))
+      throw new TypeError(`Pack presentation resource must be declared: ${manifest.id}`);
+  }
   const selections = manifest.providerSelections ?? [];
   assertUnique(
     selections.map((selection) => selection.capability),
@@ -213,19 +190,7 @@ const permissionIncludes = (
 
 /** Defines Pack authoring data without claiming that any artifact bytes were verified. */
 export function definePack(input: Contract.PackDefinitionInput): Contract.PackDefinition {
-  const modules = freezeArray(input.modules ?? []);
-  const manifest: Contract.PackManifest = Object.freeze({
-    schemaVersion: 1,
-    id: input.id,
-    version: input.version,
-    kind: input.kind,
-    entry: input.entry ?? `./${input.id.replace(':', '-')}.mjs`,
-    modules: Object.freeze(modules.map((entry) => entry.descriptor)),
-    ...(input.dependencies ? { dependencies: freezeArray(input.dependencies) } : {}),
-    ...(input.resources ? { resources: freezeArray(input.resources) } : {}),
-    ...(input.providerSelections ? { providerSelections: freezeArray(input.providerSelections) } : {}),
-  });
-  return Object.freeze({ manifest, modules });
+  return definePackDefinition(input);
 }
 
 export function assembleWorldPacks(
@@ -252,7 +217,7 @@ export function assembleWorldPacks(
         integrity: artifact.integrity,
         modules: Object.freeze(
           artifact.modules.map((entry) =>
-            Object.freeze({ descriptor: normalizeDescriptor(entry.descriptor), register: entry.register }),
+            Object.freeze({ descriptor: normalizeModuleDescriptor(entry.descriptor), register: entry.register }),
           ),
         ),
       }),
@@ -347,7 +312,10 @@ export function assembleWorldPacks(
       if (BUILTIN_WORLD_RESOURCES.includes(resource.id as (typeof BUILTIN_WORLD_RESOURCES)[number]))
         throw new TypeError(`Module cannot replace a built-in world resource: ${resource.id}`);
       if (resourceById.has(resource.id)) throw new TypeError(`Duplicate module resource: ${resource.id}`);
-      resourceById.set(resource.id, Object.freeze({ id: resource.id, operations: freezeArray(resource.operations) }));
+      resourceById.set(
+        resource.id,
+        Object.freeze({ id: resource.id, operations: Object.freeze([...resource.operations]) }),
+      );
     }
   const knownResources = new Set<string>([...BUILTIN_WORLD_RESOURCES, ...resourceById.keys()]);
   const moduleBindings: Record<string, { packId: string; permissions: readonly Contract.ModulePermission[] }> = {};
@@ -361,7 +329,11 @@ export function assembleWorldPacks(
     }
     moduleBindings[moduleId] = Object.freeze({
       packId,
-      permissions: Object.freeze((module.descriptor.permissions ?? []).map(freezePermission)),
+      permissions: Object.freeze(
+        (module.descriptor.permissions ?? []).map((permission) =>
+          Object.freeze({ resource: permission.resource, operations: Object.freeze([...permission.operations]) }),
+        ),
+      ),
     });
   }
 
@@ -369,7 +341,7 @@ export function assembleWorldPacks(
   const lifecycleRegistration = createLifecycleRegistration();
   const capabilityValues = new Map<string, unknown>();
   const contentRegistration = createContentRegistration();
-  const { items, recipes } = contentRegistration;
+  const { items, recipes, voxels, actorProfiles } = contentRegistration;
   const finalizers: ((definitions: Contract.ModDefinitionCatalog) => void)[] = [];
   let definitionsReady = false;
   for (const moduleId of moduleOrder) {
@@ -392,6 +364,8 @@ export function assembleWorldPacks(
         return Object.freeze({
           items: Object.freeze([...items.values()]),
           recipes: Object.freeze([...recipes.values()]),
+          voxels: Object.freeze([...voxels.values()]),
+          actorProfiles: Object.freeze([...actorProfiles.values()]),
         });
       },
       onDefinitionsReady(finalize: (definitions: Contract.ModDefinitionCatalog) => void) {
@@ -484,6 +458,11 @@ export function assembleWorldPacks(
         .sort((a, b) => codeUnitCompare(a.id, b.id))
         .map((recipe) => Object.freeze({ id: recipe.id, storageId: recipe.storageId ?? recipe.id })),
     ),
+    voxels: Object.freeze(
+      [...voxels.values()]
+        .sort((a, b) => codeUnitCompare(a.id, b.id))
+        .map((voxel) => Object.freeze({ id: voxel.id, storageId: voxel.storageId })),
+    ),
     systems: registeredLifecycle.systems,
     lifecycles: registeredLifecycle.lifecycles,
   });
@@ -503,6 +482,7 @@ export function assembleWorldPacks(
       ...registeredLifecycle,
       items: Object.freeze([...items.values()].sort((a, b) => codeUnitCompare(a.id, b.id))),
       recipes: Object.freeze([...recipes.values()].sort((a, b) => codeUnitCompare(a.id, b.id))),
+      voxels: Object.freeze([...voxels.values()].sort((a, b) => codeUnitCompare(a.id, b.id))),
     }),
     moduleBindings: Object.freeze(moduleBindings),
   });

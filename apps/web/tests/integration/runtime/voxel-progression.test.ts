@@ -55,9 +55,10 @@ describe('S4 voxel progression palette', () => {
     ).toEqual(samples.map((sample) => sample.hash));
   });
 
-  it('assigns stable IDs and complete full-cube materials to the five new voxels', () => {
-    expect(GENERATOR_VERSION).toBe(4);
-    expect(MAX_VOXEL_ID).toBe(Voxel.IronOre);
+  it('assigns stable IDs and complete materials to the expanded voxel palette', () => {
+    expect(GENERATOR_VERSION).toBe(11);
+    expect(MAX_VOXEL_ID).toBe(Voxel.BlackWool);
+    expect([Voxel.Farmland, Voxel.Lava, Voxel.Obsidian, Voxel.Fire, Voxel.Tnt]).toEqual([26, 27, 28, 29, 30]);
     expect([Voxel.Workbench, Voxel.Chest, Voxel.Furnace, Voxel.CoalOre, Voxel.IronOre]).toEqual([11, 12, 13, 14, 15]);
     expect([
       FaceMaterial.Workbench,
@@ -73,9 +74,35 @@ describe('S4 voxel progression palette', () => {
       faceMaterialFor(Voxel.CoalOre, 0, false),
       faceMaterialFor(Voxel.IronOre, 1, false),
     ]).toEqual([14, 15, 16, 17, 18]);
-    expect(MATERIAL_LAYER_COUNT).toBe(18);
-    expect(terrainMaterials).toHaveLength(18);
-    expect(builtinTerrainTextures).toHaveLength(18);
+    expect([
+      FaceMaterial.Farmland,
+      FaceMaterial.Lava,
+      FaceMaterial.Obsidian,
+      FaceMaterial.Fire,
+      FaceMaterial.Tnt,
+    ]).toEqual([29, 30, 31, 32, 33]);
+    expect([
+      FaceMaterial.Sapling,
+      FaceMaterial.TallGrass,
+      FaceMaterial.Flower,
+      FaceMaterial.Mushroom,
+      FaceMaterial.SugarCane,
+      FaceMaterial.Cactus,
+    ]).toEqual([34, 35, 36, 37, 38, 39]);
+    expect(FaceMaterial.Spawner).toBe(40);
+    expect(FaceMaterial.DungeonChest).toBe(41);
+    expect(FaceMaterial.DetectorRail).toBe(44);
+    expect([
+      FaceMaterial.Bedrock,
+      FaceMaterial.Gravel,
+      FaceMaterial.LapisOre,
+      FaceMaterial.Clay,
+      FaceMaterial.Ice,
+      FaceMaterial.SnowBlock,
+    ]).toEqual([45, 46, 47, 48, 49, 50]);
+    expect(MATERIAL_LAYER_COUNT).toBe(92);
+    expect(terrainMaterials).toHaveLength(92);
+    expect(builtinTerrainTextures).toHaveLength(92);
     for (const [material, textureName] of [
       [FaceMaterial.Workbench, 'workbench'],
       [FaceMaterial.Chest, 'chest'],
@@ -88,13 +115,13 @@ describe('S4 voxel progression palette', () => {
       expect(terrainMaterials.find((candidate) => candidate.faceMaterial === material)?.textureId).toBe(texture?.id);
     }
     const signatures = builtinTerrainTextures
-      .slice(-5)
+      .filter((texture) => /\/(workbench|chest|furnace|coal-ore|iron-ore)$/.test(texture.id))
       .map((texture) => createHash('sha256').update(Uint8Array.from(texture.payload.pixels)).digest('hex'));
     expect(new Set(signatures).size).toBe(5);
   });
 
   it('keeps the staged path byte-identical for versions 2, 3, and 4', () => {
-    for (const version of [2, 3, 4])
+    for (const version of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
       for (const [cx, cy, cz] of [
         [0, 0, 0],
         [-2, -1, 3],
@@ -109,6 +136,25 @@ describe('S4 voxel progression palette', () => {
       [Voxel.Furnace, FaceMaterial.Furnace],
       [Voxel.CoalOre, FaceMaterial.CoalOre],
       [Voxel.IronOre, FaceMaterial.IronOre],
+      [Voxel.GoldOre, FaceMaterial.GoldOre],
+      [Voxel.DiamondOre, FaceMaterial.DiamondOre],
+      [Voxel.IronBlock, FaceMaterial.IronBlock],
+      [Voxel.GoldBlock, FaceMaterial.GoldBlock],
+      [Voxel.DiamondBlock, FaceMaterial.DiamondBlock],
+      [Voxel.Sandstone, FaceMaterial.Sandstone],
+      [Voxel.StoneBricks, FaceMaterial.StoneBricks],
+      [Voxel.Spawner, FaceMaterial.Spawner],
+      [Voxel.DungeonChest, FaceMaterial.DungeonChest],
+      [Voxel.Rail, FaceMaterial.Rail],
+      [Voxel.PoweredRail, FaceMaterial.PoweredRail],
+      [Voxel.DetectorRail, FaceMaterial.DetectorRail],
+      [Voxel.Bedrock, FaceMaterial.Bedrock],
+      [Voxel.Gravel, FaceMaterial.Gravel],
+      [Voxel.LapisOre, FaceMaterial.LapisOre],
+      [Voxel.Clay, FaceMaterial.Clay],
+      [Voxel.Ice, FaceMaterial.Ice],
+      [Voxel.SnowBlock, FaceMaterial.SnowBlock],
+      [Voxel.LapisBlock, FaceMaterial.LapisBlock],
     ] as const;
     for (const [voxel, material] of expected) {
       const data = new Uint16Array(32 ** 3);

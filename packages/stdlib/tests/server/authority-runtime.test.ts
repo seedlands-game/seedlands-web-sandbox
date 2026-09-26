@@ -327,3 +327,36 @@ describe('AuthorityRuntime', () => {
     expect(runtime.wake(4_000 / 60).diagnostics?.recoveryResults).toHaveLength(recoveryCount ?? 0);
   });
 });
+
+it('暂停确定性推进耗尽Logic请求后，恢复运行会重新发布观察', async () => {
+  const observations: import('../../src/server/logic/logic-protocol').LogicObservation[] = [];
+  const runtime = await AuthorityRuntime.create({
+    platform: testCorePlatform,
+    epoch: 'logic-resume',
+    seedText: 'logic-resume',
+    initialWorldTime: 9,
+    startTimeMs: 0,
+    initialPlayerBodyPosition: [0.5, 33, 0.5],
+    onLogicObservation: (observation) => observations.push(observation),
+  });
+  runtime.pause(0);
+  runtime.requestLogicObservation();
+  runtime.advancePausedSession(100);
+  const previous = observations.at(-1)!;
+  expect(previous).toBeDefined();
+  expect(
+    runtime.receiveLogicIntentBatch({
+      protocolVersion: 1,
+      epoch: previous.epoch,
+      observationSequence: previous.observationSequence,
+      expiresAtPhysicsTick: previous.physicsTick + 12,
+      intents: [],
+    }),
+  ).toBe(true);
+  const count = observations.length;
+  expect(runtime.settlementDiagnostics.logicObservationRequested).toBe(false);
+  runtime.resume(1000);
+  runtime.wake(1100);
+  expect(observations.length).toBeGreaterThan(count);
+  expect(observations.at(-1)!.physicsTick).toBeGreaterThan(previous.physicsTick);
+});

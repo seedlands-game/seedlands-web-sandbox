@@ -1,0 +1,10 @@
+d4cb30009727cff20e4039f67c4cbd5095131473d330c7eb980f28a49cbef474  packages/stdlib/src/server/gameplay/modules/registered-combat-runtime.ts
+4e68f7fb2fe4ab3634f40e076decdb56dcbb364869704175cf9de9d30effb661  packages/stdlib/src/server/gameplay/prepared-combat-damage.ts
+ac6e8d928c3d950dd45db4cc9cd52b61bce422e137ead58216a0b1e4698d53d0  packages/stdlib/tests/server/registered-combat-death.test.ts
+149bfea5d85244adb73540b3ec2c7272b0629dbb95d63fb5f5974a8a9afa42de  packages/stdlib/tests/server/registered-combat-armor.test.ts
+b56f2fdb6e4ffaa69422c1da3cdc85c7539d4c152ab16ec69a06b4d2f522299c  apps/web/tests/integration/runtime/server/prepared-combat-damage.test.ts
+a7d4ea647d2d581f38bd7ff7b831108bac03d74ea1095e2c226e5cbca4382328  apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts
+503a8b73085a98b74ad154f2f87a53c808f7b3c881ed38fe759791cca4ca317d  apps/web/tests/integration/runtime/server/composition/gameplay-registered-combat.test.ts
+86739a05580f6d8b5d43e7a390c5cedc7094f5c59489f61bdc1249c4606e7161  changes/2026-09-23-classic-functional-completion/spec.md
+357340f05f42e29832d063ae85a5f772e31f3c9e11f8412d3399852facc2f598  changes/2026-09-23-classic-functional-completion/death-combat-contract.md
+371460f59b876093d0b8b103ae6dddadcf3573e720c7f1cbd40bbac15e43ca8e  changes/2026-09-23-classic-functional-completion/death-combat-evidence.md

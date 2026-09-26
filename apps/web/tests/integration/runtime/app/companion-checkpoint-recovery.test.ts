@@ -10,6 +10,10 @@ import {
 import { CognitionTimeline } from '../../../../src/client/persistence/cognition-timeline';
 import { assembleOverworldPacks } from '@seedlands/stdlib/host';
 import { pack as overworld } from '../../../../../../playbooks/classic/src/pack';
+import {
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN,
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE,
+} from '../../../../src/client/persistence/legacy-gameplay-provenance-error';
 
 const createComposition = () =>
   assembleOverworldPacks([
@@ -19,7 +23,7 @@ const createComposition = () =>
         algorithm: 'sha256',
         manifestDigest: 'a'.repeat(64),
         entryDigest: 'b'.repeat(64),
-        resources: [],
+        resources: (overworld.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
       },
     },
   ]);
@@ -395,6 +399,53 @@ it('clears a newly reserved cognition restore when the world restore promise rej
     expect(status.ok && status.data.paused).toBe(false);
   } finally {
     await source.dispose();
+    await current.dispose();
+  }
+}, 15000);
+
+it('reports unknown legacy provenance without changing the active world', async () => {
+  vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn(), removeItem: vi.fn() });
+  const current = await HeadlessSession.create({
+    createComposition: createClassicComposition,
+    platform: testCorePlatform,
+    seedText: 'legacy-feedback-current',
+  });
+  try {
+    const application = await captureApplicationCheckpoint(current.world, null, null);
+    const before = await current.world.identity();
+    const checkpoint = vi.fn(async () => ({
+      ok: false as const,
+      error: {
+        kind: 'validation' as const,
+        code: 'WORLD_RPC_INVALID',
+        message: `${LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN}: missing source`,
+      },
+    }));
+    const session = new CompanionSession(
+      () => ({
+        world: new Proxy(current.world, {
+          get(port, property) {
+            return property === 'checkpoint' ? checkpoint : Reflect.get(port, property);
+          },
+        }),
+        character: (request) => current.world.character(request),
+        bindCharacter: async () => {
+          throw new Error('no actors');
+        },
+      }),
+      () => false,
+    );
+
+    await session.importCheckpoint(new File([encodeApplicationCheckpoint(application)], 'legacy-v3.json'));
+
+    expect(checkpoint).toHaveBeenCalledOnce();
+    expect(session.get().error).toBe(LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE);
+    expect(await current.world.identity()).toEqual({
+      ...before,
+      frontier: { ...before.frontier, commitSequence: before.frontier.commitSequence + 2 },
+    });
+    session.stop();
+  } finally {
     await current.dispose();
   }
 }, 15000);

@@ -1,10 +1,11 @@
 import { assertGeneratedChunk, requireWorldgenProvider, type KernelWorldgenProvider } from '@seedlands/kernel/spatial';
-import { chunkKey } from '../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../world/voxel';
 import { legacyFluid } from './fluid/fluid-cell-state';
 import type { EntityStore } from './gameplay/entity-store';
 import type { StationStateCodec } from './gameplay/ecs-station-state';
 import type { ServerChunk } from './game-server-types';
 import type { ChunkPersistence } from './persistence/chunk-persistence';
+import type { VoxelSemanticsResolver } from '../world/voxel-semantics';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import { restoreServerChunk } from './server-chunk-restore';
 import { assertStationChunkIntegrity, stationChunkKeys } from './station-world-integrity';
@@ -21,6 +22,8 @@ type Input = Readonly<{
   currentEntities: EntityStore;
   candidateEntities: EntityStore;
   stationCodec?: StationStateCodec;
+  voxelSemantics?: VoxelSemanticsResolver;
+  mediaPositions?: readonly (readonly [number, number, number])[];
 }>;
 
 export function generateGameServerChunk(
@@ -72,6 +75,8 @@ export function generateGameServerChunk(
 /** Builds every station-dependent Chunk before the live gameplay owner is exchanged. */
 export async function prepareGameServerRestoreChunks(input: Input): Promise<Map<string, ServerChunk>> {
   const keys = new Set([...stationChunkKeys(input.currentEntities), ...stationChunkKeys(input.candidateEntities)]);
+  for (const [x, y, z] of input.mediaPositions ?? [])
+    keys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
   const prepared = new Map<string, ServerChunk>();
   for (const key of keys) {
     const [cx, cy, cz] = key.split(',').map(Number) as [number, number, number];
@@ -81,14 +86,18 @@ export async function prepareGameServerRestoreChunks(input: Input): Promise<Map<
     let chunk: ServerChunk;
     if (snapshot) {
       if (
-        !isValidChunkSnapshot(snapshot, {
-          seedText: input.seedText,
-          generatorVersion: input.generatorVersion,
-          key,
-          cx,
-          cy,
-          cz,
-        })
+        !isValidChunkSnapshot(
+          snapshot,
+          {
+            seedText: input.seedText,
+            generatorVersion: input.generatorVersion,
+            key,
+            cx,
+            cy,
+            cz,
+          },
+          input.voxelSemantics,
+        )
       )
         throw new Error(`Persisted canonical Chunk is invalid for ${key}.`);
       chunk = restoreServerChunk(snapshot, input.accessEpoch + prepared.size + 1);

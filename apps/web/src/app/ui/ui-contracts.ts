@@ -3,7 +3,7 @@ import type { StationUiPresentation } from './station-ui-projector';
 import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
-import type { GameplayItemPresentation } from './gameplay-ui-projector';
+import type { GameplayEquipmentPresentation, GameplayItemPresentation } from './gameplay-ui-projector';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 
@@ -41,13 +41,19 @@ export type ShellState = Readonly<{
     station?: StationUiPresentation | null;
     inventoryOpen: boolean;
     cursor?: GameplayItemPresentation | null;
+    personalCrafting: Readonly<{
+      slots: readonly GameplayItemPresentation[];
+      recipes: NonNullable<StationUiPresentation>['recipes'];
+    }>;
     inventoryIdentity?: string;
+    equipment: GameplayEquipmentPresentation;
     lifecycle: 'alive' | 'dead';
     mode: ActorMode;
     flightEnabled: boolean;
     inventory: readonly GameplayItemPresentation[];
     creativeCatalog: readonly GameplayItemPresentation[];
     selectedHotbarSlot: number;
+    hotbarSize?: number;
     craftableRecipeIds: readonly string[];
     recipes: readonly Readonly<{
       id: string;
@@ -56,6 +62,7 @@ export type ShellState = Readonly<{
       result: string;
       craftable: boolean;
     }>[];
+    progress?: import('@seedlands/stdlib/server/gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
   }>;
 }>;
 
@@ -65,6 +72,8 @@ export type HudState = Readonly<{
   worldClock: string;
   health: Readonly<{ value: number; max: number }>;
   hunger: Readonly<{ value: number; max: number }>;
+  armor: Readonly<{ value: number; max: number }>;
+  oxygen: Readonly<{ value: number; max: number; visible: boolean }>;
   mode: ActorMode;
   flightEnabled: boolean;
   selectedHotbarSlot: number;
@@ -85,9 +94,9 @@ export type InteractionState = Readonly<{
   breaking: Readonly<{ progress: number; label: string }> | null;
   presentedEntities: readonly Readonly<{
     id: string;
-    type: 'world-item' | 'creature' | 'npc';
+    type: 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
     label: string;
-    archetype?: 'grazer' | 'night-stalker' | 'settler';
+    archetype?: import('@seedlands/stdlib/server/gameplay/entity-store').ActorArchetype;
     behavior?: string;
     position: readonly [number, number, number];
   }>[];
@@ -143,7 +152,6 @@ export type UiActionPort = {
   setCreativeSlot: (slot: number, itemId: string | null) => void;
   toggleInventory: () => void;
   closeInventory: () => void;
-  craftRecipe: (recipeId: string) => void;
   inventoryPointer: (command: InventoryUiCommand) => Promise<boolean>;
   useInventoryItem: (slot: number) => void;
   respawn: () => void;

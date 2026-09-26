@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git23-stdlib-types",
+  "pid": 28166,
+  "startedAt": "2026-09-25T13:08:37.671Z",
+  "windowId": "git23-stdlib-types",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-23-registered-combat-armor/stdlib-types-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T13:08:41.650Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T13:08:37.672Z",
+      "loadAverage": [
+        3.56689453125,
+        3.4296875,
+        3.291015625
+      ],
+      "freeMemoryBytes": 792543232,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T13:08:41.649Z",
+      "loadAverage": [
+        3.56689453125,
+        3.4296875,
+        3.291015625
+      ],
+      "freeMemoryBytes": 702480384,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

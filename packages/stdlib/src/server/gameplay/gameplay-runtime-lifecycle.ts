@@ -1,6 +1,6 @@
 import type { WorldModuleBinding } from '../commands/module-command';
 import type { EntityStore } from './entity-store';
-import type { PlayerState } from './player-state';
+import { PlayerState } from './player-state';
 import type { EntitySpawn, GameplayEntity } from './entity-store';
 import type { ActorProfileRegistry } from './actor-profile';
 import type { ActorRegistration, AutonomyRuntime } from '../simulation/autonomy-runtime';
@@ -12,6 +12,12 @@ type Disposable = Readonly<{ dispose(): void }>;
 type ActorRequestRuntime<Result> = Readonly<{
   request(actorId: string, targetId: string, existingActionId?: string, binding?: WorldModuleBinding): Result;
 }>;
+
+export function requireGameplayPlayer(players: ReadonlyMap<string, PlayerState>, id: string): PlayerState {
+  const player = players.get(id);
+  if (!player) throw new RangeError(`Unknown player: ${id}`);
+  return player;
+}
 
 export function disposeGameplayRuntime(schedule: Disposable | null, modules: Disposable): void {
   try {
@@ -64,6 +70,30 @@ export function spawnGameplayAutonomous(
   return entity;
 }
 
+export function spawnGameplayEntity(
+  input: EntitySpawn,
+  options: Readonly<{
+    entities: EntityStore;
+    profiles: ActorProfileRegistry;
+    simulation: AutonomyRuntime;
+    players: Map<string, PlayerState>;
+    playerLimit?: number;
+    changed(): void;
+  }>,
+): GameplayEntity {
+  if (input.type === 'station' || input.kind === 'station')
+    throw new TypeError('Station creation requires a Block transaction.');
+  if (input.type === 'player' && options.players.size >= (options.playerLimit ?? Infinity))
+    throw new RangeError('Needs player membership budget exceeded.');
+  if (input.archetype) options.simulation.validateActorRegistration({ archetype: input.archetype });
+  const entity = options.entities.spawn(resolveProfiledActorSpawn(input, options.profiles));
+  if (entity.type === 'player')
+    options.players.set(entity.id, new PlayerState(entity.id, [...entity.position], undefined, options.entities));
+  if (input.archetype) options.simulation.registerActor(entity.id, { archetype: input.archetype });
+  options.changed();
+  return entity;
+}
+
 export function advanceGameplayRules(
   seconds: number,
   options: Readonly<{
@@ -74,6 +104,7 @@ export function advanceGameplayRules(
     }> | null;
     modules: Readonly<{ flushQueued(): void }>;
     blocks: Readonly<{ drain(): void; takeCommits(): readonly WorldCommitResult[] }> | null;
+    structures?: Readonly<{ takeCommits(): readonly WorldCommitResult[] }> | null;
     players: ReadonlyMap<string, PlayerState>;
     simulation: AutonomyRuntime;
     revision(): number;
@@ -104,8 +135,44 @@ export function advanceGameplayRules(
   });
   if (seconds > 0 && options.revision() === startingRevision) options.touchWithoutEvent();
   commits.push(...(options.blocks?.takeCommits() ?? []));
+  commits.push(...(options.structures?.takeCommits() ?? []));
   return { commits };
 }
+
+export function gameplayAdvanceCommitUpperBound(
+  seconds: number,
+  options: Readonly<{
+    schedule: { previewCommitUpperBound(seconds: number): number } | null;
+    modules: { queuedOperationCount(): number; queuedFlushBound(): number };
+    players: ReadonlyMap<string, PlayerState>;
+    blocks: { pendingOperationUpperBound(bound: number): number } | null;
+    combat: { pendingOperationUpperBound(bound: number): number } | null;
+    simulation: AutonomyRuntime;
+  }>,
+) {
+  const queued = options.modules.queuedOperationCount();
+  const scheduled = options.schedule?.previewCommitUpperBound(seconds) ?? 0;
+  const legacyPlayers = options.schedule ? 0 : Math.ceil(seconds) * options.players.size * 2;
+  const blocks = options.blocks?.pendingOperationUpperBound(options.modules.queuedFlushBound()) ?? 0;
+  const combat = options.combat?.pendingOperationUpperBound(scheduled) ?? 0;
+  return Math.max(
+    1,
+    legacyPlayers + options.simulation.advanceCommitUpperBound(seconds, queued + scheduled + blocks + combat),
+  );
+}
+
+export const advanceGameplayPlayer = (
+  player: PlayerState,
+  seconds: number,
+  commits: WorldCommitResult[],
+  blocks: { advanceBreak(id: string, seconds: number, commits: WorldCommitResult[]): void },
+  vitals: { advanceNeeds(id: string, seconds: number): void },
+  registeredBlocks: unknown,
+  schedule: unknown,
+) => {
+  if (player.lifecycle === 'alive' && !registeredBlocks) blocks.advanceBreak(player.entityId, seconds, commits);
+  if (player.lifecycle === 'alive' && !schedule) vitals.advanceNeeds(player.entityId, seconds);
+};
 
 export function bindRegisteredActorRequest<Result>(
   runtime: ActorRequestRuntime<Result> | null,

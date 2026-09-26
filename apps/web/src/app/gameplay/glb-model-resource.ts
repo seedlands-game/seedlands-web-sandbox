@@ -1,5 +1,6 @@
 import * as pc from 'playcanvas';
 import { loadGlbBlob } from '../../client/persistence/glb-model-store';
+import { loadClassicCreatureBlob } from './classic-creature-resource';
 import type { ModelAnimationPlayback } from './model-animation';
 
 export type GlbModelLease = Readonly<{
@@ -36,7 +37,7 @@ function centerAndNormalize(
   wrapper: pc.Entity,
   source: pc.Entity,
   animated: boolean,
-  verticalAnchor: 'center' | 'feet',
+  verticalAnchor: 'center' | 'feet' | 'authored',
 ): void {
   let minX = Infinity,
     minY = Infinity,
@@ -47,7 +48,7 @@ function centerAndNormalize(
   for (const component of source.findComponents('render')) {
     if (!(component instanceof pc.RenderComponent)) continue;
     component.isStatic = !animated;
-    component.castShadows = false;
+    component.castShadows = verticalAnchor === 'authored';
     for (const instance of component.meshInstances) {
       const { center, halfExtents } = instance.aabb;
       minX = Math.min(minX, center.x - halfExtents.x);
@@ -59,6 +60,7 @@ function centerAndNormalize(
     }
   }
   if (!Number.isFinite(minX)) return;
+  if (verticalAnchor === 'authored') return;
   const transform = normalizeGlbBounds([minX, minY, minZ], [maxX, maxY, maxZ], verticalAnchor);
   wrapper.setLocalPosition(...transform.position);
   wrapper.setLocalScale(transform.scale, transform.scale, transform.scale);
@@ -183,11 +185,15 @@ export async function addGlbModel(
   id: string,
   signal?: AbortSignal,
   suppliedBlob?: Blob,
-  verticalAnchor: 'center' | 'feet' = 'center',
+  verticalAnchor: 'center' | 'feet' | 'authored' = 'center',
+  suppliedUrl?: string,
 ): Promise<GlbModelLease> {
-  const blob = suppliedBlob ?? (await loadGlbBlob(id));
+  const blob = suppliedUrl
+    ? undefined
+    : (suppliedBlob ?? (await (loadClassicCreatureBlob(app, id) ?? loadGlbBlob(id))));
   if (signal?.aborted) throw abortError();
-  const url = URL.createObjectURL(blob);
+  const url = suppliedUrl ?? URL.createObjectURL(blob!);
+  const ownsUrl = suppliedUrl === undefined;
   let asset: pc.Asset | null = null;
   let wrapper: pc.Entity | null = null;
   let source: pc.Entity | null = null;
@@ -201,7 +207,7 @@ export async function addGlbModel(
     if (signal?.aborted) throw abortError();
     const resource = asset.resource as pc.ContainerResource | null;
     if (!resource) throw new Error('GLB 容器资源不可用');
-    source = resource.instantiateRenderEntity({ castShadows: false });
+    source = resource.instantiateRenderEntity({ castShadows: verticalAnchor === 'authored' });
     wrapper = new pc.Entity(`glb-model:${id}`, app);
     wrapper.addChild(source);
     animation = createAnimationPlayback(app, source, resource);
@@ -213,7 +219,7 @@ export async function addGlbModel(
     source?.destroy();
     animation.dispose();
     if (asset) releaseContainer(app, asset);
-    URL.revokeObjectURL(url);
+    if (ownsUrl) URL.revokeObjectURL(url);
     throw error;
   }
   let released = false;
@@ -227,7 +233,7 @@ export async function addGlbModel(
       animation.dispose();
       wrapper?.destroy();
       releaseContainer(app, asset!);
-      URL.revokeObjectURL(url);
+      if (ownsUrl) URL.revokeObjectURL(url);
     },
   };
 }

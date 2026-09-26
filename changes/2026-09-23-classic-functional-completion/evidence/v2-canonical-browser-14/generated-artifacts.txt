@@ -1,0 +1,11 @@
+Playwright generated exactly these files under the acceptance tree test-results directory:
+test-results/.last-run.json
+test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/error-context.md
+test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip
+
+The trace was archived as canonical-trace.zip.part-aaa through canonical-trace.zip.part-aae.
+Original trace size: 227649859 bytes.
+Original/reassembled trace SHA256: ca42ad29f2a3a003cba16ace578a987ec7ffea283802d70ba7bc22227e3d1aa5.
+failure-page.jpeg was mechanically extracted from trace entry:
+resources/page@12de0143f27d715fa3bfaa610002a5b5-1790383756353.jpeg
+No standalone Playwright screenshot was generated outside the trace.

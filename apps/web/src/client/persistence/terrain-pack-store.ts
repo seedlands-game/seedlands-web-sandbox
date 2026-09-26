@@ -1,5 +1,6 @@
 import type { PixelTexture } from '../presentation/asset-types';
 import { validateTerrainTexture } from '../presentation/texture-pack';
+import { FaceMaterial } from '@seedlands/stdlib/world/voxel';
 import { builtinTerrainTextures, terrainMaterial } from '../presentation/terrain-assets';
 
 export type TerrainOverride = { faceMaterial: number; texture: PixelTexture };
@@ -99,8 +100,12 @@ export async function saveTerrainPack(overrides: TerrainOverride[], expectedRevi
 }
 export function resolveTerrainTextures(pack: TerrainPack): PixelTexture[] {
   const checked = decode(pack);
+  const legacyTorch = checked.overrides.find((entry) => entry.faceMaterial === FaceMaterial.Torch);
   return builtinTerrainTextures.map((texture) => {
-    const override = checked.overrides.find((entry) => terrainMaterial(entry.faceMaterial)?.textureId === texture.id);
+    const explicit = checked.overrides.find((entry) => terrainMaterial(entry.faceMaterial)?.textureId === texture.id);
+    const override =
+      explicit ??
+      (texture.id === terrainMaterial(FaceMaterial.TorchFlame)?.textureId && legacyTorch ? legacyTorch : undefined);
     return override ? { ...override.texture, id: texture.id } : texture;
   });
 }

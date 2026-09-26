@@ -180,7 +180,7 @@ impl FluidContext<'_, '_, '_, '_> {
         };
         let voxel = self.voxel(chunk_index, local_index) as u32;
         let stored_fluid = self.fluid(chunk_index, local_index) as u32;
-        let level = if voxel == 8 && stored_fluid == 0 {
+        let level = if (voxel == 8 || voxel == 27) && stored_fluid == 0 {
             0x88
         } else {
             stored_fluid
@@ -192,7 +192,8 @@ impl FluidContext<'_, '_, '_, '_> {
         if position.y < 0 || position.y > 63 {
             return;
         }
-        if self.scratch.next_count >= self.scratch.next.len() || self.scratch.next_count >= MAX_NEXT {
+        if self.scratch.next_count >= self.scratch.next.len() || self.scratch.next_count >= MAX_NEXT
+        {
             self.scratch.needs_rescan = true;
             return;
         }
@@ -218,7 +219,9 @@ impl FluidContext<'_, '_, '_, '_> {
             .iter()
             .any(|write| write.chunk_index == chunk_index && write.local_index == local_index);
         if !seen {
-            if self.scratch.write_count >= self.scratch.writes.len() || self.scratch.write_count >= MAX_WRITES {
+            if self.scratch.write_count >= self.scratch.writes.len()
+                || self.scratch.write_count >= MAX_WRITES
+            {
                 self.scratch.needs_rescan = true;
                 return;
             }
@@ -236,25 +239,25 @@ impl FluidContext<'_, '_, '_, '_> {
         self.set_fluid(chunk_index, local_index, fluid);
     }
 
-    fn place(&mut self, position: FluidPosition, level: i32) {
+    fn place(&mut self, position: FluidPosition, kind: u16, level: i32) {
         let Some((chunk_index, local_index)) = self.address(position) else {
             return;
         };
         let voxel = self.voxel(chunk_index, local_index);
-        if voxel != 0 && voxel != 8 {
+        if voxel != 0 && voxel != kind {
             return;
         }
         let next = level.clamp(1, 8) as u8;
-        if voxel == 8 && self.fluid(chunk_index, local_index) == next {
+        if voxel == kind && self.fluid(chunk_index, local_index) == next {
             return;
         }
-        self.write(position, 8, next);
+        self.write(position, kind, next);
         self.neighborhood(position);
     }
 }
 
-fn water(value: i32) -> bool {
-    value >= 0 && (value & 65_535) == 8
+fn fluid(value: i32) -> bool {
+    value >= 0 && ((value & 65_535) == 8 || (value & 65_535) == 27)
 }
 
 fn level(value: i32) -> i32 {
@@ -270,7 +273,12 @@ fn side(position: FluidPosition, direction: i32) -> FluidPosition {
     }
 }
 
-fn ranges_overlap(left_start: usize, left_bytes: usize, right_start: usize, right_bytes: usize) -> bool {
+fn ranges_overlap(
+    left_start: usize,
+    left_bytes: usize,
+    right_start: usize,
+    right_bytes: usize,
+) -> bool {
     left_start < right_start + right_bytes && right_start < left_start + left_bytes
 }
 
@@ -280,27 +288,65 @@ pub fn fluid_candidate(
     positions: &[FluidPosition],
     scratch: &mut FluidScratch<'_>,
 ) -> Result<FluidOutcome, FluidError> {
-    if chunks.len() > MAX_CHUNKS || positions.len() > MAX_POSITIONS
-        || positions.iter().any(|p| [p.x, p.y, p.z].iter().any(|v| v.unsigned_abs() >= 1 << 29))
-        || chunks.iter().any(|c| [c.cx, c.cy, c.cz].iter().any(|v| v.unsigned_abs() >= 1 << 25))
+    if chunks.len() > MAX_CHUNKS
+        || positions.len() > MAX_POSITIONS
+        || positions
+            .iter()
+            .any(|p| [p.x, p.y, p.z].iter().any(|v| v.unsigned_abs() >= 1 << 29))
+        || chunks.iter().any(|c| {
+            [c.cx, c.cy, c.cz]
+                .iter()
+                .any(|v| v.unsigned_abs() >= 1 << 25)
+        })
     {
         return Err(FluidError::InvalidInput);
     }
     for (index, chunk) in chunks.iter().enumerate() {
         let voxel_bytes = CHUNK_CELLS * 2;
         let fluid_bytes = CHUNK_CELLS;
-        if chunk.voxel_offset.checked_add(voxel_bytes).map_or(true, |end| end > arena.len())
-            || chunk.fluid_offset.checked_add(fluid_bytes).map_or(true, |end| end > arena.len())
-            || ranges_overlap(chunk.voxel_offset, voxel_bytes, chunk.fluid_offset, fluid_bytes)
+        if chunk
+            .voxel_offset
+            .checked_add(voxel_bytes)
+            .map_or(true, |end| end > arena.len())
+            || chunk
+                .fluid_offset
+                .checked_add(fluid_bytes)
+                .map_or(true, |end| end > arena.len())
+            || ranges_overlap(
+                chunk.voxel_offset,
+                voxel_bytes,
+                chunk.fluid_offset,
+                fluid_bytes,
+            )
         {
             return Err(FluidError::InvalidLayout);
         }
         for previous in &chunks[..index] {
             if (chunk.cx, chunk.cy, chunk.cz) == (previous.cx, previous.cy, previous.cz)
-                || ranges_overlap(chunk.voxel_offset, voxel_bytes, previous.voxel_offset, voxel_bytes)
-                || ranges_overlap(chunk.voxel_offset, voxel_bytes, previous.fluid_offset, fluid_bytes)
-                || ranges_overlap(chunk.fluid_offset, fluid_bytes, previous.voxel_offset, voxel_bytes)
-                || ranges_overlap(chunk.fluid_offset, fluid_bytes, previous.fluid_offset, fluid_bytes)
+                || ranges_overlap(
+                    chunk.voxel_offset,
+                    voxel_bytes,
+                    previous.voxel_offset,
+                    voxel_bytes,
+                )
+                || ranges_overlap(
+                    chunk.voxel_offset,
+                    voxel_bytes,
+                    previous.fluid_offset,
+                    fluid_bytes,
+                )
+                || ranges_overlap(
+                    chunk.fluid_offset,
+                    fluid_bytes,
+                    previous.voxel_offset,
+                    voxel_bytes,
+                )
+                || ranges_overlap(
+                    chunk.fluid_offset,
+                    fluid_bytes,
+                    previous.fluid_offset,
+                    fluid_bytes,
+                )
             {
                 return Err(FluidError::InvalidLayout);
             }
@@ -314,7 +360,28 @@ pub fn fluid_candidate(
     };
     for &position in positions {
         let current = context.cell(position);
-        if !water(current) {
+        if !fluid(current) {
+            continue;
+        }
+        let kind = (current & 65_535) as u16;
+        let other = if kind == 8 { 27 } else { 8 };
+        let decay = if kind == 27 { 2 } else { 1 };
+        let mut reacts = false;
+        for direction in 0..4 {
+            let neighbor = context.cell(side(position, direction));
+            if neighbor >= 0 && (neighbor & 65_535) == other {
+                reacts = true;
+                break;
+            }
+        }
+        if reacts {
+            let product = if kind == 27 && (current & 0x800000) != 0 {
+                28
+            } else {
+                17
+            };
+            context.write(position, product, 0);
+            context.neighborhood(position);
             continue;
         }
         let current_level = level(current);
@@ -323,27 +390,37 @@ pub fn fluid_candidate(
             let unknown_before = context.scratch.unknown_count;
             let above = context.cell(FluidPosition::new(position.x, position.y + 1, position.z));
             let mut desired = 0;
-            if water(above) {
+            if above >= 0 && (above & 65_535) == kind as i32 {
                 desired = 8;
             } else {
                 for direction in 0..4 {
                     let neighbor = context.cell(side(position, direction));
-                    if water(neighbor) && level(neighbor) - 1 > desired {
-                        desired = level(neighbor) - 1;
+                    if neighbor >= 0
+                        && (neighbor & 65_535) == kind as i32
+                        && level(neighbor) - decay > desired
+                    {
+                        desired = level(neighbor) - decay;
                     }
                 }
             }
-            let above_again = context.cell(FluidPosition::new(position.x, position.y + 1, position.z));
+            let above_again =
+                context.cell(FluidPosition::new(position.x, position.y + 1, position.z));
             let mut stronger = false;
             for direction in 0..4 {
                 let neighbor = context.cell(side(position, direction));
-                if water(neighbor) && level(neighbor) > current_level {
+                if neighbor >= 0
+                    && (neighbor & 65_535) == kind as i32
+                    && level(neighbor) > current_level
+                {
                     stronger = true;
                     break;
                 }
             }
-            if !water(above_again) && !stronger && desired > current_level - 1 {
-                desired = current_level - 1;
+            if (above_again < 0 || (above_again & 65_535) != kind as i32)
+                && !stronger
+                && desired > current_level - decay
+            {
+                desired = current_level - decay;
             }
             if desired < current_level && unknown_before != context.scratch.unknown_count {
                 context.activate(position);
@@ -355,7 +432,7 @@ pub fn fluid_candidate(
                 continue;
             }
             if desired != current_level {
-                context.write(position, 8, desired as u8);
+                context.write(position, kind, desired as u8);
                 context.neighborhood(position);
             }
         }
@@ -365,11 +442,11 @@ pub fn fluid_candidate(
             continue;
         }
         if (below & 65_535) == 0 {
-            context.place(below_position, 8);
+            context.place(below_position, kind, 8);
             context.activate(position);
             continue;
         }
-        if water(below) {
+        if below >= 0 && (below & 65_535) == kind as i32 {
             continue;
         }
         let settled = context.cell(position);
@@ -384,9 +461,12 @@ pub fn fluid_candidate(
                 continue;
             }
             if (target & 65_535) == 0
-                || (water(target) && (target & 0x800000) == 0 && level(target) < settled_level - 1)
+                || (target >= 0
+                    && (target & 65_535) == kind as i32
+                    && (target & 0x800000) == 0
+                    && level(target) < settled_level - decay)
             {
-                context.place(target_position, settled_level - 1);
+                context.place(target_position, kind, settled_level - decay);
             }
         }
     }

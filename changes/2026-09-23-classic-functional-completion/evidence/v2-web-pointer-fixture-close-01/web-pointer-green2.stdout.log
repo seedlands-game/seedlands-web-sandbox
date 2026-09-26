@@ -1,0 +1,176 @@
+8:38:31 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-equipment-restore-e0594e02 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-equipment-restore-e0594e02
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts (9 tests | 9 failed) 101ms
+     × commits split, distribution, collection, hotbar exchange and stale denial against one stable revision 20ms
+     × crafts a real station result into an origin-free cursor and closes it into the bag 13ms
+     × uses the actor-owned 2x2 grid for personal crafting and restores it from a snapshot 10ms
+     × quick-moves to a station, takes from it without shared aliases, and batch crafts to the bag 10ms
+     × projects matched results and crafts into an empty or compatible cursor when the bag is full 10ms
+     × saves an owned cursor and drops it exactly once on player death before respawn 9ms
+     × preserves cursor ownership when an automatic pickup advances the inventory revision before close 9ms
+     × migrates a pre-cursor V4 actor facet without admitting malformed cursor state 9ms
+     × settles the cursor through the registered mode transition and rejects another bound actor 9ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > commits split, distribution, collection, hotbar exchange and stale denial against one stable revision
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:75:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > crafts a real station result into an origin-free cursor and closes it into the bag
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:111:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > uses the actor-owned 2x2 grid for personal crafting and restores it from a snapshot
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:152:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > quick-moves to a station, takes from it without shared aliases, and batch crafts to the bag
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:193:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > projects matched results and crafts into an empty or compatible cursor when the bag is full
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:245:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > saves an owned cursor and drops it exactly once on player death before respawn
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:295:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > preserves cursor ownership when an automatic pickup advances the inventory revision before close
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:324:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > migrates a pre-cursor V4 actor facet without admitting malformed cursor state
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:345:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts > registered inventory pointer owner > settles the cursor through the registered mode transition and rejects another bound actor
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:162:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ setup apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:39:17
+ ❯ apps/web/tests/integration/runtime/server/composition/gameplay-inventory-pointer.test.ts:385:48
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed (9)
+   Start at  20:38:31
+   Duration  1.28s (transform 884ms, setup 0ms, import 1.10s, tests 101ms, environment 0ms)
+

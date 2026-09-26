@@ -9,6 +9,7 @@ import {
 import { COLLISION_EPSILON } from '../../physics/geometry';
 import type { AuthorityEntity } from './authority-session-types';
 import { VoxelCollisionWorld, type LoadedVoxelSource } from './voxel-collision-world';
+import type { VoxelGeometryResolver } from '../../world/voxel-model';
 
 export const MAX_SAFE_MODE_LANDING_DISTANCE = 8;
 
@@ -27,12 +28,13 @@ export const bodyStateForAuthorityEntity = (entity: AuthorityEntity): BodyState 
 export const findSafeModeLanding = (
   entity: AuthorityEntity,
   voxelSource: LoadedVoxelSource,
+  geometry?: VoxelGeometryResolver,
 ): [number, number, number] | null => {
   const state = bodyStateForAuthorityEntity(entity);
   const config = bodyConfigFor(bodyKindForEntity(entity));
   const bodyBounds = bodyWorldAabb(state, config);
   const currentFootY = bodyBounds.min.y;
-  const world = new VoxelCollisionWorld(voxelSource);
+  const world = new VoxelCollisionWorld(voxelSource, undefined, undefined, geometry);
   world.beginStep();
   const candidates = world
     .querySolids({

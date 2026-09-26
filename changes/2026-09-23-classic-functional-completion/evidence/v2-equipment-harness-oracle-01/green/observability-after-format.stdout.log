@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/game-harness-observability.test.ts --maxWorkers=1
+4:16:44 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  04:16:44
+   Duration  563ms (transform 406ms, setup 0ms, import 488ms, tests 5ms, environment 0ms)
+

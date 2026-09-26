@@ -1,0 +1,10 @@
+b7d2c53becb79258c54c0868a298e5bdae8d8e634608d704aa88fed29c2871cb  packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
+53a65707b3cc6d94520a43a348479e767033635b9bf5927f3b1d3bbdfcbb4a5c  packages/stdlib/src/server/composition/mod-api.ts
+9361ea61a190bb055fd43c27ae7c034a73766f79b9deaa0cd198063200485ea8  packages/stdlib/tests/server/death-inventory-mixed-series.test.ts
+34fc7135db16c4d6fe4419d61a0ccea7a873ec10f799566a333b5dc854135222  changes/2026-09-23-classic-functional-completion/death-mixed-series-contract.md
+b18924b1615defb1532148338eb654da3e7e924d49ee5fa66024b6b2322f727c  changes/2026-09-23-classic-functional-completion/death-mixed-series-evidence.md
+991d99aee950edb646b9faa6b7cc11b147a864cf4d57c16b63c970b17101876f  changes/2026-09-23-classic-functional-completion/tasks.md
+49cb364d95db4f9f7d09a845f64a82b24c1e659280269e8424b49def86ac9675  changes/2026-09-23-classic-functional-completion/execution-state.md
+9fcab375fbdfc5acaf1e6a2e12d2bbbf6ab677f2d76394a5bbd0a3e262b4a8da  changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/capture-pre-death-v4-identity.mjs
+ebad22c315758e0b9e305aaff6ba7c0c4adc7026ac506fb6dfe4b82abd1db405  changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+df730051517148094edf0d01e1e650c02b866805b5875c2fa3c9b267de72a1c8  changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/mod-api-death-mixed-export.ts.log

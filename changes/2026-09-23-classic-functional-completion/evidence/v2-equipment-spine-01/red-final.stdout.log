@@ -1,0 +1,99 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts --maxWorkers=1
+5:26:30 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts (3 tests | 3 failed) 19ms
+     × equips a non-Classic registered visor through the real inventory pointer action 16ms
+     × advances the shared inventory revision when only armor changes 2ms
+     × settles equipped armor through the existing combat death producer 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > equips a non-Classic registered visor through the real inventory pointer action
+AssertionError: expected { success: false, …(1) } to deeply equal { success: true }
+
+- Expected
++ Received
+
+  {
+-   "success": true,
++   "reason": "invalid-pointer-slot",
++   "success": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:99:20
+     97|     });
+     98|
+     99|     expect(result).toEqual({ success: true });
+       |                    ^
+    100|     expect(runtime.getInventoryPointerView('pilot').armor.helmet).toEq…
+    101|       itemId: 'sample:visor',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > advances the shared inventory revision when only armor changes
+AssertionError: expected +0 to be 1 // Object.is equality
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:130:74
+    128|     prepared.validate();
+    129|     prepared.apply();
+    130|     expect(runtime.entities.actorStateAccess('pilot').inventoryRevisio…
+       |                                                                          ^
+    131|   });
+    132|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > settles equipped armor through the existing combat death producer
+AssertionError: expected { helmet: { …(3) }, …(3) } to deeply equal { Object (helmet, chestplate, ...) }
+
+- Expected
++ Received
+
+  {
+    "boots": null,
+-   "chestplate": null,
+-   "helmet": null,
++   "chestplate": {
++     "count": 1,
++     "instance": {
++       "durability": 5,
++     },
++     "itemId": "iron-chestplate",
++   },
++   "helmet": {
++     "count": 1,
++     "instance": {
++       "durability": 2,
++     },
++     "itemId": "iron-helmet",
++   },
+    "leggings": null,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:154:55
+    152|     result.entity!.apply();
+    153|
+    154|     expect(entities.actorStateAccess('target').armor).toEqual(emptyArm…
+       |                                                       ^
+    155|     expect(entities.query({ type: 'world-item' }).map((entry) => entry…
+    156|       { itemId: 'wood-block', count: 2 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  17:26:30
+   Duration  1.32s (transform 973ms, setup 0ms, import 1.22s, tests 19ms, environment 0ms)
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts --maxWorkers=1`
+Exit status 1

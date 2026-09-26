@@ -9,6 +9,7 @@ export type PersistenceWorkerConfig = {
   seedText: string;
   generatorVersion: number;
   provider: KernelWorldgenProviderIdentity;
+  voxelStorageIds: readonly number[];
 };
 export type PersistenceInitTask = {
   kind: 'init';
@@ -51,6 +52,13 @@ type StatsTask = { kind: 'stats'; requestId: number };
 export type PersistenceSeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
 type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
 export type PersistenceLatestWorldTask = { kind: 'latest-world'; requestId: number; databaseName: string };
+export type PersistenceListWorldsTask = { kind: 'list-worlds'; requestId: number; databaseName: string };
+export type PersistenceDeleteWorldTask = {
+  kind: 'delete-world';
+  requestId: number;
+  databaseName: string;
+  worldId: string;
+};
 
 export type PersistenceWorkerTask =
   | PersistenceInitTask
@@ -63,7 +71,9 @@ export type PersistenceWorkerTask =
   | StatsTask
   | PersistenceSeedCorpusTask
   | MarkLegacyMigratedTask
-  | PersistenceLatestWorldTask;
+  | PersistenceLatestWorldTask
+  | PersistenceListWorldsTask
+  | PersistenceDeleteWorldTask;
 
 export type PersistenceCorpusSummary = {
   storedChunkCount: number;

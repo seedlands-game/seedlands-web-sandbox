@@ -15,11 +15,11 @@ export type CompleteModeFacets = Readonly<{
   flight: ActorFlightComponentV1;
 }>;
 
-export const defaultActorModeFacets = (): CompleteModeFacets => ({
+export const defaultActorModeFacets = (hotbarSize = CREATIVE_HOTBAR_SIZE): CompleteModeFacets => ({
   mode: { version: 1, value: 'survival', revision: 0 },
   creativeCatalog: {
     version: 1,
-    hotbar: Object.freeze(Array.from({ length: CREATIVE_HOTBAR_SIZE }, () => null)),
+    hotbar: Object.freeze(Array.from({ length: hotbarSize }, () => null)),
     selectedSlot: 0,
     revision: 0,
   },
@@ -31,9 +31,10 @@ const validRevision = (value: number) => Number.isSafeInteger(value) && value >=
 export function validateActorModeFacets(
   facets: ActorModeSnapshotFacets,
   items: ItemDefinitionRegistry,
+  defaultHotbarSize = CREATIVE_HOTBAR_SIZE,
 ): CompleteModeFacets {
   const supplied = [facets.mode, facets.creativeCatalog, facets.flight].filter((value) => value !== undefined).length;
-  if (supplied === 0) return defaultActorModeFacets();
+  if (supplied === 0) return defaultActorModeFacets(defaultHotbarSize);
   if (supplied !== 3) throw new TypeError('Actor mode component snapshots must be supplied together.');
   const mode = facets.mode!;
   const catalog = facets.creativeCatalog!;
@@ -43,10 +44,11 @@ export function validateActorModeFacets(
   if (
     catalog.version !== 1 ||
     !Array.isArray(catalog.hotbar) ||
-    catalog.hotbar.length !== CREATIVE_HOTBAR_SIZE ||
+    catalog.hotbar.length < 1 ||
+    catalog.hotbar.length > 9 ||
     !Number.isSafeInteger(catalog.selectedSlot) ||
     catalog.selectedSlot < 0 ||
-    catalog.selectedSlot >= CREATIVE_HOTBAR_SIZE ||
+    catalog.selectedSlot >= catalog.hotbar.length ||
     !validRevision(catalog.revision) ||
     [...catalog.hotbar].some((itemId) => itemId !== null && (typeof itemId !== 'string' || !items.has(itemId)))
   )

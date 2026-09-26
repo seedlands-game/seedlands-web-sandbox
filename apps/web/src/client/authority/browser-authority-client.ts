@@ -4,28 +4,15 @@ import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/autho
 import type { FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
-import type {
-  AuthorityAction,
-  AuthorityActionResult,
-  AuthorityGameplayView,
-  AuthorityPlayerPositionResult,
-  AuthorityReady,
-  AuthorityRequest,
-  AuthorityResponse,
-  AuthoritySessionControlResult,
-} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+// prettier-ignore
+import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady, AuthorityRequest, AuthorityResponse, AuthoritySessionControlResult } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/stdlib/server/logic/logic-protocol';
-import type {
-  WorldHarnessPort,
-  WorldHarnessResult,
-  WorldPrepareRequest,
-} from '@seedlands/stdlib/server/harness/world-harness-contract';
-import type {
-  CharacterControlRequest,
-  CharacterControlResult,
-  ControlBinding,
-} from '@seedlands/stdlib/runtime/character-control-protocol';
+// prettier-ignore
+import type { WorldHarnessPort, WorldHarnessResult, WorldPrepareRequest } from '@seedlands/stdlib/server/harness/world-harness-contract';
+// prettier-ignore
+import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -34,18 +21,17 @@ import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type { VisibilityTask } from './authority-prepared-mesh-visibility';
 import { BrowserAuthorityChunkClient } from './browser-authority-chunk-client';
 import { createBoundCharacterControlPort } from './browser-character-control-port';
-import type {
-  AuthorityClientOptions,
-  BoundCharacterControlPort,
-  AuthoritySaveResult,
-  AuthorityStartOptions,
-} from './browser-authority-client-contract';
-import {
-  BrowserAuthorityDirectLogic,
-  clientFailure,
-  type DirectLogicDiagnostics,
-} from './browser-authority-direct-logic';
+// prettier-ignore
+import type { AuthorityClientOptions, BoundCharacterControlPort, AuthoritySaveResult, AuthorityStartOptions } from './browser-authority-client-contract';
+// prettier-ignore
+import { BrowserAuthorityDirectLogic, clientFailure, type DirectLogicDiagnostics } from './browser-authority-direct-logic';
 import { createBrowserAuthorityWorldPort } from './browser-authority-world-port';
+import { BrowserMediaFrontier } from './browser-media-frontier';
+import {
+  validateInitialAuthorityReadyGeometry,
+  validateRestoredAuthorityReadyGeometry,
+  voxelGeometryForAuthorityReady,
+} from './browser-authority-geometry';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
 export class BrowserAuthorityClient {
@@ -69,6 +55,7 @@ export class BrowserAuthorityClient {
   private lastInputDecisionSequence = -1;
   private runtimeEpochValue: string;
   private readonly directLogic: BrowserAuthorityDirectLogic;
+  private readonly media: BrowserMediaFrontier;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
@@ -76,6 +63,7 @@ export class BrowserAuthorityClient {
     private readonly options: AuthorityClientOptions = {},
   ) {
     this.runtimeEpochValue = epoch;
+    this.media = new BrowserMediaFrontier(epoch, options.onMediaProjection, options.onMediaFacts);
     this.directLogic = new BrowserAuthorityDirectLogic(worker, epoch);
     this.estimatedInputTransitMs = authorityInputTransitBudgetMs(options.transportFaults ?? { harnessEnabled: false });
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
@@ -85,6 +73,7 @@ export class BrowserAuthorityClient {
       (payload, transfer) => this.request(payload, transfer),
       (message, transfer) => this.post(message, transfer),
       options,
+      () => this.voxelGeometry?.list(),
     );
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
     this.snapshotGate = new AuthoritySnapshotGate(epoch);
@@ -145,34 +134,34 @@ export class BrowserAuthorityClient {
     return ready;
   }
 
-  get readyState(): AuthorityReady | null {
-    return this.readyValue;
-  }
-
-  get isReady(): boolean {
-    return Boolean(this.readyValue) && !this.disposed && !this.failureValue;
-  }
-
-  get snapshot(): AuthoritySnapshot | null {
-    return this.snapshotValue;
-  }
+  // prettier-ignore
+  get readyState(): AuthorityReady | null { return this.readyValue; }
+  // prettier-ignore
+  get isReady(): boolean { return Boolean(this.readyValue) && !this.disposed && !this.failureValue; }
+  // prettier-ignore
+  get snapshot(): AuthoritySnapshot | null { return this.snapshotValue; }
+  // prettier-ignore
+  get runtimeEpoch(): string { return this.runtimeEpochValue; }
 
   get gameplay(): AuthorityGameplayView {
     if (!this.gameplayValue) throw new Error('Authority gameplay view is not ready.');
     return this.gameplayValue;
   }
 
-  get seed(): number {
-    return this.requireReady().seed;
+  // prettier-ignore
+  get seed(): number { return this.requireReady().seed; }
+  // prettier-ignore
+  get seedText(): string { return this.requireReady().seedText; }
+
+  // prettier-ignore
+  get generatorVersion(): number { return this.requireReady().generatorVersion; }
+
+  get voxelSemantics() {
+    return createVoxelSemanticsRegistry(this.requireReady().voxelSemantics ?? []);
   }
 
-  get seedText(): string {
-    return this.requireReady().seedText;
-  }
-
-  get generatorVersion(): number {
-    return this.requireReady().generatorVersion;
-  }
+  // prettier-ignore
+  get voxelGeometry() { return voxelGeometryForAuthorityReady(this.readyValue); }
 
   get worldgenProvider(): NonNullable<AuthorityReady['worldgenProvider']> {
     const provider = this.requireReady().worldgenProvider;
@@ -180,25 +169,16 @@ export class BrowserAuthorityClient {
     return provider;
   }
 
-  get worldTime(): number {
-    return this.snapshotValue?.worldTime ?? this.requireReady().worldTime;
-  }
-
-  get worldRevision(): number {
-    return this.snapshotValue?.worldRevision ?? 0;
-  }
-
-  get mutationCount(): number {
-    return this.snapshotValue?.worldMutationCount ?? 0;
-  }
-
-  get physicsTick(): number {
-    return this.snapshotValue?.physicsTick ?? 0;
-  }
-
-  get commitSequence(): number {
-    return this.snapshotValue?.commitSequence ?? 0;
-  }
+  // prettier-ignore
+  get worldTime(): number { return this.snapshotValue?.worldTime ?? this.requireReady().worldTime; }
+  // prettier-ignore
+  get worldRevision(): number { return this.snapshotValue?.worldRevision ?? 0; }
+  // prettier-ignore
+  get mutationCount(): number { return this.snapshotValue?.worldMutationCount ?? 0; }
+  // prettier-ignore
+  get physicsTick(): number { return this.snapshotValue?.physicsTick ?? 0; }
+  // prettier-ignore
+  get commitSequence(): number { return this.snapshotValue?.commitSequence ?? 0; }
 
   get storageBytes(): number {
     return this.storageBytesValue;
@@ -409,14 +389,20 @@ export class BrowserAuthorityClient {
     switch (message.kind) {
       case 'authority-ready': {
         if (!this.readyWait.pending) return;
-        const readySnapshotRejection = this.snapshotGate.accept(message.ready.snapshot);
+        const acceptedReady = validateInitialAuthorityReadyGeometry(message.ready, (error) => this.failAll(error));
+        if (!acceptedReady) return;
+        const media = this.media.tryClone(acceptedReady.gameplay.media);
+        if (!media.ok) return this.failAll(media.error);
+        const readySnapshotRejection = this.snapshotGate.accept(acceptedReady.snapshot);
         if (readySnapshotRejection === 'wrong-epoch')
           return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
-        this.readyValue = message.ready;
-        if (!readySnapshotRejection) this.snapshotValue = message.ready.snapshot;
-        this.chunks.initialize(message.ready.snapshot.worldRevision);
-        this.updateGameplay(message.ready.gameplay);
-        this.readyWait.resolve(message.ready);
+        this.media.replaceEpoch(acceptedReady.snapshot.epoch, media.value, false);
+        Object.assign(this, { runtimeEpochValue: acceptedReady.snapshot.epoch, readyValue: acceptedReady });
+        if (!readySnapshotRejection) this.snapshotValue = acceptedReady.snapshot;
+        this.chunks.initialize(acceptedReady.snapshot.worldRevision);
+        this.updateGameplay(acceptedReady.gameplay);
+        this.media.publishCurrent();
+        this.readyWait.resolve(acceptedReady);
         break;
       }
       case 'authority-bootstrap-needed':
@@ -430,6 +416,9 @@ export class BrowserAuthorityClient {
         break;
       case 'authority-commits':
         return this.chunks.publish(message.commits);
+      case 'authority-media-facts':
+        this.media.acceptFactsSafely(this.runtimeEpochValue, message.batch);
+        return;
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
         this.lastInputDecisionSequence = message.sequence;
@@ -443,7 +432,14 @@ export class BrowserAuthorityClient {
         if (!this.requests.has(message.requestId)) return;
         if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
-          if (message.gameplay) this.updateGameplay(message.gameplay);
+          if (message.gameplay) {
+            const media = this.media.tryClone(message.gameplay.media);
+            if (!media.ok) {
+              this.requests.reject(message.requestId, media.error);
+              return;
+            }
+            this.updateGameplay(message.gameplay, media.value);
+          }
           this.chunks.publish(message.commits);
           this.requests.resolve(message.requestId, message.result);
         }
@@ -463,15 +459,34 @@ export class BrowserAuthorityClient {
       case 'world-harness-response':
         if (!this.requests.has(message.requestId)) return;
         if (message.ready) {
+          const acceptedReady = validateRestoredAuthorityReadyGeometry(
+            message.ready,
+            message.requestId,
+            (requestId, error) => this.requests.reject(requestId, error),
+          );
+          if (!acceptedReady) return;
+          const media = this.media.tryClone(acceptedReady.gameplay.media);
+          if (!media.ok) {
+            this.requests.reject(message.requestId, media.error);
+            return;
+          }
+          const nextRuntimeEpoch = message.runtimeEpoch ?? acceptedReady.snapshot.epoch;
+          if (nextRuntimeEpoch !== acceptedReady.snapshot.epoch) {
+            this.requests.reject(
+              message.requestId,
+              new Error('Authority restored runtime epoch does not match snapshot.'),
+            );
+            return;
+          }
           this.storageBytesMeasured = false;
-          this.runtimeEpochValue = message.runtimeEpoch ?? message.ready.snapshot.epoch;
+          this.runtimeEpochValue = nextRuntimeEpoch;
           this.snapshotGate = new AuthoritySnapshotGate(this.runtimeEpochValue);
           this.chunks.clear();
-          this.readyValue = message.ready;
-          this.snapshotValue = null;
-          this.gameplayValue = null;
-          this.acceptSnapshot(message.ready.snapshot, message.ready.gameplay);
-          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, message.ready);
+          Object.assign(this, { readyValue: acceptedReady, snapshotValue: null, gameplayValue: null });
+          this.media.replaceEpoch(this.runtimeEpochValue, media.value, false);
+          this.acceptSnapshot(acceptedReady.snapshot, acceptedReady.gameplay);
+          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, acceptedReady);
+          this.media.publishCurrent();
         }
         this.requests.resolve(message.requestId, message.result);
         break;
@@ -481,20 +496,25 @@ export class BrowserAuthorityClient {
     }
   }
 
-  private updateGameplay(view: AuthorityGameplayView): void {
-    if (this.gameplayValue && view.gameplayRevision <= this.gameplayValue.gameplayRevision) return;
-    this.gameplayValue = view;
-    this.options.onGameplay?.(view);
+  private updateGameplay(view: AuthorityGameplayView, media = this.media.clone(view.media)): void {
+    if (this.gameplayValue && view.gameplayRevision < this.gameplayValue.gameplayRevision) return;
+    const mediaChanged = this.media.acceptProjections(this.runtimeEpochValue, media);
+    if (this.gameplayValue && view.gameplayRevision === this.gameplayValue.gameplayRevision) {
+      if (mediaChanged) this.gameplayValue = Object.freeze({ ...this.gameplayValue, media: this.media.current });
+      return;
+    }
+    const accepted = Object.freeze({ ...view, media: this.media.current });
+    this.gameplayValue = accepted;
+    this.options.onGameplay?.(accepted);
   }
 
-  private acceptSnapshot(
-    snapshot: AuthoritySnapshot,
-    gameplay?: AuthorityGameplayView,
-    commits?: readonly WorldCommitResult[],
-  ): void {
+  // prettier-ignore
+  private acceptSnapshot(snapshot: AuthoritySnapshot, gameplay?: AuthorityGameplayView, commits?: readonly WorldCommitResult[]): void {
+    const media = gameplay ? this.media.tryClone(gameplay.media) : undefined;
+    if (media && !media.ok) return;
     this.chunks.publish(commits);
-    if (gameplay) this.updateGameplay(gameplay);
     if (this.snapshotGate.accept(snapshot)) return;
+    if (gameplay && media?.ok) this.updateGameplay(gameplay, media.value);
     this.snapshotValue = snapshot;
     this.chunks.synchronize(snapshot);
     this.options.onSnapshot?.(snapshot);

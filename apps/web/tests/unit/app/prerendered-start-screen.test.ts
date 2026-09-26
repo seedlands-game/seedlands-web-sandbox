@@ -24,7 +24,7 @@ describe('prerendered start screen', () => {
     const fragment = readFileSync('apps/web/src/app/ui/generated/prerendered-start-screen.html', 'utf8').trimEnd();
     const based = applyPrerenderedBasePath(fragment, '/seedlands/');
     expect(based).not.toContain(PRERENDER_BASE_PLACEHOLDER);
-    expect(based).toContain('/seedlands/assets/ui/arcane-crest.png');
+    expect(based).toContain('/seedlands/assets/ui/classic-crest.png');
     expect(injectPrerenderedStartScreen(`<main>${PRERENDER_OUTLET}</main>`, based)).toContain('id="start-card"');
     expect(() => injectPrerenderedStartScreen('<main></main>', based)).toThrow(/exactly one/);
     expect(() => injectPrerenderedStartScreen(`${PRERENDER_OUTLET}${PRERENDER_OUTLET}`, based)).toThrow(/exactly one/);

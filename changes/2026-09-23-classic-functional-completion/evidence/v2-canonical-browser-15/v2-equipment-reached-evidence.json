@@ -1,0 +1,158 @@
+{
+  "phase": "resources-placed",
+  "steps": [
+    {
+      "step": "resources-placed",
+      "snapshot": {
+        "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+        "gameplayRevision": 74632,
+        "actor": {
+          "entityId": "player-1",
+          "epoch": 1,
+          "lifetime": 1
+        },
+        "inventoryRevision": 36,
+        "slots": [
+          null,
+          null,
+          {
+            "itemId": "stick",
+            "count": 3
+          },
+          null,
+          {
+            "itemId": "wood-sword",
+            "count": 1
+          },
+          null,
+          null,
+          null,
+          {
+            "itemId": "plank",
+            "count": 7
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "armor": {
+          "helmet": null,
+          "chestplate": null,
+          "leggings": null,
+          "boots": null
+        },
+        "cursor": {
+          "version": 1,
+          "revision": 26,
+          "stack": null,
+          "origin": null,
+          "craftingGrid": [null, null, null, null]
+        },
+        "player": {
+          "health": 18,
+          "lifecycle": "alive"
+        },
+        "armorPoints": 0
+      }
+    }
+  ],
+  "snapshot": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 74632,
+    "actor": {
+      "entityId": "player-1",
+      "epoch": 1,
+      "lifetime": 1
+    },
+    "inventoryRevision": 36,
+    "slots": [
+      null,
+      null,
+      {
+        "itemId": "stick",
+        "count": 3
+      },
+      null,
+      {
+        "itemId": "wood-sword",
+        "count": 1
+      },
+      null,
+      null,
+      null,
+      {
+        "itemId": "plank",
+        "count": 7
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ],
+    "armor": {
+      "helmet": null,
+      "chestplate": null,
+      "leggings": null,
+      "boots": null
+    },
+    "cursor": {
+      "version": 1,
+      "revision": 26,
+      "stack": null,
+      "origin": null,
+      "craftingGrid": [null, null, null, null]
+    },
+    "player": {
+      "health": 18,
+      "lifecycle": "alive"
+    },
+    "armorPoints": 0
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "voxels": [
+    {
+      "id": "seedlands:torch",
+      "texture": "builtin:seedlands:texture/terrain/torch",
+      "material": "seedlands:material/terrain/torch"
+    }
+  ],
+  "items": [
+    {
+      "id": "seedlands:torch",
+      "model": "builtin:model:torch",
+      "icon": "builtin:seedlands:texture/terrain/torch"
+    }
+  ],
+  "actors": [
+    {
+      "id": "seedlands:zombie",
+      "model": "builtin:models/classic/zombie.glb",
+      "texture": "builtin:models/classic/zombie.glb"
+    }
+  ],
+  "materials": [
+    {
+      "id": "seedlands:material/terrain/torch",
+      "faceMaterial": 57,
+      "texture": "builtin:seedlands:texture/terrain/torch",
+      "renderMode": "opaque"
+    }
+  ]
+}

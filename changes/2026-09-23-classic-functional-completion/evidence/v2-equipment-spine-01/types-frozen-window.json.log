@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-spine-types-frozen",
+  "pid": 24642,
+  "startedAt": "2026-09-25T09:32:18.847Z",
+  "windowId": "v2-equipment-spine-types-frozen",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-spine-01/types-frozen-window.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T09:32:27.039Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T09:32:18.848Z",
+      "loadAverage": [
+        3.12939453125,
+        3.26953125,
+        3.23388671875
+      ],
+      "freeMemoryBytes": 970801152,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T09:32:23.850Z",
+      "loadAverage": [
+        3.03857421875,
+        3.248046875,
+        3.2265625
+      ],
+      "freeMemoryBytes": 85622784,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T09:32:27.038Z",
+      "loadAverage": [
+        3.03515625,
+        3.24365234375,
+        3.22509765625
+      ],
+      "freeMemoryBytes": 1078689792,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

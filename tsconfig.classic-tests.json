@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.test.json",
+  "include": [
+    "playwright.config.ts",
+    "apps/web/tests/e2e",
+    "apps/web/tests/integration/runtime/server/composition/classic-food-health.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-plank-building.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-stick-crafting.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/overworld-progression-journey.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-material-smelting.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-precious-tools.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-tool-matrix.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-building-blocks.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-shovel-tools.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-food-chain.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-hoe-farmland.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-crop-growth.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-utility-items.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-projectiles.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-species.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-difficulty-respawn.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-spawning.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-fluid-buckets.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-environment.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-lighting.test.ts"
+  ]
+}

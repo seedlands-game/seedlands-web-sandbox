@@ -43,7 +43,12 @@ export function createClassicComposition() {
   return assembleOverworldPacks([
     {
       ...pack,
-      integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
+      integrity: {
+        algorithm: 'sha256',
+        manifestDigest: 'a'.repeat(64),
+        entryDigest: 'b'.repeat(64),
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
+      },
     },
   ]);
 }

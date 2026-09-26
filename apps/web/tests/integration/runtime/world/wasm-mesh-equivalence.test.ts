@@ -27,7 +27,7 @@ function descriptorKernelReturning(length: number): KernelMemory {
     memory: new WebAssembly.Memory({ initial: 256, maximum: 256 }),
     abi_version: () => 1,
     arena_bytes: () => WASM_ARENA_BYTES,
-    mesh_describe: () => length,
+    mesh_describe_with_lookup: () => length,
   } as WebAssembly.Exports);
 }
 
@@ -155,21 +155,46 @@ describe('W04/W05 Wasm mesh descriptors', () => {
     expect(kernel.failed).toBe(false);
   }, 30_000);
 
-  it('keeps empty, solid, checkerboard, water stair and lantern material ordering exact', async () => {
+  it('keeps empty, solid, checkerboard, water stair, models and crossed-plant material ordering exact', async () => {
     const kernel = await createKernelMemory(await readFile(wasmPath));
-    for (const kind of ['empty', 'solid', 'checkerboard', 'water-stair', 'lantern'] as const) {
+    for (const kind of [
+      'empty',
+      'solid',
+      'checkerboard',
+      'water-stair',
+      'lantern',
+      'plants',
+      'planks',
+      'glass',
+      'precious',
+    ] as const) {
       const input = withHalo((data, fluid) => {
         for (let y = 0; y < 32; y += 1)
           for (let z = 0; z < 32; z += 1)
             for (let x = 0; x < 32; x += 1) {
               const index = voxelIndex(x, y, z);
               if (kind === 'solid') data[index] = Voxel.Stone;
+              if (kind === 'planks' && y === 4) data[index] = Voxel.Planks;
+              if (kind === 'precious' && y === 4) data[index] = [19, 20, 21, 22, 23, 24, 25][x % 7];
+              if (kind === 'glass' && y === 4) data[index] = x < 16 ? Voxel.Glass : Voxel.Cobblestone;
               if (kind === 'checkerboard') data[index] = (x + y + z) % 2 ? Voxel.Stone : Voxel.Air;
               if (kind === 'water-stair' && y === 4) {
                 data[index] = Voxel.Water;
                 fluid[index] = 0x80 | ((x % 8) + 1);
               }
-              if (kind === 'lantern' && x < 2 && y < 2 && z < 2) data[index] = Voxel.Lantern;
+              if (kind === 'lantern' && x < 2 && y < 2 && z < 2)
+                data[index] = [Voxel.Lantern, Voxel.Rail, Voxel.Slab, Voxel.WoodStairs, Voxel.Fence][x + z * 2];
+              if (kind === 'plants' && x < 8 && y === 4 && z === 0)
+                data[index] = [
+                  Voxel.Sapling,
+                  Voxel.TallGrass,
+                  Voxel.Flower,
+                  Voxel.Mushroom,
+                  Voxel.SugarCane,
+                  Voxel.DeadBush,
+                  Voxel.RedFlower,
+                  Voxel.RedMushroom,
+                ][x];
             }
       });
       const actual = runMeshDescriptorKernel(kernel, input.input.window, input.input.fluidWindow);

@@ -4,11 +4,9 @@ import type { BrowserComputeRuntime } from '../client/compute/browser-compute-ru
 import type { BrowserLogicClient } from '../client/authority/browser-logic-client';
 import type * as pc from 'playcanvas';
 import type { ChunkPersistenceLoadScenario } from '../client/persistence/chunk-persistence-benchmark';
-import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
-import type { FillCommand } from '@seedlands/stdlib/server/commands/fill-command';
 import type { CommandResult, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
-import type { HarnessSnapshot, LifecycleSnapshot, StreamingVariant } from './app-contracts';
+import type { HarnessSnapshot, LifecycleSnapshot } from './app-contracts';
 import type { PlayerController } from './player/player-controller';
 import type { QualityLevel } from './scene/quality-profile';
 import { FINAL_RENDER_PIPELINE } from './scene/voxel-render-pipeline';
@@ -20,52 +18,12 @@ import type { BrowserGameplay } from './gameplay/browser-gameplay';
 import type { UnderwaterVisualEffects } from './scene/underwater-visual-effects';
 import { PLAYER_FEET_OFFSET } from './player/player-view-offsets';
 import type { CollisionDebugRuntime } from './player/collision-debug-runtime';
-import type { FluidFeedbackTarget } from './gameplay/fluid-feedback-tracker';
 import type { AuthorityBodySnapshot } from '@seedlands/stdlib/server/authority/authority-session-types';
 import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-harness-contract';
-
-export type HarnessApi = {
-  world: WorldHarnessPort;
-  snapshot: () => HarnessSnapshot;
-  lifecycleSnapshot: () => LifecycleSnapshot;
-  restartWorld: (seed: string) => Promise<void>;
-  moveTo: (x: number, z: number) => Promise<void>;
-  burstEdits: () => Promise<void>;
-  fillWorld: (command: FillCommand) => Promise<unknown>;
-  removeVoxelAt: (x: number, y: number, z: number) => Promise<void>;
-  movePlayerTo: (x: number, y: number, z: number) => Promise<void>;
-  prepareFlatMovement: () => Promise<void>;
-  prepareCenterExcavation: () => Promise<void>;
-  prepareStepDown: () => Promise<void>;
-  setWorldTime: (hour: number) => Promise<void>;
-  setTimePaused: (paused: boolean) => void;
-  setTimeSpeed: (speed: number) => void;
-  setView: (yaw: number, pitch: number) => void;
-  setSpectatorPosition: (x: number, y: number, z: number) => void;
-  beginPerformanceScenario: (name: string) => string;
-  setStreamingVariant: (variant: StreamingVariant) => void;
-  exportPerformanceTrace: () => ReturnType<PerformanceTelemetry['exportChromeTrace']>;
-  executeGameplayCommand: (command: ServerCommand) => Promise<CommandResult>;
-  advanceGameplay: (seconds: number) => void;
-  setVoxelAt: (x: number, y: number, z: number, voxel: number) => Promise<void>;
-  getVoxelAt?: (x: number, y: number, z: number) => number | null;
-  advanceFluid?: (seconds: number) => void;
-  beginFluidFeedbackSample?: (target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) => void;
-  setWaterTransitionHold?: (held: boolean) => void;
-  getFluidCell?: (x: number, y: number, z: number) => { level: number; source: boolean } | null;
-  getChunkRevision?: (cx: number, cy: number, cz: number) => number | null;
-  sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
-  flushSave: () => Promise<void>;
-  blockLogicWorker: (ms: number) => Promise<void>;
-  authorityBody: (entityId: string) => {
-    physicsTick: number;
-    position: [number, number, number];
-    velocity: [number, number, number];
-    grounded: boolean;
-  } | null;
-  presentedEntityPosition: (entityId: string) => [number, number, number] | null;
-  playerDamageFeedback: () => { pitch: number; yaw: number; roll: number; active: boolean };
-};
+import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
+import type { HarnessApi } from './gameplay/game-harness-contract';
+import { createHarnessObservability } from './gameplay/game-harness-observability';
+export type { HarnessApi } from './gameplay/game-harness-contract';
 
 type RuntimeHarnessBindings = {
   developerWorld: () => WorldHarnessPort;
@@ -94,6 +52,10 @@ type RuntimeHarnessBindings = {
   queueSave: () => void;
   flushSave: () => Promise<void>;
   experiments: () => HarnessSnapshot['experiments'];
+  renderedMaterialMesh: Parameters<typeof createHarnessObservability>[0]['renderedMaterialMesh'];
+  renderedWorldEpoch: () => string | null;
+  media: Parameters<typeof createHarnessObservability>[0]['media'];
+  audio: Parameters<typeof createHarnessObservability>[0]['audio'];
 };
 
 declare global {
@@ -210,6 +172,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
   return {
     frameMs: context.frameMs,
     player,
+    viewAngles: context.controller?.viewAngles ?? [0, -16],
     streamCenter: context.world?.streamCenter ?? [0, 0],
     loadedChunks: telemetry?.loadedChunks ?? 0,
     renderedChunks: telemetry?.renderedChunks ?? 0,
@@ -231,6 +194,9 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     quality: context.qualityLevel,
     triangles: telemetry?.triangles ?? 0,
     drawCalls: telemetry?.drawCalls ?? 0,
+    blockLightBricks: telemetry?.blockLightBricks ?? 0,
+    blockLightAllocatedBytes: telemetry?.blockLightAllocatedBytes ?? 0,
+    blockLightRebuildCount: telemetry?.blockLightRebuildCount ?? 0,
     collisionDebug: context.collisionDebug?.diagnostics ?? {
       enabled: false,
       entityCount: 0,
@@ -347,6 +313,9 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     breakingOverlay: context.presentation?.breakingOverlay ?? null,
     viewmodel: context.presentation?.viewmodel ?? { isolatedLayer: false },
     visualEffects: context.visualEffects?.snapshot ?? {
+      blockLightReady: false,
+      blockLightSourceRevision: null,
+      blockLightRebuildCount: 0,
       activeLocalLights: 0,
       shadowedLocalLights: 0,
       localLightLimit: 0,
@@ -379,6 +348,13 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
 
 export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): HarnessApi {
   return {
+    ...createHarnessObservability({
+      authority: bindings.authority,
+      renderedMaterialMesh: bindings.renderedMaterialMesh,
+      renderedWorldEpoch: bindings.renderedWorldEpoch,
+      media: bindings.media,
+      audio: bindings.audio,
+    }),
     world: bindings.developerWorld(),
     snapshot: () =>
       createHarnessSnapshot({
@@ -403,7 +379,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     restartWorld: bindings.restartWorld,
     moveTo: (x, z) => bindings.controller()?.moveHarnessPlayer(x, z) ?? Promise.resolve(),
     burstEdits: () => bindings.controller()?.burstEdits() ?? Promise.resolve(),
-    fillWorld: (command) => bindings.world()?.fill('harness-fill', command) ?? Promise.resolve(),
+    fillWorld: (command) => bindings.world()?.fill('harness-fill', command) ?? Promise.resolve(undefined),
     removeVoxelAt: (x, y, z) => bindings.controller()?.removeVoxel(x, y, z) ?? Promise.resolve(),
     movePlayerTo: (x, y, z) => bindings.controller()?.movePlayerTo(x, y, z) ?? Promise.resolve(),
     prepareFlatMovement: () => bindings.controller()?.prepareFlatMovement() ?? Promise.resolve(),
@@ -422,6 +398,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     setWaterTransitionHold: (held) => bindings.world()?.setWaterTransitionHoldForHarness(held),
     getFluidCell: (x, y, z) => bindings.world()?.getFluidCell(x, y, z) ?? null,
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,
+    getRenderedChunkRevision: (cx, cy, cz) => bindings.world()?.getRenderedChunkRevision(cx, cy, cz) ?? null,
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {
       const environment = bindings.environment();
@@ -434,8 +411,9 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
       throw new Error('Authority gameplay advances only on its independent clock.');
     },
     setVoxelAt: async (x, y, z, voxel) => {
-      await bindings.world()?.edit(x, y, z, voxel);
+      const result = await bindings.world()?.edit(x, y, z, voxel);
       bindings.queueSave();
+      return result;
     },
     flushSave: bindings.flushSave,
     blockLogicWorker: bindings.blockLogicWorker,
@@ -452,6 +430,23 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         : null;
     },
     presentedEntityPosition: (entityId) => bindings.gameplay()?.presentedEntityPosition(entityId) ?? null,
+    aimedVoxelTarget: () => bindings.gameplay()?.aimedVoxelTargetForHarness() ?? null,
+    aimedEntityId: () => {
+      const controller = bindings.controller();
+      const camera = bindings.camera();
+      const gameplay = bindings.gameplay();
+      if (!controller || !camera || !gameplay) return null;
+      const position = controller.position;
+      const direction = camera.forward;
+      return (
+        nearestEntityHit(
+          gameplay.attackTargetsForHarness(),
+          [position.x, position.y, position.z],
+          [direction.x, direction.y, direction.z],
+          3,
+        )?.id ?? null
+      );
+    },
     playerDamageFeedback: () => bindings.controller()?.damageFeedback ?? { pitch: 0, yaw: 0, roll: 0, active: false },
   };
 }

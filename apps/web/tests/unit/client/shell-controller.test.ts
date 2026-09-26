@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ShellController, sanitizeQuality } from '../../../src/client/shell/shell-controller';
+import {
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN,
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE,
+} from '../../../src/client/persistence/legacy-gameplay-provenance-error';
 
 const port = () => ({
   start: vi.fn(async () => {}),
@@ -39,6 +43,18 @@ describe('游戏外壳异步状态', () => {
     await shell.start('oak', 'medium');
     expect(shell.state.phase).toBe('playing');
     expect(shell.state.error).toBe('');
+  });
+
+  it('明确提示未知旧存档来源并保留正常错误原文', async () => {
+    const game = port();
+    game.start.mockRejectedValueOnce(new Error(`${LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN}: missing source`));
+    const shell = new ShellController(game);
+    await shell.start('legacy', 'medium');
+    expect(shell.state).toMatchObject({ phase: 'menu', error: LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE });
+
+    game.start.mockRejectedValueOnce(new Error('普通启动错误'));
+    await shell.start('other', 'medium');
+    expect(shell.state.error).toBe('普通启动错误');
   });
 
   it('保存失败保留暂停世界，重试成功才显示菜单', async () => {

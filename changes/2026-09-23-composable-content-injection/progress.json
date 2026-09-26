@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "status": "ACTIVE",
+  "items": [
+    { "id": "reporter-audit", "status": "COMPLETE", "weight": 1 },
+    { "id": "voxel-semantics", "status": "COMPLETE", "weight": 2 },
+    { "id": "actor-archetypes", "status": "COMPLETE", "weight": 1 },
+    { "id": "presentation-manifest", "status": "COMPLETE", "weight": 2 },
+    { "id": "second-playbook", "status": "COMPLETE", "weight": 2 },
+    { "id": "exact-head-browser", "status": "COMPLETE", "weight": 1 },
+    { "id": "ci-pr-review", "status": "IN_PROGRESS", "weight": 1 }
+  ]
+}

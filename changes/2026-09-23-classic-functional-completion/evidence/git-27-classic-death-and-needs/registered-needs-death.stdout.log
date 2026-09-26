@@ -1,0 +1,20 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 1d ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+devDependencies:
++ @seedlands/eslint-plugin 0.1.0 <- packages/eslint-plugin
+
+. prepare$ husky
+. prepare: Done
+Done in 1.5s using pnpm v11.25.0
+
+ RUN  v4.1.11 /private/tmp/seedlands-git27-death
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  02:41:24
+   Duration  991ms (transform 700ms, setup 0ms, import 848ms, tests 69ms, environment 0ms)
+

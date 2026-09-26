@@ -1,4 +1,5 @@
 import type { ActorBehavior } from '../simulation/actor-state';
+import { isActorArchetype } from './ecs-entity-owner';
 import type { ActorArchetype, EntityType } from './entity-store';
 import type { ItemDefinitionRegistry, ItemStack } from './item-registry';
 import type { MeleeDefinition } from './melee-definition-registry';
@@ -13,6 +14,9 @@ export type ActorProfileInput = Readonly<{
   initialBehavior?: ActorBehavior;
   meleeDefinitionId?: string;
   deathDrop?: ItemStack;
+  disposition?: 'passive' | 'neutral' | 'hostile';
+  spawnWeight?: number;
+  spawnBiomes?: readonly string[];
 }>;
 export type ActorProfile = ActorProfileInput;
 
@@ -38,7 +42,6 @@ export type ActorProfileRegistry = Readonly<{
   starterEcology: StarterEcologyConfiguration | null;
 }>;
 
-const ARCHETYPES: readonly ActorArchetype[] = ['grazer', 'night-stalker', 'settler'];
 const BEHAVIORS: readonly ActorBehavior[] = [
   'idle',
   'wander',
@@ -72,7 +75,7 @@ export function createActorProfileRegistry(
   const melee = new Set(meleeDefinitions.map(({ id }) => id));
   const profiles = new Map<ActorArchetype, ActorProfile>();
   for (const input of inputs) {
-    if (!ARCHETYPES.includes(input.archetype) || profiles.has(input.archetype))
+    if (!isActorArchetype(input.archetype) || profiles.has(input.archetype))
       throw new TypeError(`Duplicate or invalid actor profile: ${String(input.archetype)}`);
     if (input.entityType !== 'creature' && input.entityType !== 'npc')
       throw new TypeError(`Actor profile entity type is invalid: ${input.archetype}`);
@@ -82,6 +85,8 @@ export function createActorProfileRegistry(
       throw new TypeError(`Actor profile behavior is invalid: ${input.archetype}`);
     if (input.meleeDefinitionId !== undefined && !melee.has(input.meleeDefinitionId))
       throw new TypeError(`Actor profile references unknown melee definition: ${input.meleeDefinitionId}`);
+    if (input.spawnWeight !== undefined && (!Number.isSafeInteger(input.spawnWeight) || input.spawnWeight <= 0))
+      throw new TypeError('Actor profile spawn weight is invalid: ' + input.archetype);
     const deathDrop = input.deathDrop ? freezeStack(items, input.deathDrop) : undefined;
     profiles.set(
       input.archetype,
@@ -96,6 +101,9 @@ export function createActorProfileRegistry(
         ...(input.initialBehavior !== undefined ? { initialBehavior: input.initialBehavior } : {}),
         ...(input.meleeDefinitionId !== undefined ? { meleeDefinitionId: input.meleeDefinitionId } : {}),
         ...(deathDrop ? { deathDrop } : {}),
+        ...(input.disposition ? { disposition: input.disposition } : {}),
+        ...(input.spawnWeight ? { spawnWeight: input.spawnWeight } : {}),
+        ...(input.spawnBiomes ? { spawnBiomes: Object.freeze([...input.spawnBiomes]) } : {}),
       }),
     );
   }

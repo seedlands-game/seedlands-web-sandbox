@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-DEATH-REGISTERED-NEEDS-01",
+  "status": "REGISTERED_NEEDS_DEATH_GREEN",
+  "baseline": "5fcdc1dffe3b4a7fbcf5e43c91ae45189ed10708",
+  "sourceManifestSha256": "5df2e073c0dffc57d9d2d303efde6d9b6d8b85b545dab0089ec7fd762e9ca83d",
+  "publicDependencies": {
+    "deathInventorySettlementSha256": "b7d2c53becb79258c54c0868a298e5bdae8d8e634608d704aa88fed29c2871cb",
+    "deathInventoryPolicySha256": "b4b20ee254098ab428d312718920ab5d79a51a83b100504b5ab29d80731da3c6",
+    "preparedDeathEffectsSha256": "84caec417143ab4bc52e8d7203cc6f6bc6fcc06a34a42265cfb3d96b07bc9ab7",
+    "mixedSeriesTestSha256": "9361ea61a190bb055fd43c27ae7c034a73766f79b9deaa0cd198063200485ea8"
+  },
+  "red": {
+    "window": "v2-death-registered-needs-red-02",
+    "status": "FAIL",
+    "files": 1,
+    "failed": 4,
+    "cause": "registered Needs ignored cursor/armor and retain policy and accepted missing/despawn policy"
+  },
+  "green": {
+    "window": "v2-death-registered-needs-final-behavior-03",
+    "status": "PASS",
+    "files": 1,
+    "tests": 12,
+    "stdoutSha256": "5d31e0efbab62faff617d25a48ee3f906f8438db2c71e43ca8cfc965713ca45e",
+    "receiptSha256": "a003d6d70ac8694b7e9fa4107d37536bf715f9cb3d67354bf9d8a9e7041ce1ef"
+  },
+  "regressions": {
+    "existingNeedsWindow": "v2-death-registered-needs-nondeath-regression-01",
+    "existingNeedsStatus": "PASS_8_SKIPPED_2_CLASSIC_DEATH_POLICY_PENDING",
+    "mixedSeriesWindow": "v2-death-registered-needs-mixed-regression-01",
+    "mixedSeriesStatus": "PASS_1_FILE_13_TESTS"
+  },
+  "static": {
+    "stdlibTypesWindow": "v2-death-registered-needs-type-stdlib-final",
+    "stdlibTypesStatus": "PASS",
+    "rootTestTypesWindow": "v2-death-registered-needs-type-root-final",
+    "rootTestTypesStatus": "PASS",
+    "classicTestTypesWindow": "v2-death-registered-needs-type-classic-final",
+    "classicTestTypesStatus": "PASS",
+    "eslintWindow": "v2-death-registered-needs-eslint-02",
+    "eslintStatus": "PASS",
+    "scopedDiffWindow": "v2-death-registered-needs-diff-delivery-frozen",
+    "scopedDiffStatus": "PASS"
+  },
+  "remaining": [
+    "Classic death policy installation and existing Classic Needs death tests",
+    "prepared player membership support for player despawn policy",
+    "non-player Needs/Autonomy death producers",
+    "build, browser, Cua, CI, save/restore composition, and complete V2 acceptance"
+  ]
+}

@@ -1,0 +1,6 @@
+3b9889dbfdb7861534ba30785eda5e03110235563ae6b606c4a4116b3fbe16a0  apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts
+e417e1592c182c0231ee3be41f720346a4b37534b1f4239b17ae4938d6b9503b  apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+81c5498e05c20500cf9c3437a0b146bce748911601b167ce2a0626415742b4d7  apps/web/tests/e2e/classic-support/door-exit-face.test.ts
+9a9ea20dcd30fec5cc9b7e84f7c2e148330e797c091ded62412c6947aacad5c4  apps/web/tests/e2e/classic-support/v1-slice.ts
+b59b8ce92208355b60edde5cb1282b0341c22fd1dbc372920dbdae2eab974d4f  changes/2026-09-23-classic-functional-completion/door-exit-face-contract.md
+5a98be6b4312115ea09f33f84fe86191b6d85b1efb1a2d3918cb806e6e0963fc  changes/2026-09-23-classic-functional-completion/spec.md

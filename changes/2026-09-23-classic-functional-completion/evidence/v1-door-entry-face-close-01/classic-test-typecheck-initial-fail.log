@@ -1,0 +1,4 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts(67,5): error TS2345: Argument of type 'import("/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/scenario").Point' is not assignable to parameter of type 'Point'.
+  The type 'Point' is 'readonly' and cannot be assigned to the mutable type 'Point'.
+[ELIFECYCLE] Command failed with exit code 2.

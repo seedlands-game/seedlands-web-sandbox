@@ -1,6 +1,6 @@
 import type * as pc from 'playcanvas';
 import { macroAt } from '@seedlands/stdlib/world/macro-world';
-import { GENERATOR_VERSION, floorDiv } from '@seedlands/stdlib/world/voxel';
+import { floorDiv } from '@seedlands/stdlib/world/voxel';
 import type { PerformanceProfile } from '../client/presentation/performance-profile';
 import { PLAYER_FEET_OFFSET } from './player/player-controller';
 import { QUALITY_PROFILES, type QualityLevel } from './scene/quality-profile';
@@ -30,7 +30,7 @@ export function projectDebug(context: DebugProjectionContext) {
   const position = camera.getPosition();
   const feetY = position.y - PLAYER_FEET_OFFSET;
   const telemetry = world.telemetry;
-  const macro = macroAt(world.seed, position.x, position.z);
+  const macro = macroAt(world.seed, position.x, position.z, world.generatorVersion);
   const water =
     macro.hydrology.kind === 'dry'
       ? 'dry'
@@ -49,7 +49,7 @@ Quality  ${QUALITY_PROFILES[context.qualityLevel].label} · 性能档位  ${cont
 估算网格内存  ${(performance.estimatedMeshBytes / 1024 / 1024).toFixed(1)} MiB · 事件丢弃 ${performance.droppedEvents}
 Time  ${worldTime.toFixed(2)}h ${environment?.paused ? '(paused)' : `${environment?.speed ?? 1}×`}
 Seed  ${context.seedText}
-Generator  v${GENERATOR_VERSION}
+Generator  v${world.generatorVersion}
 Player  ${position.x.toFixed(1)}, ${feetY.toFixed(1)}, ${position.z.toFixed(1)}
 Chunk  ${floorDiv(position.x, 32)}, ${floorDiv(feetY, 32)}, ${floorDiv(position.z, 32)}
 Macro Region  ${macro.region.join(',')} · ${macro.biome}

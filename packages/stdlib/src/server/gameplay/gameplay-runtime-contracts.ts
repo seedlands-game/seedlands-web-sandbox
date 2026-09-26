@@ -2,17 +2,29 @@ import type { ModuleActorAuthority } from '../composition/gameplay-actor-authori
 import type { ModuleSystemAuthority } from './modules/gameplay-module-schedule';
 import type { WorldComposition } from '../composition/contracts';
 import type { PreparedWorldEdit } from '../prepared-world-edit';
+import type { ExpectedWorldVoxelEdit, PreparedWorldEditBatch } from '../world-transaction-commit';
+import type { WorldEditBatch, WorldCommitResult } from '../game-server-types';
 import type { GameplayContent } from './gameplay-content';
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
 import type { MeleeDefinition } from './combat-runtime';
 import type { CompositionCheckpointIdentity } from '../composition/checkpoint-identity';
+import type { FluidCell } from '../fluid/fluid-cell';
+import type { VoxelGeometryResolver } from '../../world/voxel-model';
 
 type Position = [number, number, number];
 export type GameplayCallbacks = {
   getVoxel: (position: Position) => number | undefined;
   getLoadedVoxel?: (position: Position) => number | undefined;
+  getLoadedCell?: (position: Position) => Readonly<{ voxel: number; fluid: number }> | null;
+  getFluidCell?: (position: Position) => FluidCell | null;
+  voxelGeometry?: VoxelGeometryResolver;
   prepareVoxelEdit: (actorId: string, position: Position, voxel: number) => PreparedWorldEdit;
+  prepareVoxelEdits?: (actorId: string, edits: readonly ExpectedWorldVoxelEdit[]) => PreparedWorldEditBatch;
+  editBatch?: (batch: WorldEditBatch) => WorldCommitResult;
+  environmentSeed?: number;
+  biomeAt?: (position: Position) => string;
   getWorldTime: () => number;
+  setWorldTime?: (hours: number) => number;
   platform: CorePlatformPorts;
   content?: GameplayContent;
   composition?: WorldComposition;

@@ -1,0 +1,14 @@
+7:46:32 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  4 passed (4)
+      Tests  38 passed (38)
+   Start at  07:46:32
+   Duration  440ms (transform 81ms, setup 0ms, import 123ms, tests 13ms, environment 0ms)
+
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/door-exit-face.test.ts(32,5): error TS2345: Argument of type 'import("/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/scenario").Point' is not assignable to parameter of type 'Point'.
+  The type 'Point' is 'readonly' and cannot be assigned to the mutable type 'Point'.
+[ELIFECYCLE] Command failed with exit code 2.

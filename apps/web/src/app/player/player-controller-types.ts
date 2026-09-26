@@ -26,10 +26,15 @@ export type PlayerControllerOptions = {
     direction: [number, number, number],
     maxDistance: number,
   ) => boolean;
-  onBeginBreak: (position: [number, number, number]) => void;
+  canTargetFluidSource: () => boolean;
+  isCreativeMode?: () => boolean;
+  onBeginBreak: (position: [number, number, number]) => void | Promise<void>;
   onCancelBreak: () => void;
   onPlace: (position: [number, number, number]) => void;
-  onUseTarget: (position: [number, number, number]) => boolean;
+  onUseTarget: (
+    target: Pick<VoxelTarget, 'position' | 'adjacent'>,
+    intent: 'use' | 'alternate',
+  ) => Promise<'handled' | 'fallback'>;
   isUiBlockingInput: () => boolean;
   onUseHeldItem: () => boolean;
   onCloseUi: () => void;
@@ -45,4 +50,5 @@ export type PlayerControllerOptions = {
   };
   physicsHz: 30 | 60 | 120;
   estimatedInputTransitMs?: number;
+  mouseSensitivity?: Readonly<{ value: number }>;
 };

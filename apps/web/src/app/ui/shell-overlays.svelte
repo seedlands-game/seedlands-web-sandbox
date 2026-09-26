@@ -18,6 +18,10 @@
     experimentsRequireRefresh: application.experimentsRequireRefresh,
     capabilities: application.capabilities,
     performanceWarningOpen: application.performanceWarningOpen,
+    mouseSensitivity: application.mouseSensitivity,
+    difficulty: application.difficulty,
+    settingsError: application.settingsError,
+    settingsChanging: application.settingsChanging,
   });
   let view = $state(initial());
   const readAudio = () => application.audio.snapshot();
@@ -40,12 +44,6 @@
       unsubscribeAudio();
     };
   });
-  const chooseFile = async (event: Event) => {
-    const input = event.currentTarget as HTMLInputElement;
-    const file = input.files?.[0];
-    if (file) await application.audio.importReference(file);
-    input.value = '';
-  };
 </script>
 
 {#if view.state.phase === 'playing'}
@@ -79,7 +77,7 @@
             ? '操作指南'
             : '暂停游戏'}
     >
-      <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/arcane-crest.png')} alt="" />
+      <img class="menu-crest" src={publicAssetUrl(import.meta.env.BASE_URL, 'assets/ui/classic-crest.png')} alt="" />
       {#if view.performanceWarningOpen}
         <p class="eyebrow">PERFORMANCE NOTICE</p>
         <h2>性能提示</h2>
@@ -124,6 +122,38 @@
               >
             </select>
           </label>
+          <label class="volume-control" for="mouse-sensitivity">
+            <span>鼠标灵敏度<output>{Math.round(view.mouseSensitivity * 100)}</output></span>
+            <input
+              id="mouse-sensitivity"
+              type="range"
+              min="0.03"
+              max="0.5"
+              step="0.01"
+              value={view.mouseSensitivity}
+              oninput={(event) => application.setMouseSensitivity(Number(event.currentTarget.value))}
+            />
+          </label>
+          {#if view.difficulty}
+            <label for="settings-difficulty"
+              >难度
+              <select
+                id="settings-difficulty"
+                value={view.difficulty.value}
+                disabled={view.settingsChanging}
+                onchange={(event) =>
+                  void application.setDifficulty(
+                    event.currentTarget
+                      .value as import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty,
+                  )}
+              >
+                <option value="peaceful">和平</option><option value="easy">简单</option><option value="normal"
+                  >普通</option
+                ><option value="hard">困难</option>
+              </select>
+            </label>
+          {/if}
+          {#if view.settingsError}<p role="alert" class="start-error">{view.settingsError}</p>{/if}
         </div>
         <div class="reference-music experimental-settings" aria-label="实验性性能">
           <h3>实验性性能</h3>
@@ -180,19 +210,10 @@
             >
           {/if}
         </div>
-        <div class="reference-music">
-          <h3>本地参考曲</h3>
-          <p>仅在本机播放，不上传。支持 30 MiB / 10 分钟以内的音频；刷新后需重新选择。</p>
-          <label for="reference-audio"
-            >选择参考曲<input id="reference-audio" type="file" accept="audio/*" onchange={chooseFile} /></label
-          >
-          {#if audio.referenceName}<p class="reference-name">{audio.referenceName}</p>
-            <GameButton label="移除参考曲" onclick={() => application.audio.removeReference()}
-              >移除参考曲 · 使用内置音乐</GameButton
-            >{/if}
-        </div>
         {#if audio.error}<p role="alert" class="start-error">{audio.error}</p>{/if}
-        <GameButton label="返回" onclick={() => application.closePanel()}>返回</GameButton>
+        <GameButton label="返回" disabled={view.settingsChanging} onclick={() => application.closePanel()}
+          >返回</GameButton
+        >
       {:else if view.panel === 'guide'}
         <p class="eyebrow">FIRST STEPS</p>
         <h2>操作指南</h2>
@@ -213,7 +234,7 @@
           <dd>地图 / 暂停。暂停中可设置声音、查看指南、保存退出。</dd>
         </dl>
         <p class="muted">
-          采集树叶可得到浆果，饥饿时选中后右键食用。夜行兽有危险，留意生命与夜色；用灯笼照亮营地。死亡后可以重生并找回落下的物品，离开前在暂停菜单保存退出。
+          采集树叶可得到浆果，受伤时选中后右键食用恢复生命。夜晚可能遇到僵尸等敌对生物，留意生命与夜色；用灯笼照亮营地。死亡后可以重生并找回落下的物品，离开前在暂停菜单保存退出。
         </p>
         <GameButton label="返回" onclick={() => application.closePanel()}>返回</GameButton>
       {:else}

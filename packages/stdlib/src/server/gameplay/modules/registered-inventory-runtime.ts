@@ -83,9 +83,10 @@ export class RegisteredInventoryRuntime {
         reference: this.options.entities.createReference(id),
         kind: entity.type,
         slots: actor.inventory.snapshot(),
-        equipment: { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize },
+        equipment: { selectedSlot: actor.selectedSlot, hotbarSize: actor.hotbarSize, armor: actor.armor },
         lifecycle: actor.lifecycle,
         needs: { hunger: actor.hunger, maxHunger: actor.maxHunger, meaning: actor.hungerMeaning },
+        vitals: { health: actor.health, maxHealth: actor.maxHealth },
         inventoryRevision: actor.inventoryRevision,
         cursor: actor.inventoryCursor,
       },
@@ -190,7 +191,7 @@ export class RegisteredInventoryRuntime {
       actors: [
         {
           reference: candidate.actorReference,
-          health: this.options.entities.actorStateAccess(actorId).health,
+          health: candidate.health ?? this.options.entities.actorStateAccess(actorId).health,
           components: {
             ...components,
             inventory: [...candidate.slots],
@@ -267,6 +268,7 @@ export class RegisteredInventoryRuntime {
                 inventory: [...candidate.slots],
                 inventoryRevision: candidate.inventoryRevision,
                 inventoryCursor: candidate.cursor,
+                equipment: candidate.equipment,
                 ...(changedTool && components.player ? { player: { ...components.player, breakAction: null } } : {}),
               },
             },

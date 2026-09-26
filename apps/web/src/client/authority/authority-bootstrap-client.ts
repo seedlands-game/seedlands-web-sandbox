@@ -6,7 +6,7 @@ import type {
 
 type BootstrapRequest = Extract<AuthorityResponse, { kind: 'authority-bootstrap-needed' }>;
 type GenerateBootstrap = (
-  request: Pick<BootstrapRequest, 'seed' | 'generatorVersion' | 'provider' | 'starterEcology'>,
+  request: Pick<BootstrapRequest, 'seed' | 'generatorVersion' | 'provider' | 'starterEcology' | 'voxelSemantics'>,
 ) => Promise<AuthorityBootstrapGeneration>;
 type PostBootstrap = (message: AuthorityRequest, transfer: Transferable[]) => void;
 
@@ -21,6 +21,7 @@ export async function provideAuthorityBootstrap(
     generatorVersion: message.generatorVersion,
     provider: message.provider,
     starterEcology: message.starterEcology,
+    voxelSemantics: message.voxelSemantics,
   });
   post(
     {

@@ -1,10 +1,10 @@
+import type { PlayerInventoryLayout } from './inventory-layout';
 import type { StationStateCodec } from './ecs-station-state';
 import { validateBlockBreakAction } from './modules/block-action-model';
 import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
 import type { WorldRulesetV1 } from './modules/ruleset-module';
 import { AutonomyRuntime, type SimulationSnapshot } from '../simulation/autonomy-runtime';
-import { bodyConfigFor } from '../../physics/body-registry';
 import { EntityStore, type EntityStoreComponentSnapshot, type GameplayEntity } from './entity-store';
 import { PlayerState, type PlayerSnapshot } from './player-state';
 import type { CoreClone } from '../../runtime/platform-ports';
@@ -23,6 +23,19 @@ import {
   installAuthorityKernelState,
   type AuthorityKernelState,
 } from '../authority/authority-kernel-state';
+import { DifficultyRuntime, type DifficultyCheckpoint } from './difficulty-runtime';
+import { EnvironmentRuntime, type EnvironmentCheckpoint } from './environment-runtime';
+import { createProjectileRuntime, type ProjectileCheckpoint } from './projectile-runtime';
+import { validateLifeSkillsCheckpoint, type LifeSkillsCheckpoint } from './life-skills-runtime';
+import { validateVehicleCheckpoint, type VehicleCheckpoint } from './vehicle-runtime';
+import { navigationCheckpointFromSnapshot, validateNavigationItemsCheckpoint } from './navigation-items-runtime';
+import type { NavigationItemsCheckpoint } from './navigation-items-runtime';
+import { validateCropCheckpoint, type CropCheckpoint } from './crop-runtime';
+import { validateFinalEntitiesCheckpoint, type FinalEntitiesCheckpoint } from './final-entities-runtime';
+import { validateGameplayProgressCheckpoint, type GameplayProgressCheckpoint } from './gameplay-progress-runtime';
+import type { RegisteredMediaPlaybackCheckpointV1 } from './modules/registered-media-playback-runtime';
+export { legacyPlayerPositionToFeet } from './legacy-gameplay-position';
+import { migrateLegacyEntity, migrateLegacyPlayer } from './legacy-gameplay-position';
 
 type Position = [number, number, number];
 
@@ -60,6 +73,16 @@ export type GameplaySnapshotV4 = Omit<GameplaySnapshotV3, 'version' | 'entitySeq
   moduleSchedule?: ModuleScheduleSnapshot;
   entityStore: EntityStoreComponentSnapshot;
   authoritySession?: AuthorityKernelState;
+  difficulty?: DifficultyCheckpoint;
+  environment?: EnvironmentCheckpoint;
+  projectiles?: ProjectileCheckpoint;
+  lifeSkills?: LifeSkillsCheckpoint;
+  vehicles?: VehicleCheckpoint;
+  navigationItems?: NavigationItemsCheckpoint;
+  crops?: CropCheckpoint;
+  finalEntities?: FinalEntitiesCheckpoint;
+  progress?: GameplayProgressCheckpoint;
+  media?: RegisteredMediaPlaybackCheckpointV1;
 };
 export type GameplaySnapshot = GameplaySnapshotV1 | GameplaySnapshotV2 | GameplaySnapshotV3 | GameplaySnapshotV4;
 
@@ -75,6 +98,15 @@ export const createGameplaySnapshotV4 = (
   entityStore: EntityStoreComponentSnapshot,
   simulation: SimulationSnapshot,
   authoritySession?: AuthorityKernelState,
+  difficulty?: DifficultyCheckpoint,
+  environment?: EnvironmentCheckpoint,
+  projectiles?: ProjectileCheckpoint,
+  lifeSkills?: LifeSkillsCheckpoint,
+  vehicles?: VehicleCheckpoint,
+  navigationItems?: NavigationItemsCheckpoint,
+  crops?: CropCheckpoint,
+  finalEntities?: FinalEntitiesCheckpoint,
+  progress?: GameplayProgressCheckpoint,
 ): GameplaySnapshotV4 => ({
   version: 4,
   revision,
@@ -85,6 +117,22 @@ export const createGameplaySnapshotV4 = (
   ...(authoritySession
     ? { authoritySession: decodeAuthorityKernelState(encodeAuthorityKernelState(authoritySession)) }
     : {}),
+  ...(difficulty ? { difficulty: new DifficultyRuntime(difficulty).checkpoint() } : {}),
+  ...(environment ? { environment: new EnvironmentRuntime(environment.seed, environment).checkpoint() } : {}),
+  ...(projectiles
+    ? {
+        projectiles: createProjectileRuntime(
+          { firstVoxelHit: () => null, firstActorHit: () => null, applyDamage: () => undefined },
+          projectiles,
+        ).checkpoint(),
+      }
+    : {}),
+  ...(lifeSkills ? { lifeSkills: validateLifeSkillsCheckpoint(lifeSkills) } : {}),
+  ...(vehicles ? { vehicles: validateVehicleCheckpoint(vehicles) } : {}),
+  ...(navigationItems ? { navigationItems: validateNavigationItemsCheckpoint(navigationItems) } : {}),
+  ...(crops ? { crops: validateCropCheckpoint(crops) } : {}),
+  ...(finalEntities ? { finalEntities: validateFinalEntitiesCheckpoint(finalEntities) } : {}),
+  ...(progress ? { progress: validateGameplayProgressCheckpoint(progress) } : {}),
   ...createGameplaySnapshotMetadata(),
 });
 
@@ -100,6 +148,7 @@ type GameplaySnapshotValidationOptions = {
   clone: CoreClone;
   items?: ItemDefinitionRegistry;
   stationCodec?: StationStateCodec;
+  playerLayout?: PlayerInventoryLayout;
   meleeDefinitions?: readonly MeleeDefinition[];
   actorProfiles?: ActorProfileRegistry;
   registeredNeeds?: boolean;
@@ -110,17 +159,6 @@ type GameplaySnapshotValidationOptions = {
   behaviorCapabilities?: BehaviorCapabilityRegistry;
   allowsBehaviorCapability?(actorId: string, kind: 'npc' | 'creature', capability: BehaviorCapability): boolean;
 };
-
-const LEGACY_PLAYER_EYE_TO_FEET = 1.6;
-const worldItemConfig = bodyConfigFor('world-item');
-const LEGACY_WORLD_ITEM_CENTER_TO_FEET = (worldItemConfig.localAabb.max.y - worldItemConfig.localAabb.min.y) / 2;
-const roundCoordinate = (value: number) => Math.round(value * 1_000_000) / 1_000_000;
-
-export function legacyPlayerPositionToFeet(position: Position): Position {
-  if (position.length !== 3 || !position.every(Number.isFinite))
-    throw new TypeError('Legacy player position must contain three finite coordinates.');
-  return [position[0], roundCoordinate(position[1] - LEGACY_PLAYER_EYE_TO_FEET), position[2]];
-}
 
 const emptySimulation = (): SimulationSnapshot => ({
   version: 1,
@@ -138,11 +176,7 @@ const emptySimulation = (): SimulationSnapshot => ({
 export const simulationSnapshotFor = (snapshot: GameplaySnapshot): SimulationSnapshot =>
   snapshot.version === 1 ? emptySimulation() : snapshot.simulation;
 
-/**
- * Validates the common envelope before composition-specific participants inspect
- * their own checkpoint projections. This preserves failure atomicity and keeps a
- * malformed outer snapshot from being misreported as a module schedule failure.
- */
+/** Validates the envelope before composition-specific checkpoint projections. */
 export function validateGameplaySnapshotHeader(raw: unknown): asserts raw is GameplaySnapshot {
   const source = raw as Partial<GameplaySnapshot> | null;
   if (
@@ -158,24 +192,6 @@ export function validateGameplaySnapshotHeader(raw: unknown): asserts raw is Gam
   )
     throw new TypeError('Gameplay snapshot header is invalid.');
 }
-
-const migrateLegacyEntity = (entity: GameplayEntity, clone: CoreClone): GameplayEntity => {
-  const offset =
-    entity.type === 'player'
-      ? LEGACY_PLAYER_EYE_TO_FEET
-      : entity.type === 'world-item'
-        ? LEGACY_WORLD_ITEM_CENTER_TO_FEET
-        : 0;
-  return {
-    ...clone(entity),
-    position: [entity.position[0], roundCoordinate(entity.position[1] - offset), entity.position[2]],
-  };
-};
-
-const migrateLegacyPlayer = (player: PlayerSnapshot, clone: CoreClone): PlayerSnapshot => ({
-  ...clone(player),
-  spawnPosition: legacyPlayerPositionToFeet(player.spawnPosition),
-});
 
 function migrateLegacyCharacterBodies(
   snapshot: SimulationSnapshot,
@@ -316,7 +332,12 @@ export function validateGameplaySnapshot(
 
   const sourceVersion = source.version;
   const items = options.items ?? defaultItemDefinitionRegistry;
-  const entities = new EntityStore(items, options.stationCodec);
+  const entities = new EntityStore(
+    items,
+    options.stationCodec,
+    sourceVersion === 4 ? options.playerLayout : undefined,
+    options.actorProfiles,
+  );
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();
   try {
@@ -430,6 +451,22 @@ export function validateGameplaySnapshot(
       source.version === 4
         ? decodeAuthorityKernelState(source.authoritySession as import('@seedlands/kernel').KernelValue | undefined)
         : createAuthorityKernelState(),
+      source.version === 4 ? new DifficultyRuntime(source.difficulty).checkpoint() : undefined,
+      source.version === 4 && source.environment
+        ? new EnvironmentRuntime(source.environment.seed, source.environment).checkpoint()
+        : undefined,
+      source.version === 4 && source.projectiles
+        ? createProjectileRuntime(
+            { firstVoxelHit: () => null, firstActorHit: () => null, applyDamage: () => undefined },
+            source.projectiles,
+          ).checkpoint()
+        : undefined,
+      source.version === 4 && source.lifeSkills ? validateLifeSkillsCheckpoint(source.lifeSkills) : undefined,
+      source.version === 4 && source.vehicles ? validateVehicleCheckpoint(source.vehicles) : undefined,
+      navigationCheckpointFromSnapshot(source, entities),
+      source.version === 4 && source.crops ? validateCropCheckpoint(source.crops) : undefined,
+      source.version === 4 && source.finalEntities ? validateFinalEntitiesCheckpoint(source.finalEntities) : undefined,
+      source.version === 4 && source.progress ? validateGameplayProgressCheckpoint(source.progress) : undefined,
     );
     if (options.registeredNeeds && sourceVersion < 4) {
       const phase =

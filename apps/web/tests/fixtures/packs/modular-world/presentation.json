@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "voxels": [
+    {
+      "id": "sample:sentinel-glass",
+      "texture": "apps/web/tests/fixtures/packs/modular-world/sentinel-glass.svg",
+      "material": "sample:sentinel-glass"
+    }
+  ],
+  "items": [
+    {
+      "id": "sample:sentinel-glass",
+      "model": "builtin:model:glass-block",
+      "icon": "apps/web/tests/fixtures/packs/modular-world/sentinel-glass.svg",
+      "material": "sample:sentinel-glass"
+    }
+  ],
+  "actors": [
+    {
+      "id": "sample:sentinel",
+      "model": "builtin:models/classic/zombie.glb",
+      "texture": "builtin:models/classic/zombie.glb"
+    }
+  ],
+  "materials": [
+    {
+      "id": "sample:sentinel-glass",
+      "faceMaterial": 21,
+      "texture": "apps/web/tests/fixtures/packs/modular-world/sentinel-glass.svg",
+      "renderMode": "cutout"
+    }
+  ]
+}

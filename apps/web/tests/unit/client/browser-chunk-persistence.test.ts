@@ -7,6 +7,7 @@ import type {
 import type { FrozenGameSaveSnapshot } from '../../../../../packages/stdlib/src/server/persistence/game-save-snapshot';
 import { CHUNK_SIZE, GENERATOR_VERSION, chunkKey } from '../../../../../packages/stdlib/src/world/voxel';
 import { classicWorldgenIdentity } from '@seedlands/playbook-classic/worldgen';
+import { readBrowserAuthorityGameplaySnapshot } from '../../../src/worker/authority-worldgen-runtime';
 
 type Coordinate = Readonly<{ cx: number; cy: number; cz: number }>;
 type DeferredBatch = Readonly<{ requestId: number; coordinates: readonly Coordinate[] }>;
@@ -62,6 +63,7 @@ class FakePersistenceWorker {
   failNextSave = false;
   deferSave = false;
   initProvider: unknown;
+  initGameplaySnapshot: unknown = null;
   readonly deferredSaveRequestIds: number[] = [];
   lastSaveKind: string | null = null;
 
@@ -80,7 +82,7 @@ class FakePersistenceWorker {
         worldId: 'test-world',
         generatorVersion: GENERATOR_VERSION,
         player: null,
-        gameplaySnapshot: null,
+        gameplaySnapshot: this.initGameplaySnapshot,
         corpusSummary: null,
         legacyMigrated: true,
         provider: this.initProvider ?? message.provider,
@@ -200,6 +202,18 @@ const frozenSnapshot = (seedText: string, revision: number) =>
     gameplay: { revision: 0 },
     chunks: [snapshot(seedText, revision)],
   }) as unknown as FrozenGameSaveSnapshot;
+const legacyGameplaySnapshot = () => ({
+  version: 3,
+  revision: 0,
+  gameplayTime: 0,
+  worldTime: 9,
+  entitySequence: 0,
+  entities: [],
+  players: [],
+  simulation: {},
+  coordinateSchema: { version: 1, units: 'voxel', entityOrigin: 'body-feet-center' },
+  physicsSchema: { version: 1, bodyRegistryVersion: 1 },
+});
 
 describe('BrowserChunkPersistence neighborhood loads', () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -401,6 +415,22 @@ describe('BrowserChunkPersistence neighborhood loads', () => {
     expect(worker.lastSaveKind).toBe('replace-frozen');
     expect(persistence.seedText).toBe('restored-world');
     expect(persistence.worldId).toBe(`seedlands:g${GENERATOR_VERSION}:restored-world`);
+    persistence.dispose();
+  });
+
+  it('keeps the current durable identity and cached Chunk when legacy provenance is unknown', async () => {
+    const worker = new FakePersistenceWorker();
+    worker.singleLoadRevision = 1;
+    worker.initGameplaySnapshot = legacyGameplaySnapshot();
+    const persistence = await open(worker, 'preserved-world');
+    await persistence.ensureSnapshot(0, 0, 0);
+
+    expect(() => readBrowserAuthorityGameplaySnapshot(persistence)).toThrow('LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN');
+
+    expect(persistence.seedText).toBe('preserved-world');
+    expect(persistence.worldId).toBe('test-world');
+    expect(worker.lastSaveKind).toBeNull();
+    expect(persistence.loadSnapshot(chunkKey(0, 0, 0))?.revision).toBe(1);
     persistence.dispose();
   });
 

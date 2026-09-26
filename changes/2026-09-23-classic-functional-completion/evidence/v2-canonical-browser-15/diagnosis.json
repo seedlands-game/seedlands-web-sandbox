@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-15",
+  "classification": "canonical-fixture-v2-mining-approach-blocked-by-resource-strip",
+  "failedAt": "v2-first-wood-resource-mineVoxel-approach",
+  "source": {
+    "walkFile": "apps/web/tests/e2e/classic-support/harness.ts",
+    "walkLine": 285,
+    "mineFile": "apps/web/tests/e2e/classic-support/harness.ts",
+    "mineLine": 344,
+    "journeyFile": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts",
+    "journeyLine": 219
+  },
+  "route": {
+    "resourceTarget": [80, 31, 2],
+    "derivedApproach": [77.2, 2.5],
+    "selectedKey": "KeyS",
+    "timeoutMs": 15000,
+    "pulseMs": 100,
+    "resourceBetweenPlayerAndApproach": true
+  },
+  "traceObservation": {
+    "initialObservedAuthorityPosition": [83.60385119512642, 32.6, 1.4372953280896212],
+    "stalledNormalPosition": 81.3200007042292,
+    "finalAttachmentClientPosition": [81.31999969482422, 32.599998474121094, 2.495638370513916],
+    "finalAttachmentServerPosition": [81.3200007042292, 32.6, 2.495638381730721],
+    "finalAttachmentViewAngles": [270.1000000000001, -27.82999999999999],
+    "finalAttachmentOnGround": false,
+    "finalAttachmentColliding": false,
+    "inputPulsesContinuedWithFreshAcknowledgements": true,
+    "xProgressStoppedBeforeApproach": true,
+    "zDriftContinued": true
+  },
+  "actionBoundary": {
+    "resourcePlacementObserved": true,
+    "mineVoxelAimStarted": false,
+    "mineLeftMouseDownSent": false,
+    "miningAuthorityActionObserved": false,
+    "woodCollectedEvidenceRecorded": false,
+    "equipmentPointerReached": false
+  },
+  "summary": "The frozen V2 fixture placed all ten resource voxels, then the first wood mine invoked mineVoxel from outside its 2.5-4.5 range. mineVoxel derived approach 77.2,2.5 and selected KeyS from the player's east-side position. The placed wood voxel at x=80 lay on that direct route. Trace snapshots show fresh acknowledged KeyS pulses moving x from about 83.60 to 81.32, after which x stopped while z drifted toward 2.5 until the 15-second helper route deadline expired. The code never reached voxel aim or left mouse down for this resource.",
+  "productBoundary": "This is a canonical V2 fixture route failure before the first mining action, not evidence that Authority mining rejected an action or that the equipment pointer matrix failed. Root must freeze any follow-up; do not change generic walkTo or increase timeouts based on this run."
+}

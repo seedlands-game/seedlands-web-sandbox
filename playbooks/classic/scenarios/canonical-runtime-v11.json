@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "scenarioId": "classic-canonical-runtime-v11",
+  "playbookId": "seedlands:overworld",
+  "playbookVersion": "1.0.0",
+  "referenceMinecraftVersion": "unfrozen",
+  "seed": "classic-canonical-runtime-v11",
+  "generatorVersion": 11,
+  "quality": "low",
+  "runtime": {
+    "renderer": "webgl2",
+    "wasm": true,
+    "simd": true,
+    "packEntryPath": "packs/overworld.mjs"
+  },
+  "initialState": {
+    "floor": { "from": [-4, 30, -3], "to": [224, 30, 3], "voxel": 3 },
+    "air": { "from": [-4, 31, -3], "to": [224, 37, 3], "voxel": 0 },
+    "player": [0.5, 32.6, 0.5],
+    "view": { "yaw": -90, "pitch": -16 },
+    "worldTime": 12,
+    "hungerAdvanceMs": 120000,
+    "resourceVoxels": [
+      { "position": [34, 31, 0], "voxel": 4, "itemId": "wood-block" },
+      { "position": [38, 31, 0], "voxel": 4, "itemId": "wood-block" },
+      { "position": [42, 31, 0], "voxel": 4, "itemId": "wood-block" },
+      { "position": [45, 31, 0], "voxel": 4, "itemId": "wood-block" },
+      { "position": [49, 31, 0], "voxel": 5, "itemId": "berry" }
+    ],
+    "hostile": { "id": "classic-route-creature", "position": [56, 31, 0.5] }
+  },
+  "route": {
+    "chunkCrossing": [33, 0.5],
+    "buildTarget": [52, 31, 0],
+    "stationTarget": [75, 31, 0],
+    "hostileApproach": [54, 0.5],
+    "stationApproach": [72.5, 0.5],
+    "farTurnaround": [208.5, 0.5],
+    "returnPoint": [72.5, 0.5]
+  },
+  "v1Slice": {
+    "water": { "support": [68, 30, 2], "target": [68, 31, 2], "approach": [66, 2.5] },
+    "door": { "support": [70, 30, 0], "lower": [70, 31, 0], "upper": [70, 32, 0], "approach": [67.5, 0.5] },
+    "jukebox": { "support": [76, 30, 2], "target": [76, 31, 2], "approach": [73.5, 2.5] }
+  },
+  "v2Equipment": {
+    "resourceStrip": [
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [80, 30, 2],
+        "target": [80, 31, 2],
+        "approach": [80.5, -0.5]
+      },
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [82, 30, 2],
+        "target": [82, 31, 2],
+        "approach": [82.5, -0.5]
+      },
+      {
+        "itemId": "wood-block",
+        "dropItemId": "wood-block",
+        "voxel": 4,
+        "support": [84, 30, 2],
+        "target": [84, 31, 2],
+        "approach": [84.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [86, 30, 2],
+        "target": [86, 31, 2],
+        "approach": [86.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [88, 30, 2],
+        "target": [88, 31, 2],
+        "approach": [88.5, -0.5]
+      },
+      {
+        "itemId": "stone-block",
+        "dropItemId": "cobblestone",
+        "voxel": 3,
+        "support": [90, 30, 2],
+        "target": [90, 31, 2],
+        "approach": [90.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [92, 30, 2],
+        "target": [92, 31, 2],
+        "approach": [92.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [94, 30, 2],
+        "target": [94, 31, 2],
+        "approach": [94.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [96, 30, 2],
+        "target": [96, 31, 2],
+        "approach": [96.5, -0.5]
+      },
+      {
+        "itemId": "iron-block",
+        "dropItemId": "iron-block",
+        "voxel": 21,
+        "support": [98, 30, 2],
+        "target": [98, 31, 2],
+        "approach": [98.5, -0.5]
+      }
+    ],
+    "workbench": { "support": [78, 30, -2], "target": [78, 31, -2], "approach": [78.5, 0.5] }
+  },
+  "faultDesign": {
+    "wrongPlaybook": "C0 rejects a loaded identity or Pack asset other than Classic.",
+    "inputBypass": "C1 requires Pointer Lock plus acknowledged keyboard input and an authority trajectory crossing a Chunk boundary.",
+    "mutationWithoutPresentation": "C2/C3 require both the authoritative voxel result and a consumed mesh commit on WebGL2.",
+    "counterWithoutCausality": "Worker and Wasm counters are baselined after fixture setup and must advance with the route's own streaming work; a four-center stream shift must also keep client Chunk resources bounded before the return rebuild.",
+    "retiredActorLeak": "C0 requires the retired Classic settler to remain unavailable and the canonical fixture to run without custom NPCs.",
+    "reloadWithoutFreshness": "C5 requires a new runtime epoch, restored world/inventory state, and another acknowledged real input."
+  },
+  "coverage": {
+    "included": [
+      "production preview",
+      "Classic Pack admission",
+      "Pointer Lock movement turn jump and Chunk crossing",
+      "mining drop pickup inventory and personal crafting",
+      "placement food existing combat and workbench runtime",
+      "creative bucket source round-trip two-Chunk wooden door and jukebox record lifecycle",
+      "survival acquisition crafting and pointer interaction for four iron armor slots",
+      "streaming resource release and rebuild",
+      "save return continue and post-restore interaction",
+      "Worker Wasm WebGL2 mesh and telemetry correlation"
+    ],
+    "integratedLegacyBrowserProtection": [
+      {
+        "source": "tests/e2e/regression/world-play.spec.ts",
+        "stages": ["C1", "C2", "C3", "C5"],
+        "observation": "Real Pointer Lock movement, jump, collision-free settling, authoritative edit presentation, Chunk crossing and save/continue are exercised in one world."
+      },
+      {
+        "source": "changes/2026-09-07-loading-performance/e2e/loading-performance.spec.ts and changes/2026-09-08-node-monorepo/e2e/web-package-runtime.spec.ts",
+        "stages": ["C0", "C4"],
+        "observation": "The stamped production artifact must load its admitted Classic Pack, Worker and Wasm bytes; later route work must be completed and consumed."
+      },
+      {
+        "source": "changes/2026-09-08-gameplay-foundation/e2e and changes/2026-09-10-inventory-pointer-interactions/e2e/inventory-pointer.spec.ts",
+        "stages": ["C2", "C3", "C5"],
+        "observation": "Real mouse mining, drop pickup, E inventory, 2x2 pointer crafting, shared 3x3 recipe visibility, hotbar keyboard movement, food, placement, and a buffered wood-sword second combo hit are exercised before restored inventory."
+      },
+      {
+        "source": "changes/2026-09-10-creative-containers-visual-cohesion/e2e/creative-container-interaction.spec.ts",
+        "stages": ["C3", "C5"],
+        "observation": "A crafted workbench is placed and opened, then dismantled and picked back into inventory; after restore that inventory item is placed and opened again."
+      },
+      {
+        "source": "tests/e2e/benchmark/initial-world.spec.ts",
+        "stages": ["C0", "C1", "C2", "C3", "C4", "C5"],
+        "observation": "SEEDLANDS_CLASSIC_BENCHMARK changes sampling mode while retaining this exact scenario and action sequence."
+      }
+    ],
+    "explicitGaps": [
+      {
+        "source": "changes/2026-09-07-prerendered-start-screen/e2e/prerendered-start-screen.spec.ts",
+        "reason": "C0 starts from the hydrated production UI and does not independently prove no-JavaScript first paint or pre-hydration input continuity.",
+        "requiredDisposition": "Keep the SSG contract and record any remaining browser-only hydration check before claiming equivalent protection."
+      },
+      {
+        "source": "changes/2026-09-09-dynamic-local-shadow-invalidation/e2e/dynamic-local-shadow.spec.ts",
+        "reason": "The low-quality canonical route proves mesh consumption, but does not recreate the high-quality lantern shadow-caster removal scene.",
+        "requiredDisposition": "Retain the deterministic invalidation contract and require a separate human or approved canonical observation before claiming pixel/shadow parity."
+      },
+      {
+        "source": "tests/e2e/regression/macro-map.spec.ts and changes/2026-09-09-developer-world-harness/e2e/runtime-diagnostics.spec.ts",
+        "reason": "Macro map and F3 diagnostics are outside C0-C5 and hidden telemetry is not equivalent to their visible UI at narrow viewports.",
+        "requiredDisposition": "Lower their data rules to owned contracts; keep visible map/diagnostics behavior as an explicit acceptance gap unless scope is amended."
+      },
+      {
+        "source": "changes/2026-09-07-asset-workbench/e2e and changes/2026-09-08-asset-appearance-center/e2e",
+        "reason": "The game route consumes production assets but does not open the asset workbench, exercise IndexedDB editing, or inspect every animation/appearance.",
+        "requiredDisposition": "Keep manifest/codec/storage contracts and record the workbench and visual matrix as product-specific gaps."
+      },
+      {
+        "source": "changes/2026-09-10-npc-composable-baseline/e2e/real-three-residents.spec.ts",
+        "reason": "Classic retired its custom settler and does not use provider credentials, PG, WebSocket, or resident roles.",
+        "requiredDisposition": "Keep generic protocol/host integration tests outside the Classic product contract; never count a skipped external run as PASS."
+      }
+    ],
+    "notCovered": [
+      "real model provider or credentials",
+      "PG or WebSocket cognition bridge",
+      "audio subjective quality",
+      "non-WebGL2 renderer",
+      "multi-browser and mobile input",
+      "three-day soak",
+      "valid performance comparison outside the reservation window"
+    ]
+  }
+}

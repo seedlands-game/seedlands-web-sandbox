@@ -9,9 +9,16 @@ const artifact = (pack: typeof clicked): VerifiedPackArtifact => ({
   ...pack,
   integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
 });
+const approvedPlaybook = (pack: typeof clicked) => ({
+  id: pack.manifest.id,
+  version: pack.manifest.version,
+  integrity: artifact(pack).integrity,
+  permissions: pack.modules.flatMap((module) => module.descriptor.permissions ?? []),
+});
 
 it('独立点击转换 Pack 只匹配选中槽，真实正常输入消费与产出，不加载默认合成/Combat/Needs', async () => {
-  const createComposition = () => assembleProductPacks([artifact(clicked)]);
+  const createComposition = () =>
+    assembleProductPacks([artifact(clicked)], { approvedPlaybook: approvedPlaybook(clicked) });
   const composition = createComposition();
   expect(composition.definitionMap.modules.map((entry) => entry.id)).not.toContain('seedlands:recipe-crafting-module');
   expect(composition.definitionMap.modules.map((entry) => entry.id)).not.toContain('seedlands:combat-module');
@@ -69,7 +76,7 @@ it('无 Combat/Needs/合成/生态的建造 Playbook 可正常创建、拒绝合
   const session = await HeadlessSession.create({
     seedText: 'alternative-builder-playbook',
     platform: testCorePlatform,
-    createComposition: () => assembleProductPacks([artifact(builder)]),
+    createComposition: () => assembleProductPacks([artifact(builder)], { approvedPlaybook: approvedPlaybook(builder) }),
   });
   try {
     await session.world.clock({ kind: 'pause' });

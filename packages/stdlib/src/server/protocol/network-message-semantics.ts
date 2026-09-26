@@ -1,4 +1,9 @@
 import type { AuthorityAction } from '../protocol/authority-worker-protocol';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
+import {
+  cloneItemInteractionExpectedSelection,
+  isItemInteractionTarget,
+} from '../gameplay/modules/item-interaction-module';
 import {
   isPlayablePublicOutboundMessage,
   type PlayablePublicOutboundMessage,
@@ -157,8 +162,8 @@ export type PublicOutboundMessage =
       physicsTick: number;
       entities: readonly Readonly<{
         id: string;
-        type: 'player' | 'world-item' | 'creature' | 'npc';
-        archetype?: 'grazer' | 'night-stalker' | 'settler';
+        type: 'player' | 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
+        archetype?: import('../gameplay/ecs-entity-owner').EcsActorArchetype;
         position: [number, number, number];
         velocity: [number, number, number];
       }>[];
@@ -228,11 +233,13 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
     respawn: [],
     'select-hotbar': ['slot'],
     'use-inventory': ['slot'],
+    interact: ['intent', 'target', 'expectedSelection'],
     craft: ['recipeId'],
     attack: ['targetId'],
     'begin-break': ['position'],
     place: ['position'],
     'move-inventory': ['source', 'target'],
+    'set-difficulty': ['value', 'expectedRevision'],
   } as const;
   if (
     !Object.hasOwn(actionKeys, value.type) ||
@@ -241,9 +248,21 @@ const isAuthorityAction = (value: unknown): value is AuthorityAction => {
     return false;
   if (value.type === 'cancel-break' || value.type === 'respawn') return true;
   if (value.type === 'select-hotbar' || value.type === 'use-inventory') return isSafeInteger(value.slot);
+  if (value.type === 'interact') {
+    try {
+      cloneItemInteractionExpectedSelection(value.expectedSelection);
+      return (value.intent === 'use' || value.intent === 'alternate') && isItemInteractionTarget(value.target);
+    } catch {
+      return false;
+    }
+  }
   if (value.type === 'craft') return isNonEmptyString(value.recipeId);
   if (value.type === 'attack') return isNonEmptyString(value.targetId);
   if (value.type === 'begin-break' || value.type === 'place') return isPosition(value.position);
+  if (value.type === 'set-difficulty')
+    return (
+      ['peaceful', 'easy', 'normal', 'hard'].includes(value.value as string) && isSafeInteger(value.expectedRevision)
+    );
   return value.type === 'move-inventory' && isSafeInteger(value.source) && isSafeInteger(value.target);
 };
 
@@ -409,10 +428,9 @@ export function isPublicOutboundMessage(
         (entity) =>
           isRecord(entity) &&
           hasOnlyKeys(entity, ['id', 'type', 'archetype', 'position', 'velocity']) &&
-          (entity.archetype === undefined ||
-            ['grazer', 'night-stalker', 'settler'].includes(entity.archetype as string)) &&
+          (entity.archetype === undefined || isActorArchetype(entity.archetype)) &&
           isNonEmptyString(entity.id) &&
-          ['player', 'world-item', 'creature', 'npc'].includes(entity.type as string) &&
+          ['player', 'world-item', 'creature', 'npc', 'falling-block', 'painting'].includes(entity.type as string) &&
           isPosition(entity.position) &&
           isPosition(entity.velocity),
       )

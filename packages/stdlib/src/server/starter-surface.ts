@@ -1,4 +1,6 @@
 import { isSolid, terrainHeight, Voxel } from '../world/voxel';
+import type { VoxelSemanticsResolver } from '../world/voxel-semantics';
+import { voxelIsPassable, voxelIsSolid } from '../world/voxel-semantics';
 
 export function findDryStarterSurface(
   seed: number,
@@ -6,6 +8,7 @@ export function findDryStarterSurface(
   x: number,
   z: number,
   getVoxel: (x: number, y: number, z: number) => number,
+  semantics?: VoxelSemanticsResolver,
 ): [number, number, number] {
   for (let radius = 0; radius <= 6; radius += 1)
     for (let dx = -radius; dx <= radius; dx += 1)
@@ -15,11 +18,14 @@ export function findDryStarterSurface(
         const candidateZ = z + dz;
         const y = terrainHeight(seed, candidateX, candidateZ, generatorVersion) + 1;
         if (
-          isSolid(getVoxel(candidateX, y - 1, candidateZ)) &&
-          getVoxel(candidateX, y, candidateZ) === Voxel.Air &&
-          getVoxel(candidateX, y + 1, candidateZ) === Voxel.Air &&
-          getVoxel(candidateX, y + 2, candidateZ) === Voxel.Air &&
-          getVoxel(candidateX, y + 3, candidateZ) === Voxel.Air
+          (semantics
+            ? voxelIsSolid(getVoxel(candidateX, y - 1, candidateZ), semantics)
+            : isSolid(getVoxel(candidateX, y - 1, candidateZ))) &&
+          [0, 1, 2, 3].every((offset) =>
+            semantics
+              ? voxelIsPassable(getVoxel(candidateX, y + offset, candidateZ), semantics)
+              : getVoxel(candidateX, y + offset, candidateZ) === Voxel.Air,
+          )
         )
           return [candidateX + 0.5, y, candidateZ + 0.5];
       }

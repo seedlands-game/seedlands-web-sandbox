@@ -5,7 +5,9 @@ import type { AuthoritySnapshot } from './authority-session';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { ActorState, SimulationSnapshot } from '../simulation/actor-state';
 import type { ItemDefinitionRegistry } from '../gameplay/item-registry';
-import { CHUNK_SIZE, chunkKey, floorDiv, isSolid } from '../../world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
+import { voxelIsSolid } from '../../world/voxel-semantics';
 import type { CoreClone } from '../../runtime/platform-ports';
 import type { GameServer } from '../game-server';
 import type { ActorControlSource } from '../gameplay/ecs-actor-components';
@@ -23,6 +25,7 @@ type BuildOptions = Readonly<{
   identityRevision: (entity: GameplayEntity) => number;
   controlSource?: (entityId: string) => ActorControlSource;
   getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
+  voxelSemantics?: VoxelSemanticsResolver;
 }>;
 
 type Bounds = { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
@@ -78,6 +81,7 @@ const createTerrainWindow = (
   key: string,
   bounds: Bounds,
   getLoadedVoxel: BuildOptions['getLoadedVoxel'],
+  voxelSemantics?: VoxelSemanticsResolver,
 ): TerrainWindow | null => {
   const size: [number, number, number] = [
     bounds.maxX - bounds.minX + 1,
@@ -96,7 +100,7 @@ const createTerrainWindow = (
         const localX = x - bounds.minX;
         const localY = y - bounds.minY;
         const localZ = z - bounds.minZ;
-        occupancy[localX + size[0] * (localZ + size[2] * localY)] = Number(isSolid(loaded.voxel));
+        occupancy[localX + size[0] * (localZ + size[2] * localY)] = Number(voxelIsSolid(loaded.voxel, voxelSemantics));
       }
   return {
     key,
@@ -120,7 +124,7 @@ export function buildLogicObservation(options: BuildOptions): LogicObservation {
   for (const [key, bounds] of terrainBounds(actorEntities)) {
     const cells = (bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) * (bounds.maxZ - bounds.minZ + 1);
     if (terrainCells + cells > MAX_LOGIC_TERRAIN_CELLS) continue;
-    const terrainWindow = createTerrainWindow(key, bounds, options.getLoadedVoxel);
+    const terrainWindow = createTerrainWindow(key, bounds, options.getLoadedVoxel, options.voxelSemantics);
     if (!terrainWindow) continue;
     terrainWindows.push(terrainWindow);
     terrainCells += cells;
@@ -196,6 +200,7 @@ export class AuthorityLogicObservationBuilder {
       identityRevision: (entity) => this.identityRevision(entity),
       controlSource: (entityId) => this.server.getActorControlSource(entityId) ?? 'none',
       getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
+      ...(this.server.hasGameplayComposition ? { voxelSemantics: this.server.voxelSemantics } : {}),
     });
   }
 

@@ -1,4 +1,5 @@
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
+import type { EcsActorArchetype } from '../gameplay/ecs-entity-owner';
 import type { BodyState, Contact } from '../../physics';
 import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
 import type { FluidAuthorityDiagnostics } from '../fluid/fluid-transaction';
@@ -6,8 +7,8 @@ import type { AuthorityResidencyDiagnostics } from './authority-residency-runtim
 
 export type AuthorityEntity = Readonly<{
   id: string;
-  type: 'player' | 'world-item' | 'creature' | 'npc';
-  archetype?: 'grazer' | 'night-stalker' | 'settler';
+  type: 'player' | 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
+  archetype?: EcsActorArchetype;
   position: [number, number, number];
   physicsVelocity?: [number, number, number];
 }>;

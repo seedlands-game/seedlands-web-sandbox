@@ -9,28 +9,28 @@
     "crates/world-kernels-wasm/src/data.rs": "761ce1e399662fc8ea3b7118d2af423dc1f4ca01060b95d5a884c026011f9f72",
     "crates/world-kernels-wasm/src/fluid.rs": "d0f08542ee7790f076319bfb1f7d3a0bf94158e95f5bd32d44f6a8cba66ecfbc",
     "crates/world-kernels-wasm/src/lib.rs": "ca14ea112e58beae8c17c119674c0a38efa08df347153adabae36dfe5bc752d3",
-    "crates/world-kernels-wasm/src/mesh.rs": "bde520ea09a49c84a6ce9b32ae7bac9c30a0fd17bfb2738da4901a84b952f8d7",
+    "crates/world-kernels-wasm/src/mesh.rs": "4ba36f178bd38587dfbf1c8e87311e1f399e773ed44e5bef5855e703d346f461",
     "crates/world-kernels-wasm/src/pack.rs": "f64e50b149f261ce1d13641078e0ef106d0d86e8abe18974058dc5174a67e820",
     "crates/world-kernels/Cargo.toml": "2046dc427bc326a3e8ac5acca4a0d6e94677191efab58c1646f856046c2ffcd7",
-    "crates/world-kernels/src/codec.rs": "c921ad41a9638dfd40f815099f76cdc9824dbe7cef9d05c2c807b2fddbcdeec4",
-    "crates/world-kernels/src/fluid.rs": "9739cd93a4b4791c29ac8b480bc71cf3d878b499ce1d26a5697a2d34a38c313b",
-    "crates/world-kernels/src/generation.rs": "466efb38ee43635da368a1d3b8533ef530a9f8287b7cab1d6aedcd4c9ab6de5b",
-    "crates/world-kernels/src/lib.rs": "ff32bf9a94f91f0d6121121b5771cd66eb8078a1a60f57f0915b19e3efb2eb0e",
-    "crates/world-kernels/src/mesh.rs": "4d7b0083b1abdad3e88d50816a15c32bbd95c0165b670f69563d49a5cb11bcb1",
+    "crates/world-kernels/src/codec.rs": "2dd690d2f5387a642ee079d768903ad5e1f905e6d09877e0efcba18ad2514235",
+    "crates/world-kernels/src/fluid.rs": "434e1fabbc0d6542af34537471f14d2e2462aa2c9cd374c515e39d1923302e9f",
+    "crates/world-kernels/src/generation.rs": "71ae99ee35d896c215fa95c9dbd162140c5fb9c463a31198a45f8a7f61c039af",
+    "crates/world-kernels/src/lib.rs": "a0b0ea4ed34257a02d718e05cff1a3ed7b450ad7317c8452e9dc1c8f16e466de",
+    "crates/world-kernels/src/mesh.rs": "10c4a907166062fbcc0661dd599488e07498e410ef29dd9f437d63972e344610",
     "crates/world-kernels/src/pack.rs": "92b4a7da0b2dfaf71d6d3a3d260966a0323267c79ab3e23518ce965ef469b460",
-    "crates/world-kernels/tests/data-plane.rs": "d9462b041fcc6ac1796df66301c3603cfdbaad464586e97aecaa60abfb4977b9",
-    "crates/world-kernels/tests/fluid-mesh.rs": "c46e87c7ccf4ea577928b81ae460db4296a639f98f4d8d21db76609d2ed2ea71",
+    "crates/world-kernels/tests/data-plane.rs": "c224a7b7d112b8bf68ad0281427430e37bca6fbd975749c38713a27ace0bd4f6",
+    "crates/world-kernels/tests/fluid-mesh.rs": "8a84767fc27aa32ac5d870b800dfd53c43a896b588743533024c013fc7442653",
     "scripts/build-simd-experiment.mjs": "a072a69ac28cb4782d45f224385c17b59ff9aea6449c4df1daf24f57de3bc831",
     "scripts/link-wasm-kernels.mjs": "8b4a17970e5bc1220f28643508a55a40c653554490a7a4836e0be530737e460e"
   },
   "scalar": {
-    "bytes": 23250,
-    "sha256": "c71876a142ce9ca95556e802f41a1ddaf4de017a3199f4e6e09bfdba66cbbcd4",
-    "flags": "-C linker=/Users/bytedance/.codex/worktrees/fa24/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+    "bytes": 32646,
+    "sha256": "611c45804d9be51378388c8e7139620e2bbbeb089fe39cbf71792d712a9e7f45",
+    "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=-simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   },
   "simd": {
-    "bytes": 24812,
-    "sha256": "6c27efb40b89e7d4602fe5767cc8f2e5d562d582302ecf4c8e430d1f2c42ab1b",
-    "flags": "-C linker=/Users/bytedance/.codex/worktrees/fa24/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
+    "bytes": 34208,
+    "sha256": "c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c",
+    "flags": "-C linker=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/link-wasm-kernels.mjs -C linker-flavor=wasm-ld -C target-feature=+simd128,-relaxed-simd -C no-vectorize-loops -C no-vectorize-slp -C link-arg=--global-base=16777216 -C link-arg=--export=__data_end -C link-arg=--export=__heap_base -C link-arg=--export=__stack_pointer -C link-arg=-z -C link-arg=stack-size=1048576 -C link-arg=--initial-memory=18874368 -C link-arg=--max-memory=33554432"
   }
 }

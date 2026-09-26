@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-registered-combat-armor-stdlib-types-01",
+  "pid": 88942,
+  "startedAt": "2026-09-25T12:33:31.476Z",
+  "windowId": "v2-registered-combat-armor-stdlib-types-01",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-registered-combat-armor-01/stdlib-types-01-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T12:33:33.916Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:33:31.477Z",
+      "loadAverage": [
+        4.77880859375,
+        3.6494140625,
+        3.43994140625
+      ],
+      "freeMemoryBytes": 265584640,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:33:33.914Z",
+      "loadAverage": [
+        5.03662109375,
+        3.72119140625,
+        3.46630859375
+      ],
+      "freeMemoryBytes": 710443008,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

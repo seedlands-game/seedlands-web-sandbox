@@ -1,0 +1,23 @@
+V2-CANONICAL-BROWSER-16
+acceptanceTree=/private/tmp/seedlands-v2-acceptance-65938068
+
+canonical-attempt
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-16-65938068 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+
+artifact-postcheck
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-16-artifact-postcheck SEEDLANDS_RESERVATION_EVIDENCE=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/artifact-postcheck-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm harness:artifact 2>&1 | tee /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/artifact-postcheck.stdout.log'
+
+report-format
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-16-report-format SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/report-format-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; { pnpm exec prettier --write changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/diagnosis.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/result-summary.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/v2-equipment-reached-evidence.json && (git diff --no-index --check /dev/null changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md >/dev/null; code=$?; test $code -eq 0 -o $code -eq 1); } 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/report-format.stdout.log'
+
+metadata-final
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-16-metadata-final SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/metadata-final-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; { pnpm exec prettier --write changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/delivery-validation.json && pnpm exec prettier --check changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/diagnosis.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/result-summary.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/v2-equipment-reached-evidence.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/delivery-validation.json && (git diff --no-index --check /dev/null changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md >/dev/null; code=$?; test $code -eq 0 -o $code -eq 1) && (git diff --no-index --check /dev/null changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/validation-argv.txt >/dev/null; code=$?; test $code -eq 0 -o $code -eq 1); } 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-16/metadata-final.stdout.log'
+
+unpublished-packaging-recovery
+git update-ref refs/task-backups/git32-evidence-a402b016 a402b01623354a5c78e41260354a0fdd7c35394c
+cat <old six parts in lexical order> | shasum -a 256
+cat <old six parts in lexical order> | wc -c
+cp MANIFEST.sha256 delivery-validation.json trace-parts.sha256 trace-reassembly.sha256 prior-packaging/
+cat <old six parts in lexical order> | split -b 52428800 -d -a 2 - trace-50m/canonical-trace.zip.part-
+find trace-50m -type f -print0 | LC_ALL=C sort -z | xargs -0 cat | shasum -a 256
+find trace-50m -type f -print0 | LC_ALL=C sort -z | xargs -0 cat | wc -c

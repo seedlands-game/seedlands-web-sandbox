@@ -22,6 +22,10 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     recipes: server.listRecipes(),
     inventory,
     craftableRecipeIds: server.listCraftableRecipes(playerId).map((recipe) => recipe.id),
+    progress: server.progress.snapshot(playerId),
+    difficulty: server.gameplayDifficulty,
+    armorPoints: server.getPlayerArmorPoints(playerId),
+    media: server.mediaProjections(),
     metrics: server.gameplayMetrics(),
   };
 }

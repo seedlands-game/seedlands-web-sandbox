@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "reason": "GitHub GH001 rejected the unpublished evidence commit because each original trace part exceeded the 100 MB blob limit.",
+  "rejectedCommit": "a402b01623354a5c78e41260354a0fdd7c35394c",
+  "remoteShaAfterRejection": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+  "localBackupRef": "refs/task-backups/git32-evidence-a402b016",
+  "backupRefCommit": "a402b01623354a5c78e41260354a0fdd7c35394c",
+  "pushRejectionLog": "push-rejection.stdout.log",
+  "oldPackaging": {
+    "directory": ".",
+    "parts": 6,
+    "sizes": [134217728, 134217728, 134217728, 134217728, 134217728, 103064472],
+    "manifestSha256": "9fb56fd43e08f7761a578eadb804a86b5037fcc1b5d42fbc14f782d83ba97aa4",
+    "deliverySha256": "d45b87b5657c4dfbfe1174a4597af5b247c77966891259e2e608d94960401890",
+    "tracePartsSha256": "55e1dfa25161d5cfe922e26296f0c0393e5b227f322f2c808d2831459686c868",
+    "traceReassemblySha256": "4334edfd0463df067d35bc38c7483d770144f707df28c49e48001289727c5cf6",
+    "metadataArchive": "prior-packaging"
+  },
+  "newPackaging": {
+    "directory": "trace-50m",
+    "parts": 15,
+    "maxPartBytes": 52428800,
+    "lastPartBytes": 40149912
+  },
+  "trace": {
+    "sizeBytesBefore": 774153112,
+    "sizeBytesAfter": 774153112,
+    "sha256Before": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "sha256After": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "byteIdentical": true
+  },
+  "browserRunRepeated": false,
+  "browserResultChanged": false
+}

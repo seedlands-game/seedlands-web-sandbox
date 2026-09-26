@@ -1,0 +1,12 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/target-aim.test.ts(27,20): error TS2345: Argument of type 'import("/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/scenario").Point' is not assignable to parameter of type 'Point'.
+  The type 'Point' is 'readonly' and cannot be assigned to the mutable type 'Point'.
+apps/web/tests/e2e/classic-support/target-aim.test.ts(101,23): error TS2352: Conversion of type 'number[]' to type 'Point' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 3 element(s) but source may have fewer.
+apps/web/tests/e2e/classic-support/target-aim.test.ts(102,34): error TS2345: Argument of type 'import("/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/scenario").Point' is not assignable to parameter of type 'Point'.
+  The type 'Point' is 'readonly' and cannot be assigned to the mutable type 'Point'.
+apps/web/tests/e2e/classic-support/target-aim.ts(23,25): error TS2352: Conversion of type 'number[]' to type 'Point' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 3 element(s) but source may have fewer.
+apps/web/tests/e2e/classic-support/target-aim.ts(26,10): error TS2352: Conversion of type 'number[]' to type 'Point' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Target requires 3 element(s) but source may have fewer.
+[ELIFECYCLE] Command failed with exit code 2.

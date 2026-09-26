@@ -23,7 +23,15 @@ export type PlayerCorrectionReference = {
   collisionRevisions: ReferenceChunkRevision[];
 };
 
-export type GameplayInventorySlotReference = { slot: number; itemId: string; count: number } | null;
+export type GameplayItemStackReference = Readonly<{
+  itemId: string;
+  count: number;
+  instance?: Readonly<{ durability: number }>;
+}>;
+export type GameplayInventorySlotReference = Readonly<GameplayItemStackReference & { slot: number }> | null;
+export type GameplayEquipmentReference = Readonly<
+  Record<import('../gameplay/modules/armor-policy').ArmorSlot, GameplayItemStackReference | null>
+>;
 export type GameplayBreakActionReference = {
   position: [number, number, number];
   voxel: number;
@@ -62,17 +70,19 @@ export type GameplayPlayerReference = {
   hunger: number;
   maxHunger: number;
   lifecycle: 'alive' | 'dead';
-  inventory: GameplayInventorySlotReference[];
+  inventory: readonly GameplayInventorySlotReference[];
+  armor: GameplayEquipmentReference;
   selectedSlot: number;
   hotbarSize: number;
   breakAction: GameplayBreakActionReference;
   combat?: GameplayCombatReference;
 };
+import type { EcsActorArchetype } from '../gameplay/ecs-entity-owner';
 export type GameplayEntityReference = {
   id: string;
-  type: 'world-item' | 'creature' | 'npc';
+  type: 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting';
   position: [number, number, number];
-  archetype?: 'grazer' | 'night-stalker' | 'settler';
+  archetype?: EcsActorArchetype;
   stack?: { itemId: string; count: number };
   health?: number;
   maxHealth?: number;

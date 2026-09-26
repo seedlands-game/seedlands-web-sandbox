@@ -1,3 +1,8 @@
+import {
+  freezePlayerInventoryLayout,
+  PLAYER_INVENTORY_LAYOUT_CAPABILITY,
+  type PlayerInventoryLayout,
+} from '../inventory-layout';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
 import type { ItemDefinitionRegistry } from '../item-registry';
 import { createInventoryCandidate } from './inventory-api';
@@ -5,17 +10,24 @@ import { createInventoryCandidate } from './inventory-api';
 const COMPONENT = 'seedlands:inventory';
 const RESOURCE = 'seedlands.inventory';
 
-export function defineInventoryModule(): ModModule {
+export function defineInventoryModule(options: Readonly<{ playerLayout?: PlayerInventoryLayout }> = {}): ModModule {
+  const layout = options.playerLayout ? freezePlayerInventoryLayout(options.playerLayout) : undefined;
   return Object.freeze({
     descriptor: {
       id: 'seedlands:inventory-module',
       version: '1.0.0',
       requires: [{ id: 'seedlands:items', version: '1.0.0' }],
-      provides: [{ id: 'seedlands:inventory', version: '1.0.0' }],
+      provides: [
+        { id: 'seedlands:inventory', version: '1.0.0' },
+        ...(layout
+          ? [{ id: PLAYER_INVENTORY_LAYOUT_CAPABILITY, version: '1.0.0', definitionIdentity: JSON.stringify(layout) }]
+          : []),
+      ],
       resources: [{ id: RESOURCE, operations: ['read', 'write', 'execute'] }],
       permissions: [{ resource: RESOURCE, operations: ['read', 'write', 'execute'] }],
     },
     register(api) {
+      if (layout) api.provideCapability(PLAYER_INVENTORY_LAYOUT_CAPABILITY, layout);
       const items = api.requireCapability<ItemDefinitionRegistry>('seedlands:items');
       api.registerState({
         id: COMPONENT,

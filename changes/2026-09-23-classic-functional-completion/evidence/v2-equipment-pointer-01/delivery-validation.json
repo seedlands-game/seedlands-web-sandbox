@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-POINTER-01",
+  "status": "POINTER_GREEN_STATION_HOST_EXTERNAL",
+  "baseline": "7030adac5ea234319bfe032185828287ee07b85d",
+  "red": {
+    "modelWindow": "887c187a-dbb6-4a68-98d8-6ba5866307e1",
+    "modelPassed": 6,
+    "modelFailed": 9,
+    "registeredWindow": "851c9e65-a733-49ab-8aa0-eb3251575a17",
+    "registeredPassed": 0,
+    "registeredFailed": 1,
+    "registeredSkipped": 2
+  },
+  "green": {
+    "behaviorWindow": "520e859a-e352-4dfc-a7e8-374531f58a4a",
+    "behaviorFiles": 4,
+    "behaviorTests": 35,
+    "registeredWindow": "7ceca85c-50e6-416c-b101-917691d1d711",
+    "registeredPassed": 1,
+    "registeredSkipped": 2
+  },
+  "staticWindows": {
+    "format": "6ca4cd18-d507-49ad-bf07-90b4b67dd95e",
+    "stdlibTypecheck": "8e09f6b1-be78-4d69-87aa-34765ac72ce5",
+    "rootTestTypecheck": "276a5d5c-59b3-4600-8bd0-0a901307858e",
+    "classicTestTypecheck": "94fc51a2-0e7b-4321-a063-3dc3967c3de2",
+    "eslint": "eb724004-3390-4c63-ab9a-3306e33b65d6"
+  },
+  "files": {
+    "packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts": "ed625fee3ab30eb78617a1eaa3e615c79f9feb87d75d7c3e129b54de60aad2f6",
+    "packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts": "3511692ec9f0c7b834f3ce1c68d9aba09cedea6ba65ec8c9e005e4992c0f1f1b",
+    "packages/stdlib/tests/server/equipment-pointer-behavior.test.ts": "b23d7a987c0a528921d1788bfecaa2100d0e25607d2d310b204401ee4f626c72",
+    "packages/stdlib/tests/server/equipment-pointer-station-candidate.test.ts": "eeed870ef86a166adeb733963ae2525e8ce9501488f437177021a5f5a3196c1d",
+    "apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts": "a91a72f365dcbd0dcfcb5ed8044e51fc5b1624a8d1a528c3a7b37db9358db07a",
+    "changes/2026-09-23-classic-functional-completion/equipment-pointer-contract.md": "d113f62669d9fcc310ce4a7187ad7d944b104085f0ca0f10c62616e01bfb99d1"
+  },
+  "externalDependencies": [
+    "RegisteredStationRuntime equipment replacement and transaction tests are owned by 954.",
+    "Armor-only revision and death behavior are outside I2.1a."
+  ],
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "git"]
+}

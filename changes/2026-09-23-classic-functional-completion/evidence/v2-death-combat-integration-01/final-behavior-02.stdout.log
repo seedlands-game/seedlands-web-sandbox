@@ -1,0 +1,40 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts (10 tests | 1 failed) 66ms
+     × settles a lethal player hit with post-hit armor and one shared revision 27ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-death.test.ts > registered Combat death inventory policy > settles a lethal player hit with post-hit armor and one shared revision
+AssertionError: expected undefined to match object { …(2) }
+
+- Expected:
+{
+  "operationId": "seedlands:resolve-combat",
+  "value": {
+    "damage": 5,
+    "outcome": "hit",
+    "success": true,
+  },
+}
+
++ Received:
+undefined
+
+ ❯ packages/stdlib/tests/server/registered-combat-death.test.ts:292:34
+    290|       damage: healthDelta,
+    291|     });
+    292|     expect(pending.facts.at(-1)).toMatchObject({
+       |                                  ^
+    293|       operationId: 'seedlands:resolve-combat',
+    294|       value: { success: true, outcome: 'hit', damage: healthDelta },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  23:24:17
+   Duration  921ms (transform 646ms, setup 0ms, import 783ms, tests 66ms, environment 0ms)
+

@@ -1,10 +1,9 @@
 import { projectNearbyStations } from './gameplay/station-player-view';
 import type { WorldModuleBinding } from './commands/module-command';
 import type { ModuleInvocationValue } from './composition/contracts';
-import type { PreparedWorldEdit } from './prepared-world-edit';
 import type { WorldResourceAuthorizer } from './harness/world-authorization';
 import type { RegisteredActorOperationBinding, RegisteredOperationRequest } from './composition/operation-contracts';
-import type { WorldCommitResult, WorldEditBatch } from './game-server';
+import type { WorldEditBatch } from './game-server';
 import type {
   ActorArchetype,
   EntityQuery,
@@ -15,7 +14,7 @@ import type {
 } from './gameplay/entity-store';
 import { GameplayRuntime } from './gameplay/gameplay-runtime';
 import { legacyPlayerPositionToFeet } from './gameplay/gameplay-snapshot';
-import type { ItemStack } from './gameplay/item-registry';
+import type { ItemDefinitionRegistry, ItemStack } from './gameplay/item-registry';
 import type { ActorActionInput } from './simulation/action-runtime';
 import type { ActorRegistration } from './simulation/autonomy-runtime';
 import type { ActorAuthorityAction } from './simulation/actor-authority-rules';
@@ -26,34 +25,25 @@ import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
 import type { GameServerOptions } from './game-server-types';
-import type { ItemDefinitionRegistry } from './gameplay/item-registry';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
 import { isActorEntityType } from './gameplay/ecs-actor-state';
 import type { ActorControlSource } from './gameplay/ecs-actor-components';
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
+import type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
+import { armorPoints } from './gameplay/armor-equipment';
+import type { ProjectileVector } from './gameplay/projectile-runtime';
+import * as ItemInteraction from './gameplay/modules/item-interaction-module';
+import type { PreparedGameplayRestore } from './game-server-gameplay-restore';
 
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
-
-export type GameServerGameplayWorldPort = Readonly<{
-  worldTime(): number;
-  getVoxel(x: number, y: number, z: number): number;
-  editBatch(batch: WorldEditBatch): WorldCommitResult;
-  prepareVoxelEdit(actorId: string, position: readonly [number, number, number], voxel: number): PreparedWorldEdit;
-  setWorldTime(hours: number): number;
-  readLoadedGameplayVoxel(x: number, y: number, z: number): number | undefined;
-  readGameplayVoxel(x: number, y: number, z: number): number | undefined;
-}>;
-
-export type PreparedGameplayRestore = Readonly<{
-  gameplay: GameplayRuntime;
-  restoredVersion: 1 | 2 | 3 | 4 | null;
-}>;
+export type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
 
 export class GameServerGameplayHost {
   private activeGameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
   private restoredVersion: 1 | 2 | 3 | 4 | null = null;
+  private snapshotMigrationReports: PreparedGameplayRestore['snapshotMigrationReports'] = [];
 
   constructor(
     private readonly gameplayPersistence: Persistence | undefined,
@@ -80,8 +70,16 @@ export class GameServerGameplayHost {
     return new GameplayRuntime({
       getVoxel: (position) => this.world.readGameplayVoxel(...position),
       getLoadedVoxel: (position) => this.world.readLoadedGameplayVoxel(...position),
+      getLoadedCell: (position) => this.world.readLoadedGameplayCell(...position),
+      getFluidCell: (position) => this.world.readFluidCell(...position),
+      voxelGeometry: this.world.voxelGeometry,
       prepareVoxelEdit: (actorId, position, voxel) => this.world.prepareVoxelEdit(actorId, position, voxel),
+      prepareVoxelEdits: (actorId, edits) => this.world.prepareVoxelEdits(actorId, edits),
+      editBatch: (batch) => this.world.editBatch(batch),
+      environmentSeed: this.world.seed(),
+      biomeAt: ([x, , z]) => this.world.biomeAt(x, z),
       getWorldTime: () => this.world.worldTime(),
+      setWorldTime: (hours) => this.world.setWorldTime(hours),
       platform: this.platform,
       content: this.content,
       composition: this.compositionOptions.composition,
@@ -164,6 +162,14 @@ export class GameServerGameplayHost {
   acknowledgeBlockCommit(value: ModuleInvocationValue) {
     return this.gameplay.acknowledgeBlockCommit(value);
   }
+  get structureTargets() {
+    return this.gameplay.structureTargets;
+  }
+  get mediaTargets() {
+    return this.gameplay.media.targets;
+  }
+  mediaProjections = () => this.gameplay.media.projections();
+  takeCommittedMediaFacts = () => this.gameplay.media.takeCommittedFacts();
   bindModuleOperations(authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) {
     return this.gameplay.bindModuleOperations(authorizer, source);
   }
@@ -177,6 +183,14 @@ export class GameServerGameplayHost {
   invokeActorModuleOperation(actorId: string, request: RegisteredOperationRequest) {
     return this.gameplay.invokeActorModuleOperation(actorId, request);
   }
+  resolveItemInteraction(itemId: string, trigger: ItemInteraction.ItemInteractionTrigger) {
+    return (
+      ItemInteraction.itemInteractionRegistryForComposition(this.compositionOptions.composition)?.resolve(
+        itemId,
+        trigger,
+      ) ?? null
+    );
+  }
   getNearbyStations(playerId: string) {
     return projectNearbyStations(this.gameplay, playerId, this.compositionOptions.moduleActorAuthority, (x, y, z) =>
       this.world.readGameplayVoxel(x, y, z),
@@ -186,10 +200,10 @@ export class GameServerGameplayHost {
     return this.gameplay.content.stations?.listRecipes() ?? [];
   }
   get hasGameplayComposition() {
-    return this.gameplay.hasComposition;
+    return !!this.compositionOptions.composition;
   }
   get gameplayResources() {
-    return this.gameplay.resources;
+    return this.compositionOptions.composition?.resources ?? [];
   }
   disposeGameplay() {
     this.gameplay.dispose();
@@ -251,8 +265,59 @@ export class GameServerGameplayHost {
   placeVoxel(id: string, position: [number, number, number]) {
     return this.gameplay.placeVoxel(id, position);
   }
+  useFluidContainer(id: string, position: [number, number, number]) {
+    return this.gameplay.useFluidContainer(id, position);
+  }
   useSelectedItem(id: string) {
     return this.gameplay.useSelectedItem(id);
+  }
+  fireSelectedRangedItem(id: string, direction: ProjectileVector) {
+    return this.gameplay.fireSelectedRangedItem(id, direction);
+  }
+  shearSheep(playerId: string, sheepId: string) {
+    return this.gameplay.speciesInteractions.shear(playerId, sheepId);
+  }
+  tameWolf(playerId: string, wolfId: string) {
+    return this.gameplay.speciesInteractions.tame(playerId, wolfId);
+  }
+  toggleWolfSitting(playerId: string, wolfId: string) {
+    return this.gameplay.speciesInteractions.toggleSitting(playerId, wolfId);
+  }
+  dyeSheep(playerId: string, sheepId: string) {
+    return this.gameplay.speciesInteractions.dye(playerId, sheepId);
+  }
+  regrowSheepWool(sheepId: string) {
+    return this.gameplay.speciesInteractions.regrowWool(sheepId);
+  }
+  get lifeSkills() {
+    return this.gameplay.lifeSkills;
+  }
+  get vehicles() {
+    return this.gameplay.vehicles;
+  }
+  get navigationItems() {
+    return this.gameplay.navigationItems;
+  }
+  get crops() {
+    return this.gameplay.crops;
+  }
+  get structures() {
+    return this.gameplay.structures;
+  }
+  get finalEntities() {
+    return this.gameplay.finalEntities;
+  }
+  get progress() {
+    return this.gameplay.progress;
+  }
+  get gameplayDifficulty() {
+    return this.gameplay.difficulty.checkpoint();
+  }
+  getPlayerArmorPoints(playerId: string) {
+    return armorPoints(this.gameplay.entities.actorStateAccess(playerId), this.gameplay.content.items);
+  }
+  get specialDamage() {
+    return this.gameplay.specialDamage;
   }
   attackEntity(playerId: string, targetId: string) {
     return this.gameplay.attackEntity(playerId, targetId);
@@ -262,6 +327,9 @@ export class GameServerGameplayHost {
   }
   applyDamage(actorId: string, playerId: string, amount: number, cause: string) {
     return this.gameplay.applyDamage(actorId, playerId, amount, cause);
+  }
+  setDifficulty(value: import('./gameplay/difficulty-runtime').Difficulty, expectedRevision?: number) {
+    return this.gameplay.setDifficulty(value, expectedRevision);
   }
   healPlayer(playerId: string, amount: number) {
     return this.gameplay.healPlayer(playerId, amount);
@@ -363,15 +431,22 @@ export class GameServerGameplayHost {
   get restoredGameplayVersion() {
     return this.restoredVersion;
   }
+  get restoredSnapshotMigrationReports() {
+    return this.snapshotMigrationReports;
+  }
 
   async prepareRestore(): Promise<PreparedGameplayRestore | null> {
     const snapshot = await this.gameplayPersistence?.loadGameplaySnapshot?.();
     if (snapshot) {
       const gameplay = this.createGameplay();
       try {
-        const restored = gameplay.restoreSnapshot(snapshot);
+        const restored = gameplay.restoreSnapshot(snapshot, { deferMediaWorldValidation: true });
         gameplay.kernelState.setWorldTime(gameplay.kernelState.epoch, restored.worldTime ?? this.world.worldTime());
-        return { gameplay, restoredVersion: restored.version };
+        return {
+          gameplay,
+          restoredVersion: restored.version,
+          snapshotMigrationReports: gameplay.snapshotMigrationReports,
+        };
       } catch (error) {
         try {
           gameplay.dispose();
@@ -387,7 +462,7 @@ export class GameServerGameplayHost {
     try {
       gameplay.kernelState.setWorldTime(gameplay.kernelState.epoch, this.world.worldTime());
       gameplay.spawnPlayer({ id: 'player-1', position: legacyPlayerPositionToFeet(legacyPosition) });
-      return { gameplay, restoredVersion: null };
+      return { gameplay, restoredVersion: null, snapshotMigrationReports: [] };
     } catch (error) {
       try {
         gameplay.dispose();
@@ -402,6 +477,7 @@ export class GameServerGameplayHost {
     const retired = this.activeGameplay;
     this.activeGameplay = prepared.gameplay;
     this.restoredVersion = prepared.restoredVersion;
+    this.snapshotMigrationReports = prepared.snapshotMigrationReports;
     this.legacyEntityIds.clear();
     try {
       retired.dispose();

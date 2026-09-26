@@ -5,6 +5,8 @@ import type { WorldCommitResult } from '../game-server-types';
 import type { WorldMutationBuffer, VoxelEdit } from '../world-mutation';
 import { assertMutationCoordinate, assertVoxelValue } from '../world-mutation';
 import type { CoreTimerPort } from '../../runtime/platform-ports';
+import type { EntityLifetimeReference } from '../gameplay/ecs-entity-owner';
+import type { StructureTargetPortV1 } from '../gameplay/modules/structure-target-dispatch';
 
 const PREPARATION_TIMEOUT_MS = 5_000;
 const MAX_PREPARED_CHUNKS = 2_048;
@@ -14,6 +16,9 @@ type PreparationServer = Readonly<{
   worldRevision: number;
   prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean>;
   getEntity(id: string): EntityPosition | null;
+  resolveEntityReference(reference: EntityLifetimeReference): EntityPosition | null;
+  hasGameplayComposition?: boolean;
+  voxelSemantics?: { get(value: number): unknown };
 }>;
 type PendingPreparation = {
   promise: Promise<boolean>;
@@ -62,6 +67,7 @@ export class AuthorityMutationPreparation {
     private readonly server: PreparationServer,
     private readonly requestChunk: (key: string) => void,
     private readonly timers: CoreTimerPort,
+    private readonly structureTargets?: Pick<StructureTargetPortV1, 'prepare' | 'prepareBreak'>,
   ) {}
 
   async prepareEdits(edits: readonly VoxelEdit[]): Promise<boolean> {
@@ -70,7 +76,12 @@ export class AuthorityMutationPreparation {
       assertMutationCoordinate(x);
       assertMutationCoordinate(y);
       assertMutationCoordinate(z);
-      assertVoxelValue(value);
+      assertVoxelValue(
+        value,
+        this.server.hasGameplayComposition && this.server.voxelSemantics
+          ? (voxel) => this.server.voxelSemantics!.get(voxel) !== undefined
+          : undefined,
+      );
       keys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
     });
     return this.prepareKeys(keys);
@@ -86,7 +97,7 @@ export class AuthorityMutationPreparation {
     return this.prepareKeys(keys);
   }
 
-  prepareAction(action: AuthorityAction, playerId: string): Promise<boolean> {
+  async prepareAction(action: AuthorityAction, playerId: string): Promise<boolean> {
     const keys = new Set<string>();
     if (action.type === 'place' || action.type === 'begin-break')
       this.addVoxelTarget(keys, playerId, action.position, 5);
@@ -94,7 +105,27 @@ export class AuthorityMutationPreparation {
     if (action.type === 'inventory-pointer' && action.station)
       this.addEntitySegment(keys, playerId, action.station.reference.entityId, 5);
     if (action.type === 'attack') this.addEntitySegment(keys, playerId, action.targetId, 3);
-    return this.prepareKeys(keys);
+    if (action.type === 'interact' && action.target.kind === 'voxel') {
+      this.addVoxelTarget(keys, playerId, action.target.hit, 5);
+      this.addVoxelTarget(keys, playerId, action.target.adjacent, 5);
+    }
+    if (action.type === 'interact' && action.target.kind === 'entity')
+      this.addEntityReferenceSegment(keys, playerId, action.target.reference, 5);
+    if (!(await this.prepareKeys(keys))) return false;
+    if (!this.structureTargets) return true;
+    const resolveStructure = () =>
+      action.type === 'interact' && action.target.kind === 'voxel'
+        ? this.structureTargets!.prepare(action, playerId)
+        : action.type === 'begin-break'
+          ? this.structureTargets!.prepareBreak(playerId, action.position)
+          : null;
+    let target = resolveStructure();
+    if (!target) return true;
+    if (target.status === 'not-structure' || target.status === 'malformed') return true;
+    const additional = new Set<string>(target.chunkKeys.filter((key) => !keys.has(key)));
+    if (!(await this.prepareKeys(additional))) return false;
+    target = resolveStructure()!;
+    return target.status === 'resolved' || target.status === 'malformed';
   }
 
   prepareCommand(
@@ -168,6 +199,18 @@ export class AuthorityMutationPreparation {
   private addEntitySegment(keys: Set<string>, sourceId: string, targetId: string, range: number): void {
     const source = this.server.getEntity(sourceId);
     const target = this.server.getEntity(targetId);
+    if (source && target && withinRange(source.position, target.position, range))
+      addSegmentKeys(keys, source.position, target.position);
+  }
+
+  private addEntityReferenceSegment(
+    keys: Set<string>,
+    sourceId: string,
+    reference: EntityLifetimeReference,
+    range: number,
+  ): void {
+    const source = this.server.getEntity(sourceId);
+    const target = this.server.resolveEntityReference(reference);
     if (source && target && withinRange(source.position, target.position, range))
       addSegmentKeys(keys, source.position, target.position);
   }

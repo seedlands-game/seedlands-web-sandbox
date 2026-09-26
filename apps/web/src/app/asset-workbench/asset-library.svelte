@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
   import type { Asset } from '../../client/presentation/asset-types';
   import type { StoredGlb } from '../../client/presentation/glb-model';
   import { builtinItemBindings } from '../../client/presentation/asset-catalog';
@@ -56,14 +57,23 @@
     {
       name: '人物、生物与手臂',
       note: '共享游戏构件 · 默认方块风格',
-      assets: assets.filter((a) => a.type === 'builtin-actor-model' || a.type === 'builtin-arm-model'),
+      assets: assets.filter(
+        (a) =>
+          a.type === 'builtin-actor-model' ||
+          a.type === 'builtin-arm-model' ||
+          (a.type === 'glb-model' && !!classicCreatureDefinition(a.id)),
+      ),
     },
     {
       name: '界面与目标图标',
       note: '原始图像 · 对应界面适配',
       assets: assets.filter((a) => a.type === 'image-texture' && a.id.startsWith('seedlands:image/')),
     },
-    { name: '导入模型', note: '自包含静态 GLB', assets: assets.filter((a) => a.type === 'glb-model') },
+    {
+      name: '导入模型',
+      note: '自包含 GLB',
+      assets: assets.filter((a) => a.type === 'glb-model' && !classicCreatureDefinition(a.id)),
+    },
   ]);
 </script>
 

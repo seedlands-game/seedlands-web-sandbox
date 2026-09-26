@@ -1,0 +1,10 @@
+12:34:30 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git26-death - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git26-death
+
+
+ Test Files  1 passed (1)
+      Tests  19 passed (19)
+   Start at  00:34:30
+   Duration  1.37s (transform 849ms, setup 0ms, import 1.06s, tests 242ms, environment 0ms)
+

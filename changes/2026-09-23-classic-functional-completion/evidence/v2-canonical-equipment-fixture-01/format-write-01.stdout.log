@@ -1,0 +1,8 @@
+playbooks/classic/scenarios/canonical-runtime-v11.json 22ms
+apps/web/tests/e2e/classic-support/scenario.ts 30ms (unchanged)
+apps/web/tests/e2e/classic-support/scenario.test.ts 20ms
+apps/web/tests/e2e/classic-support/harness.ts 35ms (unchanged)
+apps/web/tests/e2e/classic-support/equipment-journey.ts 26ms
+apps/web/tests/e2e/classic-runtime.spec.ts 27ms
+changes/2026-09-23-classic-functional-completion/spec.md 62ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-journey-contract.md 10ms (unchanged)

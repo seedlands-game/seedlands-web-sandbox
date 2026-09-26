@@ -12,7 +12,7 @@ describe.each(['scalar', 'simd'])('W02 批量地形填充保留确定性 (%s)', 
     );
     const memory = await createKernelMemory(bytes);
     const generate = createChunkKernel(memory);
-    for (const version of [2, 3, 4]) {
+    for (const version of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
       for (const seed of [0, 1, 0xffffffff, 18374655]) {
         for (const [cx, cy, cz] of [
           [0, 0, 0],

@@ -1,0 +1,14 @@
+apps/web/tests/e2e/classic-support/door-exit-face.test.ts 38ms (unchanged)
+7:47:33 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  4 passed (4)
+      Tests  38 passed (38)
+   Start at  07:47:33
+   Duration  466ms (transform 83ms, setup 0ms, import 132ms, tests 14ms, environment 0ms)
+
+$ tsc -p tsconfig.classic-tests.json --noEmit
+Checking formatting...
+All matched files use Prettier code style!

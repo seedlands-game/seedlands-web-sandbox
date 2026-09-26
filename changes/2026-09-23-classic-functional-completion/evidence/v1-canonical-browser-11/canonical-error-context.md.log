@@ -1,0 +1,245 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: apps/web/tests/e2e/classic-runtime.spec.ts >> Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景
+- Location: apps/web/tests/e2e/classic-runtime.spec.ts:72:1
+
+# Error details
+
+```
+Error: expect(received).not.toEqual(expected) // deep equality
+
+Expected: not [93, 94]
+
+
+Call Log:
+- Timeout 5000ms exceeded while waiting on the predicate
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - main:
+    - dialog "暂停游戏" [ref=e4]:
+      - paragraph [ref=e5]: A MOMENT OF STILLNESS
+      - heading "旅途暂歇" [level=2] [ref=e6]
+      - paragraph [ref=e7]: 世界正在等待你
+      - generic [ref=e8]:
+        - button "继续游戏" [active] [ref=e9] [cursor=pointer]
+        - button "设置" [ref=e10] [cursor=pointer]
+        - button "操作指南" [ref=e11] [cursor=pointer]
+        - button "保存并返回主菜单" [ref=e12] [cursor=pointer]
+```
+
+# Test source
+
+```ts
+  167 |   return value;
+  168 | };
+  169 | 
+  170 | async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promise<void> {
+  171 |   const target = classicScenario.v1Slice.door.lower;
+  172 |   expect(await doorPair(page)).toEqual(expectedDoor);
+  173 |   const descriptor = await voxelGeometry(page, expectedDoor[0]);
+  174 |   expect(descriptor?.collision).toHaveLength(1);
+  175 |   const body = bodyConfigFor('player').localAabb;
+  176 |   const playerHalfWidth = Math.max(-body.min.x, body.max.x, -body.min.z, body.max.z);
+  177 |   const initial = await doorAuthorityObservation(page);
+  178 |   const plan = createClosedDoorProbePlan({
+  179 |     door: target,
+  180 |     collision: descriptor!.collision[0]!,
+  181 |     playerPosition: initial.position,
+  182 |     playerHalfWidth,
+  183 |   });
+  184 |   await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80 });
+  185 |   await correctMouseToRoute({
+  186 |     target: plan.routeTarget,
+  187 |     direction: 'KeyW',
+  188 |     observe: async () => {
+  189 |       const current = await doorAuthorityObservation(page);
+  190 |       return { player: current.position, viewAngles: current.viewAngles };
+  191 |     },
+  192 |     move: (dx, dy) => moveMouseBy(page, dx, dy),
+  193 |   });
+  194 |   const before = await doorAuthorityObservation(page);
+  195 |   expect(await doorPair(page)).toEqual(expectedDoor);
+  196 |   expect(assessClosedDoorProbe(plan, before, [])).toEqual({ status: 'pending', reason: 'no-observations' });
+  197 |   expect(
+  198 |     Math.abs(horizontalMouseCorrectionToRoute(before.position, before.viewAngles[0], plan.routeTarget, 'KeyW')),
+  199 |   ).toBeLessThan(1);
+  200 | 
+  201 |   const observations: DoorAuthorityObservation[] = [];
+  202 |   const maximumPhysicsTick = before.physicsTick + Math.ceil((before.physicsHz * CLOSED_DOOR_INPUT_BUDGET_MS) / 1_000);
+  203 |   const deadline = Date.now() + CLOSED_DOOR_INPUT_BUDGET_MS;
+  204 |   let assessment = assessClosedDoorProbe(plan, before, observations);
+  205 |   await page.keyboard.down('KeyW');
+  206 |   try {
+  207 |     while (
+  208 |       assessment.status === 'pending' &&
+  209 |       Date.now() < deadline &&
+  210 |       (observations.at(-1)?.physicsTick ?? before.physicsTick) < maximumPhysicsTick
+  211 |     ) {
+  212 |       const previousTick = observations.at(-1)?.physicsTick ?? before.physicsTick;
+  213 |       await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  214 |       const current = await doorAuthorityObservation(page);
+  215 |       if (current.physicsTick <= previousTick) continue;
+  216 |       observations.push(current);
+  217 |       assessment = assessClosedDoorProbe(plan, before, observations);
+  218 |     }
+  219 |   } finally {
+  220 |     await page.keyboard.up('KeyW');
+  221 |   }
+  222 |   expect(assessment).toEqual({ status: 'blocked' });
+  223 | }
+  224 | 
+  225 | export async function expectV1AudioSettings(page: Page): Promise<void> {
+  226 |   await page.keyboard.press('Escape');
+  227 |   await page.getByRole('button', { name: '设置', exact: true }).click();
+  228 |   const settings = page.getByRole('dialog', { name: '设置' });
+  229 |   for (const label of ['总音量', '音乐音量', '音效音量', '环境音量'])
+  230 |     await expect(settings.getByLabel(label)).toHaveCount(1);
+  231 |   await expect(settings.locator('input[type="file"]')).toHaveCount(0);
+  232 |   await settings.getByRole('button', { name: '返回', exact: true }).click();
+  233 |   await page.getByRole('button', { name: '继续游戏', exact: true }).click();
+  234 |   await lockPointer(page);
+  235 | }
+  236 | 
+  237 | export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceState> {
+  238 |   const { water, door, jukebox } = classicScenario.v1Slice;
+  239 |   const worldEpoch = await runtimeEpoch(page);
+  240 | 
+  241 |   await walkTo(page, water.approach, { key: 'KeyS', jump: true });
+  242 |   await selectCreativeItem(page, '水桶', 'water-bucket');
+  243 |   await placeSelected(page, water.support, water.target);
+  244 |   await expect.poll(() => voxelAt(page, water.target)).toBe(Voxel.Water);
+  245 |   await expect.poll(() => fluidCellAt(page, water.target)).toMatchObject({ source: true });
+  246 |   await selectCreativeItem(page, '桶', 'bucket');
+  247 |   await aimAtVoxelWithRealMouse(page, water.target);
+  248 |   await clickCanvasCenter(page, 'right');
+  249 |   await expect.poll(() => voxelAt(page, water.target)).toBe(Voxel.Air);
+  250 |   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'bucket');
+  251 | 
+  252 |   await switchToSurvival(page);
+  253 |   await waitForSnapshot(page, (value) => value.onGround && !value.colliding);
+  254 |   await walkTo(page, door.approach, { jump: true });
+  255 |   await selectCreativeItem(page, '木门', 'wooden-door');
+  256 |   await placeSelected(page, door.support, door.lower);
+  257 |   await expect.poll(async () => (await doorPair(page)).every((voxel) => voxel >= 89 && voxel <= 104)).toBe(true);
+  258 |   const placed = await doorPair(page);
+  259 |   const closedMesh = await expectDoorMesh(page, placed[0], 0, worldEpoch);
+  260 |   expect((await voxelGeometry(page, placed[0]))?.collision).toHaveLength(1);
+  261 |   await switchToSurvival(page);
+  262 |   await expectClosedDoorBlocks(page, placed);
+  263 | 
+  264 |   // The collision probe ends with the camera inside the upper door cell, which is the visible target here.
+  265 |   await aimAtVoxelWithRealMouse(page, door.upper);
+  266 |   await clickCanvasCenter(page, 'right');
+> 267 |   await expect.poll(() => doorPair(page)).not.toEqual(placed);
+      |                                               ^ Error: expect(received).not.toEqual(expected) // deep equality
+  268 |   const opened = await doorPair(page);
+  269 |   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
+  270 |   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
+  271 |   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
+  272 |   await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], { jump: true });
+  273 | 
+  274 |   await aimAtVoxelWithRealMouse(page, door.upper);
+  275 |   await clickCanvasCenter(page, 'right');
+  276 |   await expect.poll(() => doorPair(page)).toEqual(placed);
+  277 |   await aimAtVoxelWithRealMouse(page, door.lower);
+  278 |   await clickCanvasCenter(page, 'right');
+  279 |   await expect.poll(() => doorPair(page)).toEqual(opened);
+  280 | 
+  281 |   await walkTo(page, jukebox.approach, { jump: true });
+  282 |   await selectCreativeItem(page, '唱片机', 'jukebox');
+  283 |   await placeSelected(page, jukebox.support, jukebox.target);
+  284 |   await expect.poll(() => voxelAt(page, jukebox.target)).toBe(Voxel.Jukebox);
+  285 |   await selectCreativeItem(page, '唱片 13', 'record-13');
+  286 |   await aimAtVoxelWithRealMouse(page, jukebox.target);
+  287 |   await clickCanvasCenter(page, 'right');
+  288 | 
+  289 |   let media = await mediaSnapshot(page);
+  290 |   await expect
+  291 |     .poll(async () => {
+  292 |       media = await mediaSnapshot(page);
+  293 |       return media?.projection.find(({ device }) => device.position.join(',') === jukebox.target.join(','));
+  294 |     })
+  295 |     .toMatchObject({ slot: { itemId: 'seedlands:record-13' }, playing: true, resumePending: false });
+  296 |   const projection = media!.projection.find(({ device }) => device.position.join(',') === jukebox.target.join(','))!;
+  297 |   await expect
+  298 |     .poll(async () => (await mediaSnapshot(page))?.lastForwardedBatch?.facts)
+  299 |     .toMatchObject([
+  300 |       { kind: 'insert-and-activate', device: { position: jukebox.target }, revision: projection.revision },
+  301 |     ]);
+  302 |   media = await mediaSnapshot(page);
+  303 |   expect(media?.lastForwardedBatch?.facts).toHaveLength(1);
+  304 |   expect(media?.worldEpoch).toBe(worldEpoch);
+  305 |   await expect
+  306 |     .poll(
+  307 |       async () =>
+  308 |         (await mediaSnapshot(page))?.audio?.instances.find(({ key }) => key.includes(jukebox.target.join(',')))?.phase,
+  309 |     )
+  310 |     .toBe('playing');
+  311 |   await switchToSurvival(page);
+  312 | 
+  313 |   return { door: opened, mediaRevision: projection.revision, worldEpoch };
+  314 | }
+  315 | 
+  316 | export async function verifyV1SliceAfterRestore(page: Page, before: V1SliceState): Promise<void> {
+  317 |   const { jukebox } = classicScenario.v1Slice;
+  318 |   const restoredEpoch = await runtimeEpoch(page);
+  319 |   expect(restoredEpoch).not.toBe(before.worldEpoch);
+  320 |   await expect.poll(() => doorPair(page)).toEqual(before.door);
+  321 |   let media = await mediaSnapshot(page);
+  322 |   await expect
+  323 |     .poll(async () => {
+  324 |       media = await mediaSnapshot(page);
+  325 |       return media?.projection.find(({ device }) => device.position.join(',') === jukebox.target.join(','));
+  326 |     })
+  327 |     .toMatchObject({
+  328 |       revision: before.mediaRevision,
+  329 |       slot: { itemId: 'seedlands:record-13' },
+  330 |       playing: false,
+  331 |       resumePending: true,
+  332 |     });
+  333 |   expect(media?.worldEpoch).toBe(restoredEpoch);
+  334 |   expect(media?.worldEpoch).not.toBe(before.worldEpoch);
+  335 |   expect(media?.lastForwardedBatch).toBeNull();
+  336 |   expect(media?.audio?.instances).toMatchObject([{ phase: 'resume-pending', revision: before.mediaRevision }]);
+  337 | 
+  338 |   await lockPointer(page);
+  339 |   await expect
+  340 |     .poll(
+  341 |       async () =>
+  342 |         (await mediaSnapshot(page))?.audio?.instances.find(({ key }) => key.includes(jukebox.target.join(',')))?.phase,
+  343 |     )
+  344 |     .toBe('playing');
+  345 |   expect((await mediaSnapshot(page))?.lastForwardedBatch).toBeNull();
+  346 | 
+  347 |   await walkTo(page, jukebox.approach, { jump: true });
+  348 |   await clearCreativeItem(page);
+  349 |   await aimAtVoxelWithRealMouse(page, jukebox.target);
+  350 |   await clickCanvasCenter(page, 'right');
+  351 |   await expect
+  352 |     .poll(
+  353 |       async () =>
+  354 |         (await mediaSnapshot(page))?.projection.find(
+  355 |           ({ device }) => device.position.join(',') === jukebox.target.join(','),
+  356 |         )?.slot,
+  357 |     )
+  358 |     .toBeNull();
+  359 |   await expect
+  360 |     .poll(async () => (await mediaSnapshot(page))?.lastForwardedBatch?.facts)
+  361 |     .toMatchObject([{ kind: 'eject', device: { position: jukebox.target }, playing: false }]);
+  362 |   await expect
+  363 |     .poll(
+  364 |       async () =>
+  365 |         (await mediaSnapshot(page))?.audio?.instances.find(({ key }) => key.includes(jukebox.target.join(',')))?.phase,
+  366 |     )
+  367 |     .toBe('idle');
+```

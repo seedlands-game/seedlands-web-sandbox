@@ -14,6 +14,9 @@ import {
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '../../world/voxel';
 import { validateAuthorityCompleteMeshInput } from '../../compute/authority-complete-mesh-input';
 import { prepareProviderMeshInput, type ProviderMeshInput } from '../../world/provider-mesh-input';
+import { createMeshSemanticsLookup, validateVoxelGeometrySemantics } from '../../world/mesh-semantics';
+import { createVoxelSemanticsRegistry, type VoxelSemanticsDefinition } from '../../world/voxel-semantics';
+import { createVoxelGeometryRegistryV1, type VoxelGeometryDefinitionV1 } from '../../world/voxel-geometry';
 
 export { prepareProviderMeshInput } from '../../world/provider-mesh-input';
 export type { ProviderMeshInput } from '../../world/provider-mesh-input';
@@ -35,6 +38,8 @@ export type MeshTaskPayload = Readonly<{
   halo: ArrayBuffer;
   fluid: ArrayBuffer;
   fluidHalo: ArrayBuffer;
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
+  voxelGeometry?: readonly VoxelGeometryDefinitionV1[];
 }>;
 
 export type GenerateMeshTaskPayload = Readonly<{
@@ -54,6 +59,8 @@ export type GenerateMeshTaskPayload = Readonly<{
   canonical?: ArrayBuffer;
   fluid?: ArrayBuffer;
   overlays: readonly { cx: number; cy: number; cz: number; voxels: ArrayBuffer; fluid?: ArrayBuffer }[];
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
+  voxelGeometry?: readonly VoxelGeometryDefinitionV1[];
 }>;
 
 export type FindSafeSpawnTaskPayload = Readonly<{
@@ -62,6 +69,7 @@ export type FindSafeSpawnTaskPayload = Readonly<{
   generatorVersion: number;
   provider: KernelWorldgenProviderIdentity;
   starterEcology: StarterEcologyConfiguration | null;
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
 }>;
 
 export type GenerateCanonicalTaskPayload = Readonly<{
@@ -122,6 +130,22 @@ const resultIdentity = (task: MeshTaskPayload | GenerateMeshTaskPayload) => ({
 });
 
 const packMeshes = (meshes: ReturnType<typeof meshChunk>) => batchCompactMeshData(Object.values(meshes));
+
+const meshComposition = (
+  voxelSemantics?: readonly VoxelSemanticsDefinition[],
+  voxelGeometry?: readonly VoxelGeometryDefinitionV1[],
+) => {
+  const semanticsRegistry = voxelSemantics ? createVoxelSemanticsRegistry(voxelSemantics) : undefined;
+  const geometry = voxelGeometry ? createVoxelGeometryRegistryV1(voxelGeometry) : undefined;
+  if (geometry) {
+    if (!semanticsRegistry) throw new TypeError('Voxel geometry requires the matching voxel semantics projection.');
+    validateVoxelGeometrySemantics(semanticsRegistry, geometry);
+  }
+  return {
+    semantics: voxelSemantics ? createMeshSemanticsLookup(voxelSemantics) : undefined,
+    geometry,
+  };
+};
 
 export type WorldComputeKernels = Partial<{
   providers: KernelWorldgenProviderRegistry;
@@ -214,9 +238,12 @@ export async function runWorldComputeTask(
   await checkpoint(isCancelled, yieldTurn);
   if (task.kind === 'find-safe-spawn') {
     const provider = resolveProvider(kernels.providers, task.provider, task.generatorVersion);
+    const voxelSemantics = task.voxelSemantics ? createVoxelSemanticsRegistry(task.voxelSemantics) : undefined;
     const spawnChunks = new Map<string, Readonly<{ cx: number; cy: number; cz: number; voxels: Uint16Array }>>();
     const playerBodyPosition = findSafePlayerSpawn(
       proceduralVoxelReader(task.seed, task.generatorVersion, spawnChunks, provider),
+      task.generatorVersion,
+      voxelSemantics,
     );
     await checkpoint(isCancelled, yieldTurn);
     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed。');
@@ -228,7 +255,8 @@ export async function runWorldComputeTask(
       const starter = createStarterEcology(
         task.seed,
         playerBodyPosition,
-        (x, z, _nearY) => findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel),
+        (x, z, _nearY) =>
+          findDryStarterSurface(task.seed, task.generatorVersion, x, z, readStarterVoxel, voxelSemantics),
         task.starterEcology,
       );
       for (const edit of [...starter.campEdits, ...starter.naturalEdits]) readStarterVoxel(edit.x, edit.y, edit.z);
@@ -282,6 +310,7 @@ export async function runWorldComputeTask(
     const provider = resolveProvider(kernels.providers, task.provider, task.generatorVersion);
     if (!now) throw new TypeError('World mesh computation requires an explicit monotonic clock port.');
     const meshingStartedAt = now();
+    const composition = meshComposition(task.voxelSemantics, task.voxelGeometry);
     const meshes = mesh({
       seed: task.seed,
       cx: task.cx,
@@ -295,6 +324,8 @@ export async function runWorldComputeTask(
       generatorVersion: task.generatorVersion,
       outside: (x, y, z) =>
         sampleWorldgenVoxel(provider, { seed: task.seed, generatorVersion: task.generatorVersion, x, y, z }),
+      ...(composition.semantics ? { semantics: composition.semantics } : {}),
+      ...(composition.geometry ? { geometry: composition.geometry } : {}),
     });
     const workerMeshingMs = now() - meshingStartedAt;
     await checkpoint(isCancelled, yieldTurn);
@@ -369,6 +400,7 @@ export async function runWorldComputeTask(
   const workerHaloMs = now() - haloStartedAt;
   await checkpoint(isCancelled, yieldTurn);
   const meshingStartedAt = now();
+  const composition = meshComposition(task.voxelSemantics, task.voxelGeometry);
   const meshes = mesh({
     seed: task.seed,
     cx: task.cx,
@@ -381,6 +413,8 @@ export async function runWorldComputeTask(
     fluidHalo: generated.fluidHalo,
     outside,
     generatorVersion: task.generatorVersion,
+    ...(composition.semantics ? { semantics: composition.semantics } : {}),
+    ...(composition.geometry ? { geometry: composition.geometry } : {}),
   });
   const workerMeshingMs = now() - meshingStartedAt;
   await checkpoint(isCancelled, yieldTurn);

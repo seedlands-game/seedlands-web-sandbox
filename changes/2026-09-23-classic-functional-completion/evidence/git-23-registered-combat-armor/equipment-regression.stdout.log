@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /private/tmp/seedlands-git23-combat
+
+
+ Test Files  3 passed (3)
+      Tests  43 passed (43)
+   Start at  21:07:46
+   Duration  548ms (transform 226ms, setup 0ms, import 328ms, tests 26ms, environment 0ms)
+

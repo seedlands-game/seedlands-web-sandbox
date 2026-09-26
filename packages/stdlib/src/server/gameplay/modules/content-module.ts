@@ -1,11 +1,17 @@
 import { CRAFTING_CAPABILITY, freezeCraftingProvider, type CraftingProviderV1 } from './crafting-provider';
 import type { StationContentInput } from '../station-content';
 import type { StationStateCodec } from '../ecs-station-state';
-import type { ModItemDefinition, ModModule, ModRecipeDefinition } from '../../composition/contracts';
+import type {
+  ModItemDefinition,
+  ModModule,
+  ModRecipeDefinition,
+  ModVoxelDefinition,
+} from '../../composition/contracts';
 import { createGameplayContent, type GameplayContent } from '../gameplay-content';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
 import type { MeleeDefinition } from '../combat-runtime';
 import type { ActorProfileInput, StarterEcologyConfigurationInput } from '../actor-profile';
+import { GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, type GameplaySnapshotMigration } from '../gameplay-snapshot-migration';
 import {
   ACTOR_PROFILES_CAPABILITY,
   CONTENT_CRAFTING_CAPABILITY,
@@ -13,6 +19,7 @@ import {
   MELEE_DEFINITIONS_CAPABILITY,
   RECIPES_CAPABILITY,
   STATION_CONTENT_CAPABILITY,
+  VOXEL_SEMANTICS_CAPABILITY,
   contentCapabilityContracts,
 } from './content-capabilities';
 
@@ -21,12 +28,14 @@ export function defineContentModule(
     moduleId: string;
     items: readonly ModItemDefinition[];
     recipes?: readonly ModRecipeDefinition[];
+    voxels?: readonly ModVoxelDefinition[];
     craftingProvider?: boolean;
     stations?: StationContentInput;
     meleeDefinitions: readonly MeleeDefinition[];
     actorProfiles?: readonly ActorProfileInput[];
     defaultPlayerMeleeDefinitionId?: string;
     starterEcology?: StarterEcologyConfigurationInput;
+    snapshotMigration?: GameplaySnapshotMigration;
   }>,
 ): ModModule {
   return Object.freeze({
@@ -34,7 +43,10 @@ export function defineContentModule(
       id: input.moduleId,
       version: '1.0.0',
       requires: input.craftingProvider ? [{ id: CRAFTING_CAPABILITY, version: '1.0.0' }] : [],
-      provides: [...contentCapabilityContracts()],
+      provides: [
+        ...contentCapabilityContracts(),
+        ...(input.snapshotMigration ? [{ id: GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, version: '1.0.0' }] : []),
+      ],
     },
     register(api) {
       const crafting = input.craftingProvider
@@ -42,6 +54,8 @@ export function defineContentModule(
         : null;
       input.items.forEach(api.registerItem);
       (input.recipes ?? []).forEach(api.registerRecipe);
+      (input.voxels ?? []).forEach(api.registerVoxel);
+      (input.actorProfiles ?? []).forEach(api.registerActorProfile);
       let content: GameplayContent | undefined;
       const resolve = () => {
         if (content) return content;
@@ -72,8 +86,9 @@ export function defineContentModule(
             outputs: stacks(recipe.outputs),
           })),
           meleeDefinitions: input.meleeDefinitions,
+          voxelSemanticsDefinitions: definitions.voxels,
           crafting,
-          actorProfiles: (input.actorProfiles ?? []).map((profile) => ({
+          actorProfiles: definitions.actorProfiles.map((profile) => ({
             ...profile,
             ...(profile.deathDrop ? { deathDrop: stacks([profile.deathDrop])[0]! } : {}),
           })),
@@ -127,6 +142,15 @@ export function defineContentModule(
           resolve().items.assertStack(stack),
       });
       api.provideCapability(ITEMS_CAPABILITY, items);
+      api.provideCapability(
+        VOXEL_SEMANTICS_CAPABILITY,
+        Object.freeze({
+          get: (storageId: number) => resolve().voxelSemantics.get(storageId),
+          require: (storageId: number) => resolve().voxelSemantics.require(storageId),
+          getById: (id: string) => resolve().voxelSemantics.getById(id),
+          list: () => resolve().voxelSemantics.list(),
+        }),
+      );
       api.provideCapability(
         RECIPES_CAPABILITY,
         Object.freeze({
@@ -186,6 +210,8 @@ export function defineContentModule(
           match: (request: Parameters<CraftingProviderV1['match']>[0]) => resolve().crafting?.match(request) ?? null,
         }),
       );
+      if (input.snapshotMigration)
+        api.provideCapability(GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY, input.snapshotMigration);
       api.onDefinitionsReady(() => {
         meleeDefinitions.push(...resolve().meleeDefinitions);
         Object.freeze(meleeDefinitions);

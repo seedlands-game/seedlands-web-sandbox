@@ -94,13 +94,15 @@ export class GameFrameLoop {
       this.bindings.authority()?.snapshot ?? null,
       controller?.predictedPhysicsState ?? null,
       controller?.aimTarget ?? null,
+      this.bindings.authority()?.voxelGeometry,
     );
     this.bindings.waterExperience()?.updateImmersion(dt, controller?.waterImmersion, environment);
     const gameplay = this.bindings.gameplay();
     gameplay?.advance(dt);
     this.bindings.visualEffects()?.update(dt, gameplay?.shadowCasters ?? []);
     world.updateStreaming(camera.getPosition());
-    world.drainCommits();
+    const cameraPosition = camera.getPosition();
+    world.drainCommits([cameraPosition.x, cameraPosition.y, cameraPosition.z]);
     const session = this.bindings.session();
     if (session) {
       this.bindings.uiProjection.publish({

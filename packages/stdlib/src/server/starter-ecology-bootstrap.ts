@@ -9,7 +9,7 @@ import type { PoiInput } from './simulation/poi-registry';
 import type { SimulationSnapshot } from './simulation/actor-state';
 import { createStarterEcology } from './simulation/starter-ecology';
 import { findDryStarterSurface } from './starter-surface';
-import { Voxel } from '../world/voxel';
+import { voxelIsPassable } from '../world/voxel-semantics';
 
 type Position = [number, number, number];
 
@@ -55,11 +55,14 @@ export function initializeStarterEcologyBootstrap(
   const layout = createStarterEcology(
     host.seed,
     center,
-    (x, z) => findDryStarterSurface(host.seed, host.generatorVersion, x, z, getVoxel),
+    (x, z) =>
+      findDryStarterSurface(host.seed, host.generatorVersion, x, z, getVoxel, host.gameplayContent.voxelSemantics),
     configuration,
   );
   for (const edit of [...layout.campEdits, ...layout.naturalEdits]) getVoxel(edit.x, edit.y, edit.z);
-  const naturalEdits = layout.naturalEdits.filter((edit) => getVoxel(edit.x, edit.y, edit.z) === Voxel.Air);
+  const naturalEdits = layout.naturalEdits.filter((edit) =>
+    voxelIsPassable(getVoxel(edit.x, edit.y, edit.z), host.gameplayContent.voxelSemantics),
+  );
   layout.pois.forEach((poi) => host.registerPoi(poi));
   const actors = layout.actors.map((actor) => host.spawnAutonomousActor(actor));
   host.spawnWorldItem(layout.foodPosition, layout.initialItem);

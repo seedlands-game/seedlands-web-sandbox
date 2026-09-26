@@ -1,53 +1,9 @@
-import type { NativeAsset, Rgb } from './asset-types';
-
-// Shared 32px material ramps: dark edges, warm timber/brass, cool stone and iron.
-const colors = [
-  '000000',
-  '322b27',
-  '68442f',
-  '986239',
-  'bd884d',
-  'e1b76d',
-  'f4d99c',
-  '35474b',
-  '617477',
-  '93a4a0',
-  'c0ccc3',
-  'e9eee0',
-  '95622f',
-  'c18b41',
-  'ebc774',
-  '4d5757',
-  '94705c',
-  'c59470',
-];
-const palette: Rgb[] = colors.map(
-  (hex) => [0, 2, 4].map((offset) => parseInt(hex.slice(offset, offset + 2), 16)) as Rgb,
-);
-type Point = readonly [number, number];
-
-class Sprite {
-  readonly pixels = Array<number>(32 * 32).fill(0);
-  put(x: number, y: number, color: number) {
-    if (x >= 0 && y >= 0 && x < 32 && y < 32) this.pixels[y * 32 + x] = color;
-  }
-  rect(x: number, y: number, width: number, height: number, color: number) {
-    for (let row = y; row < y + height; row++)
-      for (let column = x; column < x + width; column++) this.put(column, row, color);
-  }
-  polygon(points: readonly Point[], color: number) {
-    for (let y = 0; y < 32; y++)
-      for (let x = 0; x < 32; x++) {
-        let inside = false;
-        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
-          const [a, b] = points[i],
-            [c, d] = points[j];
-          if (b > y + 0.5 !== d > y + 0.5 && x + 0.5 < ((c - a) * (y + 0.5 - b)) / (d - b) + a) inside = !inside;
-        }
-        if (inside) this.put(x, y, color);
-      }
-  }
-}
+import type { NativeAsset } from './asset-types';
+import { Sprite } from './pixel-sprite';
+import { foodSprite, type FoodSpriteKind } from './food-sprite';
+import { armorSprite, type ArmorSpriteKind } from './armor-sprite';
+import { isUtilitySpriteKind, utilitySprite, type UtilitySpriteKind } from './utility-sprite';
+import { paletteForItem } from './item-semantic-palette';
 
 function handle(sprite: Sprite) {
   sprite.rect(13, 7, 5, 23, 1);
@@ -62,10 +18,21 @@ function handle(sprite: Sprite) {
   sprite.rect(14, 27, 3, 1, 14);
 }
 
-function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'iron') {
+function tool(
+  kind: 'pickaxe' | 'axe' | 'sword' | 'shovel' | 'hoe',
+  material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond',
+) {
   const sprite = new Sprite();
   const [dark, base, light, edge] =
-    material === 'wood' ? [2, 3, 4, 5] : material === 'stone' ? [7, 8, 9, 10] : [7, 9, 10, 11];
+    material === 'wood'
+      ? [2, 3, 4, 5]
+      : material === 'stone'
+        ? [7, 8, 9, 10]
+        : material === 'gold'
+          ? [12, 13, 14, 6]
+          : material === 'diamond'
+            ? [18, 19, 20, 21]
+            : [7, 9, 10, 11];
   if (kind === 'sword') {
     sprite.polygon(
       [
@@ -161,6 +128,65 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'i
         sprite.rect(9, 5, 3, 1, 8);
         sprite.put(20, 6, 7);
       }
+    } else if (kind === 'shovel') {
+      // Compact scoop head on the shared handle; a readable spade silhouette.
+      sprite.polygon(
+        [
+          [11, 2],
+          [21, 2],
+          [23, 5],
+          [23, 13],
+          [20, 16],
+          [12, 16],
+          [9, 13],
+          [9, 5],
+        ],
+        1,
+      );
+      sprite.polygon(
+        [
+          [12, 3],
+          [20, 3],
+          [22, 6],
+          [22, 12],
+          [19, 15],
+          [13, 15],
+          [10, 12],
+          [10, 6],
+        ],
+        base,
+      );
+      sprite.rect(12, 4, 8, 1, edge);
+      sprite.rect(11, 5, 2, 8, light);
+      sprite.rect(19, 5, 2, 8, dark);
+      sprite.rect(13, 13, 6, 1, dark);
+    } else if (kind === 'hoe') {
+      // Angled blade on the shared handle: a right-angle head atop the shaft.
+      sprite.polygon(
+        [
+          [7, 3],
+          [21, 3],
+          [21, 8],
+          [16, 8],
+          [16, 6],
+          [7, 6],
+        ],
+        1,
+      );
+      sprite.polygon(
+        [
+          [8, 4],
+          [20, 4],
+          [20, 7],
+          [15, 7],
+          [15, 5],
+          [8, 5],
+        ],
+        base,
+      );
+      sprite.rect(8, 4, 12, 1, edge);
+      sprite.rect(8, 5, 1, 2, light);
+      sprite.rect(19, 5, 1, 2, dark);
     } else {
       sprite.polygon(
         [
@@ -222,9 +248,88 @@ function tool(kind: 'pickaxe' | 'axe' | 'sword', material: 'wood' | 'stone' | 'i
   return sprite.pixels;
 }
 
-function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot') {
+function resource(
+  kind:
+    | 'coal'
+    | 'raw-iron'
+    | 'iron-ingot'
+    | 'gold-ingot'
+    | 'diamond'
+    | 'stick'
+    | 'apple'
+    | 'bread'
+    | 'raw-porkchop'
+    | 'cooked-porkchop'
+    | 'raw-fish'
+    | 'cooked-fish'
+    | 'wheat'
+    | 'wheat-seeds',
+) {
+  if (
+    kind === 'apple' ||
+    kind === 'bread' ||
+    kind === 'raw-porkchop' ||
+    kind === 'cooked-porkchop' ||
+    kind === 'raw-fish' ||
+    kind === 'cooked-fish' ||
+    kind === 'wheat' ||
+    kind === 'wheat-seeds'
+  )
+    return foodSprite(kind satisfies FoodSpriteKind);
   const sprite = new Sprite();
-  if (kind === 'iron-ingot') {
+  if (kind === 'diamond') {
+    sprite.polygon(
+      [
+        [10, 5],
+        [23, 5],
+        [29, 13],
+        [16, 28],
+        [3, 13],
+      ],
+      18,
+    );
+    sprite.polygon(
+      [
+        [11, 7],
+        [21, 7],
+        [26, 13],
+        [16, 25],
+        [6, 13],
+      ],
+      19,
+    );
+    sprite.polygon(
+      [
+        [11, 7],
+        [16, 7],
+        [10, 13],
+        [6, 13],
+      ],
+      21,
+    );
+    sprite.polygon(
+      [
+        [16, 7],
+        [21, 7],
+        [26, 13],
+        [21, 13],
+      ],
+      20,
+    );
+    sprite.polygon(
+      [
+        [11, 14],
+        [21, 14],
+        [16, 24],
+      ],
+      20,
+    );
+  } else if (kind === 'stick') {
+    for (let i = 5; i < 26; i++) {
+      sprite.rect(i, 30 - i, 4, 4, 2);
+      sprite.rect(i, 30 - i, 2, 2, i % 4 === 0 ? 3 : 5);
+    }
+  } else if (kind === 'iron-ingot' || kind === 'gold-ingot') {
     sprite.polygon(
       [
         [10, 10],
@@ -316,16 +421,43 @@ function resource(kind: 'coal' | 'raw-iron' | 'iron-ingot') {
       sprite.rect(15, 21, 5, 2, 17);
     }
   }
+  if (kind === 'gold-ingot') {
+    const gold: Record<number, number> = { 7: 12, 8: 13, 9: 14, 10: 14, 11: 6 };
+    return sprite.pixels.map((color) => gold[color] ?? color);
+  }
   return sprite.pixels;
 }
 
 export function pixelItemAssets(
   id: string,
   name: string,
-  kind: 'pickaxe' | 'axe' | 'sword' | 'coal' | 'raw-iron' | 'iron-ingot',
-  material: 'wood' | 'stone' | 'iron' = 'wood',
+  kind:
+    | 'pickaxe'
+    | 'axe'
+    | 'sword'
+    | 'shovel'
+    | 'hoe'
+    | 'coal'
+    | 'raw-iron'
+    | 'iron-ingot'
+    | 'gold-ingot'
+    | 'diamond'
+    | 'stick'
+    | 'apple'
+    | 'bread'
+    | 'raw-porkchop'
+    | 'cooked-porkchop'
+    | 'raw-fish'
+    | 'cooked-fish'
+    | 'wheat'
+    | 'wheat-seeds'
+    | ArmorSpriteKind
+    | UtilitySpriteKind,
+  material: 'wood' | 'stone' | 'iron' | 'gold' | 'diamond' = 'wood',
 ): NativeAsset[] {
   const textureId = `builtin:texture:${id}:detail`;
+  const armorMaterial = material === 'wood' || material === 'stone' ? 'leather' : material;
+  const armorKinds = ['armor-helmet', 'armor-chestplate', 'armor-leggings', 'armor-boots'];
   return [
     {
       id: textureId,
@@ -336,8 +468,15 @@ export function pixelItemAssets(
       payload: {
         width: 32,
         height: 32,
-        palette: palette.map((color) => [...color]),
-        pixels: kind === 'axe' || kind === 'sword' || kind === 'pickaxe' ? tool(kind, material) : resource(kind),
+        palette: paletteForItem(kind),
+        pixels:
+          kind === 'axe' || kind === 'sword' || kind === 'pickaxe' || kind === 'shovel' || kind === 'hoe'
+            ? tool(kind, material)
+            : armorKinds.includes(kind)
+              ? armorSprite(kind as ArmorSpriteKind, armorMaterial)
+              : isUtilitySpriteKind(kind)
+                ? utilitySprite(kind)
+                : resource(kind as Parameters<typeof resource>[0]),
       },
     },
     {

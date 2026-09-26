@@ -50,7 +50,10 @@ export function projectStationUi(
             id: recipe.id,
             output: slots(recipe.outputs, recipe.outputs.length)[0] ?? null,
             name: recipe.outputs.map((item) => `${name(item.itemId)} × ${item.count}`).join(' + '),
-            pattern: recipe.kind === 'shaped' ? slots(recipe.pattern, 9) : [],
+            pattern:
+              recipe.kind === 'shaped'
+                ? slots(recipe.pattern, 9)
+                : slots([...recipe.inputs, ...Array(9 - recipe.inputs.length).fill(null)], 9),
             requirements:
               recipe.kind === 'shapeless'
                 ? recipe.inputs.map((item) => `${name(item.itemId)} × ${item.count}`).join(' + ')

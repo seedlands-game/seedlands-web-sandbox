@@ -41,6 +41,7 @@ const gameplay = {
     revision: 0,
     slots: [],
     hotbarSize: 8,
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
     cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
   },
   gameplayRevision: 1,

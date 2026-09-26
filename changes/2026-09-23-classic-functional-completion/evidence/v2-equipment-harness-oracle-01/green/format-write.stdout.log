@@ -1,0 +1,5 @@
+apps/web/src/app/app-contracts.ts 29ms (unchanged)
+apps/web/src/app/gameplay/game-harness-contract.ts 6ms (unchanged)
+apps/web/src/app/gameplay/game-harness-observability.ts 13ms
+apps/web/tests/unit/app/game-harness-observability.test.ts 21ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-harness-contract.md 18ms (unchanged)

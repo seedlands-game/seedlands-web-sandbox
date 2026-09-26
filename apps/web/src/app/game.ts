@@ -3,11 +3,10 @@ import * as sceneBootstrap from './scene/scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
 import { WorldAudio } from './audio/world-audio';
 import { WaterExperience } from './gameplay/water-experience';
-import { BrowserChunkPersistence } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/presentation/performance-profile';
 // prettier-ignore
-import { executeSlashCommand, type CommandExecutorPort, type SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
+import type { CommandExecutorPort, SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 // prettier-ignore
 import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
@@ -38,14 +37,22 @@ import { GameFrameLoop } from './game-frame-loop';
 import { GameSaveQueue } from './world/game-save-queue';
 import { startBrowserWorkerSession } from './browser-worker-session';
 import { createAppearanceMaterials } from './gameplay/load-appearance-runtime';
+import { setVoxelPresentationSemantics } from './gameplay/appearance-runtime';
 import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { readGameRuntimeDiagnostics } from './experimental/game-runtime-diagnostics';
 import { restoreBrowserPresentation } from './world/browser-world-restore';
 import { CompanionSession } from './gameplay/companion/companion-session';
+import { gameDifficulty, setGameDifficulty, setGameMouseSensitivity } from './player/game-user-settings';
+import { deleteBrowserWorld, latestBrowserWorldSeed, listBrowserWorlds } from './world/browser-world-directory';
+import { executeGameSlashCommand } from './gameplay/game-command-runtime';
+import { createGameCommandConsumer } from './gameplay/game-command-consumer';
+import { disposeGameOwnedResources } from './world/game-runtime-disposal';
+import { GameMediaController } from './audio/game-media-controller';
 
 export class Game {
   private paused = false;
   private worldAudio: WorldAudio | null = null;
+  private readonly media: GameMediaController;
   private waterExperience: WaterExperience | null = null;
   private app: pc.Application | null = null;
   private world: World | null = null;
@@ -73,11 +80,13 @@ export class Game {
   private commandExecutor: CommandExecutorPort | null = null;
   private commandSource: CommandSource | null = null;
   private uiSession: UiWorldSession | null = null;
+  // prettier-ignore
   private hudSequence = 0;
   private interactionSequence = 0;
   private debugSequence = 0;
   private readonly uiProjection = new GameUiProjection();
   private readonly lifecycle: LifecycleSnapshot = { worldInstanceId: 0, disposedWorlds: 0, staleVisibleCommits: 0 };
+  private harnessRenderedWorldEpoch: string | null = null;
   private sessionSequence = 0;
   private startGeneration = 0;
   private pendingStartAbort: AbortController | null = null;
@@ -90,6 +99,9 @@ export class Game {
   onRuntimeFailure: ((error: Error) => void) | null = null;
   private readonly onResize = () => this.app?.resizeCanvas();
   private readonly onPageHide = () => void this.saveQueue.flush().catch(() => undefined);
+  private readonly mouseSensitivity = { value: 0.13 };
+  // prettier-ignore
+  private readonly commandConsumer = createGameCommandConsumer({ queueSave: () => this.saveQueue.queue(), playerId: () => this.serverPlayerId, authority: () => this.authority, controller: () => this.controller, world: () => this.world, environment: () => this.environment, gameplay: () => this.gameplayClient });
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -98,6 +110,8 @@ export class Game {
     experiments: ResolvedExperimentalClientOptions = resolveExperimentalClientOptions(),
   ) {
     this.experimentState = new GameExperimentState(experiments);
+    // prettier-ignore
+    this.media = new GameMediaController(audio, (message) => this.uiSession?.publishFeedback(++this.interactionSequence, { message, tone: 'error', durationMs: 6_000 }));
     this.frameLoop = new GameFrameLoop({
       app: () => this.app,
       authority: () => this.authority,
@@ -128,8 +142,15 @@ export class Game {
   }
 
   loadSavedSession = () => this.store.load();
-
-  loadLatestWorldSeed = async () => (await BrowserChunkPersistence.latestWorld())?.seedText ?? null;
+  loadLatestWorldSeed = latestBrowserWorldSeed;
+  listWorlds = listBrowserWorlds;
+  deleteWorld = deleteBrowserWorld;
+  setMouseSensitivity = (value: number) => setGameMouseSensitivity(this.mouseSensitivity, value);
+  setDifficulty = (value: import('@seedlands/stdlib/server/gameplay/difficulty-runtime').Difficulty) =>
+    setGameDifficulty(this.authority, this.gameplayClient, value, () => this.saveQueue.queue());
+  get difficulty() {
+    return gameDifficulty(this.authority);
+  }
 
   // prettier-ignore
   async start(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode = 'continue', actorMode: ActorMode = 'survival') {
@@ -159,6 +180,13 @@ export class Game {
       throw new Error('World start was superseded.');
     }
     this.app = scene.application;
+    this.app.on('seedlands:asset-error', (message: string) => {
+      this.uiSession?.publishFeedback(++this.interactionSequence, {
+        message,
+        tone: 'error',
+        durationMs: 6_000,
+      });
+    });
     this.experimentState.acceptRenderer(scene);
     this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = sceneBootstrap.createSun(this.app, lightingBudget);
@@ -174,6 +202,7 @@ export class Game {
     const sessionConfig = readBrowserSessionConfig(location.search);
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
+    await this.media.load(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin));
     const clientOptions = {
       onSnapshot: (snapshot: import('@seedlands/stdlib/server/authority/authority-session').AuthoritySnapshot) =>
         this.authoritySync.receive(snapshot),
@@ -183,6 +212,7 @@ export class Game {
       },
       onCommit: (commit: import('@seedlands/stdlib/server/game-server-types').WorldCommitResult) =>
         this.world?.consumeServerCommit(commit),
+      ...this.media.callbacks,
       onUnknownChunk: (key: string) => runtimeControls.requestAuthorityChunk(this.world, key),
       // prettier-ignore
       onInputDecision: (decision: { sequence: number; decision: import('@seedlands/stdlib/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
@@ -216,8 +246,12 @@ export class Game {
       throw new Error('World start was superseded.');
     }
     Object.assign(this, { authority, computeRuntime, logicClient });
+    setVoxelPresentationSemantics(this.app, ready.voxelSemantics ?? []);
     this.environment.setTime(ready.worldTime);
-    if (this.audio) this.worldAudio = new WorldAudio(this.audio, ready.seed);
+    if (this.audio) {
+      this.worldAudio = new WorldAudio(this.audio, ready.seed);
+      this.media.beginWorld(authority.runtimeEpoch);
+    }
     this.world = new World(
       authority,
       computeRuntime.meshPort,
@@ -230,6 +264,7 @@ export class Game {
       () => (this.lifecycle.staleVisibleCommits += 1),
       this.visualResources.waterLayer.id,
     );
+    this.harnessRenderedWorldEpoch = authority.runtimeEpoch;
     this.visualEffects = new AdvancedVisualEffects(
       this.app,
       this.camera,
@@ -257,7 +292,7 @@ export class Game {
     await initialWorldReady;
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
-    this.companion.start();
+    runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
     return { seed: ready.seedText };
   }
 
@@ -270,6 +305,7 @@ export class Game {
       playerId,
       bridge: this.uiBridge,
       session: this.uiSession,
+      sampleBlockLight: (position) => this.visualEffects?.sampleBlockLight(position) ?? 0,
       nextHudSequence: () => ++this.hudSequence,
       nextInteractionSequence: () => ++this.interactionSequence,
       getVoxel: (x, y, z) => this.world?.getVoxel(x, y, z) ?? 0,
@@ -290,7 +326,11 @@ export class Game {
     if (!authority || !this.world || !this.camera || !this.environment) return;
     // prettier-ignore
     const restored = restoreBrowserPresentation(ready, { authority, world: this.world, camera: this.camera, environment: this.environment, audio: this.audio, controller: this.controller, gameplay: this.gameplayClient, worldAudio: this.worldAudio, authoritySync: this.authoritySync, commandSource: this.commandSource, createGameplay: (playerId) => this.createGameplay(authority, playerId), createController: () => this.createController(this.camera!) });
+    // prettier-ignore
     Object.assign(this, { serverPlayerId: ready.playerId, seedText: ready.seedText, ...restored });
+    this.harnessRenderedWorldEpoch = authority.runtimeEpoch;
+    this.media.beginRestore(authority.runtimeEpoch);
+    runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);
   }
 
   private createController(camera: pc.Entity) {
@@ -304,6 +344,7 @@ export class Game {
       getWorld: () => this.world,
       getEnvironment: () => this.environment,
       isPaused: () => this.paused,
+      mouseSensitivity: this.mouseSensitivity,
       uiBridge: this.uiBridge,
       getGameplay: () => this.gameplayClient,
       getUiSession: () => this.uiSession,
@@ -371,7 +412,7 @@ export class Game {
         gameplay: () => this.gameplayClient,
         frameMs: () => this.frameLoop.frameMs,
         qualityLevel: () => this.qualityLevel,
-        authority: () => authority,
+        authority: () => this.authority,
         collisionDebug: () => this.collisionDebug,
         compute: () => this.computeRuntime,
         logic: () => this.logicClient,
@@ -379,6 +420,11 @@ export class Game {
         ui: () => this.uiBridge.metrics(),
         visualEffects: () => this.visualEffects,
         underwaterVisual: () => this.waterExperience?.visual ?? null,
+        renderedMaterialMesh: (cx, cy, cz, material) =>
+          this.world?.getRenderedMaterialMesh(cx, cy, cz, material) ?? null,
+        renderedWorldEpoch: () => this.harnessRenderedWorldEpoch,
+        media: () => this.media.snapshot(),
+        audio: () => this.audio?.snapshot().worldMedia ?? null,
         setWorldTime: (hour) => this.setWorldTime(hour),
         setTimePaused: (paused) => runtimeControls.setAuthorityWorldClockPaused(this.environment, authority, paused),
         setTimeSpeed: (speed) => runtimeControls.setAuthorityWorldClockSpeed(this.environment, authority, speed),
@@ -393,28 +439,26 @@ export class Game {
   }
 
   async executeCommand(input: string): Promise<SlashCommandExecution> {
-    if (!this.commandExecutor || !this.commandSource) throw new Error('服务端命令入口尚未就绪。');
-    const execution = await executeSlashCommand(this.commandExecutor, this.commandSource, input);
-    if (execution.command && execution.result.success) this.consumeBrowserCommand(execution.command, execution.result);
-    return execution;
+    return executeGameSlashCommand(this.commandExecutor, this.commandSource, input, this.commandConsumer);
   }
 
   prepareMeleeShowcase = async () => void (await this.gameplayClient?.prepareMeleeShowcase());
-
   triggerMeleeShowcaseDamage = async () => void (await this.gameplayClient?.triggerMeleeShowcaseDamage());
 
   releaseInput = () => this.controller?.releaseInput();
 
   setPaused(paused: boolean) {
     this.paused = paused;
-    this.companion.setPaused(paused);
-    this.controller?.releaseInput();
-    const control =
-      this.authority?.mode === 'local' ? (paused ? this.authority.pause() : this.authority.resume()) : undefined;
-    void control?.catch(() => undefined);
-    this.gameplayClient?.setSuspended(paused);
-    // prettier-ignore
-    this.worldAudio?.updateWorld(this.camera, this.world, this.controller?.onGround ?? false, paused, this.controller?.waterImmersion);
+    runtimeControls.setGamePaused(paused, {
+      companion: this.companion,
+      controller: this.controller,
+      authority: this.authority,
+      gameplay: this.gameplayClient,
+      audio: this.worldAudio,
+      media: (value) => this.media.pause(value),
+      camera: this.camera,
+      world: this.world,
+    });
   }
 
   async leaveWorld() {
@@ -427,11 +471,13 @@ export class Game {
   abortStart = () => {
     this.pendingStartAbort?.abort();
     this.pendingStartAbort = null;
+    this.uiBridge.resetWorldPresentation();
     this.disposeRuntime();
   };
 
   dispose() {
     this.abortStart();
+    this.media.dispose();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('pagehide', this.onPageHide);
   }
@@ -444,15 +490,12 @@ export class Game {
   toggleCollisionDebug = () => this.collisionDebug?.toggle();
 
   setCollisionDebugContacts = (enabled: boolean) => this.collisionDebug?.setDetails({ contacts: enabled });
-
   setCollisionDebugSensors = (enabled: boolean) => this.collisionDebug?.setDetails({ sensors: enabled });
 
   closeInventory = () => this.gameplayClient?.closeInventory();
 
   inventoryPointer = (command: InventoryControl) =>
     this.gameplayClient?.inventoryPointer(command) ?? Promise.resolve(false);
-
-  craftRecipe = (recipeId: string) => this.gameplayClient?.craftRecipe(recipeId);
 
   useInventoryItem = (slot: number) => this.gameplayClient?.useInventoryItem(slot);
 
@@ -461,34 +504,17 @@ export class Game {
   toggleCommandShell = () => runtimeControls.toggleCommandShell(this.uiBridge, this.controller);
 
   closeCommandShell = () => this.uiBridge.publishShell({ commandOpen: false });
-
   closeMap = () => this.uiBridge.publishShell({ mapOpen: false });
 
   setMapLayer = (layer: MapLayer) => runtimeControls.setMapLayer(this.uiBridge, layer);
 
-  private consumeBrowserCommand(
-    command: ServerCommand,
-    result: Extract<SlashCommandExecution['result'], { success: true }>,
-  ) {
-    if (result.commit) this.saveQueue.queue();
-    if (command.type === 'teleport' && this.serverPlayerId) {
-      const entity = this.authority?.gameplay.entities.find((candidate) => candidate.id === this.serverPlayerId);
-      if (entity)
-        void this.controller?.movePlayerTo(
-          entity.position[0],
-          entity.position[1] + PLAYER_FEET_OFFSET,
-          entity.position[2],
-        );
-    }
-    if (command.type === 'time-set' && this.world && this.environment) this.environment.setTime(this.world.worldTime);
-    this.gameplayClient?.refresh();
-  }
-
   private async executeGameplayCommand(command: ServerCommand) {
-    if (!this.commandExecutor || !this.commandSource) throw new Error('Gameplay command runtime is unavailable.');
-    const result = await this.commandExecutor.execute(this.commandSource, command);
-    if (result.success) this.consumeBrowserCommand(command, result);
-    return result;
+    return runtimeControls.executeBrowserCommand(
+      this.commandExecutor,
+      this.commandSource,
+      command,
+      this.commandConsumer,
+    );
   }
 
   private publishDebugVisibility = (visible: boolean) =>
@@ -504,45 +530,15 @@ export class Game {
   private disposeRuntime() {
     this.companion.stop();
     this.startGeneration += 1;
-    this.worldAudio?.dispose();
-    this.worldAudio = null;
-    this.uiSession?.dispose();
-    this.uiSession = null;
-    this.commandExecutor = null;
-    this.commandSource = null;
     this.removeHarness?.();
-    this.removeHarness = null;
-    this.controller?.dispose();
-    this.controller = null;
-    this.collisionDebug?.dispose();
-    this.collisionDebug = null;
-    this.gameplayClient?.dispose();
-    this.gameplayClient = null;
+    this.harnessRenderedWorldEpoch = null;
     this.uiBridge.publishShell({ commandOpen: false, mapOpen: false });
     if (this.world) {
-      this.world.dispose();
       this.lifecycle.disposedWorlds += 1;
     }
-    this.world = null;
-    this.logicClient?.dispose();
-    this.logicClient = null;
-    this.authority?.dispose();
-    this.authority = null;
-    this.computeRuntime?.dispose();
-    this.computeRuntime = null;
-    this.authoritySync.clear();
-    this.visualEffects?.destroy();
-    this.visualEffects = null;
-    this.waterExperience?.destroy();
-    this.waterExperience = null;
-    this.environment?.destroy();
-    this.environment = null;
-    this.visualResources?.destroy();
-    this.visualResources = null;
-    this.app?.destroy();
-    this.app = null;
-    this.experimentState.clearRenderer();
-    this.camera = null;
+    // prettier-ignore
+    disposeGameOwnedResources({ disposable: [this.worldAudio, this.uiSession, this.controller, this.collisionDebug, this.gameplayClient, this.world, this.logicClient, this.authority, this.computeRuntime], destroyable: [this.visualEffects, this.waterExperience, this.environment, this.visualResources, this.app], clear: () => { this.authoritySync.clear(); this.experimentState.clearRenderer(); }, target: this, fields: ['worldAudio', 'uiSession', 'commandExecutor', 'commandSource', 'removeHarness', 'controller', 'collisionDebug', 'gameplayClient', 'world', 'logicClient', 'authority', 'computeRuntime', 'visualEffects', 'waterExperience', 'environment', 'visualResources', 'app', 'camera'] });
     this.serverPlayerId = null;
+    this.media.endWorld();
   }
 }

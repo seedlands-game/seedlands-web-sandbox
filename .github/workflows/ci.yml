@@ -1,4 +1,4 @@
-name: CI architecture baseline
+name: CI Classic baseline
 
 on:
   pull_request:
@@ -91,3 +91,92 @@ jobs:
           set -euo pipefail
           printf 'Architecture: %s; deterministic: %s\n' "$ARCHITECTURE_RESULT" "$DETERMINISTIC_RESULT"
           [[ "$ARCHITECTURE_RESULT" == "success" && "$DETERMINISTIC_RESULT" == "success" ]]
+
+  classic-headless:
+    name: Classic headless contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Exercise Classic progression, food and saved construction
+        run: pnpm test:classic:headless
+
+  build:
+    name: Production build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Build one identified production artifact
+        run: pnpm build
+      - name: Upload exact production bytes and receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: production-web-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/web/dist
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  chromium:
+    name: Chromium regression
+    needs: build
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Require successful production build
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: test "$BUILD_RESULT" = success
+      - name: Check out exact source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up pnpm and Node.js
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.12.0
+          cache: true
+          require-lockfile: true
+      - name: Download identified production bytes
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: production-web-${{ github.run_id }}-${{ github.run_attempt }}
+          path: apps/web/dist
+      - name: Install matching Chromium and system libraries
+        run: pnpm harness:browser:install --with-deps
+      - name: Run unique Classic production journey
+        id: classic
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+        run: pnpm harness:classic
+      - name: Preserve Classic result and failure traces
+        if: ${{ always() && steps.classic.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: classic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            harness/results/
+            test-results/
+            playwright-report/
+          if-no-files-found: error
+          retention-days: 7

@@ -102,6 +102,16 @@ describe('参考投影整数零', () => {
     const gameplay = {
       gameplayRevision: -0,
       gameplayTime: -0,
+      inventory: {
+        version: 1,
+        actor: { entityId: 'player', epoch: 1, lifetime: 1 },
+        revision: 0,
+        slots: [{ itemId: 'berry', count: -0 }],
+        hotbarSize: 1,
+        armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+        cursor: { version: 1, revision: 0, stack: null, origin: null, craftingGrid: [null, null, null, null] },
+        matchedCraftingRecipeIds: [],
+      },
       player: {
         entityId: 'player',
         health: -0,

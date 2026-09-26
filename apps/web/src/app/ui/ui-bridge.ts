@@ -66,6 +66,13 @@ const initialShell = (): ShellState => ({
   gameplay: {
     station: null,
     inventoryOpen: false,
+    equipment: {
+      helmet: { slot: 'helmet', itemId: null, count: 0, name: '空头盔槽', edible: false },
+      chestplate: { slot: 'chestplate', itemId: null, count: 0, name: '空胸甲槽', edible: false },
+      leggings: { slot: 'leggings', itemId: null, count: 0, name: '空护腿槽', edible: false },
+      boots: { slot: 'boots', itemId: null, count: 0, name: '空靴子槽', edible: false },
+    },
+    personalCrafting: { slots: [], recipes: [] },
     lifecycle: 'alive',
     mode: 'survival',
     flightEnabled: false,
@@ -81,6 +88,8 @@ const initialHud = (): HudState => ({
   worldClock: '',
   health: { value: 20, max: 20 },
   hunger: { value: 20, max: 20 },
+  armor: { value: 0, max: 20 },
+  oxygen: { value: 20, max: 20, visible: false },
   mode: 'survival',
   flightEnabled: false,
   selectedHotbarSlot: 0,
@@ -173,6 +182,28 @@ export function createUiBridge(options: BridgeOptions = {}) {
     debug: debug.channel,
     publishShell: (patch: Partial<ShellState>) => publishPatch(shell, patch),
     publishDebug: (patch: Partial<DebugState>) => publishPatch(debug, patch),
+    resetWorldPresentation() {
+      activeToken += 1;
+      clearFeedback();
+      const freshShell = initialShell();
+      publishPatch(shell, {
+        mapOpen: false,
+        mapLayer: freshShell.mapLayer,
+        mapSeed: freshShell.mapSeed,
+        mapCenter: freshShell.mapCenter,
+        mapRevision: freshShell.mapRevision,
+        commandOpen: false,
+        commandRunning: false,
+        commandEntries: freshShell.commandEntries,
+        commandStatus: freshShell.commandStatus,
+        commandStatusState: freshShell.commandStatusState,
+        experience: null,
+        gameplay: freshShell.gameplay,
+      });
+      publishPatch(hud, initialHud());
+      publishPatch(interaction, initialInteraction());
+      publishPatch(debug, initialDebug());
+    },
     beginMeasurementWindow() {
       rateStartedAt = now();
       ratePublishBaseline =

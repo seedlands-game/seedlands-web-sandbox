@@ -1,6 +1,6 @@
 import { bodyConfigFor, type BodyKind } from '@seedlands/stdlib/physics/body-registry';
 import type { BodyState, Contact, Vec3, WorldAabb } from '@seedlands/stdlib/physics/types';
-import { collisionBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { collisionBoxesForVoxel, type VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export const COLLISION_DEBUG_RADIUS = 32;
 export const COLLISION_DEBUG_BODY_LIMIT = 128;
@@ -40,6 +40,7 @@ export type CollisionDebugProjectionOptions = Readonly<{
   includeContacts?: boolean;
   includeSensors?: boolean;
   includePickupSensors?: boolean;
+  voxelGeometry?: VoxelGeometryResolver;
 }>;
 
 export type CollisionDebugLine = Readonly<{
@@ -273,7 +274,7 @@ export function createCollisionDebugBatch(
 
   if (snapshot.targetVoxel) {
     const [x, y, z] = snapshot.targetVoxel.position;
-    for (const box of collisionBoxesForVoxel(snapshot.targetVoxel.voxel))
+    for (const box of collisionBoxesForVoxel(snapshot.targetVoxel.voxel, options.voxelGeometry))
       appendAabb(
         positions,
         colors,

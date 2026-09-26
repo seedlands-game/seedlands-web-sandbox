@@ -8,10 +8,13 @@ import {
   voxelAppearanceMetalnessGlsl,
   voxelAppearanceEmissionGlsl,
 } from '../shaders/voxel-appearance-chunks';
-import { FaceMaterial, faceMaterialNames, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { faceMaterialNames } from '@seedlands/stdlib/world/face-material-names';
 import type { MeshPart } from '../app-contracts';
 import type { QualityProfile } from './quality-profile';
+import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';
+import { voxelEmissionRedDominance, voxelEmissionThreshold } from './voxel-emission-profile';
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
@@ -53,18 +56,46 @@ export async function createVoxelMaterials(
   quality: QualityProfile,
   sources?: PixelTexture[],
   assets?: readonly Asset[],
+  presentation?: PackPresentationCatalog,
 ): Promise<VoxelMaterials> {
   const textures = sources ?? resolveTerrainTextures(await loadTerrainPack());
   const surface: number[] = [];
   const emission: number[] = [];
+  const emissionThreshold: number[] = [];
+  const emissionRedDominance: number[] = [];
   const tiles = new Map<FaceMaterialId, pc.Texture>();
   const tileCanvases = new Map<FaceMaterialId, HTMLCanvasElement>();
+  const packMaterialByFace = new Map(
+    Object.values(presentation?.materials ?? {}).map((material) => [material.faceMaterial, material]),
+  );
   for (const definition of terrainMaterials) {
     const material = assets?.find((asset) => asset.id === definition.id && asset.type === 'material');
     const parameters = material?.type === 'material' ? material.payload : undefined;
-    const source = textures.find((texture) => texture.id === (parameters?.textureId ?? definition.textureId));
+    const packMaterial = packMaterialByFace.get(definition.faceMaterial);
+    if (packMaterial && packMaterial.renderMode !== definition.renderMode)
+      throw new Error(`Pack 材质渲染模式与槽位不匹配：${packMaterial.id}`);
+    const builtinPackTexture = packMaterial?.texture.startsWith('builtin:')
+      ? packMaterial.texture.slice('builtin:'.length)
+      : undefined;
+    const source = textures.find(
+      (texture) => texture.id === (builtinPackTexture ?? parameters?.textureId ?? definition.textureId),
+    );
     if (!source) throw new Error(`缺少地形贴图：${definition.textureId}`);
-    const canvas = pixelCanvas(source);
+    let canvas: HTMLCanvasElement;
+    const packTextureUrl = packMaterial
+      ? packMaterial.texture.startsWith('builtin:')
+        ? undefined
+        : presentation?.assetUrls[packMaterial.texture]
+      : undefined;
+    if (packTextureUrl) {
+      const image = new Image();
+      image.src = packTextureUrl;
+      await image.decode();
+      canvas = document.createElement('canvas');
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      canvas.getContext('2d')!.drawImage(image, 0, 0);
+    } else canvas = pixelCanvas(source);
     surface.push(
       1 - (parameters?.roughness ?? (definition.renderMode === 'transparent' ? 0.18 : 0.92)),
       parameters?.metalness ?? 0,
@@ -76,6 +107,8 @@ export async function createVoxelMaterials(
       linearEmission.b,
       parameters?.emissiveIntensity ?? definition.emissiveIntensity,
     );
+    emissionThreshold.push(voxelEmissionThreshold(definition.faceMaterial));
+    emissionRedDominance.push(voxelEmissionRedDominance(definition.faceMaterial));
     tileCanvases.set(definition.faceMaterial, canvas);
     if (
       [
@@ -99,6 +132,21 @@ export async function createVoxelMaterials(
   fallbackContext.fillStyle = '#17364a';
   fallbackContext.fillRect(0, 0, 2, 2);
   const reflectionFallback = textureFromCanvas(app.graphicsDevice, 'reflection-fallback', reflectionFallbackCanvas);
+  const blockLightFallback = new pc.Texture(app.graphicsDevice, {
+    name: 'voxel-block-light-fallback',
+    width: 1,
+    height: 1,
+    depth: 1,
+    volume: true,
+    format: pc.PIXELFORMAT_R8,
+    mipmaps: false,
+    minFilter: pc.FILTER_NEAREST,
+    magFilter: pc.FILTER_NEAREST,
+    addressU: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressV: pc.ADDRESS_CLAMP_TO_EDGE,
+    addressW: pc.ADDRESS_CLAMP_TO_EDGE,
+    levels: [new Uint8Array(1)],
+  });
   const waterLayer = new pc.Layer({ name: 'Voxel Water' });
   // UI 是相机后处理截点；水体须保留主场景深度并一起调色。
   const uiLayer = app.scene.layers.getLayerById(pc.LAYERID_UI);
@@ -159,11 +207,18 @@ export async function createVoxelMaterials(
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('glossPS', voxelAppearanceGlossGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('metalnessPS', voxelAppearanceMetalnessGlsl);
     material.setParameter('uVoxelSurface[0]', new Float32Array(surface));
+    // Chunk MeshInstances override these three parameters with their own brick.
+    // Non-world previews stay deterministically unlit instead of sampling an unbound texture.
+    material.setParameter('texture_blockLight', blockLightFallback);
+    material.setParameter('uBlockLightOrigin', new Float32Array([0, 0, 0]));
+    material.setParameter('uBlockLightSize', 1);
     if (category !== 'transparent') {
       material.emissive = new pc.Color(1, 0.48, 0.1);
       material.emissiveIntensity = category === 'emissive' ? 1.4 : 1.15;
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelAppearanceEmissionGlsl);
       material.setParameter('uVoxelEmission[0]', new Float32Array(emission));
+      material.setParameter('uVoxelEmissionThreshold[0]', new Float32Array(emissionThreshold));
+      material.setParameter('uVoxelEmissionRedDominance[0]', new Float32Array(emissionRedDominance));
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('emissivePS', voxelArrayLanternEmissionWgsl);
     }
     if (category === 'cutout' || category === 'transparent') {
@@ -171,10 +226,9 @@ export async function createVoxelMaterials(
       material.opacityMapChannel = 'a';
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('opacityPS', voxelArrayOpacityGlsl);
       material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('opacityPS', voxelArrayOpacityWgsl);
-      material.setParameter(
-        'uOpacityVoxelLayer',
-        category === 'cutout' ? FaceMaterial.Leaves - 1 : FaceMaterial.Water - 1,
-      );
+      // Retain the per-face material layer in depth/shadow alpha passes too.
+      material.opacityVertexColor = true;
+      material.opacityVertexColorChannel = 'a';
     }
     if (category === 'cutout') {
       material.alphaTest = mix(0.34, 0.5, quality.vegetationDensity);
@@ -216,6 +270,7 @@ export async function createVoxelMaterials(
       categoryMaterials.forEach((material) => material.destroy());
       tiles.forEach((texture) => texture.destroy());
       reflectionFallback.destroy();
+      blockLightFallback.destroy();
       textureArray.destroy();
       app.scene.layers.removeTransparent(waterLayer);
     },

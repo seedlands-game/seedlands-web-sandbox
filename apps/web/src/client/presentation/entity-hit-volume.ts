@@ -1,6 +1,7 @@
-import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
+import { bodyConfigFor, bodyKindForEntity } from '@seedlands/stdlib/physics/body-registry';
 
 type Point = readonly [number, number, number];
+type HittableEntity = Readonly<{ id: string; position: Point; archetype?: string }>;
 
 /** 模型以脚底为锚点；返回射线进入躯干体积的距离，受体素遮挡上限约束。 */
 export function entityHitDistance(
@@ -10,7 +11,13 @@ export function entityHitDistance(
   direction: Point,
   maxDistance: number,
 ): number | null {
-  const kind = archetype === 'grazer' || archetype === 'settler' ? archetype : 'night-stalker';
+  let kind;
+  try {
+    kind = bodyKindForEntity({ type: archetype === 'settler' ? 'npc' : 'creature', archetype });
+  } catch (error) {
+    if (error instanceof RangeError) return null;
+    throw error;
+  }
   const box = bodyConfigFor(kind).localAabb;
   const low = [feet[0] + box.min.x, feet[1] + box.min.y, feet[2] + box.min.z];
   const high = [feet[0] + box.max.x, feet[1] + box.max.y, feet[2] + box.max.z];
@@ -28,4 +35,19 @@ export function entityHitDistance(
     if (near > far) return null;
   }
   return far > 0 ? near : null;
+}
+
+export function nearestEntityHit<T extends HittableEntity>(
+  entities: readonly T[],
+  origin: Point,
+  direction: Point,
+  maxDistance: number,
+): T | undefined {
+  return entities
+    .map((entity) => ({
+      entity,
+      distance: entityHitDistance(entity.position, entity.archetype, origin, direction, maxDistance),
+    }))
+    .filter((hit): hit is typeof hit & { distance: number } => hit.distance !== null)
+    .sort((left, right) => left.distance - right.distance)[0]?.entity;
 }

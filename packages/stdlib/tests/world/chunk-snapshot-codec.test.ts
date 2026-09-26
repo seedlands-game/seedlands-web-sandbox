@@ -7,6 +7,7 @@ import {
   validateStoredFluid,
 } from '../../src/world/chunk-snapshot-codec';
 import { CHUNK_SIZE } from '../../src/world/voxel';
+import { woolVoxelColors } from '../../src/world/wool-colors';
 
 const VOXEL_COUNT = CHUNK_SIZE ** 3;
 
@@ -26,6 +27,15 @@ const legacyBytes = (voxels: Uint16Array) =>
   new TextEncoder().encode(JSON.stringify({ ...identity(), voxels: [...voxels] })).byteLength;
 
 describe('Chunk snapshot codec', () => {
+  it('round-trips all sixteen wool voxel IDs without changing the codec schema', () => {
+    const procedural = new Uint16Array(VOXEL_COUNT);
+    const current = procedural.slice();
+    woolVoxelColors.forEach(([, , voxel], index) => (current[index * 257] = voxel));
+    const record = createStoredChunkRecord({ ...identity(), voxels: current, proceduralVoxels: procedural });
+
+    expect(decodeStoredChunkRecord(record, { ...identity(), proceduralVoxels: procedural })).toEqual(current);
+  });
+
   it('selects a procedural final-diff record for sparse state and round-trips without mutating inputs', () => {
     const procedural = new Uint16Array(VOXEL_COUNT).fill(3);
     const current = procedural.slice();

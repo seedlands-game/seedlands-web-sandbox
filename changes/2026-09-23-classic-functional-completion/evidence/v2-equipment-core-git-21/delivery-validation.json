@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-21-EQUIPMENT-CORE",
+  "status": "CORE_VALIDATED_EXPECTED_DEATH_RED",
+  "baseline": "7030adac5ea234319bfe032185828287ee07b85d",
+  "sourceCommit": "fe2fcc9f174848ef9d7419cb5df96209a2d25796",
+  "sourceTree": "65fe988f8c6089502dad6dfd0ec8754f44072119",
+  "stagedPatchSha256": "409271b89f90db79f25495d726aba27e025f104095b593d7e9856f440556fbe2",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 32,
+    "sha256": "df9a420ad8e211213c77f06a8b5bf3bab88a1cd94dafc71628901ece54a68f96"
+  },
+  "sourceSnapshots": {
+    "spine": "2dbf0c6f666e49f31d718a23c3c5184365e76f5a11ce641dd9ac7742297fa1ab",
+    "pointer": "b39ca43d4e84b58bfc88db4ab3075cd71acafbf49cafad5dcb456f0189c59403",
+    "revision": "59bd762231695400fb029a3a59679889e95e93fe957de83b7a42515511406463",
+    "stationHost": "79efe4f8f24d4381c13dbbfe8aa8fb6a8855ec6d019e7e2c22a11b3c3a667a31"
+  },
+  "dependencies": {
+    "tree": "/private/tmp/seedlands-git21-equipment",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "spineContract": {
+      "window": "git21-spine-contract",
+      "status": "PASS",
+      "files": 1,
+      "passed": 9
+    },
+    "pointer": {
+      "window": "git21-pointer-green",
+      "status": "PASS",
+      "files": 4,
+      "passed": 35
+    },
+    "revision": {
+      "window": "git21-revision-green",
+      "status": "PASS",
+      "files": 1,
+      "passed": 12
+    },
+    "stationHost": {
+      "window": "git21-station-host-green",
+      "status": "PASS",
+      "files": 1,
+      "passed": 11
+    },
+    "runtimeRegressions": {
+      "window": "git21-runtime-regressions",
+      "status": "PASS",
+      "files": 3,
+      "passed": 18
+    },
+    "sharedDeathRed": {
+      "window": "git21-shared-death-red",
+      "status": "EXPECTED_FAIL",
+      "exitCode": 1,
+      "files": 1,
+      "passed": 2,
+      "failed": 1,
+      "onlyFailure": "combat death producer does not settle equipped helmet and chestplate"
+    }
+  },
+  "static": {
+    "stdlibTypes": { "window": "git21-stdlib-types", "status": "PASS" },
+    "rootTestTypes": { "window": "git21-root-test-types", "status": "PASS" },
+    "classicTestTypes": { "window": "git21-classic-test-types", "status": "PASS" },
+    "stagedEslint": { "window": "git21-staged-eslint", "status": "PASS" },
+    "editableFormat": { "window": "git21-editable-format", "status": "PASS" },
+    "scopedDiff": { "window": "git21-scoped-diff", "status": "PASS" }
+  },
+  "notRun": [
+    "browser",
+    "cua",
+    "ci",
+    "deploy",
+    "death-producer-implementation",
+    "equipment-ui",
+    "combat-armor",
+    "v4-restore"
+  ]
+}

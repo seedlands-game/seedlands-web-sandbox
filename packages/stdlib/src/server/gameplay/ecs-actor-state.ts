@@ -1,4 +1,9 @@
-import { validateDurableExecutionOrigin } from '../composition/execution-origin';
+import {
+  DEFAULT_PLAYER_INVENTORY_LAYOUT,
+  validateSavedInventoryLayout,
+  validateSavedEquipment,
+  type PlayerInventoryLayout,
+} from './inventory-layout';
 import { addComponents, type World } from 'bitecs';
 import { Inventory, createInventoryAccess } from './inventory';
 import type { ItemDefinitionRegistry } from './item-registry';
@@ -12,6 +17,15 @@ import {
   type createActorComponents,
 } from './ecs-actor-components';
 import type { BreakAction } from './player-state';
+import { copyBreakAction } from './player-break-action-codec';
+import { createPlayerComponentAccess } from './player-component-access';
+import {
+  emptyArmorEquipment,
+  normalizeArmorEquipment,
+  readActorArmor,
+  writeActorArmor,
+  type ArmorEquipment,
+} from './ecs-actor-armor-state';
 import {
   emptyInventoryCursor,
   validateInventoryCursor,
@@ -22,6 +36,12 @@ import {
   validateCharacterComponentState,
 } from '../simulation/character-runtime-validation';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
+import {
+  createSpeciesStateAccess,
+  defaultSpeciesState,
+  validateSpeciesState,
+  type SpeciesStateV1,
+} from './species-state';
 import {
   defaultActorModeFacets,
   readActorCreativeCatalog,
@@ -46,9 +66,11 @@ export function initializeActorComponents(
   eid: number,
   entity: GameplayEntity,
   items: ItemDefinitionRegistry,
+  playerLayout: PlayerInventoryLayout = DEFAULT_PLAYER_INVENTORY_LAYOUT,
 ): void {
   if (!isActorEntityType(entity.type)) return;
   const player = entity.type === 'player';
+  const layout = player ? playerLayout : DEFAULT_PLAYER_INVENTORY_LAYOUT;
   addComponents(
     world,
     eid,
@@ -68,16 +90,18 @@ export function initializeActorComponents(
   components.needs.hungerAccumulator[eid] = 0;
   components.needs.healingAccumulator[eid] = 0;
   components.needs.starvationAccumulator[eid] = 0;
-  components.inventory.value[eid] = new Inventory(24, undefined, items);
+  components.inventory.value[eid] = new Inventory(layout.capacity, undefined, items);
   components.inventory.revision[eid] = 0;
   components.inventory.cursor[eid] = emptyInventoryCursor();
   components.equipment.selectedSlot[eid] = 0;
-  components.equipment.hotbarSize[eid] = 8;
+  components.equipment.hotbarSize[eid] = layout.hotbarSize;
+  components.equipment.armor[eid] = emptyArmorEquipment();
   components.control.source[eid] = player ? 'player' : 'autonomous';
   components.control.revision[eid] = 0;
   components.behavior.value[eid] = undefined;
   components.life.lifecycle[eid] = entity.health === 0 ? 'dead' : 'alive';
-  writeActorModeFacets(components, eid, defaultActorModeFacets());
+  writeActorModeFacets(components, eid, defaultActorModeFacets(layout.hotbarSize));
+  components.species.value[eid] = defaultSpeciesState(entity.archetype) ?? undefined;
   if (player) {
     addComponents(world, eid, components.player);
     [components.player.spawnX[eid], components.player.spawnY[eid], components.player.spawnZ[eid]] = entity.position;
@@ -127,6 +151,7 @@ export function readActorComponentSnapshot(
     equipment: {
       selectedSlot: components.equipment.selectedSlot[eid]!,
       hotbarSize: components.equipment.hotbarSize[eid]!,
+      armor: readActorArmor(components, eid),
     },
     lifecycle: components.life.lifecycle[eid]!,
     controlSource: components.control.source[eid]!,
@@ -137,6 +162,7 @@ export function readActorComponentSnapshot(
     mode: readActorMode(components, eid),
     creativeCatalog: readActorCreativeCatalog(components, eid),
     flight: readActorFlight(components, eid),
+    ...(components.species.value[eid] ? { species: validateSpeciesState(components.species.value[eid])! } : {}),
     ...(player
       ? {
           player: {
@@ -158,11 +184,12 @@ export type PreparedActorComponentSnapshot = Readonly<{
   inventory: Inventory;
   inventoryRevision: number;
   inventoryCursor: InventoryCursorV1;
-  equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
+  equipment: Readonly<{ selectedSlot: number; hotbarSize: number; armor: ArmorEquipment }>;
   lifecycle: ActorComponentSnapshot['lifecycle'];
   controlSource: ActorComponentSnapshot['controlSource'];
   controlRevision: number;
   character: CharacterComponentStateV1 | null;
+  species: SpeciesStateV1 | null;
   modeFacets: CompleteModeFacets;
   player: Readonly<{ spawnPosition: [number, number, number]; breakAction: BreakAction | null }> | null;
 }>;
@@ -171,6 +198,7 @@ export function prepareActorComponentSnapshot(
   snapshot: ActorComponentSnapshot,
   player: boolean,
   items: ItemDefinitionRegistry,
+  playerLayout: PlayerInventoryLayout = DEFAULT_PLAYER_INVENTORY_LAYOUT,
 ): PreparedActorComponentSnapshot {
   const needs = snapshot.needs;
   if (
@@ -188,16 +216,7 @@ export function prepareActorComponentSnapshot(
     )
   )
     throw new TypeError('Actor needs snapshot is invalid.');
-  if (
-    !snapshot.equipment ||
-    !Number.isSafeInteger(snapshot.equipment.hotbarSize) ||
-    snapshot.equipment.hotbarSize <= 0 ||
-    snapshot.equipment.hotbarSize !== 8 ||
-    !Number.isSafeInteger(snapshot.equipment.selectedSlot) ||
-    snapshot.equipment.selectedSlot < 0 ||
-    snapshot.equipment.selectedSlot >= snapshot.equipment.hotbarSize
-  )
-    throw new TypeError('Actor equipment snapshot is invalid.');
+  validateSavedEquipment(snapshot.equipment, player, playerLayout);
   if (snapshot.lifecycle !== 'alive' && snapshot.lifecycle !== 'dead')
     throw new TypeError('Actor lifecycle snapshot is invalid.');
   if (!['player', 'autonomous', 'behavior', 'none'].includes(snapshot.controlSource))
@@ -206,22 +225,25 @@ export function prepareActorComponentSnapshot(
   if (!Number.isSafeInteger(controlRevision) || controlRevision < 0)
     throw new TypeError('Actor control revision is invalid.');
   const character = snapshot.character ? validateCharacterComponentState(snapshot.character) : null;
+  const species = validateSpeciesState(snapshot.species);
   if ((snapshot.controlSource === 'behavior') !== Boolean(character))
     throw new TypeError('Actor behavior state and control source must be installed together.');
   if (character && (player || character.entityId !== snapshot.entityId || character.lifecycle !== 'active'))
     throw new TypeError('Actor behavior component identity is invalid.');
   if (player !== Boolean(snapshot.player)) throw new TypeError('Player component snapshot membership is invalid.');
-  if (!Array.isArray(snapshot.inventory) || snapshot.inventory.length !== 24)
-    throw new TypeError('Actor inventory snapshot is invalid.');
+  validateSavedInventoryLayout(snapshot.inventory, snapshot.equipment.hotbarSize, player, playerLayout);
 
-  const inventory = new Inventory(24, snapshot.inventory, items);
+  const inventory = new Inventory(snapshot.inventory.length, snapshot.inventory, items);
+  const armor = normalizeArmorEquipment(items, snapshot.equipment.armor);
   const inventoryRevision = snapshot.inventoryRevision ?? 0;
   if (!Number.isSafeInteger(inventoryRevision) || inventoryRevision < 0)
     throw new TypeError('Actor inventory revision is invalid.');
   const inventoryCursor = validateInventoryCursor(snapshot.inventoryCursor, items);
   if (inventoryCursor.origin?.kind === 'inventory' && inventoryCursor.origin.slot >= inventory.capacity)
     throw new TypeError('Actor inventory cursor origin is invalid.');
-  const modeFacets = validateActorModeFacets(snapshot, items);
+  const modeFacets = validateActorModeFacets(snapshot, items, snapshot.equipment.hotbarSize);
+  if (modeFacets.creativeCatalog.hotbar.length !== snapshot.equipment.hotbarSize)
+    throw new TypeError('Actor catalog and equipment layouts do not match.');
   let preparedPlayer: PreparedActorComponentSnapshot['player'] = null;
   if (snapshot.player) {
     if (snapshot.player.spawnPosition.length !== 3 || !snapshot.player.spawnPosition.every(Number.isFinite))
@@ -241,11 +263,12 @@ export function prepareActorComponentSnapshot(
     inventory,
     inventoryRevision,
     inventoryCursor,
-    equipment: Object.freeze({ ...snapshot.equipment }),
+    equipment: Object.freeze({ ...snapshot.equipment, armor: Object.freeze(armor) }),
     lifecycle: snapshot.lifecycle,
     controlSource: snapshot.controlSource,
     controlRevision,
     character,
+    species,
     modeFacets: Object.freeze({
       mode: Object.freeze({ ...modeFacets.mode }),
       creativeCatalog: Object.freeze({
@@ -279,11 +302,13 @@ export function installPreparedActorComponentSnapshot(
   components.inventory.cursor[eid] = prepared.inventoryCursor;
   components.equipment.selectedSlot[eid] = prepared.equipment.selectedSlot;
   components.equipment.hotbarSize[eid] = prepared.equipment.hotbarSize;
+  components.equipment.armor[eid] = { ...prepared.equipment.armor! };
   components.life.lifecycle[eid] = prepared.lifecycle;
   components.control.source[eid] = prepared.controlSource;
   components.control.revision[eid] = prepared.controlRevision;
   if (!preserveCharacterBinding)
     components.behavior.value[eid] = prepared.character ? cloneCharacterComponentState(prepared.character) : undefined;
+  components.species.value[eid] = prepared.species ?? undefined;
   writeActorModeFacets(components, eid, prepared.modeFacets);
   if (prepared.player) {
     components.player.spawnX[eid] = prepared.player.spawnPosition[0];
@@ -301,8 +326,13 @@ export function restoreActorComponentSnapshot(
   snapshot: ActorComponentSnapshot,
   player: boolean,
   items: ItemDefinitionRegistry,
+  playerLayout: PlayerInventoryLayout = DEFAULT_PLAYER_INVENTORY_LAYOUT,
 ): void {
-  installPreparedActorComponentSnapshot(components, eid, prepareActorComponentSnapshot(snapshot, player, items));
+  installPreparedActorComponentSnapshot(
+    components,
+    eid,
+    prepareActorComponentSnapshot(snapshot, player, items, playerLayout),
+  );
 }
 
 export type ActorAccessBindings = Readonly<{
@@ -373,6 +403,12 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
       const eid = binding.resolve();
       return validateInventoryCursor(components.inventory.cursor[eid], inventory.items);
     },
+    get armor() {
+      return readActorArmor(components, binding.resolve());
+    },
+    replaceArmor(value) {
+      writeActorArmor(components, binding.resolve(), inventory.items, value);
+    },
     get controlSource() {
       return components.control.source[binding.resolve()]!;
     },
@@ -391,6 +427,10 @@ export function createActorStateAccess(components: Components, binding: ActorAcc
     get flight() {
       return readActorFlight(components, binding.resolve());
     },
+    ...createSpeciesStateAccess(
+      () => components.species.value[binding.resolve()],
+      (value) => (components.species.value[binding.resolve()] = value),
+    ),
     selectSlot(value: number) {
       const eid = binding.resolve();
       if (!selectedSlot(components, eid, value)) return false;
@@ -446,63 +486,9 @@ export function installActorCharacterComponent(
   return prepared ? components.behavior.value[eid]! : null;
 }
 
-const copyBreakAction = (value: BreakAction | null | undefined): BreakAction | null => {
-  if (value === null || value === undefined) return null;
-  if (
-    value.position.length !== 3 ||
-    !value.position.every(Number.isFinite) ||
-    !Number.isInteger(value.voxel) ||
-    value.voxel < 0 ||
-    !Number.isFinite(value.elapsedSeconds) ||
-    value.elapsedSeconds < 0 ||
-    !Number.isFinite(value.requiredSeconds) ||
-    value.requiredSeconds < 0
-  )
-    throw new TypeError('Invalid player break action component.');
-  return {
-    ...value,
-    position: [...value.position],
-    ...(value.origin === undefined ? {} : { origin: validateDurableExecutionOrigin(value.origin) }),
-  };
-};
-
 export function createPlayerStateAccess(components: Components, binding: ActorAccessBindings): PlayerComponentAccess {
   const actor = createActorStateAccess(components, binding);
-  const player = {
-    get spawnPosition(): [number, number, number] {
-      const eid = binding.resolve();
-      return [components.player.spawnX[eid]!, components.player.spawnY[eid]!, components.player.spawnZ[eid]!];
-    },
-    set spawnPosition(value: [number, number, number]) {
-      if (value.length !== 3 || !value.every(Number.isFinite)) throw new TypeError('Invalid player spawn position.');
-      const eid = binding.resolve();
-      [components.player.spawnX[eid], components.player.spawnY[eid], components.player.spawnZ[eid]] = value;
-    },
-    get hungerAccumulator() {
-      return components.needs.hungerAccumulator[binding.resolve()]!;
-    },
-    set hungerAccumulator(value: number) {
-      components.needs.hungerAccumulator[binding.resolve()] = within(value, Infinity, 'hunger accumulator');
-    },
-    get healingAccumulator() {
-      return components.needs.healingAccumulator[binding.resolve()]!;
-    },
-    set healingAccumulator(value: number) {
-      components.needs.healingAccumulator[binding.resolve()] = within(value, Infinity, 'healing accumulator');
-    },
-    get starvationAccumulator() {
-      return components.needs.starvationAccumulator[binding.resolve()]!;
-    },
-    set starvationAccumulator(value: number) {
-      components.needs.starvationAccumulator[binding.resolve()] = within(value, Infinity, 'starvation accumulator');
-    },
-    get breakAction() {
-      return copyBreakAction(components.player.breakAction[binding.resolve()]);
-    },
-    set breakAction(value: BreakAction | null) {
-      components.player.breakAction[binding.resolve()] = copyBreakAction(value);
-    },
-  };
+  const player = createPlayerComponentAccess(components, binding);
   // Copy descriptors, not values: all access remains bound to the single ECS owner.
   return Object.freeze(
     Object.defineProperties(player, Object.getOwnPropertyDescriptors(actor)),
