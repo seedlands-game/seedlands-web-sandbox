@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "sourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+  "sourceDigest": "773a32909250c868ab5757a0366282562bbae296db71ce509e48bb77a40448d1",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "builtAt": "2026-09-28T08:08:13.435Z",
+  "artifactFiles": 276,
+  "diskFilesIncludingReceipt": 277,
+  "symlinks": 0,
+  "missing": [],
+  "extra": [],
+  "mismatched": [],
+  "receiptMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "diskMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "mapsEqual": true,
+  "build10MapEqual": true,
+  "build10MapDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "artifactReceiptSha256": "af9a738e68d28cf09f21c956fde8bd2e54697838e38efa70548482ff83c8955e"
+}

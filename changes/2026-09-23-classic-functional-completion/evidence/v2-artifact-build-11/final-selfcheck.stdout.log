@@ -1,0 +1,69 @@
+Checking formatting...
+All matched files use Prettier code style!
+changes/2026-09-23-classic-functional-completion/v2-artifact-build-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/tasks.md: OK
+changes/2026-09-23-classic-functional-completion/execution-state.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-map-compare.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-map-vs-build10.diff.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-map.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-verify.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-verify.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/build.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/build.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/dependency-setup.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/dist-files.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/harness-artifact.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/metadata-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/metadata-format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/preconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/validation-argv.txt: OK
+{
+  "status": "PASS",
+  "buildSource": {
+    "sourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+    "sourceTree": "345682c2280824a294b5531b3a6654a71764c9cc",
+    "sourceDigest": "773a32909250c868ab5757a0366282562bbae296db71ce509e48bb77a40448d1",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-73e8d4da"
+  },
+  "artifact": {
+    "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+    "builtAt": "2026-09-28T08:08:13.435Z",
+    "artifactFiles": 276,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "receiptSha256": "af9a738e68d28cf09f21c956fde8bd2e54697838e38efa70548482ff83c8955e",
+    "receiptMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "diskMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "mapsEqual": true,
+    "missing": 0,
+    "extra": 0,
+    "mismatched": 0
+  },
+  "sourceManifest": {
+    "scope": "final-delivery-documents",
+    "entries": 3,
+    "sha256": "f8b8df80f226e9fe077a527c7380b6f2c70eb96596f3ea57e8a8fc43d2cf8b64"
+  },
+  "evidenceManifest": {
+    "entries": 17,
+    "sha256": "4db0ad19d957dfe8e418bbaafc9d33370cc0a3ea0c14ed3906f5092c62a8a7db"
+  },
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourcePublicAndDistMatch": true,
+    "packLockEntryCount": 1,
+    "packLockMatches": true
+  },
+  "build10MapDifference": "none",
+  "browser19Status": "FAIL",
+  "firstIronInventoryPickup": "NOT_PROVEN",
+  "browser20Run": false
+}
