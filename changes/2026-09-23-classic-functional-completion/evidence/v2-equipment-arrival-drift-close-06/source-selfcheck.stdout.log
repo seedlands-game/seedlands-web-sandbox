@@ -1,0 +1,9 @@
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts: OK
+apps/web/tests/e2e/classic-support/scenario.test.ts: OK
+apps/web/tests/e2e/classic-support/route-progress.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md: OK
+changes/2026-09-23-classic-functional-completion/equipment-resource-route-evidence.md: OK

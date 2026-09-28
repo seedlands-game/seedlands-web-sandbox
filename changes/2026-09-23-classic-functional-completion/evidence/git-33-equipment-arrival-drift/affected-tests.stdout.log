@@ -1,0 +1,10 @@
+3:59:05 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git33-equipment-arrival-drift - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git33-equipment-arrival-drift
+
+
+ Test Files  6 passed (6)
+      Tests  46 passed (46)
+   Start at  15:59:05
+   Duration  965ms (transform 416ms, setup 0ms, import 533ms, tests 38ms, environment 0ms)
+

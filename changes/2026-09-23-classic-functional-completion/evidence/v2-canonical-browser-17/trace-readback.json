@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceTraceSha256": "341dbe30467b4f1a5dc008182fe67f92ea4ed565de8fda44d95de0b810d61544",
+  "console": { "log": 1, "warning": 0, "error": 0 },
+  "pageErrorEvents": 0,
+  "networkResourceSnapshots": 810,
+  "httpStatusAtLeast400": 0,
+  "failureAttachmentFields": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "resourcePlacementReadbacks": [
+    { "target": [80, 31, 2], "voxel": 4, "status": "PASS" },
+    { "target": [82, 31, 2], "voxel": 4, "status": "PASS" },
+    { "target": [84, 31, 2], "voxel": 4, "status": "PASS" },
+    { "target": [86, 31, 2], "voxel": 3, "status": "PASS" },
+    { "target": [88, 31, 2], "voxel": 3, "status": "PASS" },
+    { "target": [90, 31, 2], "voxel": 3, "status": "PASS" },
+    { "target": [92, 31, 2], "voxel": 21, "status": "PASS" },
+    { "target": [94, 31, 2], "voxel": 21, "status": "NOT_REACHED" }
+  ],
+  "failureFrame": {
+    "traceEventType": "screencast-frame",
+    "traceResource": "page@aac0295201f4b8e20453262c72625499-1790406753665.jpeg",
+    "timestamp": 270041.341,
+    "sha256": "0cc26c2204fe18946a4f59a876956e7eefa5357e287cc3c0fd2adbcfa59a79be",
+    "interpretation": "Normal in-world HUD during the V2 resource route; it does not expose the arrival predicate breakdown."
+  }
+}

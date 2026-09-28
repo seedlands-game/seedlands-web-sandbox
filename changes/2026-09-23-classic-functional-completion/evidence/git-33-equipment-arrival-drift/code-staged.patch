@@ -1,0 +1,422 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts b/apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts
+new file mode 100644
+index 00000000..8c072af2
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts
+@@ -0,0 +1,144 @@
++import { describe, expect, it } from 'vitest';
++import { classifyEquipmentRouteWait, followEquipmentRoute } from './equipment-resource-route';
++import type { Point, RoutePoint } from './scenario';
++
++const target: RoutePoint = [94.5, -0.5];
++const routeSnapshot = (position: Point, physicsTick: number, ack: number, serverPosition = position) => ({
++  player: position,
++  serverPlayerPosition: serverPosition,
++  onGround: true,
++  colliding: false,
++  authority: { physicsTick, acknowledgedInputSequence: ack },
++});
++
++describe('Classic V2 equipment arrival drift', () => {
++  it('returns client drift from the Browser-17 wait stream before the bounded wait expires', async () => {
++    let now = 1000;
++    const initial = routeSnapshot([94.586637, 32.6, -0.225486], 16748, 9980);
++    const walked = routeSnapshot(
++      [94.45967102050781, 32.599998474121094, -0.505328357219696],
++      16754,
++      9986,
++      [94.52751791462997, 32.6, -0.30881927104446866],
++    );
++    const stream = [
++      walked,
++      routeSnapshot(
++        [94.45094299316406, 32.599998474121094, -0.6365221738815308],
++        16757,
++        9989,
++        [94.45967187683496, 32.6, -0.5053283343049474],
++      ),
++      routeSnapshot(
++        [94.45094299316406, 32.599998474121094, -0.6545403003692627],
++        16760,
++        9992,
++        [94.45094541979219, 32.6, -0.6545403172740075],
++      ),
++    ];
++    const walks: string[] = [];
++
++    await expect(
++      followEquipmentRoute(target, {
++        now: () => now,
++        observe: async () => initial,
++        walk: async (direction) => {
++          walks.push(direction);
++          now += 100;
++          return walks.length === 1 ? walked : routeSnapshot([94.5, 32.6, -0.5], 16761, 9993);
++        },
++        waitForProgress: async (baseline, direction, timeout) => {
++          for (const snapshot of stream) {
++            now += 100;
++            const result = classifyEquipmentRouteWait(baseline, snapshot, target, direction);
++            if (result) return result;
++          }
++          now += timeout;
++          throw new Error('fullmatch-only wait timed out');
++        },
++      }),
++    ).resolves.toMatchObject({ player: [94.5, 32.6, -0.5] });
++    expect(walks).toEqual(['KeyS', 'KeyW']);
++  });
++
++  it.each([
++    {
++      name: 'z corridor',
++      current: routeSnapshot([94.45, 32.6, -0.636522], 16757, 9989, [94.46, 32.6, -0.505328]),
++    },
++    {
++      name: 'finite x neighborhood',
++      current: routeSnapshot([95.01, 32.6, -0.5], 16757, 9989, [94.5, 32.6, -0.5]),
++    },
++  ])('classifies fresh ready client drift outside the $name', ({ current }) => {
++    const walked = routeSnapshot([94.46, 32.6, -0.5], 16754, 9986, [94.53, 32.6, -0.31]);
++    expect(classifyEquipmentRouteWait(walked, current, target, 'KeyW')).toEqual({
++      kind: 'drift',
++      snapshot: current,
++    });
++  });
++
++  it('rejects stale, ack-regressed, and unready samples as drift', () => {
++    const walked = routeSnapshot([94.46, 32.6, -0.5], 16754, 9986, [94.53, 32.6, -0.31]);
++    const drift = routeSnapshot([94.45, 32.6, -0.64], 16757, 9989, [94.46, 32.6, -0.5]);
++    expect(
++      classifyEquipmentRouteWait(
++        walked,
++        { ...drift, authority: { ...drift.authority, physicsTick: walked.authority.physicsTick } },
++        target,
++        'KeyW',
++      ),
++    ).toBeNull();
++    expect(
++      classifyEquipmentRouteWait(
++        walked,
++        { ...drift, authority: { ...drift.authority, acknowledgedInputSequence: 9985 } },
++        target,
++        'KeyW',
++      ),
++    ).toBeNull();
++    expect(classifyEquipmentRouteWait(walked, { ...drift, onGround: false }, target, 'KeyW')).toBeNull();
++    expect(classifyEquipmentRouteWait(walked, { ...drift, colliding: true }, target, 'KeyW')).toBeNull();
++  });
++
++  it('keeps waiting when the client stays arrived and only the server is late', () => {
++    const walked = routeSnapshot([94.46, 32.6, -0.5], 16754, 9986, [94.53, 32.6, -0.31]);
++    const serverLate = routeSnapshot([94.46, 32.6, -0.5], 16757, 9989, [94.5, 32.6, -0.31]);
++    expect(classifyEquipmentRouteWait(walked, serverLate, target, 'KeyW')).toBeNull();
++  });
++
++  it('cannot extend repeated drift corrections past the original route deadline', async () => {
++    let now = 1000;
++    let walks = 0;
++    const initial = routeSnapshot([94, 32.6, -0.5], 100, 50);
++    await expect(
++      followEquipmentRoute(target, {
++        now: () => now,
++        observe: async () => initial,
++        walk: async (direction, timeout) => {
++          walks += 1;
++          expect(timeout).toBe(45_000 - (walks - 1) * 10_000);
++          now += 5000;
++          return routeSnapshot(
++            [direction === 'KeyW' ? 94.5 : 94.45, 32.6, -0.5],
++            100 + walks * 2,
++            50 + walks,
++            [94.5, 32.6, -0.31],
++          );
++        },
++        waitForProgress: async (walked) => {
++          now += 5000;
++          return {
++            kind: 'drift',
++            snapshot: routeSnapshot(
++              [walked.player[0], 32.6, -0.64],
++              walked.authority.physicsTick + 1,
++              walked.authority.acknowledgedInputSequence,
++            ),
++          };
++        },
++      }),
++    ).rejects.toThrow('Equipment route timed out');
++    expect(walks).toBe(5);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+index c4016199..eaf425d5 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+@@ -17,12 +17,12 @@ import { itemCount } from './journey';
+ import { classicScenario, type V2EquipmentResource } from './scenario';
+ import {
+   equipmentResourcePickup,
++  classifyEquipmentRouteWait,
+   followEquipmentRoute,
+   equipmentWorkbenchCorridor,
+   equipmentWorkbenchMiningApproach,
+   EQUIPMENT_RESOURCE_WALK_OPTIONS,
+   isEquipmentMiningReady,
+-  matchesEquipmentRouteArrival,
+ } from './equipment-resource-route';
+ 
+ export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
+@@ -195,8 +195,20 @@ async function walkEquipmentRoute(page: Page, target: readonly [number, number])
+     now: Date.now,
+     observe: () => snapshot(page),
+     walk: (key, timeout) => walkTo(page, target, { key, timeout, ...EQUIPMENT_RESOURCE_WALK_OPTIONS }),
+-    waitForArrival: (baseline, key, timeout) =>
+-      waitForSnapshot(page, (current) => matchesEquipmentRouteArrival(baseline, current, target, key), timeout),
++    waitForProgress: async (baseline, key, timeout) => {
++      let kind: 'arrival' | 'drift' | null = null;
++      const current = await waitForSnapshot(
++        page,
++        (snapshot) => {
++          const result = classifyEquipmentRouteWait(baseline, snapshot, target, key);
++          kind = result?.kind ?? null;
++          return result !== null;
++        },
++        timeout,
++      );
++      if (!kind) throw new Error('Equipment route wait resolved without an arrival or drift result.');
++      return { kind, snapshot: current };
++    },
+   });
+ }
+ 
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+index deb93d51..7ff8eebd 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+@@ -28,6 +28,7 @@ const routeSnapshot = (position: Point, physicsTick: number, ack: number, server
+   authority: { physicsTick, acknowledgedInputSequence: ack },
+ });
+ const obstacle = (placement: Readonly<{ target: Point }>) => ({ position: placement.target });
++const arrival = (snapshot: ReturnType<typeof routeSnapshot>) => ({ kind: 'arrival' as const, snapshot });
+ 
+ describe('Classic V2 equipment resource route', () => {
+   it('does not let the default eastbound crossing rule accept an east-to-west transition', () => {
+@@ -134,7 +135,7 @@ describe('Classic V2 equipment resource route', () => {
+         now += 1000;
+         return walks.length === 1 ? overshot : corrected;
+       },
+-      waitForArrival: async () => {
++      waitForProgress: async () => {
+         throw new Error('Overshot positions must be corrected with real input instead of stationary waiting.');
+       },
+     });
+@@ -159,9 +160,9 @@ describe('Classic V2 equipment resource route', () => {
+         now += 30000;
+         return serverLag;
+       },
+-      waitForArrival: async (_currentBaseline, _direction, timeout) => {
++      waitForProgress: async (_currentBaseline, _direction, timeout) => {
+         waits.push(timeout);
+-        return matched;
++        return arrival(matched);
+       },
+     });
+ 
+@@ -198,10 +199,10 @@ describe('Classic V2 equipment resource route', () => {
+           current = serverOutside;
+           return current;
+         },
+-        waitForArrival: async (_currentBaseline, direction, timeout) => {
++        waitForProgress: async (_currentBaseline, direction, timeout) => {
+           waits.push({ direction, timeout });
+           current = matched;
+-          return current;
++          return arrival(current);
+         },
+       });
+ 
+@@ -226,9 +227,9 @@ describe('Classic V2 equipment resource route', () => {
+           now += 1000;
+           return serverOutside;
+         },
+-        waitForArrival: async () => {
++        waitForProgress: async () => {
+           waits += 1;
+-          return { ...serverOutside, authority: { ...serverOutside.authority, physicsTick: 102 } };
++          return arrival({ ...serverOutside, authority: { ...serverOutside.authority, physicsTick: 102 } });
+         },
+       }),
+     ).rejects.toThrow('Equipment route wait returned a non-matching snapshot.');
+@@ -250,10 +251,10 @@ describe('Classic V2 equipment resource route', () => {
+           now += 30000;
+           return serverOutside;
+         },
+-        waitForArrival: async (_currentBaseline, _direction, timeout) => {
++        waitForProgress: async (_currentBaseline, _direction, timeout) => {
+           waits.push(timeout);
+           now += timeout;
+-          return matched;
++          return arrival(matched);
+         },
+       }),
+     ).rejects.toThrow('Equipment route timed out');
+@@ -274,7 +275,7 @@ describe('Classic V2 equipment resource route', () => {
+         now += 1000;
+         return walks.length === 1 ? beforeCrossing : matched;
+       },
+-      waitForArrival: async () => {
++      waitForProgress: async () => {
+         throw new Error('A client that has not crossed must continue through the real walk driver.');
+       },
+     });
+@@ -295,7 +296,7 @@ describe('Classic V2 equipment resource route', () => {
+           now += 45_001;
+           return matched;
+         },
+-        waitForArrival: async () => matched,
++        waitForProgress: async () => arrival(matched),
+       }),
+     ).rejects.toThrow('Equipment route timed out');
+   });
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+index 9d1c733f..a43d7832 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+@@ -25,15 +25,19 @@ export type EquipmentRouteSnapshot = Readonly<{
+ }>;
+ 
+ export type EquipmentRouteObstacle = Readonly<{ position: Point }>;
++export type EquipmentRouteWaitResult = Readonly<{
++  kind: 'arrival' | 'drift';
++  snapshot: EquipmentRouteSnapshot;
++}>;
+ export type EquipmentRouteDriver = Readonly<{
+   now(): number;
+   observe(): Promise<EquipmentRouteSnapshot | null>;
+   walk(direction: RouteDirection, timeoutMs: number): Promise<EquipmentRouteSnapshot>;
+-  waitForArrival(
++  waitForProgress(
+     baseline: EquipmentRouteSnapshot,
+     direction: RouteDirection,
+     timeoutMs: number,
+-  ): Promise<EquipmentRouteSnapshot>;
++  ): Promise<EquipmentRouteWaitResult>;
+ }>;
+ 
+ export const equipmentRouteDirection = (position: Point, target: RoutePoint): RouteDirection =>
+@@ -84,6 +88,34 @@ export function matchesEquipmentRouteArrival(
+   );
+ }
+ 
++export function classifyEquipmentRouteWait(
++  baseline: EquipmentRouteSnapshot,
++  current: EquipmentRouteSnapshot,
++  target: RoutePoint,
++  direction: RouteDirection,
++): EquipmentRouteWaitResult | null {
++  if (matchesEquipmentRouteArrival(baseline, current, target, direction)) return { kind: 'arrival', snapshot: current };
++  if (
++    !current.onGround ||
++    current.colliding ||
++    current.authority.physicsTick <= baseline.authority.physicsTick ||
++    current.authority.acknowledgedInputSequence < baseline.authority.acknowledgedInputSequence
++  )
++    return null;
++  if (
++    !isInsideEquipmentRouteNeighborhood(current.player, target) ||
++    !reachedRouteTarget(
++      current.player,
++      target,
++      direction,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++    )
++  )
++    return { kind: 'drift', snapshot: current };
++  return null;
++}
++
+ export async function followEquipmentRoute(
+   target: RoutePoint,
+   driver: EquipmentRouteDriver,
+@@ -110,11 +142,14 @@ export async function followEquipmentRoute(
+     ) {
+       const remaining = Math.min(20_000, deadline - driver.now());
+       if (remaining <= 0) break;
+-      const matched = await driver.waitForArrival(baseline, direction, remaining);
++      const result = await driver.waitForProgress(walked, direction, remaining);
+       if (driver.now() >= deadline) break;
+-      if (!matchesEquipmentRouteArrival(baseline, matched, target, direction))
++      const classified = classifyEquipmentRouteWait(walked, result.snapshot, target, direction);
++      if (!classified || classified.kind !== result.kind)
+         throw new Error('Equipment route wait returned a non-matching snapshot.');
+-      return matched;
++      if (result.kind === 'arrival') return result.snapshot;
++      baseline = result.snapshot;
++      continue;
+     }
+     baseline = walked;
+   }
+diff --git a/apps/web/tests/e2e/classic-support/scenario.test.ts b/apps/web/tests/e2e/classic-support/scenario.test.ts
+index 9a572729..754d66f1 100644
+--- a/apps/web/tests/e2e/classic-support/scenario.test.ts
++++ b/apps/web/tests/e2e/classic-support/scenario.test.ts
+@@ -223,6 +223,7 @@ describe('Classic canonical scenario contract', () => {
+       supportSource.indexOf('async function walkToEquipmentWorkbench'),
+     );
+     expect(equipmentWalk).toContain('...EQUIPMENT_RESOURCE_WALK_OPTIONS');
++    expect(equipmentWalk).toContain('classifyEquipmentRouteWait(baseline, snapshot, target, key)');
+     expect(equipmentWalk).not.toContain('jump: true');
+ 
+     const closeSettlement = equipmentSource.slice(
+diff --git a/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md b/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+index 6b1d082a..8d0c3ba1 100644
+--- a/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
++++ b/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+@@ -1,9 +1,23 @@
+ # V2 装备资源安全走廊合同
+ 
+-阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05`
+-
+-状态：Close-05 测试模型、确定性与静态验证完成；Close-04 实现保持不变，Browser-16 保持 FAIL，
+-Browser-17 未授权。
++阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04 / V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05 / V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06`
++
++状态：Close-06 fixture controller、确定性与静态验证完成；Browser-17 保持 FAIL，Browser-18 未授权。
++
++## Close-06 arrival drift 闭环
++
++- Browser-17 在第二个 iron approach `[94.5,-0.5]` 的 `waitForArrival` 失败。walked snapshot 的 client
++  `[94.459671,-0.505328]` 已到位，server z=`-0.308819` 尚迟到；server 后续到达 z≈`-0.505328` 时 client 已漂至
++  z≈`-0.636522`，最终双方稳定 z≈`-0.654540`，20 秒内没有 strict 双投影同轮 arrival。
++- wait 的 freshness baseline 必须是刚返回的 walked snapshot，不是 pre-walk baseline。共享分类 helper 只返回三态：
++  strict full arrival 为 `arrival`；fresh tick、ack 不倒退、client ready 且 client 自身离开有限邻域或不再满足原 direction
++  crossing 为 `drift`；其他样本返回 `null` 并继续等待。stale、ack 回退、ungrounded/colliding 不得触发纠偏。
++- controller 收到 `drift` 后只使用最新 client 位置对同一 waypoint 重算 `KeyW/KeyS` 并继续真实 walk。client 仍到位
++  而仅 server 迟到时继续原 bounded read-only wait，不用 server 选方向，不发零输入 walk。
++- 私有 driver callback 命名为 `waitForProgress`，返回 `arrival | drift` discriminant；这不是生产/public API 扩展。
++- wait、drift correction 和后续 walk 全部计入首次建立的 45 秒 deadline；每个 wait 仍为 `min(20s, remaining)`，
++  await 返回后仍检查 deadline。不得捕获 timeout 后盲重试，不新增第二路线、随机 fallback、容差或预算。
++- `.06/.08/±.45`、80ms、grounded `jump=false`、scenario 坐标、52-leg 几何与 full-arrival 双投影合同保持。
+ 
+ ## Close-05 release/consume 测试合同
+ 
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index a7d9d274..43dcdb2a 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -197,6 +197,14 @@ equipment route 的既有固定平面 route 因此必须以 `jump=false` 调用
+ `InputCommandBuffer.consumeForTick()` 确认该 release sequence 且 `stepBody` grounded 后才可开始下一 pulse；不得连续
+ 签发 pressed command、直接 reset buffer、手工置 grounded，或用 issued sequence 代替 Authority consumed ack。固定 60Hz
+ 测试时钟只是可控调度合同，不作为浏览器墙钟或性能保证。
++Browser-17 在第 8 格 resource approach `[94.5,-0.5]` 暴露 arrival wait 闭环缺口：walk 返回时 client 已进入有限
++邻域，但 server 尚未进入 corridor；server 追平前一 client 位置时 client 又因残余速度漂出 corridor，旧 wait 仍只寻找
++strict full arrival，最终耗尽 20 秒。wait 必须从刚返回的 walked snapshot 绑定 fresh tick/ack，并用同一公开 fixture helper
++分类：strict full arrival 立即成功；fresh、ack 不倒退、client ready 且 client 已离开有限邻域或不再满足原 direction
++crossing 时显式返回 drift；client 仍到位而仅 server 迟到时继续只读等待。controller 只在 drift 时以最新 client snapshot
++为 baseline，对同一 waypoint 重算 `KeyW/KeyS` 并恢复真实 walk。所有 wait/correction 继续共享原 45 秒 deadline，单次
++wait 上限 20 秒，`.06/.08/±.45`、80ms、grounded `jump=false`、路线与 scenario 坐标不变。stale、ack 回退、未 ready
++样本不能触发 arrival 或 drift；不得捕获 timeout 后盲重试、用 server 选方向或扩容差/预算。
+ 
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命

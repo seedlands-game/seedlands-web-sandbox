@@ -1,0 +1,66 @@
+$ node scripts/harness/classic.mjs
+[WebServer] (node:15567) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ vite preview --host 127.0.0.1 --port 4273 --strictPort
+[WebServer] (node:15584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 3 tests using 1 worker
+
+(node:15591) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+     1.1 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › C0 启动固定 Classic 生产世界并冻结初态 (3.5s)
+     1.2 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › C1 Pointer Lock、真实转向/移动/跳跃并跨越 Chunk (18.6s)
+     1.3 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › C2 真实采集、掉落拾取、背包与配方 (21.9s)
+     1.4 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › C3 真实建造、进食和现有战斗 (17.0s)
+     1.5 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › V1 水桶、跨 Chunk 木门与唱片机均通过正式玩家输入 (1.1m)
+     1.6 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 › V2 真实资源链与背包手势完成四槽装备矩阵 (2.1m)
+  ✘  1 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 (4.7m)
+(node:19002) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  2 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:509:1 › Classic 视觉 v3 生产素材、连续帧与单击破坏回归 (32.2s)
+  -  3 [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:514:1 › 非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation
+
+
+  1) [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 20000ms exceeded while waiting on the predicate
+
+       at apps/web/tests/e2e/classic-support/harness.ts:194
+
+      192 |       { timeout, intervals: [16, 32, 64, 100] },
+      193 |     )
+    > 194 |     .toBe(true);
+          |      ^
+      195 |   return matched!;
+      196 | }
+      197 |
+        at waitForSnapshot (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/harness.ts:194:6)
+        at Object.waitForArrival (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/equipment-journey-support.ts:199:7)
+        at followEquipmentRoute (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/equipment-resource-route.ts:113:36)
+        at placeResourceStrip (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/equipment-journey-support.ts:225:5)
+        at prepareCraftedIronArmor (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/equipment-journey-support.ts:366:3)
+        at Module.completeEquipmentJourneyBeforeSave (/private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-support/equipment-journey.ts:147:3)
+        at /private/tmp/seedlands-v2-acceptance-cb4941bf/apps/web/tests/e2e/classic-runtime.spec.ts:309:28
+
+    Error Context: test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/error-context.md
+
+    attachment #8: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 
+  1 skipped
+  1 passed (5.5m)
+[ELIFECYCLE] Command failed with exit code 1.

@@ -167,6 +167,31 @@ jump=false 同预算可达。首个实现因 pending input lead 将上一 neutra
 ESLint 和 Prettier/scoped diff 均 PASS，所有命令使用默认 benchmark machine lock、Vitest `maxWorkers=1`。
 Browser/build/devserver/Cua/CI/Git/index/push/deploy 均未运行。
 
+## Close-06 Arrival Drift
+
+Browser-17 唯一正式 attempt 在第 8 格 resource approach `[94.5,-0.5]` 证明旧 wait 只寻找 full arrival：client
+先到 corridor、server 迟到，随后 server 追到 prior client 而 client 漂出，20 秒内从未同轮匹配。CLOSE-05
+SOURCE/MANIFEST/delivery、合同/证据与 controller/support/tests 已在修改前原字节复制到
+`evidence/v2-equipment-arrival-drift-close-06/prior-release/` 并逐项 `cmp`。
+
+RED `v2-equipment-arrival-drift-close-06-red` 使用 Browser-17 walked→drift→stable 的真实 snapshot 流逐项调用旧
+full-arrival predicate，稳定以 `fullmatch-only wait timed out` 失败，`exitCode=1`，不是 missing import 或直接返回预期 final
+的 stub。实现新增共享 `classifyEquipmentRouteWait`，wait adapter 与测试消费同一 helper；新鲜度绑定 walked。controller
+只在显式 drift 时用最新 client 重新选方向，同一 waypoint 从 Browser-17 的 `KeyS` 改为 `KeyW` 并最终 strict arrival。
+
+补充反例覆盖 z corridor drift、x 有限域 drift、stale tick、ack 回退、ungrounded/colliding、client 稳定而仅 server 迟到
+继续只读等待，以及反复 drift 不得超过共享 45 秒。首次 GREEN 的两个失败均是测试预期问题：Browser-17 初始位置
+在 target 东侧故方向应为 `KeyS`，且 deadline stub 的 walked 双投影已 full arrival；修正测试数据后 `green-02` 为
+`2 files / 24 tests PASS`。fixture/static 证据仍不证明 Browser-18。
+私有 callback 同步由 `waitForArrival` 改名为 `waitForProgress`，准确表达其 `arrival | drift` 返回值；未扩生产/public
+API。
+
+最终 affected 为 `6 files / 46 tests PASS`，保留 grounded-route 与 52-leg 几何用例。Classic types 首轮仅因旧 route
+test 误加未使用 helper import 报 TS6133，删除该 import 后最终 Classic/root test types、目标 ESLint、Prettier/scoped
+diff 全部 PASS。所有命令经默认 benchmark machine lock、Vitest `maxWorkers=1` 串行执行；未运行 Browser/build/Cua/
+devserver/CI/Git/index/push/deploy。长期 docs 不更新，因为本片只修 canonical fixture controller，不改变 owner、公共协议或
+架构边界。预算预计不超过 2 小时、硬上限 3 小时；传统工作量约 0.25-0.5 PD，credits、费率和额度分母 unknown。
+
 ## GIT32 未发布证据包装恢复
 
 首次 evidence commit `a402b01623354a5c78e41260354a0fdd7c35394c` 包含六个超过 GitHub 100 MB 限制的

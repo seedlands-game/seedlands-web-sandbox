@@ -1,0 +1,23 @@
+V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06
+baseline=672dc6a1d2452a22f7a92d32352911584babfe7e
+
+red
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-red SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/red-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/red.stdout.log'
+
+green and green-02
+Both run equipment-arrival-drift.test.ts plus equipment-resource-route.test.ts with maxWorkers=1 and unique machine-lock receipts. green retains the initial test-data expectation failures; green-02 passes 2 files / 24 tests.
+
+final-affected-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-final-affected-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-affected-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-affected-02.stdout.log'
+
+final-classic-types-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-final-classic-types-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-classic-types-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm typecheck:classic 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-classic-types-02.stdout.log'
+
+final-root-types-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-final-root-types-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-root-types-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec tsc -p tsconfig.test.json --noEmit 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-root-types-02.stdout.log'
+
+final-eslint-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-final-eslint-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-eslint-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; pnpm exec eslint apps/web/tests/e2e/classic-support/equipment-resource-route.ts apps/web/tests/e2e/classic-support/equipment-journey-support.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts 2>&1 | tee changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-eslint-02.stdout.log'
+
+final-static-02
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-arrival-drift-close-06-final-static-02 SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-arrival-drift-close-06/final-static-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -lc 'set -o pipefail; prettier --check and scoped git diff --check for CLOSE-06 owned files'

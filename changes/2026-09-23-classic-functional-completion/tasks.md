@@ -337,6 +337,16 @@ types、4 TS ESLint、6 路径 Prettier 与 scoped diff 均 PASS；代码/tests/
 移动；本地 backup ref 保留原提交。经授权仅 amend 该 evidence commit，把同一 774153112 bytes / SHA256
 `5ce02c71...aab41` 的 trace 重切为 15 个最大 50 MiB 分片；未重跑 Browser 或更改其 FAIL 结论。
 
+### V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06 / GIT-33-EQUIPMENT-ARRIVAL-DRIFT
+
+状态：LOCAL_CODE_COMMIT_READY。Browser17 在第 8 格 resource approach 的同轮双投影 corridor wait 失败；完整 V1、
+workbench 与前 7 格 resource 真实通过，但第 8 格未放置，`resources-placed`、采矿、装备 pointer、C4/C5 均未触达。
+Close-06 只在 canonical V2 fixture 内增加 fresh arrival/drift 分类与同 waypoint 真实纠偏，共享 45 秒 deadline、容差、
+scenario 坐标、V1、production 与通用 route 均未改变。GIT33 在 HEAD `672dc6a1...` 加精确 7 路径 staged patch 的
+detached tree 验证 6 files / 46 tests、Classic/root test types、5 TS ESLint、7 路径 Prettier 与 scoped diff 均 PASS；
+代码/tests/spec/contract 提交为 `117b4e9396d2f05c701eeba40d52f4d53abaed34`。Browser18/build/artifact/Cua/CI 未运行；
+fixture/static GREEN 不等于 Browser 产品 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357
