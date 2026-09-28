@@ -335,7 +335,11 @@ export async function adjustPitchToTarget(page: Page, target: Point): Promise<vo
   throw new Error(`Real mouse input could not aim at ${target.join(',')}; last targets=${JSON.stringify(history)}.`);
 }
 
-export async function mineVoxel(page: Page, target: Point): Promise<void> {
+export async function mineVoxel(
+  page: Page,
+  target: Point,
+  aim: (page: Page, target: Point) => Promise<unknown> = adjustPitchToTarget,
+): Promise<void> {
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before mining.');
   const distance = voxelInteractionDistance(current.player, target);
@@ -352,7 +356,7 @@ export async function mineVoxel(page: Page, target: Point): Promise<void> {
       throw new Error(`Mining target ${target.join(',')} remains out of range.`);
   }
   await ensurePointerLock(page);
-  await adjustPitchToTarget(page, target);
+  await aim(page, target);
   const attemptsBefore = (await snapshot(page))?.interactionAttempts ?? 0;
   await page.mouse.down({ button: 'left' });
   try {
