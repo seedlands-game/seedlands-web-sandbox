@@ -1,0 +1,21 @@
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+apps/web/tests/e2e/classic-support/route-aim-contract.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md: OK
+docs/code-map.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/README.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/code-staged.patch: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/code-staged.paths: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/staged-gate.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/staged-gate.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/validation-argv.txt: OK
+Checking formatting...
+All matched files use Prettier code style!
+FINAL_SELFCHECK_PASS

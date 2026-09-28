@@ -1,0 +1,41 @@
++ pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts apps/web/tests/e2e/classic-support/door-exit-face.test.ts apps/web/tests/e2e/classic-support/door-readiness.test.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts --maxWorkers=1
+8:02:44 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git37-arrival-during-aim - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git37-arrival-during-aim
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (17 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 6ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (12 tests) 18ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 21ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 12ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts (7 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts (18 tests) 6ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-exit-face.test.ts (8 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/target-aim.test.ts (11 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts (3 tests) 2ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+ Test Files  13 passed (13)
+      Tests  138 passed (138)
+   Start at  20:02:44
+   Duration  2.09s (transform 460ms, setup 0ms, import 1.18s, tests 88ms, environment 1ms)
+
++ pnpm typecheck:classic
+$ tsc -p tsconfig.classic-tests.json --noEmit
++ pnpm exec tsc -p tsconfig.test.json --noEmit
++ pnpm exec eslint apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/harness-snapshot.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
++ pnpm exec prettier --check apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/harness-snapshot.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md docs/code-map.md
+Checking formatting...
+All matched files use Prettier code style!
++ git diff --cached --check -- apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/harness-snapshot.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md docs/code-map.md
+++ git diff --cached --name-only
+++ wc -l
+++ tr -d ' '
++ test 9 = 9
+++ git diff --cached --name-only
+++ grep -v -F -f /private/tmp/seedlands-git37-artifacts/code-staged.paths
++ test -z ''
++ echo STAGED_GATE_PASS
+STAGED_GATE_PASS

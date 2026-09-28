@@ -1,5 +1,65 @@
 # V2 Canonical Browser 证据
 
+## Browser-21 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-21`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实完成；V2 已完成 workbench/10 格资源放置，并对第一格
+wood `[80,31,2]` 完成真实左键采矿、voxel 清空、drop-or-pickup 轮询和独立 inventory itemCount 增量。随后返回
+waypoint `[80.5,-0.5]` 的动态 route aim 在 18 次 move/19 次 observation 后 fail closed。第二格 wood 起、木石镐、
+iron、五件铁甲、四槽 pointer、C4、C5 与保存恢复均 NOT REACHED。** Classic 视觉测试独立 PASS，non-Classic
+smoke SKIPPED。该结果不证明完整 V2 产品 GREEN。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-908d0d82`，HEAD/source
+`908d0d82881e3e8c7dff7ee27cf3a4785013f37a`，tree `eb8a5d9a3cc423378f243e93804a6284f64539e6`；
+source/lock/artifact digest 为
+`e22c3a5bec65a09deeb271f8aabc30b07044b74e7a2649c56dccc88b93949312`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`982d9156954c395c6bc93913f824562b2cda849330e1e66464095b74595e1a38`，builtAt
+`2026-09-28T09:55:13.206Z`，dist 为 276 个盖章文件/277 个磁盘普通文件、0 symlink。
+
+唯一命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-21-908d0d82 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+唯一机器窗口 `bbbc47c3-d740-4c35-ba3b-2f67e995fec7`，UTC `2026-09-28T10:16:07.407Z` 至
+`10:22:10.904Z`，`waitedMs=1`、`exitCode=1`、`measurement.status=NOT_RECORDED`。Playwright 单 worker、
+`retries=0`、canonical 主测试只有 attempt 0；完整 stdout/stderr 从启动起保存。没有第二 attempt。
+
+C0-C3 receipt 均为 PASS；V1 step 本次完整返回，覆盖水桶、门、唱片机与 media。V2 receipt
+在资源放置循环后记录唯一 `phase=resources-placed`。第一格 wood 的完整 trace 记录：采矿前 bag 无 wood-block；
+`pw:api@6584` 真实 leftdown 后 interaction attempts 从 29 增至 30；`pw:api@6589` 读取 voxel 4，
+`pw:api@6625` 读取 0，随后 `pw:api@6627` leftup；drop-or-pickup poll 返回 true。独立 itemCount poll
+`pw:api@6693..6695` 通过，`pw:api@6694` 明确读取 slot 0 `{itemId: wood-block, count: 1}`，因此本轮
+第一格 wood 的 Authority mining、voxel clear、drop/pickup 与实际入包均为 PASS，不以 `worldItems=0` 代替入包证明。
+
+失败发生在第一格 wood pickup 后返回 approach 的 `KeyS` route。五个真实 KeyS pulse 将玩家从 z≈2.445 移到
+z≈-0.475；下一轮 `correctMouseToRoute` 首 observation 为 client
+`[80.500381,32.599998,-0.474648]`、server `[80.500644,32.6,-0.263537]`、yaw `-899.90°`、
+tick/ack `18287/11510`，dx `-5.861933`。第一下校正后残余移动令 client z 越过目标到 `-0.580203`，
+`KeyS` 目标 yaw 从 `180.862051°` 翻转为 `359.727485°`。helper 随后按每次真实 observation 重算，合计 19 次
+observation、18 次 mouse move，并跨过两次 Pointer Lock cooldown/relock；末 observation yaw `-722.32°`、
+tick/ack `18372/11598`、grounded/non-colliding，仍有 dx `-15.749888`，遂在下一次键盘 pulse 之前明确抛错。
+这是 canonical fixture 动态 route aim 的有界收敛边界，不是输入停滞，也不据此宣称 production gameplay 缺陷。
+
+failure attachment 是 afterEach 退出 Pointer Lock 后的 snapshot，只用于收尾状态，不替代上述完整失败 leg。其
+pageErrors/failedResponses 未由 failure schema 记录，均标 `NOT_RECORDED_BY_FAILURE_ATTACHMENT`。第二、三格 wood、
+木镐、stone、石镐、iron、iron unpack、五件铁甲、四槽 click/Shift/wrong-slot/swap/quickmove/close、C4、
+`before.v2EquipmentPreSave`、C5、save/continue、V1 media restore、runtime/actor epoch、revision/durability/newref
+均 `NOT_REACHED`。durability-1、death、equipment drop、respawn 为 `NOT_OBSERVED`；Cua/人类听觉 `NOT RUN`；
+性能 `NOT MEASURED`。
+
+trace 原文件为 502,812,277 bytes、SHA256
+`248e8063558af124373fbfca7c27263c87009e3f1d1a36dad2895c3cbe66df06`，无损切为 10 个最大 50 MiB 分片并流式
+重组验证。独立 machine-lock artifact 后验 `v2-canonical-browser-21-artifact-postcheck` PASS，UTC
+`2026-09-28T10:33:42.620Z` 至 `10:33:46.429Z`，同 source/lock/artifact、builtAt 与 276-file map。验收树
+tracked/index clean，4273、owned Playwright/Chromium/preview 和机器锁均清零；BUILD09/10/11/12 tree/dist 与 Git32
+backup ref 保留。本阶段未修改 source/test/scenario/dist，未运行 build、第二 attempt、Browser22、Cua、CI、Git/index、
+push、deploy、merge 或修复。
+
 ## Browser-20 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-20`

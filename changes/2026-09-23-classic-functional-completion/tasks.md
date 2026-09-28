@@ -420,6 +420,21 @@ source/public/dist bytes、MIME、SHA、唯一 lock entry 一致。BUILD09/10/11
 Browser20 仍 FAIL/V2 `NOT_REACHED`，Browser19 首 iron pickup `NOT_PROVEN`；Browser21/Cua/CI/deploy/merge 未运行，
 artifact PASS 不等于产品 GREEN。
 
+### V2-CANONICAL-BROWSER-21 / CLOSE-12 / GIT-37-ARRIVAL-DURING-AIM
+
+状态：GIT37 EVIDENCE_FROZEN。Browser21 唯一 canonical attempt 真实通过 C0-C3、完整 V1、workbench/10 格资源
+放置及第一格 wood 的采矿、清格、掉落和独立 inventory itemCount 入包断言；返回 approach 的 route aim 中，helper
+观察到 client 已进入 `.06/.08` 路径包络、server 尚未到达，但未把该同一 snapshot 交回 outer，随后动态翻向并在
+18 moves/19 observations 后 fail closed。后续 V2、pointer、C4/C5/save 均 `NOT_REACHED`；Browser19 首 iron 入包
+仍 `NOT_PROVEN`。Close12 为 shared helper 增加 typed `angle-aligned`/`route-reached` outcome 与可选只读 terminal，
+只由现有 V2 `refreshAfterCorrection=true` 路径启用；outer 继续独占 strict 双投影、freshness/readiness、wait/drift。
+FORMAT-CLOSURE 已归档旧 Close12 原字节，删除本片新增 inline suppression，并将 `ClassicSnapshot` 等价拆到
+type-only `harness-snapshot.ts`；规范化 runtime JS 与类型 AST 均等价。GIT37 baseline `24dc3a1d...868a` 的精确
+九路径 patch `8d55c757...6f4b5` 在 detached tree 通过 `13 files / 138 tests`、Classic/root test types、6 TS
+ESLint、九路径常规 Prettier 与 staged scope；代码 commit 为 `99b895067324ae930fd5dbd6bb227c578c499c8d`。
+evidence/state 随本提交冻结，精确远端 SHA 以最终 checkpoint 读回为准。BUILD13、Browser22、Cua、CI、deploy、
+merge 未运行；fixture/static GREEN 不等于产品 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

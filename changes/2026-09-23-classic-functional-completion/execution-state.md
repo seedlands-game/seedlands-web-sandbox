@@ -114,6 +114,16 @@ MP3 source/public/dist identity 一致。BUILD09/10/11/12 tree/dist 与 Git32 ba
 未到达，Browser19 首 iron pickup 未证明；BUILD12 evidence 随本提交冻结，精确提交/远端 SHA 待本阶段收尾读回。
 Browser21/Cua/devserver/CI/deploy/merge 未运行。
 
+当前 Browser21/Close12/GIT37 checkpoint：Browser21 唯一 canonical attempt 在 BUILD12 artifact 上完成 C0-C3、完整
+V1、workbench/10 格资源放置和第一格 wood 的真实采矿/清格/掉落/独立 itemCount 入包后，于返回 approach 的动态
+route aim fail closed；后续 V2/pointer/C4/C5/save `NOT_REACHED`。MAP01 定位到 helper 内 observation 已 client-reached、
+server-late 却未交还 outer。Close12 typed terminal handoff 只由 V2 true 路径启用；FORMAT-CLOSURE 归档旧 release，
+清零本片新增 inline suppression，并以 type-only `harness-snapshot.ts` 保持类型和规范化 runtime 等价。GIT37 精确
+九路径 patch `8d55c757...6f4b5` 的 detached staged tree 已通过 `13 files / 138 tests`、Classic/root test types、
+6 TS ESLint、九路径常规 Prettier 与 scope；代码 commit `99b895067324ae930fd5dbd6bb227c578c499c8d`。长期 docs
+仅因新增测试侧 type owner 更新 `docs/code-map.md`，不表示生产架构或公共协议变化。evidence/state 随本提交冻结，
+远端 identity 以后续只读收尾为准；BUILD13/Browser22/Cua/devserver/CI/deploy/merge 未运行。
+
 ## 恢复规则
 
 - 所有 checkpoint、锁请求、风险和完成报告发给 root `4decc58b-bca7-4d00-a0ca-392fc5532f10`。`954...` 是 TAKEOVER-01 和唯一 Git writer，但不是总负责人或 worker 回报接收者；旧 `d08...` 不再使用。

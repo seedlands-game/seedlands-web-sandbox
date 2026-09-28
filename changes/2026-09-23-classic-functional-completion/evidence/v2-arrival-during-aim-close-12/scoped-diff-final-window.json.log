@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-arrival-during-aim-close-12-scoped-diff-final",
+  "pid": 36549,
+  "startedAt": "2026-09-28T11:24:43.998Z",
+  "windowId": "v2-arrival-during-aim-close-12-scoped-diff-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/scoped-diff-final-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T11:24:44.052Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T11:24:43.999Z",
+      "loadAverage": [
+        2.1474609375,
+        2.8271484375,
+        2.75341796875
+      ],
+      "freeMemoryBytes": 2122530816,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T11:24:44.050Z",
+      "loadAverage": [
+        2.1474609375,
+        2.8271484375,
+        2.75341796875
+      ],
+      "freeMemoryBytes": 2115698688,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

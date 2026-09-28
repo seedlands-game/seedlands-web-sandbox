@@ -1,0 +1,81 @@
+7:16:42 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (12 tests | 1 failed) 18ms
+     ✓ returns the Browser19 strict correction snapshot before sending pulse 9 1ms
+     ✓ does not send input when correction exhausts the original deadline 1ms
+     × does not send input when the refresh await exhausts the original deadline 3ms
+     ✓ fails closed when the post-correction refresh is unavailable 0ms
+     ✓ continues with the original pulse when the refreshed client has not arrived 6ms
+     ✓ keeps the 'omitted' default path and snapshot read count 2ms
+     ✓ keeps the 'false' default path and snapshot read count 0ms
+     ✓ keeps the 'omitted' default path when correction crosses the deadline 2ms
+     ✓ keeps the 'false' default path when correction crosses the deadline 2ms
+     ✓ returns a refreshed client arrival to the existing outer bounded wait when the server is late 0ms
+     ✓ keeps stale, unready, and one-sided snapshots out of strict arrival 0ms
+     ✓ enables refresh only for the V2 equipment walk options 0ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 21ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 17ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 6ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts (18 tests) 6ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (17 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts (7 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-exit-face.test.ts (8 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/target-aim.test.ts (11 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts (3 tests) 2ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > does not send input when the refresh await exhausts the original deadline
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20546,
++     "commitSequence": 1,
++     "physicsTick": 27121,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "serverPlayerPosition": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:154:5
+    152|         refreshAfterCorrection: true,
+    153|       }),
+    154|     ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
+       |     ^
+    155|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
+    156|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 12 passed (13)
+      Tests  1 failed | 137 passed (138)
+   Start at  19:16:42
+   Duration  2.15s (transform 495ms, setup 0ms, import 1.22s, tests 92ms, environment 0ms)
+

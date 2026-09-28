@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER21-ARRIVAL-DURING-AIM-MAP-01",
+  "status": "READ_ONLY_CONTRACT_MAP_COMPLETE",
+  "baselineSha": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+  "build12SourceSha": "908d0d82881e3e8c7dff7ee27cf3a4785013f37a",
+  "browser21Input": {
+    "sourceManifestSha256": "fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001",
+    "evidenceManifestSha256": "83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8",
+    "deliverySha256": "93c572c0a698bc55cf969b226242946073392326722a6233bb2318e027ab9d72",
+    "timelineSha256": "9f424f6aaac3d499d54415e266e5380812e330bbbb77723a257f6de93a3ed6d3"
+  },
+  "sourceManifest": {
+    "entries": 15,
+    "sha256": "50c8c21b93c186427a27e47623e151b736bc17528fb4319a8aae2b6e35d991f3"
+  },
+  "evidenceManifest": {
+    "entries": 4,
+    "sha256": "486c335f220d9bacb1ea4019c81db44f7df36129e32c9b59d86c7410125e73a0",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "result": {
+    "outerBaselineId": "pw:api@6696",
+    "walkCurrentBeforeFailureCorrectionId": "pw:api@6753",
+    "earliestClientReachedId": "pw:api@6755",
+    "clientDistance": 0.025355139191978876,
+    "serverDistance": 0.23646390674186887,
+    "clientReachedAndFinite": true,
+    "serverReachedAndFinite": false,
+    "freshAndReady": true,
+    "outerStrict": false,
+    "existingOuterBranch": "bounded waitForProgress",
+    "recordedNextSampleId": "pw:api@6759",
+    "recordedNextSampleClassifierVsReachedBaseline": "drift",
+    "keySPulsesBeforeFailingCorrection": 7,
+    "selectedCandidate": "typed route-reached terminal handoff from shared aim helper enabled only for refreshAfterCorrection=true",
+    "counterfactualBrowserSuccessClaimed": false
+  },
+  "contract": {
+    "typedOutcomes": ["angle-aligned", "route-reached"],
+    "optionalReadOnlyPredicate": true,
+    "predicateBeforeMouseMoveAndZeroVectorFailure": true,
+    "defaultDirectCallerStrictAngleBehaviorRetained": true,
+    "defaultGenericWalkBehaviorRetained": true,
+    "outerStrictAndWaitDriftOwnerRetained": true,
+    "originalDeadlineRetained": true,
+    "exceptionFallback": false,
+    "secondHelperCall": false,
+    "budgetStepSensitivityToleranceOrCoordinatesChanged": false
+  },
+  "red": {
+    "browser21FullChain": "@6696 -> @6753 -> @6755 returns same snapshot, zero mouse and keyboard input, then real outer strict/wait classification",
+    "recordedDrift": "@6759 classifies drift versus @6755 and starts same-waypoint KeyS correction without claiming arrival",
+    "angleVsRouteAndDefaults": true,
+    "deadlineBoundaries": true,
+    "zeroAndNearVector": true,
+    "strictNegativeMatrix": true,
+    "executed": false
+  },
+  "affectedClosure": {
+    "testFiles": 13,
+    "testCount": "TO_BE_RECORDED_AFTER_RED_FILE_EXISTS",
+    "maxWorkers": 1,
+    "classicAndRootTestTypes": true,
+    "changedTsEslint": 5,
+    "exactFormatAndScopedDiff": true
+  },
+  "boundaries": {
+    "sourceModified": false,
+    "browser21EvidenceModified": false,
+    "cumulativeBrowserReportModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "browserRun": false,
+    "gitOrIndexWrite": false,
+    "longTermDocsUpdated": false
+  },
+  "estimate": {
+    "implementationAiHours": "1-2",
+    "implementationHardCapHours": 3,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentAiHours": 2.4,
+    "conservative120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "notRun": ["implementation", "test", "build", "browser22", "git", "push", "cua", "ci", "deploy", "merge"]
+}
