@@ -494,3 +494,34 @@ tree/dist 与 `refs/task-backups/git32-evidence-a402b016` 均保留。Browser22 
 三格 wood 独立入包通过，wood pickaxe 起后续 V2/C4/C5/save 未到达；Browser19 首 iron inventory pickup 仍
 `NOT_PROVEN`。BUILD14 未运行 Browser23、Cua、devserver、CI watch、deploy 或 merge；artifact PASS 不等于 Browser
 产品 GREEN。
+
+## BUILD15：Canonical Budget And Terminal Receipt
+
+- 已推送 source SHA：`556c9b76fb4447c49ad7d6f7a76bd7233d0011e6`；tree
+  `45ef275288163c3880bd9ea75d28c62996f3723a`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-556c9b76`。构建前 tracked/index clean 且没有
+  `apps/web/dist/harness-artifact.json`；根、Web 与 Classic 的 `@seedlands/*` workspace links 均解析到该 tree 内。依赖使用
+  `pnpm install --offline --frozen-lockfile --ignore-scripts`，下载 0。
+- 唯一 `pnpm build`：runId `v2-artifact-build-15-build`，UTC `2026-09-28T21:53:25.462Z` 至
+  `21:53:58.940Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-15-artifact-verify`，UTC
+  `2026-09-28T21:54:36.320Z` 至 `21:54:41.468Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出 identity 一致：sourceDigest
+`a4bdd67ba41aa5e59c3650f5fcbcb0ffd7e37737f666a941fd79c6e379ddb136`、lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`、276 项，builtAt
+`2026-09-28T21:53:54.075Z`。receipt SHA-256 为
+`f9a31b847ac71bdbdbf2aa7614039a0b5872d0f44e4b0aab9f1848d04a9045cf`。276 项 receipt/disk map 逐项一致，
+map SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；dist 为 277
+个普通文件，0 symlink/missing/extra/mismatch。BUILD15 与 BUILD14 map 完全相同：GIT39 只改变 Playwright/Harness
+证据 owner、测试预算、terminal receipt 验证和 change-local 文档，因此 production artifact bytes 不变，但 source identity 与
+receipt 已推进，不能复用 BUILD14 receipt。
+
+Pack lock source/dist SHA-256 均为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。
+源、public 与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+BUILD15 不改变 Browser23 结论：其 canonical attempt 仍因 720 秒总 timeout 正式 FAIL，原 trace 仍缺 EOCD/中央目录。
+本阶段未运行 BUILD15 之外的测试、Browser24、其他 Browser、Cua、devserver、CI 修复、deploy 或 merge；artifact PASS
+不等于产品或 Browser GREEN。

@@ -429,4 +429,10 @@ GIT-21 Equipment Core 组合、推送与 V2 BUILD01 是已准出子片的窄交�
 
 ## Delivery Snapshot
 
+V2-ARTIFACT-BUILD-15 从 GIT39 已推送 source `556c9b76fb4447c49ad7d6f7a76bd7233d0011e6` 的 clean detached
+tree 唯一执行 `pnpm build` 与 `pnpm harness:artifact`，均 PASS。产物 276 项、磁盘含 receipt 277 项，0
+symlink/missing/extra/mismatch；artifact map 与 BUILD14 相同。该结果只冻结 GIT39 的 production artifact，不改变
+Browser23 正式 FAIL/TRACE_INCOMPLETE，也不表示 Browser24、完整 Classic、Cua、CI 或部署已通过。长期架构 docs 不更新，
+因为本阶段没有改变 owner、公共 API 或产品协议。
+
 V1.9 早期 canonical browser 门禁已由 Browser-12 单一 production artifact/单一 Chromium attempt 通过；water/lava bucket、两格门、record/jukebox、Media 公共/Pack/Web 组合根与保存恢复的本阶段证据见 `execution-state.md`。该结果不替代后续完整 194 项矩阵、V2/V3/V4、Lighting 生产渲染、全量 deterministic/Classic headless、Cua/人类听觉、CI/review 或 PR preview。近接触薄门 origin-cell `adjacent=null` 的 production 限制保留待 root 裁决；旧 4 files / 16 tests 仍只作此前 control。

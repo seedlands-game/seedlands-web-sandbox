@@ -507,6 +507,15 @@ hook 失败。`artifact-readback.json`、`playwright-attachments.json`、`receip
 `prior-hook-json` 原字节保留为未批准尝试前件；`scope-correction` 保存九份中间 metadata、manifest 和 incident 说明。
 本 closure 只重冻 GIT39 自身 evidence/allowlist 并执行 metadata/hook/scope/blob 门禁，不重跑 16 tests/types/lint。
 
+### V2-ARTIFACT-BUILD-15
+
+状态：PASS，EVIDENCE_PENDING_COMMIT。从已推送 GIT39 source `556c9b76fb4447c49ad7d6f7a76bd7233d0011e6`
+的 clean detached tree `45ef2752...723a` 完成唯一 build 与唯一 artifact verify。sourceDigest `a4bdd67b...b136`、
+lockDigest `44db46fb...1169`、artifactDigest `f6f1ea67...cfa4`；276 项 receipt/disk map 与 BUILD14 完全相同，
+dist 为 277 个普通文件、0 symlink/missing/extra/mismatch。Pack lock 与 MP3 source/public/dist identity 一致。
+BUILD09-15 tree/dist 与 Git32 backup ref 保留。Browser23 仍为正式 FAIL/TRACE_INCOMPLETE；Browser24、Cua、devserver、
+CI 修复、deploy、merge 均未运行。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

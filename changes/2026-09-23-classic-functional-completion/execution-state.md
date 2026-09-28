@@ -34,6 +34,13 @@ Browser23/MAP/GIT39 metadata、累计报告及状态文件已逐字节归档于 
 `prior-hook-json` 的 26 项原字节保留为未批准尝试前件，`scope-correction` 只保存九份错误中间 metadata 与 incident。
 当前进入 `GIT39-CLOSURE-B`：仅待 GIT39 evidence/allowlist 自检、第二笔自然 hook、非破坏分支推进、普通 push 与 PR41
 一次读回；BUILD15、Browser24、artifact、Cua、devserver、CI 修复、deploy、merge 均不在本阶段。
+
+当前 BUILD15 checkpoint：GIT39 已远端交付至 `556c9b76fb4447c49ad7d6f7a76bd7233d0011e6`；其 clean detached
+tree `45ef2752...723a` 已完成唯一 `pnpm build` 与唯一 `pnpm harness:artifact`，均 PASS。sourceDigest
+`a4bdd67b...b136`、lockDigest `44db46fb...1169`、artifactDigest `f6f1ea67...cfa4`；276 项 receipt/disk map
+与 BUILD14 相同，dist 为 277 个普通文件、0 symlink/missing/extra/mismatch，Pack lock 与 MP3 三副本一致。Browser23
+仍为正式 FAIL/TRACE_INCOMPLETE；Browser24、Cua、devserver、CI 修复、deploy、merge 未运行。BUILD15 evidence/state
+待本阶段单独语义 commit、push 与 PR41 readback。
 当前 Equipment checkpoint：`V2-EQUIPMENT-HARNESS-ORACLE-01` 与
 `V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 已在 GIT28 detached staged tree 组合验证；observability `8/8`、scenario
 `7/7`、Web/Svelte/root/Classic test types 与目标静态均 PASS，原 oracle Classic-types 并行阻塞已关闭。代码提交

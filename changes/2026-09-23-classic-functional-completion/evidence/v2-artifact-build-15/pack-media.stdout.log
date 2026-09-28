@@ -1,0 +1,16 @@
+packLockSourceSha=f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f
+packLockDistSha=f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f
+sourceDistPackLockEqual=true
+bytes=2976045 path=playbooks/classic/assets/audio/to-far-shores.mp3
+3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  playbooks/classic/assets/audio/to-far-shores.mp3
+playbooks/classic/assets/audio/to-far-shores.mp3: audio/mpeg
+bytes=2976045 path=apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3
+3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3
+apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3: audio/mpeg
+bytes=2976045 path=apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3
+3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9  apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3
+apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3: audio/mpeg
+packLockEntryCount=1
+packLockEntry={"path":"playbooks/classic/assets/audio/to-far-shores.mp3","sha256":"3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9","size":2976045,"contentType":"audio/mpeg"}
+sourcePublicDistMatch=true
+packLockEntryMatches=true
