@@ -1,5 +1,43 @@
 # V2 Equipment Core Artifact Build 证据
 
+## BUILD16：Canonical discovery boundary
+
+- 已推送 source SHA：`fdb53c07c0da14c7f523473e4f33060a385f23ff`；tree
+  `ecc7940708bca8ea1d01e8df50337fa536d27d18`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-fdb53c07`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；离线 frozen 安装下载 0 个包，根与 package 级 `@seedlands/*` workspace links 全部指向本树。
+- 唯一 `pnpm build`：runId `v2-artifact-build-16-build`，UTC `2026-09-28T23:18:54.983Z` 至
+  `23:19:34.526Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-16-artifact-verify`，UTC
+  `2026-09-28T23:20:07.580Z` 至 `23:20:12.962Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出的 identity 一致：
+
+```text
+sourceSha=fdb53c07c0da14c7f523473e4f33060a385f23ff
+sourceDigest=80ec89b82c297f451902bd5661b56c31ef6d1be76774bd93a3fcd11c10d0c574
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4
+files=276
+builtAt=2026-09-28T23:19:29.712Z
+```
+
+artifact receipt SHA-256 为 `5af78cfc542d641f4e6bf5cd0e503a616db2c146db4d8f53b187af2a1eb86702`。
+receipt map 与磁盘 map 均为 276 项且 SHA-256 均为
+`d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；磁盘另含 receipt，共 277 个普通
+文件，missing/extra/mismatch/symlink 均为空。该 map 与 BUILD15 逐字节相同，说明 GIT40 的 test-only discovery
+边界未改变 production artifact；不能外推为 Browser 或产品 GREEN。
+
+Pack lock 的 source/dist SHA-256 均为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。MP3 source/public/dist 均为
+`2976045` bytes、SHA-256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`；
+Pack lock 中该路径恰好一项，`contentType=audio/mpeg`、size/digest 匹配。
+
+一次只读 inspection 因 task-owned 脚本错误读取不存在的 `digest` 字段而 exit 1；其输出显示其它 map/文件检查均已
+通过，原件保留。改为实际 schema 的 `sha256` 后同一只读 inspection PASS；未重跑 build 或 verifier。Browser24 仍为
+`FAIL_BEFORE_TEST_DISCOVERY`、Chromium attempt 0，Browser23 仍为 `FAIL/TRACE_INCOMPLETE`；BUILD16 不证明
+Browser25、Cua、人类听觉、CI、部署或产品 GREEN。
+
 阶段：V2-ARTIFACT-BUILD-01
 状态：production build 与 artifact verification 通过；未运行 Browser、Cua 或 CI。
 
