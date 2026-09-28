@@ -2,6 +2,8 @@ import type { Point } from './scenario';
 
 const MOUSE_SENSITIVITY_DEGREES = 0.13;
 const MAX_MOUSE_STEP = 80;
+const MAX_ROUTE_AIM_MOVES = 18;
+const MAX_ROUTE_AIM_OBSERVATIONS = MAX_ROUTE_AIM_MOVES + 1;
 
 const normalizeDegrees = (value: number) => {
   let normalized = value % 360;
@@ -90,9 +92,26 @@ export async function correctMouseToRoute(
     move: (dx: number, dy: number) => Promise<void>;
   }>,
 ): Promise<void> {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  if (!options.target.every(Number.isFinite))
+    throw new Error(`Classic route aim target is invalid: target=${options.target.join(',')}.`);
+  let lastDx: number | null = null;
+  for (let attempt = 0; attempt < MAX_ROUTE_AIM_OBSERVATIONS; attempt += 1) {
     const current = await options.observe();
-    if (!current) continue;
+    if (!current) {
+      if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1)
+        throw new Error(
+          `Classic route aim observation remained unavailable: target=${options.target.join(',')}; direction=${options.direction}.`,
+        );
+      continue;
+    }
+    if (![...current.player, current.viewAngles[0]].every(Number.isFinite))
+      throw new Error(
+        `Classic route aim observation is invalid: target=${options.target.join(',')}; direction=${options.direction}.`,
+      );
+    if (current.player[0] === options.target[0] && current.player[2] === options.target[1])
+      throw new Error(
+        `Classic route aim direction is undefined: target=${options.target.join(',')}; direction=${options.direction}.`,
+      );
     const dx = horizontalMouseCorrectionToRoute(
       current.player,
       current.viewAngles[0],
@@ -100,8 +119,13 @@ export async function correctMouseToRoute(
       options.direction,
     );
     if (Math.abs(dx) < 1) return;
+    lastDx = dx;
+    if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1) break;
     await options.move(dx, 0);
   }
+  throw new Error(
+    `Classic route aim did not converge: target=${options.target.join(',')}; direction=${options.direction}; lastDx=${String(lastDx)}.`,
+  );
 }
 
 export async function correctMouseUntilEntityAimed(
