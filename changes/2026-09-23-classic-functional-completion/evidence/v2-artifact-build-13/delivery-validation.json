@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-13",
+  "status": "PASS",
+  "buildSource": {
+    "sourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+    "sourceTree": "f91590626a01d1a6b2d771e27fdb74b5d022d47b",
+    "sourceDigest": "af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-8ae9e354"
+  },
+  "artifact": {
+    "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+    "builtAt": "2026-09-28T12:34:28.272Z",
+    "artifactFiles": 276,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "receiptSha256": "2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388",
+    "receiptMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "diskMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "mapsEqual": true,
+    "missing": 0,
+    "extra": 0,
+    "mismatched": 0
+  },
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReusedOffline": true,
+    "downloadedPackages": 0,
+    "taskStateEnvironmentInsideAcceptanceTree": true,
+    "taskStatePersisted": false
+  },
+  "dependencySetup": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "window": "v2-artifact-build-13-dependency-setup",
+    "startedAt": "2026-09-28T12:33:44.559Z",
+    "endedAt": "2026-09-28T12:33:48.515Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "2410c9a4d64add022205806b03df4d1da859c21a173c1daffe1fedfc2b6360b8",
+    "receiptSha256": "b4a98b4120d9121979ed5cd7d25988628c861d48d6c4388a8bc6855dbeadb3e1"
+  },
+  "build": {
+    "command": "pnpm build",
+    "window": "v2-artifact-build-13-build",
+    "startedAt": "2026-09-28T12:34:02.636Z",
+    "endedAt": "2026-09-28T12:34:32.034Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "4acbd5de808d15ff4e9a216a3c40b507b2875f35b1c7c237c6e1f3a210c6a0bd",
+    "receiptSha256": "2275107a775f0c7ea9ea8bb37cd8956bde37871a3d015390bde0c1c317e6ca90"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "window": "v2-artifact-build-13-artifact-verify",
+    "startedAt": "2026-09-28T12:34:37.437Z",
+    "endedAt": "2026-09-28T12:34:41.546Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "340aa77e6c52452d338e54157f0cb7eab45fd9f2b39e95a0a3a7069e582f0496",
+    "receiptSha256": "8013d6bfd636b8448e9bbff43b8c93da19645fafd65eb72e3f18bdaf32c603c2"
+  },
+  "packLock": {
+    "sourceAndDistEqual": true,
+    "sha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f"
+  },
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourcePublicAndDistMatch": true,
+    "packLockEntryCount": 1,
+    "packLockMatches": true
+  },
+  "artifactDigestRelation": {
+    "sameAsBuild12": true,
+    "mapDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reason": "GIT37 changes the canonical fixture, tests, change-local specification/evidence, and a test-only type owner map; source identity advances while the independently compared production artifact map remains byte-identical."
+  },
+  "sourceManifest": {
+    "scope": "final-delivery-documents",
+    "note": "This manifest binds the final artifact report, tasks, and execution-state; buildSource separately binds the earlier clean source used to produce dist.",
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "b5bfc9d34e21601451cd10586e853f6a739c449d7457894b9b2498edf69eee60"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 20,
+    "sha256": "3ba1936d960377f8035bcdb383671ca2885d81217450610380fc469e216dc16f",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final.window.json.log",
+      "delivery-format-final.stdout.log",
+      "delivery-format-final.window.json.log",
+      "delivery-format-release.stdout.log",
+      "delivery-format-release.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log",
+      "final-selfcheck-release.stdout.log",
+      "final-selfcheck-release.window.json.log",
+      "final-selfcheck-staged-assumption-failure.stdout.log",
+      "final-selfcheck-staged-assumption-failure.window.json.log"
+    ]
+  },
+  "collectionDiagnostics": [
+    "The first postconditions collection used the reserved zsh variable name status and failed before writing output. The failure is preserved; the same read-only checks passed after renaming the local variable.",
+    "The first artifact-map collection generated both maps successfully, then failed only while copying the receipt because cd changed the relative path. The receipt was copied from the tree root without rebuilding or re-verifying.",
+    "The first release selfcheck used an obsolete empty-index assertion after the exact BUILD13 scope had already been staged. All preceding source, manifest and artifact checks passed; the failure stdout/window is preserved, and the final selfcheck instead verifies that staged paths are confined to BUILD13 ownership."
+  ],
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "machineLockFree": true,
+    "taskStatePersisted": false,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "build11TreePreserved": true,
+    "build12TreePreserved": true,
+    "build13TreePreserved": true,
+    "backupRefPreserved": true
+  },
+  "boundaries": {
+    "browser21Status": "FAIL_AFTER_FIRST_WOOD_PICKUP",
+    "browser21LaterV2": "NOT_REACHED",
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN",
+    "productGreenClaimed": false,
+    "performanceMeasured": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "BUILD13 only records an artifact for an already-delivered fixture change; it does not change architecture ownership or public product protocols."
+  },
+  "budget": {
+    "traditionalPd": "about 0.25",
+    "aiActiveHours": "at-most-1",
+    "hardLimitHours": 2,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["browser22", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

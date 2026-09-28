@@ -1,0 +1,5 @@
+V2-ARTIFACT-BUILD-13 postconditions collection attempt 1
+status=VALIDATOR_FAILED_BEFORE_OUTPUT
+error=zsh:1: read-only variable: status
+impact=No build, artifact verify, receipt, dist file, source file, or existing evidence file was changed.
+retry=The same read-only collection was rerun with the local variable renamed to tree_status.

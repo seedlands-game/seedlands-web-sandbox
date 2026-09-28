@@ -1,0 +1,13 @@
+V2-ARTIFACT-BUILD-13
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-8ae9e354
+Build source SHA: 8ae9e3545c40cca83798afea0aa52ef156e4e3d3
+Build source tree: f91590626a01d1a6b2d771e27fdb74b5d022d47b
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state environment: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-8ae9e354/.pnpm-task-run-state-v1
+Task state persisted after run: false
+
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-13-dependency-setup SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/dependency-setup.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm install --offline --frozen-lockfile --ignore-scripts > <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/dependency-setup.stdout.log 2>&1'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-13-build SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build > <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/build.stdout.log 2>&1'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-13-artifact-verify SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact > <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-13/artifact-verify.stdout.log 2>&1'
+
+Post-build collection independently hashed all mapped dist files, compared receipt and disk maps, checked disk closure and symlinks, compared BUILD12, and verified Pack lock, MP3, tree/index, workspace links, task-state persistence, port 4273, residual processes, acceptance trees and backup ref without running build or artifact again.
