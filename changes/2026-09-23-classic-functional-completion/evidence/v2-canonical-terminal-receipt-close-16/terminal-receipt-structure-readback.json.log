@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "reporters": [
+    "list",
+    "html",
+    "./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ],
+  "canonicalMainTimeoutMs": 900000,
+  "chromiumProjectTimeoutMs": 60000,
+  "attachmentWriterCount": 0,
+  "reporterWriterCount": 1,
+  "reporterCallbacks": [
+    "onBegin",
+    "onTestEnd",
+    "onEnd"
+  ],
+  "staleReceiptRemovedBeforeSpawn": true,
+  "artifactReverifiedBeforeReceiptValidation": true,
+  "receiptKeyEncoding": "JSON_TUPLE_NO_NUL"
+}

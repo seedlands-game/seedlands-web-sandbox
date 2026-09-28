@@ -1,0 +1,39 @@
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.928459ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.166375ms)
+✖ present non-object failure attachments fail closed without losing detailed evidence (0.456541ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.140667ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.312792ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.211084ms)
+✔ missing receipt files and ambiguous main selections fail closed (3.963583ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.247125ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.057583
+
+✖ failing tests:
+
+test at scripts/harness/classic-receipt.test.mjs:124:1
+✖ present non-object failure attachments fail closed without losing detailed evidence (0.456541ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'PASS' !== 'FAIL'
+  
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:136:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'PASS',
+    expected: 'FAIL',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

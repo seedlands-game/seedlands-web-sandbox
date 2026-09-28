@@ -1,0 +1,121 @@
+apps/web/tests/e2e/classic-support/canonical-reporter.ts 30ms (unchanged)
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts 14ms (unchanged)
+scripts/harness/classic.mjs 8ms (unchanged)
+scripts/harness/classic-receipt.mjs 11ms (unchanged)
+scripts/harness/classic-receipt.d.mts 4ms (unchanged)
+scripts/harness/classic-receipt.test.mjs 12ms (unchanged)
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.874958ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.183125ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.155583ms)
+✖ different retries remain visible and the unique-attempt gate rejects them (0.605083ms)
+✖ runner validation rejects process failure and stale or missing full receipts (0.2025ms)
+✖ missing receipt files and ambiguous main selections fail closed (3.361166ms)
+✖ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.138083ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 3
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.950667
+
+✖ failing tests:
+
+test at scripts/harness/classic-receipt.test.mjs:149:1
+✖ different retries remain visible and the unique-attempt gate rejects them (0.605083ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /exactly one/. Input:
+  
+  'Error: Classic terminal receipt selection mode mismatches the Harness run mode.'
+  
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:162:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Classic terminal receipt selection mode mismatches the Harness run mode.
+        at validateClassicRunReceipt (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.mjs:226:11)
+        at file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:164:7
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:162:10)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1402:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+        at Test.postRun (node:internal/test_runner/test:1542:19)
+        at Test.run (node:internal/test_runner/test:1467:12),
+    expected: /exactly one/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/harness/classic-receipt.test.mjs:175:1
+✖ runner validation rejects process failure and stale or missing full receipts (0.2025ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /selected/. Input:
+  
+  'Error: Classic terminal receipt selection mode mismatches the Harness run mode.'
+  
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:242:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Classic terminal receipt selection mode mismatches the Harness run mode.
+        at validateClassicRunReceipt (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.mjs:226:11)
+        at file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:244:7
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:242:10)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1402:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+        at Test.postRun (node:internal/test_runner/test:1542:19)
+        at Test.run (node:internal/test_runner/test:1467:12),
+    expected: /selected/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/harness/classic-receipt.test.mjs:267:1
+✖ missing receipt files and ambiguous main selections fail closed (3.361166ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /ambiguous/. Input:
+  
+  'Error: Classic terminal receipt selection mode mismatches the Harness run mode.'
+  
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:291:10)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Classic terminal receipt selection mode mismatches the Harness run mode.
+        at validateClassicRunReceipt (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.mjs:226:11)
+        at file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:293:7
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:291:10)
+        at async Test.run (node:internal/test_runner/test:1409:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    expected: /ambiguous/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/harness/classic-receipt.test.mjs:304:1
+✖ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.138083ms)
+  Error: Classic terminal receipt selection mode mismatches the Harness run mode.
+      at validateClassicRunReceipt (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.mjs:226:11)
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:313:5)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7)

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-23",
+  "classification": "CANONICAL_FAIL_TOTAL_TEST_TIMEOUT_AFTER_C0_C5_AND_V2_ASSERTIONS",
+  "runner": {
+    "status": "FAIL",
+    "exitCode": 1,
+    "mainTestStatus": "timedOut",
+    "mainTestDurationMs": 761526,
+    "errors": ["Test timeout of 720000ms exceeded.", "Test timeout of 30000ms exceeded."],
+    "visualStatus": "PASS",
+    "nonClassicStatus": "SKIPPED"
+  },
+  "terminalTimeline": {
+    "mainStart": "2026-09-28T15:45:04.247Z",
+    "C5CompletedOffsetMs": 718819,
+    "postRestoreGlassStartedOffsetMs": 718822,
+    "testTimeoutOffsetMs": 720000,
+    "failureAttachmentOffsetMs": 720773,
+    "postRestoreGlassAttachmentOffsetMs": 724459,
+    "v5DiamondBlockCompletedOffsetMs": 726986,
+    "detailedEvidenceAttachmentOffsetMs": 727244,
+    "finalAssertionsOffsetMs": 727316,
+    "contextCloseCompletedOffsetMs": 762283
+  },
+  "evidenceSemantics": {
+    "playwrightAttempts": 1,
+    "retries": 0,
+    "receiptRecordsForMainTest": 2,
+    "recordsAreSameAttempt": true,
+    "failureRecord": "afterEach appended a FAIL record after the 720-second timeout",
+    "detailedRecord": "the in-flight cleanup path later appended detailed C0-C5 evidence with its local status PASS",
+    "canonicalStatus": "FAIL because the Playwright result, process exit, and aggregate receipt status are FAIL"
+  },
+  "V2": {
+    "phase": "ready-to-save",
+    "checkpointCount": 19,
+    "resourcesPlaced": true,
+    "woodInventoryCount": 3,
+    "cobblestoneInventoryCount": 3,
+    "ironBlockInventoryCount": 4,
+    "fiveIronArmorItemsCrafted": true,
+    "ironIngotsRemainingAfterCrafting": 7,
+    "fourArmorSlotsEquipped": true,
+    "wrongSlotZeroChange": true,
+    "occupiedHelmetSwap": true,
+    "quickMoveAndClose": true,
+    "workbenchReclaimedIntoInventory": true,
+    "stonePickaxeDurability": { "created": 132, "afterIronMining": 128, "beforeSave": 127 },
+    "bagProof": "Each resource loop asserted independent itemCount growth; the receipt checkpoints directly record 3 wood, 3 cobblestone, and 4 iron blocks. worldItems=0 was not used as bag proof."
+  },
+  "restore": {
+    "preSaveRuntimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "restoredRuntimeEpoch": "seedlands:classic-canonical-runtime-v11:2",
+    "preSaveActorEpoch": 1,
+    "restoredActorEpoch": 2,
+    "actorLifetimeBeforeAndAfter": 1,
+    "inventoryRevisionPreserved": 143,
+    "continuedInventoryRevision": 145,
+    "gameplayRevisionBeforeSave": 382378,
+    "gameplayRevisionRestored": 397165,
+    "gameplayRevisionContinued": 397704,
+    "armorAndDurabilityRestored": true,
+    "newObjectReferenceAsserted": false,
+    "newObjectReferenceStatus": "NOT_RECORDED_NOT_ASSERTED",
+    "V1MediaRestore": "ASSERTED_BY_COMPLETED_C5_CALL_CHAIN_NOT_SERIALIZED_IN_RESTORE_EVIDENCE"
+  },
+  "notCovered": {
+    "death": "NOT_RUN",
+    "equipmentDropOnDeath": "NOT_RUN",
+    "respawn": "NOT_RUN",
+    "Cua": "NOT_RUN",
+    "humanAudio": "NOT_RUN",
+    "performance": "NOT_MEASURED"
+  },
+  "pageErrors": [],
+  "failedResponses": [],
+  "traceStatus": "RAW_INCOMPLETE_MISSING_CENTRAL_DIRECTORY",
+  "repairSelected": false
+}

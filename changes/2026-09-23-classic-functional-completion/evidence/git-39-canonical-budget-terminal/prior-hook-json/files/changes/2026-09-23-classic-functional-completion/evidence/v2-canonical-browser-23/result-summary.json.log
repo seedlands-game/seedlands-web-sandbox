@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-23",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-23-0eafd427",
+  "canonicalAttempts": 1,
+  "retries": 0,
+  "workers": 1,
+  "runner": {
+    "tests": 3,
+    "passed": 1,
+    "failed": 1,
+    "skipped": 1,
+    "exitCode": 1,
+    "mainTestStatus": "timedOut",
+    "mainTestDurationMs": 761526,
+    "errors": ["Test timeout of 720000ms exceeded.", "Test timeout of 30000ms exceeded."],
+    "visualStatus": "PASS",
+    "nonClassicStatus": "SKIPPED"
+  },
+  "stageEvidence": {
+    "C0": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "C1": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "C2": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "C3": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "V1": "PASS_PLAYWRIGHT_STEP_AND_COMPLETED_ASSERTION_CHAIN",
+    "V2": "PASS_PLAYWRIGHT_STEP_WITH_19_DIRECT_RECEIPT_CHECKPOINTS",
+    "C4": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "C5": "PASS_DIRECT_RECEIPT_AND_PLAYWRIGHT_STEP",
+    "postRestoreGlass": "COMPLETED_DURING_TIMEOUT_CLEANUP_WITH_ATTACHMENT",
+    "v5DiamondBlock": "COMPLETED_DURING_TIMEOUT_CLEANUP_WITH_ATTACHMENT"
+  },
+  "canonicalPassClaimed": false,
+  "productCompleteClaimed": false
+}

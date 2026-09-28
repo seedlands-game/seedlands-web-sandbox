@@ -1,0 +1,29 @@
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts 43ms
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.9335ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.176875ms)
+✔ present non-object failure attachments fail closed without losing detailed evidence (0.337541ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.096667ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.31975ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.206041ms)
+✔ missing receipt files and ambiguous main selections fail closed (2.695875ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.246167ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 43.901334
+3:07:20 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ✓ |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts (3 tests) 167ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (5 tests) 8ms
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  03:07:20
+   Duration  378ms (transform 36ms, setup 0ms, import 53ms, tests 175ms, environment 0ms)
+

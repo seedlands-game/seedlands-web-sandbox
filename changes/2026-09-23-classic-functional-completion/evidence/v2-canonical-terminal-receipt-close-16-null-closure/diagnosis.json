@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-TERMINAL-RECEIPT-CLOSE-16-NULL-CLOSURE",
+  "status": "DETERMINISTIC_STATIC_GREEN_BROWSER24_NOT_RUN",
+  "rootReproduction": {
+    "externalRawClaimedAsLocal": false,
+    "shape": "valid detailed PASS plus classic-runtime-failure.json payload null plus terminal passed",
+    "oldReceiptStatus": "PASS",
+    "oldRunnerAccepted": true
+  },
+  "localRed": {
+    "pure": {
+      "status": "EXPECTED_FAIL_1_OF_8",
+      "invalidPayloads": [null, "failure", 7, true, [], ["failure"]],
+      "attachmentOrdersPerPayload": 2,
+      "failure": "old helper returned PASS"
+    },
+    "reporter": {
+      "status": "EXPECTED_FAIL_1_OF_5",
+      "input": "Buffer.from('null')",
+      "lifecycle": ["onBegin", "onTestEnd", "onEnd", "runner validator"],
+      "failure": "old reporter receipt returned PASS before validator assertion"
+    }
+  },
+  "fix": {
+    "implementationFile": "scripts/harness/classic-receipt.mjs",
+    "assertionEvidencePresenceSeparated": true,
+    "failureEvidencePresenceSeparated": true,
+    "failureAttachmentPresenceBlocksPass": true,
+    "nonObjectFailurePayloadError": "failure attachment is not a JSON object",
+    "payloadPreserved": true,
+    "detailedStagesRestoreAndMeasurementPreserved": true
+  },
+  "green": {
+    "pureReceiptTests": 8,
+    "reporterTests": 5,
+    "measurementConsumerTests": 3,
+    "totalTests": 16,
+    "status": "PASS"
+  },
+  "unchangedFromClose16": [
+    "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "apps/web/tests/e2e/classic-support/evidence.ts",
+    "apps/web/tests/e2e/classic-support/canonical-reporter.ts",
+    "playwright.config.ts",
+    "scripts/harness/classic.mjs",
+    "scripts/harness/classic-receipt.d.mts",
+    "changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md",
+    "changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md",
+    "docs/code-map.md"
+  ],
+  "boundaries": {
+    "reporterImplementationChanged": false,
+    "runnerChanged": false,
+    "budgetChanged": false,
+    "selectionChanged": false,
+    "zipChanged": false,
+    "productionOrBrowserBehaviorChanged": false,
+    "browser24Run": false,
+    "gitOrIndexWrite": false,
+    "longTermDocsUpdated": false
+  }
+}

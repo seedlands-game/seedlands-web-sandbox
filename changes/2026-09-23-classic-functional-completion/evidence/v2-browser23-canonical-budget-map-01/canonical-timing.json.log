@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER23-CANONICAL-BUDGET-MAP-01",
+  "source": "Frozen Browser23 Playwright HTML report embedded JSON",
+  "method": {
+    "topLevel": "Durations are copied from main-step-timeline.json.",
+    "directChildCategories": "Only direct children of V2 and C4 are classified. Nested children are not added. Direct intervals are unioned to remove overlap before uncovered wall time is calculated.",
+    "performanceClaim": false
+  },
+  "main": {
+    "startTime": "2026-09-28T15:45:04.247Z",
+    "status": "timedOut",
+    "reportedDurationMs": 761526,
+    "testBudgetMs": 720000,
+    "steps": [
+      { "index": 0, "name": "Before Hooks", "startOffsetMs": 8, "durationMs": 1054, "endOffsetMs": 1062 },
+      { "index": 1, "name": "C0", "startOffsetMs": 1065, "durationMs": 3450, "endOffsetMs": 4515 },
+      { "index": 45, "name": "C1", "startOffsetMs": 17889, "durationMs": 18476, "endOffsetMs": 36365 },
+      { "index": 46, "name": "C2", "startOffsetMs": 36365, "durationMs": 21071, "endOffsetMs": 57436 },
+      { "index": 47, "name": "C3", "startOffsetMs": 57436, "durationMs": 17378, "endOffsetMs": 74814 },
+      { "index": 48, "name": "V1", "startOffsetMs": 74815, "durationMs": 47810, "endOffsetMs": 122625 },
+      { "index": 49, "name": "V2", "startOffsetMs": 122625, "durationMs": 426474, "endOffsetMs": 549099 },
+      { "index": 50, "name": "C4", "startOffsetMs": 549102, "durationMs": 149669, "endOffsetMs": 698771 },
+      { "index": 51, "name": "C5", "startOffsetMs": 698774, "durationMs": 20045, "endOffsetMs": 718819 },
+      { "index": 52, "name": "post-restore-glass", "startOffsetMs": 718822, "durationMs": 5637, "endOffsetMs": 724459 },
+      { "index": 53, "name": "After Hooks", "startOffsetMs": 720756, "durationMs": 41532, "endOffsetMs": 762288 },
+      { "index": 54, "name": "Worker Cleanup", "startOffsetMs": 762290, "durationMs": 495, "endOffsetMs": 762785 }
+    ],
+    "namedC0ThroughC5StageDurationMs": 704373,
+    "unnamedPreparationAndInterstageWallBeforeC5CompleteMs": 14446,
+    "C5CompletedOffsetMs": 718819,
+    "timeoutOffsetMs": 720000,
+    "failureAttachmentOffsetMs": 720773,
+    "v5CompletedOffsetMs": 726986,
+    "detailedEvidenceAttachmentOffsetMs": 727244,
+    "finalAssertionsOffsetMs": 727316,
+    "contextCloseCompletedOffsetMs": 762283
+  },
+  "stageShareOfC5CompletionWindow": {
+    "C0Percent": 0.48,
+    "C1Percent": 2.57,
+    "C2Percent": 2.93,
+    "C3Percent": 2.42,
+    "V1Percent": 6.65,
+    "V2Percent": 59.33,
+    "C4Percent": 20.82,
+    "C5Percent": 2.79
+  },
+  "directChildDisjointWall": [
+    {
+      "stage": "V2",
+      "durationMs": 426474,
+      "directChildCount": 8635,
+      "directChildDurationSumMs": 380453,
+      "overlapPairs": 227,
+      "overlapMs": 2669,
+      "directChildIntervalUnionMs": 377784,
+      "directChildIntervalUnionPercent": 88.58,
+      "uncoveredWallMs": 48690,
+      "uncoveredWallPercent": 11.42,
+      "categories": [
+        { "name": "explicit-wait-timeout", "count": 128, "durationMs": 192535, "percentOfStage": 45.15 },
+        { "name": "evaluate", "count": 3357, "durationMs": 79795, "percentOfStage": 18.71 },
+        { "name": "unwrapped-gap", "count": null, "durationMs": 48690, "percentOfStage": 11.42 },
+        { "name": "poll-assertion", "count": 719, "durationMs": 36336, "percentOfStage": 8.52 },
+        { "name": "pointer-geometry", "count": 2472, "durationMs": 29461, "percentOfStage": 6.91 },
+        { "name": "click-fill-mouse-input", "count": 478, "durationMs": 25744, "percentOfStage": 6.04 },
+        { "name": "other-assertion", "count": 160, "durationMs": 6120, "percentOfStage": 1.44 },
+        { "name": "keyboard-input", "count": 1035, "durationMs": 4266, "percentOfStage": 1.0 },
+        { "name": "wait-for-function", "count": 285, "durationMs": 3475, "percentOfStage": 0.81 },
+        { "name": "other-api", "count": 1, "durationMs": 52, "percentOfStage": 0.01 }
+      ],
+      "explicitWaitSource": {
+        "path": "apps/web/tests/e2e/classic-support/mouse-input.ts",
+        "line": 36,
+        "count": 128,
+        "durationMs": 192535,
+        "configuredDelayMs": 1500
+      },
+      "pulseGapObservation": {
+        "KeyWDownToUpCount": 256,
+        "KeyWDownToUpGapMs": 20983,
+        "KeySDownToUpCount": 247,
+        "KeySDownToUpGapMs": 20206,
+        "classification": "MECHANICALLY_LOCATED_IN_UNWRAPPED_GAP_NOT_RECLASSIFIED_AS_API_STEP"
+      }
+    },
+    {
+      "stage": "C4",
+      "durationMs": 149669,
+      "directChildCount": 1154,
+      "directChildDurationSumMs": 95820,
+      "overlapPairs": 0,
+      "overlapMs": 0,
+      "directChildIntervalUnionMs": 95820,
+      "directChildIntervalUnionPercent": 64.02,
+      "uncoveredWallMs": 53849,
+      "uncoveredWallPercent": 35.98,
+      "categories": [
+        { "name": "poll-assertion", "count": 179, "durationMs": 84647, "percentOfStage": 56.56 },
+        { "name": "unwrapped-gap", "count": null, "durationMs": 53849, "percentOfStage": 35.98 },
+        { "name": "evaluate", "count": 214, "durationMs": 4481, "percentOfStage": 2.99 },
+        { "name": "keyboard-input", "count": 708, "durationMs": 3236, "percentOfStage": 2.16 },
+        { "name": "explicit-wait-timeout", "count": 2, "durationMs": 3006, "percentOfStage": 2.01 },
+        { "name": "pointer-geometry", "count": 34, "durationMs": 258, "percentOfStage": 0.17 },
+        { "name": "click-fill-mouse-input", "count": 4, "durationMs": 181, "percentOfStage": 0.12 },
+        { "name": "wait-for-function", "count": 4, "durationMs": 11, "percentOfStage": 0.01 }
+      ],
+      "pollSource": {
+        "path": "apps/web/tests/e2e/classic-support/harness.ts",
+        "line": 126,
+        "count": 179,
+        "durationMs": 84647,
+        "maximumSinglePollMs": 605
+      },
+      "pulseGapObservation": {
+        "KeySWithSpaceCount": 91,
+        "KeySWithSpaceGapMs": 27404,
+        "KeyWWithSpaceCount": 86,
+        "KeyWWithSpaceGapMs": 25940,
+        "classification": "MECHANICALLY_LOCATED_IN_UNWRAPPED_GAP_NOT_RECLASSIFIED_AS_API_STEP"
+      }
+    }
+  ],
+  "budgetDerivation": {
+    "observedFinalAssertionsOffsetMs": 727316,
+    "multiplier": 1.2,
+    "calculatedMainMs": 872779.2,
+    "recommendedFiniteMainMs": 900000,
+    "recommendedHeadroomVsObservedFinalAssertionsMs": 172684,
+    "observedFinalAssertionToContextCloseMs": 34967,
+    "calculatedFinalizationMs": 41960.4,
+    "recommendedFiniteFinalizationMs": 60000,
+    "supportsP95OrStabilityClaim": false
+  }
+}

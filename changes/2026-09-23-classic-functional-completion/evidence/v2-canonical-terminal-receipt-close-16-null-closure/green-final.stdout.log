@@ -1,0 +1,35 @@
+scripts/harness/classic-receipt.mjs 30ms (unchanged)
+scripts/harness/classic-receipt.test.mjs 19ms (unchanged)
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts 25ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 72ms (unchanged)
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md 7ms (unchanged)
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-evidence.md 5ms (unchanged)
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/README.md 1ms (unchanged)
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.996292ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.190833ms)
+✔ present non-object failure attachments fail closed without losing detailed evidence (0.351083ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.106042ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.3425ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.215417ms)
+✔ missing receipt files and ambiguous main selections fail closed (2.633208ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.207709ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 45.745125
+3:05:35 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (5 tests) 9ms
+ ✓ |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts (3 tests) 151ms
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  03:05:35
+   Duration  366ms (transform 37ms, setup 0ms, import 54ms, tests 161ms, environment 0ms)
+

@@ -1,0 +1,51 @@
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts 35ms (unchanged)
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (1.16175ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.115917ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.133167ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.338916ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.190292ms)
+✔ missing receipt files and ambiguous main selections fail closed (2.746125ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.174417ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.185917
+2:36:32 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ✓ |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts (3 tests) 190ms
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (4 tests | 1 failed) 10ms
+     ✓ writes one terminal main attempt from the completed Playwright result and attachments 3ms
+     ✓ uses the filtered suite and excludes visual and skipped non-main tests from attempts 1ms
+     × reads file-backed attachments and fails closed on malformed evidence 4ms
+     ✓ marks a modular-world selection without accepting a canonical main attempt 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts > CanonicalReporter > reads file-backed attachments and fails closed on malformed evidence
+AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ apps/web/tests/e2e/classic-support/canonical-reporter.test.ts:129:28
+    127|
+    128|     const receipt = JSON.parse(readFileSync(path, 'utf8'));
+    129|     expect(receipt.status).toBe('FAIL');
+       |                            ^
+    130|     expect(receipt.attempts).toHaveLength(1);
+    131|     expect(receipt.attempts[0]).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 6 passed (7)
+   Start at  02:36:32
+   Duration  409ms (transform 39ms, setup 0ms, import 56ms, tests 200ms, environment 0ms)
+

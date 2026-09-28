@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T15:38:00Z
+更新时间：2026-09-28T19:45:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,13 +10,30 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：`GIT-38-POST-DRIFT-DIRECTION` 的代码提交
-`550adf8a352cd1c24aff5b2f3885b8b970c69bd7` 已生成；精确五路径 patch `e864ea67...931c` 在
-`658e059d...d89` detached staged tree 通过 `14 files / 145 tests`、Classic/root test types、3 TS ESLint、
-5 路径标准 Prettier 与 scope。第二笔 evidence 首次自然 hook 被四份 Browser22 mechanical raw 的 `.json` 扩展名阻断，
-没有产生提交；恢复阶段仅做原字节 `.json.log` 改名、prior-packaging 和 identity 重冻，不重跑行为门禁。Browser22/
-MAP01/Close14/GIT38 evidence 和本文件随第二笔提交冻结，远端 identity 以后续 readback 为准；BUILD14/Browser23/
-Cua/CI/deploy/merge 未运行。
+当前 Git/Docs checkpoint：`GIT-38-POST-DRIFT-DIRECTION` 与 `V2-ARTIFACT-BUILD-14` 已远端交付至
+`2db4c5fd8cf81294d164b128d667f73fa7e5f01f`。Browser23 唯一 canonical attempt 为正式 FAIL：C0-C5 与 V2
+19 checkpoint 已到达，但 720 秒主测试预算在玻璃/V5/evidence 收尾前触发，原 trace 缺 EOCD/中央目录；分片重组只证明
+封存字节一致。Close15 将下一次完整旅程的 main budget 有界登记为 900 秒，并明确 Chromium project 的 60 秒分别作用于
+teardown/trace 等 slot，不是全部收尾总预算。Close16 用 Playwright Reporter `onTestEnd` 生成唯一 terminal receipt；null
+closure 进一步使所有已存在但非 object 的 failure attachment fail closed。GIT39 第一笔代码/tests/spec/contracts/code-map
+提交为 `fca25ef1`，detached tree 内 pure `8/8`、Reporter `5/5`、performance-window consumer `3/3`、Classic/root
+test types、目标 ESLint/Prettier 与 staged diff 均 PASS；第二笔 evidence/state 随本提交冻结，远端 identity 以后续 readback
+为准。Browser24、build、artifact、Cua、CI、deploy、merge 未运行；terminal receipt 静态 GREEN 不证明 canonical Browser GREEN，
+ZIP 完整性仍由人工 evidence 门禁检查。
+
+GIT39 第二笔首次 selfcheck 在 frozen Browser23 `attachments/test-0-error-context.md` 的自然 Prettier 门禁处失败，
+未创建提交。root 已准出 `GIT39-BROWSER23-RAW-PACKAGING-RECOVERY`：只把主证据副本和 detached 副本更名为
+`.md.log`，内容仍为 2800 bytes、SHA-256 `499ae94a...a573`；acceptance raw/report/trace 未动。修改前 21 个
+Browser23/MAP/GIT39 metadata、累计报告及状态文件已逐字节归档于 GIT39 `prior-packaging`，独立 manifest SHA 为
+`891511bd...e4e5`。当前 Browser23 SOURCE22/MANIFEST127/delivery 为 `d275044b...160` / `e985c56a...d188` /
+`35842ab0...c941`，MAP01 SOURCE23/MANIFEST10/delivery 为 `1257c5a4...3559` / `52d68bec...e94d` /
+`0483a770...55e0`；旧身份由映射保留。第二笔、push 与 PR 读回仍待最终 recovery selfcheck 和自然 hook。
+
+`GIT39-SCOPE-CORRECTION-A` 已恢复未经可核验授权而短暂更名的四份 Browser23 JSON raw；没有第二次自然 hook 失败。
+四项在主证据副本和 detached tree 均回到原 `.json` 路径、原字节，Browser23/MAP 三元组保持上一段所列值。
+`prior-hook-json` 的 26 项原字节保留为未批准尝试前件，`scope-correction` 只保存九份错误中间 metadata 与 incident。
+当前进入 `GIT39-CLOSURE-B`：仅待 GIT39 evidence/allowlist 自检、第二笔自然 hook、非破坏分支推进、普通 push 与 PR41
+一次读回；BUILD15、Browser24、artifact、Cua、devserver、CI 修复、deploy、merge 均不在本阶段。
 当前 Equipment checkpoint：`V2-EQUIPMENT-HARNESS-ORACLE-01` 与
 `V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 已在 GIT28 detached staged tree 组合验证；observability `8/8`、scenario
 `7/7`、Web/Svelte/root/Classic test types 与目标静态均 PASS，原 oracle Classic-types 并行阻塞已关闭。代码提交

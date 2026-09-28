@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git39-browser23-packaging-format",
+  "pid": 10214,
+  "startedAt": "2026-09-28T20:02:27.187Z",
+  "windowId": "git39-browser23-packaging-format",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/browser23-packaging-format.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T20:02:27.629Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T20:02:27.188Z",
+      "loadAverage": [
+        2.69287109375,
+        2.58251953125,
+        2.6572265625
+      ],
+      "freeMemoryBytes": 397885440,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T20:02:27.627Z",
+      "loadAverage": [
+        2.69287109375,
+        2.58251953125,
+        2.6572265625
+      ],
+      "freeMemoryBytes": 392658944,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

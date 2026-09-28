@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT39-BROWSER23-HOOK-JSON-RECOVERY",
+  "files": [
+    {
+      "oldPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/artifact-readback.json",
+      "currentPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/artifact-readback.json.log",
+      "priorCopyPath": "files/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/artifact-readback.json.log",
+      "sizeBytes": 1144,
+      "sha256BeforeAndAfter": "f0ee79048c3d5cb7bab4b10a98a51ff4cafda1ac60c8b67988d93a4d49c43792"
+    },
+    {
+      "oldPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/playwright-attachments.json",
+      "currentPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/playwright-attachments.json.log",
+      "priorCopyPath": "files/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/playwright-attachments.json.log",
+      "sizeBytes": 28444,
+      "sha256BeforeAndAfter": "5ce5214a9a2d837a68261515439f1c15fb3151c58eeec27bcf6b6c12a0f6701a"
+    },
+    {
+      "oldPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/receipt-readback.json",
+      "currentPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/receipt-readback.json.log",
+      "priorCopyPath": "files/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/receipt-readback.json.log",
+      "sizeBytes": 58872,
+      "sha256BeforeAndAfter": "b93920cb8aefb444f2ea338720337b30f9f109719af16217af2010503d0da6b8"
+    },
+    {
+      "oldPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/result-summary.json",
+      "currentPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/result-summary.json.log",
+      "priorCopyPath": "files/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/result-summary.json.log",
+      "sizeBytes": 1209,
+      "sha256BeforeAndAfter": "70623f2e17b2c23c9ddfb95f0515f6ce6a2d1ee18b43f6b04e75577a01ea2c26"
+    }
+  ],
+  "byteComparison": "PASS",
+  "acceptanceRawReportOrTraceChanged": false
+}

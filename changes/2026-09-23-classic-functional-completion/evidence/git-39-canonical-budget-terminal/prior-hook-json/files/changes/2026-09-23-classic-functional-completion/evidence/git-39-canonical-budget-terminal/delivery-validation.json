@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-39-CANONICAL-BUDGET-TERMINAL",
+  "status": "CODE_COMMITTED_RAW_PACKAGING_RECOVERED_EVIDENCE_FROZEN",
+  "baseline": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f",
+  "codeCommit": "fca25ef13eb060b281aa90cf713ce4837b603b14",
+  "codeTree": "eeace764cd18744cc89550b3c5e7b768f53edd22",
+  "codePaths": 13,
+  "codePatchSha256": "5d03d720b3fb637fbca859482ee41e465f340fb8ea7534c34bf2338a959bb5da",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 13,
+    "sha256": "9431139f712b23814c0d368fbe49531875264c3f8a7a29fb89ab566537fdd1db"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 68,
+    "sha256": "cec1d771927d105971ca8e377f0938daa9e3def6a2551d3de6b05ff1ee78c8c7",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "prior-packaging/metadata-identity-mapping.json",
+      "recovery-selfcheck.stdout.log",
+      "recovery-selfcheck.window.json.log"
+    ]
+  },
+  "evidenceCommitAllowlistEntries": 406,
+  "dependencySetup": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "status": "PASS",
+    "stdoutSha256": "308d30e3394f90b53dafc98efb0e53a48b28dc14916dc45dc15ba9b152117b91",
+    "windowSha256": "3dce7edec59ca6029056979b28db20c3060ee64911cd781cef1b8d1fb0031687"
+  },
+  "stagedGate": {
+    "status": "PASS",
+    "exitCode": 0,
+    "pureReceiptTests": 8,
+    "reporterTests": 5,
+    "performanceWindowConsumerTests": 3,
+    "totalTests": 16,
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslint": "PASS_8_PATHS",
+    "format": "PASS_13_PATHS_NORMAL_PRETTIER",
+    "stagedDiff": "PASS_13_PATHS",
+    "maxWorkers": 1,
+    "stdoutSha256": "a58fd069245dcd88b3365023814bff75f319d71296e4374389cc78fe9dfa2836",
+    "windowSha256": "7f46cf534e97388264d35e5c3bfeaf9d3cc84ea9621fd6afc2fa3126dc0c646b",
+    "measurement": "NOT_RECORDED"
+  },
+  "retainedIntermediateEvidence": {
+    "initialAllowlistComparison": "FAIL_ORDER_ONLY_NO_MISSING_OR_EXTRA_PATH",
+    "evidenceAllowlistComparison": "FAIL_FILTER_MATCHED_HISTORICAL_SAME_BASENAMES",
+    "evidenceAllowlistFailureMutation": false,
+    "evidenceAllowlistCorrection": "Exclude only the two full GIT39 final-selfcheck paths instead of matching the basename in every historical evidence directory.",
+    "initialStagedGate": "FAIL_ENVIRONMENT_POLLUTION_AFTER_13_OF_16_TESTS",
+    "cause": "The outer absolute reservation evidence path was inherited by the existing performance-window consumer's nested temporary repository.",
+    "implementationChangedAfterFailure": false,
+    "correction": "Clear the six reservation/window variables only for the consumer subprocess while retaining the single outer default machine lock.",
+    "stdoutSha256": "21f6849156270d6821017df50c816cb2cf1580475ac6b243d56b86840b070f89",
+    "windowSha256": "c185bf1740e6bff81cf5a2e83f48fdcd4dfedde0917e715d57faf75340d5d620"
+  },
+  "retainedRecoveryEvidence": {
+    "firstSelfcheck": "FAIL_FROZEN_BROWSER23_MARKDOWN_RAW_SELECTED_BY_PRETTIER",
+    "firstSelfcheckStdoutSha256": "81cf31f0ceb3ceeae935aa8c3321afc472e824d4a51bbb7074157f38e0ba9a39",
+    "firstSelfcheckWindowSha256": "0b66aa4dc9bc6ce2399f3e929ba8782da41750c7a544b58c5eec1b42f6fecfd7",
+    "firstMetadataFormat": "FAIL_ZSH_NO_PRETTIER_PARSER",
+    "firstMetadataFormatMutationToScripts": false,
+    "correction": "Match the natural hook and format only Markdown and JSON metadata; zsh helpers are not Prettier targets.",
+    "identitySupersededSelfcheck": "FAIL_DURING_INTERMEDIATE_CURRENT_IDENTITY_CHAIN",
+    "identitySupersededMutationFromFailure": false,
+    "identitySupersededStdoutSha256": "877e4ba0bc37e48b259d7bb9a3b7c2ed3a0b5430cdf2e54857d445df6395d73e",
+    "identitySupersededWindowSha256": "8cb423a94c3273be9b9ef7b539e7aaf7fbb59754d03aea881dd434f0f4a094ac",
+    "acceptanceVariableSelfcheck": "FAIL_CHECKER_MISSING_ACCEPTANCE_PATH",
+    "acceptanceVariableMutationFromFailure": false,
+    "acceptanceVariableCompletedBeforeFailure": [
+      "exact staged scope",
+      "current manifests and raw",
+      "prior Browser23 manifest127",
+      "prior MAP source23 and manifest10",
+      "prior GIT39 manifest20"
+    ],
+    "acceptanceVariableStdoutSha256": "98b327b9928659e828a138200f0bb4714ee6eebe3077ec7a083ea77f223354f8",
+    "acceptanceVariableWindowSha256": "c351e47e3c650a43dbebc9a963769255632be26c95cfda1262aca47efa3c935d",
+    "acceptanceVariableCorrection": "Define the unchanged BUILD14 acceptance tree path before its clean/head assertions."
+  },
+  "frozenInputs": {
+    "browser23": {
+      "status": "FAIL",
+      "sourceManifestSha256": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+      "evidenceManifestSha256": "e985c56ac652b7af5c1c84bb4853f06d9f321c3754bd6fbb5e94f115c03fd188",
+      "deliverySha256": "35842ab0daeebd431707a12f92bcf34a48ce25b9b28a2b13e78b9997134fc941",
+      "priorEvidenceManifestSha256": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+      "priorDeliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c"
+    },
+    "budgetMap": {
+      "sourceManifestSha256": "1257c5a4382b49f9425dd17cfb3250958443415e0066f989f15a9bcbcfac3559",
+      "evidenceManifestSha256": "52d68bec8123d823c8d89bf0e956eabcc40e48e673ca23dc1851c9f28762e94d",
+      "deliverySha256": "0483a7701a555f0288f37ffdfc1804283eb2803b2d0f9d5209377db70cb555e0",
+      "priorSourceManifestSha256": "64ce50ef3284e12a92a410600c1dc6b663330fdf0f3954d91adb50cbfc2fbc68",
+      "priorEvidenceManifestSha256": "554fb4aabcce039eb93870b695143f8403edb154a3b314fc793d5fbecf4ead55",
+      "priorDeliverySha256": "828f23d14b54d51f19d5fd66d6454da8322b2210526d73f80713d412e992da61"
+    },
+    "close15": {
+      "sourceManifestSha256": "258ac9faf2329f7c5f07565795bb93c769e7e87b55bfc213f6f8edf7775ab138",
+      "evidenceManifestSha256": "f512cfa8907a48689936b5b8c02d1fed99fe588b6a1f3d432d1380a69875dfad",
+      "deliverySha256": "b853e2cec7300f90f01cf43d9d021c0ad0df7bbbe9f9acd406277460d492f944"
+    },
+    "close16": {
+      "sourceManifestSha256": "5f16faaef7050c993a147f963fd3b202956ef5a373ce0f2153a22013d7e14922",
+      "evidenceManifestSha256": "1fbae8b8ca484192010e1363c375d869dea6bff0118727cbddf71653e691586e",
+      "deliverySha256": "a4f0dd2668f1250294d174b73d2972ad90a548a70cd44a1ea3b13ad1a81f3896"
+    },
+    "nullClosure": {
+      "sourceManifestSha256": "c2a8af72f41639572f1ad57766bf78e25a90ee76d1d03541887e61dd81defd14",
+      "evidenceManifestSha256": "cca7c4334b0b510d53f931dbaafa5657e2832bbca2b9027acc6738d9d3e423c0",
+      "deliverySha256": "b1307e63d4176f42db1733808acc85c32ce02e370163b7c0c0024f0ab4ee6810"
+    }
+  },
+  "rawPackagingRecovery": {
+    "stage": "GIT39-BROWSER23-RAW-PACKAGING-RECOVERY",
+    "oldPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/attachments/test-0-error-context.md",
+    "currentPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/attachments/test-0-error-context.md.log",
+    "sizeBytes": 2800,
+    "sha256BeforeAndAfter": "499ae94ac08d04e70cc7e1775ca03a453b7c1daae16fd5f3b26209652c31a573",
+    "priorManifestEntries": 21,
+    "priorManifestSha256": "891511bd6446a871e6c0fae7c933688572c1bfeb800a7bca615c2ad13b6ae4e5",
+    "rawBytesChanged": false,
+    "acceptanceRawReportOrTraceChanged": false,
+    "firstSelfcheckFailurePreserved": true,
+    "firstSelfcheckFailureCause": "Frozen Browser23 raw used a .md archive suffix and was selected by the natural Prettier hook."
+  },
+  "recoverySelfcheck": {
+    "script": "recovery-selfcheck.zsh",
+    "stdout": "recovery-selfcheck.stdout.log",
+    "window": "recovery-selfcheck.window.json.log",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "boundaries": {
+    "browser23Result": "FAIL",
+    "browser24Run": false,
+    "build15Run": false,
+    "artifactRun": false,
+    "traceIntegrityAutomationImplemented": false,
+    "productionChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "Fixture budget registration and test evidence ownership changed without changing a production owner or public API."
+  },
+  "rawDiffCheck": {
+    "status": "EXPECTED_NONZERO_RAW_EVIDENCE_ONLY",
+    "exitCode": 2,
+    "metadataOrSourceWhitespaceErrors": false,
+    "rawBytesModified": false
+  },
+  "notValidated": [
+    "complete canonical Browser PASS",
+    "trace ZIP integrity automation",
+    "new object reference assertion",
+    "death, equipment drop and respawn",
+    "16 armor and 194 item matrix",
+    "V3 and V4",
+    "Cua or human audio",
+    "CI"
+  ]
+}

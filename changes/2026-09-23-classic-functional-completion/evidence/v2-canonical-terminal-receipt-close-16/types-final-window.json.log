@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-close16-types-final",
+  "pid": 26452,
+  "startedAt": "2026-09-28T18:27:28.702Z",
+  "windowId": "v2-close16-types-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/types-final-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T18:27:53.627Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T18:27:28.703Z",
+      "loadAverage": [
+        2.04736328125,
+        2.86572265625,
+        3.212890625
+      ],
+      "freeMemoryBytes": 6651789312,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T18:27:33.705Z",
+      "loadAverage": [
+        2.04345703125,
+        2.85107421875,
+        3.20556640625
+      ],
+      "freeMemoryBytes": 6125830144,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T18:27:38.708Z",
+      "loadAverage": [
+        2.19970703125,
+        2.8701171875,
+        3.2099609375
+      ],
+      "freeMemoryBytes": 6003359744,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T18:27:43.710Z",
+      "loadAverage": [
+        2.18359375,
+        2.85546875,
+        3.20263671875
+      ],
+      "freeMemoryBytes": 5750439936,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T18:27:48.712Z",
+      "loadAverage": [
+        2.16845703125,
+        2.8408203125,
+        3.1953125
+      ],
+      "freeMemoryBytes": 6137249792,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T18:27:53.625Z",
+      "loadAverage": [
+        2.15478515625,
+        2.82666015625,
+        3.18798828125
+      ],
+      "freeMemoryBytes": 6752010240,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

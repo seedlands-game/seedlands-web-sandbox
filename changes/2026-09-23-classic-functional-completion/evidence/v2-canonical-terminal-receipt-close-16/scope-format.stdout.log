@@ -1,0 +1,8 @@
+Checking formatting...
+All matched files use Prettier code style!
+FORMAT=PASS
+DIFF_CHECK=PASS
+UNIQUE_WRITER=PASS
+CLOSE15_BUDGETS=PASS
+NO_NEW_SUPPRESSION=PASS
+INDEX_EMPTY=PASS

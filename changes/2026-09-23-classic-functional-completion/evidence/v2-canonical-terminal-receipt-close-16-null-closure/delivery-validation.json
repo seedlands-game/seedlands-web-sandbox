@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-TERMINAL-RECEIPT-CLOSE-16-NULL-CLOSURE",
+  "status": "DETERMINISTIC_STATIC_GREEN_BROWSER24_NOT_RUN",
+  "baselineSha": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f",
+  "predecessorClose16": {
+    "sourceManifestEntries": 15,
+    "sourceManifestSha256": "5f16faaef7050c993a147f963fd3b202956ef5a373ce0f2153a22013d7e14922",
+    "evidenceManifestEntries": 79,
+    "evidenceManifestSha256": "1fbae8b8ca484192010e1363c375d869dea6bff0118727cbddf71653e691586e",
+    "deliverySha256": "a4f0dd2668f1250294d174b73d2972ad90a548a70cd44a1ea3b13ad1a81f3896",
+    "archivePath": "prior-release",
+    "archiveEntries": 18,
+    "archiveManifestSha256": "9bddb9dfef7870f5e8e9160563dcc1155a243d74534861baf2dc35d19794289b",
+    "sourceEntriesValidatedFromArchive": 15,
+    "historicalGreenPreserved": true,
+    "nullFailureClaimSuperseded": true
+  },
+  "red": {
+    "rootExternalReproductionClaimedAsLocal": false,
+    "pure": {
+      "status": "EXPECTED_FAIL_1_OF_8",
+      "stdoutSha256": "0e60f6d8edb2b0f0568e39e6410f830cf34ec27c0ee10b1f11c2c2cdd5e0af39",
+      "receiptSha256": "f7dfc1ef86c034968fd038fd4dd18f8ea37cb2e20168f12d5b2f1b2664175b76",
+      "failure": "Present null failure attachment produced PASS"
+    },
+    "reporter": {
+      "status": "EXPECTED_FAIL_1_OF_5",
+      "input": "Buffer.from('null')",
+      "stdoutSha256": "b5af51f3cb8ed86c9591c3f1bc80b756befefffbced7683e9e361b5f8d50eec5",
+      "receiptSha256": "b46d0b4316a931f651933c8b8d6b4271cac31f0078bb543577e2eac3792bd682",
+      "failure": "Reporter lifecycle wrote a PASS receipt before runner validation"
+    }
+  },
+  "implementation": {
+    "file": "scripts/harness/classic-receipt.mjs",
+    "assertionEvidencePresenceSeparated": true,
+    "failureEvidencePresenceSeparated": true,
+    "failureAttachmentPresenceBlocksPass": true,
+    "invalidPayloadsCovered": [null, "string", "number", "boolean", "empty-array", "nonempty-array"],
+    "attachmentOrdersCovered": ["detailed-then-failure", "failure-then-detailed"],
+    "invalidFailureError": "failure attachment is not a JSON object",
+    "failurePayloadPreserved": true,
+    "detailedStagesRestoreAndMeasurementPreserved": true,
+    "normalNoFailurePassPreserved": true,
+    "reporterImplementationChanged": false,
+    "runnerChanged": false
+  },
+  "green": {
+    "window": "v2-close16-null-green-sealed",
+    "status": "PASS",
+    "pureReceiptTests": 8,
+    "reporterTests": 5,
+    "measurementConsumerTests": 3,
+    "totalTests": 16,
+    "reporterNullOrders": 2,
+    "reporterRunnerValidatorRejectsNullFailure": true,
+    "stdoutSha256": "5610727f80c76f02895bd1e4ed4958c9172e59bcd7391c14d2124f66550d09fd",
+    "receiptSha256": "5bf1283c89bbec3f247961f855c875356eb8f39de532bbf75799a441dddd36da"
+  },
+  "static": {
+    "sameWindowAsGreen": true,
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslintFiles": 3,
+    "eslintStatus": "PASS",
+    "formatStatus": "PASS",
+    "scopeWindow": "v2-close16-null-scope-sealed",
+    "scopeStatus": "PASS",
+    "scopeStdoutSha256": "87a7c13848c1a9a52015ab546b71137bd3cf9dbfc888460a17778a5504559a24",
+    "scopeReceiptSha256": "bb294bf8cb6b27af99c51caea8062c382c0a9cf85e18a2a4913749f1d7323468",
+    "scopeReadbackSha256": "3cb52bcbeb1e5c4bd98ee66c22ebe227746099b5b91fcf042131d8128c375e68",
+    "unchangedPredecessorPaths": 9,
+    "expectedChangedPaths": 6,
+    "indexEmpty": true,
+    "noNewSuppression": true
+  },
+  "finalSelfcheck": {
+    "status": "PASS",
+    "sourceEntriesValidated": 6,
+    "manifestEntriesValidated": 51,
+    "stdoutSha256": "2acc08fc18c4c3a03f96c9091074de2957affa909b3d60fdf1a4b0406ccc7478",
+    "receiptSha256": "420f1125044363aa42965ffa9332679f6291dfb0f74f2c541fd408231b92b8ca",
+    "predecessorClose16Validated": true,
+    "historicalIdentitiesUnchanged": true,
+    "indexEmpty": true,
+    "machineLockReleasedAfterCheck": true
+  },
+  "retainedIntermediateEvidence": {
+    "greenFirst": {
+      "status": "FAIL_1_OF_8_REPORTER_AND_CONSUMER_TESTS",
+      "reason": "Malformed JSON now produced both parse and non-object errors while the prior assertion expected only the parse error. Pure helper and null Reporter case already passed.",
+      "stdoutSha256": "a7d13b09c7ce5f33b40ac015a04eed13b43331ff8ddc5b6172434166386b02e7",
+      "receiptSha256": "46c0aee737607b79390e8eb8c86658c5a5617fa2232da0af719ab3e1b27c7b35"
+    },
+    "scopeFirst": {
+      "status": "FAIL_EVIDENCE_CHECKER_REGEX",
+      "reason": "An evidence-only regex lost escaping; predecessor byte comparison remains the authoritative budget proof.",
+      "stdoutSha256": "3bca259adec3d4393e6048ee254b482b68a9aae4f49fe4a5897556f141189089",
+      "receiptSha256": "3534c23e2019a754a955c1310e2361e3fa1d9d4e27af7938ea6e80ba41e5096b"
+    },
+    "archiveFirstCommand": "FAIL_ZSH_PATH_VARIABLE_OVERWROTE_PATH_BEFORE_COPY",
+    "archiveFirstCommandProducedOnlyEmptyDirectorySkeleton": true,
+    "archiveRetryValidated": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "c2a8af72f41639572f1ad57766bf78e25a90ee76d1d03541887e61dd81defd14"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 51,
+    "sha256": "cca7c4334b0b510d53f931dbaafa5657e2832bbca2b9027acc6738d9d3e423c0",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "manifest.stdout.log",
+      "manifest-window.json.log",
+      "manifest-final.stdout.log",
+      "manifest-final-window.json.log",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "boundaries": {
+    "budgetChanged": false,
+    "selectionChanged": false,
+    "reporterImplementationChanged": false,
+    "runnerChanged": false,
+    "zipChanged": false,
+    "productionOrBrowserBehaviorChanged": false,
+    "browser23OrClose16RawModified": false,
+    "browser24Run": false,
+    "behaviorClosure145Rerun": false,
+    "gitOrIndexWrite": false,
+    "longTermDocsUpdated": false
+  },
+  "budget": {
+    "aiTargetMinutesMaximum": 45,
+    "aiHardLimitHours": 1,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "notRun": [
+    "browser24",
+    "build",
+    "artifact",
+    "behavior-closure-145",
+    "cua",
+    "devserver",
+    "ci",
+    "git",
+    "index-write",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

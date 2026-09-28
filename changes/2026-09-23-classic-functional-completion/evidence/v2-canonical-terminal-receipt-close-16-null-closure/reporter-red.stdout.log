@@ -1,0 +1,35 @@
+3:02:07 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (5 tests | 1 failed) 11ms
+     ✓ writes one terminal main attempt from the completed Playwright result and attachments 3ms
+     ✓ uses the filtered suite and excludes visual and skipped non-main tests from attempts 1ms
+     ✓ reads file-backed attachments and fails closed on malformed evidence 2ms
+     × treats a parsed null failure attachment as present and invalid 3ms
+     ✓ marks a modular-world selection without accepting a canonical main attempt 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts > CanonicalReporter > treats a parsed null failure attachment as present and invalid
+AssertionError: expected 'PASS' to be 'FAIL' // Object.is equality
+
+Expected: "FAIL"
+Received: "PASS"
+
+ ❯ apps/web/tests/e2e/classic-support/canonical-reporter.test.ts:157:28
+    155|
+    156|     const receipt = JSON.parse(readFileSync(path, 'utf8'));
+    157|     expect(receipt.status).toBe('FAIL');
+       |                            ^
+    158|     expect(receipt.attempts).toHaveLength(1);
+    159|     expect(receipt.attempts[0]).toMatchObject({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  03:02:07
+   Duration  117ms (transform 26ms, setup 0ms, import 33ms, tests 11ms, environment 0ms)
+

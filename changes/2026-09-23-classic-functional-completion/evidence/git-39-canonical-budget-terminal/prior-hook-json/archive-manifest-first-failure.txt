@@ -1,0 +1,5 @@
+GIT39-BROWSER23-HOOK-JSON-RECOVERY prior archive manifest attempt: FAIL
+
+The loop used zsh's reserved `path` variable, which overwrote `PATH`; `shasum` was then not found.
+The MAP diagnosis copy completed and matched before the failure. The manifest output was truncated and was not accepted as an identity.
+The retry uses `filepath`, rebuilds the manifest from all archived files, and validates every entry. No raw or source file was changed by this failure.

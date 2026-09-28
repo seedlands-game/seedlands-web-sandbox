@@ -1,0 +1,3 @@
+The first staged allowlist comparison exited 1 because code-staged.paths used semantic ordering while git diff
+--cached --name-only emitted lexical path ordering. All 13 expected paths were present, no extra path was staged, and no
+commit was attempted. The allowlist was sorted before rechecking the existing index; files were not restaged.
