@@ -215,6 +215,18 @@ target-card 与 `aimedVoxelTarget()` 同轮双读回，并使用原 180 次完�
 和 `ensurePointerLock` 后、left mouse down 前只调用一次；reject 立即停止且不得 fallback 到旧 aim。不得复制
 `mineVoxel` 的输入/掉落流程、修改通用 aim/target trace、增加路线或 timeout。确定性 control 必须包含真实 scenario
 floor；旧 helper 的 null observation 分支必须实际调用 `mouseCorrectionToVoxel`，不得人为保持 view 不变。
+Browser-19 已越过该 aim 缺口，并完成 wood/stone 全链、木石镐与首个 iron clear/drop；首 iron pickup waypoint
+`[92.5,2.5]` 在 V2 route 内失败。完整 trace 证明 generic `walkTo` 的 `correctMouseToRoute.observe` 已在 pulse 9
+前读到严格满足现有条件的 `@15023`，但 helper 返回 void 后旧 current 仍触发 KeyS。Close-09 只为 `walkTo` options
+增加默认 false 的 `refreshAfterCorrection`；仅 V2 equipment walk options 开启。true 分支在 correction 后与 refresh
+await 后都检查同一原 deadline，以已有 `snapshot(page)` 刷新 current；null fail closed，仍在预算且 client reached 才
+返回，否则发送原 pulse。outer 双投影/freshness/readiness、45s/20s/80ms、jump=false、.06/.08/±.45、方向、坐标和
+pickup inventory 断言均保持；不得改 aim、fallback 或将 Browser19 FAIL 静态改写为 GREEN。
+Close-10 精确取代 Close-09 的默认兼容声明：Close-09 把 correction 后的第一次 deadline check 放在 true 分支外，
+使省略/false 也新增提前 timeout。该检查必须移入 `refreshAfterCorrection=true` 分支，refresh await 后的第二次检查
+保持；省略/false 在 correction 返回时即使越过 deadline，仍按原实现发送该轮 pulse 并由既有 wait 取得新样本。
+Close-09 的原 SOURCE/MANIFEST/delivery、合同、报告、源码与测试字节归档到 Close-10 `prior-release/`；其真实
+RED/GREEN/static 结果不抹去，但不得继续声称当时 generic default deadline 行为未改变。
 
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
