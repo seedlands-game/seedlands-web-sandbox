@@ -228,6 +228,17 @@ Close-10 精确取代 Close-09 的默认兼容声明：Close-09 把 correction �
 Close-09 的原 SOURCE/MANIFEST/delivery、合同、报告、源码与测试字节归档到 Close-10 `prior-release/`；其真实
 RED/GREEN/static 结果不抹去，但不得继续声称当时 generic default deadline 行为未改变。
 
+Browser-20 唯一 canonical attempt 在完整 C0-C3 后、V1 closed-door probe 发键前失败。生产 Pointer Lock 对
+`movementX` 使用 `0.13°/unit`，fixture route correction clamp 为 `80 units`，故单次真实 move 最多覆盖 `10.4°`；
+合法归一化 yaw 差最大 `180°`，旧 12 moves 只覆盖 `124.8°`。`correctMouseToRoute` 的 shared 合同必须显式改为
+最多 18 moves/19 observations：null 消耗同一 observation 配额但不 move、不复用旧值；每个有效 observation 都用
+既有 `horizontalMouseCorrectionToRoute` 根据最新 position/yaw 重算，只有合法非零水平 route vector 且真实
+`abs(dx)<1` 才成功。最后一次 move 后仍须 observation 证明；持续 null、非有限输入、精确零 route vector、mouse
+不响应或最终仍未收敛必须稳定 fail closed，不能静默返回让 `walkTo` 发键。18 是固定 vector/正常 0.13 响应下的完整
+yaw 域上界，不保证动态漂移必达；动态场景在同一上界内重算并在耗尽时失败。不得改变 step/sensitivity、route/door/
+canonical timeout、pulse、voxel aim 180、容差、坐标、Close10 refresh 或增加第二 helper/fallback。Browser-20 仍为
+fixture FAIL，V2 未到达；deterministic/static GREEN 不等于 Browser-21 或产品 GREEN。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
