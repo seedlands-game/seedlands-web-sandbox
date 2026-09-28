@@ -1,0 +1,15 @@
+V2-ARTIFACT-BUILD-11
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-73e8d4da
+Build source SHA: 73e8d4da504e3d21290fc82208b7e2516521515a
+Build source tree: 345682c2280824a294b5531b3a6654a71764c9cc
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state environment: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-73e8d4da/.pnpm-task-run-state-v1
+Task state persisted after run: false
+
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-11-dependency-setup SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/dependency-setup.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm install --offline --frozen-lockfile --ignore-scripts 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/dependency-setup.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-11-build SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/build.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-11-artifact-verify SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-11/artifact-verify.stdout.log'
+
+Post-build collection copied the receipt, independently hashed all 276 mapped dist files, checked the 277-file disk closure and zero symlinks, compared the receipt/disk maps byte-for-byte and against BUILD10, and verified tree/index, workspace links, task-state persistence, port 4273, residual processes, packs.lock, and source/public/dist MP3 identity without running build or artifact again.
+
+SOURCE-MANIFEST.sha256 binds the final delivery documents, not the earlier build source. The build source is bound separately by sourceSha/sourceTree/sourceDigest/lockDigest and the artifact receipt.

@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T07:52:00Z
+更新时间：2026-09-28T08:10:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -95,6 +95,12 @@ Close10 RED `2 failed / 10 passed`、GREEN `12/12`。GIT35 baseline `a1d2b5ae...
 `7264b34a...fb3e` 在 detached tree 通过 `7 files / 74 tests`、Classic/root test types、3 TS ESLint、Prettier 与
 scope；代码提交为 `1afd8e6ba111936d7d04c449ea234cc2f573cac8`。evidence/state 随本提交冻结，精确提交与远端 SHA
 以最终 checkpoint 读回为准；BUILD11/Browser20/Cua/devserver/CI/deploy/merge 未运行。
+当前 BUILD11 checkpoint：已推送 GIT35 source `73e8d4da504e3d21290fc82208b7e2516521515a` 的 clean detached
+tree `345682c2...c9cc` 完成唯一 build 与唯一 artifact verify。sourceDigest `773a3290...48d1`、artifactDigest
+`f6f1ea67...cfa4`，276 项 receipt map 与 277 个磁盘普通文件逐项一致，0 symlink，且 map 与 BUILD10 相同；
+Pack lock 与 MP3 source/public/dist identity 一致。BUILD09/10/11 tree/dist 与 Git32 backup ref 保留。Browser19 FAIL、
+首 iron pickup 未证明及后续未到达事实不变；BUILD11 evidence 随本提交冻结，精确提交/远端 SHA 以最终 checkpoint
+读回为准。Browser20/Cua/devserver/CI/deploy/merge 未运行。
 
 ## 恢复规则
 
