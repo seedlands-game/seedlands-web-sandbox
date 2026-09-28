@@ -297,3 +297,33 @@ receipt SHA-256 为 `a02e67c6c2694bfbb188d81ae8d74b554f6604c773389d952a4c5e40c22
 构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD08、七棵旧 V2 与九棵 V1 tree/dist
 全部保留。BUILD08 未运行 Browser17、Cua、devserver、CI、deploy 或 merge；不能据此宣称 grounded route 的真实
 Browser 墙钟、采矿拾取、equipment pointer/C4/C5 或产品 GREEN。
+
+## BUILD09：Equipment Arrival Drift Fixture
+
+- 已推送 source SHA：`4de6383e431df6f1b08fb6297e1b9c7ab95143a6`；tree
+  `04fa698407463b167125ba86b5403d3f57a767e7`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-4de6383e`。构建前 tracked diff/index 为空；
+  根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖离线复用，task state 位于该 tree。
+- 唯一 `pnpm build`：window `v2-artifact-build-09-build`，UTC `2026-09-28T04:06:31.024Z` 至
+  `04:06:56.683Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-09-artifact-verify`，UTC
+  `2026-09-28T04:07:17.308Z` 至 `04:07:20.313Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`900774ae3ae028f06767b75c73ac5243473f3f8ad63a034232b41dea27459c30`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T04:06:54.023Z`。BUILD09 与 BUILD08 的 276 项 artifact map 完全相同，符合本片仅改 canonical
+fixture/tests/docs 的范围；不据此声称 Browser 动态行为通过。
+
+receipt SHA-256 为 `a0200fe0eb3b182c50f22535c104e753a0045c0a9c96f86e3d04e5cb52c875fd`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；BUILD09 tree/dist 保留。恢复开始前历史
+V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除，不能继续声称旧树仍保留。BUILD09 未运行 Browser18、
+Cua、devserver、CI、deploy 或 merge；不能据此宣称 arrival drift 的真实 Browser 闭环、采矿拾取、equipment
+pointer/C4/C5 或产品 GREEN。

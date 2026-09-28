@@ -1,0 +1,10 @@
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-4de6383e
+Source SHA: 4de6383e431df6f1b08fb6297e1b9c7ab95143a6
+Source tree: 04fa698407463b167125ba86b5403d3f57a767e7
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-4de6383e/.pnpm-task-run-state-v1
+
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-09-build SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-09/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-09/build.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-09-artifact-verify SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-09/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-09/artifact-verify.stdout.log'
+
+Post-build collection copied the generated receipt, independently hashed the same 276 dist files, compared both maps byte-for-byte and against BUILD08, and read tree/index, internal package links, task state, port 4273, residual processes, packs.lock, and MP3 bytes/MIME/SHA without running build or artifact again.
