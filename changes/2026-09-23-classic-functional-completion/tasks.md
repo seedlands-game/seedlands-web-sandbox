@@ -356,6 +356,17 @@ fixture/static GREEN 不等于 Browser 产品 GREEN。
 供 root 后续独立决定 Browser18；本阶段未运行 Browser/Cua/CI，不外推为 arrival drift 或装备产品 GREEN。恢复开始前
 历史 V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除；当前仅保留新 BUILD09 tree。
 
+### V2-EQUIPMENT-MINING-AIM-CLOSE-07/08 / GIT-34-EQUIPMENT-MINING-AIM
+
+状态：EVIDENCE_FROZEN。Browser18 已真实通过完整 V1、workbench、10 格 resource 与
+`resources-placed`，但首格 wood `[80,31,2]` 的旧 pitch-only aim 在 180 moves 后仍未 exact，left mouse mining
+input 未发送；后续采矿、装备 pointer、C4/C5/save 均未触达。Close08 以 `mineVoxel` 单一可选 aim callback 取代
+Close07 的外部 pre-aim：默认调用保持旧 aim，V2 只注入 existing full aim；reject 时 mouse down=0 且不 fallback。
+GIT34 在 baseline `4dccab89...` 的精确 5 路径 detached tree 验证 7 files / 73 tests、Classic/root test types、
+3 TS ESLint、5 路径 Prettier 与 exact scope 均 PASS；代码提交为
+`a987a672df865f4687898ed15b3b5e7f239d6273`；GIT34 evidence/state 随本证据提交交付，精确远端 SHA 以最终
+checkpoint 读回为准。Browser19/BUILD10/Cua/CI 未运行；静态 GREEN 不等于产品 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

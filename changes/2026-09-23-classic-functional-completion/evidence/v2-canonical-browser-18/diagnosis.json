@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-18",
+  "classification": "canonical-fixture-v2-first-wood-mining-aim-oscillation",
+  "failedAt": "first-wood-resource-mouse-aim",
+  "sourceLocation": "apps/web/tests/e2e/classic-support/harness.ts:335",
+  "target": [80, 31, 2],
+  "error": "Real mouse input could not aim at 80,31,2 after 180 correction attempts",
+  "lastRecordedV2Phase": "resources-placed",
+  "resourcePlacement": {
+    "workbenchPlaced": true,
+    "resourceVoxelsPlaced": 10,
+    "resourcesPlacedPhaseRecorded": true
+  },
+  "miningAim": {
+    "playerAtFailure": [80.65967559814453, 32.599998474121094, -0.4997326731681824],
+    "viewAnglesAtFailure": [-481.16999999999973, -17.689999999999987],
+    "targetCenterDistanceMeters": 3.1990450215938315,
+    "miningRangeSatisfied": true,
+    "mouseMoveEventsInAimLoop": 180,
+    "mouseButtonEventsInAimLoop": 0,
+    "lastTargets": [
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1"
+    ],
+    "stableTailMouseX": 479.5560324666302,
+    "stableTailMouseYValues": [196.8863497647945, 190.8863497647945],
+    "stableTailMoveCounts": [81, 81],
+    "helperBehavior": "When an observed target is a valid but wrong voxel, adjustPitchToTarget changes only dy by plus or minus 6 and does not run the full dx/dy correction.",
+    "leftMouseMiningInputSent": false
+  },
+  "failureSnapshot": {
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 29,
+    "worldRevision": 157,
+    "physicsTick": 17508,
+    "acknowledgedInputSequence": 10687
+  },
+  "limits": {
+    "all180ObservedTargetValuesSerialized": false,
+    "last12ObservedTargetsSerializedByError": true,
+    "ackAloneProvesMiningInput": false,
+    "failureAttachmentSnapshotUsedAsExactAimLoopTimeline": false,
+    "productionMiningFailureClaimed": false
+  }
+}

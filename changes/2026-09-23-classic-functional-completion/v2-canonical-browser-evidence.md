@@ -1,5 +1,77 @@
 # V2 Canonical Browser 证据
 
+## Browser-18 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-18`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实通过；V2 已完成 workbench、10 格资源放置并真实记录
+`phase=resources-placed`，随后在第一格 wood `[80,31,2]` 的真实鼠标瞄准中失败。** 该格左键采矿输入尚未发送，
+因此资源采矿拾取、木/石镐、iron unpack、五件铁甲、四槽 pointer 矩阵、C4/C5 与保存恢复均 NOT REACHED。
+Classic 视觉测试独立 PASS，non-Classic smoke SKIPPED。本结果不证明 16 件护甲、194 项矩阵、Cua、人类听觉或性能。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-4de6383e`，HEAD/source
+`4de6383e431df6f1b08fb6297e1b9c7ab95143a6`，tree `04fa698407463b167125ba86b5403d3f57a767e7`；
+source/lock/artifact digest 为
+`900774ae3ae028f06767b75c73ac5243473f3f8ad63a034232b41dea27459c30`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`a0200fe0eb3b182c50f22535c104e753a0045c0a9c96f86e3d04e5cb52c875fd`，builtAt
+`2026-09-28T04:06:54.023Z`，dist 为 276 个盖章文件/277 个磁盘文件且无 symlink。Pack lock 与 MP3 SHA256
+分别为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`、
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-18-4de6383e node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+唯一机器窗口/run ID `4aba5a83-c1c9-4d4e-b4c4-a0a5123c279d`，UTC `2026-09-28T04:17:21.422Z` 至
+`04:22:28.553Z`，`waitedMs=1`、`exitCode=1`、`measurement.status=NOT_RECORDED`。Playwright 单 worker/
+单 Chromium/`retries=0`，结果 `1 failed / 1 passed / 1 skipped`；canonical 主测试只有 attempt 0，没有第二 attempt。
+
+C0-C3 receipt 均为 PASS。V1 test step 在本次 attempt 中完整返回，覆盖水桶、门 readiness/upper/lower/exit-face、
+jukebox/record/media；没有用历史结果倒填。V2 receipt 在 `placeResourceStrip` 完整循环之后记录
+`phase=resources-placed` 和同名 step，因此可确认 workbench 与 10 格 resource placement、grounded route 及 Close-06
+arrival/drift 闭环本次真实到达。该 snapshot 的四个 armor slot、cursor 均为空，`armorPoints=0`。
+
+失败发生在 `equipment-journey-support.ts:260` 调用 `mineVoxel([80,31,2])`，最终由 `harness.ts:335` 抛出。
+失败快照 player `[80.659676,32.599998,-0.499733]` 到目标中心距离约 `3.199m`，已经通过既有 mining readiness/range。
+完整失败 step trace 记录 180 次真实 `Mouse move`；错误对象保留的最后 12 个 target 在 `[84,31,2]` 与
+`[84,30,1]` 间交替。末段鼠标 x 固定为 `479.556...`，y 在 `196.886.../190.886...` 间各出现 81 次。
+`adjustPitchToTarget` 对有效但错误的 voxel 只发 `dy=±6`，不会调用完整 dx/dy correction；关键帧也显示轮廓落在
+更远 wood voxel。该 step 中 `Mouse down/up` 事件为 0，故第一格 wood 的左键采矿输入尚未发送；不能将失败归因于
+Authority mining、掉落或拾取。failure snapshot 的 physics tick/ack 前进也不能单独证明未发送的采矿输入。
+
+| 域                                                                     | Browser-18 结果                   |
+| ---------------------------------------------------------------------- | --------------------------------- |
+| C0-C3                                                                  | PASS；receipt 明确记录            |
+| V1 水桶、门、jukebox/record/media                                      | PASS；完整 test step 已返回       |
+| V2 workbench、10 格 resource、`resources-placed`                       | PASS；receipt phase/step 明确记录 |
+| 第一格 wood approach/mining readiness                                  | PASS；距离约 3.199m               |
+| 第一格 wood 鼠标 aim / 左键 mining input                               | FAIL / NOT SENT                   |
+| 全部采矿拾取、木石镐、iron unpack、五件铁甲                            | NOT REACHED                       |
+| 四槽 click/Shift、wrong-slot 零变化、swap、quickmove、close settlement | NOT REACHED                       |
+| C4、`before.v2EquipmentPreSave`、C5、save/continue、V1 media restore   | NOT REACHED                       |
+| runtime/actor epoch、durability/revision、新 ref restore               | NOT REACHED                       |
+| Classic 视觉 v3                                                        | PASS，31.2 秒                     |
+| non-Classic smoke                                                      | SKIPPED                           |
+| durability-1、death、drop、respawn                                     | NOT OBSERVED                      |
+| Cua、人类听觉                                                          | NOT RUN                           |
+| 性能                                                                   | NOT MEASURED                      |
+
+failure attachment schema 不含 pageErrors/failedResponses，二者为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。只读 trace 记录 1 条 log、0 条 page-error 和 944 条 network resource
+snapshot，其中 HTTP `>=400` 为 0；这些 trace readback 不补造成 failure attachment 字段。trace 为 438432955 bytes，
+SHA256 `93321ab6b0deefa228ed7e84c125a0269a8b88ab23d36c67f7d74298c7fa420e`；`trace-50m/` 含 9 个最大
+50 MiB 分片，流式重组已验证。
+
+独立 machine-lock `harness:artifact` 后验窗口 `v2-canonical-browser-18-artifact-postcheck` PASS，UTC
+`2026-09-28T04:27:03.330Z` 至 `04:27:06.322Z`，同 source/lock/artifact digest、builtAt 与 276-file map。
+后验验收树 tracked/index clean，dist 277 files/0 symlink，4273 无监听，owned Playwright/Chromium/preview 为 0，
+benchmark lock absent。本轮未修改 source/test/scenario/dist，也未 build、第二 attempt、Cua、CI、Git/index、push、
+deploy 或 merge。Browser lease 在证据封存后释放。
+
 ## Browser-17 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-17`

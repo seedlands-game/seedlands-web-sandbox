@@ -1,0 +1,15 @@
+V2-EQUIPMENT-MINING-AIM-CLOSE-08
+baseline=4dccab8980b546dc577ac5ace8c9d8131782b324
+owned editable paths=6
+
+red
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-08-red SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/red-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/red.stdout.log'
+
+green-final
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-08-green-final-02 SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/green-final-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/green-final-02.stdout.log'
+
+affected-final
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-08-affected-final-02 SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/affected-final-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/affected-final-02.stdout.log'
+
+classic-types-final / root-types-final / eslint-final / format-final-02 / scoped-diff-final
+See corresponding stdout and machine-window receipts. All wrappers use /bin/bash -o pipefail; Vitest uses maxWorkers=1.

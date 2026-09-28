@@ -1,0 +1,107 @@
+12:52:42 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests | 3 failed) 15ms
+     ✓ reproduces Browser-18 pitch-only oscillation and converges with one full correction budget 2ms
+     ✓ keeps 'wood-block:80:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:80:1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:82:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:82:1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:84:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:84:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:86:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:86:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:88:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:88:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:90:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:90:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:92:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:92:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:94:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:94:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:96:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:96:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:98:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:98:1' visible from the finite route boundary 0ms
+     ✓ keeps the reclaimed workbench visible from its mining approach 0ms
+     × requires both V2 mining consumers to inject full aim into mineVoxel instead of pre-aiming separately 3ms
+     ✓ keeps the default mineVoxel aim callback and calls it before the mining button 5ms
+     × uses one injected full-aim callback and does not fall back to the legacy guard 1ms
+     × stops before left mouse down when the injected full-aim callback rejects 1ms
+     ✓ keeps the correction mechanism content-neutral 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts > Classic V2 equipment mining aim > requires both V2 mining consumers to inject full aim into mineVoxel instead of pre-aiming separately
+AssertionError: expected 'async function mineResources(page: Pa…' not to contain 'await aimAtVoxelWithRealMouse(page,'
+
+- Expected
++ Received
+
+- await aimAtVoxelWithRealMouse(page,
++ async function mineResources(page: Page, resources: readonly V2EquipmentResource[]): Promise<void> {
++   await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
++   for (const resource of resources) {
++     const before = itemCount(await playerState(page), resource.dropItemId);
++     const approach = await walkEquipmentRoute(page, resource.approach);
++     if (!isEquipmentMiningReady(approach, resource.target))
++       throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
++     await aimAtVoxelWithRealMouse(page, resource.target);
++     await mineVoxel(page, resource.target);
++     await expectPresentedDropOrPickup(page, resource.dropItemId, before);
++     await walkEquipmentRoute(page, equipmentResourcePickup(resource));
++     await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
++     await walkEquipmentRoute(page, resource.approach);
++   }
++ }
++
++
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:156:28
+    154|     );
+    155|     for (const consumer of [resourceMining, workbenchMining]) {
+    156|       expect(consumer).not.toContain('await aimAtVoxelWithRealMouse(pa…
+       |                            ^
+    157|       expect(consumer).toContain('await mineVoxel(page,');
+    158|       expect(consumer).toContain('aimAtVoxelWithRealMouse');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts > Classic V2 equipment mining aim > uses one injected full-aim callback and does not fall back to the legacy guard
+Error: legacy aim callback must not run
+ ❯ Object.evaluate apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:86:44
+     84|       if (source.includes('target-card')) {
+     85|         calls.legacyAimReads += 1;
+     86|         if (options.failOnLegacyAim) throw new Error('legacy aim callb…
+       |                                            ^
+     87|         return target.join(',');
+     88|       }
+ ❯ adjustPitchToTarget apps/web/tests/e2e/classic-support/harness.ts:317:33
+ ❯ mineVoxel apps/web/tests/e2e/classic-support/harness.ts:355:9
+ ❯ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:174:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts > Classic V2 equipment mining aim > stops before left mouse down when the injected full-aim callback rejects
+AssertionError: expected [Function] to throw error including 'full aim rejected' but got 'legacy aim callback must not run'
+
+Expected: "full aim rejected"
+Received: "legacy aim callback must not run"
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:186:50
+    184|       throw new Error('full aim rejected');
+    185|     });
+    186|     await expect(mineVoxel(page, target, fullAim)).rejects.toThrow('fu…
+       |                                                  ^
+    187|     expect(fullAim).toHaveBeenCalledOnce();
+    188|     expect(calls).toMatchObject({ legacyAimReads: 0, down: 0, up: 0 });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 24 passed (27)
+   Start at  12:52:42
+   Duration  348ms (transform 77ms, setup 0ms, import 247ms, tests 15ms, environment 0ms)
+
