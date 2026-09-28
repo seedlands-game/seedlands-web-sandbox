@@ -58,7 +58,7 @@ Web 的 engineering/architecture 合同会启动独立的编译器或全源 Lint
 
 ## 延期设计：唯一 Classic 线路
 
-全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
+全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 保留仓库根 `rootDir` 以生成稳定的根相对 Reporter identity，同时由唯一 Chromium project 把收集目录限制在 `apps/web/tests/e2e` 并只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
 
 build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` 记录 source、lock 与每个产物文件的摘要；Chromium job 下载该 artifact 到相同路径，`pnpm harness:classic` 在启动前后调用 `verifyArtifact`。重新构建、缺 receipt、source/lock 不一致或任一字节变化都失败。
 

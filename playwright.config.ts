@@ -59,5 +59,5 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI && !production && process.env.SEEDLANDS_E2E_REUSE_SERVER === '1',
     timeout: 30_000,
   },
-  projects: [{ name: 'chromium', timeout: 60_000 }],
+  projects: [{ name: 'chromium', testDir: './apps/web/tests/e2e', timeout: 60_000 }],
 });
