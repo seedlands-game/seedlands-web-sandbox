@@ -205,6 +205,16 @@ crossing 时显式返回 drift；client 仍到位而仅 server 迟到时继续�
 为 baseline，对同一 waypoint 重算 `KeyW/KeyS` 并恢复真实 walk。所有 wait/correction 继续共享原 45 秒 deadline，单次
 wait 上限 20 秒，`.06/.08/±.45`、80ms、grounded `jump=false`、路线与 scenario 坐标不变。stale、ack 回退、未 ready
 样本不能触发 arrival 或 drift；不得捕获 timeout 后盲重试、用 server 选方向或扩容差/预算。
+Browser-18 唯一 canonical attempt 已让完整 V1、workbench 与 10 格资源放置真实通过，并记录
+`phase=resources-placed`；随后第一格 wood `[80,31,2]` 在 `mineVoxel` 的旧 `adjustPitchToTarget` 中失败。完整失败 step
+记录 180 次真实 mouse move、0 次 mouse button，错误保留的最后 12 个 target 在 `[84,31,2]` 与 `[84,30,1]`
+间振荡；左键采矿尚未发送，不能归因为 Authority mining、掉落或拾取。Close-08 只在 V2 equipment consumer 内，
+对 10 个 resource 与最终 workbench 回收，把既有 `aimAtVoxelWithRealMouse` 作为 `mineVoxel` 的单一可选 aim
+callback。`mineVoxel` 默认 callback 仍为旧 `adjustPitchToTarget`，保持所有原调用语义；V2 callback 继续以
+target-card 与 `aimedVoxelTarget()` 同轮双读回，并使用原 180 次完整 yaw/pitch 总预算。callback 在既有 range guard
+和 `ensurePointerLock` 后、left mouse down 前只调用一次；reject 立即停止且不得 fallback 到旧 aim。不得复制
+`mineVoxel` 的输入/掉落流程、修改通用 aim/target trace、增加路线或 timeout。确定性 control 必须包含真实 scenario
+floor；旧 helper 的 null observation 分支必须实际调用 `mouseCorrectionToVoxel`，不得人为保持 view 不变。
 
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命

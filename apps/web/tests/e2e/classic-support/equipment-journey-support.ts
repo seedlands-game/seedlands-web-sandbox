@@ -257,7 +257,7 @@ async function mineResources(page: Page, resources: readonly V2EquipmentResource
     const approach = await walkEquipmentRoute(page, resource.approach);
     if (!isEquipmentMiningReady(approach, resource.target))
       throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
-    await mineVoxel(page, resource.target);
+    await mineVoxel(page, resource.target, aimAtVoxelWithRealMouse);
     await expectPresentedDropOrPickup(page, resource.dropItemId, before);
     await walkEquipmentRoute(page, equipmentResourcePickup(resource));
     await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
@@ -434,7 +434,7 @@ export async function reclaimEquipmentWorkbench(page: Page): Promise<void> {
   const miningApproach = await walkEquipmentRoute(page, equipmentWorkbenchMiningApproach(workbench));
   if (!isEquipmentMiningReady(miningApproach, workbench.target))
     throw new Error(`Equipment workbench approach is outside mining range for ${workbench.target.join(',')}.`);
-  await mineVoxel(page, workbench.target);
+  await mineVoxel(page, workbench.target, aimAtVoxelWithRealMouse);
   await expectPresentedDropOrPickup(page, 'workbench', before);
   await walkEquipmentRoute(page, equipmentResourcePickup(workbench));
   await expect.poll(async () => itemCount(await playerState(page), 'workbench')).toBeGreaterThan(before);
