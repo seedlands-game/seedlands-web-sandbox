@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { verifyArtifact, root } from './artifact.mjs';
+import { readClassicReceipt, validateClassicRunReceipt } from './classic-receipt.mjs';
 import { performanceWindowContext, writeMeasurementDeclaration } from './performance-window-proof.mjs';
 
 const artifact = verifyArtifact();
@@ -11,6 +12,7 @@ const resultPath = resolve(root, 'harness/results', runId, 'classic.json');
 const selectionArgs = process.argv.slice(2);
 if (process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1' && selectionArgs.length)
   throw new Error('Benchmark must use the complete frozen scenario; test selection is correctness-only.');
+rmSync(resultPath, { force: true });
 const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'playwright.config.ts', ...selectionArgs], {
   cwd: root,
   stdio: 'inherit',
@@ -23,13 +25,21 @@ const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'pla
 });
 if (result.error) throw result.error;
 verifyArtifact();
+const benchmark = process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1';
+const modularWorld = process.env.SEEDLANDS_PACK_SMOKE === 'modular-world';
+const receipt = readClassicReceipt(resultPath);
+const canonicalAttempt = validateClassicRunReceipt(receipt, {
+  runId,
+  sourceSha: artifact.sourceSha,
+  processStatus: result.status,
+  requireCanonicalMain: selectionArgs.length === 0 && !modularWorld,
+  benchmark,
+  modularWorld,
+});
 const window = performanceWindowContext();
-if (result.status === 0 && process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1' && window) {
-  const receipt = JSON.parse(readFileSync(resultPath, 'utf8'));
-  if (receipt?.status !== 'PASS' || receipt.attempts?.length !== 1)
-    throw new Error('Classic benchmark declaration requires exactly one PASS attempt.');
-  const measurement = receipt.attempts[0]?.benchmark?.measurement;
-  if (measurement?.status !== 'MEASURED') throw new Error('Classic benchmark did not produce a measured record.');
+if (benchmark) {
+  if (!window || !canonicalAttempt) throw new Error('Classic benchmark requires a reserved canonical measurement.');
+  const measurement = canonicalAttempt.benchmark.measurement;
   writeMeasurementDeclaration(window, {
     measurementPath: resultPath,
     format: 'classic',

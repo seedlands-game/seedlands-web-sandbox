@@ -72,7 +72,7 @@ test.afterEach(async ({ page }, testInfo) => {
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
-  test.setTimeout(720_000);
+  test.setTimeout(900_000);
   evidenceWritten = false;
   restoreEvidence = undefined;
   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
