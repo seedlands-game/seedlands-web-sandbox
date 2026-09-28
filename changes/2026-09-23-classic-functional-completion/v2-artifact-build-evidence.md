@@ -327,3 +327,39 @@ dist 共 277 个普通文件且无 symlink。`packs.lock.json` SHA-256 为
 V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除，不能继续声称旧树仍保留。BUILD09 未运行 Browser18、
 Cua、devserver、CI、deploy 或 merge；不能据此宣称 arrival drift 的真实 Browser 闭环、采矿拾取、equipment
 pointer/C4/C5 或产品 GREEN。
+
+## BUILD10：Equipment Mining Aim Fixture
+
+- 已推送 source SHA：`f282da95833c5ff568b8b7a4caac7d7a7513514f`；tree
+  `ad93a8e1afdbb461a32f7c87ab4b860fd44a2074`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-f282da95`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖通过
+  `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，0 下载。两个重负载窗口的
+  `XDG_STATE_HOME` 均定向到该 tree 内 `.pnpm-task-run-state-v1`，但实际没有产生持久 task-state 目录，按事实记录为
+  `taskStatePersisted=false`。
+- 唯一 `pnpm build`：window `v2-artifact-build-10-build`，UTC `2026-09-28T05:46:41.956Z` 至
+  `05:47:07.933Z`，`PASS/exit 0`；Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功，
+  Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-10-artifact-verify`，UTC
+  `2026-09-28T05:47:14.881Z` 至 `05:47:18.065Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c8463ed87574e1ff1ad4d1c06beb4649fc518ee6815e071a289aec1187c0e865`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T05:47:05.058Z`。BUILD10 与 BUILD09 的 276 项 artifact map 实测完全相同；GIT34 只改 canonical
+fixture、测试、spec/contract/evidence，不改变 production artifact 字节，但 source identity 已推进，不能用旧 receipt
+替代本次构建。
+
+receipt SHA-256 为 `fd010be92fce57ffebb254b0eb2b653a385922d22234856d85317074e39d79e0`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；BUILD09 与 BUILD10 tree/dist 均保留，
+`refs/task-backups/git32-evidence-a402b016` 保留。更早 acceptance trees 在本阶段开始前已缺失，非本阶段删除。
+Browser18 仍为 FAIL：完整 V1 与 V2 `resources-placed` 通过，首 wood aim 后未发 left mouse mining input，后续
+mining/pointer/C4/C5/save 未到。BUILD10 未运行 Browser19、Cua、devserver、CI、deploy 或 merge；CLOSE08/GIT34
+static 与本次 artifact GREEN 均不等于 Browser 产品 GREEN。
