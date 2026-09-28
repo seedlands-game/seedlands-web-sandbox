@@ -10,6 +10,7 @@ export const EQUIPMENT_RESOURCE_ROUTE_OPTIONS = Object.freeze({
 export const EQUIPMENT_RESOURCE_WALK_OPTIONS = Object.freeze({
   ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
   jump: false,
+  refreshAfterCorrection: true,
 });
 export const EQUIPMENT_ROUTE_TIMEOUT_MS = 45_000;
 // Matches mineVoxel's existing approach tolerance, contains one 80ms pulse (max 0.36m),

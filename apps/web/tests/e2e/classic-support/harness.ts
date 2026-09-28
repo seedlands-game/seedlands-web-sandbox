@@ -273,22 +273,29 @@ export async function walkTo(
     corridorTolerance?: number;
     timeout?: number;
     pulseMs?: number;
+    refreshAfterCorrection?: boolean;
   }> = {},
 ): Promise<ClassicSnapshot> {
   const key = options.key ?? 'KeyW';
-  const tolerance = options.tolerance ?? 0.65;
-  const corridorTolerance = options.corridorTolerance ?? 1.5;
+  const { tolerance = 0.65, corridorTolerance = 1.5 } = options;
   const deadline = Date.now() + (options.timeout ?? 45_000);
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
-    if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
+    if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
     await correctMouseToRoute({
       target,
       direction: key,
       observe: () => snapshot(page),
       move: (dx, dy) => moveMouseBy(page, dx, dy),
     });
+    if (options.refreshAfterCorrection) {
+      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+      if ((current = await snapshot(page)) === null)
+        throw new Error('Classic snapshot is unavailable after route correction.');
+      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+      if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
+    }
     const segmentStart = current;
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
     await page.keyboard.down(key);
