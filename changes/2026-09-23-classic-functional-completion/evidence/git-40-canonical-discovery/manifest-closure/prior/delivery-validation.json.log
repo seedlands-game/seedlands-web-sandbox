@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "stage": "GIT-40-CANONICAL-DISCOVERY",
-  "status": "PASS_STRICT_MANIFEST_CLOSURE",
+  "status": "PASS_PENDING_NATURAL_HOOK",
   "baseline": "549dfecad3f6a8c6ba5c5179382f1af39101c1ff",
   "codeCommit": {
     "sha": "ed6ea030cfacc517aab337b32993803c50ed3ab7",
@@ -61,16 +61,13 @@
     "sha256": "922f1859ff33d8d1fe4cfad1ce6613e7d16c57057977924f2fd4c4556c4d4120"
   },
   "evidenceManifest": {
-    "entries": 39,
-    "sha256": "bd38a8b14f12a772ce9e7281642e95117e66e14409c2f3fe112e5fac12db89e6",
+    "entries": 17,
+    "sha256": "289b0c5f8441d8272e386ca2f42131be26425e2a62ba8e7de24129a2017dfb6d",
     "excludes": [
       "MANIFEST.sha256",
       "delivery-validation.json",
       "final-selfcheck.stdout.log",
-      "final-selfcheck.window.json.log",
-      "manifest-closure/strict-green.stdout.json.log",
-      "manifest-closure/strict-green.stderr.log",
-      "manifest-closure/strict-green.window.json.log"
+      "final-selfcheck.window.json.log"
     ]
   },
   "secondCommit": {
@@ -80,24 +77,8 @@
   },
   "finalSelfcheck": {
     "runId": "git40-final-selfcheck",
-    "status": "SUPERSEDED_WARNING_SKIPPED_ONE_ENTRY",
+    "status": "PASS",
     "outputsExcludedFromManifestToAvoidSelfReference": true
-  },
-  "manifestClosure": {
-    "publishedManifestSha256": "289b0c5f8441d8272e386ca2f42131be26425e2a62ba8e7de24129a2017dfb6d",
-    "publishedDeliverySha256": "5ff72f342e65195b604d28b7f791ae0aba918e6f246badb2f461b26b9c2dd641",
-    "selectionActualSha256": "7156c9366d06b66ae5649a39176b3ddbdb9658de6a63267e2a25f455baee57",
-    "oldLineDigestCharacters": 62,
-    "oldManifestDeclaredEntries": 17,
-    "oldManifestStrictValidEntries": 16,
-    "oldManifestStrictVerifiedEntries": 0,
-    "oldManifestStrictStatus": "FAIL",
-    "oldManifestStrictExitCode": 1,
-    "priorManifestSha256": "21890daced658dccf7596743160419ac571f45598d00ba42640e21b76ea1bd07",
-    "currentManifestStrictStatus": "PASS",
-    "currentManifestStrictVerifiedEntries": 39,
-    "strictGreenOutputsExcludedFromManifest": true,
-    "closureCommitExactPaths": 28
   },
   "boundaries": {
     "browser25Run": false,
