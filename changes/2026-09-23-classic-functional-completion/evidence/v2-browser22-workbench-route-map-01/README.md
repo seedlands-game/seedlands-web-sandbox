@@ -1,0 +1,94 @@
+# V2 Browser22 Workbench Route Map 01
+
+状态：`MAP ONLY / NO IMPLEMENTATION`。Browser22 仍为正式 FAIL；本阶段没有执行测试、build、browser、Git、Cua、
+CI、部署或合并，也没有修改既有 Browser22 evidence、累计报告、Close13 dirty、spec、tasks 或 state。
+
+## 结论
+
+Browser22 在 `wood-collected` 后执行 `openWorkbench` 的第二段 route，target 为 `[78.5,0.5]`。第一段 corridor
+`[78.5,-0.5]` 已完成；本报告只分析第二段。从 outer 初始 observation `@8674` 到失败 step 结束共
+`45,707.761ms`。现有调用序列唯一支持三次 outer iteration：
+
+1. `@8674` 为 outer baseline，第一次 inner walk 从 `@8675` 开始并以 `@8880` 返回 client-only snapshot。
+   outer `waitForProgress` 的 `@8883` 与 `@8880` tick/ack 相同，按现有 freshness 为 null；`@8885` tick/ack 前进，
+   client 已漂出、server 已到，按现有 classifier 为 drift。随后 `@8887` 是下一次 inner walk 的初始 observation。
+2. 第二次 inner walk 以 `@9107` 返回 client-only；outer `@9110` 仍 client-only，`@9112` 为 fresh
+   server-only/client-drift，分类为 drift；`@9114` 启动第三次 inner walk。
+3. 第三次 inner walk 未返回。最后完成的 `@9386` 是 grounded/non-colliding snapshot，但 client/server 都距 target
+   约 `0.36688`；其 await 返回后越过 inner deadline，`harness.ts:223` 抛出最终错误。
+
+`@8880` 的 typed `route-reached` kind 没有序列化，不能直接声称；但它作为 `walkTo` 返回值后紧接 outer
+`waitForProgress`，且没有额外 mouse/key，可由源码与 API 顺序推出 inner walk 已返回该同一 snapshot。outer classifier
+也没有序列化；`@8883 -> @8885 -> @8887` 的 parent expect、现有 classifier 与下一 baseline 共同唯一推出 stale poll、
+drift completion 和 baseline 更新。全 144 个 route snapshot 没有 client/server 同时满足现有 strict geometry。
+
+## 时间归因
+
+完整 leg 记录 111 次真实 mouse move、8 对 KeyS pulse、8 个 inner grounded wait、2 个 outer wait 和 22 个
+Pointer Lock unlock。每次 unlock 后都紧随一个独立 `page.waitForTimeout(1500)`；不是确认调用重复计数。22 个实际
+cooldown API span 合计 `33,086.562ms`（72.387%）；mouse correction pipeline 扣除 cooldown 后
+`9,588.054ms`（20.977%）；8 个 pulse 合计 `698.730ms`（1.529%）；grounded wait `123.605ms`
+（0.270%）；outer wait `94.576ms`（0.207%）；其余 snapshot/JS/call gap `2,116.234ms`（4.630%）。
+这些是单次失败 leg 的诊断分解，不是性能 benchmark。
+
+22 个 reset 均符合现有 `mouse-input.ts` safety frame：candidate 将越过 canvas 内缩 64px 边界时先 exit、确认 unlock、
+固定等待 1500ms、必要时点击继续、重新 lock，再从 canvas 中心恢复相对移动。证据没有显示 mouse event 被拒绝：
+move 后 yaw 按约 `0.13°/unit` 改变，Pointer Lock 也都重新取得。因此不能把它定性为 production input 错误；但真实
+跨目标时 target yaw 约翻转 180°，18-step correction 经常触发多个 safety reset，固定 cooldown 成为共享 45 秒预算的
+主要消耗。后续 8 个 KeyS pulse 在 outer 的 x-based direction 规则下均为正确方向；残余 x 约 0.01-0.09m，不足以
+证明横向纠正或生产 physics 错误。
+
+trace 的 `Mouse move` 参数是 Playwright canvas 绝对坐标，不是浏览器事件的 `movementX`；`movementX` 没有直接
+序列化。机械 timeline 因此把 requested movement 标为 `NOT_RECORDED_DIRECTLY`，只记录相邻 snapshot 的 yaw delta，
+并按冻结 production sensitivity `0.13` 给出反推值。111 次 move 后的下一观察均出现非零 yaw delta，这支持“输入有
+响应”，不等于证明每个浏览器事件的精确 movementX。
+
+## Close13 裁决
+
+冻结但未准出的 Close13 catch 不能挽救真实 Browser22。真实 `walkEquipmentRoute` 使用 `now: Date.now`；outer 先算
+`remainingBeforeWalk = outerDeadline - Date.now()`，稍后进入 `walkTo` 才创建
+`innerDeadline = Date.now() + remainingBeforeWalk`。单调时钟下 `innerDeadline >= outerDeadline`。Browser22 又是在
+`Date.now() >= innerDeadline` 的 observe-after-await 边界抛错，所以错误到达 outer catch 时必然也有
+`Date.now() >= outerDeadline`；“outer 尚有剩余才 observe/classify”分支不可达。提前 reject 的 stub 只证明 toy driver，
+不代表真实 driver 合同。该 dirty 保留但本阶段不修改、不测试、不推荐准出。
+
+## 单一候选与 RED
+
+最窄候选是在现有 outer classifier 已验证 `drift` 后，只为下一轮保存一次相反 key 的 direction hint。
+`waitForProgress` 只在 client 已 reached 后进入，因此 fresh drift 表示已从该到达状态离开。`@8885` 的 x 残差仅
+`+0.007843m`、z 残差 `-0.085964m`；当前 x-only 规则再次选 KeyS，但当前 yaw 对 KeyW 只差 `1.673°`，
+对 KeyS 差 `178.327°`。`@9112` 同样为 `1.937°` 对 `178.063°`。这是最早可机械证明的不必要转向：第二、
+第三轮分别消耗 36/44 次 mouse move 和 7/9 个 cooldown。候选不改 shared aim、mouse safety、generic walk 或
+deadline；下一循环消费 hint 后继续同 target、baseline 和剩余 45 秒预算。arrival/null/error 不设置 hint，普通非 wait
+循环仍用现有 x-based direction。它不宣称 Browser23 会通过。
+
+建议 RED：
+
+- 真实 `followEquipmentRoute` 重放 `@8674 -> @8880 -> @8883 -> @8885`：第一次 wait 的 stale poll 为 null，fresh
+  server-only/client-drift 更新 baseline；下一 `driver.walk` 必须仍为同 target 但从 KeyS 反转为 KeyW，并用 sentinel
+  终止，不能 stub 成功。
+- 同样重放 `@8885 -> @9107 -> @9110 -> @9112`；validated drift 只影响紧接的一轮。arrival/null/error 和普通
+  non-wait baseline 更新不得设置或保留 hint。
+- 测试直接调用现有 `horizontalMouseCorrectionToRoute`，证明 @8885/@9112 的 KeyW 校正远小于 KeyS；不复制角度算法。
+- 可用 fake Page 补真实 `walkTo` 接线，必须明确 snapshot/input/physics 为模型；产品结论只能由后续唯一 Browser 验收。
+- null、stale、unready、one-sided 不冒充 strict；不改 45s/20s/80ms、18/19、step80、0.13、容差或坐标。
+
+拟议 ownership：只改 `equipment-resource-route.ts` 与其现有测试或一个新的 focused post-drift-direction 测试，并窄更新
+当前 change 合同/证据。`harness.ts`、`equipment-journey-support.ts`、`target-aim.ts`、`mouse-input.ts`、production、
+scenario 和 Browser22 raw 均保持只读，除非 root 另行扩 scope。预计实现 AI 1-2h、硬 3h、传统 0.25-0.5 PD，
+120% 容量 AI 2.4h/传统 0.6 PD；credits、
+费率、API 等价费用、额度与占比 unknown。
+
+## 封存说明
+
+首次最终 selfcheck 在 repo root 直接校验带 `./` 相对路径的 MANIFEST，因 cwd 错误以 exit 1 结束；失败 stdout/window
+原样保留。该命令没有修改文件。最终 selfcheck 改为从 evidence 目录校验 MANIFEST、从 BUILD13 acceptance tree 校验
+SOURCE。
+
+第二次 selfcheck 的全部内容断言已经完成，但脚本又在 benchmark-window 内错误要求机器锁目录不存在，因此以 exit 1
+结束；空 stdout 与 window 原样保留。最终脚本改为在锁内验证 owner runId，退出后再独立确认锁释放。
+
+GIT38 提交前的自然 hook 发现 Browser22 四份机械导出使用 `.json` 后缀时会被 Prettier 当作可编辑 JSON。本报告当前
+引用已改名但原字节不变的 `.json.log` 文件；Browser22 与本 MAP 的旧审批 metadata、旧路径映射均保存在
+`../git-38-post-drift-direction/prior-packaging/`。这是 packaging-only supersession，不改变 MAP 结论、Browser22 FAIL、
+source、trace 或任何运行行为。

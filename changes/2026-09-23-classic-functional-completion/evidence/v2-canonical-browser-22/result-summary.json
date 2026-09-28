@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "runId": "v2-canonical-browser-22-8ae9e354",
+  "status": "FAIL",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-8ae9e354",
+  "sourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+  "treeSha": "f91590626a01d1a6b2d771e27fdb74b5d022d47b",
+  "sourceDigest": "af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388",
+  "builtAt": "2026-09-28T12:34:28.272Z",
+  "performanceWindow": {
+    "id": "9c2c7c2a-bf89-4739-9e69-5d62d22e0bec",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T12:50:41.523Z",
+    "endedAt": "2026-09-28T12:59:12.609Z",
+    "waitedMs": 2,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED"
+  },
+  "playwright": {
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1,
+    "mainStatus": "FAIL",
+    "visualStatus": "PASS_BY_RUNNER_STDOUT",
+    "nonClassicStatus": "SKIPPED_BY_RUNNER_STDOUT",
+    "runnerStdoutRecordedFromStart": true
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_THREE_WOOD_PICKUPS_ON_WORKBENCH_APPROACH_ROUTE",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "v2Reached": [
+    "workbench-and-ten-resources-placed",
+    "three-wood-real-left-mouse-mining-actions",
+    "three-wood-voxels-cleared",
+    "three-wood-drop-or-pickup-polls",
+    "three-wood-independent-inventory-item-count-increases",
+    "wood-collected-snapshot-with-wood-block-count-3"
+  ],
+  "notReached": [
+    "wood-pickaxe-crafting-and-equipping",
+    "stone-mining-pickup-and-stone-pickaxe",
+    "iron-mining-and-pickup",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "wrong-slot-no-change",
+    "swap-quickmove-and-close-settlement",
+    "C4",
+    "before-v2EquipmentPreSave",
+    "C5",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "durability-revision-and-new-reference-restore"
+  ],
+  "notObserved": ["durability-1", "death", "equipment-drop", "respawn"],
+  "notRun": ["human-audible-audio", "Cua"],
+  "notMeasured": ["performance"],
+  "trace": {
+    "sizeBytes": 667031083,
+    "parts": 13,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19",
+    "reassemblyValidated": true
+  }
+}

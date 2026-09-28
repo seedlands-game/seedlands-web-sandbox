@@ -1,0 +1,1 @@
+Initial dependency-link/SOURCE command partially failed before creating SOURCE-MANIFEST because zsh reserves lowercase path as its command-search array. The staged five-path tree remained intact. The command stdout was not redirected; this diagnostic records the observed shell errors and the empty SOURCE file was replaced before validation.

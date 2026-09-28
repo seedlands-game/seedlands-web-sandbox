@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "classification": "canonical-fixture-v2-workbench-approach-route-deadline",
+  "failedAt": "wood-collected-to-workbench-approach-before-wood-pickaxe-crafting",
+  "ownerReadback": {
+    "consumer": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:prepareCraftedIronArmor:391",
+    "workbenchRoute": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:openWorkbench:270",
+    "outerController": "apps/web/tests/e2e/classic-support/equipment-resource-route.ts:followEquipmentRoute:131",
+    "driver": "apps/web/tests/e2e/classic-support/harness.ts:walkTo:218",
+    "deadlineThrow": "apps/web/tests/e2e/classic-support/harness.ts:223",
+    "productionFailureClaimed": false
+  },
+  "error": {
+    "message": "Real input route timed out before 78.5,0.5.",
+    "source": "apps/web/tests/e2e/classic-support/harness.ts:223 observe-after-await deadline",
+    "playwrightExitCode": 1
+  },
+  "reachedBeforeFailure": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "resourcesPlaced": "PASS_BY_RESTORE_EVIDENCE_STEP",
+    "woodMiningAndPickup": "PASS_BY_WOOD_COLLECTED_STEP_AND_INDEPENDENT_BAG_COUNT",
+    "woodInventoryStack": { "slot": 0, "itemId": "wood-block", "count": 3 },
+    "inventoryRevision": 39,
+    "gameplayRevision": 113681,
+    "worldItemsZeroUsedAsPickupProof": false,
+    "woodPickaxe": "NOT_REACHED",
+    "stone": "NOT_REACHED",
+    "iron": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "failedRouteLeg": {
+    "target": [78.5, 0.5],
+    "directionObservedForAllKeyboardPulses": "KeyS",
+    "interval": {
+      "baselineStep": "pw:api@8674",
+      "baselineStartTime": 388570.806,
+      "lastObservationStep": "pw:api@9386",
+      "lastObservationEndTime": 434277.232
+    },
+    "counts": {
+      "snapshotCalls": 144,
+      "mouseMoves": 111,
+      "keyDowns": 8,
+      "keyUps": 8,
+      "pointerUnlockCalls": 22
+    },
+    "baseline": {
+      "source": "INFERRED_FROM_CALL_ORDER_AND_SOURCE",
+      "stepId": "pw:api@8674",
+      "player": [78.55076599121094, 32.599998474121094, -0.49871936440467834],
+      "serverPlayerPosition": [78.55076243809718, 32.6, -0.4987193627433512],
+      "physicsTick": 20342,
+      "acknowledgedInputSequence": 13641
+    },
+    "firstClientReached": {
+      "stepId": "pw:api@8880",
+      "player": [78.50784301757812, 32.599998474121094, 0.5390361547470093],
+      "serverPlayerPosition": [78.49858066153473, 32.6, 0.6640361514406132],
+      "clientDistance": 0.03981625675729993,
+      "serverDistance": 0.1640422918064936,
+      "clientReached": true,
+      "serverReached": false,
+      "physicsTick": 20546,
+      "acknowledgedInputSequence": 13854
+    },
+    "subsequentProjectionSamples": [
+      {
+        "stepId": "pw:api@8883",
+        "clientDistance": 0.018286700588146555,
+        "serverDistance": 0.1640422918064936,
+        "clientReached": true,
+        "serverReached": false,
+        "physicsTick": 20546,
+        "acknowledgedInputSequence": 13854
+      },
+      {
+        "stepId": "pw:api@8885",
+        "clientDistance": 0.08632088748044076,
+        "serverDistance": 0.01828646942914441,
+        "clientReached": false,
+        "serverReached": true,
+        "physicsTick": 20549,
+        "acknowledgedInputSequence": 13857
+      },
+      {
+        "stepId": "pw:api@8887",
+        "clientDistance": 0.10016028535770438,
+        "serverDistance": 0.05871220558685115,
+        "clientReached": false,
+        "serverReached": true,
+        "physicsTick": 20550,
+        "acknowledgedInputSequence": 13858
+      }
+    ],
+    "strictDualProjectionSamples": 0,
+    "typedAimOutcome": "NOT_RECORDED_DIRECTLY",
+    "outerClassifierReturnValues": "NOT_RECORDED_DIRECTLY",
+    "lastObservation": {
+      "stepId": "pw:api@9386",
+      "player": [78.58699035644531, 32.599998474121094, 0.14358022809028625],
+      "serverPlayerPosition": [78.58699081891291, 32.6, 0.14358022550786598],
+      "viewAngles": [-100.14000000000044, -20.03000000000001],
+      "physicsTick": 21036,
+      "acknowledgedInputSequence": 14370,
+      "onGround": true,
+      "colliding": false
+    },
+    "conclusion": "The trace records repeated client-only and server-only arrival samples, but no sample satisfying both existing route projections. The final observed snapshot returned at the walkTo observation boundary after the shared route deadline. This seals the first failure and owner chain only; it does not select or validate a repair."
+  },
+  "failureAttachment": {
+    "currentSource": "afterEach snapshot after failure handling",
+    "usedAsFailureTimeline": false,
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "standaloneScreenshotAttachment": "NOT_RECORDED",
+    "failureScreencastFrame": {
+      "source": "trace resource page@da3b269eb0e28e52c39a72efc232e91c-1790600281268.jpeg",
+      "sha256": "d2d22976b7ee1262d0c9798da15d47400b3b311f9d465fe9790dc447a9a6bd6f",
+      "isPlaywrightScreenshotAttachment": false
+    }
+  },
+  "limits": {
+    "v2StepTitleUsedAsPassProof": false,
+    "afterEachSnapshotUsedAsFullTimeline": false,
+    "ackAloneUsedAsActionProof": false,
+    "worldItemsZeroUsedAsPickupProof": false,
+    "historicalBrowserProgressUsed": false,
+    "productionFailureClaimed": false,
+    "repairSelected": false,
+    "performanceMeasured": false,
+    "humanAudibleAudioRun": false,
+    "cuaRun": false
+  }
+}

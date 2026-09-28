@@ -1,0 +1,5 @@
+d13262b22165fcfa04c264a20172b8c0627b13c93a2afaea1e16688c45c7eb83  apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+b15715534d63571185fc6da82916f37d014853c09ebd821e40bb1f42f9f6ce82  apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+63195b11fa95d0bf74daa669d7c06892fa58e5d774f794b397fc945c25bfa800  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+f5cccfe0445b2f1a001780f794187a804d4cbcf9ca40b8e589e95cd1a594599f  changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+d203fac2bb1788749a8a5b7be3034e8d10058dc8c5230e88615f8911599c74b4  changes/2026-09-23-classic-functional-completion/spec.md

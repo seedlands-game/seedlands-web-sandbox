@@ -1,0 +1,15 @@
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/v1-slice.ts: OK
+apps/web/tests/e2e/classic-support/door-collision-oracle.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK
+apps/web/dist/harness-artifact.json: OK

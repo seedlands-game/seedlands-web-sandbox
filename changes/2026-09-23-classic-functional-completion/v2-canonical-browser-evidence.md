@@ -1,5 +1,70 @@
 # V2 Canonical Browser 证据
 
+## Browser-22 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-22`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实完成；V2 已完成 workbench/10 格资源放置，并对三格 wood
+完成真实左键采矿、voxel 清空、drop-or-pickup 轮询和各自独立 inventory itemCount 增量。`wood-collected` snapshot
+明确记录 `wood-block:3`、`inventoryRevision=39`。随后从 corridor 返回 workbench approach `[78.5,0.5]` 的路线在
+`harness.ts:223` observe-after-await deadline 失败；wood pickaxe 起、stone、iron、五件铁甲、四槽 pointer、C4、C5
+与保存恢复均 NOT REACHED。** Classic 视觉测试独立 PASS，non-Classic smoke SKIPPED。V2 step 标题本身不作 PASS
+证据，本结果不证明完整 V2 产品 GREEN。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-8ae9e354`，HEAD/source
+`8ae9e3545c40cca83798afea0aa52ef156e4e3d3`，tree `f91590626a01d1a6b2d771e27fdb74b5d022d47b`；
+source/lock/artifact digest 为
+`af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388`，builtAt
+`2026-09-28T12:34:28.272Z`，dist 为 276 个盖章文件/277 个磁盘普通文件、0 symlink。
+
+唯一命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-22-8ae9e354 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+唯一机器窗口 `9c2c7c2a-bf89-4739-9e69-5d62d22e0bec`，UTC `2026-09-28T12:50:41.523Z` 至
+`12:59:12.609Z`，`waitedMs=2`、`exitCode=1`、`measurement.status=NOT_RECORDED`。Playwright 单 worker、
+`retries=0`、canonical 主测试只有 attempt 0；完整 stdout/stderr 从启动起保存，没有第二 attempt。
+
+C0-C3 receipt 均为 PASS；V1 step 本次完整返回。V2 receipt 先记录 `resources-placed`，随后记录
+`wood-collected`：slot 0 为 `{itemId: wood-block, count: 3}`，inventory revision 从 36 增至 39、gameplay revision
+从 79458 增至 113681。因此三格 wood 的真实采矿、清空、drop/pickup 和独立入包均已完成；`worldItems=0` 没有
+被当作拾取证明。
+
+失败发生在 `prepareCraftedIronArmor:391 -> openWorkbench:270 -> followEquipmentRoute:131 -> walkTo:218 ->
+correctMouseToRoute:104 -> harness.ts:223 observe-after-await deadline`。失败 route 的 outer baseline 可按源码调用顺序
+定位为 `@8674`：client/server 均约 `[78.55076,32.6,-0.49872]`，tick/ack `20342/13641`。从该 baseline 到最后
+有效 observation `@9386`，trace 机械记录 144 个 snapshot、111 个 mouse move、8 对 KeyS down/up 与 22 次
+Pointer Lock cooldown unlock；这些计数是完整相关区间，不是 afterEach 尾窗。
+
+`@8880` 首次 client 距目标 `0.039816 < .06`，server 距 `0.164042`，仅 client 到达；`@8883` 仍是 client-only。
+`@8885` client/server 距离分别为 `0.086321/0.018286`，转为 server-only；`@8887` 为
+`0.100160/0.058712`，仍仅 server 到达。完整 144 个 snapshot 没有一帧同时满足现有双投影几何条件。typed aim
+outcome 与 outer classifier 返回值没有直接序列化，分别标 `NOT_RECORDED_DIRECTLY`；不能从单侧位置或 ack 推断
+strict arrival。最后有效 observation `@9386` 为 client/server 约 `[78.586990,32.6,0.143580]`、yaw `-100.14°`、
+tick/ack `21036/14370`、grounded/non-colliding；随后 await 返回越过原 route deadline 并抛出
+`Real input route timed out before 78.5,0.5.`。本证据只冻结首因、真实时间线和 owner 链，不选择或验证修复。
+
+failure attachment 是 afterEach 收尾 snapshot，不替代失败 leg；其 pageErrors/failedResponses 未由 schema 记录，
+均为 `NOT_RECORDED_BY_FAILURE_ATTACHMENT`。原运行无独立 Playwright screenshot attachment；封存的
+`failure-screencast-frame.jpeg` 是原 trace 最后一个失败前 screencast frame，已明确标注来源。wood pickaxe、stone、
+stone pickaxe、iron、iron unpack、五件铁甲、四槽 click/Shift/wrong-slot/swap/quickmove/close、C4、
+`before.v2EquipmentPreSave`、C5、save/continue、V1 media restore、runtime/actor epoch、revision/durability/newref
+均 `NOT_REACHED`。durability-1、death、equipment drop、respawn 为 `NOT_OBSERVED`；Cua/人类听觉 `NOT RUN`；
+性能 `NOT MEASURED`。
+
+trace 原文件为 667,031,083 bytes、SHA256
+`9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19`，无损切为 13 个最大 50 MiB 分片并流式
+重组验证。独立 machine-lock artifact 后验 `v2-canonical-browser-22-artifact-postcheck` 已在此前唯一运行中 PASS，
+UTC `2026-09-28T13:12:07.044Z` 至 `13:12:11.785Z`，同 source/lock/artifact、builtAt 与 276-file map；本次封存
+没有重跑。验收树 tracked/index clean，4273、owned Playwright/Chromium/preview 与机器锁均清零；BUILD09-13
+tree/dist 和 Git32 backup ref 保留。本阶段未修改验收 source/test/scenario/dist，未运行 build、第二 attempt、修复、
+Browser23、Cua、CI、Git/index、push、deploy 或 merge。
+
 ## Browser-21 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-21`

@@ -445,6 +445,24 @@ source/public/dist identity 一致。BUILD09/10/11/12/13 tree/dist 与 Git32 bac
 V1、resources 和首 wood pickup 已真实通过；后续 V2 未到达，Browser19 首 iron pickup 仍未证明。Browser22/Cua/
 devserver/CI watch/deploy/merge 未运行，artifact PASS 不等于产品 GREEN。
 
+### V2-CANONICAL-BROWSER-22 / CLOSE-14 / GIT-38-POST-DRIFT-DIRECTION
+
+状态：GIT38 EVIDENCE_FROZEN。Browser22 唯一 canonical attempt 完成 C0-C3、完整 V1、workbench/10 格资源放置和
+三格 wood 的真实采矿、清格、掉落及独立 inventory itemCount 入包；`wood-collected` 为 `wood-block:3`。随后返回
+workbench approach `[78.5,0.5]` 的第二段 route 在 `harness.ts:223` observe-after-await deadline 正式 FAIL；
+wood pickaxe 起、stone/iron、装备 pointer、C4/C5/save 均 `NOT_REACHED`，Browser19 首 iron 入包仍 `NOT_PROVEN`。
+MAP01 对完整 45.708s leg 证明 22 个独立 1500ms Pointer Lock cooldown 占 33.087s；两次 outer validated drift 后
+x-only 规则继续选择 KeyS，虽当时 yaw 对 KeyW 只差约 1.7/1.9 度、对 KeyS 约差 178 度。未准出的 Close13 timeout
+catch 对真实 nested deadline 不可达，原 source/test/spec/contract/raw 已归档为 rejected evidence，catch 与对应测试已撤除。
+Close14 只在 validated drift 后为紧接一轮使用一次相反 key，其他 loop、driver error、strict/wait、预算/容差保持。
+新测试 RED `4 failed / 3 passed`，最终 `7/7`；affected `14 files / 145 tests`、Classic/root test types、3 TS
+ESLint、5 路径常规 Prettier 与 scope 均 PASS。GIT38 baseline `658e059d...d89` 的精确五路径 patch
+`e864ea67...931c` 在 detached staged tree再次通过相同门禁，source tree `48b06d94...49ec`，代码提交
+`550adf8a352cd1c24aff5b2f3885b8b970c69bd7`。evidence/state 随本提交冻结，BUILD14/Browser23/Cua/CI/
+deploy/merge 未运行；fixture/static GREEN 不等于产品 GREEN。第一次 evidence commit 的自然 hook 因四份 Browser22
+机械 raw 使用 `.json` 后缀而失败，没有产生提交；恢复阶段只做四份 raw 原字节 `.json.log` 改名、prior-packaging 与
+Browser22/MAP01/GIT38 identity 重冻，不复跑行为测试。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357
