@@ -268,6 +268,34 @@ target 和共享 45 秒 deadline 不变。普通 loop 继续按 client x 选择�
 异常原样传播。该策略不放宽双投影 finite neighborhood、freshness/readiness、.06/.08/+-0.45 或任何输入/aim 预算。
 Browser-22 保持正式 FAIL；fixture deterministic/static GREEN 不等于 Browser-23 或产品 GREEN。
 
+Browser-23 唯一 canonical attempt 已完成 C0-C5、完整 V1、V2 的 19 个 checkpoint、三类资源独立入包、四槽装备
+矩阵、石镐耐久 `132 -> 128 -> 127` 与保存恢复，但 main test 在既有 `720000ms` 总预算处 timed out，runner exit 1；
+C5 完成于 `+718819ms`，timeout 后 cleanup 中的最终断言完成于 `+727316ms`，不能把 canonical FAIL 改写为 PASS。原
+trace 缺 EOCD/中央目录，分片重组 SHA 相同只证明封存字节一致。`V2-CANONICAL-BUDGET-REGISTRATION-CLOSE-15`
+按 `canonical-budget-contract.md` 只把 main 的下一次有限工程验收预算登记为 `900000ms`，并把现有 chromium project
+timeout 显式登记为 `60000ms`。Playwright 1.62.1 的 after-hooks slot 使用
+`max(project.timeout,testInfo.timeout)`，worker teardown 与 trace stop 则各自使用 project timeout；因此 60 秒是每个独立
+slot 的预算，不是全收尾总墙钟承诺。45s/20s/80ms、18/19、mouse、容差、路线、坐标、旅程顺序和断言均不改。
+900 秒不证明性能、p95 或稳定性；若后续唯一 Browser 仍超时或 trace 不完整，必须独立归因，不能继续自动加预算。
+receipt 同 attempt 多记录、skipped non-main 污染与 trace 完整性校验留给 root 另行裁决的终态合同，本片不修改
+`evidence.ts`、runner 或 ZIP 处理，也不补 new object reference、death/drop/respawn、16 armor/194、V3/V4 证据。
+
+V2 canonical terminal receipt 子片冻结 `canonical-terminal-receipt-contract.md`：现有 evidence attachment 保持真实局部
+证据，唯一 canonical 文件 writer 迁到 Playwright Reporter。Reporter 用过滤后的 suite 精确识别 main，并在
+`onTestEnd` 以公开 result status 生成 `{test,project,retry}` 唯一终态；`onEnd` 只记录 runner outcome，不覆盖失败。
+terminal PASS 同时要求 result passed、detailed local PASS、无 failure attachment及 run/source identity 一致；timeout、
+interrupted、local FAIL、附件冲突或缺失全部 fail closed。不同 retry 全部保留，完整 canonical/benchmark 的唯一-attempt
+门禁拒绝多个 retry。visual 与 skipped non-Classic 不污染 attempts；visual-only/modular correctness 通过真实 selection
+明确 NOT_SELECTED，default full 不得借缺 receipt 或 NOT_SELECTED 放行。runner 必须同时要求进程 exit 0 与合法 terminal
+receipt；benchmark 额外要求既有 measurement 位置为 MEASURED。本片不实现 ZIP 完整性、repair/retry，也不改变 Close-15
+900s/60s 预算或任何玩法旅程。Browser23 与其 local PASS/FAIL raw 保持不改。
+
+Close-16 null closure 修复附件存在性与 payload 合法性不可混用的漏判：任何命名为
+`classic-runtime-failure.json` 的已存在附件都禁止 terminal PASS；其 JSON payload 若为 `null`、primitive 或 array，需保留
+有效 detailed stages/restore/measurement，同时记录明确 non-object error 并保持 FAIL。正常没有 failure attachment 的
+detailed PASS 不受影响，附件前后顺序不改变结果。该闭包只修改 pure receipt helper 与 focused tests，不改变 Reporter、runner、
+预算、selection、ZIP 或浏览器行为；Browser23 原 FAIL 和 Close16 历史证据保持。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

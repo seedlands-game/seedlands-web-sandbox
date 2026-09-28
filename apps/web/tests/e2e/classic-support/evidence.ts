@@ -1,6 +1,4 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
 import type { ChromeTrace, ClassicSnapshot } from './harness';
 import type { ArtifactReadback, CompositionIdentity, PackLockReadback, RuntimeEnvironment } from './identity';
 import type { ClassicLogicObservationEvidence } from './logic';
@@ -85,28 +83,6 @@ const measurementSample = (stage: ClassicStage, snapshot: ClassicSnapshot) => ({
   },
   storage: { bytes: snapshot.storageBytes },
 });
-
-const resultPath = () => (process.env.SEEDLANDS_CLASSIC_RESULT ? resolve(process.env.SEEDLANDS_CLASSIC_RESULT) : null);
-
-function writeAttempt(evidence: Record<string, unknown>): void {
-  const path = resultPath();
-  if (!path) return;
-  mkdirSync(dirname(path), { recursive: true });
-  let attempts: unknown[] = [];
-  try {
-    const prior = JSON.parse(readFileSync(path, 'utf8')) as { attempts?: unknown[] };
-    if (Array.isArray(prior.attempts)) attempts = prior.attempts;
-  } catch {
-    // A new run has no result file yet.
-  }
-  attempts.push(evidence);
-  const status = attempts.every(
-    (attempt) => attempt !== null && typeof attempt === 'object' && 'status' in attempt && attempt.status === 'PASS',
-  )
-    ? 'PASS'
-    : 'FAIL';
-  writeFileSync(path, `${JSON.stringify({ schemaVersion: 1, status, attempts }, null, 2)}\n`);
-}
 
 export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceData): Promise<void> {
   const status =
@@ -205,7 +181,6 @@ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceDa
     body: JSON.stringify(evidence, null, 2),
     contentType: 'application/json',
   });
-  writeAttempt(evidence);
 }
 
 export async function attachClassicFailure(
@@ -222,6 +197,8 @@ export async function attachClassicFailure(
     attempt: testInfo.retry,
     test: testInfo.title,
     project: testInfo.project.name,
+    runId: process.env.SEEDLANDS_HARNESS_RUN_ID ?? null,
+    sourceSha: process.env.SEEDLANDS_SOURCE_SHA ?? null,
     benchmark: benchmarkMode,
     stages,
     errors: testInfo.errors.map(({ message }) => message),
@@ -233,7 +210,6 @@ export async function attachClassicFailure(
     body: JSON.stringify(evidence, null, 2),
     contentType: 'application/json',
   });
-  writeAttempt(evidence);
 }
 
 export function requireAllClassicStages(stages: Partial<Record<ClassicStage, ClassicStageResult>>): void {
