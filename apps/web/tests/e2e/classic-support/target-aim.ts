@@ -84,14 +84,19 @@ export function horizontalMouseCorrectionToRoute(
   return clampStep(normalizeDegrees(yaw - targetYaw) / MOUSE_SENSITIVITY_DEGREES);
 }
 
-export async function correctMouseToRoute(
+export type RouteAimObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
+export type RouteAimOutcome<T extends RouteAimObservation> =
+  Readonly<{ kind: 'angle-aligned'; observation: T }> | Readonly<{ kind: 'route-reached'; observation: T }>;
+
+export async function correctMouseToRoute<T extends RouteAimObservation>(
   options: Readonly<{
     target: readonly [number, number];
     direction: 'KeyW' | 'KeyS';
-    observe: () => Promise<Readonly<{ player: Point; viewAngles: readonly [number, number] }> | null>;
+    observe: () => Promise<T | null>;
     move: (dx: number, dy: number) => Promise<void>;
+    routeReached?: (observation: T) => boolean;
   }>,
-): Promise<void> {
+): Promise<RouteAimOutcome<T>> {
   if (!options.target.every(Number.isFinite))
     throw new Error(`Classic route aim target is invalid: target=${options.target.join(',')}.`);
   let lastDx: number | null = null;
@@ -108,6 +113,7 @@ export async function correctMouseToRoute(
       throw new Error(
         `Classic route aim observation is invalid: target=${options.target.join(',')}; direction=${options.direction}.`,
       );
+    if (options.routeReached?.(current)) return { kind: 'route-reached', observation: current };
     if (current.player[0] === options.target[0] && current.player[2] === options.target[1])
       throw new Error(
         `Classic route aim direction is undefined: target=${options.target.join(',')}; direction=${options.direction}.`,
@@ -118,7 +124,7 @@ export async function correctMouseToRoute(
       options.target,
       options.direction,
     );
-    if (Math.abs(dx) < 1) return;
+    if (Math.abs(dx) < 1) return { kind: 'angle-aligned', observation: current };
     lastDx = dx;
     if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1) break;
     await options.move(dx, 0);

@@ -96,7 +96,7 @@ describe('Classic V2 pickup route post-correction refresh', () => {
       refreshAfterCorrection: true,
     });
 
-    expect(calls).toMatchObject({ reads: 3, down: 0, up: 0, moves: 0 });
+    expect(calls).toMatchObject({ reads: 2, down: 0, up: 0, moves: 0 });
     expect(result).toBe(strict);
   });
 
@@ -104,10 +104,13 @@ describe('Classic V2 pickup route post-correction refresh', () => {
     let now = 1_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
+    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
+      view: [0.8592819133153222, -20.03],
+    });
+    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
     const { calls, page } = routePage({
       initial,
-      correction: strict,
+      correction: alignedNotReached,
       refreshed: strict,
       onRead: (read) => {
         if (read === 2) now = 46_001;
@@ -130,10 +133,13 @@ describe('Classic V2 pickup route post-correction refresh', () => {
     let now = 1_000;
     vi.spyOn(Date, 'now').mockImplementation(() => now);
     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
+    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
+      view: [0.8592819133153222, -20.03],
+    });
+    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
     const { calls, page } = routePage({
       initial,
-      correction: strict,
+      correction: alignedNotReached,
       refreshed: strict,
       onRead: (read) => {
         if (read === 3) now = 46_001;
@@ -154,8 +160,16 @@ describe('Classic V2 pickup route post-correction refresh', () => {
 
   it('fails closed when the post-correction refresh is unavailable', async () => {
     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
-    const { calls, page } = routePage({ initial, correction: strict, refreshed: null, afterPulse: strict });
+    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
+      view: [0.8592819133153222, -20.03],
+    });
+    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
+    const { calls, page } = routePage({
+      initial,
+      correction: alignedNotReached,
+      refreshed: null,
+      afterPulse: strict,
+    });
 
     await expect(
       walkTo(page, TARGET, {

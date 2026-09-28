@@ -113,7 +113,7 @@ describe('Classic shared route aim bounded contract', () => {
     let reads = 0;
     let moves = 0;
 
-    await correctMouseToRoute({
+    const result = await correctMouseToRoute({
       target,
       direction,
       observe: async () => {
@@ -128,6 +128,7 @@ describe('Classic shared route aim bounded contract', () => {
 
     expect(moves).toBe(18);
     expect(reads).toBe(19);
+    expect(result.kind).toBe('angle-aligned');
     expect(Math.abs(horizontalMouseCorrectionToRoute([0, 32.6, 0], yaw, target, direction))).toBeLessThan(1);
   });
 
@@ -136,7 +137,7 @@ describe('Classic shared route aim bounded contract', () => {
     let reads = 0;
     let moves = 0;
 
-    await correctMouseToRoute({
+    const result = await correctMouseToRoute({
       target: [1, 0],
       direction: 'KeyW',
       observe: async () => {
@@ -150,6 +151,7 @@ describe('Classic shared route aim bounded contract', () => {
     });
 
     expect({ reads, moves }).toEqual({ reads: 3, moves: 1 });
+    expect(result.kind).toBe('angle-aligned');
   });
 
   it('fails unavailable after 19 persistent null observations without moving', async () => {
@@ -242,16 +244,17 @@ describe('Classic shared route aim bounded contract', () => {
     ).rejects.toThrow('route aim direction is undefined');
 
     let moves = 0;
+    const aligned = observation(player, -90);
     await expect(
       correctMouseToRoute({
         target: [1 + Number.EPSILON, 2],
         direction: 'KeyW',
-        observe: async () => observation(player, -90),
+        observe: async () => aligned,
         move: async () => {
           moves += 1;
         },
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ kind: 'angle-aligned', observation: aligned });
     expect(moves).toBe(0);
   });
 
