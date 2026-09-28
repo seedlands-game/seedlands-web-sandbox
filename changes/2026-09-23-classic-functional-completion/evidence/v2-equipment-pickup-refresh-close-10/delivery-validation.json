@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-10",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "b4d68bdd69867c0bf9c4fbc2b9480c1976b910006e432d4ef0e0c630c4aa6471"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 36,
+    "sha256": "a6fc39dc7a4a13e2f604c4da6959079dc4517961bac4165e6ae96a99b46fdb3e",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09",
+    "sourceManifestSha256": "114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5",
+    "evidenceManifestSha256": "709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62",
+    "deliverySha256": "02f5a71308c04374fbcfc261ea6597fa4db8776b5c1c30c5986a7ff16326b867",
+    "archivedSourceEntries": 6,
+    "archivedByteEqual": true,
+    "supersededClaim": "Close-09 genericDefaultBehaviorChanged:false did not account for its unconditional post-correction deadline check.",
+    "historicalPassRetained": true
+  },
+  "inputs": {
+    "browser19": {
+      "sourceManifestSha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+      "evidenceManifestSha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+      "deliverySha256": "35bf1a0c9a0abbf100bb3899052b4910c242f613f77ea32c363e164a11e16968"
+    },
+    "diag01": {
+      "sourceManifestSha256": "a8dafd1db7b51ca3d85d58a878e28568f12230dd783ad88170000d298bff5449",
+      "evidenceManifestSha256": "61dcc897a03b7a5f2410752206b6242db335ac5fc860b7dd68b122ba4f49def2",
+      "deliverySha256": "b0bc00b245276857fcc1fb67d43acbccd822ecead2342d8292b63ffb19774a68"
+    }
+  },
+  "red": {
+    "window": "v2-equipment-pickup-refresh-close-10-red",
+    "status": "EXPECTED_FAIL_2_OF_12",
+    "passed": 10,
+    "failed": 2,
+    "exitCode": 1,
+    "reason": "Omitted and explicit-false paths threw at the unconditional post-correction deadline check instead of sending their legacy pulse.",
+    "stdoutSha256": "12b108477c21fdfb6856151007c129c91defac8c3c884f75241a03c389e50687",
+    "receiptSha256": "e6f91b775d117e28329446e6df6f394738d4c0e8f9714817860131e17745126c"
+  },
+  "implementation": {
+    "postCorrectionDeadlineCheckInsideTrueBranch": true,
+    "postRefreshDeadlineCheckRetained": true,
+    "defaultPathAddsDateRead": false,
+    "defaultPathAddsTimeoutBranch": false,
+    "defaultPathSnapshotReadsPreserved": true,
+    "truePathNullFailsClosed": true,
+    "newCallback": false,
+    "fallbackAdded": false,
+    "genericDefaultBehaviorChanged": false
+  },
+  "green": {
+    "window": "v2-equipment-pickup-refresh-close-10-green",
+    "status": "PASS_1_FILE_12_TESTS",
+    "stdoutSha256": "04adba75d5ddaeaa961eee027f9d0d5c0e0b09562f4c91a818f8bd01116bf02f",
+    "receiptSha256": "dc7e8e3ae1c57b10fd4b2c3aa4f599f49c4c4d6ebdb4815440c9b0d267a7b395"
+  },
+  "affected": {
+    "window": "v2-equipment-pickup-refresh-close-10-affected",
+    "status": "PASS_7_FILES_74_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "ba555eaebaaf8460bb4fd40aab2c916f5047c75a76fa4668bd88faccc801511d",
+    "receiptSha256": "2ba2d1536e0830a167d9c7b26461d35377e8897221af22a520ee8246fc464d39"
+  },
+  "static": {
+    "classicTypes": {
+      "window": "v2-equipment-pickup-refresh-close-10-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "28c395af1ef75561d0c67ff17c9d79e1009929be6b041520731c4c471fcba933"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-pickup-refresh-close-10-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "d4437f99ddee288e7cce7ff6a1817868acf65eb30783776a996a26cf60592c61"
+    },
+    "eslint": {
+      "window": "v2-equipment-pickup-refresh-close-10-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "2a138485507617838def8d41cff1a67a9cc877c69df11ca73e8a6011629518ed"
+    },
+    "format": {
+      "window": "v2-equipment-pickup-refresh-close-10-format-final-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "9a2956a5ed3ee78062d18bf5fa35407d8e870e82705631caae0d8da31b0d8e12"
+    },
+    "scopedDiff": {
+      "window": "v2-equipment-pickup-refresh-close-10-scoped-diff-final",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "a6c03fd8185b490ac6e0a5081e9261dda22a1dd91cd479ea83cfad90bcfc1cff"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-pickup-refresh-close-10-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "d794e8d35f0279ae696d4aff7c725159ad11adf0846f9b4837b7a8a449293205"
+    },
+    "metadataFinal": {
+      "window": "v2-equipment-pickup-refresh-close-10-metadata-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "791b5aff764201d0199e0af173f894934a65629e20f1009fe5189bf2c132a245"
+    }
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "v1Changed": false,
+    "scenarioJsonChanged": false,
+    "aimOrMouseChanged": false,
+    "miningCallbackChanged": false,
+    "saveSchemaChanged": false,
+    "browser19Status": "FAIL",
+    "firstIronInventoryPickup": "NOT_PROVEN",
+    "browser20Run": false,
+    "longTermDocsUpdated": false
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "at-most-1",
+    "hardLimitHours": 1,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index", "push", "build", "browser20", "cua", "devserver", "ci", "deploy", "merge"]
+}

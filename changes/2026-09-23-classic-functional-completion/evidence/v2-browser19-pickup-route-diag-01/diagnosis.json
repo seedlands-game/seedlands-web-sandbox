@@ -1,0 +1,585 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER19-PICKUP-ROUTE-DIAG-01",
+  "source": {
+    "browserEvidence": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-19",
+    "sourceManifestSha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+    "evidenceManifestSha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+    "deliverySha256": "35bf1a0c9a0abbf100bb3899052b4910c242f613f77ea32c363e164a11e16968",
+    "traceSha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7"
+  },
+  "constants": {
+    "tolerance": 0.06,
+    "corridorTolerance": 0.08,
+    "finiteX": 0.45,
+    "pulseMs": 80,
+    "routeBudgetMs": 45000,
+    "waitBudgetMs": 20000,
+    "jump": false
+  },
+  "route": {
+    "target": [92.5, 2.5],
+    "outerStartMonotonic": 670701.011,
+    "outerDeadlineMonotonicApprox": 715701.011,
+    "activeKey": "KeyS",
+    "activeKeyEvidence": [
+      "followEquipmentRoute selects KeyS from each outer baseline client x > 92.5",
+      "each driver.walk receives a fixed key",
+      "all 17 trace keyboard down events are KeyS and there are zero KeyW down events"
+    ],
+    "drivers": [
+      {
+        "index": 1,
+        "result": "drift",
+        "pulseRange": [1, 11],
+        "pulseCount": 11,
+        "outerBaseline": {
+          "id": "pw:api@14843",
+          "sourceParent": "test.step@2627",
+          "time": 670701.011,
+          "player": [92.66876220703125, 32.599998474121094, -0.5008355379104614],
+          "server": [92.66876421389405, 32.6, -0.500835561937228],
+          "view": [-173.0700000000012, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 26893,
+          "ack": 20313
+        },
+        "walkInitialCurrent": {
+          "id": "pw:api@14844",
+          "sourceParent": "test.step@2627",
+          "time": 670788.171,
+          "player": [92.66876220703125, 32.599998474121094, -0.5008355379104614],
+          "server": [92.66876421389405, 32.6, -0.500835561937228],
+          "view": [-173.0700000000012, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 26899,
+          "ack": 20319
+        },
+        "remainingAtInitialMsApprox": 44912.840000000084,
+        "waitPolls": [
+          {
+            "id": "pw:api@15165",
+            "sourceParent": "expect@15164",
+            "time": 687701.828,
+            "player": [92.51187896728516, 32.599998474121094, 2.493187189102173],
+            "server": [92.42473530111971, 32.6, 2.590172543581477],
+            "view": [-222.3400000000012, -20.029999999999987],
+            "onGround": true,
+            "colliding": false,
+            "tick": 27261,
+            "ack": 20692,
+            "conditions": {
+              "client": {
+                "dx": 0.01187896728515625,
+                "dz": -0.0068128108978271484,
+                "distance": 0.013693949616212437,
+                "reached": true,
+                "finite": true
+              },
+              "server": {
+                "dx": -0.07526469888028942,
+                "dz": 0.09017254358147708,
+                "distance": 0.11745578961249216,
+                "reached": false,
+                "finite": false
+              },
+              "ready": true,
+              "fresh": true,
+              "clientReady": true,
+              "outerStrict": false
+            },
+            "classifiedKind": "null"
+          },
+          {
+            "id": "pw:api@15167",
+            "sourceParent": "expect@15164",
+            "time": 687736.033,
+            "player": [92.54345703125, 32.599998474121094, 2.4517576694488525],
+            "server": [92.51187571717237, 32.6, 2.493187271625618],
+            "view": [-222.3400000000012, -20.029999999999987],
+            "onGround": true,
+            "colliding": false,
+            "tick": 27263,
+            "ack": 20694,
+            "conditions": {
+              "client": {
+                "dx": 0.04345703125,
+                "dz": -0.04824233055114746,
+                "distance": 0.06492946959639861,
+                "reached": false,
+                "finite": true
+              },
+              "server": {
+                "dx": 0.011875717172372902,
+                "dz": -0.006812728374382182,
+                "distance": 0.013691089301487472,
+                "reached": true,
+                "finite": true
+              },
+              "ready": true,
+              "fresh": true,
+              "clientReady": false,
+              "outerStrict": false
+            },
+            "classifiedKind": "drift"
+          }
+        ]
+      },
+      {
+        "index": 2,
+        "result": "drift",
+        "pulseRange": [12, 14],
+        "pulseCount": 3,
+        "outerBaseline": {
+          "id": "pw:api@15167",
+          "sourceParent": "expect@15164",
+          "time": 687736.033,
+          "player": [92.54345703125, 32.599998474121094, 2.4517576694488525],
+          "server": [92.51187571717237, 32.6, 2.493187271625618],
+          "view": [-222.3400000000012, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 27263,
+          "ack": 20694
+        },
+        "walkInitialCurrent": {
+          "id": "pw:api@15169",
+          "sourceParent": "test.step@2627",
+          "time": 687752.16,
+          "player": [92.54345703125, 32.599998474121094, 2.4517576694488525],
+          "server": [92.51187571717237, 32.6, 2.493187271625618],
+          "view": [-222.3400000000012, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 27263,
+          "ack": 20694
+        },
+        "remainingAtInitialMsApprox": 27948.851000000024,
+        "waitPolls": [
+          {
+            "id": "pw:api@15390",
+            "sourceParent": "expect@15389",
+            "time": 702369.714,
+            "player": [92.58053588867188, 32.599998474121094, 2.419706106185913],
+            "server": [92.48637916059972, 32.6, 2.5098651473903275],
+            "view": [-586.0800000000005, -20.029999999999987],
+            "onGround": true,
+            "colliding": false,
+            "tick": 27490,
+            "ack": 20932,
+            "conditions": {
+              "client": {
+                "dx": 0.080535888671875,
+                "dz": -0.08029389381408691,
+                "distance": 0.11372395854874429,
+                "reached": false,
+                "finite": false
+              },
+              "server": {
+                "dx": -0.013620839400275031,
+                "dz": 0.009865147390327511,
+                "distance": 0.016818097365664475,
+                "reached": true,
+                "finite": true
+              },
+              "ready": true,
+              "fresh": true,
+              "clientReady": false,
+              "outerStrict": false
+            },
+            "classifiedKind": "drift"
+          }
+        ]
+      },
+      {
+        "index": 3,
+        "result": "inner-walk-timeout",
+        "pulseRange": [15, 17],
+        "pulseCount": 3,
+        "outerBaseline": {
+          "id": "pw:api@15390",
+          "sourceParent": "expect@15389",
+          "time": 702369.714,
+          "player": [92.58053588867188, 32.599998474121094, 2.419706106185913],
+          "server": [92.48637916059972, 32.6, 2.5098651473903275],
+          "view": [-586.0800000000005, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 27490,
+          "ack": 20932
+        },
+        "walkInitialCurrent": {
+          "id": "pw:api@15392",
+          "sourceParent": "test.step@2627",
+          "time": 702386.434,
+          "player": [92.60678100585938, 32.599998474121094, 2.3954598903656006],
+          "server": [92.54040233835688, 32.6, 2.4578411503791617],
+          "view": [-586.0800000000005, -20.029999999999987],
+          "onGround": true,
+          "colliding": false,
+          "tick": 27491,
+          "ack": 20933
+        },
+        "remainingAtInitialMsApprox": 13314.577000000048,
+        "waitPolls": []
+      }
+    ]
+  },
+  "pulseCount": 17,
+  "pulseTable": "pickup-route-pulses.tsv",
+  "fullTimeline": "pickup-route-timeline.json",
+  "staticEnvelopeSamples": [
+    {
+      "id": "pw:api@15023",
+      "source": "driver1 correctMouseToRoute.observe before pulse 9",
+      "baseline": "pw:api@15013",
+      "outerBaseline": "pw:api@14843",
+      "sample": {
+        "id": "pw:api@15023",
+        "sourceParent": "test.step@2627",
+        "time": 679171.789,
+        "player": [92.49810791015625, 32.599998474121094, 2.442101240158081],
+        "server": [92.49811121062714, 32.6, 2.442101343748016],
+        "view": [1.909999999998863, -20.029999999999987],
+        "onGround": true,
+        "colliding": false,
+        "tick": 27121,
+        "ack": 20546
+      },
+      "relativeToWalkCurrent": {
+        "client": {
+          "dx": -0.00189208984375,
+          "dz": -0.057898759841918945,
+          "distance": 0.057929667660094754,
+          "reached": true,
+          "finite": true
+        },
+        "server": {
+          "dx": -0.0018887893728560812,
+          "dz": -0.05789865625198409,
+          "distance": 0.057929456419687136,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": true,
+        "outerStrict": true
+      },
+      "relativeToOuterBaseline": {
+        "client": {
+          "dx": -0.00189208984375,
+          "dz": -0.057898759841918945,
+          "distance": 0.057929667660094754,
+          "reached": true,
+          "finite": true
+        },
+        "server": {
+          "dx": -0.0018887893728560812,
+          "dz": -0.05789865625198409,
+          "distance": 0.057929456419687136,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": true,
+        "outerStrict": true
+      }
+    },
+    {
+      "id": "pw:api@15167",
+      "source": "outer waitForProgress poll after driver1; classified drift",
+      "baseline": "pw:api@15162",
+      "outerBaseline": "pw:api@15162",
+      "sample": {
+        "id": "pw:api@15167",
+        "sourceParent": "expect@15164",
+        "time": 687736.033,
+        "player": [92.54345703125, 32.599998474121094, 2.4517576694488525],
+        "server": [92.51187571717237, 32.6, 2.493187271625618],
+        "view": [-222.3400000000012, -20.029999999999987],
+        "onGround": true,
+        "colliding": false,
+        "tick": 27263,
+        "ack": 20694
+      },
+      "relativeToWalkCurrent": {
+        "client": {
+          "dx": 0.04345703125,
+          "dz": -0.04824233055114746,
+          "distance": 0.06492946959639861,
+          "reached": false,
+          "finite": true
+        },
+        "server": {
+          "dx": 0.011875717172372902,
+          "dz": -0.006812728374382182,
+          "distance": 0.013691089301487472,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": false,
+        "outerStrict": false
+      },
+      "relativeToOuterBaseline": {
+        "client": {
+          "dx": 0.04345703125,
+          "dz": -0.04824233055114746,
+          "distance": 0.06492946959639861,
+          "reached": false,
+          "finite": true
+        },
+        "server": {
+          "dx": 0.011875717172372902,
+          "dz": -0.006812728374382182,
+          "distance": 0.013691089301487472,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": false,
+        "outerStrict": false
+      }
+    },
+    {
+      "id": "pw:api@15170",
+      "source": "driver2 correctMouseToRoute.observe before pulse 12",
+      "baseline": "pw:api@15169",
+      "outerBaseline": "pw:api@15167",
+      "sample": {
+        "id": "pw:api@15170",
+        "sourceParent": "test.step@2627",
+        "time": 687767.212,
+        "player": [92.54345703125, 32.599998474121094, 2.4517576694488525],
+        "server": [92.54346057766948, 32.6, 2.451757555225314],
+        "view": [-222.3400000000012, -20.029999999999987],
+        "onGround": true,
+        "colliding": false,
+        "tick": 27265,
+        "ack": 20696
+      },
+      "relativeToWalkCurrent": {
+        "client": {
+          "dx": 0.04345703125,
+          "dz": -0.04824233055114746,
+          "distance": 0.06492946959639861,
+          "reached": false,
+          "finite": true
+        },
+        "server": {
+          "dx": 0.043460577669478084,
+          "dz": -0.04824244477468609,
+          "distance": 0.0649319281186334,
+          "reached": false,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": false,
+        "outerStrict": false
+      },
+      "relativeToOuterBaseline": {
+        "client": {
+          "dx": 0.04345703125,
+          "dz": -0.04824233055114746,
+          "distance": 0.06492946959639861,
+          "reached": false,
+          "finite": true
+        },
+        "server": {
+          "dx": 0.043460577669478084,
+          "dz": -0.04824244477468609,
+          "distance": 0.0649319281186334,
+          "reached": false,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": false,
+        "outerStrict": false
+      }
+    },
+    {
+      "id": "pw:api@15548",
+      "source": "driver3 correctMouseToRoute.observe before pulse 17; same position persisted through @15606",
+      "baseline": "pw:api@15533",
+      "outerBaseline": "pw:api@15390",
+      "sample": {
+        "id": "pw:api@15548",
+        "sourceParent": "test.step@2627",
+        "time": 712800.212,
+        "player": [92.41839599609375, 32.599998474121094, 2.5745434761047363],
+        "server": [92.41839281180437, 32.6, 2.57454358126603],
+        "view": [-846.0799999999999, -20.029999999999987],
+        "onGround": true,
+        "colliding": false,
+        "tick": 27652,
+        "ack": 21100
+      },
+      "relativeToWalkCurrent": {
+        "client": {
+          "dx": -0.08160400390625,
+          "dz": 0.07454347610473633,
+          "distance": 0.11052575846068037,
+          "reached": true,
+          "finite": true
+        },
+        "server": {
+          "dx": -0.08160718819563328,
+          "dz": 0.07454358126602978,
+          "distance": 0.1105281804480771,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": true,
+        "outerStrict": true
+      },
+      "relativeToOuterBaseline": {
+        "client": {
+          "dx": -0.08160400390625,
+          "dz": 0.07454347610473633,
+          "distance": 0.11052575846068037,
+          "reached": true,
+          "finite": true
+        },
+        "server": {
+          "dx": -0.08160718819563328,
+          "dz": 0.07454358126602978,
+          "distance": 0.1105281804480771,
+          "reached": true,
+          "finite": true
+        },
+        "ready": true,
+        "fresh": true,
+        "clientReady": true,
+        "outerStrict": true
+      }
+    }
+  ],
+  "earliestStrictObservation": {
+    "id": "pw:api@15023",
+    "source": "driver1 correctMouseToRoute.observe before pulse 9",
+    "time": 679171.789,
+    "player": [92.49810791015625, 32.599998474121094, 2.442101240158081],
+    "server": [92.49811121062714, 32.6, 2.442101343748016],
+    "view": [1.909999999998863, -20.029999999999987],
+    "tick": 27121,
+    "ack": 20546,
+    "ready": true,
+    "client": {
+      "dx": -0.00189208984375,
+      "dz": -0.057898759841918945,
+      "distance": 0.057929667660094754,
+      "reached": true,
+      "finite": true
+    },
+    "serverConditions": {
+      "dx": -0.0018887893728560812,
+      "dz": -0.05789865625198409,
+      "distance": 0.057929456419687136,
+      "reached": true,
+      "finite": true
+    },
+    "freshVsWalkCurrent": true,
+    "strictVsWalkCurrent": true,
+    "freshVsOuterBaseline": true,
+    "strictVsOuterBaseline": true
+  },
+  "laterStrictObservation": {
+    "id": "pw:api@15548",
+    "source": "driver3 correctMouseToRoute.observe before pulse 17; same position persisted through @15606",
+    "time": 712800.212,
+    "player": [92.41839599609375, 32.599998474121094, 2.5745434761047363],
+    "server": [92.41839281180437, 32.6, 2.57454358126603],
+    "view": [-846.0799999999999, -20.029999999999987],
+    "tick": 27652,
+    "ack": 21100,
+    "ready": true,
+    "client": {
+      "dx": -0.08160400390625,
+      "dz": 0.07454347610473633,
+      "distance": 0.11052575846068037,
+      "reached": true,
+      "finite": true
+    },
+    "serverConditions": {
+      "dx": -0.08160718819563328,
+      "dz": 0.07454358126602978,
+      "distance": 0.1105281804480771,
+      "reached": true,
+      "finite": true
+    },
+    "freshVsWalkCurrent": true,
+    "strictVsWalkCurrent": true,
+    "freshVsOuterBaseline": true,
+    "strictVsOuterBaseline": true
+  },
+  "yawAtEarliestStrict": {
+    "targetYawForKeyS": 1.8717187781891766,
+    "viewYaw": 1.909999999998863,
+    "horizontalCorrectionDx": 0.29447093699758775,
+    "helperExit": "Math.abs(dx) < 1, so correctMouseToRoute returns void without moving the mouse"
+  },
+  "finding": {
+    "earliestMissedAt": "pw:api@15023 before pulse 9",
+    "rejectedByArrivalCondition": false,
+    "reasonNotAccepted": "The strict snapshot is only observed inside correctMouseToRoute. That helper returns void; walkTo does not assign it to current or recheck reachedRouteTarget/deadline after correction, so it sends pulse 9 from stale current @15013.",
+    "laterRepeat": "pw:api@15548 before pulse 17 is strict and persists through @15606; correction work has already crossed the shared outer deadline before pulse 17, but walkTo checks its deadline only before correction and still sends the pulse.",
+    "excludedCandidates": {
+      "outerInitialAlreadyArrived": "false; initial outer baseline is about 3.0m short in z",
+      "wrongKeySelection": "false; KeyS is correct for every outer baseline x > 92.5 and matches all trace key events",
+      "missingHorizontalCorrection": "false as primary cause; correction converges to |dx| < 1 at the strict sample",
+      "inputStall": "false; tick/ack advance and 17 KeyS pulses are recorded",
+      "releaseInertia": "contributes to overshoot but is not the first missed acceptance; strict observation exists before pulse 9",
+      "outerPredicateTolerance": "not implicated; @15023 satisfies existing .06/.08/.45 and freshness without relaxing any threshold"
+    }
+  },
+  "candidate": {
+    "singleChange": "Add one optional private fixture option refreshAfterCorrection?: boolean to generic walkTo, default false. walkTo already owns snapshot(page), so no callback or target-aim change is needed. After correctMouseToRoute returns and before keydown, walkTo first rechecks the original deadline; when the option is true, it reads one snapshot, rechecks the deadline, assigns it to current, and returns only when still in budget and reachedRouteTarget is true. Otherwise it issues the original input only while still in budget.",
+    "defaultBehavior": "All existing callers that omit or disable the option retain the exact current behavior and snapshot call count; Date.now remains unchanged.",
+    "v2Wiring": "EQUIPMENT_RESOURCE_WALK_OPTIONS alone sets refreshAfterCorrection=true; no new route, callback, fallback, coordinate, tolerance, pulse, wait, or budget.",
+    "preserves": [
+      "45s outer deadline",
+      "20s wait cap",
+      "80ms pulse",
+      "jump=false",
+      ".06/.08/.45",
+      "all scenario coordinates",
+      "real pickup inventory assertion"
+    ],
+    "whyControllerOnlyShortCircuitIsInsufficient": "The initial outer snapshot is not arrived. The strict samples occur inside the long-running generic walk before it returns control to followEquipmentRoute."
+  },
+  "red": {
+    "primary": "A deterministic fake Page drives real walkTo with Browser19 baseline @15013, correction and post-correction snapshots @15023, fixed KeyS, and a keyboard spy. With refreshAfterCorrection=true, walkTo must return @15023 with keydown/up=0; current code has no option and sends a key.",
+    "deadline": "A second deterministic case uses a Vitest fake timer or Date.now spy to advance the existing clock during correction past the timeout and asserts zero keydown after correction. This prevents the Browser19 pulse-17 behavior without enlarging the budget.",
+    "compatibility": "The same fake Page with the option omitted or false must preserve the existing default path and issue one KeyS pulse before returning the grounded sample.",
+    "consumerContract": "Source-policy or an options-value test proves only EQUIPMENT_RESOURCE_WALK_OPTIONS sets refreshAfterCorrection=true; no other walkTo caller changes.",
+    "negativeCases": [
+      "post-correction snapshot ungrounded or colliding: reachedRouteTarget may end movement at generic walkTo level just as its existing while condition does, but outer strict still validates readiness after driver return",
+      "post-correction client reached while server outside: generic walkTo returns on client as it always does; outer controller performs existing bounded server wait",
+      "post-correction client not reached: issue the original real key pulse"
+    ]
+  },
+  "inventory": {
+    "priorCount": 0,
+    "dropOrImmediatePickupPoll": true,
+    "explicitBagIncreaseReadbackAfterRoute": false,
+    "latestRecordedPreIronPhaseContainsIronBlock": false,
+    "failureTimeBagReadback": "NOT_RECORDED",
+    "failureSnapshotWorldItems": 0,
+    "conclusion": "There is no persisted read-only bag proof that first iron entered inventory. worldItems=0 is non-specific and may reflect despawn/pickup/presentation timing; the canonical itemCount > before assertion was never reached. The stored stone-pickaxe phase snapshot predates first-iron mining and is not a failure-time bag readback."
+  },
+  "limitations": [
+    "Date.now is not serialized; deadline values use trace monotonic deltas from the outer observe call and are approximate by a small call-overhead offset.",
+    "activeKey is reconstructed from source-fixed direction per driver.walk call plus all 17 recorded KeyS down events; it is not a field inside snapshot payloads.",
+    "correctMouseToRoute observations are real page snapshots but are not assigned to walkTo current and are not returned to followEquipmentRoute."
+  ]
+}

@@ -1,0 +1,251 @@
+3:19:42 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-acceptance-f282da95 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-acceptance-f282da95
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (10 tests | 7 failed) 113ms
+     × returns the Browser19 strict correction snapshot before sending pulse 9 96ms
+     × does not send input when correction exhausts the original deadline 4ms
+     × does not send input when the refresh await exhausts the original deadline 2ms
+     × fails closed when the post-correction refresh is unavailable 2ms
+     × continues with the original pulse when the refreshed client has not arrived 2ms
+     ✓ keeps the 'omitted' default path and snapshot read count 2ms
+     ✓ keeps the 'false' default path and snapshot read count 2ms
+     × returns a refreshed client arrival to the existing outer bounded wait when the server is late 2ms
+     ✓ keeps stale, unready, and one-sided snapshots out of strict arrival 0ms
+     × enables refresh only for the V2 equipment walk options 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > returns the Browser19 strict correction snapshot before sending pulse 9
+AssertionError: expected { reads: 3, down: 1, up: 1, …(2) } to match object { reads: 3, down: +0, up: +0, …(1) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "down": 0,
++   "down": 1,
+    "moves": 0,
+    "reads": 3,
+-   "up": 0,
++   "up": 1,
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:99:19
+     97|     });
+     98|
+     99|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0, moves: 0 }…
+       |                   ^
+    100|     expect(result).toBe(strict);
+    101|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > does not send input when correction exhausts the original deadline
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20546,
++     "commitSequence": 1,
++     "physicsTick": 27121,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "serverPlayerPosition": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:125:5
+    123|         refreshAfterCorrection: true,
+    124|       }),
+    125|     ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
+       |     ^
+    126|     expect(calls).toMatchObject({ reads: 2, down: 0, up: 0 });
+    127|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > does not send input when the refresh await exhausts the original deadline
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20546,
++     "commitSequence": 1,
++     "physicsTick": 27121,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "serverPlayerPosition": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:151:5
+    149|         refreshAfterCorrection: true,
+    150|       }),
+    151|     ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
+       |     ^
+    152|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
+    153|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > fails closed when the post-correction refresh is unavailable
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20546,
++     "commitSequence": 1,
++     "physicsTick": 27121,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "serverPlayerPosition": [
++     92.49810791015625,
++     32.599998474121094,
++     2.442101240158081,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:168:5
+    166|         refreshAfterCorrection: true,
+    167|       }),
+    168|     ).rejects.toThrow('Classic snapshot is unavailable after route cor…
+       |     ^
+    169|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
+    170|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > continues with the original pulse when the refreshed client has not arrived
+AssertionError: expected { reads: 3, down: 1, up: 1, …(2) } to match object { reads: 4, down: 1, up: 1 }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "down": 1,
+-   "reads": 4,
++   "reads": 3,
+    "up": 1,
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:189:19
+    187|       }),
+    188|     ).resolves.toStrictEqual(reached);
+    189|     expect(calls).toMatchObject({ reads: 4, down: 1, up: 1 });
+       |                   ^
+    190|   });
+    191|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > returns a refreshed client arrival to the existing outer bounded wait when the server is late
+AssertionError: expected { reads: 3, down: 1, up: 1, …(2) } to match object { down: +0, up: +0 }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "down": 0,
+-   "up": 0,
++   "down": 1,
++   "up": 1,
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:240:19
+    238|
+    239|     expect(result).toBe(strict);
+    240|     expect(calls).toMatchObject({ down: 0, up: 0 });
+       |                   ^
+    241|     expect(waitCalls).toBe(1);
+    242|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > enables refresh only for the V2 equipment walk options
+AssertionError: expected { tolerance: 0.06, …(3) } to match object { tolerance: 0.06, …(4) }
+
+- Expected
++ Received
+
+  {
+    "corridorTolerance": 0.08,
+    "jump": false,
+    "pulseMs": 80,
+-   "refreshAfterCorrection": true,
+    "tolerance": 0.06,
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:263:45
+    261|
+    262|   it('enables refresh only for the V2 equipment walk options', () => {
+    263|     expect(EQUIPMENT_RESOURCE_WALK_OPTIONS).toMatchObject({
+       |                                             ^
+    264|       tolerance: 0.06,
+    265|       corridorTolerance: 0.08,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  7 failed | 3 passed (10)
+   Start at  15:19:42
+   Duration  422ms (transform 48ms, setup 0ms, import 215ms, tests 113ms, environment 0ms)
+

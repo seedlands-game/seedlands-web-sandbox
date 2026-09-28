@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T05:26:00Z
+更新时间：2026-09-28T07:52:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -87,6 +87,14 @@ sourceDigest `c8463ed8...e865`、artifactDigest `f6f1ea67...cfa4`，276 项 rece
 dist 277 files / 0 symlink，Pack lock 与 MP3 source/dist 一致。BUILD09 与 BUILD10 tree/dist、Git32 backup ref 保留；
 Browser18 FAIL 事实不变，Browser19/Cua/devserver/CI/deploy/merge 未运行。BUILD10 evidence/state 已冻结并随本提交
 交付，精确远端 SHA 以最终 checkpoint 读回为准。
+当前 Equipment pickup refresh checkpoint：Browser19 完整 V1、workbench/10 格 resource、wood/stone mining/drop/pickup
+与木/石镐真实完成；首个 iron leftdown、voxel clear 与 drop 已观察，但 inventory pickup 仍未证明，剩余 V2、pointer、
+C4/C5/save 均未到达。Close09 增加 V2-only post-correction refresh；Close10 把 correction 后的首次 deadline check
+移入 true 分支，省略/false 恢复原 pulse 与 snapshot read 行为。Close09 冻结身份和六项 SOURCE 原件逐字节归档；
+Close10 RED `2 failed / 10 passed`、GREEN `12/12`。GIT35 baseline `a1d2b5ae...4fd9` 的五路径 patch
+`7264b34a...fb3e` 在 detached tree 通过 `7 files / 74 tests`、Classic/root test types、3 TS ESLint、Prettier 与
+scope；代码提交为 `1afd8e6ba111936d7d04c449ea234cc2f573cac8`。evidence/state 随本提交冻结，精确提交与远端 SHA
+以最终 checkpoint 读回为准；BUILD11/Browser20/Cua/devserver/CI/deploy/merge 未运行。
 
 ## 恢复规则
 

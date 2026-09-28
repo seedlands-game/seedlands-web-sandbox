@@ -377,6 +377,18 @@ BUILD09 与 BUILD10 tree/dist 及 Git32 backup ref 均保留。Browser18 仍 FAI
 artifact PASS 不外推为 equipment mining/pointer/save 或产品 GREEN。BUILD10 evidence/state 随本提交交付，精确远端
 SHA 以最终 checkpoint 读回为准。
 
+### V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09/10 / GIT-35-EQUIPMENT-PICKUP-REFRESH
+
+状态：GIT35 EVIDENCE_FROZEN。Browser19 已真实完成完整 V1、workbench/10 格 resource、
+wood/stone 各三格 mining/drop/pickup、木/石镐，以及首个 iron leftdown、voxel clear 与 drop；首 iron inventory
+pickup 仍 `NOT PROVEN`，剩余 V2、pointer、C4/C5/save 均 `NOT REACHED`。Close09 增加仅 V2 开启的 correction 后
+snapshot refresh；Close10 将 post-correction deadline check 收回 true 分支，恢复省略/false 的旧 pulse 行为。Close09
+原 SOURCE/MANIFEST/delivery 与六项 SOURCE 原件逐字节保存在 Close10 `prior-release/`。GIT35 baseline
+`a1d2b5ae...4fd9` 的精确五路径 staged patch `7264b34a...fb3e` 在 detached tree 通过 `7 files / 74 tests`、
+Classic/root test types、3 TS ESLint、五路径 Prettier 与 scope；代码提交为
+`1afd8e6ba111936d7d04c449ea234cc2f573cac8`。evidence/state 随本提交冻结，精确提交与远端 SHA 以最终 checkpoint
+读回为准。BUILD11、Browser20、Cua、CI 均未运行；静态 GREEN 不等于产品 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357

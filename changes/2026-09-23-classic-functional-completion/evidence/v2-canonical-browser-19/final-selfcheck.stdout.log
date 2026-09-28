@@ -1,0 +1,86 @@
+Checking formatting...
+All matched files use Prettier code style!
+{
+  "status": "PASS",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 52,
+    "sha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "trace": {
+    "sizeBytes": 1041592835,
+    "parts": 20,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7",
+    "partsManifestSha256": "28598d053ab1a3cac7170430130da5f0d196e41d268fc0ec16f220b3a292eb8d",
+    "reassemblyValidated": true,
+    "filesAtLeast100MB": 0
+  },
+  "window": {
+    "id": "25700431-601a-4f4d-a294-d90574e3d4f7",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T05:59:07.361Z",
+    "endedAt": "2026-09-28T06:12:37.996Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "35a0465c00d1fe12af2414f41867ae8688346bcd616199defa30c2ee111f7c60"
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-19-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-28T06:20:22.389Z",
+    "endedAt": "2026-09-28T06:20:25.713Z",
+    "files": 276,
+    "receiptSha256": "41e102866f6e8d762ce354afb90330d02d899433c9eb133f84befeb350eb7632",
+    "stdoutSha256": "e1c17455c136104b313fb50fae3d61d640cf9cbe2e4d0a996b3bac95e3b537aa"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v2-first-iron-pickup-route-timeout",
+    "target": [
+      92.5,
+      2.5
+    ],
+    "resourceTarget": [
+      92,
+      31,
+      2
+    ],
+    "sourceLocation": "apps/web/tests/e2e/classic-support/equipment-resource-route.ts:130",
+    "lastRecordedV2Phase": "stone-pickaxe",
+    "firstIronMouseDownSent": true,
+    "firstIronVoxelCleared": true,
+    "firstIronDropObserved": true,
+    "firstIronInventoryPickupConfirmed": false,
+    "routeKeySPulses": 17,
+    "routeKeyWPulses": 0,
+    "routeMouseMoves": 118,
+    "controllerBranchSerialized": false,
+    "diagnosisSha256": "6c2d17dc8fc805fedb4f6dc694ce7cf848566c59a8c0aec06cc11f5ff4cba1e6"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016"
+  }
+}

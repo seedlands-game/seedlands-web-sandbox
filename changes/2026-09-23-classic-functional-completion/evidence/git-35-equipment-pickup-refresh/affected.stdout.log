@@ -1,0 +1,17 @@
+3:50:20 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git35-equipment-pickup-refresh - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git35-equipment-pickup-refresh
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 6ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (12 tests) 19ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 21ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 15ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+ Test Files  7 passed (7)
+      Tests  74 passed (74)
+   Start at  15:50:20
+   Duration  1.41s (transform 435ms, setup 0ms, import 860ms, tests 69ms, environment 0ms)
+

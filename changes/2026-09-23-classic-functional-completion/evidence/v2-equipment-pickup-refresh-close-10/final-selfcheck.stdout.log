@@ -1,0 +1,81 @@
+Checking formatting...
+All matched files use Prettier code style!
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/affected-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/classic-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/eslint-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/green-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/green.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/metadata-format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/metadata-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/delivery-validation.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/equipment-resource-route.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/harness.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/pickup-refresh-contract.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/pickup-refresh-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/prior-release/spec.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/red-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/red.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/root-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/scoped-diff-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/scoped-diff-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/scoped-diff-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-10/validation-argv.txt: OK
+{
+  "status": "PASS",
+  "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-10",
+  "sourceManifest": {
+    "entries": 6,
+    "sha256": "b4d68bdd69867c0bf9c4fbc2b9480c1976b910006e432d4ef0e0c630c4aa6471"
+  },
+  "evidenceManifest": {
+    "entries": 36,
+    "sha256": "a6fc39dc7a4a13e2f604c4da6959079dc4517961bac4165e6ae96a99b46fdb3e",
+    "includesPriorReleaseIdentities": true,
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09",
+    "sourceManifestSha256": "114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5",
+    "evidenceManifestSha256": "709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62",
+    "deliverySha256": "02f5a71308c04374fbcfc261ea6597fa4db8776b5c1c30c5986a7ff16326b867",
+    "archivedByteEqual": true
+  },
+  "red": "EXPECTED_FAIL_2_OF_12",
+  "green": "PASS_1_FILE_12_TESTS",
+  "affected": "PASS_7_FILES_74_TESTS",
+  "static": "PASS",
+  "browser19": "FAIL",
+  "firstIronInventoryPickup": "NOT_PROVEN",
+  "browser20Run": false,
+  "indexClean": true,
+  "filesAtLeast100MB": 0
+}
