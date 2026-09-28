@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git-36-route-aim-bounded-staged-gate",
+  "pid": 29980,
+  "startedAt": "2026-09-28T09:34:06.589Z",
+  "windowId": "git-36-route-aim-bounded-staged-gate",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/staged-gate-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T09:34:19.849Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T09:34:06.590Z",
+      "loadAverage": [
+        3.19189453125,
+        3.0146484375,
+        2.93359375
+      ],
+      "freeMemoryBytes": 722649088,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T09:34:11.593Z",
+      "loadAverage": [
+        2.93603515625,
+        2.96435546875,
+        2.916015625
+      ],
+      "freeMemoryBytes": 313360384,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T09:34:16.595Z",
+      "loadAverage": [
+        3.26123046875,
+        3.03125,
+        2.93994140625
+      ],
+      "freeMemoryBytes": 322338816,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T09:34:19.848Z",
+      "loadAverage": [
+        3.26123046875,
+        3.03125,
+        2.93994140625
+      ],
+      "freeMemoryBytes": 1084964864,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

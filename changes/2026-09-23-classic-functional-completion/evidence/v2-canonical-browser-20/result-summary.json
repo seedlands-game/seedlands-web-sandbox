@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "runId": "v2-canonical-browser-20-73e8d4da",
+  "status": "FAIL",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-73e8d4da",
+  "sourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+  "treeSha": "345682c2280824a294b5531b3a6654a71764c9cc",
+  "sourceDigest": "773a32909250c868ab5757a0366282562bbae296db71ce509e48bb77a40448d1",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "af9a738e68d28cf09f21c956fde8bd2e54697838e38efa70548482ff83c8955e",
+  "builtAt": "2026-09-28T08:08:13.435Z",
+  "performanceWindow": {
+    "id": "1588d767-4a07-4954-a08c-ed9c87c11bec",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T08:21:02.164Z",
+    "endedAt": "2026-09-28T08:23:49.493Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED"
+  },
+  "playwright": {
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1,
+    "mainStatus": "FAIL",
+    "visualStatus": "PASS_BY_RUNNER_STDOUT",
+    "nonClassicStatus": "SKIPPED_BY_RUNNER_STDOUT",
+    "runnerStdoutRecordedFromStart": true
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "FAIL_AT_CLOSED_DOOR_PROBE_BEFORE_INPUT",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "notReached": [
+    "v1-closed-door-KeyW-probe",
+    "v1-door-toggle-and-traverse",
+    "v1-jukebox-and-media",
+    "v2-resources-placement-and-mining",
+    "v2-first-iron-inventory-pickup",
+    "v2-iron-unpack-and-five-armor",
+    "v2-four-slot-pointer-matrix",
+    "C4",
+    "before-v2EquipmentPreSave",
+    "C5",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "durability-revision-and-new-reference-restore"
+  ],
+  "notObserved": ["durability-1", "death", "equipment-drop", "respawn", "human-audible-audio", "Cua", "performance"],
+  "trace": {
+    "sizeBytes": 227988314,
+    "parts": 5,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "4fcb6d98862f1893770f4bb7a3dce6e269ca1b4908ef79899e9326da30794285",
+    "reassemblyValidated": true
+  }
+}

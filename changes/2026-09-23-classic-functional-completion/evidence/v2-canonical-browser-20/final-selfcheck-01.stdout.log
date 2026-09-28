@@ -1,0 +1,81 @@
+Checking formatting...
+All matched files use Prettier code style!
+sha256sum: WARNING: 1 computed checksum did NOT match
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/v1-slice.ts: OK
+apps/web/tests/e2e/classic-support/door-collision-oracle.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK
+apps/web/dist/harness-artifact.json: FAILED
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/SOURCE-MANIFEST.sha256: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/artifact-postcheck-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/artifact-postcheck.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/canonical-error-context.md.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/classic-runtime-failure.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/classic.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/closed-door-correction-timeline.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/command.txt: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/diagnosis.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-34.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-38.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-42.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-45.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-49.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/failure-frame.jpeg: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/harness-artifact.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-write-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-write.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-01-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-03-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-03.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-write-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-write.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/network-summary.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/performance-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/playwright-last-run.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/postconditions.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/preexisting-window-files.txt: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/result-summary.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/runner.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-aa: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ab: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ac: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ad: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ae: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-parts.sha256: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-readback.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-reassembly.sha256: OK
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+true !== false
+
+    at [eval]:7:655
+    at [eval]:8:345
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30)
+    at evalTypeScript (node:internal/process/execution:295:3)
+    at node:internal/main/eval_string:71:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

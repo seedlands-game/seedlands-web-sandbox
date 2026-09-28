@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-ROUTE-AIM-BOUNDED-CLOSE-11",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "266f82cbcef5770d51b6d907723cb84f952d35a9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "13c8c634c91c984a8405ef3308b51a31805636c7c91e7b581d227bb398cc7c37"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 44,
+    "sha256": "8d571e7bd17e0da885d1eb9df1935340510e1b86fa198d2f95fee91f35b35369",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "metadata-write.stdout.log",
+      "metadata-write-window.json.log",
+      "metadata-final.stdout.log",
+      "metadata-final-window.json.log",
+      "metadata-final-02.stdout.log",
+      "metadata-final-02-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "inputs": {
+    "map01": {
+      "sourceManifestSha256": "5848879ef25500c0c786ada0d86d84e91c17c06f3ed8b96912e341ac6061525a",
+      "evidenceManifestSha256": "7f788fe22817bb678067f9731a986fc3bb56ed144f651756440f5f70ff0e49b4",
+      "deliverySha256": "852f5fac254fd209235eec0813613d241ba1226b45da560aed72cd13be9a2d45"
+    },
+    "browser20": {
+      "sourceManifestSha256": "0419909a5bf74910cce09b540a7ffd7040d7a960eb1ea2782d19e680cfdd9591",
+      "evidenceManifestSha256": "d77403b9bccf928df5438e2fe2f27380719d26205ca578298a8fd57b3f66ca6c",
+      "deliverySha256": "59431a5bbf81a5720592076120caac1a6bd5db71f4a2bdeb830cb05d9ded7621",
+      "status": "FAIL",
+      "v2Reached": false
+    },
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN"
+  },
+  "red": {
+    "window": "v1-route-aim-bounded-close-11-red-02",
+    "status": "EXPECTED_FAIL_17_OF_18",
+    "passed": 1,
+    "failed": 17,
+    "exitCode": 1,
+    "stdoutSha256": "1c22247c5a7a55eb48a1d7f5f85e1355f31357556bd2db62783d86ffb500c9ca",
+    "receiptSha256": "d15c28b4c3a42f850afc0178f4be73515039345048c90b68ff0458f8496f8936",
+    "reason": "The old helper silently resolved after 12 moves, lacked bounded invalid/null/zero/no-response failures, and allowed walkTo keyboard input after exhaustion."
+  },
+  "implementation": {
+    "maximumMoves": 18,
+    "maximumObservations": 19,
+    "successRequiresObservedAbsDxLessThanOne": true,
+    "finalMoveRequiresFollowingObservation": true,
+    "transientNullCanRecover": true,
+    "nullReusesPreviousObservation": false,
+    "persistentNullFailsUnavailable": true,
+    "nonFiniteInputFailsInvalid": true,
+    "zeroHorizontalVectorFailsUndefinedDirection": true,
+    "exhaustionIncludesTargetDirectionAndLastDx": true,
+    "secondHelperCallOrFallbackAdded": false,
+    "walkToChanged": false,
+    "mouseStepOrSensitivityChanged": false,
+    "routeTimeoutPulseToleranceOrCoordinatesChanged": false
+  },
+  "green": {
+    "window": "v1-route-aim-bounded-close-11-green-release",
+    "status": "PASS_1_FILE_18_TESTS",
+    "stdoutSha256": "18018236b4f6b712e67192dd80107b1a8709837bf0e1238efb4c121ec1e491a3",
+    "receiptSha256": "50e551ea2b5d02d13e9c76a44ca97794d41d61e690ca68ce8ba6cd31d3184dc3"
+  },
+  "affected": {
+    "window": "v1-route-aim-bounded-close-11-affected-release",
+    "status": "PASS_12_FILES_131_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "0658ba63a0228e8fe49951acbbd413717086a4ae6d3723d88163d295766f1669",
+    "receiptSha256": "a8dc986eb41859fa0c8000d2a8c5537cb062475b3818b60f5ab0133abefed6b1"
+  },
+  "static": {
+    "classicTypes": {
+      "window": "v1-route-aim-bounded-close-11-classic-types-release",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "df3be38c0b459bf4be05e9a008e634b17f3a976875e3041298f8ac30a04ff1ba"
+    },
+    "rootTypes": {
+      "window": "v1-route-aim-bounded-close-11-root-types-release",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "e92ba63584860e9a95a5619fa14192dd7102c8d6bfd7fda9a40189368b7e8459"
+    },
+    "eslint": {
+      "window": "v1-route-aim-bounded-close-11-eslint-release",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "e8dfe81b602d26d52b855e8f789d63d5f1156c4795f7c6b2bce2b1727e713fa6"
+    },
+    "format": {
+      "window": "v1-route-aim-bounded-close-11-format-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "313134a46a4b24114399b26d3a0ec1e788899c4034333245e131c00e6856f444"
+    },
+    "scopedDiff": {
+      "window": "v1-route-aim-bounded-close-11-scoped-diff-final",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "95e31b16fe8300eb4a740f7f33d27dae7809d55e4ca547dc22fb375208c8a8da"
+    }
+  },
+  "retainedIntermediateEvidence": {
+    "preDirectoryShellFailureRanTest": false,
+    "initialRedRetained": true,
+    "initialGreenAndAffectedRetained": true,
+    "initialClassicTypesFailureRetained": true,
+    "initialFormatFailureRetained": true,
+    "initialMetadataFormatFailureRetained": true,
+    "unreservedFormatDiagnosticWasFormalGate": false
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "harnessChanged": false,
+    "v1SliceChanged": false,
+    "mouseInputChanged": false,
+    "routeProgressChanged": false,
+    "close10Changed": false,
+    "browser20EvidenceChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "browser20Status": "FAIL",
+    "browser21Run": false,
+    "longTermDocsUpdated": false
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index", "push", "build", "browser21", "cua", "devserver", "ci", "deploy", "merge"]
+}
