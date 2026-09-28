@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-24",
+  "status": "FAIL_BEFORE_TEST_DISCOVERY",
+  "identity": {
+    "sourceSha": "556c9b76fb4447c49ad7d6f7a76bd7233d0011e6",
+    "sourceTree": "45ef275288163c3880bd9ea75d28c62996f3723a",
+    "sourceDigest": "a4bdd67ba41aa5e59c3650f5fcbcb0ffd7e37737f666a941fd79c6e379ddb136",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+    "builtAt": "2026-09-28T21:53:54.075Z",
+    "artifactReceiptSha256": "f9a31b847ac71bdbdbf2aa7614039a0b5872d0f44e4b0aab9f1848d04a9045cf",
+    "artifactMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6"
+  },
+  "build15EvidenceIdentityCorrection": {
+    "committedAndWorkingDeliverySha256": "3c77e382c9abe14fe840f07af73c44507ce7a1f1055c9c8d22f7839c4b697e26",
+    "supersededCheckpointSha256": "50eaadec6cb18b885abd947259af20f093305399fdfc3a60029dc3dbbd74da9b",
+    "build15CommittedFileModified": false
+  },
+  "preflight": {
+    "trackedAndIndexClean": true,
+    "port4273Listening": false,
+    "ownedProcesses": 0,
+    "machineLockFree": true,
+    "ciSet": false,
+    "selectorSet": false,
+    "benchmarkSet": false,
+    "modularSet": false,
+    "workers": 1,
+    "retries": 0,
+    "mainTimeoutMs": 900000,
+    "projectTimeoutMs": 60000,
+    "traceMode": "retain-on-failure"
+  },
+  "canonicalRun": {
+    "command": "env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-24-556c9b76 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic",
+    "startedAt": "2026-09-28T22:11:21.162Z",
+    "endedAt": "2026-09-28T22:11:37.548Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "status": "FAIL",
+    "stdoutSha256": "bc56870a4d8cb229a1cb8d88ef7e3a9801b323f280935ad7c9eee793c9eef243",
+    "windowSha256": "8e6f86a11de3de3c0b5c674a4738b9d450a267261f54bb5644cd86ce96adf16c",
+    "actualChromiumAttempts": 0,
+    "retryAttempts": 0,
+    "firstCause": "PLAYWRIGHT_TEST_DISCOVERY_MISSING_VISUAL_REBUILD_IMPORT_IN_TWO_EVIDENCE_SNAPSHOTS"
+  },
+  "receipt": {
+    "path": "classic.json.log",
+    "sha256": "5674f2e6c2345fbf17a03b6c3bb3f86ec0ef71e4b9c689e8c4ca75f3fe6734e0",
+    "status": "FAIL",
+    "selectionMode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "attempts": 0,
+    "runnerOutcome": "failed"
+  },
+  "trace": {
+    "status": "NOT_PRODUCED_BEFORE_TEST_DISCOVERY_FAILURE",
+    "originalTraceExists": false,
+    "zipIntegrityCheckRun": false,
+    "splitRun": false,
+    "repairRun": false
+  },
+  "artifactPostcheck": {
+    "runId": "v2-canonical-browser-24-artifact-postcheck",
+    "startedAt": "2026-09-28T22:12:04.223Z",
+    "endedAt": "2026-09-28T22:12:10.232Z",
+    "exitCode": 0,
+    "status": "PASS",
+    "stdoutSha256": "f2601723f441c43fcff2a71d1050cb2a7544f6b4176a7b3670140861e4288606",
+    "windowSha256": "fdbbd83d19a8e61335702405dc5b4b0376f04d49ccd60647617b2f450c3adc33",
+    "identityUnchanged": true
+  },
+  "historicalTail": {
+    "startsAt": "## Browser-23 正式验收",
+    "bytes": 64589,
+    "sha256": "d19ec067355f7278d460aef24ab533d8deb1bf535e73c1ffde65946a4dc2c45f",
+    "preserved": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "ad8b5a66672e967ed0f73b839c1354f54e922edd69fc92ade94833b778bf7b1a"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 18,
+    "sha256": "4cf5e544d22d3826ecdaa6292607ed118fd1890257b1f388d36bd3847cbfa44f",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "finalSelfcheck": {
+    "runId": "v2-canonical-browser-24-final-selfcheck",
+    "status": "PASS",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "retainedSelfcheckFailure": {
+    "status": "FAIL_SOURCE_MANIFEST_CHECKED_FROM_ONE_ROOT",
+    "mutationFromFailure": false,
+    "stdoutSha256": "325c46eb0106cd9aab1c8ebf0fb9fbd6d76c47e276ea1d2d4997fdf4c2e7a191",
+    "windowSha256": "5ccdbe1bec618d193d5a2bf3259e87d5e89c4a09079da122d6fd9d944e11c32a",
+    "correction": "Validate six frozen source paths from the acceptance tree and the cumulative report from the main evidence tree."
+  },
+  "retainedPreCorrectionSelfcheck": {
+    "status": "PASS_BEFORE_BUILD15_DELIVERY_SHA_CORRECTION",
+    "stdoutSha256": "9324b2e2823140f7704179c22ba1e54929a5ea31673605190734a3b853b7c2ba",
+    "windowSha256": "47262bfe6a302795ff87ba152af94a3006718246d2e7e2ec6e175a1cfa802aab"
+  },
+  "postconditions": {
+    "acceptanceTrackedClean": true,
+    "acceptanceIndexClean": true,
+    "port4273Listening": false,
+    "ownedProcesses": 0,
+    "machineLockFree": true,
+    "build09Through15Preserved": true,
+    "git32BackupRefPreserved": true
+  },
+  "boundaries": {
+    "browser23Changed": false,
+    "browser23Status": "FAIL_TIMEOUT_TRACE_INCOMPLETE",
+    "implementationChanged": false,
+    "gitOrIndexWrite": false,
+    "browser24Rerun": false,
+    "buildRun": false,
+    "cuaRun": false,
+    "ciRepairRun": false,
+    "deployOrMergeRun": false
+  },
+  "notRunOrRecorded": [
+    "canonical main attempt 0",
+    "C0-C5",
+    "V1/V2 checkpoints",
+    "bag counts",
+    "equipment pointer",
+    "save/restore",
+    "visual test",
+    "non-Classic smoke",
+    "attachments",
+    "trace",
+    "new reference",
+    "death/drop/respawn",
+    "16 armor/194 matrix",
+    "V3/V4"
+  ]
+}

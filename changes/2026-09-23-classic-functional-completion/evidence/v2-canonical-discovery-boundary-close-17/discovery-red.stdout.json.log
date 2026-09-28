@@ -1,0 +1,91 @@
+{
+  "config": {
+    "argv": [
+      "/Users/bytedance/.local/share/fnm/node-versions/v24.21.0/installation/bin/node",
+      "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/node_modules/@playwright/test/cli.js",
+      "test",
+      "--list",
+      "--reporter=json"
+    ],
+    "configFile": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/playwright.config.ts",
+    "rootDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+    "failOnFlakyTests": true,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+        "testIgnore": [],
+        "testMatch": [
+          "apps/web/tests/e2e/classic-runtime.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": {
+      "command": "pnpm --filter @seedlands/web preview --host 127.0.0.1 --port 4273 --strictPort",
+      "url": "http://127.0.0.1:4273/",
+      "reuseExistingServer": false,
+      "timeout": 30000
+    }
+  },
+  "suites": [],
+  "errors": [
+    {
+      "message": "Error: Cannot find module '/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-support/visual-rebuild' imported from /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts",
+      "stack": "Error: Cannot find module '/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-support/visual-rebuild' imported from /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts\n    at eval (<anonymous>:1:1)",
+      "location": {
+        "file": "<anonymous>",
+        "column": 1,
+        "line": 1
+      }
+    },
+    {
+      "message": "Error: Cannot find module '/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-support/visual-rebuild' imported from /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-runtime.spec.ts",
+      "stack": "Error: Cannot find module '/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-support/visual-rebuild' imported from /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-runtime.spec.ts\n    at eval (<anonymous>:1:1)",
+      "location": {
+        "file": "<anonymous>",
+        "column": 1,
+        "line": 1
+      }
+    }
+  ],
+  "stats": {
+    "startTime": "2026-09-28T22:26:42.347Z",
+    "duration": 450.30400000000003,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

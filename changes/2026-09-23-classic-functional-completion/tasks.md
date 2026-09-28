@@ -575,6 +575,20 @@ CI 修复、deploy、merge 均未运行。
 
 ## V5–V6 串行验收与交付
 
+### V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17 / GIT-40
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`。Close17 已按冻结合同完成：真实 Playwright 1.62.1
+`--list --reporter=json` RED 精确收集两份历史 evidence snapshot 并因缺少 `visual-rebuild` exit 1；唯一
+Chromium project 增加 `testDir: './apps/web/tests/e2e'` 后，同命令 GREEN，只发现真实 canonical spec 的 main、
+visual、modular 三条 identity，现有 `createCanonicalSelection` 返回唯一 `CANONICAL_MAIN`。Classic/root types、配置
+ESLint、正常 Prettier、scope 与最终 selfcheck 均 PASS。该结果只关闭 discovery boundary，不是 Browser25 或产品
+GREEN；Browser24 保持 `FAIL_BEFORE_TEST_DISCOVERY`/Chromium 0，Browser23 保持 `FAIL/TRACE_INCOMPLETE`。
+
+GIT-40 只提交两笔：第一笔为 `playwright.config.ts`、`docs/ci-testing.md`、`spec.md` 与
+`canonical-discovery-contract.md`；第二笔为 Close17/Browser24 evidence、累计 Browser 报告、本 evidence 摘要、
+tasks/execution-state 窄状态。隔离 detached tree 执行真实 discovery list、selection、Classic/root types、配置 ESLint、
+4-path 正常 Prettier 与 scope；不重跑 16 focused/145 behavior，不运行 build、Browser25、Cua 或 CI。
+
 ### RESTORE-OWNER-CLOSE-01
 
 Owner：954ef059-b17c-4842-bf46-5ebc1807b38e；阶段上限 2h。

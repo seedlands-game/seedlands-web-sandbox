@@ -1,0 +1,17 @@
+3211dc822c1baebabdd787ae5b14a900ff093491751e936bf2322ea85b70b82d  ./README.md
+922f1859ff33d8d1fe4cfad1ce6613e7d16c57057977924f2fd4c4556c4d4120  ./SOURCE-MANIFEST.sha256
+6130909157201de4000f3383c4e801a34fd587c0946e0efeada72c971a91e5b5  ./code-commit.stdout.log
+a150d3d1dddca54864351a9f575faafc8943d0aba41da564e7f3f89d9a309b58  ./code.paths
+0a13b4e1b6fc7cfd41beeb426be5d33264473ad83576df03b096d4a4383046a4  ./dependency-setup.window.json.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  ./discovery.stderr.log
+8da6bb12401e7e8f9fe71bbbc01259aa04b4f12b3ee0eaa753c33fdf3fd557ed  ./discovery.stdout.json.log
+f1f70a45f0a065c2cf05a8fb657ea28791c1d05f76b75aa5bd19a8ffb2b5d7b5  ./evidence-format.stdout.log
+2bb6c341566eb6c9d6ab1783bc7e86c494cdc00569867c4c7762fa908bce2f8b  ./evidence-format.window.json.log
+334e02f53ef070ac6a145249d6094883ab3807fe83b15f7551c187cf9ba2c0b0  ./evidence.paths
+5d9ef27c319589ac488a01f12d91fe4319de06468badadf41d63e5776e078023  ./final-selfcheck.zsh
+7156c9366d06b66ae5649a39176b3ddbdb9658de6a63267e2a25f455baee57  ./selection.stdout.json.log
+42d31bd40937c05ede6b0ddf1deb45c4c25131e4fef0646580a0bf822584665d  ./staged-gate-shell-expansion-failure.stdout.log
+8e437c815b827cf04fb120403e4da91baa011f8a7b5b36ce0be612027704c892  ./staged-gate-shell-expansion-failure.window.json.log
+29862f2185e56d918530ddb37873400627bb7e44e6c67512642243876196f5b6  ./staged-gate.stdout.log
+6d1eab227bfc9e2718274a5b7531e3c2151e88046c64ae2588bbc1cbb26cc91e  ./staged-gate.window.json.log
+6d6be6a43616bb8cff2a749359a76152c91cb1ca1e6ab714a90682772eb41335  ./workspace-links.stdout.log

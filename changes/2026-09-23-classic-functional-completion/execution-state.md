@@ -21,6 +21,13 @@ test types、目标 ESLint/Prettier 与 staged diff 均 PASS；第二笔 evidenc
 为准。Browser24、build、artifact、Cua、CI、deploy、merge 未运行；terminal receipt 静态 GREEN 不证明 canonical Browser GREEN，
 ZIP 完整性仍由人工 evidence 门禁检查。
 
+当前 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
+两份历史 snapshot 而 exit 1，实际 Chromium attempt 为 0。`V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17` 只在唯一
+Chromium project 增加 `testDir: './apps/web/tests/e2e'`，保留仓库根 `rootDir` 和现有 root-relative Reporter
+identity。真实 `--list --reporter=json` RED/GREEN、现有 `createCanonicalSelection`、Classic/root types、配置 ESLint、
+Prettier/scope/selfcheck 均 PASS；GREEN 只发现 canonical 文件的 main/visual/modular 三条测试。该静态结果不代表
+Browser25 或产品 GREEN。GIT-40 正在按两笔精确 allowlist 隔离交付；BUILD16/Browser25 尚未运行。
+
 GIT39 第二笔首次 selfcheck 在 frozen Browser23 `attachments/test-0-error-context.md` 的自然 Prettier 门禁处失败，
 未创建提交。root 已准出 `GIT39-BROWSER23-RAW-PACKAGING-RECOVERY`：只把主证据副本和 detached 副本更名为
 `.md.log`，内容仍为 2800 bytes、SHA-256 `499ae94a...a573`；acceptance raw/report/trace 未动。修改前 21 个
