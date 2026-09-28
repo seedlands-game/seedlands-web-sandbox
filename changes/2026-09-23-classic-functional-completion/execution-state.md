@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-26T08:00:05Z
+更新时间：2026-09-28T04:08:37Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -66,8 +66,12 @@ GitHub 100 MB 限制被 `GH001` 拒绝，远端未移动；本地 `refs/task-bac
 第 8 格 approach 中 client/server 未同轮进入 corridor，Browser17 保持 FAIL，`resources-placed`、采矿、equipment
 pointer、C4/C5 未触达且 lease 已释放。`V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06` 已由 root 定向准出；GIT33
 detached staged tree 的 6 files / 46 tests、Classic/root test types 与目标静态均 PASS，代码提交
-`117b4e9396d2f05c701eeba40d52f4d53abaed34` 已本地生成。证据/state 尚待第二笔提交和正常 push；BUILD09 与
-Browser18/Cua/devserver/CI 均未运行。fixture/static GREEN 不外推为 Browser 产品 GREEN。
+`117b4e9396d2f05c701eeba40d52f4d53abaed34` 与 evidence/state 提交
+`4de6383e431df6f1b08fb6297e1b9c7ab95143a6` 均已推送，local/upstream/origin/ls-remote 为 `0/0`。BUILD09 已从
+该 source 的 clean detached tree 完成唯一 build 与唯一 artifact verify：sourceDigest `900774ae...9c30`、
+artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致且与 BUILD08 相同；artifact evidence 待本阶段第三笔独立
+提交。Browser18/Cua/devserver/CI 均未运行。fixture/static/artifact GREEN 不外推为 Browser 产品 GREEN。恢复开始前
+历史 V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除；当前仅保留新 BUILD09 tree/dist。
 
 ## 恢复规则
 
