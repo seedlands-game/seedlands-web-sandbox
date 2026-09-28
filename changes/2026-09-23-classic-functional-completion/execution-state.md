@@ -107,6 +107,12 @@ helper 的 12 moves 只覆盖 `124.8°` 且最后 move 后不观察，V2 未到�
 detached staged tree 精确四路径 patch `2ffd10c7...6a2` 通过 `12 files / 131 tests`、Classic/root test types、2 TS
 ESLint、四路径 format/scope；代码 commit 为 `38c3f5e55a2e6609650cded507b90b54bff893a5`。evidence/state 随本
 提交冻结，精确提交与远端 identity 以本阶段收尾读回为准；BUILD12/Browser21/Cua/devserver/CI/deploy/merge 未运行。
+当前 BUILD12 checkpoint：已推送 GIT36 source `908d0d82881e3e8c7dff7ee27cf3a4785013f37a` 的 clean detached
+tree `eb8a5d9a...39e6` 已完成唯一 build 与唯一 artifact verify。sourceDigest `e22c3a5b...9312`、artifactDigest
+`f6f1ea67...cfa4`，276 项 receipt/disk map 与 BUILD11 完全相同，dist 为 277 个普通文件、0 symlink；Pack lock 与
+MP3 source/public/dist identity 一致。BUILD09/10/11/12 tree/dist 与 Git32 backup ref 保留。Browser20 仍 FAIL、V2
+未到达，Browser19 首 iron pickup 未证明；BUILD12 evidence 随本提交冻结，精确提交/远端 SHA 待本阶段收尾读回。
+Browser21/Cua/devserver/CI/deploy/merge 未运行。
 
 ## 恢复规则
 

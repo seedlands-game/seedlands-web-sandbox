@@ -1,0 +1,13 @@
+V2-ARTIFACT-BUILD-12
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-908d0d82
+Build source SHA: 908d0d82881e3e8c7dff7ee27cf3a4785013f37a
+Build source tree: eb8a5d9a3cc423378f243e93804a6284f64539e6
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state environment: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-908d0d82/.pnpm-task-run-state-v1
+Task state persisted after run: false
+
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-12-dependency-setup SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/dependency-setup.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm install --offline --frozen-lockfile --ignore-scripts 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/dependency-setup.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-12-build SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/build.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-12-artifact-verify SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-verify.stdout.log'
+
+Post-build collection copied the receipt, independently hashed all 276 mapped dist files, checked the 277-file disk closure and zero symlinks, compared the receipt/disk maps byte-for-byte and against BUILD11, and verified tree/index, workspace links, task-state persistence, port 4273, residual processes, packs.lock, and source/public/dist MP3 identity without running build or artifact again.

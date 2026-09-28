@@ -1,0 +1,26 @@
+changes/2026-09-23-classic-functional-completion/v2-artifact-build-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/tasks.md: OK
+changes/2026-09-23-classic-functional-completion/execution-state.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/git36-format-exclusion-appendix.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-map-compare.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-map-vs-build11.diff.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-map.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-verify.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/artifact-verify.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/build.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/build.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/dependency-setup.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/dist-files.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/doc-format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/doc-format-final.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/doc-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/doc-format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/git36-format-exclusion-appendix.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/harness-artifact.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/pack-media.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/preconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-12/validation-argv.txt: OK
+FINAL_SELFCHECK_PASS
