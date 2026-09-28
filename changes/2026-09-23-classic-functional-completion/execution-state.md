@@ -80,6 +80,13 @@ aim，reject 零 mouse down 且无 fallback。GIT34 detached tree 的 7 files / 
 ESLint、5 路径 format/scoped diff 全 PASS，代码提交 `a987a672df865f4687898ed15b3b5e7f239d6273` 已本地生成。
 GIT34 evidence/state 随包含本文的第二笔提交交付，精确远端 SHA 以最终 checkpoint 读回为准；BUILD10 明确留待
 独立阶段，Browser19/Cua/devserver/CI 未运行。
+GIT34 两笔提交已远端交付：代码 `a987a672df865f4687898ed15b3b5e7f239d6273`，evidence/state
+`f282da95833c5ff568b8b7a4caac7d7a7513514f`，交付前 local/upstream/ls-remote/PR head 为 `0/0`。BUILD10 已从
+该已推送 source 的 clean detached tree 完成唯一 build 与唯一 artifact verify：tree `ad93a8e1...2074`、
+sourceDigest `c8463ed8...e865`、artifactDigest `f6f1ea67...cfa4`，276 项 receipt map 与磁盘及 BUILD09 map 一致，
+dist 277 files / 0 symlink，Pack lock 与 MP3 source/dist 一致。BUILD09 与 BUILD10 tree/dist、Git32 backup ref 保留；
+Browser18 FAIL 事实不变，Browser19/Cua/devserver/CI/deploy/merge 未运行。BUILD10 evidence/state 已冻结并随本提交
+交付，精确远端 SHA 以最终 checkpoint 读回为准。
 
 ## 恢复规则
 
