@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "attempt": 0,
+  "test": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+  "project": "chromium",
+  "benchmark": false,
+  "stages": {},
+  "errors": [],
+  "current": null,
+  "logicEvidence": []
+}

@@ -1,0 +1,75 @@
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:6: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:331: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:363: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:380: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:538: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:575: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/code-staged.patch:1451: trailing whitespace.
++ 
+changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/staged-gate-environment-failure.stdout.log:46: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/runner.stdout.log:29: trailing whitespace.
++  1) [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/runner.stdout.log:38: trailing whitespace.
++    [chromium] › apps/web/tests/e2e/classic-runtime.spec.ts:73:1 › Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景 
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/green-failure.stdout.log:69: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/green-final-02.stdout.log:29: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/green-final-03.stdout.log:29: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/green-final.stdout.log:35: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/pure-red.stdout.log:23: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/pure-red.stdout.log:25: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/reporter-red.stdout.log:35: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/eslint-failure.stdout.log:6: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-02.stdout.log:27: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-03.stdout.log:27: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-04.stdout.log:27: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-05.stdout.log:51: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:28: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:30: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:59: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:61: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:90: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-06.stdout.log:92: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-07.stdout.log:33: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-08.stdout.log:29: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final-09.stdout.log:29: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-final.stdout.log:26: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-receipt-failure-02.stdout.log:21: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-receipt-failure-02.stdout.log:23: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-receipt-failure.stdout.log:22: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-receipt-failure.stdout.log:27: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/green-reporter.stdout.log:11: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/measurement-consumer.stdout.log:11: new blank line at EOF.
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:21: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:23: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:40: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:42: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:61: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:63: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:119: trailing whitespace.
++  
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/red.stdout.log:122: trailing whitespace.
++  

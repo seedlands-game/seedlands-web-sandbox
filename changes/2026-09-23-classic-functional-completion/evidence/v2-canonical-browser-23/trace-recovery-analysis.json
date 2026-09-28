@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "status": "RECOVERED_PARTIAL_METADATA_ONLY",
+  "raw": {
+    "path": "acceptance-tree/test-results/.../trace.zip",
+    "sizeBytes": 1269815136,
+    "sha256": "fa61f3c1962a0134a85c9cb72eee911f141804f04cc39f764a3d949ca5fbcc48",
+    "stableAfterProducerExit": true,
+    "zipinfoExitCode": 9,
+    "integrity": "INCOMPLETE_MISSING_END_OF_CENTRAL_DIRECTORY"
+  },
+  "archive": {
+    "parts": 25,
+    "maxPartBytes": 52428800,
+    "reassembledSha256": "fa61f3c1962a0134a85c9cb72eee911f141804f04cc39f764a3d949ca5fbcc48",
+    "reassemblyProvesZipIntegrity": false
+  },
+  "boundedRecovery": {
+    "method": "A byte-identical task-owned copy was passed once to zip -FF.",
+    "result": "ABORTED_PARTIAL_NO_RECOVERED_ZIP",
+    "exitCode": 130,
+    "reason": "zip -FF treated the input as a split archive, repeatedly requested raw-copy.z01, and was interrupted after the bounded five-minute audit.",
+    "originalRawOverwritten": false,
+    "recoveredFileProduced": false,
+    "stdoutOriginalBytes": 12884609463,
+    "stdoutOriginalSha256": "4bd7b280440148536737a36eaeed3172998492d0901a858b974eb9bacb56f0a2",
+    "stdoutGzipSha256": "3e5fd5fe3ab4923b3805302cc26a0945202708be4d7a136f506c8418168a2038",
+    "stdoutGzipParts": 3,
+    "stdoutGzipMaxPartBytes": 52428800
+  },
+  "localHeaderReadback": {
+    "status": "PARTIAL",
+    "offset": 0,
+    "signature": "504b0304",
+    "flags": 2056,
+    "compressionMethod": 8,
+    "name": "resources/src@bac91f29cfd70b77678a4016901111cf580312d2.txt",
+    "completeEntryRecovered": false,
+    "missingRange": "Unknown because no central directory is present."
+  },
+  "helperDiagnostics": [
+    "A whole-file signature scan helper completed its read but failed before writing the derived report because the temporary script referenced an undefined fs namespace. It did not modify the raw or parts.",
+    "No second ZIP repair or browser attempt was run."
+  ]
+}

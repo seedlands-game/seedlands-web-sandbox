@@ -1,0 +1,5 @@
+cf4cc0218d97b9437a4a2797d5cb3820ca2084224fe9f4bc12f985bf0384536c  apps/web/tests/e2e/classic-runtime.spec.ts
+40a6237f13a9b59f36bded5cfdef17616e2ca966228fb4d51911f908d489472c  playwright.config.ts
+1f2434477e92128e58f5af15c4e7bc1f31e0688fa6a1db4a23141a748a4e125f  changes/2026-09-23-classic-functional-completion/spec.md
+2d5ec8bf02755f716ddc6b48a4d2b77308c6a83aef3a46db4ea47bac7576c0b8  changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md
+41437bbe73fd0c1b1eb3ef053c5c4c488b57ddc4feb06ca601c6293c9bfb85be  changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md

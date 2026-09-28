@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT39-BROWSER23-RAW-PACKAGING-RECOVERY",
+  "priorManifest": {
+    "entries": 21,
+    "sha256": "891511bd6446a871e6c0fae7c933688572c1bfeb800a7bca615c2ad13b6ae4e5"
+  },
+  "browser23": {
+    "sourceManifest": {
+      "before": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+      "after": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160"
+    },
+    "evidenceManifest": {
+      "before": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+      "after": "e985c56ac652b7af5c1c84bb4853f06d9f321c3754bd6fbb5e94f115c03fd188"
+    },
+    "delivery": {
+      "before": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+      "after": "35842ab0daeebd431707a12f92bcf34a48ce25b9b28a2b13e78b9997134fc941"
+    }
+  },
+  "budgetMap": {
+    "sourceManifest": {
+      "before": "64ce50ef3284e12a92a410600c1dc6b663330fdf0f3954d91adb50cbfc2fbc68",
+      "after": "1257c5a4382b49f9425dd17cfb3250958443415e0066f989f15a9bcbcfac3559"
+    },
+    "evidenceManifest": {
+      "before": "554fb4aabcce039eb93870b695143f8403edb154a3b314fc793d5fbecf4ead55",
+      "after": "52d68bec8123d823c8d89bf0e956eabcc40e48e673ca23dc1851c9f28762e94d"
+    },
+    "delivery": {
+      "before": "828f23d14b54d51f19d5fd66d6454da8322b2210526d73f80713d412e992da61",
+      "after": "0483a7701a555f0288f37ffdfc1804283eb2803b2d0f9d5209377db70cb555e0"
+    }
+  },
+  "git39": {
+    "sourceManifestBefore": "9431139f712b23814c0d368fbe49531875264c3f8a7a29fb89ab566537fdd1db",
+    "sourceManifestExpectedAfter": "9431139f712b23814c0d368fbe49531875264c3f8a7a29fb89ab566537fdd1db",
+    "manifestBefore": "5569be8e1ae4dea3562cc0ee17dd492b0631af7b0653ae763b6ea1bd3a400473",
+    "deliveryBeforeCommit": "NOT_FROZEN_AS_RELEASE_IDENTITY",
+    "manifestAfter": "cec1d771927d105971ca8e377f0938daa9e3def6a2551d3de6b05ff1ee78c8c7",
+    "deliveryAfter": "5fbff2e6b832614737156b7ed47677b79b5d977d7dfb27b768c7bd9de37ebb60"
+  },
+  "conclusionsChanged": false
+}

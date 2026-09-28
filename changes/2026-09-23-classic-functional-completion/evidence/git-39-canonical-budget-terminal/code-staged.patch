@@ -1,0 +1,1488 @@
+diff --git a/apps/web/tests/e2e/classic-runtime.spec.ts b/apps/web/tests/e2e/classic-runtime.spec.ts
+index d9d61eac..2ed6b765 100644
+--- a/apps/web/tests/e2e/classic-runtime.spec.ts
++++ b/apps/web/tests/e2e/classic-runtime.spec.ts
+@@ -72,7 +72,7 @@ test.afterEach(async ({ page }, testInfo) => {
+ 
+ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
+   test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
+-  test.setTimeout(720_000);
++  test.setTimeout(900_000);
+   evidenceWritten = false;
+   restoreEvidence = undefined;
+   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
+diff --git a/apps/web/tests/e2e/classic-support/canonical-reporter.test.ts b/apps/web/tests/e2e/classic-support/canonical-reporter.test.ts
+new file mode 100644
+index 00000000..7c4cd2e1
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/canonical-reporter.test.ts
+@@ -0,0 +1,201 @@
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import type { FullConfig, FullResult, Suite, TestCase, TestResult } from '@playwright/test/reporter';
++import CanonicalReporter from './canonical-reporter';
++import { canonicalMainIdentity, validateClassicRunReceipt } from '../../../../../scripts/harness/classic-receipt.mjs';
++
++const temporaryPaths: string[] = [];
++const runId = 'reporter-test-run';
++const sourceSha = 'b'.repeat(40);
++
++const config = { rootDir: process.cwd() } as FullConfig;
++const project = { name: canonicalMainIdentity.project };
++const testCase = (title = canonicalMainIdentity.title, file = canonicalMainIdentity.file) =>
++  ({
++    id: title === canonicalMainIdentity.title ? 'canonical-id' : 'other-id',
++    title,
++    location: { file: join(process.cwd(), file), line: 1, column: 1 },
++    parent: { project: () => project },
++  }) as TestCase;
++const suite = (...tests: TestCase[]) => ({ allTests: () => tests }) as Suite;
++const attachment = (name: string, payload: unknown) => ({
++  name,
++  contentType: 'application/json',
++  body: Buffer.from(JSON.stringify(payload)),
++});
++const detailed = {
++  schemaVersion: 1,
++  status: 'PASS',
++  attempt: 0,
++  test: canonicalMainIdentity.title,
++  project: canonicalMainIdentity.project,
++  runId,
++  artifact: { identity: { sourceSha } },
++  benchmark: { measurement: { status: 'NOT_MEASURED' } },
++  stages: { C5: { status: 'PASS' } },
++  restoreEvidence: { after: { v2Equipment: { phase: 'restored' } } },
++};
++const result = (status: TestResult['status'], attachments: TestResult['attachments'], retry = 0): TestResult =>
++  ({
++    status,
++    retry,
++    attachments,
++    errors: status === 'passed' ? [] : [{ message: `result:${status}` }],
++  }) as TestResult;
++
++afterEach(() => {
++  vi.unstubAllEnvs();
++  for (const path of temporaryPaths.splice(0)) rmSync(path, { recursive: true, force: true });
++});
++
++function destination() {
++  const directory = join(tmpdir(), `seedlands-canonical-reporter-${process.pid}-${temporaryPaths.length}`);
++  temporaryPaths.push(directory);
++  mkdirSync(directory);
++  return join(directory, 'classic.json');
++}
++
++function reporter(path: string) {
++  vi.stubEnv('SEEDLANDS_CLASSIC_RESULT', path);
++  vi.stubEnv('SEEDLANDS_HARNESS_RUN_ID', runId);
++  vi.stubEnv('SEEDLANDS_SOURCE_SHA', sourceSha);
++  return new CanonicalReporter();
++}
++
++describe('CanonicalReporter', () => {
++  it('writes one terminal main attempt from the completed Playwright result and attachments', () => {
++    const path = destination();
++    const instance = reporter(path);
++    const main = testCase();
++    instance.onBegin(config, suite(main));
++    instance.onTestEnd(
++      main,
++      result('timedOut', [
++        attachment('classic-runtime-failure.json', { ...detailed, status: 'FAIL', errors: ['timeout'] }),
++        attachment('classic-runtime-evidence.json', detailed),
++      ]),
++    );
++    expect(instance.onEnd({ status: 'failed' } as FullResult)).toBeUndefined();
++
++    const receipt = JSON.parse(readFileSync(path, 'utf8'));
++    expect(receipt.status).toBe('FAIL');
++    expect(receipt.runnerOutcome).toBe('failed');
++    expect(receipt.attempts).toHaveLength(1);
++    expect(receipt.attempts[0]).toMatchObject({
++      testOutcome: 'timedOut',
++      assertionEvidencePresent: true,
++      assertionEvidenceStatus: 'PASS',
++      stages: detailed.stages,
++      restoreEvidence: detailed.restoreEvidence,
++      failureEvidence: { errors: ['timeout'] },
++      failureEvidencePresent: true,
++    });
++  });
++
++  it('uses the filtered suite and excludes visual and skipped non-main tests from attempts', () => {
++    const path = destination();
++    const instance = reporter(path);
++    const visual = testCase('Classic 视觉 v3 生产素材、连续帧与单击破坏回归');
++    const modular = testCase(
++      '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
++    );
++    instance.onBegin(config, suite(visual, modular));
++    instance.onTestEnd(visual, result('passed', [attachment('classic-runtime-evidence.json', detailed)]));
++    instance.onTestEnd(modular, result('skipped', []));
++    instance.onEnd({ status: 'passed' } as FullResult);
++
++    const receipt = JSON.parse(readFileSync(path, 'utf8'));
++    expect(receipt).toMatchObject({ status: 'PASS', runnerOutcome: 'passed', selection: { mode: 'NON_MAIN' } });
++    expect(receipt.attempts).toEqual([]);
++  });
++
++  it('reads file-backed attachments and fails closed on malformed evidence', () => {
++    const path = destination();
++    const detailedPath = path + '.detailed.json';
++    writeFileSync(detailedPath, JSON.stringify(detailed));
++    const instance = reporter(path);
++    const main = testCase();
++    instance.onBegin(config, suite(main));
++    instance.onTestEnd(
++      main,
++      result('passed', [
++        { name: 'classic-runtime-evidence.json', contentType: 'application/json', path: detailedPath },
++        { name: 'classic-runtime-failure.json', contentType: 'application/json', body: Buffer.from('{') },
++      ]),
++    );
++    instance.onEnd({ status: 'passed' } as FullResult);
++
++    const receipt = JSON.parse(readFileSync(path, 'utf8'));
++    expect(receipt.status).toBe('FAIL');
++    expect(receipt.attempts).toHaveLength(1);
++    expect(receipt.attempts[0]).toMatchObject({
++      assertionEvidenceStatus: 'PASS',
++      failureEvidence: null,
++      receiptErrors: [
++        'classic-runtime-failure.json is not valid readable JSON',
++        'failure attachment is not a JSON object',
++      ],
++    });
++  });
++
++  it('treats a parsed null failure attachment as present and invalid', () => {
++    const nullFailure = {
++      name: 'classic-runtime-failure.json',
++      contentType: 'application/json',
++      body: Buffer.from('null'),
++    };
++    for (const attachments of [
++      [attachment('classic-runtime-evidence.json', detailed), nullFailure],
++      [nullFailure, attachment('classic-runtime-evidence.json', detailed)],
++    ]) {
++      const path = destination();
++      const instance = reporter(path);
++      const main = testCase();
++      instance.onBegin(config, suite(main));
++      instance.onTestEnd(main, result('passed', attachments));
++      instance.onEnd({ status: 'passed' } as FullResult);
++
++      const receipt = JSON.parse(readFileSync(path, 'utf8'));
++      expect(receipt.status).toBe('FAIL');
++      expect(receipt.attempts).toHaveLength(1);
++      expect(receipt.attempts[0]).toMatchObject({
++        status: 'FAIL',
++        assertionEvidencePresent: true,
++        assertionEvidenceStatus: 'PASS',
++        stages: detailed.stages,
++        restoreEvidence: detailed.restoreEvidence,
++        failureEvidence: null,
++        failureEvidencePresent: true,
++        receiptErrors: ['failure attachment is not a JSON object'],
++      });
++      expect(() =>
++        validateClassicRunReceipt(receipt, {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: true,
++          benchmark: false,
++        }),
++      ).toThrow(/runner outcome/);
++    }
++  });
++
++  it('marks a modular-world selection without accepting a canonical main attempt', () => {
++    const path = destination();
++    vi.stubEnv('SEEDLANDS_PACK_SMOKE', 'modular-world');
++    const instance = reporter(path);
++    const main = testCase();
++    const modular = testCase(
++      '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
++    );
++    instance.onBegin(config, suite(main, modular));
++    instance.onTestEnd(main, result('skipped', []));
++    instance.onTestEnd(modular, result('passed', []));
++    instance.onEnd({ status: 'passed' } as FullResult);
++
++    const receipt = JSON.parse(readFileSync(path, 'utf8'));
++    expect(receipt).toMatchObject({ status: 'PASS', selection: { mode: 'MODULAR_WORLD' }, attempts: [] });
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/canonical-reporter.ts b/apps/web/tests/e2e/classic-support/canonical-reporter.ts
+new file mode 100644
+index 00000000..1aa948da
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/canonical-reporter.ts
+@@ -0,0 +1,90 @@
++import type { FullConfig, FullResult, Reporter, Suite, TestCase, TestResult } from '@playwright/test/reporter';
++import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
++import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
++import {
++  createCanonicalSelection,
++  createClassicReceipt,
++  finalizeClassicReceipt,
++  recordCanonicalTestEnd,
++  type ClassicEvidenceAttachment,
++  type ClassicReceipt,
++  type ClassicTestIdentity,
++} from '../../../../../scripts/harness/classic-receipt.mjs';
++
++const resultPath = () => (process.env.SEEDLANDS_CLASSIC_RESULT ? resolve(process.env.SEEDLANDS_CLASSIC_RESULT) : null);
++const requiredEnvironment = (name: string) => {
++  const value = process.env[name]?.trim();
++  if (!value) throw new Error(name + ' is required by the Classic terminal reporter.');
++  return value;
++};
++const normalizedFile = (rootDir: string, file: string) =>
++  (isAbsolute(file) ? relative(rootDir, file) : file).split(sep).join('/');
++
++function testIdentity(rootDir: string, test: TestCase): ClassicTestIdentity {
++  return {
++    testId: test.id,
++    file: normalizedFile(rootDir, test.location.file),
++    test: test.title,
++    project: test.parent.project()?.name ?? '',
++  };
++}
++
++function parseAttachment(attachment: TestResult['attachments'][number]): ClassicEvidenceAttachment | null {
++  if (attachment.name !== 'classic-runtime-evidence.json' && attachment.name !== 'classic-runtime-failure.json')
++    return null;
++  try {
++    const bytes = attachment.body ?? (attachment.path ? readFileSync(attachment.path) : null);
++    if (!bytes) return { name: attachment.name, payload: null, error: 'has no body or readable path' };
++    return { name: attachment.name, payload: JSON.parse(bytes.toString('utf8')) as unknown };
++  } catch {
++    return { name: attachment.name, payload: null, error: 'is not valid readable JSON' };
++  }
++}
++
++export default class CanonicalReporter implements Reporter {
++  private rootDir = '';
++  private path: string | null = null;
++  private receipt: ClassicReceipt | null = null;
++
++  onBegin(config: FullConfig, suite: Suite): void {
++    this.rootDir = config.rootDir;
++    this.path = resultPath();
++    if (!this.path) return;
++    const selectedTests = suite.allTests().map((test) => testIdentity(this.rootDir, test));
++    const selection = createCanonicalSelection(selectedTests, {
++      modularWorld: process.env.SEEDLANDS_PACK_SMOKE === 'modular-world',
++    });
++    this.receipt = createClassicReceipt({
++      runId: requiredEnvironment('SEEDLANDS_HARNESS_RUN_ID'),
++      sourceSha: requiredEnvironment('SEEDLANDS_SOURCE_SHA'),
++      selection,
++    });
++  }
++
++  onTestEnd(test: TestCase, result: TestResult): void {
++    if (!this.receipt) return;
++    this.receipt = recordCanonicalTestEnd(this.receipt, {
++      ...testIdentity(this.rootDir, test),
++      retry: result.retry,
++      resultStatus: result.status,
++      resultErrors: result.errors.map((error) => error.message ?? error.value ?? 'Unknown Playwright test error.'),
++      attachments: result.attachments.flatMap((attachment) => {
++        const parsed = parseAttachment(attachment);
++        return parsed ? [parsed] : [];
++      }),
++    });
++  }
++
++  onEnd(result: FullResult): void {
++    if (!this.path || !this.receipt) return;
++    const receipt = finalizeClassicReceipt(this.receipt, result.status);
++    mkdirSync(dirname(this.path), { recursive: true });
++    const temporary = this.path + '.' + process.pid + '.tmp';
++    writeFileSync(temporary, JSON.stringify(receipt, null, 2) + '\n', { mode: 0o600 });
++    renameSync(temporary, this.path);
++  }
++
++  printsToStdio(): boolean {
++    return false;
++  }
++}
+diff --git a/apps/web/tests/e2e/classic-support/evidence.ts b/apps/web/tests/e2e/classic-support/evidence.ts
+index 561186fc..fa7e5183 100644
+--- a/apps/web/tests/e2e/classic-support/evidence.ts
++++ b/apps/web/tests/e2e/classic-support/evidence.ts
+@@ -1,6 +1,4 @@
+ import { expect, type Page, type TestInfo } from '@playwright/test';
+-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+-import { dirname, resolve } from 'node:path';
+ import type { ChromeTrace, ClassicSnapshot } from './harness';
+ import type { ArtifactReadback, CompositionIdentity, PackLockReadback, RuntimeEnvironment } from './identity';
+ import type { ClassicLogicObservationEvidence } from './logic';
+@@ -86,28 +84,6 @@ const measurementSample = (stage: ClassicStage, snapshot: ClassicSnapshot) => ({
+   storage: { bytes: snapshot.storageBytes },
+ });
+ 
+-const resultPath = () => (process.env.SEEDLANDS_CLASSIC_RESULT ? resolve(process.env.SEEDLANDS_CLASSIC_RESULT) : null);
+-
+-function writeAttempt(evidence: Record<string, unknown>): void {
+-  const path = resultPath();
+-  if (!path) return;
+-  mkdirSync(dirname(path), { recursive: true });
+-  let attempts: unknown[] = [];
+-  try {
+-    const prior = JSON.parse(readFileSync(path, 'utf8')) as { attempts?: unknown[] };
+-    if (Array.isArray(prior.attempts)) attempts = prior.attempts;
+-  } catch {
+-    // A new run has no result file yet.
+-  }
+-  attempts.push(evidence);
+-  const status = attempts.every(
+-    (attempt) => attempt !== null && typeof attempt === 'object' && 'status' in attempt && attempt.status === 'PASS',
+-  )
+-    ? 'PASS'
+-    : 'FAIL';
+-  writeFileSync(path, `${JSON.stringify({ schemaVersion: 1, status, attempts }, null, 2)}\n`);
+-}
+-
+ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceData): Promise<void> {
+   const status =
+     Object.values(data.stages).length === 6 &&
+@@ -205,7 +181,6 @@ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceDa
+     body: JSON.stringify(evidence, null, 2),
+     contentType: 'application/json',
+   });
+-  writeAttempt(evidence);
+ }
+ 
+ export async function attachClassicFailure(
+@@ -222,6 +197,8 @@ export async function attachClassicFailure(
+     attempt: testInfo.retry,
+     test: testInfo.title,
+     project: testInfo.project.name,
++    runId: process.env.SEEDLANDS_HARNESS_RUN_ID ?? null,
++    sourceSha: process.env.SEEDLANDS_SOURCE_SHA ?? null,
+     benchmark: benchmarkMode,
+     stages,
+     errors: testInfo.errors.map(({ message }) => message),
+@@ -233,7 +210,6 @@ export async function attachClassicFailure(
+     body: JSON.stringify(evidence, null, 2),
+     contentType: 'application/json',
+   });
+-  writeAttempt(evidence);
+ }
+ 
+ export function requireAllClassicStages(stages: Partial<Record<ClassicStage, ClassicStageResult>>): void {
+diff --git a/changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md b/changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md
+new file mode 100644
+index 00000000..27101eed
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md
+@@ -0,0 +1,60 @@
++# V2 Canonical Browser 预算登记合同
++
++阶段：`V2-CANONICAL-BUDGET-REGISTRATION-CLOSE-15`
++
++状态：合同冻结；本阶段只登记现有唯一 Classic Browser 线路的有限预算，不改变玩法、旅程、证据 schema 或失败处理。
++
++## 观察 RED
++
++Browser23 是本阶段已存在的可执行观察 RED，不重新运行：唯一 Chromium attempt、单 worker、retry 0，main test 在
++`720000ms` 总预算处 `timedOut`，runner exit 1。C5 在 main start 后 `718819ms` 完成；重开后玻璃步骤已开始，最终断言链
++在 timeout 后的 cleanup 中于 `727316ms` 完成。原 trace 为 `1269815136` bytes、SHA-256
++`fa61f3c1962a0134a85c9cb72eee911f141804f04cc39f764a3d949ca5fbcc48`，缺 EOCD/中央目录并以 `zipinfo -t` exit 9
++失败。局部断言完成和 detailed local PASS 不改变 canonical FAIL。
++
++有限 Git 历史证明 `720000ms` 在 `5d05607027ad0781a349bec37bb49c1c485b8b99` 引入 V1 browser oracles 时由
++`480000ms` 上调；完整 V2 equipment journey 在后续 `3df61d38b0b0de55c48ab709afd6315aa9f23ff2` 插入同一 main
++test 时没有重新登记总预算。
++
++## 预算合同
++
++1. `classic-runtime.spec.ts` 的 canonical main test 总预算固定为 `900000ms`。推导仅基于 Browser23 最终断言
++   `727316ms * 120% = 872779.2ms` 后向上取整；它是下一次工程验收的有限预算，不是性能阈值、p95 或稳定性声明。
++2. `playwright.config.ts` 的现有 `chromium` project 显式登记 `timeout: 60000`。main 的 `900000ms`、视觉 test 的
++   `240000ms` 与 modular smoke 的 `90000ms` 继续由各 test 显式覆盖；`actionTimeout=10000`、
++   `navigationTimeout=30000`、`webServer.timeout=30000`、worker=1、retries、trace=`retain-on-failure` 均不改。
++3. 锁定的 Playwright 1.62.1 中，after-hooks slot 使用
++   `calculateMaxTimeout(project.timeout, testInfo.timeout)`，所以 main 的正常 afterEach 路径可有 `900000ms` slot；独立
++   worker teardown slot 和 trace stop slot各使用 project timeout，即分别为 `60000ms`。多个 slot 不组成“全收尾最多
++   60 秒”的单一墙钟承诺。
++4. Browser23 从最终断言到 context close 的单次观测为 `34967ms`；`34967 * 120% = 41960.4ms` 只支持把各独立
++   project-timeout slot 的下一次候选登记为 `60000ms`。它不能证明 60 秒充分，不能证明第二个 30 秒 timeout 唯一来自
++   trace stop，也不能授权继续加预算。
++5. 通用 `walkTo` 45 秒、`waitForSnapshot`/equipment progress 最多 20 秒、equipment pulse 80ms、普通 pulse 300ms、
++   route aim 18 moves/19 observations、mouse step/sensitivity、容差、路线和坐标全部保持。总预算不能掩盖局部超时或
++   死循环。
++
++## RED、验证与停止线
++
++- 不新增只把 literal 与自身比较的测试。用 TypeScript AST/配置解析读回确认：唯一 canonical main 为 900 秒；视觉与
++  modular 分别仍是 240/90 秒；chromium project 为 60 秒；worker/retries/trace/action/navigation/webServer 等字段不变。
++- 运行 Classic test types、root test types、两个变更 TS 文件的 ESLint、精确 Prettier 与 scoped diff。已有 14 files /
++  145 tests 行为闭包不重跑，本阶段没有改变业务行为。
++- 后续唯一 Browser 验收只有 root 另行授权后才能运行。若 main 仍未在 900 秒内正常返回，或任一独立收尾 slot 仍超时、
++  trace 仍缺中央目录/CRC，则保持 FAIL，单独归因 fixture cost 或 finalization，不再自动增加预算。
++
++## 后续独立合同
++
++本阶段不修改 `evidence.ts`、`classic.mjs`、receipt schema 或 ZIP 处理。Browser23 已证明当前 aggregate 的 FAIL 优先没有
++被稍后的 local PASS 覆盖，但同一 `{test, project, retry}` 会追加多个 records，且 skipped non-main 进入同一 receipt；
++runner 的 `attempts.length===1` 假设因此需要后续独立终态合同。失败 trace 的 EOCD、中央目录和全 entry CRC 验证也属于
++同一后续独立范围；repair 产物不得替代 raw，失败不得自动 retry。
++
++## Ownership 与预算
++
++本阶段只修改 `apps/web/tests/e2e/classic-runtime.spec.ts`、`playwright.config.ts`、当前 `spec.md`、本合同、
++`canonical-budget-evidence.md` 和 `evidence/v2-canonical-budget-registration-close-15/`。production、scenario、
++route/aim/mouse、receipt writer/runner、历史 Browser23/MAP、累计 Browser 报告、tasks/state 均只读。
++
++传统工程量不超过 `0.25 PD`；AI 目标 `<=1h`、硬上限 `1.5h`。credits、费率、API 等价费用、当前额度与占比均为
++`unknown`。长期 docs 不更新，因为本片只登记现有 fixture 的内部预算，不改变 owner、API 或生产架构。
+diff --git a/changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md b/changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md
+new file mode 100644
+index 00000000..64a3a9ba
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md
+@@ -0,0 +1,77 @@
++# V2 Canonical Terminal Receipt 合同
++
++阶段：`V2-CANONICAL-TERMINAL-RECEIPT-CLOSE-16`
++
++状态：实施合同。只修复唯一 Classic Playwright 线路的终态 receipt 所有权，不改变玩法、Browser 旅程、预算、artifact、
++performance-window-proof 或 trace ZIP 校验。
++
++## 已有 RED
++
++Browser23 的同一个 `{test, project, retry=0}` 在 `afterEach` 写入 FAIL 后，timeout cleanup 中仍在途的主函数又写入
++detailed local PASS；现有 `writeAttempt` 将两者 append 成两个 `attempts`。同次运行的 skipped non-Classic test 还追加第三条
++FAIL。顶层 `every(PASS)` 本次仍正确保持 FAIL，但 `attempts` 已不再等价于真实 Playwright attempts，且局部 PASS 不是
++`onTestEnd` 终态。原 Browser23 raw、FAIL、SOURCE/MANIFEST/delivery 保持冻结，本阶段不重跑 Browser。
++
++## Owner 与数据流
++
++1. `evidence.ts` 继续构造并附加 `classic-runtime-evidence.json` 与 `classic-runtime-failure.json`。两份附件保持现有字段、
++   measurement、stages、restore、errors/current/logic diagnostics；它不再写 `SEEDLANDS_CLASSIC_RESULT`。
++2. `canonical-reporter.ts` 是 canonical receipt 的唯一文件 writer。它只接受精确 identity：
++   `apps/web/tests/e2e/classic-runtime.spec.ts`、完整 main title、project `chromium`；visual 与 non-Classic 即使 passed/skipped
++   也不进入 attempts。
++3. Reporter 的 `onBegin` 使用过滤后的公开 `Suite.allTests()` 记录本次真实 selection；`onTestEnd` 使用公开
++   `TestResult.status/errors/retry/attachments` 构造一个 terminal attempt；`onEnd` 只记录 full runner outcome 并写文件，返回
++   `void`，不得覆盖 Playwright 已有结果。Reporter 方法异常即可能导致文件缺失，由 runner fail closed。
++4. `scripts/harness/classic-receipt.mjs` 是 Reporter 与 `classic.mjs` 共用的纯 identity、合并和验证 owner；无 Web、游戏或
++   artifact 写入。`classic.mjs` 保留运行前后 artifact verify，并在 Playwright 结束后同时校验 process status、runId、
++   sourceSha、selection 与 terminal receipt。
++
++## Receipt 兼容与终态
++
++- 顶层继续保留 `schemaVersion/status/attempts`；每个 detailed attempt 继续把 `benchmark.measurement` 放在
++  `attempts[0].benchmark.measurement`，兼容现有 performance-window-proof consumer。新增 selection、runnerOutcome、
++  testOutcome、assertionEvidenceStatus 与 failureEvidence 分栏。
++- attempt key 固定为 `{test, project, retry}`。相同 key 的字节等价 terminal event 幂等；不同内容的重复 event 明确冲突并
++  使 receipt FAIL，不追加第二条。不同 retry 保留为不同记录；完整 canonical/benchmark 的唯一-attempt 门禁拒绝多 retry，
++  不吞掉失败 attempt。
++- terminal PASS 仅当 `TestResult.status=passed`、detailed attachment status=PASS、没有 failure attachment、附件合法且
++  runId/source identity 一致。`failed/timedOut/interrupted/skipped`、局部 FAIL、缺 detailed、附件冲突或解析失败全部 FAIL。
++  detailed local PASS 后发生断言或 teardown failure 仍由 `onTestEnd` 变成 terminal FAIL；局部 FAIL 即使 result passed 也
++  fail closed。
++- default full Classic 必须由真实 selection 精确选中一个 main，并只有 retry 0 的一个 terminal attempt。带 correctness
++  selection args 时以 reporter 的过滤后 suite 判定 main 是否选中；visual-only 可明确 NOT_SELECTED。
++  `SEEDLANDS_PACK_SMOKE=modular-world` 明确不要求 canonical main，main/visual 的动态 skip 不写 attempts。缺 receipt、
++  malformed、ambiguous selection、stale runId/source、错误 main identity 或 full run 的 NOT_SELECTED 全部拒绝。
++- Playwright process 非零永远整体 FAIL；receipt PASS 不能覆盖。`onEnd.runnerOutcome` 只记录 test runner 层状态，不声称
++  覆盖 reporter 之后的进程/宿主错误。benchmark 除上述条件外必须保持唯一 attempt 且
++  `benchmark.measurement.status=MEASURED`，才可写 measurement declaration。
++
++Null closure 补充：附件是否存在与 payload 值分开判断。任何命中 `classic-runtime-failure.json` 名称的附件都表示
++failure evidence 存在；即使 JSON 可解析为 `null`、primitive 或 array，也必须记录
++`failure attachment is not a JSON object` 并使 terminal FAIL。不得用 `failures[0] ?? null`、truthiness 或
++`failureEvidence === null` 同时表达“不存在”和“存在但值为 null”。正常没有 failure attachment 的 detailed PASS 仍可通过。
++
++## 可执行 RED / GREEN
++
++1. Browser23 形状的 failure+detailed（两种附件顺序）配 `timedOut`，预期一个 terminal FAIL，同时保留 detailed V2/C5、
++   restore、benchmark 与 failure diagnostics。旧 append writer 会产生两个 records，因此 RED 不是缺 import。
++2. detailed PASS 后 `result=failed` 仍 FAIL；failure attachment 配 `result=passed` 仍 FAIL；正常 detailed PASS 配 passed
++   得一个 PASS 并保留 measurement。
++3. visual/skipped non-main 不产生 canonical attempt；相同 key 重复事件幂等，冲突拒绝；retry 0/1 均可见且 runner 唯一
++   attempt 门禁拒绝。
++4. runner helper 覆盖非零 process+local PASS、full missing/malformed/ambiguous/stale runId/source、benchmark 非 MEASURED、
++   visual-only NOT_SELECTED、modular NOT_SELECTED 与正常 full PASS。
++5. 运行定向 reporter/runner/measurement 测试、Classic/root types、变更 TS/MJS ESLint、精确 Prettier 与 scope；不用
++   Browser、build 或现有 145 行为闭包冒充终态修复。
++
++## 非目标与停止线
++
++不实现 trace EOCD/central-directory/CRC，不 repair、不 retry；未来 Browser evidence 仍由独立验收检查原 trace 完整性。
++不修改 Close-15 的 900 秒 main 或 project 60 秒、scenario、route/aim/mouse、production、V1/V2 helper，也不补
++new-reference、death/drop/respawn、16 armor/194、V3/V4。若公开 Reporter 实际附件/selection shape 无法在上述窄边界
++稳定解析，停止并报告，不增加第二 writer 或泛化框架。
++
++## 预算
++
++AI 目标 `1-2h`、硬上限 `3h`；传统 `0.25-0.5 PD`，120% 容量为 AI `2.4h`、传统 `0.6 PD`。credits、费率、
++API 等价费用、当前额度与占比均为 `unknown`。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 2e386530..3d615e86 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -268,6 +268,34 @@ target 和共享 45 秒 deadline 不变。普通 loop 继续按 client x 选择
+ 异常原样传播。该策略不放宽双投影 finite neighborhood、freshness/readiness、.06/.08/+-0.45 或任何输入/aim 预算。
+ Browser-22 保持正式 FAIL；fixture deterministic/static GREEN 不等于 Browser-23 或产品 GREEN。
+ 
++Browser-23 唯一 canonical attempt 已完成 C0-C5、完整 V1、V2 的 19 个 checkpoint、三类资源独立入包、四槽装备
++矩阵、石镐耐久 `132 -> 128 -> 127` 与保存恢复，但 main test 在既有 `720000ms` 总预算处 timed out，runner exit 1；
++C5 完成于 `+718819ms`，timeout 后 cleanup 中的最终断言完成于 `+727316ms`，不能把 canonical FAIL 改写为 PASS。原
++trace 缺 EOCD/中央目录，分片重组 SHA 相同只证明封存字节一致。`V2-CANONICAL-BUDGET-REGISTRATION-CLOSE-15`
++按 `canonical-budget-contract.md` 只把 main 的下一次有限工程验收预算登记为 `900000ms`，并把现有 chromium project
++timeout 显式登记为 `60000ms`。Playwright 1.62.1 的 after-hooks slot 使用
++`max(project.timeout,testInfo.timeout)`，worker teardown 与 trace stop 则各自使用 project timeout；因此 60 秒是每个独立
++slot 的预算，不是全收尾总墙钟承诺。45s/20s/80ms、18/19、mouse、容差、路线、坐标、旅程顺序和断言均不改。
++900 秒不证明性能、p95 或稳定性；若后续唯一 Browser 仍超时或 trace 不完整，必须独立归因，不能继续自动加预算。
++receipt 同 attempt 多记录、skipped non-main 污染与 trace 完整性校验留给 root 另行裁决的终态合同，本片不修改
++`evidence.ts`、runner 或 ZIP 处理，也不补 new object reference、death/drop/respawn、16 armor/194、V3/V4 证据。
++
++V2 canonical terminal receipt 子片冻结 `canonical-terminal-receipt-contract.md`：现有 evidence attachment 保持真实局部
++证据，唯一 canonical 文件 writer 迁到 Playwright Reporter。Reporter 用过滤后的 suite 精确识别 main，并在
++`onTestEnd` 以公开 result status 生成 `{test,project,retry}` 唯一终态；`onEnd` 只记录 runner outcome，不覆盖失败。
++terminal PASS 同时要求 result passed、detailed local PASS、无 failure attachment及 run/source identity 一致；timeout、
++interrupted、local FAIL、附件冲突或缺失全部 fail closed。不同 retry 全部保留，完整 canonical/benchmark 的唯一-attempt
++门禁拒绝多个 retry。visual 与 skipped non-Classic 不污染 attempts；visual-only/modular correctness 通过真实 selection
++明确 NOT_SELECTED，default full 不得借缺 receipt 或 NOT_SELECTED 放行。runner 必须同时要求进程 exit 0 与合法 terminal
++receipt；benchmark 额外要求既有 measurement 位置为 MEASURED。本片不实现 ZIP 完整性、repair/retry，也不改变 Close-15
++900s/60s 预算或任何玩法旅程。Browser23 与其 local PASS/FAIL raw 保持不改。
++
++Close-16 null closure 修复附件存在性与 payload 合法性不可混用的漏判：任何命名为
++`classic-runtime-failure.json` 的已存在附件都禁止 terminal PASS；其 JSON payload 若为 `null`、primitive 或 array，需保留
++有效 detailed stages/restore/measurement，同时记录明确 non-object error 并保持 FAIL。正常没有 failure attachment 的
++detailed PASS 不受影响，附件前后顺序不改变结果。该闭包只修改 pure receipt helper 与 focused tests，不改变 Reporter、runner、
++预算、selection、ZIP 或浏览器行为；Browser23 原 FAIL 和 Close16 历史证据保持。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
+diff --git a/docs/code-map.md b/docs/code-map.md
+index e43ea1e7..b6aaf13b 100644
+--- a/docs/code-map.md
++++ b/docs/code-map.md
+@@ -246,7 +246,7 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与
+ 
+ - apps/web/src/app/ui/personal-crafting.svelte 展示 Authority 投影的随身 2×2 网格、结果和共享配方手册；inventory-crafting.svelte 持有库存、随身合成格与工位共用的游标手势。Classic 的 2×2/3×3 均消费 stations.ts 中的同一网格配方目录。
+ - packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
+-- scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
++- scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/canonical-reporter.ts 在公开 Playwright onTestEnd 边界生成唯一终态 receipt，scripts/harness/classic-receipt.mjs 负责纯合并与 runner 校验；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
+ - [harness-snapshot.ts](../apps/web/tests/e2e/classic-support/harness-snapshot.ts) 只定义 canonical Browser Harness 的只读
+   snapshot 类型；`harness.ts` 保持运行操作 owner，并以同名 type re-export 维持既有测试导入面。
+ - 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。
+diff --git a/playwright.config.ts b/playwright.config.ts
+index 6b3e75eb..73f558b2 100644
+--- a/playwright.config.ts
++++ b/playwright.config.ts
+@@ -35,6 +35,7 @@ export default defineConfig({
+   reporter: [
+     ['list', { printSteps: true }],
+     ['html', { open: 'never' }],
++    ['./apps/web/tests/e2e/classic-support/canonical-reporter.ts'],
+   ],
+   use: {
+     baseURL,
+@@ -58,5 +59,5 @@ export default defineConfig({
+     reuseExistingServer: !process.env.CI && !production && process.env.SEEDLANDS_E2E_REUSE_SERVER === '1',
+     timeout: 30_000,
+   },
+-  projects: [{ name: 'chromium' }],
++  projects: [{ name: 'chromium', timeout: 60_000 }],
+ });
+diff --git a/scripts/harness/classic-receipt.d.mts b/scripts/harness/classic-receipt.d.mts
+new file mode 100644
+index 00000000..6f887c10
+--- /dev/null
++++ b/scripts/harness/classic-receipt.d.mts
+@@ -0,0 +1,66 @@
++export type ClassicTestIdentity = Readonly<{
++  testId: string;
++  file: string;
++  test: string;
++  project: string;
++}>;
++
++export type ClassicSelection = Readonly<{
++  mode: 'CANONICAL_MAIN' | 'NON_MAIN' | 'MODULAR_WORLD' | 'AMBIGUOUS';
++  canonicalMainSelected: boolean;
++  canonicalMainMatches: number;
++  modularSmokeMatches: number;
++  selectedTests: readonly ClassicTestIdentity[];
++}>;
++
++export type ClassicEvidenceAttachment = Readonly<{ name: string; payload: unknown; error?: string }>;
++export type ClassicTestEndEvent = ClassicTestIdentity &
++  Readonly<{
++    retry: number;
++    resultStatus: 'passed' | 'failed' | 'timedOut' | 'skipped' | 'interrupted';
++    resultErrors: readonly string[];
++    attachments: readonly ClassicEvidenceAttachment[];
++  }>;
++
++export type ClassicReceipt = Readonly<Record<string, unknown>> &
++  Readonly<{
++    status: 'PASS' | 'FAIL';
++    runId: string;
++    sourceSha: string;
++    selection: ClassicSelection;
++    attempts: readonly Readonly<Record<string, unknown>>[];
++    conflicts: readonly Readonly<Record<string, unknown>>[];
++  }>;
++
++export const canonicalMainIdentity: Readonly<{ file: string; title: string; project: string }>;
++export const modularSmokeIdentity: Readonly<{ file: string; title: string; project: string }>;
++export function isCanonicalMainTest(test: ClassicTestIdentity): boolean;
++export function createCanonicalSelection(
++  selectedTests: readonly ClassicTestIdentity[],
++  options?: Readonly<{ modularWorld?: boolean }>,
++): ClassicSelection;
++export function createClassicReceipt(
++  options: Readonly<{
++    runId: string;
++    sourceSha: string;
++    selection: ClassicSelection;
++  }>,
++): ClassicReceipt;
++export function recordCanonicalTestEnd(receipt: ClassicReceipt, event: ClassicTestEndEvent): ClassicReceipt;
++export function finalizeClassicReceipt(
++  receipt: ClassicReceipt,
++  runnerOutcome: 'passed' | 'failed' | 'timedout' | 'interrupted',
++): ClassicReceipt;
++export function parseClassicReceiptText(text: string): unknown;
++export function readClassicReceipt(path: string): unknown;
++export function validateClassicRunReceipt(
++  receipt: unknown,
++  options: Readonly<{
++    runId: string;
++    sourceSha: string;
++    processStatus: number | null;
++    requireCanonicalMain: boolean;
++    benchmark: boolean;
++    modularWorld?: boolean;
++  }>,
++): Readonly<Record<string, unknown>> | null;
+diff --git a/scripts/harness/classic-receipt.mjs b/scripts/harness/classic-receipt.mjs
+new file mode 100644
+index 00000000..b06235ba
+--- /dev/null
++++ b/scripts/harness/classic-receipt.mjs
+@@ -0,0 +1,266 @@
++import { readFileSync } from 'node:fs';
++
++export const canonicalMainIdentity = Object.freeze({
++  file: 'apps/web/tests/e2e/classic-runtime.spec.ts',
++  title: 'Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景',
++  project: 'chromium',
++});
++export const modularSmokeIdentity = Object.freeze({
++  file: canonicalMainIdentity.file,
++  title: '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
++  project: canonicalMainIdentity.project,
++});
++
++const terminalStatuses = new Set(['passed', 'failed', 'timedOut', 'skipped', 'interrupted']);
++const runnerStatuses = new Set(['running', 'passed', 'failed', 'timedout', 'interrupted']);
++
++const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
++const stableValue = (value) => JSON.stringify(value);
++const attemptKey = ({ test, project, retry, attempt }) => JSON.stringify([project, test, retry ?? attempt]);
++
++function requireRecord(value, label) {
++  if (!isRecord(value)) throw new Error(`${label} is invalid.`);
++  return value;
++}
++
++function requireString(value, label) {
++  if (typeof value !== 'string' || !value) throw new Error(`${label} is invalid.`);
++  return value;
++}
++
++function requireInteger(value, label) {
++  if (!Number.isSafeInteger(value) || value < 0) throw new Error(`${label} is invalid.`);
++  return value;
++}
++
++function distinctPayloads(attachments, name) {
++  const values = attachments.filter((attachment) => attachment.name === name).map(({ payload }) => payload);
++  const distinct = new Map(values.map((value) => [stableValue(value), value]));
++  return [...distinct.values()];
++}
++
++function localEvidenceError(payload, event, runId, sourceSha) {
++  if (!isRecord(payload)) return 'attachment is not a JSON object';
++  if (payload.test !== event.test || payload.project !== event.project || payload.attempt !== event.retry)
++    return 'attachment test identity does not match the terminal result';
++  if (payload.runId !== runId) return 'attachment runId does not match the Harness run';
++  const attachmentSource = payload.artifact?.identity?.sourceSha ?? payload.sourceSha;
++  if (attachmentSource !== sourceSha) return 'attachment sourceSha does not match the Harness source';
++  if (payload.status !== 'PASS' && payload.status !== 'FAIL') return 'attachment status is invalid';
++  return null;
++}
++
++function receiptStatus(receipt) {
++  if (receipt.runnerOutcome !== 'passed' || receipt.conflicts.length) return 'FAIL';
++  if (receipt.selection.mode === 'CANONICAL_MAIN')
++    return receipt.attempts.length === 1 && receipt.attempts[0]?.status === 'PASS' ? 'PASS' : 'FAIL';
++  return receipt.selection.mode === 'NON_MAIN' || receipt.selection.mode === 'MODULAR_WORLD'
++    ? receipt.attempts.length === 0
++      ? 'PASS'
++      : 'FAIL'
++    : 'FAIL';
++}
++
++export function isCanonicalMainTest(test) {
++  return (
++    test.file === canonicalMainIdentity.file &&
++    test.test === canonicalMainIdentity.title &&
++    test.project === canonicalMainIdentity.project
++  );
++}
++
++function isModularSmokeTest(test) {
++  return (
++    test.file === modularSmokeIdentity.file &&
++    test.test === modularSmokeIdentity.title &&
++    test.project === modularSmokeIdentity.project
++  );
++}
++
++export function createCanonicalSelection(selectedTests, { modularWorld = false } = {}) {
++  const normalized = selectedTests.map((test) => ({
++    testId: requireString(test.testId, 'selected test id'),
++    file: requireString(test.file, 'selected test file'),
++    test: requireString(test.test, 'selected test title'),
++    project: requireString(test.project, 'selected test project'),
++  }));
++  const canonicalMainMatches = normalized.filter(isCanonicalMainTest).length;
++  const modularSmokeMatches = normalized.filter(isModularSmokeTest).length;
++  const mode = modularWorld
++    ? modularSmokeMatches === 1
++      ? 'MODULAR_WORLD'
++      : 'AMBIGUOUS'
++    : canonicalMainMatches === 1
++      ? 'CANONICAL_MAIN'
++      : canonicalMainMatches === 0
++        ? 'NON_MAIN'
++        : 'AMBIGUOUS';
++  return {
++    mode,
++    canonicalMainSelected: mode === 'CANONICAL_MAIN',
++    canonicalMainMatches,
++    modularSmokeMatches,
++    selectedTests: normalized,
++  };
++}
++
++export function createClassicReceipt({ runId, sourceSha, selection }) {
++  return {
++    schemaVersion: 1,
++    status: 'FAIL',
++    runId: requireString(runId, 'receipt runId'),
++    sourceSha: requireString(sourceSha, 'receipt sourceSha'),
++    selection: requireRecord(selection, 'receipt selection'),
++    runnerOutcome: 'running',
++    attempts: [],
++    conflicts: [],
++  };
++}
++
++export function recordCanonicalTestEnd(receipt, event) {
++  if (!isCanonicalMainTest(event) || receipt.selection.mode !== 'CANONICAL_MAIN') return receipt;
++  if (!terminalStatuses.has(event.resultStatus)) throw new Error('Canonical terminal result status is invalid.');
++  const retry = requireInteger(event.retry, 'canonical retry');
++  const detailed = distinctPayloads(event.attachments, 'classic-runtime-evidence.json');
++  const failures = distinctPayloads(event.attachments, 'classic-runtime-failure.json');
++  const assertionEvidencePresent = detailed.length > 0;
++  const failureEvidencePresent = failures.length > 0;
++  const receiptErrors = event.attachments.flatMap((attachment) =>
++    attachment.error ? [`${attachment.name} ${attachment.error}`] : [],
++  );
++  if (detailed.length > 1) receiptErrors.push('conflicting detailed evidence attachments');
++  if (failures.length > 1) receiptErrors.push('conflicting failure evidence attachments');
++  const assertionEvidence = assertionEvidencePresent ? detailed[0] : null;
++  const failureEvidence = failureEvidencePresent ? failures[0] : null;
++  if (assertionEvidencePresent) {
++    const error = localEvidenceError(assertionEvidence, event, receipt.runId, receipt.sourceSha);
++    if (error) receiptErrors.push(`detailed ${error}`);
++  }
++  if (failureEvidencePresent) {
++    const error = localEvidenceError(failureEvidence, event, receipt.runId, receipt.sourceSha);
++    if (error) receiptErrors.push(`failure ${error}`);
++  }
++  const assertionEvidenceStatus = isRecord(assertionEvidence) ? assertionEvidence.status : 'MISSING';
++  const passed =
++    event.resultStatus === 'passed' &&
++    event.resultErrors.length === 0 &&
++    assertionEvidenceStatus === 'PASS' &&
++    !failureEvidencePresent &&
++    receiptErrors.length === 0;
++  const inherited = isRecord(assertionEvidence) ? assertionEvidence : {};
++  const attempt = {
++    ...inherited,
++    schemaVersion: 1,
++    status: passed ? 'PASS' : 'FAIL',
++    attempt: retry,
++    testId: event.testId,
++    file: event.file,
++    test: event.test,
++    project: event.project,
++    runId: receipt.runId,
++    sourceSha: receipt.sourceSha,
++    testOutcome: event.resultStatus,
++    assertionEvidencePresent,
++    assertionEvidenceStatus,
++    resultErrors: [...event.resultErrors],
++    failureEvidencePresent,
++    failureEvidence,
++    receiptErrors,
++  };
++  const key = attemptKey(attempt);
++  const existing = receipt.attempts.find((candidate) => attemptKey(candidate) === key);
++  if (existing) {
++    if (stableValue(existing) === stableValue(attempt)) return receipt;
++    return {
++      ...receipt,
++      status: 'FAIL',
++      conflicts: [...receipt.conflicts, { key, reason: 'conflicting terminal event for the same attempt' }],
++    };
++  }
++  return {
++    ...receipt,
++    attempts: [...receipt.attempts, attempt].sort((left, right) => left.attempt - right.attempt),
++  };
++}
++
++export function finalizeClassicReceipt(receipt, runnerOutcome) {
++  if (!runnerStatuses.has(runnerOutcome) || runnerOutcome === 'running')
++    throw new Error('Classic runner outcome is invalid.');
++  const finalized = { ...receipt, runnerOutcome };
++  return { ...finalized, status: receiptStatus(finalized) };
++}
++
++export function parseClassicReceiptText(text) {
++  try {
++    return JSON.parse(text);
++  } catch {
++    throw new Error('Classic terminal receipt is malformed.');
++  }
++}
++
++export function readClassicReceipt(path) {
++  try {
++    return parseClassicReceiptText(readFileSync(path, 'utf8'));
++  } catch (error) {
++    if (error instanceof Error && error.message === 'Classic terminal receipt is malformed.') throw error;
++    throw new Error('Classic terminal receipt is missing or unreadable.', { cause: error });
++  }
++}
++
++export function validateClassicRunReceipt(unknownReceipt, options) {
++  if (options.processStatus !== 0) throw new Error('Classic Playwright process did not exit successfully.');
++  const receipt = requireRecord(unknownReceipt, 'Classic terminal receipt');
++  if (receipt.schemaVersion !== 1) throw new Error('Classic terminal receipt schema is invalid.');
++  if (receipt.runId !== options.runId) throw new Error('Classic terminal receipt runId is stale.');
++  if (receipt.sourceSha !== options.sourceSha) throw new Error('Classic terminal receipt sourceSha is stale.');
++  if (!Array.isArray(receipt.attempts) || !Array.isArray(receipt.conflicts) || receipt.conflicts.length)
++    throw new Error('Classic terminal receipt attempts are ambiguous.');
++  const selection = requireRecord(receipt.selection, 'Classic terminal receipt selection');
++  if (!Array.isArray(selection.selectedTests)) throw new Error('Classic terminal receipt selection tests are invalid.');
++  const derivedSelection = createCanonicalSelection(selection.selectedTests, {
++    modularWorld: selection.mode === 'MODULAR_WORLD',
++  });
++  if (
++    derivedSelection.mode !== selection.mode ||
++    derivedSelection.canonicalMainSelected !== selection.canonicalMainSelected ||
++    derivedSelection.canonicalMainMatches !== selection.canonicalMainMatches ||
++    derivedSelection.modularSmokeMatches !== selection.modularSmokeMatches
++  )
++    throw new Error('Classic terminal receipt selection identity is invalid.');
++  if ((selection.mode === 'MODULAR_WORLD') !== Boolean(options.modularWorld))
++    throw new Error('Classic terminal receipt selection mode mismatches the Harness run mode.');
++  if (selection.mode === 'AMBIGUOUS') throw new Error('Classic canonical main selection is ambiguous.');
++  if (options.requireCanonicalMain && selection.mode !== 'CANONICAL_MAIN')
++    throw new Error('Classic canonical main was not selected.');
++  if (selection.mode === 'CANONICAL_MAIN' && receipt.attempts.length !== 1)
++    throw new Error('Classic run requires exactly one canonical attempt.');
++  if (receipt.runnerOutcome !== 'passed' || receipt.status !== 'PASS')
++    throw new Error('Classic terminal receipt did not finish with a passing runner outcome.');
++  if (selection.mode !== 'CANONICAL_MAIN') {
++    if (selection.mode !== 'NON_MAIN' && selection.mode !== 'MODULAR_WORLD')
++      throw new Error('Classic terminal receipt selection mode is invalid.');
++    if (receipt.attempts.length) throw new Error('Non-main Classic selection contains canonical attempts.');
++    if (options.benchmark) throw new Error('Classic benchmark requires the canonical main.');
++    return null;
++  }
++  if (selection.canonicalMainMatches !== 1 || selection.canonicalMainSelected !== true)
++    throw new Error('Classic canonical main selection identity is invalid.');
++  const attempt = requireRecord(receipt.attempts[0], 'Classic canonical attempt');
++  const selectedMain = selection.selectedTests.find(isCanonicalMainTest);
++  if (
++    attempt.attempt !== 0 ||
++    attempt.testId !== selectedMain?.testId ||
++    attempt.file !== canonicalMainIdentity.file ||
++    attempt.test !== canonicalMainIdentity.title ||
++    attempt.project !== canonicalMainIdentity.project ||
++    attempt.testOutcome !== 'passed' ||
++    attempt.assertionEvidenceStatus !== 'PASS' ||
++    attempt.status !== 'PASS'
++  )
++    throw new Error('Classic canonical attempt did not terminate successfully.');
++  if (attempt.runId !== options.runId || attempt.sourceSha !== options.sourceSha)
++    throw new Error('Classic canonical attempt identity is stale.');
++  if (options.benchmark && attempt.benchmark?.measurement?.status !== 'MEASURED')
++    throw new Error('Classic benchmark did not produce a measured record.');
++  return attempt;
++}
+diff --git a/scripts/harness/classic-receipt.test.mjs b/scripts/harness/classic-receipt.test.mjs
+new file mode 100644
+index 00000000..4d776cb7
+--- /dev/null
++++ b/scripts/harness/classic-receipt.test.mjs
+@@ -0,0 +1,486 @@
++import assert from 'node:assert/strict';
++import { mkdtemp, rm } from 'node:fs/promises';
++import { tmpdir } from 'node:os';
++import { join } from 'node:path';
++import test from 'node:test';
++
++import {
++  canonicalMainIdentity,
++  createClassicReceipt,
++  finalizeClassicReceipt,
++  modularSmokeIdentity,
++  parseClassicReceiptText,
++  readClassicReceipt,
++  recordCanonicalTestEnd,
++  validateClassicRunReceipt,
++} from './classic-receipt.mjs';
++
++const runId = 'terminal-receipt-test';
++const sourceSha = 'a'.repeat(40);
++const measurement = { status: 'MEASURED', runId, owner: 'web-runtime', scenario: 'classic' };
++const detailed = (status = 'PASS') => ({
++  schemaVersion: 1,
++  status,
++  attempt: 0,
++  test: canonicalMainIdentity.title,
++  project: canonicalMainIdentity.project,
++  runId,
++  artifact: { identity: { sourceSha } },
++  benchmark: { measurement },
++  stages: { C0: { status: 'PASS' }, C5: { status: 'PASS' } },
++  restoreEvidence: { after: { v2Equipment: { phase: 'restored' } } },
++});
++const failure = () => ({
++  schemaVersion: 1,
++  status: 'FAIL',
++  attempt: 0,
++  test: canonicalMainIdentity.title,
++  project: canonicalMainIdentity.project,
++  runId,
++  sourceSha,
++  errors: ['Test timeout of 720000ms exceeded.'],
++});
++const selection = (selected = true) => ({
++  mode: selected ? 'CANONICAL_MAIN' : 'NON_MAIN',
++  canonicalMainSelected: selected,
++  canonicalMainMatches: selected ? 1 : 0,
++  modularSmokeMatches: 0,
++  selectedTests: selected
++    ? [
++        {
++          testId: 'canonical-id',
++          file: canonicalMainIdentity.file,
++          test: canonicalMainIdentity.title,
++          project: canonicalMainIdentity.project,
++        },
++      ]
++    : [],
++});
++const event = ({ status = 'passed', retry = 0, attachments = [] } = {}) => ({
++  testId: 'canonical-id',
++  file: canonicalMainIdentity.file,
++  test: canonicalMainIdentity.title,
++  project: canonicalMainIdentity.project,
++  retry,
++  resultStatus: status,
++  resultErrors: status === 'passed' ? [] : [`result:${status}`],
++  attachments,
++});
++const attachment = (name, payload) => ({ name, payload });
++const invalidFailurePayloads = [null, 'failure', 7, true, [], ['failure']];
++
++test('Browser23 failure and local PASS become one terminal FAIL in either attachment order', () => {
++  for (const attachments of [
++    [attachment('classic-runtime-failure.json', failure()), attachment('classic-runtime-evidence.json', detailed())],
++    [attachment('classic-runtime-evidence.json', detailed()), attachment('classic-runtime-failure.json', failure())],
++  ]) {
++    const receipt = recordCanonicalTestEnd(
++      createClassicReceipt({ runId, sourceSha, selection: selection() }),
++      event({ status: 'timedOut', attachments }),
++    );
++    assert.equal(receipt.attempts.length, 1);
++    assert.equal(receipt.attempts[0].status, 'FAIL');
++    assert.equal(receipt.attempts[0].testOutcome, 'timedOut');
++    assert.equal(receipt.attempts[0].failureEvidencePresent, true);
++    assert.equal(receipt.attempts[0].assertionEvidenceStatus, 'PASS');
++    assert.deepEqual(receipt.attempts[0].stages.C5, { status: 'PASS' });
++    assert.deepEqual(receipt.attempts[0].restoreEvidence.after.v2Equipment, { phase: 'restored' });
++    assert.deepEqual(receipt.attempts[0].failureEvidence.errors, ['Test timeout of 720000ms exceeded.']);
++  }
++});
++
++test('test outcome and local failure both fail closed while complete PASS preserves measurement', () => {
++  const failedAfterPass = recordCanonicalTestEnd(
++    createClassicReceipt({ runId, sourceSha, selection: selection() }),
++    event({ status: 'failed', attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  assert.equal(failedAfterPass.attempts[0].status, 'FAIL');
++
++  const localFailure = recordCanonicalTestEnd(
++    createClassicReceipt({ runId, sourceSha, selection: selection() }),
++    event({ status: 'passed', attachments: [attachment('classic-runtime-failure.json', failure())] }),
++  );
++  assert.equal(localFailure.attempts[0].status, 'FAIL');
++
++  const passed = recordCanonicalTestEnd(
++    createClassicReceipt({ runId, sourceSha, selection: selection() }),
++    event({ status: 'passed', attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  assert.equal(passed.attempts[0].status, 'PASS');
++  assert.equal(passed.attempts[0].assertionEvidencePresent, true);
++  assert.equal(passed.attempts[0].failureEvidencePresent, false);
++  assert.equal(passed.attempts[0].failureEvidence, null);
++  assert.deepEqual(passed.attempts[0].benchmark.measurement, measurement);
++
++  for (const staleDetailed of [
++    { ...detailed(), runId: 'stale' },
++    { ...detailed(), artifact: { identity: { sourceSha: 'c'.repeat(40) } } },
++  ]) {
++    const stale = recordCanonicalTestEnd(
++      createClassicReceipt({ runId, sourceSha, selection: selection() }),
++      event({ status: 'passed', attachments: [attachment('classic-runtime-evidence.json', staleDetailed)] }),
++    );
++    assert.equal(stale.attempts[0].status, 'FAIL');
++    assert.equal(stale.attempts[0].receiptErrors.length, 1);
++  }
++});
++
++test('present non-object failure attachments fail closed without losing detailed evidence', () => {
++  for (const payload of invalidFailurePayloads) {
++    for (const attachments of [
++      [attachment('classic-runtime-evidence.json', detailed()), attachment('classic-runtime-failure.json', payload)],
++      [attachment('classic-runtime-failure.json', payload), attachment('classic-runtime-evidence.json', detailed())],
++    ]) {
++      const receipt = finalizeClassicReceipt(
++        recordCanonicalTestEnd(
++          createClassicReceipt({ runId, sourceSha, selection: selection() }),
++          event({ attachments }),
++        ),
++        'passed',
++      );
++      assert.equal(receipt.status, 'FAIL');
++      assert.equal(receipt.attempts.length, 1);
++      assert.equal(receipt.attempts[0].status, 'FAIL');
++      assert.equal(receipt.attempts[0].assertionEvidencePresent, true);
++      assert.equal(receipt.attempts[0].assertionEvidenceStatus, 'PASS');
++      assert.deepEqual(receipt.attempts[0].stages, detailed().stages);
++      assert.deepEqual(receipt.attempts[0].restoreEvidence, detailed().restoreEvidence);
++      assert.equal(receipt.attempts[0].failureEvidence, payload);
++      assert.equal(receipt.attempts[0].failureEvidencePresent, true);
++      assert.deepEqual(receipt.attempts[0].receiptErrors, ['failure attachment is not a JSON object']);
++      assert.throws(
++        () =>
++          validateClassicRunReceipt(receipt, {
++            runId,
++            sourceSha,
++            processStatus: 0,
++            requireCanonicalMain: true,
++            benchmark: false,
++          }),
++        /runner outcome/,
++      );
++    }
++  }
++});
++
++test('non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting', () => {
++  const initial = createClassicReceipt({ runId, sourceSha, selection: selection() });
++  const visual = recordCanonicalTestEnd(initial, {
++    ...event({ status: 'passed', attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++    testId: 'visual-id',
++    test: 'Classic 视觉 v3 生产素材、连续帧与单击破坏回归',
++  });
++  assert.equal(visual.attempts.length, 0);
++
++  const first = recordCanonicalTestEnd(
++    initial,
++    event({ attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  const idempotent = recordCanonicalTestEnd(
++    first,
++    event({ attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  assert.deepEqual(idempotent, first);
++  const conflict = recordCanonicalTestEnd(
++    first,
++    event({ status: 'failed', attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  assert.equal(conflict.status, 'FAIL');
++  assert.equal(conflict.conflicts.length, 1);
++});
++
++test('different retries remain visible and the unique-attempt gate rejects them', () => {
++  const first = recordCanonicalTestEnd(
++    createClassicReceipt({ runId, sourceSha, selection: selection() }),
++    event({ attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++  );
++  const retried = recordCanonicalTestEnd(
++    first,
++    event({ retry: 1, attachments: [attachment('classic-runtime-evidence.json', { ...detailed(), attempt: 1 })] }),
++  );
++  assert.deepEqual(
++    retried.attempts.map(({ attempt }) => attempt),
++    [0, 1],
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(finalizeClassicReceipt(retried, 'passed'), {
++        runId,
++        sourceSha,
++        processStatus: 0,
++        requireCanonicalMain: true,
++        benchmark: false,
++      }),
++    /exactly one/,
++  );
++});
++
++test('runner validation rejects process failure and stale or missing full receipts', () => {
++  const complete = finalizeClassicReceipt(
++    recordCanonicalTestEnd(
++      createClassicReceipt({ runId, sourceSha, selection: selection() }),
++      event({ attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++    ),
++    'passed',
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(complete, {
++        runId,
++        sourceSha,
++        processStatus: 1,
++        requireCanonicalMain: true,
++        benchmark: false,
++      }),
++    /process/,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        { ...complete, runId: 'stale' },
++        {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: true,
++          benchmark: false,
++        },
++      ),
++    /runId/,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        { ...complete, sourceSha: 'c'.repeat(40) },
++        {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: true,
++          benchmark: false,
++        },
++      ),
++    /sourceSha/,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        {
++          ...complete,
++          selection: {
++            ...complete.selection,
++            selectedTests: [{ ...complete.selection.selectedTests[0], file: 'apps/web/tests/e2e/other.spec.ts' }],
++          },
++        },
++        {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: true,
++          benchmark: false,
++        },
++      ),
++    /selection identity/,
++  );
++  for (const staleAttempt of [
++    { ...complete.attempts[0], testId: 'stale-id' },
++    { ...complete.attempts[0], file: 'apps/web/tests/e2e/other.spec.ts' },
++  ]) {
++    assert.throws(
++      () =>
++        validateClassicRunReceipt(
++          { ...complete, attempts: [staleAttempt] },
++          {
++            runId,
++            sourceSha,
++            processStatus: 0,
++            requireCanonicalMain: true,
++            benchmark: false,
++          },
++        ),
++      /attempt did not terminate successfully/,
++    );
++  }
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        finalizeClassicReceipt(createClassicReceipt({ runId, sourceSha, selection: selection(false) }), 'passed'),
++        { runId, sourceSha, processStatus: 0, requireCanonicalMain: true, benchmark: false },
++      ),
++    /selected/,
++  );
++  assert.throws(() => parseClassicReceiptText('{not json'), /malformed/);
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        { ...complete, conflicts: [{ key: 'duplicate' }] },
++        {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: true,
++          benchmark: false,
++        },
++      ),
++    /ambiguous/,
++  );
++});
++
++test('missing receipt files and ambiguous main selections fail closed', async () => {
++  const directory = await mkdtemp(join(tmpdir(), 'seedlands-missing-receipt-'));
++  try {
++    assert.throws(() => readClassicReceipt(join(directory, 'missing.json')), /missing or unreadable/);
++  } finally {
++    await rm(directory, { recursive: true, force: true });
++  }
++  const duplicateMain = {
++    testId: 'canonical-id-2',
++    file: canonicalMainIdentity.file,
++    test: canonicalMainIdentity.title,
++    project: canonicalMainIdentity.project,
++  };
++  const ambiguous = createClassicReceipt({
++    runId,
++    sourceSha,
++    selection: {
++      mode: 'AMBIGUOUS',
++      canonicalMainSelected: false,
++      canonicalMainMatches: 2,
++      modularSmokeMatches: 0,
++      selectedTests: [duplicateMain, { ...duplicateMain, testId: 'canonical-id-3' }],
++    },
++  });
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(finalizeClassicReceipt(ambiguous, 'passed'), {
++        runId,
++        sourceSha,
++        processStatus: 0,
++        requireCanonicalMain: true,
++        benchmark: false,
++      }),
++    /ambiguous/,
++  );
++});
++
++test('benchmark requires MEASURED while non-main correctness and modular selections remain valid', () => {
++  const complete = finalizeClassicReceipt(
++    recordCanonicalTestEnd(
++      createClassicReceipt({ runId, sourceSha, selection: selection() }),
++      event({ attachments: [attachment('classic-runtime-evidence.json', detailed())] }),
++    ),
++    'passed',
++  );
++  assert.equal(
++    validateClassicRunReceipt(complete, {
++      runId,
++      sourceSha,
++      processStatus: 0,
++      requireCanonicalMain: true,
++      benchmark: true,
++    }).benchmark.measurement.status,
++    'MEASURED',
++  );
++  const notSelected = finalizeClassicReceipt(
++    createClassicReceipt({ runId, sourceSha, selection: selection(false) }),
++    'passed',
++  );
++  assert.equal(
++    validateClassicRunReceipt(notSelected, {
++      runId,
++      sourceSha,
++      processStatus: 0,
++      requireCanonicalMain: false,
++      benchmark: false,
++    }),
++    null,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        { ...notSelected, runnerOutcome: 'failed', status: 'FAIL' },
++        {
++          runId,
++          sourceSha,
++          processStatus: 0,
++          requireCanonicalMain: false,
++          benchmark: false,
++        },
++      ),
++    /runner outcome/,
++  );
++  const modularSelection = {
++    mode: 'MODULAR_WORLD',
++    canonicalMainSelected: false,
++    canonicalMainMatches: 1,
++    modularSmokeMatches: 1,
++    selectedTests: [
++      selection().selectedTests[0],
++      {
++        testId: 'modular-id',
++        file: modularSmokeIdentity.file,
++        test: modularSmokeIdentity.title,
++        project: modularSmokeIdentity.project,
++      },
++    ],
++  };
++  assert.equal(
++    validateClassicRunReceipt(
++      finalizeClassicReceipt(createClassicReceipt({ runId, sourceSha, selection: modularSelection }), 'passed'),
++      {
++        runId,
++        sourceSha,
++        processStatus: 0,
++        requireCanonicalMain: false,
++        benchmark: false,
++        modularWorld: true,
++      },
++    ),
++    null,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        finalizeClassicReceipt(
++          createClassicReceipt({
++            runId,
++            sourceSha,
++            selection: { ...modularSelection, modularSmokeMatches: 1, selectedTests: selection().selectedTests },
++          }),
++          'passed',
++        ),
++        { runId, sourceSha, processStatus: 0, requireCanonicalMain: false, benchmark: false },
++      ),
++    /selection identity/,
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(
++        finalizeClassicReceipt(createClassicReceipt({ runId, sourceSha, selection: modularSelection }), 'passed'),
++        { runId, sourceSha, processStatus: 0, requireCanonicalMain: false, benchmark: false },
++      ),
++    /run mode/,
++  );
++  const diagnostic = recordCanonicalTestEnd(
++    createClassicReceipt({ runId, sourceSha, selection: selection() }),
++    event({
++      attachments: [
++        attachment('classic-runtime-evidence.json', {
++          ...detailed(),
++          benchmark: { measurement: { ...measurement, status: 'DIAGNOSTIC' } },
++        }),
++      ],
++    }),
++  );
++  assert.throws(
++    () =>
++      validateClassicRunReceipt(finalizeClassicReceipt(diagnostic, 'passed'), {
++        runId,
++        sourceSha,
++        processStatus: 0,
++        requireCanonicalMain: true,
++        benchmark: true,
++      }),
++    /measured/,
++  );
++});
+diff --git a/scripts/harness/classic.mjs b/scripts/harness/classic.mjs
+index 2276d2b4..1830d5f7 100644
+--- a/scripts/harness/classic.mjs
++++ b/scripts/harness/classic.mjs
+@@ -1,8 +1,9 @@
+ import { spawnSync } from 'node:child_process';
+ import { randomUUID } from 'node:crypto';
+-import { readFileSync } from 'node:fs';
++import { rmSync } from 'node:fs';
+ import { resolve } from 'node:path';
+ import { verifyArtifact, root } from './artifact.mjs';
++import { readClassicReceipt, validateClassicRunReceipt } from './classic-receipt.mjs';
+ import { performanceWindowContext, writeMeasurementDeclaration } from './performance-window-proof.mjs';
+ 
+ const artifact = verifyArtifact();
+@@ -11,6 +12,7 @@ const resultPath = resolve(root, 'harness/results', runId, 'classic.json');
+ const selectionArgs = process.argv.slice(2);
+ if (process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1' && selectionArgs.length)
+   throw new Error('Benchmark must use the complete frozen scenario; test selection is correctness-only.');
++rmSync(resultPath, { force: true });
+ const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'playwright.config.ts', ...selectionArgs], {
+   cwd: root,
+   stdio: 'inherit',
+@@ -23,13 +25,21 @@ const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'pla
+ });
+ if (result.error) throw result.error;
+ verifyArtifact();
++const benchmark = process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1';
++const modularWorld = process.env.SEEDLANDS_PACK_SMOKE === 'modular-world';
++const receipt = readClassicReceipt(resultPath);
++const canonicalAttempt = validateClassicRunReceipt(receipt, {
++  runId,
++  sourceSha: artifact.sourceSha,
++  processStatus: result.status,
++  requireCanonicalMain: selectionArgs.length === 0 && !modularWorld,
++  benchmark,
++  modularWorld,
++});
+ const window = performanceWindowContext();
+-if (result.status === 0 && process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1' && window) {
+-  const receipt = JSON.parse(readFileSync(resultPath, 'utf8'));
+-  if (receipt?.status !== 'PASS' || receipt.attempts?.length !== 1)
+-    throw new Error('Classic benchmark declaration requires exactly one PASS attempt.');
+-  const measurement = receipt.attempts[0]?.benchmark?.measurement;
+-  if (measurement?.status !== 'MEASURED') throw new Error('Classic benchmark did not produce a measured record.');
++if (benchmark) {
++  if (!window || !canonicalAttempt) throw new Error('Classic benchmark requires a reserved canonical measurement.');
++  const measurement = canonicalAttempt.benchmark.measurement;
+   writeMeasurementDeclaration(window, {
+     measurementPath: resultPath,
+     format: 'classic',

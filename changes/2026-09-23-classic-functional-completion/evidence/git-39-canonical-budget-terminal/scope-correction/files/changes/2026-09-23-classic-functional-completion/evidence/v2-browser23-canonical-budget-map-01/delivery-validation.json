@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER23-CANONICAL-BUDGET-MAP-01",
+  "status": "MAP_ONLY_NO_IMPLEMENTATION",
+  "identity": {
+    "acceptanceSourceSha": "0eafd4273bc1f5a23e7d147ded37801436074015",
+    "acceptanceTreeSha": "a1cbf676594be93a86c77afcbb59dacc1611899e",
+    "mainHeadSha": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f"
+  },
+  "browser23Input": {
+    "status": "FAIL",
+    "sourceManifestEntries": 22,
+    "sourceManifestSha256": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+    "evidenceManifestEntries": 127,
+    "evidenceManifestSha256": "bada5a3115c8d1b16fe7802e25e1c6bfe87b53f2174dc7008ffecd3def4f29e3",
+    "deliverySha256": "c81a6f68c2453a232172678b17f0cd963945bec3fcad27586b2905ce18ac9428",
+    "priorEvidenceManifestSha256": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+    "priorDeliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+    "rawOrReportModified": false,
+    "packagingPathOnlyRecovery": true
+  },
+  "sourceManifest": {
+    "entries": 23,
+    "sha256": "73a7ae1173dacd543d3db482ca30392d7ecf3e70123c1c7ea3c2c45de5cf798b",
+    "validatedAgainstBuild14AcceptanceTree": true,
+    "browserEvidenceEntriesValidatedAgainstMainWorkspace": true,
+    "mainDirtyUsedAsSource": false
+  },
+  "evidenceManifest": {
+    "entries": 10,
+    "sha256": "7049a913babbf63fa975a3a5e16fbae2e8126de22b843006c68e0e4962118619",
+    "excludes": [
+      "MANIFEST.sha256",
+      "SOURCE-MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-validation.stdout.log",
+      "final-validation-window.json.log"
+    ]
+  },
+  "packagingRecovery": {
+    "stage": "GIT39-BROWSER23-RAW-PACKAGING-RECOVERY",
+    "previousSourceManifestSha256": "64ce50ef3284e12a92a410600c1dc6b663330fdf0f3954d91adb50cbfc2fbc68",
+    "previousEvidenceManifestSha256": "554fb4aabcce039eb93870b695143f8403edb154a3b314fc793d5fbecf4ead55",
+    "previousDeliverySha256": "828f23d14b54d51f19d5fd66d6454da8322b2210526d73f80713d412e992da61",
+    "browser23PreviousDeliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+    "browser23CurrentDeliverySha256": "35842ab0daeebd431707a12f92bcf34a48ce25b9b28a2b13e78b9997134fc941",
+    "priorPackagingPath": "../git-39-canonical-budget-terminal/prior-packaging",
+    "priorManifestEntries": 21,
+    "priorManifestSha256": "891511bd6446a871e6c0fae7c933688572c1bfeb800a7bca615c2ad13b6ae4e5",
+    "diagnosticConclusionChanged": false
+  },
+  "hookJsonPackagingRecovery": {
+    "stage": "GIT39-BROWSER23-HOOK-JSON-RECOVERY",
+    "previousSourceManifestSha256": "1257c5a4382b49f9425dd17cfb3250958443415e0066f989f15a9bcbcfac3559",
+    "previousEvidenceManifestSha256": "52d68bec8123d823c8d89bf0e956eabcc40e48e673ca23dc1851c9f28762e94d",
+    "previousDeliverySha256": "0483a7701a555f0288f37ffdfc1804283eb2803b2d0f9d5209377db70cb555e0",
+    "browser23PreviousDeliverySha256": "35842ab0daeebd431707a12f92bcf34a48ce25b9b28a2b13e78b9997134fc941",
+    "browser23CurrentDeliverySha256": "c81a6f68c2453a232172678b17f0cd963945bec3fcad27586b2905ce18ac9428",
+    "priorPackagingPath": "../git-39-canonical-budget-terminal/prior-hook-json",
+    "priorManifestEntries": 24,
+    "priorManifestSha256": "12757d8a0d33ac31edb2e19a649bb6eaab4060cecdd7cccf324dcff8756434ef",
+    "diagnosticConclusionChanged": false
+  },
+  "result": {
+    "budgetPredatesCompleteV2": true,
+    "observedFinalAssertionsOffsetMs": 727316,
+    "recommendedFiniteMainBudgetMs": 900000,
+    "recommendedFiniteFinalizationBudgetMs": 60000,
+    "singleSamplePerformanceOrStabilityClaimed": false,
+    "terminalReceiptContractRequired": true,
+    "traceIntegrityContractRequired": true,
+    "implementationSelectedOrPerformed": false,
+    "browser24AuthorizedOrRun": false
+  },
+  "format": {
+    "firstAttempt": "FAIL_NO_PARSER_FOR_JSON_LOG",
+    "firstAttemptReceiptSha256": "5002759c84c73498ac3abae542910b243fbc44f401d4dd7ef63740c0d1a7d8f4",
+    "mutationFromFailure": false,
+    "jsonLogExplicitParserAttempt": "PASS",
+    "jsonLogExplicitParserReceiptSha256": "137d9bc4711a60af45cd4ea451a41bda81f35e54c710ad4a66f400c1689b6089",
+    "ignoreOrSuppressionAdded": false
+  },
+  "selfcheck": {
+    "status": "PASS",
+    "sourceEntriesValidated": 23,
+    "manifestEntriesValidated": 10,
+    "firstAttempt": "FAIL_MIXED_SOURCE_ROOT",
+    "firstAttemptReceiptSha256": "baf2ab814928e12bf6b78fa72e4ef1976efbebe5a8ed4ce490f2ff7c209f57bd",
+    "firstAttemptAcceptedSourceEntries": 17,
+    "firstAttemptMissingBrowser23InputEntries": 6,
+    "secondAttempt": "FAIL_DELIVERY_BOUNDARY_ASSERTION_PATH",
+    "secondAttemptReceiptSha256": "c066991779513de4528f9b06ac585bdf548d0d59419e3803070ebc095525ea82",
+    "secondAttemptSourceEntriesValidated": 23,
+    "secondAttemptManifestEntriesValidated": 7,
+    "thirdAttempt": "FAIL_DELIVERY_MISSING_IMPLEMENTATION_BOUNDARY",
+    "thirdAttemptReceiptSha256": "6dba0ea4f2c21394ba77624d8dd1ba2972944fae469ed40b333eb8a105462496",
+    "thirdAttemptSourceEntriesValidated": 23,
+    "thirdAttemptManifestEntriesValidated": 8,
+    "finalAttempt": "PASS",
+    "finalAttemptReceiptSha256": "a2d78eed82b56696af38f868accdca9a5cc596874058adaef2822231c83a7524",
+    "sealedValidation": "PASS",
+    "sealedValidationReceipt": "final-validation-window.json.log",
+    "sealedValidationReceiptSha256": "a277b463f796fab959144653879e5edaabe2316523377a3f094c04c4cf7e6ad9",
+    "sealedValidationStdoutSha256": "ddd39546e772094f033755fc0525cf2d1656cff4d5e34b72d2364ec01b9012c9",
+    "mutationFromFailure": false,
+    "deliverySelfHashExcluded": true
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "sourceModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "gitOrIndexWrite": false,
+    "specTasksOrExecutionStateModified": false,
+    "longTermDocsUpdated": false
+  },
+  "notRun": ["implementation", "test", "build", "artifact", "browser24", "git", "push", "cua", "ci", "deploy", "merge"]
+}
