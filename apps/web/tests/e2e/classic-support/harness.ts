@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import type { ClassicSnapshot } from './harness-snapshot';
 import { reachedRouteTarget } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
@@ -19,6 +20,7 @@ import type {
 } from '../../../src/app/app-contracts';
 import type { GlobalAudio } from '../../../src/app/audio/global-audio';
 export { clickCanvasCenter, lockPointer, moveMouseBy } from './mouse-input';
+export type { ClassicSnapshot } from './harness-snapshot';
 
 export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
 export type PlayerState = Readonly<{
@@ -43,76 +45,6 @@ export type CharacterObservation = Readonly<{
   cursor: number;
   gap?: boolean;
 }>;
-// prettier-ignore
-export type ClassicSnapshot = Readonly<{
-  player: Point;
-  serverPlayerPosition: Point;
-  viewAngles: readonly [number, number];
-  streamCenter: readonly [number, number];
-  loadedChunks: number; renderedChunks: number;
-  onGround: boolean; colliding: boolean;
-  interactionAttempts: number;
-  mutationCount: number; worldRevision: number;
-  remeshSchedulingCount: number; lastCommitMeshChunkCount: number;
-  storageBytes: number;
-  runtime: 'authority-worker';
-  workers: Readonly<{ authority: number; logic: number; persistence: number; fluid: number; general: number }>;
-  authority: Readonly<{
-    physicsTick: number;
-    acknowledgedInputSequence: number;
-    commitSequence: number;
-    residency: Readonly<{ evictionCount: number; residentCount: number; dirtyCount: number }> | null;
-  }>;
-  generatorVersion: number;
-  renderPipeline: Readonly<{ backend: 'webgl2' | 'webgpu' }>;
-  experiments: Readonly<{
-    requested: Readonly<{ renderer: string; wasm: boolean; simd: boolean }>;
-    renderer: Readonly<{ effectiveRenderer: string }> | null;
-    workers: readonly Readonly<{
-      lane: 'fluid' | 'general';
-      status: string;
-      effectiveArtifact: string;
-      artifactSha256?: string;
-    }>[];
-  }>;
-  compute: Readonly<{
-    submittedTasks: number;
-    completedTasks: number;
-    failedTasks: number;
-    staleResults: number;
-    submittedBytes: number;
-    workerActivity?: readonly Readonly<{
-      lane: 'fluid' | 'general';
-      completedTasks: number;
-      kernel: Readonly<{ calls: number; failures: number; memoryBytes: number; failed: boolean }> | null;
-    }>[];
-  }>;
-  performance: Readonly<{
-    scenarioId: string;
-    frame: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number; longFrameCount: number }>;
-    chunkVisible: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number }>;
-    completedChunkTraces: number;
-    traceEventCount: number;
-    uploadQueueDepth: number;
-    estimatedMeshBytes: number;
-  }>;
-  gameplay: Readonly<{
-    npcCount: number;
-    worldItemCount: number;
-    inventoryOperationCount: number;
-    actionCompletionCount: number;
-    behaviorEvaluationCount: number;
-    presentedEntityCount: number;
-  }>;
-  visualEffects: Readonly<{
-    blockLightReady: boolean;
-    blockLightSourceRevision: number | null;
-    blockLightRebuildCount: number;
-    shadowUpdateCount: number;
-    shadowStableFrameCount: number;
-  }>;
-}>;
-
 export type ChromeTrace = Readonly<{
   traceEvents: readonly Readonly<{
     name: string;
@@ -276,21 +208,36 @@ export async function walkTo(
     refreshAfterCorrection?: boolean;
   }> = {},
 ): Promise<ClassicSnapshot> {
-  const key = options.key ?? 'KeyW';
-  const { tolerance = 0.65, corridorTolerance = 1.5 } = options;
+  const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
   const deadline = Date.now() + (options.timeout ?? 45_000);
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
     if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-    await correctMouseToRoute({
-      target,
-      direction: key,
-      observe: () => snapshot(page),
-      move: (dx, dy) => moveMouseBy(page, dx, dy),
-    });
+    const correction = options.refreshAfterCorrection
+      ? await correctMouseToRoute({
+          target,
+          direction: key,
+          observe: async () => {
+            const observed = await snapshot(page);
+            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+            return observed;
+          },
+          move: async (dx, dy) => {
+            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+            await moveMouseBy(page, dx, dy);
+          },
+          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
+        })
+      : await correctMouseToRoute({
+          target,
+          direction: key,
+          observe: () => snapshot(page),
+          move: (dx, dy) => moveMouseBy(page, dx, dy),
+        });
     if (options.refreshAfterCorrection) {
       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+      if (correction.kind === 'route-reached') return correction.observation;
       if ((current = await snapshot(page)) === null)
         throw new Error('Classic snapshot is unavailable after route correction.');
       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');

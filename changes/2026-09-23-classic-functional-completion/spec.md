@@ -239,6 +239,26 @@ yaw 域上界，不保证动态漂移必达；动态场景在同一上界内重�
 canonical timeout、pulse、voxel aim 180、容差、坐标、Close10 refresh 或增加第二 helper/fallback。Browser-20 仍为
 fixture FAIL，V2 未到达；deterministic/static GREEN 不等于 Browser-21 或产品 GREEN。
 
+Browser-21 唯一 canonical attempt 已完成 C0-C3、完整 V1、V2 workbench/10 格资源放置，并真实完成第一格 wood
+`[80,31,2]` 的 leftdown、voxel clear、drop/pickup 与独立 inventory itemCount 增量；随后在返回 approach
+`[80.5,-0.5]` 的 `KeyS` route aim 中失败。`walkTo` 的旧 current `@6753` 尚未到达；helper 的下一次真实
+observation `@6755` 已让 client 距目标 `0.025355 < .06`，但 server 距 `0.236464` 尚未到达。该同一 snapshot
+没有交还 caller，旧 helper 继续 mouse 后 client 越过目标并最终耗尽 18 moves/19 observations。Close-12 只给
+`correctMouseToRoute` 增加泛型 typed outcome（`angle-aligned` / `route-reached`）和可选只读 terminal predicate；每个
+有效 finite observation 在 zero-vector、角度计算和 mouse move 前检查 predicate。仅现有 V2
+`refreshAfterCorrection=true` 路径传入复用 `reachedRouteTarget(client, target, key, tolerance, corridorTolerance)` 的
+predicate，并从 typed outcome 取得同一完整 snapshot；未过原 deadline 才直接返回 outer。outer 继续独占双投影、
+freshness、grounded/colliding、20s wait/drift，45s 总 deadline 不重置。`angle-aligned` 仍走 Close10 的
+post-correction refresh；true observe 在 snapshot await 后、true move 在输入前检查原 deadline。默认省略/false 不使用
+这些 wrapper，不新增 `Date.now()`/snapshot 或改变行为；closed-door direct caller 不传 predicate，继续纯角度
+18/19、invalid/null/zero/exhaustion fail closed。不得捕获 exhaustion fallback、第二次调用 helper、增加预算/步幅、
+改变 sensitivity、容差、坐标或路线。Browser-21 保持 FAIL；fixture/static GREEN 不等于 Browser-22 或产品 GREEN。
+Close-12 初版为压低 `harness.ts` 行数新增了多处 inline `prettier-ignore` 并压平 `walkTo`，因此当时的 Prettier
+PASS 不能证明正常格式达标。format closure 先保存该 release 原字节，再把只读 `ClassicSnapshot` 类型等价移到
+`classic-support/harness-snapshot.ts`；`harness.ts` 用 type-only import 和同名 type re-export 保持既有导入面，运行函数、
+typed handoff、默认路径和 deadline 调用次序均不改。本片新增 inline suppression 清零并恢复正常 Prettier 格式；新增
+测试侧类型职责同步记入 `docs/code-map.md`，不改变生产架构或公共协议。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
