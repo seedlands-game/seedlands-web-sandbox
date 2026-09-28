@@ -124,8 +124,10 @@ export async function followEquipmentRoute(
   const deadline = driver.now() + EQUIPMENT_ROUTE_TIMEOUT_MS;
   let baseline = await driver.observe();
   if (!baseline) throw new Error('Classic snapshot is unavailable before the equipment route.');
+  let nextDirection: RouteDirection | null = null;
   while (driver.now() < deadline) {
-    const direction = equipmentRouteDirection(baseline.player, target);
+    const direction: RouteDirection = nextDirection ?? equipmentRouteDirection(baseline.player, target);
+    nextDirection = null;
     const remainingBeforeWalk = deadline - driver.now();
     if (remainingBeforeWalk <= 0) break;
     const walked = await driver.walk(direction, remainingBeforeWalk);
@@ -150,6 +152,7 @@ export async function followEquipmentRoute(
         throw new Error('Equipment route wait returned a non-matching snapshot.');
       if (result.kind === 'arrival') return result.snapshot;
       baseline = result.snapshot;
+      nextDirection = direction === 'KeyW' ? 'KeyS' : 'KeyW';
       continue;
     }
     baseline = walked;

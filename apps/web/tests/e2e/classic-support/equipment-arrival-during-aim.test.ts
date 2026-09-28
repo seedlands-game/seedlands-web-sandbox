@@ -126,7 +126,7 @@ describe('Classic V2 arrival during route aim', () => {
       }),
     ).rejects.toThrow('Browser21 drift correction sentinel');
 
-    expect(directions).toEqual(['KeyS', 'KeyS']);
+    expect(directions).toEqual(['KeyS', 'KeyW']);
     expect(waits).toBe(1);
     expect(calls).toMatchObject({ reads: 2, moves: 0, down: 0, up: 0 });
   });

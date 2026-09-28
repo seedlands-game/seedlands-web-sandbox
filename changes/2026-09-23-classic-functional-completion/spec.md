@@ -259,6 +259,15 @@ PASS 不能证明正常格式达标。format closure 先保存该 release 原字
 typed handoff、默认路径和 deadline 调用次序均不改。本片新增 inline suppression 清零并恢复正常 Prettier 格式；新增
 测试侧类型职责同步记入 `docs/code-map.md`，不改变生产架构或公共协议。
 
+Browser-22 唯一 canonical attempt 已完成 C0-C3、完整 V1、V2 resources placement 与三格 wood 的真实
+leftdown、voxel clear、drop 和独立 inventory itemCount 增量；随后返回 workbench approach `[78.5,0.5]` 时于
+`walkTo` 的 observe-after-await deadline 失败。未准出的 Close-13 timeout catch 已由 MAP01 证明对真实 driver 不可达并
+撤回，其原字节和 raw 保留为 rejected evidence。Close-14 只在 existing outer wait result 经现有 classifier 重新验证为
+drift 后，为紧接的一轮保存一次与刚使用 direction 相反的 key；下一轮消费即清空，baseline 仍为该 drift 同一对象，
+target 和共享 45 秒 deadline 不变。普通 loop 继续按 client x 选择方向；arrival/null/invalid/error 不设置 hint，driver
+异常原样传播。该策略不放宽双投影 finite neighborhood、freshness/readiness、.06/.08/+-0.45 或任何输入/aim 预算。
+Browser-22 保持正式 FAIL；fixture deterministic/static GREEN 不等于 Browser-23 或产品 GREEN。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
