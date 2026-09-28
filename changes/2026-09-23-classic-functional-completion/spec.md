@@ -296,6 +296,14 @@ Close-16 null closure 修复附件存在性与 payload 合法性不可混用的�
 detailed PASS 不受影响，附件前后顺序不改变结果。该闭包只修改 pure receipt helper 与 focused tests，不改变 Reporter、runner、
 预算、selection、ZIP 或浏览器行为；Browser23 原 FAIL 和 Close16 历史证据保持。
 
+V2 canonical discovery boundary Close-17 冻结 `canonical-discovery-contract.md`：Browser24 在 Playwright test
+discovery 阶段失败，不是 Chromium、玩法或预算失败。Playwright 1.62.1 会把字符串 `testMatch` 补成可匹配任意前缀的
+glob；顶层 `testDir: '.'` 因而让两份历史 evidence snapshot 中同后缀的 `classic-runtime.spec.ts` 被收集并因缺少相邻
+`visual-rebuild` 导入而失败。唯一修复是在既有 `chromium` project 上增加 `testDir: './apps/web/tests/e2e'`：顶层
+`testDir`、`testMatch`、Reporter root、canonical identity、900s/60s、workers/retries/trace、runner 与玩法测试均保持。真实
+Playwright `--list --reporter=json` 必须先重现 RED，再证明 GREEN 只发现 canonical 文件中的 main、visual、modular 三个测试，
+并以纯 `createCanonicalSelection` 读回 main 仍为 `CANONICAL_MAIN`。该静态 GREEN 不等于 Browser25 或产品 GREEN。
+
 V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
@@ -434,5 +442,10 @@ tree 唯一执行 `pnpm build` 与 `pnpm harness:artifact`，均 PASS。产物 2
 symlink/missing/extra/mismatch；artifact map 与 BUILD14 相同。该结果只冻结 GIT39 的 production artifact，不改变
 Browser23 正式 FAIL/TRACE_INCOMPLETE，也不表示 Browser24、完整 Classic、Cua、CI 或部署已通过。长期架构 docs 不更新，
 因为本阶段没有改变 owner、公共 API 或产品协议。
+
+V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17 仅修正唯一 Chromium project 的 Playwright 收集目录，不改变顶层
+root、Reporter identity、玩法、预算、artifact 或 receipt。传统工程量 `0.1-0.25 PD`，AI 目标 `<=1h`、硬上限 `2h`；
+按上限 120% 的容量建议为传统 `0.3 PD`、AI `2.4h`。credits、费率、API 等价费用、当前额度和占比均为
+`unknown`。长期 CI 文档只补充 root 与 project collection scope 的职责区别，不改变产品或架构 owner。
 
 V1.9 早期 canonical browser 门禁已由 Browser-12 单一 production artifact/单一 Chromium attempt 通过；water/lava bucket、两格门、record/jukebox、Media 公共/Pack/Web 组合根与保存恢复的本阶段证据见 `execution-state.md`。该结果不替代后续完整 194 项矩阵、V2/V3/V4、Lighting 生产渲染、全量 deterministic/Classic headless、Cua/人类听觉、CI/review 或 PR preview。近接触薄门 origin-cell `adjacent=null` 的 production 限制保留待 root 裁决；旧 4 files / 16 tests 仍只作此前 control。
