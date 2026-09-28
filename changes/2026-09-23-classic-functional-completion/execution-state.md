@@ -123,6 +123,12 @@ server-late 却未交还 outer。Close12 typed terminal handoff 只由 V2 true �
 6 TS ESLint、九路径常规 Prettier 与 scope；代码 commit `99b895067324ae930fd5dbd6bb227c578c499c8d`。长期 docs
 仅因新增测试侧 type owner 更新 `docs/code-map.md`，不表示生产架构或公共协议变化。evidence/state 随本提交冻结，
 远端 identity 以后续只读收尾为准；BUILD13/Browser22/Cua/devserver/CI/deploy/merge 未运行。
+当前 BUILD13 checkpoint：已推送 GIT37 source `8ae9e3545c40cca83798afea0aa52ef156e4e3d3` 的 clean detached
+tree `f9159062...d47b` 已完成唯一 build 与唯一 artifact verify。sourceDigest `af113628...62ee`、artifactDigest
+`f6f1ea67...cfa4`；276 项 receipt/disk map 与 BUILD12 完全相同，dist 为 277 个普通文件、0 symlink；Pack lock 与
+MP3 source/public/dist identity 一致。BUILD09/10/11/12/13 tree/dist 与 Git32 backup ref 保留。Browser21 仍 FAIL，
+但完整 V1、resources 和首 wood pickup 已真实通过；后续 V2 未到达，Browser19 首 iron pickup 未证明。BUILD13
+evidence 随本提交冻结，精确提交/远端 SHA 待本阶段收尾读回；Browser22/Cua/devserver/CI watch/deploy/merge 未运行。
 
 ## 恢复规则
 
