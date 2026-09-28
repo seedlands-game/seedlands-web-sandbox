@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-26T05:36:00Z
+更新时间：2026-09-26T08:00:05Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -56,11 +56,18 @@ Classic/root test types 与目标静态均 PASS，代码提交 `a1ebf10856cc57c1
 evidence/state 已 amend 为 `cb4941bfd1801422802463bc7bbc41dd7d8e9484` 并推送；旧未发布 `a402b016...` 由
 task-owned backup ref 保留且不推送。BUILD08 已从该 source 的 clean detached tree 完成唯一 build 与唯一 artifact
 verify：sourceDigest `ec6301ae...9a17`、artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致；artifact evidence
-作为本阶段第三笔独立提交交付。Browser17/Cua/devserver/CI 仍未运行。
+作为本阶段第三笔独立提交交付。Browser17 后续已运行并保持 FAIL，事实见下一 checkpoint；Cua/devserver/CI 仍未运行。
 首次未发布 evidence commit `a402b01623354a5c78e41260354a0fdd7c35394c` 因 Browser16 六个 trace 分片超过
 GitHub 100 MB 限制被 `GH001` 拒绝，远端未移动；本地 `refs/task-backups/git32-evidence-a402b016` 保留原提交。
 经 root 授权仅 amend 该 evidence commit，将同一 774153112 bytes / SHA256 `5ce02c71...aab41` 的 trace 无损重切为
 15 个最大 50 MiB 分片。Browser16 未重跑，代码提交与已发布历史均未重写。
+当前 Equipment arrival drift checkpoint：GIT32 与 BUILD08 已远端交付至
+`672dc6a1d2452a22f7a92d32352911584babfe7e`。Browser17 完整 V1 真实通过并放置 workbench 与前 7 格 resource；
+第 8 格 approach 中 client/server 未同轮进入 corridor，Browser17 保持 FAIL，`resources-placed`、采矿、equipment
+pointer、C4/C5 未触达且 lease 已释放。`V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06` 已由 root 定向准出；GIT33
+detached staged tree 的 6 files / 46 tests、Classic/root test types 与目标静态均 PASS，代码提交
+`117b4e9396d2f05c701eeba40d52f4d53abaed34` 已本地生成。证据/state 尚待第二笔提交和正常 push；BUILD09 与
+Browser18/Cua/devserver/CI 均未运行。fixture/static GREEN 不外推为 Browser 产品 GREEN。
 
 ## 恢复规则
 

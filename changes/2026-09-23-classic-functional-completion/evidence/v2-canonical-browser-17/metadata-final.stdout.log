@@ -1,0 +1,8 @@
+Checking formatting...
+All matched files use Prettier code style!
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts: OK
+apps/web/tests/e2e/classic-support/scenario.test.ts: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK

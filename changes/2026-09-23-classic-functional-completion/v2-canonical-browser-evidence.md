@@ -1,5 +1,79 @@
 # V2 Canonical Browser 证据
 
+## Browser-17 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-17`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实通过；V2 已放置 workbench、3 格 wood、3 格 stone 和首个
+iron resource，在前往第 8 格（第二个 iron）approach `[94.5,-0.5]` 的双投影 arrival wait 中失败。** 第 8 格
+`[94,31,2]` 尚未选择或放置，`resources-placed` phase、全部采矿/拾取、合成与装备手势均 NOT REACHED。Classic
+视觉测试独立 PASS，non-Classic smoke SKIPPED。本结果不证明 16 件护甲、194 项矩阵、Cua、人类听觉或性能。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-cb4941bf`，HEAD/source
+`cb4941bfd1801422802463bc7bbc41dd7d8e9484`，tree `0ce6d40c340f153007a8d8bc24742f635222fb29`；
+source/lock/artifact digest 为
+`ec6301aec3c1de8f61579c1e305626a675f76be10fb40aaf2b1b350efc1c9a17`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`a02e67c6c2694bfbb188d81ae8d74b554f6604c773389d952a4c5e40c222f682`，builtAt
+`2026-09-26T06:29:08.702Z`，dist 为 276 个盖章文件/277 个磁盘文件且无 symlink。Pack lock 与 MP3 SHA256
+分别为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`、
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-17-cb4941bf node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+唯一机器窗口 `v2-canonical-browser-17-cb4941bf`，UTC `2026-09-26T07:07:54.237Z` 至
+`2026-09-26T07:13:43.802Z`，`waitedMs=1`、`exitCode=1`、`measurement.status=NOT_RECORDED`。Playwright
+单 worker/单 Chromium/`retries=0`，结果 `1 failed / 1 passed / 1 skipped`；canonical 主测试只有 attempt 0，
+没有第二 attempt。
+
+C0-C3 receipt 均为 PASS。V1 test step 在本次 attempt 中完整返回，覆盖本轮水桶、门 readiness/upper/lower/
+exit-face、jukebox/record/media；没有用 Browser-16 的 V1 PASS 倒填。V2 receipt 只记录 `phase=started`，armor 四槽与
+cursor 为空。trace 的 voxel readback 明确记录七次成功，按 scenario 顺序为 `[80,82,84]` 三格 wood、
+`[86,88,90]` 三格 stone 和 `[92]` 首个 iron，z 均为 `2`、y 均为 `31`；第 8 格 `[94,31,2]` 尚未进入
+creative 选择或右键放置。
+
+失败发生在 `equipment-journey-support.ts:225` 对第 8 格 approach `[94.5,-0.5]` 的
+`followEquipmentRoute -> waitForArrival`。最后真实 `KeyW` pulse 为 trace `249924.979..250008.719ms`，内部
+grounded wait 在 `250026.263ms` 成功。此时 client `[94.459671,-0.505328]` 已进入有限到达域，但 server 为
+`[94.527518,-0.308819]`，尚未进入 `<0.08` z corridor；下一采样 server 到达约 `-0.505328` 时，client 已因
+释放后的残余速度到达 `-0.636522`。之后双方稳定在约 `-0.654540`，20 秒内从未出现双投影同轮满足 corridor 的
+snapshot。同期 physics tick `16754 -> 17955`、ack `9986 -> 11187` 持续前进，client 保持 grounded、
+non-colliding；因此不能归因为 input 未 ack、tick 停止或 Browser-16 的“停滞”。trace 未序列化每次 predicate 的布尔
+分解或输入轴值，本阶段只把它归类为 fixture 双投影 arrival mismatch，不声称更深生产根因。
+
+| 域                                                                  | Browser-17 结果                         |
+| ------------------------------------------------------------------- | --------------------------------------- |
+| C0-C3                                                               | PASS；receipt 明确记录                  |
+| V1 水桶、门 readiness/upper/lower/exit-face、jukebox/record/media   | PASS；完整 test step 已返回             |
+| V2 workbench 与前 7 格 resource                                     | PASS；trace voxel readback 明确记录     |
+| 第 8 格 iron approach                                               | FAIL；双投影未同轮进入 `<0.08` corridor |
+| 剩余 3 格 iron、`resources-placed` phase                            | NOT REACHED                             |
+| wood/stone/iron 采矿拾取、两把镐、iron unpack、五件铁甲             | NOT REACHED                             |
+| 四槽 click/Shift、wrong-slot、swap、脱穿、close settlement          | NOT REACHED                             |
+| C4、C5、`before.v2EquipmentPreSave`、save/restore、双 epoch、新 ref | NOT REACHED                             |
+| Classic 视觉 v3                                                     | PASS，32.2 秒                           |
+| non-Classic smoke                                                   | SKIPPED                                 |
+| death、durability-1、drop、respawn                                  | NOT OBSERVED                            |
+| Cua、人类听觉                                                       | NOT RUN                                 |
+| 性能                                                                | NOT MEASURED                            |
+
+failure attachment schema 不含 pageErrors/failedResponses，二者为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。只读 trace 另记录 1 条 Tone.js log、0 条 page-error 和 810 条 network
+resource snapshot，其中 HTTP `>=400` 为 0；这些 trace readback 不补造成 failure attachment 字段。trace 为
+480136175 bytes，SHA256 `341dbe30467b4f1a5dc008182fe67f92ea4ed565de8fda44d95de0b810d61544`；
+`trace-50m/` 含 10 个最大 50 MiB 分片，流式重组已验证，仓库内无本轮 `>=100MB` 文件。
+
+独立 machine-lock `harness:artifact` 后验窗口 `v2-canonical-browser-17-artifact-postcheck` PASS，UTC
+`2026-09-26T07:20:40.769Z` 至 `2026-09-26T07:20:43.599Z`，同 source/lock/artifact digest 与 276-file map。
+后验验收树 tracked/index 0/0，dist 277 files/0 symlink，4273 无监听，本树 Playwright/Chromium/preview 为 0，
+benchmark lock absent；历史 `refs/task-backups/git32-evidence-a402b016` 保留。本轮未修改 source/test/scenario/dist，
+也未 build、第二 attempt、Cua、CI、Git/index、push、deploy 或 merge。Browser lease 在证据封存后释放。
+
 ## Browser-16 输入轨迹勘误（CLOSE-04）
 
 后续对同一原始 trace 的完整失败 leg 流式提取否定了下方 Browser-16 初步段中的“先有 1.35m 净进展后停滞”：

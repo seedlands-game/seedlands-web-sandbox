@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-17",
+  "classification": "canonical-fixture-v2-resource-8-dual-projection-corridor-miss",
+  "failedAt": "resource-strip-second-iron-approach",
+  "sourceLocation": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:225",
+  "target": [94.5, -0.5],
+  "resourceTarget": [94, 31, 2],
+  "error": "waitForSnapshot timed out after 20000ms while followEquipmentRoute waited for a dual-projection arrival snapshot",
+  "lastRecordedV2Phase": "started",
+  "resourcePlacement": {
+    "workbenchPlaced": true,
+    "resourceVoxelsPlaced": 7,
+    "placedInScenarioOrder": [
+      [80, 31, 2],
+      [82, 31, 2],
+      [84, 31, 2],
+      [86, 31, 2],
+      [88, 31, 2],
+      [90, 31, 2],
+      [92, 31, 2]
+    ],
+    "notSelectedOrPlaced": [94, 31, 2]
+  },
+  "arrival": {
+    "directionOfFinalPulse": "KeyW",
+    "keyDownMs": 249924.979,
+    "keyUpMs": 250008.719,
+    "walkGroundedWaitCompletedMs": 250026.263,
+    "outerWaitStartedMs": 250026.621,
+    "clientFirstInside": [94.45967102050781, 32.599998474121094, -0.505328357219696],
+    "serverAtClientFirstInside": [94.52751791462997, 32.6, -0.30881927104446866],
+    "tickAtClientFirstInside": 16754,
+    "ackAtClientFirstInside": 9986,
+    "nextClient": [94.45094299316406, 32.599998474121094, -0.6365221738815308],
+    "serverWhenItReachedPriorClientPosition": [94.45967187683496, 32.6, -0.5053283343049474],
+    "nextTick": 16757,
+    "nextAck": 9989,
+    "stableClient": [94.45094299316406, 32.599998474121094, -0.6545403003692627],
+    "stableServer": [94.45094541979219, 32.6, -0.6545403172740075],
+    "finalTick": 17955,
+    "finalAck": 11187,
+    "groundedThroughoutSamples": true,
+    "collidingInSamples": false,
+    "finiteXNeighborhoodSatisfiedInSamples": true,
+    "dualProjectionCorridorSnapshotObserved": false,
+    "freshTickAndAckContinued": true
+  },
+  "limits": {
+    "predicateBooleanBreakdownSerialized": false,
+    "inputAxisValueSerialized": false,
+    "ackAloneProvesAxisValue": false,
+    "afterEachSnapshotUsedAsFailureInstant": false,
+    "productionRootCauseBeyondFixtureArrivalMismatchClaimed": false
+  }
+}

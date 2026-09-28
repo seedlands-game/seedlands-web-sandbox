@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-ARRIVAL-DRIFT-CLOSE-06",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "672dc6a1d2452a22f7a92d32352911584babfe7e",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "e9b045efd4105a78aa01d30a48ce5add015262fb03ae5de35da10fe73f0be0d7",
+    "validatedEntries": 9
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 57,
+    "sha256": "5f5d343730d857770bed62c94fb439f50f967e60e5f128bf2b384b0733b287f7",
+    "validatedEntries": 57,
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05",
+    "byteEqual": true,
+    "sourceManifestSha256": "8351c4d14b34fecdafe75e27dbf9fcdc44262f45c36d1aa33d51c11ad1fa0d4c",
+    "evidenceManifestSha256": "51e19b37e510a363631239b4ff89b654da2196f661dbc18de6d7655dded498fe",
+    "deliverySha256": "fe2a914f7404401c1963b759e79063a9e0a99f9a7431e6529fae10923589422e",
+    "routeSha256": "4c7b2925b8bf6e8e64510716896ca9469fb675c79121a2b520b3fbb12fcef767",
+    "supportSha256": "8f34c85c9cb94dc485ac3adfb43b3871bff8dfe3bf831b00b67774d96766dbe4",
+    "routeTestSha256": "9964aeca6cc0b4cbe679cbc1f4f446b78d6ab98b8204dc085eb30585ad1fa381",
+    "scenarioTestSha256": "f4dc4c202bdfcd5ad64f687e4fee8d8e765a0060b81e510ad947dd95617965af",
+    "contractSha256": "a85ee6af9618969fad8461f54e67e0f2bfc8f734d22715b9b7181930fd6c27b4",
+    "evidenceSha256": "d52fb6ea8bd78a07ac5a83aa204901cb679e3ea66c21d4219fca4ad12421432d"
+  },
+  "browser17Input": {
+    "target": [94.5, -0.5],
+    "resourceTarget": [94, 31, 2],
+    "walkedClient": [94.45967102050781, 32.599998474121094, -0.505328357219696],
+    "walkedServer": [94.52751791462997, 32.6, -0.30881927104446866],
+    "driftClient": [94.45094299316406, 32.599998474121094, -0.6365221738815308],
+    "serverAtPriorClient": [94.45967187683496, 32.6, -0.5053283343049474],
+    "stableZ": -0.6545403
+  },
+  "controllerContract": {
+    "callback": "waitForProgress",
+    "callbackVisibility": "private canonical fixture",
+    "resultKinds": ["arrival", "drift"],
+    "nullMeansContinueWaiting": true,
+    "freshnessBaseline": "walked snapshot",
+    "arrivalRemainsStrictDualProjection": true,
+    "driftRequiresFreshTick": true,
+    "driftRejectsAckRegression": true,
+    "driftRequiresClientReady": true,
+    "directionOwner": "latest client position",
+    "serverOnlyLagUsesReadOnlyWait": true,
+    "sameWaypointOnly": true,
+    "sharedDeadlineMs": 45000,
+    "waitCapMs": 20000,
+    "toleranceChanged": false,
+    "timeoutChanged": false,
+    "randomFallbackAdded": false,
+    "publicApiChanged": false
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-arrival-drift-close-06-red",
+      "status": "EXPECTED_FAIL",
+      "exitCode": 1,
+      "failed": 1,
+      "reason": "The Browser-17 walked-drift-stable stream timed out because the old wait recognized only strict full arrival.",
+      "stdoutSha256": "4c2e565db2fdecc1281afc7c2f742d34f5bcd983674987c3a0be1604b0c63819",
+      "receiptSha256": "d76bb9fb85219d1529c795218fb2ff57d4de1258c455f8812bbe5ab40182fb21"
+    },
+    "initialGreen": {
+      "window": "v2-equipment-arrival-drift-close-06-green",
+      "status": "FAIL",
+      "exitCode": 1,
+      "reason": "Test data incorrectly expected initial KeyW instead of client-owned KeyS and accidentally made the repeated-drift walked sample a strict full arrival.",
+      "stdoutSha256": "19cd693c38abec70400a99a223dd5f735b9a78f9e6f4dfe84fef4c42aee41567",
+      "receiptSha256": "477cce4bb675cd318c6d79c44a694cf36f15ff5aad092a1dac88b8721bced948"
+    },
+    "green": {
+      "window": "v2-equipment-arrival-drift-close-06-green-02",
+      "status": "PASS",
+      "files": 2,
+      "tests": 24,
+      "stdoutSha256": "cd7463b74f93afbb9bf3ac90ef5372c173f9c8284933eff12e318b12dd9c6471",
+      "receiptSha256": "c0b0dedde0023fd76c21b58c2aef8cc10e0c459a85f78dce865bc54f69398ea1"
+    },
+    "classicTypesInitial": {
+      "window": "v2-equipment-arrival-drift-close-06-classic-types",
+      "status": "FAIL",
+      "exitCode": 2,
+      "reason": "TS6133 for an unused helper import in the existing route test.",
+      "stdoutSha256": "fbf65e876089a0f94cf0a41b3de59716dd07c1d81ec5f6017364e35a0e8cff65",
+      "receiptSha256": "cba18a0ab32d6e2b9a96e643c8bc49be024af147c5fa81f0198ad7323944a7e3"
+    },
+    "affected": {
+      "window": "v2-equipment-arrival-drift-close-06-final-affected-02",
+      "status": "PASS",
+      "files": 6,
+      "tests": 46,
+      "maxWorkers": 1,
+      "stdoutSha256": "8d4c676a3e3a805c5c1250ec04c0c2e6e9c9c80e562e044b08cd220766b0dc23",
+      "receiptSha256": "891c33a2f74be2efc77877f2eb65163a22635d10fd253f1c1881daeaea9959b7"
+    },
+    "classicTypes": {
+      "window": "v2-equipment-arrival-drift-close-06-final-classic-types-02",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "079086e19bc9e12a13ab5f394dd2503b4f4d735d865b283c4025f9c8b2ef66b8"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-arrival-drift-close-06-final-root-types-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "a683effa2d0d350635b5a6da6410933930738f85a5277839f61b23e17105b1b9"
+    },
+    "eslint": {
+      "window": "v2-equipment-arrival-drift-close-06-final-eslint-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "bc8c48d39e08c15d37d003a3c7e18e322ea6a6e6f074e6bfc55f243d39cf739e"
+    },
+    "static": {
+      "window": "v2-equipment-arrival-drift-close-06-final-static-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "25491acae836f88f369c903f8585d4a253762bdf26756d33be9974ffe77cd792"
+    },
+    "metadata": {
+      "window": "v2-equipment-arrival-drift-close-06-metadata-final-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "cc97482178cfaf2901d8e3dc7fcf46138c7142f3a600a4b3b29efec7a9dbffe6"
+    }
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "browserValidated": false,
+    "browser17StillFail": true,
+    "browser18Authorized": false,
+    "scenarioChanged": false,
+    "productionChanged": false,
+    "genericWalkToChanged": false,
+    "genericRouteProgressChanged": false,
+    "groundedRouteTestChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure corrects only the canonical fixture arrival controller and changes no owner, public protocol, or architecture boundary."
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}
