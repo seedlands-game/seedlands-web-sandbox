@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T15:12:00Z
+更新时间：2026-09-28T15:38:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -144,6 +144,12 @@ staged tree `48b06d94...49ec`、patch `e864ea67...931c` 通过相同门禁；代
 第一次 evidence commit 自然 hook 因四份 mechanical raw 使用 `.json` 后缀失败且未创建提交；恢复只做四份 raw 原字节
 `.json.log` 改名、旧 metadata 归档与 Browser22/MAP01/GIT38 packaging identity 重冻。BUILD14/Browser23/Cua/
 devserver/CI/deploy/merge 未运行。
+当前 BUILD14 checkpoint：已推送 GIT38 source `0eafd4273bc1f5a23e7d147ded37801436074015` 的 clean detached
+tree `a1cbf676...899e` 完成唯一 build 与唯一 artifact verify。sourceDigest `4a280a63...caa8`、artifactDigest
+`f6f1ea67...cfa4`；276 项 receipt/disk map 与 BUILD13 完全相同，dist 为 277 个普通文件、0 symlink，Pack lock 与
+MP3 source/public/dist identity 一致。BUILD09/10/11/12/13/14 tree/dist 与 Git32 backup ref 保留。Browser22 正式 FAIL，
+但 C0-C3、完整 V1、resources 与三格 wood 独立入包通过；wood pickaxe 起后续 V2/C4/C5/save 未到达，Browser19 首
+iron 入包未证明。BUILD14 evidence 随本阶段唯一提交交付；Browser23/Cua/devserver/CI watch/deploy/merge 未运行。
 
 ## 恢复规则
 

@@ -463,6 +463,16 @@ deploy/merge 未运行；fixture/static GREEN 不等于产品 GREEN。第一次 
 机械 raw 使用 `.json` 后缀而失败，没有产生提交；恢复阶段只做四份 raw 原字节 `.json.log` 改名、prior-packaging 与
 Browser22/MAP01/GIT38 identity 重冻，不复跑行为测试。
 
+### V2-ARTIFACT-BUILD-14
+
+状态：PASS，EVIDENCE_FROZEN。从已推送 GIT38 source `0eafd4273bc1f5a23e7d147ded37801436074015` 的 clean
+detached tree `a1cbf676...899e` 完成唯一 `pnpm build` 与唯一 `pnpm harness:artifact`。sourceDigest
+`4a280a63...caa8`、lockDigest `44db46fb...1169`、artifactDigest `f6f1ea67...cfa4`；276 项 receipt/disk map
+逐项一致，dist 为 277 个普通文件、0 symlink/missing/extra/mismatch，且与 BUILD13 map 相同。Pack lock 与 MP3
+source/public/dist identity 一致。BUILD09/10/11/12/13/14 tree/dist 与 Git32 backup ref 保留。Browser22 仍 FAIL：
+C0-C3、完整 V1、resources 和三格 wood 独立入包已通过，wood pickaxe 起后续 V2/C4/C5/save 未到达；Browser19
+首 iron 入包仍未证明。Browser23/Cua/devserver/CI watch/deploy/merge 未运行，artifact PASS 不等于产品 GREEN。
+
 领域开始前只由 coordinator 添加该域首个消费者所需的公共 spine，并在 ≤6h 内结束：V2.0 的 done_when 是 equipment pointer target/projection 与 death prepared participant 的 RED 编译且不含 Classic ID；V3.0a 的 done_when 是 ClimbSurface schema＋Authority movement 接口 RED，V3.0b 是 Route/Transport schema＋entity projection/checkpoint V2 RED；V4.0 的 done_when 是 LightingPresentation schema、Pack loader 和 block+sky cache 数据合同 RED。每个公共 checkpoint 未完成时，对应 worker 不启动；不把四个阶段合成一次大改。
 
 ### interactions — 761fb4f2-9bc7-48bb-8520-0cf639839357
