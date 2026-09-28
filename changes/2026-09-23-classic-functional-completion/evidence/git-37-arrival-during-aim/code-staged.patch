@@ -1,0 +1,802 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts b/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+new file mode 100644
+index 00000000..091b39b8
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+@@ -0,0 +1,286 @@
++import type { Page } from '@playwright/test';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import {
++  classifyEquipmentRouteWait,
++  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++  EQUIPMENT_RESOURCE_WALK_OPTIONS,
++  followEquipmentRoute,
++  matchesEquipmentRouteArrival,
++} from './equipment-resource-route';
++import { lockPointer } from './mouse-input';
++import { walkTo, type ClassicSnapshot } from './harness';
++import { correctMouseToRoute, type RouteAimOutcome } from './target-aim';
++import { reachedRouteTarget } from './route-progress';
++import type { Point, RoutePoint } from './scenario';
++
++const TARGET: RoutePoint = [80.5, -0.5];
++const OUTER_BASELINE = snapshot(
++  [80.5007095336914, 32.599998474121094, 2.444796085357666],
++  18220,
++  11443,
++  [80.50070902152164, 32.6, 2.4447960558592863],
++  -900.6799999999987,
++);
++const WALK_CURRENT = snapshot(
++  [80.50038146972656, 32.599998474121094, -0.4135367274284363],
++  18286,
++  11509,
++  [80.50077447174287, 32.6, -0.19409252460450183],
++  -899.8999999999987,
++);
++const CLIENT_REACHED_SERVER_LATE = snapshot(
++  [80.50038146972656, 32.599998474121094, -0.47464773058891296],
++  18287,
++  11510,
++  [80.50064357211583, 32.6, -0.2635369690489463],
++  -899.8999999999987,
++);
++const CLIENT_DRIFT_SERVER_REACHED = snapshot(
++  [80.50038146972656, 32.599998474121094, -0.5802028179168701],
++  18290,
++  11513,
++  [80.50038177286176, 32.6, -0.4746477374655492],
++  -899.1199999999988,
++);
++
++function snapshot(player: Point, tick: number, ack: number, server: Point, yaw: number): ClassicSnapshot {
++  return {
++    player,
++    serverPlayerPosition: server,
++    viewAngles: [yaw, -20.159999999999993],
++    onGround: true,
++    colliding: false,
++    interactionAttempts: 30,
++    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
++  } as unknown as ClassicSnapshot;
++}
++
++function routePage(values: readonly ClassicSnapshot[]) {
++  let read = 0;
++  const calls = { reads: 0, moves: 0, down: 0, up: 0 };
++  const page = {
++    evaluate: async (callback: (...args: unknown[]) => unknown) => {
++      const source = String(callback);
++      if (source.includes('snapshot()')) {
++        calls.reads += 1;
++        return values[Math.min(read++, values.length - 1)] ?? null;
++      }
++      return undefined;
++    },
++    keyboard: {
++      press: async () => undefined,
++      down: async () => {
++        calls.down += 1;
++      },
++      up: async () => {
++        calls.up += 1;
++      },
++    },
++    locator: (selector: string) => ({
++      isVisible: async () => false,
++      boundingBox: async () => (selector === '#game' ? { x: 0, y: 0, width: 100_000, height: 540 } : null),
++      click: async () => undefined,
++    }),
++    getByRole: () => ({ isVisible: async () => false, click: async () => undefined }),
++    mouse: {
++      move: async () => {
++        calls.moves += 1;
++      },
++    },
++    waitForFunction: async () => undefined,
++    waitForTimeout: async () => undefined,
++  } as unknown as Page;
++  return { calls, page };
++}
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe('Classic V2 arrival during route aim', () => {
++  it('hands Browser21 client arrival to the real outer wait before mouse or keyboard input', async () => {
++    const { calls, page } = routePage([WALK_CURRENT, CLIENT_REACHED_SERVER_LATE, CLIENT_DRIFT_SERVER_REACHED]);
++    await lockPointer(page);
++    const directions: string[] = [];
++    let waits = 0;
++
++    await expect(
++      followEquipmentRoute(TARGET, {
++        now: () => 1_000,
++        observe: async () => OUTER_BASELINE,
++        walk: async (direction, timeout) => {
++          directions.push(direction);
++          if (directions.length > 1) throw new Error('Browser21 drift correction sentinel');
++          return walkTo(page, TARGET, { key: direction, timeout, ...EQUIPMENT_RESOURCE_WALK_OPTIONS });
++        },
++        waitForProgress: async (baseline, direction) => {
++          waits += 1;
++          expect(baseline).toBe(CLIENT_REACHED_SERVER_LATE);
++          expect(matchesEquipmentRouteArrival(OUTER_BASELINE, baseline, TARGET, direction)).toBe(false);
++          expect(classifyEquipmentRouteWait(baseline, CLIENT_DRIFT_SERVER_REACHED, TARGET, direction)).toEqual({
++            kind: 'drift',
++            snapshot: CLIENT_DRIFT_SERVER_REACHED,
++          });
++          return { kind: 'drift', snapshot: CLIENT_DRIFT_SERVER_REACHED };
++        },
++      }),
++    ).rejects.toThrow('Browser21 drift correction sentinel');
++
++    expect(directions).toEqual(['KeyS', 'KeyS']);
++    expect(waits).toBe(1);
++    expect(calls).toMatchObject({ reads: 2, moves: 0, down: 0, up: 0 });
++  });
++
++  it('distinguishes an aligned angle from a reached route and still moves when neither is true', async () => {
++    const far = snapshot([79.5, 32.6, -0.5], 1, 1, [79.5, 32.6, -0.5], -79.6);
++    const aligned = snapshot([79.5, 32.6, -0.5], 2, 2, [79.5, 32.6, -0.5], -90);
++    const observations = [far, aligned];
++    let moves = 0;
++    const angleResult: RouteAimOutcome<ClassicSnapshot> = await correctMouseToRoute({
++      target: TARGET,
++      direction: 'KeyW',
++      observe: async () => observations.shift() ?? null,
++      move: async () => {
++        moves += 1;
++      },
++      routeReached: (current) =>
++        reachedRouteTarget(
++          current.player,
++          TARGET,
++          'KeyW',
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++        ),
++    });
++    expect(angleResult).toEqual({ kind: 'angle-aligned', observation: aligned });
++    expect(moves).toBe(1);
++
++    moves = 0;
++    const reachedResult: RouteAimOutcome<ClassicSnapshot> = await correctMouseToRoute({
++      target: TARGET,
++      direction: 'KeyS',
++      observe: async () => CLIENT_REACHED_SERVER_LATE,
++      move: async () => {
++        moves += 1;
++      },
++      routeReached: (current) =>
++        reachedRouteTarget(
++          current.player,
++          TARGET,
++          'KeyS',
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++        ),
++    });
++    expect(reachedResult).toEqual({ kind: 'route-reached', observation: CLIENT_REACHED_SERVER_LATE });
++    expect(moves).toBe(0);
++  });
++
++  it('hands an exact V2 route point back before the pure-aim zero-vector error', async () => {
++    const exact = snapshot([80.5, 32.6, -0.5], 2, 2, [80.5, 32.6, -0.5], 0);
++    const reachedResult: RouteAimOutcome<ClassicSnapshot> = await correctMouseToRoute({
++      target: TARGET,
++      direction: 'KeyS',
++      observe: async () => exact,
++      move: async () => undefined,
++      routeReached: (current) =>
++        reachedRouteTarget(
++          current.player,
++          TARGET,
++          'KeyS',
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++          EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++        ),
++    });
++    expect(reachedResult).toEqual({ kind: 'route-reached', observation: exact });
++
++    await expect(
++      correctMouseToRoute({
++        target: TARGET,
++        direction: 'KeyS',
++        observe: async () => exact,
++        move: async () => undefined,
++      }),
++    ).rejects.toThrow('route aim direction is undefined');
++  });
++
++  it.each([
++    { name: 'observation await', dates: [1_000, 1_000, 46_001] },
++    { name: 'move boundary', dates: [1_000, 1_000, 1_000, 46_001] },
++  ])('fails before new input when the true-path $name crosses the original deadline', async ({ dates }) => {
++    let dateRead = 0;
++    vi.spyOn(Date, 'now').mockImplementation(() => dates[Math.min(dateRead++, dates.length - 1)]!);
++    const misaligned = snapshot([79.5, 32.6, -0.5], 2, 2, [79.5, 32.6, -0.5], 0);
++    const { calls, page } = routePage([farFromTarget(), misaligned]);
++    await lockPointer(page);
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyW',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
++      }),
++    ).rejects.toThrow('Real input route timed out before 80.5,-0.5.');
++    expect(calls).toMatchObject({ moves: 0, down: 0, up: 0 });
++  });
++
++  it('checks the original deadline after a terminal handoff without replacing its snapshot', async () => {
++    const dates = [1_000, 1_000, 1_000, 46_001];
++    let dateRead = 0;
++    vi.spyOn(Date, 'now').mockImplementation(() => dates[Math.min(dateRead++, dates.length - 1)]!);
++    const { calls, page } = routePage([WALK_CURRENT, CLIENT_REACHED_SERVER_LATE]);
++
++    await expect(
++      walkTo(page, TARGET, { key: 'KeyS', timeout: 45_000, ...EQUIPMENT_RESOURCE_WALK_OPTIONS }),
++    ).rejects.toThrow('Real input route timed out before 80.5,-0.5.');
++    expect(calls).toMatchObject({ reads: 2, moves: 0, down: 0, up: 0 });
++  });
++
++  it('keeps server-late, stale, ack-regressed, unready and one-sided observations out of strict arrival', () => {
++    expect(matchesEquipmentRouteArrival(OUTER_BASELINE, CLIENT_REACHED_SERVER_LATE, TARGET, 'KeyS')).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        OUTER_BASELINE,
++        {
++          ...CLIENT_REACHED_SERVER_LATE,
++          serverPlayerPosition: CLIENT_REACHED_SERVER_LATE.player,
++          authority: { ...CLIENT_REACHED_SERVER_LATE.authority, physicsTick: OUTER_BASELINE.authority.physicsTick },
++        },
++        TARGET,
++        'KeyS',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        OUTER_BASELINE,
++        {
++          ...CLIENT_REACHED_SERVER_LATE,
++          serverPlayerPosition: CLIENT_REACHED_SERVER_LATE.player,
++          authority: { ...CLIENT_REACHED_SERVER_LATE.authority, acknowledgedInputSequence: 11442 },
++        },
++        TARGET,
++        'KeyS',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        OUTER_BASELINE,
++        { ...CLIENT_REACHED_SERVER_LATE, serverPlayerPosition: CLIENT_REACHED_SERVER_LATE.player, onGround: false },
++        TARGET,
++        'KeyS',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        OUTER_BASELINE,
++        { ...CLIENT_REACHED_SERVER_LATE, serverPlayerPosition: CLIENT_REACHED_SERVER_LATE.player, colliding: true },
++        TARGET,
++        'KeyS',
++      ),
++    ).toBe(false);
++  });
++});
++
++function farFromTarget(): ClassicSnapshot {
++  return snapshot([79.5, 32.6, -0.5], 1, 1, [79.5, 32.6, -0.5], 0);
++}
+diff --git a/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts b/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+index 498aa0f8..4914fa1f 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+@@ -96,7 +96,7 @@ describe('Classic V2 pickup route post-correction refresh', () => {
+       refreshAfterCorrection: true,
+     });
+ 
+-    expect(calls).toMatchObject({ reads: 3, down: 0, up: 0, moves: 0 });
++    expect(calls).toMatchObject({ reads: 2, down: 0, up: 0, moves: 0 });
+     expect(result).toBe(strict);
+   });
+ 
+@@ -104,10 +104,13 @@ describe('Classic V2 pickup route post-correction refresh', () => {
+     let now = 1_000;
+     vi.spyOn(Date, 'now').mockImplementation(() => now);
+     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
+-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
++      view: [0.8592819133153222, -20.03],
++    });
++    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
+     const { calls, page } = routePage({
+       initial,
+-      correction: strict,
++      correction: alignedNotReached,
+       refreshed: strict,
+       onRead: (read) => {
+         if (read === 2) now = 46_001;
+@@ -130,10 +133,13 @@ describe('Classic V2 pickup route post-correction refresh', () => {
+     let now = 1_000;
+     vi.spyOn(Date, 'now').mockImplementation(() => now);
+     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
+-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
++      view: [0.8592819133153222, -20.03],
++    });
++    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
+     const { calls, page } = routePage({
+       initial,
+-      correction: strict,
++      correction: alignedNotReached,
+       refreshed: strict,
+       onRead: (read) => {
+         if (read === 3) now = 46_001;
+@@ -154,8 +160,16 @@ describe('Classic V2 pickup route post-correction refresh', () => {
+ 
+   it('fails closed when the post-correction refresh is unavailable', async () => {
+     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
+-    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
+-    const { calls, page } = routePage({ initial, correction: strict, refreshed: null, afterPulse: strict });
++    const alignedNotReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
++      view: [0.8592819133153222, -20.03],
++    });
++    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
++    const { calls, page } = routePage({
++      initial,
++      correction: alignedNotReached,
++      refreshed: null,
++      afterPulse: strict,
++    });
+ 
+     await expect(
+       walkTo(page, TARGET, {
+diff --git a/apps/web/tests/e2e/classic-support/harness-snapshot.ts b/apps/web/tests/e2e/classic-support/harness-snapshot.ts
+new file mode 100644
+index 00000000..10fd158c
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/harness-snapshot.ts
+@@ -0,0 +1,74 @@
++import type { Point } from './scenario';
++
++export type ClassicSnapshot = Readonly<{
++  player: Point;
++  serverPlayerPosition: Point;
++  viewAngles: readonly [number, number];
++  streamCenter: readonly [number, number];
++  loadedChunks: number;
++  renderedChunks: number;
++  onGround: boolean;
++  colliding: boolean;
++  interactionAttempts: number;
++  mutationCount: number;
++  worldRevision: number;
++  remeshSchedulingCount: number;
++  lastCommitMeshChunkCount: number;
++  storageBytes: number;
++  runtime: 'authority-worker';
++  workers: Readonly<{ authority: number; logic: number; persistence: number; fluid: number; general: number }>;
++  authority: Readonly<{
++    physicsTick: number;
++    acknowledgedInputSequence: number;
++    commitSequence: number;
++    residency: Readonly<{ evictionCount: number; residentCount: number; dirtyCount: number }> | null;
++  }>;
++  generatorVersion: number;
++  renderPipeline: Readonly<{ backend: 'webgl2' | 'webgpu' }>;
++  experiments: Readonly<{
++    requested: Readonly<{ renderer: string; wasm: boolean; simd: boolean }>;
++    renderer: Readonly<{ effectiveRenderer: string }> | null;
++    workers: readonly Readonly<{
++      lane: 'fluid' | 'general';
++      status: string;
++      effectiveArtifact: string;
++      artifactSha256?: string;
++    }>[];
++  }>;
++  compute: Readonly<{
++    submittedTasks: number;
++    completedTasks: number;
++    failedTasks: number;
++    staleResults: number;
++    submittedBytes: number;
++    workerActivity?: readonly Readonly<{
++      lane: 'fluid' | 'general';
++      completedTasks: number;
++      kernel: Readonly<{ calls: number; failures: number; memoryBytes: number; failed: boolean }> | null;
++    }>[];
++  }>;
++  performance: Readonly<{
++    scenarioId: string;
++    frame: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number; longFrameCount: number }>;
++    chunkVisible: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number }>;
++    completedChunkTraces: number;
++    traceEventCount: number;
++    uploadQueueDepth: number;
++    estimatedMeshBytes: number;
++  }>;
++  gameplay: Readonly<{
++    npcCount: number;
++    worldItemCount: number;
++    inventoryOperationCount: number;
++    actionCompletionCount: number;
++    behaviorEvaluationCount: number;
++    presentedEntityCount: number;
++  }>;
++  visualEffects: Readonly<{
++    blockLightReady: boolean;
++    blockLightSourceRevision: number | null;
++    blockLightRebuildCount: number;
++    shadowUpdateCount: number;
++    shadowStableFrameCount: number;
++  }>;
++}>;
+diff --git a/apps/web/tests/e2e/classic-support/harness.ts b/apps/web/tests/e2e/classic-support/harness.ts
+index e0228b4d..5acdaa79 100644
+--- a/apps/web/tests/e2e/classic-support/harness.ts
++++ b/apps/web/tests/e2e/classic-support/harness.ts
+@@ -1,4 +1,5 @@
+ import { expect, type Page } from '@playwright/test';
++import type { ClassicSnapshot } from './harness-snapshot';
+ import { reachedRouteTarget } from './route-progress';
+ import type { ClassicScenario, Point, RoutePoint } from './scenario';
+ import {
+@@ -19,6 +20,7 @@ import type {
+ } from '../../../src/app/app-contracts';
+ import type { GlobalAudio } from '../../../src/app/audio/global-audio';
+ export { clickCanvasCenter, lockPointer, moveMouseBy } from './mouse-input';
++export type { ClassicSnapshot } from './harness-snapshot';
+ 
+ export type InventoryItem = Readonly<{ itemId: string; count: number; instance?: Readonly<{ durability?: number }> }>;
+ export type PlayerState = Readonly<{
+@@ -43,76 +45,6 @@ export type CharacterObservation = Readonly<{
+   cursor: number;
+   gap?: boolean;
+ }>;
+-// prettier-ignore
+-export type ClassicSnapshot = Readonly<{
+-  player: Point;
+-  serverPlayerPosition: Point;
+-  viewAngles: readonly [number, number];
+-  streamCenter: readonly [number, number];
+-  loadedChunks: number; renderedChunks: number;
+-  onGround: boolean; colliding: boolean;
+-  interactionAttempts: number;
+-  mutationCount: number; worldRevision: number;
+-  remeshSchedulingCount: number; lastCommitMeshChunkCount: number;
+-  storageBytes: number;
+-  runtime: 'authority-worker';
+-  workers: Readonly<{ authority: number; logic: number; persistence: number; fluid: number; general: number }>;
+-  authority: Readonly<{
+-    physicsTick: number;
+-    acknowledgedInputSequence: number;
+-    commitSequence: number;
+-    residency: Readonly<{ evictionCount: number; residentCount: number; dirtyCount: number }> | null;
+-  }>;
+-  generatorVersion: number;
+-  renderPipeline: Readonly<{ backend: 'webgl2' | 'webgpu' }>;
+-  experiments: Readonly<{
+-    requested: Readonly<{ renderer: string; wasm: boolean; simd: boolean }>;
+-    renderer: Readonly<{ effectiveRenderer: string }> | null;
+-    workers: readonly Readonly<{
+-      lane: 'fluid' | 'general';
+-      status: string;
+-      effectiveArtifact: string;
+-      artifactSha256?: string;
+-    }>[];
+-  }>;
+-  compute: Readonly<{
+-    submittedTasks: number;
+-    completedTasks: number;
+-    failedTasks: number;
+-    staleResults: number;
+-    submittedBytes: number;
+-    workerActivity?: readonly Readonly<{
+-      lane: 'fluid' | 'general';
+-      completedTasks: number;
+-      kernel: Readonly<{ calls: number; failures: number; memoryBytes: number; failed: boolean }> | null;
+-    }>[];
+-  }>;
+-  performance: Readonly<{
+-    scenarioId: string;
+-    frame: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number; longFrameCount: number }>;
+-    chunkVisible: Readonly<{ count: number; p50Ms: number; p95Ms: number; p99Ms: number }>;
+-    completedChunkTraces: number;
+-    traceEventCount: number;
+-    uploadQueueDepth: number;
+-    estimatedMeshBytes: number;
+-  }>;
+-  gameplay: Readonly<{
+-    npcCount: number;
+-    worldItemCount: number;
+-    inventoryOperationCount: number;
+-    actionCompletionCount: number;
+-    behaviorEvaluationCount: number;
+-    presentedEntityCount: number;
+-  }>;
+-  visualEffects: Readonly<{
+-    blockLightReady: boolean;
+-    blockLightSourceRevision: number | null;
+-    blockLightRebuildCount: number;
+-    shadowUpdateCount: number;
+-    shadowStableFrameCount: number;
+-  }>;
+-}>;
+-
+ export type ChromeTrace = Readonly<{
+   traceEvents: readonly Readonly<{
+     name: string;
+@@ -276,21 +208,36 @@ export async function walkTo(
+     refreshAfterCorrection?: boolean;
+   }> = {},
+ ): Promise<ClassicSnapshot> {
+-  const key = options.key ?? 'KeyW';
+-  const { tolerance = 0.65, corridorTolerance = 1.5 } = options;
++  const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
+   const deadline = Date.now() + (options.timeout ?? 45_000);
+   let current = await snapshot(page);
+   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+     if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+-    await correctMouseToRoute({
+-      target,
+-      direction: key,
+-      observe: () => snapshot(page),
+-      move: (dx, dy) => moveMouseBy(page, dx, dy),
+-    });
++    const correction = options.refreshAfterCorrection
++      ? await correctMouseToRoute({
++          target,
++          direction: key,
++          observe: async () => {
++            const observed = await snapshot(page);
++            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
++            return observed;
++          },
++          move: async (dx, dy) => {
++            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
++            await moveMouseBy(page, dx, dy);
++          },
++          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
++        })
++      : await correctMouseToRoute({
++          target,
++          direction: key,
++          observe: () => snapshot(page),
++          move: (dx, dy) => moveMouseBy(page, dx, dy),
++        });
+     if (options.refreshAfterCorrection) {
+       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
++      if (correction.kind === 'route-reached') return correction.observation;
+       if ((current = await snapshot(page)) === null)
+         throw new Error('Classic snapshot is unavailable after route correction.');
+       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+diff --git a/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts b/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+index dddeb95d..1a199e31 100644
+--- a/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
++++ b/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+@@ -113,7 +113,7 @@ describe('Classic shared route aim bounded contract', () => {
+     let reads = 0;
+     let moves = 0;
+ 
+-    await correctMouseToRoute({
++    const result = await correctMouseToRoute({
+       target,
+       direction,
+       observe: async () => {
+@@ -128,6 +128,7 @@ describe('Classic shared route aim bounded contract', () => {
+ 
+     expect(moves).toBe(18);
+     expect(reads).toBe(19);
++    expect(result.kind).toBe('angle-aligned');
+     expect(Math.abs(horizontalMouseCorrectionToRoute([0, 32.6, 0], yaw, target, direction))).toBeLessThan(1);
+   });
+ 
+@@ -136,7 +137,7 @@ describe('Classic shared route aim bounded contract', () => {
+     let reads = 0;
+     let moves = 0;
+ 
+-    await correctMouseToRoute({
++    const result = await correctMouseToRoute({
+       target: [1, 0],
+       direction: 'KeyW',
+       observe: async () => {
+@@ -150,6 +151,7 @@ describe('Classic shared route aim bounded contract', () => {
+     });
+ 
+     expect({ reads, moves }).toEqual({ reads: 3, moves: 1 });
++    expect(result.kind).toBe('angle-aligned');
+   });
+ 
+   it('fails unavailable after 19 persistent null observations without moving', async () => {
+@@ -242,16 +244,17 @@ describe('Classic shared route aim bounded contract', () => {
+     ).rejects.toThrow('route aim direction is undefined');
+ 
+     let moves = 0;
++    const aligned = observation(player, -90);
+     await expect(
+       correctMouseToRoute({
+         target: [1 + Number.EPSILON, 2],
+         direction: 'KeyW',
+-        observe: async () => observation(player, -90),
++        observe: async () => aligned,
+         move: async () => {
+           moves += 1;
+         },
+       }),
+-    ).resolves.toBeUndefined();
++    ).resolves.toEqual({ kind: 'angle-aligned', observation: aligned });
+     expect(moves).toBe(0);
+   });
+ 
+diff --git a/apps/web/tests/e2e/classic-support/target-aim.ts b/apps/web/tests/e2e/classic-support/target-aim.ts
+index 6dc923b4..7e28a2ce 100644
+--- a/apps/web/tests/e2e/classic-support/target-aim.ts
++++ b/apps/web/tests/e2e/classic-support/target-aim.ts
+@@ -84,14 +84,19 @@ export function horizontalMouseCorrectionToRoute(
+   return clampStep(normalizeDegrees(yaw - targetYaw) / MOUSE_SENSITIVITY_DEGREES);
+ }
+ 
+-export async function correctMouseToRoute(
++export type RouteAimObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
++export type RouteAimOutcome<T extends RouteAimObservation> =
++  Readonly<{ kind: 'angle-aligned'; observation: T }> | Readonly<{ kind: 'route-reached'; observation: T }>;
++
++export async function correctMouseToRoute<T extends RouteAimObservation>(
+   options: Readonly<{
+     target: readonly [number, number];
+     direction: 'KeyW' | 'KeyS';
+-    observe: () => Promise<Readonly<{ player: Point; viewAngles: readonly [number, number] }> | null>;
++    observe: () => Promise<T | null>;
+     move: (dx: number, dy: number) => Promise<void>;
++    routeReached?: (observation: T) => boolean;
+   }>,
+-): Promise<void> {
++): Promise<RouteAimOutcome<T>> {
+   if (!options.target.every(Number.isFinite))
+     throw new Error(`Classic route aim target is invalid: target=${options.target.join(',')}.`);
+   let lastDx: number | null = null;
+@@ -108,6 +113,7 @@ export async function correctMouseToRoute(
+       throw new Error(
+         `Classic route aim observation is invalid: target=${options.target.join(',')}; direction=${options.direction}.`,
+       );
++    if (options.routeReached?.(current)) return { kind: 'route-reached', observation: current };
+     if (current.player[0] === options.target[0] && current.player[2] === options.target[1])
+       throw new Error(
+         `Classic route aim direction is undefined: target=${options.target.join(',')}; direction=${options.direction}.`,
+@@ -118,7 +124,7 @@ export async function correctMouseToRoute(
+       options.target,
+       options.direction,
+     );
+-    if (Math.abs(dx) < 1) return;
++    if (Math.abs(dx) < 1) return { kind: 'angle-aligned', observation: current };
+     lastDx = dx;
+     if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1) break;
+     await options.move(dx, 0);
+diff --git a/changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md b/changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md
+new file mode 100644
+index 00000000..3e093c1e
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md
+@@ -0,0 +1,74 @@
++# V2 Aim 期间到达交还合同
++
++阶段：`V2-ARRIVAL-DURING-AIM-CLOSE-12`
++
++状态：合同冻结，fixture/deterministic/static GREEN，等待 root 独立准出。输入为 MAP01 SOURCE15
++`50c8c21b93c186427a27e47623e151b736bc17528fb4319a8aae2b6e35d991f3`、MANIFEST4
++`486c335f220d9bacb1ea4019c81db44f7df36129e32c9b59d86c7410125e73a0`、delivery
++`0e32bc91a71db284838265ecb5192fefb72dc7540c2c7a3eeca2537655538fc6`。
++
++## 行为
++
++1. `correctMouseToRoute<T extends RouteAimObservation>` 返回 `RouteAimOutcome<T>`：
++   `{kind:'angle-aligned', observation:T}` 或 `{kind:'route-reached', observation:T}`。可选
++   `routeReached?: (observation:T) => boolean` 只读观察值。
++2. 每个非 null observation 先执行原 finite 校验，再调用 terminal predicate；true 时在 zero-vector、角度计算和 mouse
++   move 之前原样返回同一对象。`route-reached` 只表示 caller 的 client route 条件成立，不表示角度、server、freshness、
++   readiness 或 outer strict 成立。
++3. 未提供 predicate 时，继续执行精确 zero-vector 检查和现有 `horizontalMouseCorrectionToRoute`；只有真实
++   `abs(dx)<1` 返回 `angle-aligned`。最多 18 moves/19 observations，null、invalid、zero、no-response、exhaustion
++   继续按 Close11 fail closed。
++4. `walkTo` 仅在 `refreshAfterCorrection=true` 时传入复用现有 `reachedRouteTarget` 的 predicate，并保留完整
++   `ClassicSnapshot` 类型。`route-reached` 在 helper 返回后的原 deadline 检查通过后赋给 current 并直接返回；不得再
++   snapshot 覆盖或发 mouse/keyboard。`angle-aligned` 继续 Close10 的 refresh/null/deadline/reached/pulse 顺序。
++5. true 路径的 observe wrapper 在 `snapshot(page)` await 返回后检查原 deadline；move wrapper 在
++   `moveMouseBy(page,dx,dy)` 前检查原 deadline。省略/false 不使用 wrapper，不新增 `Date.now()`、snapshot 或行为。
++6. outer `followEquipmentRoute` 保持唯一 strict owner：双投影、fresh tick、ack 不回退、grounded/non-colliding、最多 20s
++   wait 和 drift。共享 45s deadline 不重置。exact zero 在 V2 predicate 已 reached 时先 handoff；默认 pure aim 仍
++   `undefined-direction`。
++
++## 不变量
++
++- 不改 route `45s`、wait `20s`、pulse `80ms`、`jump=false`、`.06/.08/±.45`、mouse step `80`、sensitivity
++  `0.13`、18/19 aim 上界、坐标或 pickup itemCount 断言。
++- 不改 `equipment-resource-route.ts`、`equipment-journey-support.ts`、`v1-slice.ts`、`mouse-input.ts`、
++  `route-progress.ts`、scenario JSON 或 production。
++- 不加 exception fallback、第二 helper 调用、随机路线、缓存旧 current 或多策略框架。
++- 旧 `route-aim-contract.md` 原字节保留；本合同只 supersede 其 `Promise<void>` 返回形状和“无 callback”局部边界，
++  Close11 的 18/19 有界 fail-closed 核心继续有效。
++
++## RED / GREEN
++
++- Browser21 主 RED 调用真实 `followEquipmentRoute -> walkTo -> correctMouseToRoute`，用 outer `@6696`、walk
++  current `@6753`、terminal `@6755`；目标是同对象交还、0 mouse、0 keyboard。旧实现继续 mouse/exhaustion。
++- 用记录的 `@6759` 调用真实 classifier，必须得到 drift；下一 driver 必须仍是同 target/`KeyS`，由 sentinel 终止，
++  不伪造成功。
++- 未到达且未对齐继续 move；纯角度对齐返回 `angle-aligned`；route 到达返回 `route-reached`。默认 direct helper
++  的全 yaw、null、invalid、zero、no-response、最后 observation 与 exhaustion 回归不得削弱。
++- true observe/move/terminal-return deadline 边界均零额外输入；省略/false 的 snapshot/Date.now/pulse 兼容用例保留。
++- stale、ack 回退、ungrounded、colliding、client/server one-sided 不得冒充 outer strict。
++
++## Ownership、闭包与预算
++
++实现只允许 `target-aim.ts`、`harness.ts`、新 `equipment-arrival-during-aim.test.ts`，以及窄改
++`equipment-pickup-route-refresh.test.ts`、`route-aim-contract.test.ts`。文档只改当前 spec、本合同、
++`arrival-during-aim-evidence.md` 和 Close12 evidence。其余上列路径与历史 evidence 只读。
++
++affected 闭包为新测试，加 route-aim-contract、pickup-refresh、resource-route、arrival-drift、grounded-route、
++route-progress、target-aim、door-collision-oracle、door-exit-face、door-readiness、equipment-mining-aim、scenario，共 13 个
++test files；实际 tests 数在 RED 后记录。另跑 Classic/root test types、5 个变更 TS ESLint、精确 source/contract/spec
++Prettier 与 scoped diff，全部 machine lock、Vitest `maxWorkers=1`。
++
++最终实际闭包为 13 files / 138 tests PASS。可信 RED 为新测试 1 file / 6 failed / 1 passed；实现后新测试 7/7
++PASS。affected 前两轮分别保留为 3 failed / 135 passed 与 1 failed / 137 passed：均为 Close10 true-path 旧测试数据
++仍把 correction observation 建模为已到达，和新 typed terminal handoff 的少一次 snapshot 语义冲突；测试改为
++angle-aligned 但未到达的样本后，原 refresh deadline/null 合同继续得到真实覆盖。Classic/root test types、5 TS ESLint、
++Prettier 和 scoped diff 最终 PASS；ESLint 首轮仅因 `harness.ts` 超过既有 max-lines。Close12 当时为绕过行数门禁在
++`walkTo` 新增多处 inline `prettier-ignore` 并压平控制流；这不满足正常格式合同，“未改 `.prettierignore`”不能等同
++“未增加格式豁免”。`V2-ARRIVAL-DURING-AIM-CLOSE-12-FORMAT-CLOSURE` 已将 `ClassicSnapshot` 原字段逐字义拆到同目录
++`harness-snapshot.ts`，由 `harness.ts` type import 并同名 re-export，随后移除本片全部 inline suppression 并恢复普通
++Prettier 格式。该 type-only 拆分不改变 typed handoff、默认路径、Date.now/snapshot 次数或 runtime import。
++
++预算：AI 1-2h、硬上限 3h，传统 0.25-0.5 PD；120% 容量为 AI 2.4h、传统 0.6 PD。credits、费率、API 等价
++费用、额度与占比 unknown。Close12 初版未更新长期 docs 的理由只适用于行为；format closure 因新增测试侧 type-only
++职责文件而窄更新 `docs/code-map.md`，不改变生产架构或公共协议。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index ef96a2b5..48f315d5 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -239,6 +239,26 @@ yaw 域上界，不保证动态漂移必达；动态场景在同一上界内重
+ canonical timeout、pulse、voxel aim 180、容差、坐标、Close10 refresh 或增加第二 helper/fallback。Browser-20 仍为
+ fixture FAIL，V2 未到达；deterministic/static GREEN 不等于 Browser-21 或产品 GREEN。
+ 
++Browser-21 唯一 canonical attempt 已完成 C0-C3、完整 V1、V2 workbench/10 格资源放置，并真实完成第一格 wood
++`[80,31,2]` 的 leftdown、voxel clear、drop/pickup 与独立 inventory itemCount 增量；随后在返回 approach
++`[80.5,-0.5]` 的 `KeyS` route aim 中失败。`walkTo` 的旧 current `@6753` 尚未到达；helper 的下一次真实
++observation `@6755` 已让 client 距目标 `0.025355 < .06`，但 server 距 `0.236464` 尚未到达。该同一 snapshot
++没有交还 caller，旧 helper 继续 mouse 后 client 越过目标并最终耗尽 18 moves/19 observations。Close-12 只给
++`correctMouseToRoute` 增加泛型 typed outcome（`angle-aligned` / `route-reached`）和可选只读 terminal predicate；每个
++有效 finite observation 在 zero-vector、角度计算和 mouse move 前检查 predicate。仅现有 V2
++`refreshAfterCorrection=true` 路径传入复用 `reachedRouteTarget(client, target, key, tolerance, corridorTolerance)` 的
++predicate，并从 typed outcome 取得同一完整 snapshot；未过原 deadline 才直接返回 outer。outer 继续独占双投影、
++freshness、grounded/colliding、20s wait/drift，45s 总 deadline 不重置。`angle-aligned` 仍走 Close10 的
++post-correction refresh；true observe 在 snapshot await 后、true move 在输入前检查原 deadline。默认省略/false 不使用
++这些 wrapper，不新增 `Date.now()`/snapshot 或改变行为；closed-door direct caller 不传 predicate，继续纯角度
++18/19、invalid/null/zero/exhaustion fail closed。不得捕获 exhaustion fallback、第二次调用 helper、增加预算/步幅、
++改变 sensitivity、容差、坐标或路线。Browser-21 保持 FAIL；fixture/static GREEN 不等于 Browser-22 或产品 GREEN。
++Close-12 初版为压低 `harness.ts` 行数新增了多处 inline `prettier-ignore` 并压平 `walkTo`，因此当时的 Prettier
++PASS 不能证明正常格式达标。format closure 先保存该 release 原字节，再把只读 `ClassicSnapshot` 类型等价移到
++`classic-support/harness-snapshot.ts`；`harness.ts` 用 type-only import 和同名 type re-export 保持既有导入面，运行函数、
++typed handoff、默认路径和 deadline 调用次序均不改。本片新增 inline suppression 清零并恢复正常 Prettier 格式；新增
++测试侧类型职责同步记入 `docs/code-map.md`，不改变生产架构或公共协议。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、
+diff --git a/docs/code-map.md b/docs/code-map.md
+index 46e19a23..e43ea1e7 100644
+--- a/docs/code-map.md
++++ b/docs/code-map.md
+@@ -247,6 +247,8 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与
+ - apps/web/src/app/ui/personal-crafting.svelte 展示 Authority 投影的随身 2×2 网格、结果和共享配方手册；inventory-crafting.svelte 持有库存、随身合成格与工位共用的游标手势。Classic 的 2×2/3×3 均消费 stations.ts 中的同一网格配方目录。
+ - packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
+ - scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
++- [harness-snapshot.ts](../apps/web/tests/e2e/classic-support/harness-snapshot.ts) 只定义 canonical Browser Harness 的只读
++  snapshot 类型；`harness.ts` 保持运行操作 owner，并以同名 type re-export 维持既有测试导入面。
+ - 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。
+ 
+ V5金钻矿沿用 world/ore-generation.ts 与 Rust generation.rs 的分组hash，在 generatorVersion=5 时追加金/钻石矿；旧版本字节保留。apps/web/src/client/persistence/stored-world-selection.ts 对选中的存档验证版本与provider身份，拒绝不兼容继续，不把旧记录过滤成新世界。矿物、工具、资源块配方仍归Classic内容文件。

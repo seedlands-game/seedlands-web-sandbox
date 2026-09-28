@@ -1,0 +1,15 @@
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.cjs:43
+if (priorRuntimeAst !== currentRuntimeAst) throw new Error('harness.ts runtime statement AST differs');
+                                           ^
+
+Error: harness.ts runtime statement AST differs
+    at Object.<anonymous> (/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.cjs:43:50)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.21.0

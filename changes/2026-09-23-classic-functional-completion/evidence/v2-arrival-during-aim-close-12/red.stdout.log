@@ -1,0 +1,128 @@
+7:14:15 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts (7 tests | 6 failed) 8ms
+     × hands Browser21 client arrival to the real outer wait before mouse or keyboard input 4ms
+     × distinguishes an aligned angle from a reached route and still moves when neither is true 1ms
+     × hands an exact V2 route point back before the pure-aim zero-vector error 0ms
+     × fails before new input when the true-path 'observation await' crosses the original deadline 1ms
+     × fails before new input when the true-path 'move boundary' crosses the original deadline 0ms
+     × checks the original deadline after a terminal handoff without replacing its snapshot 0ms
+     ✓ keeps server-late, stale, ack-regressed, unready and one-sided observations out of strict arrival 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > hands Browser21 client arrival to the real outer wait before mouse or keyboard input
+AssertionError: expected [Function] to throw error including 'Browser21 drift correction sentinel' but got 'Classic route aim did not converge: t…'
+
+Expected: "Browser21 drift correction sentinel"
+Received: "Classic route aim did not converge: target=80.5,-0.5; direction=KeyS; lastDx=-80."
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts:140:5
+    138|         },
+    139|       }),
+    140|     ).rejects.toThrow('Browser21 drift correction sentinel');
+       |     ^
+    141|
+    142|     expect(directions).toEqual(['KeyS', 'KeyS']);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > distinguishes an aligned angle from a reached route and still moves when neither is true
+AssertionError: expected undefined to deeply equal { kind: 'angle-aligned', …(1) }
+
+- Expected:
+{
+  "kind": "angle-aligned",
+  "observation": {
+    "authority": {
+      "acknowledgedInputSequence": 2,
+      "commitSequence": 1,
+      "physicsTick": 2,
+    },
+    "colliding": false,
+    "interactionAttempts": 30,
+    "onGround": true,
+    "player": [
+      79.5,
+      32.6,
+      -0.5,
+    ],
+    "serverPlayerPosition": [
+      79.5,
+      32.6,
+      -0.5,
+    ],
+    "viewAngles": [
+      -90,
+      -20.159999999999993,
+    ],
+  },
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts:168:25
+    166|         ),
+    167|     });
+    168|     expect(angleResult).toEqual({ kind: 'angle-aligned', observation: …
+       |                         ^
+    169|     expect(moves).toBe(1);
+    170|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > hands an exact V2 route point back before the pure-aim zero-vector error
+Error: Classic route aim direction is undefined: target=80.5,-0.5; direction=KeyS.
+ ❯ correctMouseToRoute apps/web/tests/e2e/classic-support/target-aim.ts:112:13
+    110|       );
+    111|     if (current.player[0] === options.target[0] && current.player[2] =…
+    112|       throw new Error(
+       |             ^
+    113|         `Classic route aim direction is undefined: target=${options.ta…
+    114|       );
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts:194:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > fails before new input when the true-path 'observation await' crosses the original deadline
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > fails before new input when the true-path 'move boundary' crosses the original deadline
+AssertionError: expected [Function] to throw error including 'Real input route timed out before 80.…' but got 'Classic route aim did not converge: t…'
+
+Expected: "Real input route timed out before 80.5,-0.5."
+Received: "Classic route aim did not converge: target=80.5,-0.5; direction=KeyW; lastDx=80."
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts:236:5
+    234|         ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
+    235|       }),
+    236|     ).rejects.toThrow('Real input route timed out before 80.5,-0.5.');
+       |     ^
+    237|     expect(calls).toMatchObject({ moves: 0, down: 0, up: 0 });
+    238|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts > Classic V2 arrival during route aim > checks the original deadline after a terminal handoff without replacing its snapshot
+AssertionError: expected [Function] to throw error including 'Real input route timed out before 80.…' but got 'Real mouse movement requires a Pointe…'
+
+Expected: "Real input route timed out before 80.5,-0.5."
+Received: "Real mouse movement requires a Pointer Lock baseline."
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts:248:5
+    246|     await expect(
+    247|       walkTo(page, TARGET, { key: 'KeyS', timeout: 45_000, ...EQUIPMEN…
+    248|     ).rejects.toThrow('Real input route timed out before 80.5,-0.5.');
+       |     ^
+    249|     expect(calls).toMatchObject({ reads: 2, moves: 0, down: 0, up: 0 }…
+    250|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 1 passed (7)
+   Start at  19:14:16
+   Duration  292ms (transform 48ms, setup 0ms, import 196ms, tests 8ms, environment 0ms)
+

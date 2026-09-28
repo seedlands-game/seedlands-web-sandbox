@@ -1,0 +1,50 @@
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+apps/web/tests/e2e/classic-support/route-aim-contract.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md: OK
+changes/2026-09-23-classic-functional-completion/arrival-during-aim-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected-03-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected-03.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/classic-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/eslint-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/eslint-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/eslint-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format-write-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format-write.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/green-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/green.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/red-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/red.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/root-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/scoped-diff-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/scoped-diff-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/scoped-diff-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/validation-argv.txt: OK
+Checking formatting...
+All matched files use Prettier code style!
+SOURCE8=PASS
+MANIFEST30=PASS
+DELIVERY=PASS
+AFFECTED13_FILES_138_TESTS=PASS
+CLASSIC_TYPES=PASS
+ROOT_TYPES=PASS
+ESLINT5=PASS
+FORMAT=PASS
+SCOPED_DIFF=PASS
+INDEX_EMPTY=PASS

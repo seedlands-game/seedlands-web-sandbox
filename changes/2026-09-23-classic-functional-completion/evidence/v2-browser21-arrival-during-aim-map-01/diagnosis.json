@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER21-ARRIVAL-DURING-AIM-MAP-01",
+  "status": "READ_ONLY_CONTRACT_MAP_COMPLETE",
+  "baselineSha": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+  "build12SourceSha": "908d0d82881e3e8c7dff7ee27cf3a4785013f37a",
+  "browser21": {
+    "status": "FAIL",
+    "sourceManifestSha256": "fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001",
+    "evidenceManifestSha256": "83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8",
+    "deliverySha256": "93c572c0a698bc55cf969b226242946073392326722a6233bb2318e027ab9d72",
+    "timelineSha256": "9f424f6aaac3d499d54415e266e5380812e330bbbb77723a257f6de93a3ed6d3",
+    "failedAt": "V2 first wood return route aim before next keyboard pulse",
+    "v2AfterFirstWoodReached": false,
+    "productionDefectClaimed": false
+  },
+  "route": {
+    "target": [80.5, -0.5],
+    "direction": "KeyS",
+    "activeKeySerializedInSnapshot": false,
+    "activeKeyBasis": "equipmentRouteDirection on outer baseline client x > target x plus recorded KeyS driver calls",
+    "outerBaseline": {
+      "id": "pw:api@6696",
+      "tick": 18220,
+      "ack": 11443,
+      "player": [80.5007095336914, 32.599998474121094, 2.444796085357666],
+      "server": [80.50070902152164, 32.6, 2.4447960558592863]
+    },
+    "walkInitialCurrent": {
+      "id": "pw:api@6697",
+      "tick": 18221,
+      "ack": 11444
+    },
+    "currentBeforeFailingCorrection": {
+      "id": "pw:api@6753",
+      "tick": 18286,
+      "ack": 11509,
+      "clientDistance": 0.08646411407593792,
+      "clientReached": false
+    },
+    "keySPulsesBeforeFailingCorrection": 7,
+    "frozenBrowserReportPulseCountUsed": false
+  },
+  "earliestClientReached": {
+    "id": "pw:api@6755",
+    "source": "correctMouseToRoute first observation after walk current pw:api@6753",
+    "player": [80.50038146972656, 32.599998474121094, -0.47464773058891296],
+    "server": [80.50064357211583, 32.6, -0.2635369690489463],
+    "tick": 18287,
+    "ack": 11510,
+    "onGround": true,
+    "colliding": false,
+    "clientDistance": 0.025355139191978876,
+    "serverDistance": 0.23646390674186887,
+    "clientReached": true,
+    "clientFinite": true,
+    "serverReached": false,
+    "serverFinite": false,
+    "freshVsOuterBaseline": true,
+    "freshVsWalkCurrent": true,
+    "ready": true,
+    "outerStrict": false,
+    "existingOuterBranch": "bounded waitForProgress because client is reached and finite while strict is false"
+  },
+  "recordedNextSample": {
+    "id": "pw:api@6759",
+    "source": "old implementation after one mouse move; not guaranteed under candidate",
+    "clientDistance": 0.0802037251064993,
+    "serverDistance": 0.025355136878622665,
+    "clientReached": false,
+    "clientFinite": false,
+    "serverReached": true,
+    "serverFinite": true,
+    "freshAndReadyVsEarliestClientReached": true,
+    "existingClassifierVsEarliestClientReached": "drift",
+    "nextOuterTarget": [80.5, -0.5],
+    "nextOuterDirection": "KeyS",
+    "counterfactualBrowserSuccessClaimed": false
+  },
+  "recommendation": {
+    "selected": "typed route-reached terminal handoff from shared aim helper, enabled only by refreshAfterCorrection=true",
+    "outcomes": ["angle-aligned", "route-reached"],
+    "optionalPredicate": "routeReached?: (observation: T) => boolean",
+    "predicateTiming": "after non-null finite observation validation and before zero-vector/angle correction/mouse move",
+    "defaultDirectCallerPredicate": false,
+    "defaultGenericWalkBehaviorChanged": false,
+    "v2OnlyFlag": "EQUIPMENT_RESOURCE_WALK_OPTIONS.refreshAfterCorrection=true",
+    "sameObservationReturned": true,
+    "outerStrictOwnerChanged": false,
+    "exceptionFallback": false,
+    "secondCorrectionCall": false,
+    "budgetStepSensitivityToleranceOrCoordinatesChanged": false
+  },
+  "deadline": {
+    "outerBudgetMs": 45000,
+    "waitBudgetMs": 20000,
+    "resetOuterDeadline": false,
+    "v2ObservationAndMoveBoundariesFailClosed": true,
+    "v2DeadlineWrapper": "observe checks after snapshot await; move checks before moveMouseBy; default path uses neither wrapper",
+    "postHelperDeadlineCheckRetained": true,
+    "refreshAwaitDeadlineCheckRetained": true,
+    "expiredPathInputCount": 0
+  },
+  "red": {
+    "primary": "actual followEquipmentRoute -> walkTo -> correctMouseToRoute with Browser21 @6696/@6753/@6755 returns the exact @6755 object with zero mouse and keyboard input",
+    "drift": "real classifyEquipmentRouteWait maps recorded @6759 against @6755 to drift and next outer loop requests the same target with KeyS; no stubbed success",
+    "angleVsRoute": "not-reached and misaligned still moves; aligned returns angle-aligned; route-reached returns route-reached before movement",
+    "deadline": "observation/move/post-helper deadline exhaustion produces zero new input and keeps the original deadline",
+    "zeroVector": "V2 terminal predicate returns route-reached before zero-vector rejection; direct helper without predicate still rejects undefined direction",
+    "strictNegatives": "server-late, stale, ack-regressed, ungrounded, colliding and one-sided samples never become strict arrival",
+    "executed": false
+  },
+  "proposedOwnership": {
+    "implementation": [
+      "apps/web/tests/e2e/classic-support/target-aim.ts",
+      "apps/web/tests/e2e/classic-support/harness.ts",
+      "apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts",
+      "apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts",
+      "apps/web/tests/e2e/classic-support/route-aim-contract.test.ts",
+      "changes/2026-09-23-classic-functional-completion/spec.md",
+      "changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md"
+    ],
+    "readOnly": [
+      "apps/web/tests/e2e/classic-support/equipment-resource-route.ts",
+      "apps/web/tests/e2e/classic-support/equipment-journey-support.ts",
+      "apps/web/tests/e2e/classic-support/v1-slice.ts",
+      "apps/web/tests/e2e/classic-support/mouse-input.ts",
+      "apps/web/tests/e2e/classic-support/route-progress.ts",
+      "playbooks/classic/scenarios/canonical-runtime-v11.json",
+      "production source and historical evidence"
+    ]
+  },
+  "affectedClosure": {
+    "testFiles": 13,
+    "testCount": "TO_BE_RECORDED_AFTER_RED_FILE_EXISTS",
+    "maxWorkers": 1,
+    "classicAndRootTestTypes": true,
+    "changedTsEslint": 5,
+    "exactFormatAndScopedDiff": true,
+    "browserOrBuildRequiredInImplementationStage": false
+  },
+  "estimate": {
+    "mapStageAiHoursCap": 0.5,
+    "implementationAiHours": "1-2",
+    "implementationHardCapHours": 3,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentAiHours": 2.4,
+    "conservative120PercentTraditionalPd": 0.6,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "apiEquivalentCost": "UNKNOWN",
+    "quotaAndShare": "UNKNOWN"
+  },
+  "boundaries": {
+    "sourceModified": false,
+    "browser21EvidenceModified": false,
+    "cumulativeBrowserReportModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "browserRun": false,
+    "gitOrIndexWrite": false
+  },
+  "notRun": ["implementation", "test", "build", "browser22", "git", "push", "cua", "ci", "deploy", "merge"]
+}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "priorTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+  "currentTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+  "typeAstByteEqual": true,
+  "priorNormalizedRuntimeSha256": "a36af5074274ffe5897f3037b1d67df0022d477dc7d222e8b40b940e9eac8af7",
+  "currentNormalizedRuntimeSha256": "a36af5074274ffe5897f3037b1d67df0022d477dc7d222e8b40b940e9eac8af7",
+  "normalizedRuntimeByteEqual": true,
+  "baselineInlinePrettierIgnoreCount": 3,
+  "priorReleaseInlinePrettierIgnoreCount": 9,
+  "currentInlinePrettierIgnoreCount": 2,
+  "addedInlinePrettierIgnoreCount": 0,
+  "runtimeImportAdded": false,
+  "typeImportAndReExport": true
+}

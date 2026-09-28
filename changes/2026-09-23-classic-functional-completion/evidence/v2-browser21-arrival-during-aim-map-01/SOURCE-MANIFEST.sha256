@@ -1,0 +1,15 @@
+25bd32172677614fcc3891debdc7914044dc5a81aed955d91381539d63d81c1e  apps/web/tests/e2e/classic-support/target-aim.ts
+566eb79c1fd6ba110c85c147ffccbbbc30c34ca9a6bf7055c298f4712d57fab1  apps/web/tests/e2e/classic-support/harness.ts
+3ef6f3217c628b79bc117d533ebfa662a941b67fd1872a8d846c430bab13f84e  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+934d1d90bdcab91af76d53ab419a6f31ea141bec5a6705743c7ce9c7f5e99b6f  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+3bc8077550aca273bdf20541a3b14b8c874ecca99e558c240936689004d98ed6  apps/web/tests/e2e/classic-support/route-progress.ts
+0c33a94232f5e24126dcbce252e05fdd4bd8d6db77e1360a9848b44ee8c489a8  apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+366df168a64c994393528b7c8dd4a65e5f866d060e295d462a8d8ce4bafa6924  apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+740584532de087994417cf757abcdb6c93c433756ab42e79a3d2eb04cc7afb45  apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+326c8cabd55cb440b3c97a1a2069bf8efdb0b79e1c61e975eccac2ab2653fd69  apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts
+0b8033217e5d10c02fa1f1a3b29fc5b48de9ad69974b8375bc8411c980b5c2e0  changes/2026-09-23-classic-functional-completion/route-aim-contract.md
+9f424f6aaac3d499d54415e266e5380812e330bbbb77723a257f6de93a3ed6d3  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/return-route-aim-timeline.json
+940ccd32c4dc7b41af039c80df4989e13513c8b039288c1dad86b20033099269  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/diagnosis.json
+fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/SOURCE-MANIFEST.sha256
+83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/MANIFEST.sha256
+93c572c0a698bc55cf969b226242946073392326722a6233bb2318e027ab9d72  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/delivery-validation.json

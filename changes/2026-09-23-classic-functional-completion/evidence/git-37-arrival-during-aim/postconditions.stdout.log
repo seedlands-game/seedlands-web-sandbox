@@ -1,0 +1,25 @@
+GIT-37-ARRIVAL-DURING-AIM staged-tree postconditions
+baseline=24dc3a1daca6e629ca273ea07aeae50eb4be868a
+validationTree=/private/tmp/seedlands-git37-arrival-during-aim
+validationTreeHead=24dc3a1daca6e629ca273ea07aeae50eb4be868a
+codeCommit=99b895067324ae930fd5dbd6bb227c578c499c8d
+sourceTree=fd5cd21572509cf7b57536947bf3d88d23c7ad5a
+stagedPaths=9
+stagedPatchSha256=8d55c757e842d65ce710f3e4af83f5e404516bcc9388fa578b63017a1116f4b5
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+dependencySetup=pnpm install --offline --frozen-lockfile --ignore-scripts
+dependencySetupExitCode=0
+dependencySetupStdout=NOT_RECORDED_AS_FILE
+rootWorkspaceLinksInsideTree=true
+webWorkspaceLinksInsideTree=true
+stagedGateExitCode=0
+affected=PASS_13_FILES_138_TESTS
+classicTypes=PASS
+rootTypes=PASS
+eslint=PASS_6_TS
+format=PASS_9_PATHS_NORMAL_PRETTIER
+scopedDiff=PASS_9_PATHS
+newInlineSuppressions=0
+mainIndexAfterCodeCommit=EMPTY
+build13=NOT_RUN
+browser22=NOT_RUN

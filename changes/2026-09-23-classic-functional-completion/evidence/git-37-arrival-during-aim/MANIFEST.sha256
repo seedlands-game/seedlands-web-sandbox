@@ -1,0 +1,9 @@
+d3bbdd23c61d849a22fec1657bb3e14f91df6a219154e245cb54297802363074  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/README.md
+34c3c0e1ddd49f6a7ceb4cf83407676b16763ae4d8058ab3ac4575a18246b945  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/SOURCE-MANIFEST.sha256
+8d55c757e842d65ce710f3e4af83f5e404516bcc9388fa578b63017a1116f4b5  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/code-staged.patch
+4a845e71b66b7a6742b1cbfd803c2d445723ada50b257145c50252e75b864acc  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/code-staged.paths
+23fe796ce99f8a2bab850ac4f8b89a6c7d7a01b15f71c8ce77390bcd9c2ecee8  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/dependency-setup.window.json.log
+2b3d0baaa64b5a5eaa15bba5568f5a137116e7f550b1d0029d9a4c939df38162  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/postconditions.stdout.log
+3ade6edbe6f796be093df783b9c58b49ecd5e54539349afdb0a8c3e87d3e468a  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/staged-gate.stdout.log
+a8ba96949f53eca16198bd1fc82cc3387da7c43e2a93d7b77a63341e8ef20d75  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/staged-gate.window.json.log
+bac301af6b1f807e28a584603400cc9204e3ed93cee18b0929c5a2a02c8be7ea  changes/2026-09-23-classic-functional-completion/evidence/git-37-arrival-during-aim/validation-argv.txt

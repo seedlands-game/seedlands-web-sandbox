@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARRIVAL-DURING-AIM-CLOSE-12-FORMAT-CLOSURE",
+  "status": "TYPE_ONLY_FORMAT_STATIC_GREEN",
+  "baseline": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 11,
+    "sha256": "c30ea54a3e32e34e904d92c9f996e5143f4352d8b5ed1601eab43bbe13c5452a"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 57,
+    "sha256": "833fbaf473a20b2af1d0216e12e8abf36e379ca5a3b53d8e37104a3878e5203d",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "metadata-final.stdout.log",
+      "metadata-final-window.json.log",
+      "metadata-release.stdout.log",
+      "metadata-release-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-ARRIVAL-DURING-AIM-CLOSE-12",
+    "sourceManifestSha256": "c75666b03c3201b58fbd9d8a9e03f971ffb3f9d8716cfb24f3d2723ef4da4f9b",
+    "evidenceManifestSha256": "a8f5d291fcb5da489b2c554ab6a52425573e1ff239f53bcec73dcf177952c8ed",
+    "deliverySha256": "f01dbc717f2640855db38aeb81c8fc93845af8128fd77ba173bda3286353e019",
+    "archivedSourceEntries": 8,
+    "archiveTimeByteComparePassed": true,
+    "archivedCurrentHashesMatchOldSourceManifest": true,
+    "historicalBehaviorEvidenceRetained": true,
+    "supersededClaim": "prettierIgnoreChanged:false only described the global ignore file and failed to disclose added inline suppressions; the old Prettier PASS did not prove unsuppressed formatting"
+  },
+  "typeSplit": {
+    "newFile": "apps/web/tests/e2e/classic-support/harness-snapshot.ts",
+    "owner": "read-only canonical Browser Harness snapshot type",
+    "harnessRuntimeOwnerRetained": true,
+    "sameNameTypeReExportRetained": true,
+    "runtimeImportAdded": false,
+    "priorTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+    "currentTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+    "typeAstByteEqual": true,
+    "priorNormalizedRuntimeSha256": "a36af5074274ffe5897f3037b1d67df0022d477dc7d222e8b40b940e9eac8af7",
+    "currentNormalizedRuntimeSha256": "a36af5074274ffe5897f3037b1d67df0022d477dc7d222e8b40b940e9eac8af7",
+    "normalizedRuntimeByteEqual": true,
+    "harnessPhysicalLinesBefore": 520,
+    "harnessPhysicalLinesAfter": 467
+  },
+  "formatCorrection": {
+    "baselineInlinePrettierIgnoreCount": 3,
+    "priorReleaseInlinePrettierIgnoreCount": 9,
+    "currentInlinePrettierIgnoreCount": 2,
+    "addedInlinePrettierIgnoreCount": 0,
+    "removedClassicSnapshotSuppression": true,
+    "walkToInlineSuppressionsRemoved": true,
+    "globalPrettierIgnoreChanged": false,
+    "normalPrettierPass": true
+  },
+  "static": {
+    "classicTypes": {
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "8c33a0a927d1043ab33993842fb9b282e1795ecd13bc6aa5c947f0ecef0d9aaa"
+    },
+    "rootTypes": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "65f9719113ae0f4d45f566fa42a8e0b9095d5f54466bd27dcbd5f7f600f9a202"
+    },
+    "eslintSixTsFiles": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "088db2c4ae427b173b2e31f493b80e578e2fce615368eb53c3e093e1329bad5a"
+    },
+    "format": {
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "4e7fbed4d45f5548c5e35cc5b8b5c7a4fcac3cedd00dce0a59f8d8367abd444f"
+    },
+    "scopedDiff": {
+      "status": "PASS",
+      "stdoutSha256": "8e09ca7f0c7f73ba7193998d06201cc9167913e176e3b93635922b62db0a1997",
+      "receiptSha256": "8e7e6fdf104c399261b89b266c5ba4eb5e93e4bdbebc87d6b3202be45b5e74c7"
+    },
+    "typeAndRuntimeEquivalence": {
+      "window": "v2-arrival-during-aim-close-12-format-closure-type-equivalence-release",
+      "status": "PASS",
+      "stdoutSha256": "e65ee7f8c86b7abd98a37aa264d9ba6ae8546c79a6960c9b04bc515b8792389a",
+      "receiptSha256": "06ca6bf81148c7758ea5ef9ac883d78fd39e0577d9a31c70571a3742c5285d56"
+    }
+  },
+  "retainedVerifierFailures": {
+    "preVerifierShellFailure": true,
+    "typeEquivalence02Through07": "FAIL_VALIDATOR_FALSE_NEGATIVES_OR_VALIDATOR_BUG",
+    "reason": "Earlier experimental validators compared formatting trivia in emitted text/AST, and one script referenced hash before initialization. They did not run product behavior or modify source. Final normalized emitted JS comparison passed."
+  },
+  "behaviorEvidence": {
+    "close12Affected": "PASS_13_FILES_138_TESTS",
+    "rerunInFormatClosure": false,
+    "reason": "Only a type declaration moved and walkTo was restored from suppressed compressed text to the same runtime token sequence."
+  },
+  "boundaries": {
+    "typedHandoffChanged": false,
+    "defaultWalkBehaviorChanged": false,
+    "deadlineCallOrderChanged": false,
+    "productionChanged": false,
+    "browser21EvidenceChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "longTermDocsUpdated": "docs/code-map.md only, because harness-snapshot.ts is a new type-only responsibility"
+  },
+  "notRun": ["behavior-tests", "build", "browser22", "cua", "devserver", "ci", "git-write", "push", "deploy", "merge"]
+}

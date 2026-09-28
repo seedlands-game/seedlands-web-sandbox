@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "priorTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+  "currentTypeAstSha256": "f2a9df7b26b09b33cfde8a2eb6217153ec9898b741001f95501dc7f496596df3",
+  "typeAstByteEqual": true,
+  "baselineInlinePrettierIgnoreCount": 3,
+  "currentInlinePrettierIgnoreCount": 2,
+  "addedInlinePrettierIgnoreCount": 0,
+  "runtimeImportAdded": false,
+  "typeImportAndReExport": true
+}

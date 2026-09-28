@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-21",
+  "classification": "canonical-fixture-v2-return-route-dynamic-direction-flip-exhaustion",
+  "failedAt": "v2-first-wood-return-route-aim-before-next-keyboard-pulse",
+  "owner": {
+    "consumer": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:mineResources",
+    "routeController": "apps/web/tests/e2e/classic-support/equipment-resource-route.ts:followEquipmentRoute",
+    "driver": "apps/web/tests/e2e/classic-support/harness.ts:walkTo",
+    "correctionHelper": "apps/web/tests/e2e/classic-support/target-aim.ts:correctMouseToRoute",
+    "mouseDriver": "apps/web/tests/e2e/classic-support/mouse-input.ts:moveMouseBy",
+    "productionFailureClaimed": false
+  },
+  "error": {
+    "message": "Classic route aim did not converge: target=80.5,-0.5; direction=KeyS; lastDx=-15.749887530628607.",
+    "source": "apps/web/tests/e2e/classic-support/target-aim.ts:126",
+    "playwrightExitCode": 1
+  },
+  "reachedBeforeFailure": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "resourcesPlaced": "PASS_BY_RESTORE_EVIDENCE_PHASE",
+    "firstWoodTarget": [80, 31, 2],
+    "firstWoodLeftMouseInput": "PASS_BY_TRACE",
+    "firstWoodVoxelClear": "PASS_BY_TRACE_4_TO_0",
+    "firstWoodDropOrPickupPoll": "PASS_BY_TRACE",
+    "firstWoodInventoryPickup": "PASS_BY_INDEPENDENT_ITEM_COUNT_POLL",
+    "firstWoodInventoryStack": { "slot": 0, "itemId": "wood-block", "count": 1 },
+    "secondWood": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "firstWoodTraceAnchors": {
+    "bagBaseline": "pw:api@6411",
+    "preInputSnapshot": "pw:api@6583",
+    "mouseDown": "pw:api@6584",
+    "postInputSnapshot": "pw:api@6586",
+    "firstVoxelPoll": { "stepId": "pw:api@6589", "voxel": 4 },
+    "clearVoxelPoll": { "stepId": "pw:api@6625", "voxel": 0 },
+    "mouseUp": "pw:api@6627",
+    "dropOrPickupPoll": "pw:api@6628-pw:api@6630",
+    "inventoryIncreasePoll": "pw:api@6693-pw:api@6695",
+    "inventoryReadback": "pw:api@6694"
+  },
+  "returnRouteAim": {
+    "target": [80.5, -0.5],
+    "direction": "KeyS",
+    "keyboardPulsesBeforeCorrection": 5,
+    "correctionObservations": 19,
+    "correctionMouseMoves": 18,
+    "pointerLockBoundaryResets": 2,
+    "firstObservation": {
+      "player": [80.50038146972656, 32.599998474121094, -0.47464773058891296],
+      "serverPlayerPosition": [80.50064357211583, 32.6, -0.2635369690489463],
+      "viewAngles": [-899.8999999999987, -20.159999999999993],
+      "physicsTick": 18287,
+      "acknowledgedInputSequence": 11510,
+      "targetYaw": 180.8620512716386,
+      "rawMouseDx": -5.861932858748822
+    },
+    "postFirstMoveObservation": {
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.4746477374655492],
+      "viewAngles": [-899.1199999999988, -20.159999999999993],
+      "targetYaw": 359.7274853789826,
+      "rawMouseDx": -1375.7498875306246
+    },
+    "lastObservation": {
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-722.3199999999991, -20.159999999999993],
+      "physicsTick": 18372,
+      "acknowledgedInputSequence": 11598,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "lastDx": -15.749887530628607
+    },
+    "nextKeyboardPulseSent": false,
+    "conclusion": "The first correction observation was near convergence, but residual movement crossed the target z coordinate before the next observation. KeyS then required the opposite facing direction. The bounded helper recomputed from every real observation, performed 18 mouse moves and failed closed on observation 19 with abs(dx) still above 1. This is a canonical fixture dynamic route-aim convergence boundary, not evidence of input stagnation or a production gameplay failure."
+  },
+  "failureAttachment": {
+    "currentSource": "afterEach snapshot after pointer lock exit",
+    "usedAsFailurePreconditionSnapshot": false,
+    "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+    "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+    "viewAngles": [-722.3199999999991, -20.159999999999993],
+    "physicsTick": 18374,
+    "acknowledgedInputSequence": 11600,
+    "interactionAttempts": 30,
+    "worldRevision": 158,
+    "worldItems": 0,
+    "restoreEvidence": "RECORDED_RESOURCES_PLACED_ONLY",
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "limits": {
+    "afterEachSnapshotUsedAsFullTimeline": false,
+    "ackAloneUsedAsActionProof": false,
+    "worldItemsZeroUsedAsPickupProof": false,
+    "historicalBrowserProgressUsed": false,
+    "productionFailureClaimed": false,
+    "performanceMeasured": false,
+    "humanAudibleAudioRun": false,
+    "cuaRun": false
+  }
+}

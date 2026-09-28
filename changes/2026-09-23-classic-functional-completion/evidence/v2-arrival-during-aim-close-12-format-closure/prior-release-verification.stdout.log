@@ -1,0 +1,12 @@
+archiveTimeCmpIdentityAndEightSources=PASS
+sourceManifestSha256=c75666b03c3201b58fbd9d8a9e03f971ffb3f9d8716cfb24f3d2723ef4da4f9b
+evidenceManifestSha256=a8f5d291fcb5da489b2c554ab6a52425573e1ff239f53bcec73dcf177952c8ed
+deliverySha256=f01dbc717f2640855db38aeb81c8fc93845af8128fd77ba173bda3286353e019
+SOURCE_OK 997d43dbee99baee440b1a5bc695fb06857b441a3619cfd44acb5cead37d94b6 changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/target-aim.ts
+SOURCE_OK 69f705c6019305b9c5dc54830bba3b76f92aadc76bd19e50013bd58be9fb7bab changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/harness.ts
+SOURCE_OK d01f9e40a6f1f9c8f50a50bddf97285609a1d86166a85a5c62a206217d12b12e changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/equipment-arrival-during-aim.test.ts
+SOURCE_OK 2302866a38cf872912e5afec9b8f80436cff60a40db6d75fecfd196e68dcc995 changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/equipment-pickup-route-refresh.test.ts
+SOURCE_OK 7454462193858f33e89d8e2c52397db0eb19afb339edad1f6e8bd402c608f5c3 changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/route-aim-contract.test.ts
+SOURCE_OK 2e8fb28aa8ba0c095ca27f45ac9132f94170acc6e7b17e223fe949756fed4aa5 changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/spec.md
+SOURCE_OK 6926224191fdfe7e071a0f13f4bd0bdb878ad143dae5011937200e6f878ac8eb changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/arrival-during-aim-contract.md
+SOURCE_OK 64717473168668ea8ee0566a1fea8d0f9611c57ebef936773e91f889b4d8ca84 changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/arrival-during-aim-evidence.md

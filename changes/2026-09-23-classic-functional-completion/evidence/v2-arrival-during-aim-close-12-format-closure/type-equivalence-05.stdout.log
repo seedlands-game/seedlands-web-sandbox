@@ -1,0 +1,96 @@
+{
+  "mismatch": 357,
+  "priorTokenCount": 509,
+  "currentTokenCount": 509,
+  "priorAroundMismatch": [
+    [
+      80,
+      "resource"
+    ],
+    [
+      25,
+      "."
+    ],
+    [
+      80,
+      "itemId"
+    ],
+    [
+      20,
+      "}"
+    ],
+    [
+      15,
+      "`);\n        unwrap(await harness.world.command({ type: 'teleport', position: scenario.initialState.player }), 'initial player position');\n        await harness.setWorldTime(scenario.initialState.worldTime);\n        for (let remaining = scenario.initialState.hungerAdvanceMs; remaining > 0; remaining -= 60_000)\n            unwrap(await harness.world.clock({ kind: 'advance', elapsedMs: Math.min(remaining, 60_000) }), 'hunger setup');\n        unwrap(await harness.world.command({ type: 'apply-damage', amount: 6 }), 'initial injured player');\n        const hostile = unwrap(await harness.world.command({\n            type: 'spawn-creature',\n            id: scenario.initialState.hostile.id,\n            position: scenario.initialState.hostile.position,\n        }), 'hostile setup');\n        const hostileId = hostile.data?.entity?.id;\n        if (!hostileId)\n            throw new Error('Classic hostile setup returned no entity.');\n        harness.setView(scenario.initialState.view.yaw, scenario.initialState.view.pitch);\n        await harness.flushSave();\n        unwrap(await harness.world.clock({ kind: 'run' }), 'run');\n        const identity = unwrap(await harness.world.identity(), 'identity');\n        return { hostileId, identity };\n    }, scenario);\n}\nexport async function walkTo(page, target, options = {}) {\n    const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;\n    const deadline = Date.now() + (options.timeout ?? 45_000);\n    let current = await snapshot(page);\n    if (!current)\n        throw new Error('Classic snapshot is unavailable before route movement.');\n    while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {\n        if (Date.now() >= deadline)\n            throw new Error('Real input route timed out before ' + target.join(',') + '.');\n        const correction = options.refreshAfterCorrection ? await correctMouseToRoute({\n            target, direction: key,\n            observe: async () => { const observed = await snapshot(page); if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.'); return observed; },\n            move: async (dx, dy) => { if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.'); await moveMouseBy(page, dx, dy); },\n            routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),\n        }) : await correctMouseToRoute({ target, direction: key, observe: () => snapshot(page), move: (dx, dy) => moveMouseBy(page, dx, dy) });\n        if (options.refreshAfterCorrection) {\n            if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.');\n            if (correction.kind === 'route-reached')\n                return correction.observation;\n            if ((current = await snapshot(page)) === null)\n                throw new Error('Classic snapshot is unavailable after route correction.');\n            if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.');\n            if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance))\n                return current;\n        }\n        const segmentStart = current;\n        const sequenceBeforeInput = current.authority.acknowledgedInputSequence;\n        await page.keyboard.down(key);\n        if (options.jump)\n            await page.keyboard.down('Space');\n        try {\n            await new Promise((resolve) => setTimeout(resolve, options.pulseMs ?? 300));\n        }\n        finally {\n            await page.keyboard.up(key);\n            if (options.jump)\n                await page.keyboard.up('Space');\n        }\n        current = await waitForSnapshot(page, (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding, 20_000);\n        if (current.player[1] < segmentStart.player[1] - 2)\n            throw new Error(`"
+    ],
+    [
+      80,
+      "Real"
+    ],
+    [
+      80,
+      "input"
+    ],
+    [
+      80,
+      "route"
+    ],
+    [
+      80,
+      "left"
+    ]
+  ],
+  "currentAroundMismatch": [
+    [
+      80,
+      "resource"
+    ],
+    [
+      25,
+      "."
+    ],
+    [
+      80,
+      "itemId"
+    ],
+    [
+      20,
+      "}"
+    ],
+    [
+      15,
+      "`);\n        unwrap(await harness.world.command({ type: 'teleport', position: scenario.initialState.player }), 'initial player position');\n        await harness.setWorldTime(scenario.initialState.worldTime);\n        for (let remaining = scenario.initialState.hungerAdvanceMs; remaining > 0; remaining -= 60_000)\n            unwrap(await harness.world.clock({ kind: 'advance', elapsedMs: Math.min(remaining, 60_000) }), 'hunger setup');\n        unwrap(await harness.world.command({ type: 'apply-damage', amount: 6 }), 'initial injured player');\n        const hostile = unwrap(await harness.world.command({\n            type: 'spawn-creature',\n            id: scenario.initialState.hostile.id,\n            position: scenario.initialState.hostile.position,\n        }), 'hostile setup');\n        const hostileId = hostile.data?.entity?.id;\n        if (!hostileId)\n            throw new Error('Classic hostile setup returned no entity.');\n        harness.setView(scenario.initialState.view.yaw, scenario.initialState.view.pitch);\n        await harness.flushSave();\n        unwrap(await harness.world.clock({ kind: 'run' }), 'run');\n        const identity = unwrap(await harness.world.identity(), 'identity');\n        return { hostileId, identity };\n    }, scenario);\n}\nexport async function walkTo(page, target, options = {}) {\n    const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;\n    const deadline = Date.now() + (options.timeout ?? 45_000);\n    let current = await snapshot(page);\n    if (!current)\n        throw new Error('Classic snapshot is unavailable before route movement.');\n    while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {\n        if (Date.now() >= deadline)\n            throw new Error('Real input route timed out before ' + target.join(',') + '.');\n        const correction = options.refreshAfterCorrection\n            ? await correctMouseToRoute({\n                target,\n                direction: key,\n                observe: async () => {\n                    const observed = await snapshot(page);\n                    if (Date.now() >= deadline)\n                        throw new Error('Real input route timed out before ' + target.join(',') + '.');\n                    return observed;\n                },\n                move: async (dx, dy) => {\n                    if (Date.now() >= deadline)\n                        throw new Error('Real input route timed out before ' + target.join(',') + '.');\n                    await moveMouseBy(page, dx, dy);\n                },\n                routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),\n            })\n            : await correctMouseToRoute({\n                target,\n                direction: key,\n                observe: () => snapshot(page),\n                move: (dx, dy) => moveMouseBy(page, dx, dy),\n            });\n        if (options.refreshAfterCorrection) {\n            if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.');\n            if (correction.kind === 'route-reached')\n                return correction.observation;\n            if ((current = await snapshot(page)) === null)\n                throw new Error('Classic snapshot is unavailable after route correction.');\n            if (Date.now() >= deadline)\n                throw new Error('Real input route timed out before ' + target.join(',') + '.');\n            if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance))\n                return current;\n        }\n        const segmentStart = current;\n        const sequenceBeforeInput = current.authority.acknowledgedInputSequence;\n        await page.keyboard.down(key);\n        if (options.jump)\n            await page.keyboard.down('Space');\n        try {\n            await new Promise((resolve) => setTimeout(resolve, options.pulseMs ?? 300));\n        }\n        finally {\n            await page.keyboard.up(key);\n            if (options.jump)\n                await page.keyboard.up('Space');\n        }\n        current = await waitForSnapshot(page, (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding, 20_000);\n        if (current.player[1] < segmentStart.player[1] - 2)\n            throw new Error(`"
+    ],
+    [
+      80,
+      "Real"
+    ],
+    [
+      80,
+      "input"
+    ],
+    [
+      80,
+      "route"
+    ],
+    [
+      80,
+      "left"
+    ]
+  ]
+}
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.cjs:62
+  throw new Error('harness.ts runtime statement AST differs');
+  ^
+
+Error: harness.ts runtime statement AST differs
+    at Object.<anonymous> (/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.cjs:62:9)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.21.0

@@ -1,0 +1,11 @@
+997d43dbee99baee440b1a5bc695fb06857b441a3619cfd44acb5cead37d94b6  apps/web/tests/e2e/classic-support/target-aim.ts
+d7b7a041a0c1f38abd44c76f5997645672526c3fca15452eed5176c33935f659  apps/web/tests/e2e/classic-support/harness.ts
+a03089144111494c50af05de1fa6299652e2e8a265272b2a5afb4356d434992c  apps/web/tests/e2e/classic-support/harness-snapshot.ts
+d01f9e40a6f1f9c8f50a50bddf97285609a1d86166a85a5c62a206217d12b12e  apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+2302866a38cf872912e5afec9b8f80436cff60a40db6d75fecfd196e68dcc995  apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+7454462193858f33e89d8e2c52397db0eb19afb339edad1f6e8bd402c608f5c3  apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+7bd3c106fac1644e2b168f87af3895dbbdc2e536174343392ba9d75dea99e0b0  changes/2026-09-23-classic-functional-completion/spec.md
+da961ca52a164b249c97cfe91bb5623c68ca1b0244ff5c3234b1bb530256eecf  changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md
+464d678a115e227e5af633a621ab79efb8220a53e51251c466b40498992d5bae  changes/2026-09-23-classic-functional-completion/arrival-during-aim-evidence.md
+67b1fd5d1db1c0d0a11c48721226f2e76322bf5a240faa6e88f2f4945e9744f8  changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/delivery-validation.json
+56046642a42d36ff692f5bb2eea25d0a9b385e03050b3f6f41fda92c8e554034  docs/code-map.md
