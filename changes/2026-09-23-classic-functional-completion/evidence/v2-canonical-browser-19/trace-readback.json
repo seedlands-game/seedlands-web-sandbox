@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "sourceTraceSha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7",
+  "console": { "log": 1, "warning": 0, "error": 0 },
+  "pageErrorEvents": 0,
+  "networkResourceSnapshots": 1331,
+  "httpStatusAtLeast400": 0,
+  "failureAttachmentFields": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "v2Receipt": {
+    "phase": "stone-pickaxe",
+    "steps": [
+      "resources-placed",
+      "wood-collected",
+      "wood-pickaxe-equipped",
+      "stone-collected",
+      "stone-pickaxe-equipped"
+    ],
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "actor": { "entityId": "player-1", "epoch": 1, "lifetime": 1 },
+    "stonePickaxeDurability": 132,
+    "woodPickaxeDurability": 57,
+    "armorSlotsEmpty": true,
+    "cursorEmpty": true,
+    "armorPoints": 0
+  },
+  "firstIron": {
+    "target": [92, 31, 2],
+    "pickupWaypoint": [92.5, 2.5],
+    "mouseDownEvents": 1,
+    "mouseUpEvents": 1,
+    "voxelChangedFrom": 21,
+    "voxelChangedTo": 0,
+    "dropOrImmediatePickupObserved": true,
+    "inventoryPickupConfirmed": false
+  },
+  "pickupRoute": {
+    "keySPulses": 17,
+    "keyWPulses": 0,
+    "mouseMoves": 118,
+    "fullControllerDecisionsSerialized": false,
+    "summaryPath": "route-trace-summary.json"
+  },
+  "failureFrame": {
+    "traceResource": "page@116073fcb13b8c8a9cf1c4a4c0692eab-1790575868358.jpeg",
+    "timestamp": 717001.242,
+    "sha256": "7eae3538c47e66f53fdbce005182acca911f9a1563e475eaa1fd72d79c128b2d",
+    "interpretation": "The frame shows the resource platform and held stone pickaxe. It does not independently prove the route-controller branch or inventory pickup."
+  }
+}

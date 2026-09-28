@@ -1,0 +1,113 @@
+Checking formatting...
+All matched files use Prettier code style!
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/delivery-format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/delivery-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final-03-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final-03.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/eslint-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-write-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/format-write.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-03-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-03.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/green.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/metadata-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/metadata-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/metadata-format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/metadata-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/red.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-final-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-final-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/root-types-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/scoped-diff-release-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/scoped-diff-release-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/scoped-diff-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/scoped-diff-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-pickup-refresh-close-09/validation-argv.txt: OK
+{
+  "status": "PASS",
+  "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09",
+  "sourceManifest": {
+    "entries": 6,
+    "sha256": "114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5"
+  },
+  "evidenceManifest": {
+    "entries": 79,
+    "sha256": "709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "red": "EXPECTED_FAIL_7_OF_10",
+  "green": "PASS_1_FILE_10_TESTS",
+  "affected": "PASS_7_FILES_72_TESTS",
+  "static": "PASS",
+  "browser19": "FAIL",
+  "firstIronInventoryPickup": "NOT_PROVEN",
+  "browser20Run": false,
+  "indexClean": true
+}

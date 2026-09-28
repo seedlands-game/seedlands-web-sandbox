@@ -1,0 +1,6 @@
+566eb79c1fd6ba110c85c147ffccbbbc30c34ca9a6bf7055c298f4712d57fab1  apps/web/tests/e2e/classic-support/harness.ts
+3ef6f3217c628b79bc117d533ebfa662a941b67fd1872a8d846c430bab13f84e  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+366df168a64c994393528b7c8dd4a65e5f866d060e295d462a8d8ce4bafa6924  apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+112276371981a5fe956dda8af3b2c1fb5a063f919456125e6cd814b7973b71b0  changes/2026-09-23-classic-functional-completion/spec.md
+7f54ae2fae0b3d4c201c9a23cd9864c1b911624ef20de490376f6ed810fb6929  changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md
+b009392a667267939785b26bb6dd7bc05a5a218da6fdd4efaa036e8e6da62fc9  changes/2026-09-23-classic-functional-completion/pickup-refresh-evidence.md

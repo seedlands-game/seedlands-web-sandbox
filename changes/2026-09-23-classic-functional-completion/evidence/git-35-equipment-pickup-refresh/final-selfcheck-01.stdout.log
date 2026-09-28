@@ -1,0 +1,58 @@
+Checking formatting...
+All matched files use Prettier code style!
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/affected.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/classic-types.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/code-staged.patch: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/code-staged.paths: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/dependency-setup.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/eslint.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format-final.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/root-types.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/scoped-diff.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/validation-argv.txt: OK
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ '6571e202661fbc1613532ee04b9334bac65c7f78c80fd6fe5db1dfb00b524'
+- '6571e202661fbc1613532ee1df3abd901a8dc0e2134be7202e2db80aafb8d0a2'
+
+    at [eval]:1:1973
+    at [eval]:1:3752
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+    at [eval]-wrapper:6:24
+    at runScriptInContext (node:internal/process/execution:449:60)
+    at evalFunction (node:internal/process/execution:283:30)
+    at evalTypeScript (node:internal/process/execution:295:3)
+    at node:internal/main/eval_string:71:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '6571e202661fbc1613532ee04b9334bac65c7f78c80fd6fe5db1dfb00b524',
+  expected: '6571e202661fbc1613532ee1df3abd901a8dc0e2134be7202e2db80aafb8d0a2',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.21.0

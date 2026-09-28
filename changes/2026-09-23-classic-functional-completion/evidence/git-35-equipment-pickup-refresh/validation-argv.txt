@@ -1,0 +1,20 @@
+GIT-35-EQUIPMENT-PICKUP-REFRESH
+Validation tree: /private/tmp/seedlands-git35-equipment-pickup-refresh
+Baseline HEAD: a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9
+Code commit: 1afd8e6ba111936d7d04c449ea234cc2f573cac8
+Source tree: dd63b1a168fe5633bc2052ec9dab8b707eb3d80c
+Staged paths: 5
+Staged patch SHA-256: 7264b34a917ba6dfd1090ee4845590184f95cc3efc16f5f75a3d4aa8f022fb3e
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state: XDG_STATE_HOME=/private/tmp/seedlands-git35-equipment-pickup-refresh/.pnpm-task-run-state-v1
+
+affected
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts --maxWorkers=1
+
+classic-types: pnpm typecheck:classic
+root-types: pnpm exec tsc -p tsconfig.test.json --noEmit
+eslint: pnpm exec eslint apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/equipment-resource-route.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+format: pnpm exec prettier --check <exact five code/spec/contract paths>
+scoped-diff: assert baseline, exact five staged paths, patch SHA, source tree, and git diff --cached --check
+
+All validation commands ran serially under unique default benchmark-window reservations. Vitest used maxWorkers=1. Shell pipelines used /bin/bash -o pipefail.

@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER19-PICKUP-ROUTE-DIAG-01",
+  "status": "READ_ONLY_DIAGNOSIS_COMPLETE",
+  "browser19Input": {
+    "sourceManifestSha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+    "evidenceManifestSha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+    "deliverySha256": "35bf1a0c9a0abbf100bb3899052b4910c242f613f77ea32c363e164a11e16968",
+    "traceSha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7"
+  },
+  "sourceManifest": {
+    "entries": 5,
+    "sha256": "a8dafd1db7b51ca3d85d58a878e28568f12230dd783ad88170000d298bff5449"
+  },
+  "evidenceManifest": {
+    "entries": 6,
+    "sha256": "61dcc897a03b7a5f2410752206b6242db335ac5fc860b7dd68b122ba4f49def2",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "route": {
+    "target": [92.5, 2.5],
+    "drivers": 3,
+    "driverPulses": [11, 3, 3],
+    "totalPulses": 17,
+    "activeKey": "KeyS",
+    "activeKeySerializedInSnapshot": false,
+    "activeKeyBasis": "equipmentRouteDirection on each outer client baseline plus 17 recorded KeyS events and zero KeyW events"
+  },
+  "earliestMissedStrict": {
+    "callId": "pw:api@15023",
+    "source": "driver1 correctMouseToRoute.observe before pulse 9",
+    "player": [92.49810791015625, 32.599998474121094, 2.442101240158081],
+    "server": [92.49811121062714, 32.6, 2.442101343748016],
+    "tick": 27121,
+    "ack": 20546,
+    "viewYaw": 1.909999999998863,
+    "horizontalCorrectionDx": 0.29447093699758775,
+    "reached": true,
+    "finite": true,
+    "freshVsWalkCurrent": true,
+    "strictVsOuterBaseline": true,
+    "passedToArrivalPredicate": false
+  },
+  "rootCause": {
+    "owner": "generic fixture walkTo post-correction data flow",
+    "statement": "correctMouseToRoute observes a strict snapshot but returns void; walkTo neither assigns that observation to current nor rechecks reached/deadline before keydown.",
+    "outerInitialAlreadyArrived": false,
+    "wrongDirection": false,
+    "toleranceChangeRequired": false,
+    "inputStall": false
+  },
+  "candidate": {
+    "singleChange": "optional walkTo option refreshAfterCorrection?: boolean, default false; V2 options set true",
+    "deadlineRule": "check original deadline after correction, refresh only while in budget, recheck deadline after refresh, return only while in budget and client reached",
+    "newCallback": false,
+    "fallback": false,
+    "budgetOrToleranceChange": false,
+    "implementationRun": false
+  },
+  "red": {
+    "primary": "real walkTo with Browser19 @15013 then @15023 snapshots and refreshAfterCorrection=true returns @15023 with zero keydown/up",
+    "deadline": "fake Date.now crosses deadline during correction; zero keydown and original timeout",
+    "compatibility": "option omitted/false preserves one-pulse default path",
+    "consumer": "only EQUIPMENT_RESOURCE_WALK_OPTIONS enables the option",
+    "executed": false
+  },
+  "inventoryEvidence": {
+    "countBefore": 0,
+    "dropOrImmediatePickupPoll": true,
+    "worldItemsAtRouteStart": 1,
+    "worldItemsAtFailure": 0,
+    "failureTimeBagReadback": "NOT_RECORDED",
+    "inventoryPickupProven": false
+  },
+  "boundaries": {
+    "sourceModified": false,
+    "browser19EvidenceModified": false,
+    "browserRun": false,
+    "testsRun": false,
+    "buildRun": false,
+    "gitOrIndex": false
+  },
+  "notRun": ["implementation", "test", "build", "browser20", "git", "push", "cua", "ci", "deploy", "merge"]
+}

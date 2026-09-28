@@ -1,0 +1,32 @@
+SOURCE-MANIFEST.sha256
+artifact-postcheck-window.json.log
+artifact-postcheck.stdout.log
+canonical-error-context.md.log
+classic-runtime-failure.json.log
+classic.json.log
+command.txt
+diagnosis.json
+failure-page.jpeg
+generated-artifacts.txt
+harness-artifact.json
+performance-window.json.log
+playwright-last-run.json.log
+postconditions.stdout.log
+result-summary.json
+route-trace-summary.json
+trace-50m/canonical-trace.zip.part-aa through trace-50m/canonical-trace.zip.part-at
+trace-parts.sha256
+trace-readback.json
+trace-reassembly.sha256
+validation-argv.txt
+
+Generated after metadata freeze and excluded from MANIFEST to avoid self-reference:
+MANIFEST.sha256
+delivery-validation.json
+metadata-format.stdout.log
+metadata-format-window.json.log
+final-selfcheck.stdout.log
+final-selfcheck-window.json.log
+
+Not recorded by the original command:
+canonical runner stdout file (NOT_RECORDED_AS_FILE)

@@ -1,0 +1,12 @@
+V2-CANONICAL-BROWSER-19
+acceptanceTree=/private/tmp/seedlands-v2-acceptance-f282da95
+sourceSha=f282da95833c5ff568b8b7a4caac7d7a7513514f
+sourceTree=ad93a8e1afdbb461a32f7c87ab4b860fd44a2074
+
+canonical-attempt0
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-19-f282da95 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+
+artifact-postcheck
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-19-artifact-postcheck SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/artifact-postcheck-window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <evidence>/artifact-postcheck.stdout.log'
+
+Post-run collection copied the performance-window receipt, Classic receipt, last-run record, error context, failure attachment and artifact receipt. The trace was split mechanically into 50 MiB parts and reassembled by streaming hash. Read-only trace analysis decoded Playwright snapshot values for the complete failed pickup leg; it did not rerun Browser, build, or tests.

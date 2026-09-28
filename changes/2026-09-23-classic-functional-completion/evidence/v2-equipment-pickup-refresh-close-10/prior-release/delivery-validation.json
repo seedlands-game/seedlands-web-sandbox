@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 79,
+    "sha256": "709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "inputs": {
+    "browser19": {
+      "sourceManifestSha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+      "evidenceManifestSha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+      "deliverySha256": "35bf1a0c9a0abbf100bb3899052b4910c242f613f77ea32c363e164a11e16968"
+    },
+    "diag01": {
+      "sourceManifestSha256": "a8dafd1db7b51ca3d85d58a878e28568f12230dd783ad88170000d298bff5449",
+      "evidenceManifestSha256": "61dcc897a03b7a5f2410752206b6242db335ac5fc860b7dd68b122ba4f49def2",
+      "deliverySha256": "b0bc00b245276857fcc1fb67d43acbccd822ecead2342d8292b63ffb19774a68"
+    }
+  },
+  "red": {
+    "window": "v2-equipment-pickup-refresh-close-09-red-release",
+    "source": "BUILD10 tracked source plus final untracked Close09 test",
+    "status": "EXPECTED_FAIL_7_OF_10",
+    "passed": 3,
+    "failed": 7,
+    "exitCode": 1,
+    "primaryFailure": "Browser19 strict correction snapshot still caused KeyS down=1/up=1 instead of zero input",
+    "stdoutSha256": "8c6a6f3f1d366d97ca8cbe5c5ba4696825058a379e318b54b27505d89b0f09ba",
+    "receiptSha256": "ba3df359465289ace168eb60a889c354eeb555c06ce78328b0d3a547bbd32c1c"
+  },
+  "implementation": {
+    "option": "refreshAfterCorrection?: boolean",
+    "default": false,
+    "enabledConsumer": "EQUIPMENT_RESOURCE_WALK_OPTIONS",
+    "deadlineChecks": ["after-correction", "after-refresh"],
+    "refreshUsesExistingSnapshot": true,
+    "nullFailsClosed": true,
+    "newCallback": false,
+    "fallbackAdded": false,
+    "targetAimChanged": false,
+    "genericDefaultBehaviorChanged": false
+  },
+  "green": {
+    "window": "v2-equipment-pickup-refresh-close-09-green-release-02",
+    "status": "PASS_1_FILE_10_TESTS",
+    "stdoutSha256": "c480625e982b40baa4a807149c2e3575952617882971dead8b44a4c8b3863f76",
+    "receiptSha256": "4b5d8d75cbfcf3f2464e3326a21fd445c214c2697fcc7c408bb2b7fdddc4ca7e"
+  },
+  "affected": {
+    "window": "v2-equipment-pickup-refresh-close-09-affected-release-02",
+    "status": "PASS_7_FILES_72_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "3c73ad119b4d3a0521e3258daf59dbb035256e9d48cfc3a8a5c13fd95ccaa608",
+    "receiptSha256": "1345f48e99b080381809a0b391e40befe709ea61171fa366db17173f308a0c30"
+  },
+  "static": {
+    "classicTypes": {
+      "window": "v2-equipment-pickup-refresh-close-09-classic-types-release-02",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "14109ae208e6b630b97fe7ff2e0696dffbf27d7e04943924d5322f8750a7f704"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-pickup-refresh-close-09-root-types-release-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "250f459a2c167dd0a7af62e8fe3b737c4cf3874e2b9995608997f710ebce62a5"
+    },
+    "eslint": {
+      "window": "v2-equipment-pickup-refresh-close-09-eslint-release-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "dd9c930e49abac92d727387d6e190d5cba2c0c2b58b6304c6600205b89a3c8ce"
+    },
+    "format": {
+      "window": "v2-equipment-pickup-refresh-close-09-format-release-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "962a92e1bca45c4235ac744de08a2e84f1d38bf622631ee988ebf716f47be54d"
+    },
+    "scopedDiff": {
+      "window": "v2-equipment-pickup-refresh-close-09-scoped-diff-release-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "54648b205b56060a66a0362591a91d22b581b086830df8ff2a6a39a0621a783d"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-pickup-refresh-close-09-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "d5ce2c8c8eac6505935d14efd47b33c7df95d97a9624b185016eedf3b1649ad3"
+    },
+    "metadataFinal": {
+      "window": "v2-equipment-pickup-refresh-close-09-metadata-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "630338ad6765e75a63a87070d1d0d8b32ed709f4ea12a7eb332965088a48039b"
+    },
+    "deliveryFormat": {
+      "window": "v2-equipment-pickup-refresh-close-09-delivery-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "3f1496d993c166f90b4672a9131bc4a286a22514c93d684caa1907bdcc6aef6b"
+    }
+  },
+  "intermediateEvidenceRetained": true,
+  "intermediateFailures": [
+    "initial RED and RED-02 included test-model identity/default-tolerance issues",
+    "green and green-02 exposed test read sequencing and pointer-lock baseline issues",
+    "classic types first run exposed duplicate pulseMs test options",
+    "eslint first two runs exposed harness max-lines before local compaction",
+    "format first run exposed the new test before single-file formatting"
+  ],
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "v1Changed": false,
+    "scenarioJsonChanged": false,
+    "aimOrMouseChanged": false,
+    "miningCallbackChanged": false,
+    "saveSchemaChanged": false,
+    "browser19Status": "FAIL",
+    "firstIronInventoryPickup": "NOT_PROVEN",
+    "browser20Run": false,
+    "longTermDocsUpdated": false
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index", "push", "build", "browser20", "cua", "devserver", "ci", "deploy", "merge"]
+}

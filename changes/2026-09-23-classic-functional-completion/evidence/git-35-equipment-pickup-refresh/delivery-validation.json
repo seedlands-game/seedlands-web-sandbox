@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-35-EQUIPMENT-PICKUP-REFRESH",
+  "status": "EVIDENCE_FROZEN",
+  "baseline": "a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9",
+  "codeCommit": "1afd8e6ba111936d7d04c449ea234cc2f573cac8",
+  "sourceTree": "dd63b1a168fe5633bc2052ec9dab8b707eb3d80c",
+  "stagedPatchSha256": "7264b34a917ba6dfd1090ee4845590184f95cc3efc16f5f75a3d4aa8f022fb3e",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "b2c4a472ef766b41d788f801f249d8a4a4f7bd2814e5b896f2c36140f3e0620a"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 25,
+    "sha256": "e78e7913881cd327038fb6eda4b64db62a82696e23f175a9cdc156df4f57a2da",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "frozenInputs": {
+    "browser19": {
+      "sourceManifestSha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+      "evidenceManifestSha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+      "deliverySha256": "35bf1a0c9a0abbf100bb3899052b4910c242f613f77ea32c363e164a11e16968",
+      "status": "FAIL_AFTER_FIRST_IRON_CLEAR_AND_DROP_BEFORE_PICKUP",
+      "traceBytes": 1041592835,
+      "traceParts": 20,
+      "traceMaxPartBytes": 52428800,
+      "traceSha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7"
+    },
+    "diag01": {
+      "sourceManifestSha256": "a8dafd1db7b51ca3d85d58a878e28568f12230dd783ad88170000d298bff5449",
+      "evidenceManifestSha256": "61dcc897a03b7a5f2410752206b6242db335ac5fc860b7dd68b122ba4f49def2",
+      "deliverySha256": "b0bc00b245276857fcc1fb67d43acbccd822ecead2342d8292b63ffb19774a68"
+    },
+    "close09": {
+      "sourceManifestSha256": "114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5",
+      "evidenceManifestSha256": "709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62",
+      "deliverySha256": "02f5a71308c04374fbcfc261ea6597fa4db8776b5c1c30c5986a7ff16326b867"
+    },
+    "close10": {
+      "sourceManifestSha256": "b4d68bdd69867c0bf9c4fbc2b9480c1976b910006e432d4ef0e0c630c4aa6471",
+      "evidenceManifestSha256": "a6fc39dc7a4a13e2f604c4da6959079dc4517961bac4165e6ae96a99b46fdb3e",
+      "deliverySha256": "474e9b25147ff204a3c19de890ef23ce6fe6ea333251718ebf9946bf3bb44f53"
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git35-equipment-pickup-refresh",
+    "head": "a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9",
+    "stagedPaths": 5,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReusedOffline": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "affected": {
+      "window": "git-35-equipment-pickup-refresh-affected",
+      "status": "PASS_7_FILES_74_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "418598b238f31e2b2e846722ee04b9334bac65c7f78c80fd6fe5db1dfb00b524",
+      "receiptSha256": "95e645397f14fc8fa52a9379a2e280e46bdbe524bfbf8bee19c1e3301374b890"
+    }
+  },
+  "static": {
+    "classicTypes": {
+      "window": "git-35-equipment-pickup-refresh-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "f102354676783256c390e555275a1aeb14c4b43e194747ce08ff4f582f5d922c"
+    },
+    "rootTypes": {
+      "window": "git-35-equipment-pickup-refresh-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "3d43470e869ad34db2d549ab6ec13bf05c3f18afb2c051d251f5d8d3ee087bc4"
+    },
+    "eslint": {
+      "window": "git-35-equipment-pickup-refresh-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "35d91a491e0c59194763ec4fb2ea1c8ac1e5d67e23b9afc23eb8eac1c8d6a741"
+    },
+    "format": {
+      "window": "git-35-equipment-pickup-refresh-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "6130bad863126a1f4a83bb7ac42d4a79335a675221ce61fc5358da1b52791b0e"
+    },
+    "scopedDiff": {
+      "window": "git-35-equipment-pickup-refresh-scoped-diff",
+      "status": "PASS_5_PATHS",
+      "stdoutSha256": "6571e202661fbc1613532ee1df3abd901a8dc0e2134be7202e2db80aafb8d0a2",
+      "receiptSha256": "c57a21bb335302216a04663461a4290b971481af75fd3c6df1ac91cbab3d5cb2"
+    },
+    "evidenceFormat": {
+      "window": "git-35-equipment-pickup-refresh-evidence-format-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "352d172728992fa4083ea2a1238b45053fa5057185c3258d89b08906b31bbabe"
+    },
+    "metadataFinal": {
+      "window": "git-35-equipment-pickup-refresh-metadata-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "341509754b9f59980c467eb16e51b78a8984cb83f4ce2d0fd76b188d27b8af24"
+    }
+  },
+  "browser19Facts": {
+    "status": "FAIL",
+    "woodStoneMiningDropPickup": "PASS",
+    "firstIronMouseDownVoxelClearDrop": "PASS",
+    "firstIronInventoryPickup": "NOT_PROVEN",
+    "remainingV2PointerC4C5Save": "NOT_REACHED"
+  },
+  "evidenceDiagnostics": [
+    "The first final selfcheck found a copied scopedDiff stdout hash in delivery metadata; the failing stdout and receipt are retained as final-selfcheck-01, and no code validation was rerun."
+  ],
+  "boundaries": {
+    "productionChanged": false,
+    "build11Run": false,
+    "browser20Run": false,
+    "productGreenClaimed": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This delivery changes only the canonical fixture and its change-local contract/evidence; no architecture owner or public product protocol changes."
+  },
+  "notRun": ["build11", "browser20", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

@@ -1,5 +1,102 @@
 # V2 Canonical Browser 证据
 
+## Browser-19 后续 fixture 收口
+
+Browser-19 原始结果保持 FAIL：wood/stone 各三格采矿、掉落、拾取与木/石镐已真实完成；首个 iron 已真实
+leftdown、清空 voxel 并观察到 drop，但 inventory pickup 仍 `NOT PROVEN`。剩余 iron、iron unpack、五件铁甲、四槽
+pointer、C4/C5 与保存恢复仍 `NOT REACHED`。
+
+`V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-09/10` 后续只修 canonical fixture 的 post-correction snapshot 边界：仅 V2
+equipment walk options 开启 refresh；true 分支在 correction 后与 refresh await 后检查原 deadline，省略/false 保持原
+pulse 与 snapshot 读取语义。Close-10 RED 为 `2 failed / 10 passed`，GREEN 为 `12/12`，affected closure 为
+`7 files / 74 tests`；GIT35 detached staged tree 对同一五路径 patch 再次通过 `7 files / 74 tests`、Classic/root test
+types、3 TS ESLint、Prettier 与 scope 校验。该 fixture/static GREEN 不改写 Browser-19，也不证明 Browser-20 或完整
+V2 产品 GREEN；BUILD11 与 Browser20 尚未执行。
+
+## Browser-19 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-19`
+
+结论：**FAIL。C0-C3 与完整 V1 test step 本次真实完成；V2 已完成 workbench/10 格资源放置、wood/stone 各三格
+采矿/掉落/拾取、木镐与石镐合成装备，并对首个 iron `[92,31,2]` 发出真实左键、清空 voxel 和观察到可展示
+drop。随后前往该 iron 的 pickup waypoint `[92.5,2.5]` 时 route 超时。** 首个 iron 的 inventory pickup 未确认，
+剩余三格 iron、iron unpack、五件铁甲、四槽 pointer、C4/C5 与保存恢复均 NOT REACHED。本结果不证明 16 件护甲、
+194 项矩阵、Cua、人类听觉或性能。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-f282da95`，HEAD/source
+`f282da95833c5ff568b8b7a4caac7d7a7513514f`，tree `ad93a8e1afdbb461a32f7c87ab4b860fd44a2074`；
+source/lock/artifact digest 为
+`c8463ed87574e1ff1ad4d1c06beb4649fc518ee6815e071a289aec1187c0e865`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`。artifact receipt SHA256 为
+`fd010be92fce57ffebb254b0eb2b653a385922d22234856d85317074e39d79e0`，builtAt
+`2026-09-28T05:47:05.058Z`，dist 为 276 个盖章文件/277 个磁盘文件且无 symlink。Pack lock 与 MP3 SHA256
+分别为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`、
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`。
+
+精确命令：
+
+```sh
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-19-f282da95 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+```
+
+唯一机器窗口 `25700431-601a-4f4d-a294-d90574e3d4f7`，UTC `2026-09-28T05:59:07.361Z` 至
+`06:12:37.996Z`，`waitedMs=1`、`exitCode=1`、`measurement.status=NOT_RECORDED`。Playwright 单 worker/
+单 Chromium/`retries=0`，canonical 主测试只有 attempt 0，没有第二 attempt。原命令未把 runner stdout 重定向到文件，
+故 frozen evidence 将该文件标为 `NOT_RECORDED_AS_FILE`；不从会话输出补造视觉测试状态。Classic receipt 明确记录
+non-Classic attempt 为 skipped。
+
+C0-C3 receipt 均为 PASS；V1 step 在 `75.606..123.531s` 无错误返回。V2 receipt 的
+`restoreEvidence.before.v2Equipment` 记录到 `phase=stone-pickaxe`：`resources-placed`、`wood-collected`、
+`wood-pickaxe-equipped`、`stone-collected`、`stone-pickaxe-equipped` 五个 snapshot 均存在。wood 三格和 stone
+三格的 inventory 增量已经按步骤落盘；木镐 durability 从 60 变为 57，石镐为 132，证明前三次 stone mining 消耗了
+木镐。四个 armor slot 与 cursor 仍为空，`armorPoints=0`。
+
+首个 iron 的完整 trace 在 `669656.305ms` 记录 `Mouse down(left)`，`669678..670360ms` 的 voxel poll
+仍读到 `21`，`670502.804ms` 成功读到 `0`，随后 `670503.157ms` 发送 `Mouse up`。drop poll 以
+`itemId=iron-block,countBefore=0` 在 `670700.355ms` 返回 true；这是“inventory 已增加或可展示 world item”的析取，
+不能单独当作 inventory pickup。随后 `walkEquipmentRoute([92.5,2.5])` 运行 17 个 `KeyS` down/up pulse、118 次
+route mouse move、0 次 mouse button，最终超时；因此首 iron 的 Authority mining/voxel clear/drop 已通过，inventory
+pickup 尚未通过。
+
+完整失败 leg 解码 157 个 snapshot/60 个压缩位置段。初始 route 样本 client/server 为
+`[92.473900,32.6,-0.317659]` / `[92.627098,32.6,-0.459169]`，`onGround=true`、world item=1；失败附件
+末值为 `[92.681175,32.6,2.330123]` / `[92.612282,32.6,2.389833]`，`onGround=false`、world item=0。
+期间 trace 有 4 组位置样本静态落入 `±0.45/<0.08` 双投影包络，但没有序列化每次 controller 的 active direction、
+freshness baseline 或分类返回值；故可证 owner 是 V2 fixture route controller/consumer，不可仅凭这些位置提前冻结
+“already arrived short-circuit”或其他具体修复。afterEach 尾窗、ack 增长和 step 标题均未被用作该归因的单独证据。
+
+| 域                                                                     | Browser-19 结果                        |
+| ---------------------------------------------------------------------- | -------------------------------------- |
+| C0-C3                                                                  | PASS；receipt 明确记录                 |
+| V1 水桶、门、jukebox/record/media                                      | PASS；完整 test step 已返回            |
+| V2 workbench、10 格 resource、`resources-placed`                       | PASS；receipt phase/step 明确记录      |
+| wood/stone 各三格 mining/drop/pickup、木镐/石镐                        | PASS；五个 equipment snapshot 明确记录 |
+| 首格 iron leftdown、voxel clear、drop                                  | PASS；完整 trace 调用和 poll 明确记录  |
+| 首格 iron inventory pickup / `[92.5,2.5]` route                        | NOT CONFIRMED / FAIL                   |
+| 剩余 iron、iron unpack、五件铁甲                                       | NOT REACHED                            |
+| 四槽 click/Shift、wrong-slot 零变化、swap、quickmove、close settlement | NOT REACHED                            |
+| C4、`before.v2EquipmentPreSave`、C5、save/continue、V1 media restore   | NOT REACHED                            |
+| runtime/actor epoch、durability/revision、新 ref restore               | NOT REACHED                            |
+| non-Classic smoke                                                      | SKIPPED；Classic receipt 明确记录      |
+| 视觉测试                                                               | NOT RECORDED IN CLASSIC RECEIPT        |
+| durability-1、death、drop、respawn                                     | NOT OBSERVED                           |
+| Cua、人类听觉                                                          | NOT RUN                                |
+| 性能                                                                   | NOT MEASURED                           |
+
+failure attachment schema 不含 pageErrors/failedResponses，二者为
+`NOT_RECORDED_BY_FAILURE_ATTACHMENT`。只读 trace 记录 1 条 Tone.js log、0 条 page-error 和 1331 条 network
+resource snapshot，其中 HTTP `>=400` 为 0；这些 trace readback 不补造成 failure attachment 字段。trace 为
+1041592835 bytes，SHA256 `09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7`；
+`trace-50m/` 含 20 个最大 50 MiB 分片，流式重组已验证。
+
+独立 machine-lock `harness:artifact` 后验窗口 `v2-canonical-browser-19-artifact-postcheck` PASS，UTC
+`2026-09-28T06:20:22.389Z` 至 `06:20:25.713Z`，同 source/lock/artifact digest、builtAt 与 276-file map。
+后验验收树 tracked/index clean，dist 277 files/0 symlink，4273 无监听，owned Playwright/Chromium/preview 为 0，
+benchmark lock absent；BUILD09/BUILD10 tree 与 Git32 backup ref 保留。本轮未修改 source/test/scenario/dist，也未 build、
+第二 attempt、Browser20、Cua、CI、Git/index、push、deploy 或 merge。Close09 尚未实施或验证，需 root 独立审证据后
+重新冻结 scope。
+
 ## Browser-18 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-18`

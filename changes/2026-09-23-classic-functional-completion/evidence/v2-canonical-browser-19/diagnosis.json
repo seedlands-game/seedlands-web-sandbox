@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-19",
+  "classification": "canonical-fixture-v2-first-iron-pickup-route-timeout",
+  "failedAt": "first-iron-pickup-route",
+  "owner": {
+    "controller": "apps/web/tests/e2e/classic-support/equipment-resource-route.ts:followEquipmentRoute",
+    "consumer": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:mineResources",
+    "inputDriver": "apps/web/tests/e2e/classic-support/harness.ts:walkTo",
+    "productionFailureClaimed": false
+  },
+  "error": "Real input route timed out before 92.5,2.5.",
+  "target": [92.5, 2.5],
+  "targetMeaning": "pickup waypoint for the first iron resource at [92,31,2]",
+  "reachedBeforeFailure": {
+    "resourcesPlaced": true,
+    "woodMiningDropPickup": true,
+    "woodPickaxeEquipped": true,
+    "woodPickaxeDurabilityAfterStone": 57,
+    "stoneMiningDropPickup": true,
+    "stonePickaxeEquipped": true,
+    "stonePickaxeDurabilityBeforeIron": 132,
+    "firstIronLeftMouseInput": true,
+    "firstIronVoxelCleared": true,
+    "firstIronPresentedDropOrImmediatePickup": true,
+    "firstIronInventoryPickup": false
+  },
+  "firstIronMiningTrace": {
+    "mouseDownAtMs": 669656.305,
+    "mouseUpAtMs": 670503.157,
+    "initialVoxel": 21,
+    "voxelClearPollCompletedAtMs": 670502.804,
+    "dropOrImmediatePickupPollCompletedAtMs": 670700.355,
+    "dropQuery": { "itemId": "iron-block", "countBefore": 0, "result": true },
+    "interactionAttemptsAfterMining": 39,
+    "worldRevisionAfterMining": 164
+  },
+  "pickupRouteTrace": {
+    "keyWDown": 0,
+    "keySDown": 17,
+    "keyWUp": 0,
+    "keySUp": 17,
+    "routeMouseMoves": 118,
+    "routeMouseButtons": 0,
+    "decodedSnapshotCountIncludingMiningTail": 157,
+    "compressedSnapshotRuns": 60,
+    "firstDecodedRouteSample": {
+      "player": [92.4738998413086, 32.599998474121094, -0.31765905022621155],
+      "server": [92.6270975472274, 32.6, -0.4591688952705613],
+      "onGround": true,
+      "colliding": false,
+      "physicsTick": 27005,
+      "ack": 20429,
+      "worldItems": 1
+    },
+    "lastFailureSample": {
+      "player": [92.6811752319336, 32.599998474121094, 2.330122709274292],
+      "server": [92.61228236701231, 32.6, 2.389833121297501],
+      "onGround": false,
+      "colliding": false,
+      "physicsTick": 27718,
+      "ack": 21170,
+      "worldItems": 0
+    },
+    "staticEnvelopeSamplesObserved": 4,
+    "controllerBranchOutcomeSerialized": false,
+    "activeDirectionPerSampleSerialized": false,
+    "conclusion": "The fixture route continued after samples that satisfy the static finite envelope. The trace does not serialize followEquipmentRoute's active direction and classification result for each sample, so Browser19 proves a fixture route-controller convergence failure but does not by itself freeze a specific fix."
+  },
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "routeControllerBranch": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "limits": {
+    "afterEachSnapshotUsedAsFullTimeline": false,
+    "ackAloneUsedAsActionProof": false,
+    "stepTitleUsedAsV2PassProof": false,
+    "visualStatusRecordedInClassicReceipt": false,
+    "runnerStdoutFile": "NOT_RECORDED_AS_FILE"
+  }
+}

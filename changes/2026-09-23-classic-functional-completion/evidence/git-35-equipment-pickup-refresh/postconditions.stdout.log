@@ -1,0 +1,12 @@
+capturedAt=2026-09-28T07:52:20Z
+baseline=a1d2b5aeb7208c1864ed6b8e0b08d675c8044fd9
+codeCommit=1afd8e6ba111936d7d04c449ea234cc2f573cac8
+sourceTree=dd63b1a168fe5633bc2052ec9dab8b707eb3d80c
+patchSha256=7264b34a917ba6dfd1090ee4845590184f95cc3efc16f5f75a3d4aa8f022fb3e
+stagedPaths=5
+indexCleanAfterCodeCommit=true
+browser19Status=FAIL
+firstIronInventoryPickup=NOT_PROVEN
+build11Run=false
+browser20Run=false
+longTermDocsUpdated=false
