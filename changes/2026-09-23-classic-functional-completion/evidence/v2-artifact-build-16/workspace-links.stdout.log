@@ -1,0 +1,7 @@
+node_modules/@seedlands/kernel -> /private/tmp/seedlands-v2-acceptance-fdb53c07/packages/kernel
+node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-fdb53c07/packages/stdlib
+node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-v2-acceptance-fdb53c07/playbooks/classic
+apps/web/node_modules/@seedlands/kernel -> /private/tmp/seedlands-v2-acceptance-fdb53c07/packages/kernel
+apps/web/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-fdb53c07/packages/stdlib
+apps/web/node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-v2-acceptance-fdb53c07/playbooks/classic
+playbooks/classic/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-fdb53c07/packages/stdlib

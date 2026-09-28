@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T19:45:00Z
+更新时间：2026-09-28T23:20:13Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,16 +10,13 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：`GIT-38-POST-DRIFT-DIRECTION` 与 `V2-ARTIFACT-BUILD-14` 已远端交付至
-`2db4c5fd8cf81294d164b128d667f73fa7e5f01f`。Browser23 唯一 canonical attempt 为正式 FAIL：C0-C5 与 V2
-19 checkpoint 已到达，但 720 秒主测试预算在玻璃/V5/evidence 收尾前触发，原 trace 缺 EOCD/中央目录；分片重组只证明
-封存字节一致。Close15 将下一次完整旅程的 main budget 有界登记为 900 秒，并明确 Chromium project 的 60 秒分别作用于
-teardown/trace 等 slot，不是全部收尾总预算。Close16 用 Playwright Reporter `onTestEnd` 生成唯一 terminal receipt；null
-closure 进一步使所有已存在但非 object 的 failure attachment fail closed。GIT39 第一笔代码/tests/spec/contracts/code-map
-提交为 `fca25ef1`，detached tree 内 pure `8/8`、Reporter `5/5`、performance-window consumer `3/3`、Classic/root
-test types、目标 ESLint/Prettier 与 staged diff 均 PASS；第二笔 evidence/state 随本提交冻结，远端 identity 以后续 readback
-为准。Browser24、build、artifact、Cua、CI、deploy、merge 未运行；terminal receipt 静态 GREEN 不证明 canonical Browser GREEN，
-ZIP 完整性仍由人工 evidence 门禁检查。
+当前 Git/Docs checkpoint：`GIT-40-CANONICAL-DISCOVERY` 与其 manifest closure 已远端交付至
+`fdb53c07c0da14c7f523473e4f33060a385f23ff`。Close17 把唯一 Chromium project 的 Playwright 收集目录限制在
+真实 E2E owner，同时保留仓库根 Reporter identity；真实 discovery RED/GREEN 与严格 manifest closure 均已通过 root
+验收。Browser24 仍是 discovery 前 FAIL、实际 Chromium attempt 0；Browser23 仍是 720 秒 timeout FAIL 且
+TRACE_INCOMPLETE。BUILD16 已从该远端 source/tree `ecc79407...7d18` 的 clean detached tree 完成唯一 build 与唯一
+artifact verify，均 PASS；276 项产物 map 与 BUILD15 相同，证据待本片提交。Browser25、Cua、CI 修复、deploy、merge
+均未运行，artifact PASS 不等于产品 GREEN。
 
 当前 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
 两份历史 snapshot 而 exit 1，实际 Chromium attempt 为 0。`V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17` 只在唯一

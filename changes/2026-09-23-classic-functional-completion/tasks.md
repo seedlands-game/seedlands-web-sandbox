@@ -22,6 +22,11 @@
 
 ## A0：Architecture Approved
 
+当前交付 checkpoint：GIT40 与 manifest closure 已推送至
+`fdb53c07c0da14c7f523473e4f33060a385f23ff`；BUILD16 在该 source 的 clean detached tree 上唯一 build 和
+artifact verify 均 PASS，证据待本片语义提交。Browser24 仍为 discovery 前 FAIL/Chromium 0，Close17 仅 static
+GREEN；Browser25 未运行。
+
 架构、owner/API/失败/保存/第二配置/矩阵/预算/preview 已形成并获用户批准。历史 hash 仅为历史快照；用户本轮已批准现有目标和执行安排，不能虚构其曾审核某个 SHA，也不重复请求 hash/IMPLEMENT。
 
 当前分类仍为 Breaking。实施、提交、推送、最终 CI/review 修复和 Cloudflare PR preview 已获授权；不自动合并、不部署 production、不改权限凭据。开发过程中由唯一 Git writer 及时做语义 commit+push，中途不跟 CI，最后集中处理到可合入。

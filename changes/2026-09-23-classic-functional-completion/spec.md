@@ -437,6 +437,14 @@ GIT-21 Equipment Core 组合、推送与 V2 BUILD01 是已准出子片的窄交�
 
 ## Delivery Snapshot
 
+V2-ARTIFACT-BUILD-16 从 GIT40 manifest closure 已推送 source
+`fdb53c07c0da14c7f523473e4f33060a385f23ff` / tree `ecc7940708bca8ea1d01e8df50337fa536d27d18` 的
+clean detached tree 唯一执行 `pnpm build` 与 `pnpm harness:artifact`，均 PASS。产物 276 项、磁盘含 receipt
+277 项，0 symlink/missing/extra/mismatch；artifact map 与 BUILD15 相同，Pack lock 与 MP3 source/public/dist 一致。
+该结果只冻结 Close17 test-only discovery boundary 后的 production artifact；Browser24 仍为 discovery 前 FAIL 且
+Chromium attempt 0，Browser23 仍为 FAIL/TRACE_INCOMPLETE，Browser25 未运行。最终 docs SOURCE 由本阶段 evidence
+另行冻结，不与 build source 混淆；长期架构 docs 不更新，因为没有改变 owner、公共 API 或产品协议。
+
 V2-ARTIFACT-BUILD-15 从 GIT39 已推送 source `556c9b76fb4447c49ad7d6f7a76bd7233d0011e6` 的 clean detached
 tree 唯一执行 `pnpm build` 与 `pnpm harness:artifact`，均 PASS。产物 276 项、磁盘含 receipt 277 项，0
 symlink/missing/extra/mismatch；artifact map 与 BUILD14 相同。该结果只冻结 GIT39 的 production artifact，不改变
