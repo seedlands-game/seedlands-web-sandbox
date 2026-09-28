@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-24-556c9b76",
+  "sourceSha": "556c9b76fb4447c49ad7d6f7a76bd7233d0011e6",
+  "selection": {
+    "mode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "modularSmokeMatches": 0,
+    "selectedTests": []
+  },
+  "runnerOutcome": "failed",
+  "attempts": [],
+  "conflicts": []
+}

@@ -1,0 +1,141 @@
+{
+  "config": {
+    "argv": [
+      "/Users/bytedance/.local/share/fnm/node-versions/v24.21.0/installation/bin/node",
+      "/private/tmp/seedlands-git40-canonical-discovery/node_modules/.pnpm/@playwright+test@1.62.1/node_modules/@playwright/test/cli.js",
+      "test",
+      "--list",
+      "--reporter=json"
+    ],
+    "configFile": "/private/tmp/seedlands-git40-canonical-discovery/playwright.config.ts",
+    "rootDir": "/private/tmp/seedlands-git40-canonical-discovery",
+    "failOnFlakyTests": true,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {},
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/private/tmp/seedlands-git40-canonical-discovery/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "/private/tmp/seedlands-git40-canonical-discovery/apps/web/tests/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "apps/web/tests/e2e/classic-runtime.spec.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": {
+      "command": "pnpm --filter @seedlands/web preview --host 127.0.0.1 --port 4273 --strictPort",
+      "url": "http://127.0.0.1:4273/",
+      "reuseExistingServer": false,
+      "timeout": 30000
+    }
+  },
+  "suites": [
+    {
+      "title": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "c1221f8f363362ddeabe-684679c2f0f617936171",
+          "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "c1221f8f363362ddeabe-678e4b727b3674f8fea7",
+          "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+          "line": 509,
+          "column": 1
+        },
+        {
+          "title": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [],
+              "status": "skipped"
+            }
+          ],
+          "id": "c1221f8f363362ddeabe-26e907d0b652e2074825",
+          "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+          "line": 514,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-28T22:43:35.246Z",
+    "duration": 270.35,
+    "expected": 0,
+    "skipped": 3,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

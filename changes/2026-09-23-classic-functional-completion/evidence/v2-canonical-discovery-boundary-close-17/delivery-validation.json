@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17",
+  "status": "PASS_STATIC_DISCOVERY_BOUNDARY",
+  "baseline": {
+    "head": "549dfecad3f6a8c6ba5c5179382f1af39101c1ff",
+    "indexEmptyBeforeAndAfter": true
+  },
+  "implementation": {
+    "owner": "playwright.config.ts chromium project collection scope",
+    "change": "projects[chromium].testDir = ./apps/web/tests/e2e",
+    "topLevelTestDirUnchanged": ".",
+    "testMatchUnchanged": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "reporterAndReceiptChanged": false,
+    "browserBusinessTestsChanged": false
+  },
+  "red": {
+    "command": "pnpm exec playwright test --list --reporter=json",
+    "runId": "v2-canonical-discovery-close-17-red",
+    "exitCode": 1,
+    "status": "PASS_EXPECTED_FAILURE_REPRODUCED",
+    "playwrightVersion": "1.62.1",
+    "projectTestDir": "repository root",
+    "historicalSnapshotImportErrors": 2,
+    "stdoutSha256": "11868b8dd64dd70fc9ad6aa68d0a67eb2ebdf8b38ed8e4233b7b792d41a39995",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windowSha256": "872159d442da42e9d9e0a76d33a348f2c6d5de2611df756153d2840e05785386"
+  },
+  "green": {
+    "command": "pnpm exec playwright test --list --reporter=json",
+    "runId": "v2-canonical-discovery-close-17-green",
+    "exitCode": 0,
+    "status": "PASS",
+    "rootDir": "repository root",
+    "project": "chromium",
+    "projectTestDir": "apps/web/tests/e2e",
+    "files": ["apps/web/tests/e2e/classic-runtime.spec.ts"],
+    "testCount": 3,
+    "historicalSnapshotMatches": 0,
+    "stdoutSha256": "cc2073e1edfda8b4b162f7c77f352f618c7a91165f2d873ef11d80eac9047c1c",
+    "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "windowSha256": "ef78caa2005f1777e66e27a23de419ff326785fae8057310b2e93e76be380729",
+    "browserStarted": false,
+    "webServerStarted": false
+  },
+  "selection": {
+    "status": "PASS",
+    "mode": "CANONICAL_MAIN",
+    "canonicalMainSelected": true,
+    "canonicalMainMatches": 1,
+    "modularSmokeMatches": 1,
+    "stdoutSha256": "3df639d4f6e633e5f8d791e9e6f20c9f8762ac35caaf31c58996a207c829d61f",
+    "windowSha256": "e6750a3a1b279572416d042c7d49f365fe4ac3af57d5842f337a41d2cd366171"
+  },
+  "staticGates": {
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslintPlaywrightConfig": "PASS",
+    "normalPrettier": "PASS",
+    "scope": "PASS",
+    "maxBlobBytes": 7312
+  },
+  "reusedEvidence": {
+    "git39SourceManifestSha256": "9431139f712b23814c0d368fbe49531875264c3f8a7a29fb89ab566537fdd1db",
+    "git39EvidenceManifestSha256": "57684cabdac02207b94a4695b23de298b30769480c7dd08e61b1a7fe6410f762",
+    "git39DeliverySha256": "1ece187dc577e144ee0f25fb795aa98b918a4149253a93a9f50db7322c1ac453",
+    "focusedTests": "8 pure receipt + 5 Reporter + 3 performance-window consumer = 16 PASS",
+    "behaviorClosure": "14 files / 145 tests PASS at existing frozen evidence",
+    "rerun": false
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "b67b0a48bf7c7ee2ba41a6dfbd5d7394b3ca9aa7ffccaaa704f668071e2ae403"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 24,
+    "sha256": "791017d6c245f3f241cff8c0ac5f07f679c30110e9fb24edaf34a67f544b0852",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "finalSelfcheck": {
+    "runId": "v2-canonical-discovery-close-17-final-selfcheck-02",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "b1dd35e8e3f703efe2c0be9a8262807436f67970dd36fe380bf224de03365630",
+    "windowSha256": "421d6a6e11156a889cf2f8c834bb91b93d5c9a6de15176fd5cf9051c65c4ba52",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "retainedSelfcheckFailure": {
+    "status": "FAIL_SCRIPT_PATH_VARIABLE_SHADOWED_ZSH_PATH",
+    "exitCode": 127,
+    "stdoutSha256": "2ddb4e754b29f6f8fb17d345c1376ba5d5ff330a6fe61b15c89acb2db5c631e4",
+    "windowSha256": "6b66e299ce20b49af46b33fb7e4a15f0f29081ecdcb5ddd5e4ad433d9ca46e04",
+    "productOrDiscoveryFailure": false
+  },
+  "boundaries": {
+    "browser24Changed": false,
+    "browser24Status": "FAIL_BEFORE_TEST_DISCOVERY",
+    "browser23Changed": false,
+    "browser23Status": "FAIL_TIMEOUT_TRACE_INCOMPLETE",
+    "browser25Run": false,
+    "buildOrArtifactRun": false,
+    "productionChanged": false,
+    "gitOrIndexWrite": false,
+    "cuaCiDeployMergeRun": false
+  },
+  "longTermDocs": {
+    "updated": true,
+    "path": "docs/ci-testing.md",
+    "reason": "Clarify stable repository-root Reporter identity versus project-local Playwright collection scope."
+  },
+  "finalOwnedPathCount": 33
+}

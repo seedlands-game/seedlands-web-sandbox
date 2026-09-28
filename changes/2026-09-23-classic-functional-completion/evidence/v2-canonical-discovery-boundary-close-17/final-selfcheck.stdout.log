@@ -1,0 +1,36 @@
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+changes/2026-09-23-classic-functional-completion/canonical-discovery-contract.md: OK
+changes/2026-09-23-classic-functional-completion/canonical-discovery-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+docs/ci-testing.md: OK
+package.json: OK
+playwright.config.ts: OK
+pnpm-lock.yaml: OK
+scripts/harness/classic-receipt.mjs: OK
+./README.md: OK
+./SOURCE-MANIFEST.sha256: OK
+./classic-types-window.json.log: OK
+./classic-types.stdout.log: OK
+./command-green.txt: OK
+./command-red.txt: OK
+./discovery-green-window.json.log: OK
+./discovery-green.stderr.log: OK
+./discovery-green.stdout.json.log: OK
+./discovery-red-window.json.log: OK
+./discovery-red.stderr.log: OK
+./discovery-red.stdout.json.log: OK
+./eslint-window.json.log: OK
+./eslint.stdout.log: OK
+./final-selfcheck.zsh: OK
+./final-selfcheck-path-variable-failure.stdout.log: OK
+./final-selfcheck-path-variable-failure.window.json.log: OK
+./format-window.json.log: OK
+./format.stdout.log: OK
+./root-types-window.json.log: OK
+./root-types.stdout.log: OK
+./selection-window.json.log: OK
+./selection.stderr.log: OK
+./selection.stdout.json.log: OK
+Checking formatting...
+All matched files use Prettier code style!
+CLOSE17_FINAL_SELFCHECK=PASS

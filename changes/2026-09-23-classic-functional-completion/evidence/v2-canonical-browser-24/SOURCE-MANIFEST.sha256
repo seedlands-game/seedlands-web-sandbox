@@ -1,0 +1,7 @@
+52589fae3acf16c1cd07cd10b81bd95457db2085329bcad26c74631c57c0c780  playwright.config.ts
+89a99f81c0fd7ada0991d630f0882c99ad6a3140b807893f40413dd4d844094a  scripts/harness/classic.mjs
+9dba96cb4202d279b58a838b98ba39ad1fcf9ed8c0f20eefdd71cde9dc9ae774  scripts/harness/classic-receipt.mjs
+cf4cc0218d97b9437a4a2797d5cb3820ca2084224fe9f4bc12f985bf0384536c  apps/web/tests/e2e/classic-runtime.spec.ts
+cf4cc0218d97b9437a4a2797d5cb3820ca2084224fe9f4bc12f985bf0384536c  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts
+cf4cc0218d97b9437a4a2797d5cb3820ca2084224fe9f4bc12f985bf0384536c  changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-runtime.spec.ts
+5f9b42da4db1cea60d063c6440fe7e5bdb55f799f357a2c7af3deb474500e7d0  changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md

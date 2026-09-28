@@ -1,0 +1,26 @@
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+scripts/harness/classic-receipt.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-runtime.spec.ts: OK
+changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md: OK
+./SOURCE-MANIFEST.sha256: OK
+./artifact-postcheck-window.json.log: OK
+./artifact-postcheck.stdout.log: OK
+./canonical-window.json.log: OK
+./classic.json.log: OK
+./command.txt: OK
+./diagnosis.json: OK
+./final-selfcheck-source-root-failure.stdout.log: OK
+./final-selfcheck-source-root-failure.window.json.log: OK
+./final-selfcheck.zsh: OK
+./metadata-format.stdout.log: OK
+./metadata-format.window.json.log: OK
+./playwright-last-run.json.log: OK
+./playwright-report-index.html.log: OK
+./runner.stdout.log: OK
+./trace-disposition.txt: OK
+Checking formatting...
+All matched files use Prettier code style!
+BROWSER24_FINAL_SELFCHECK=PASS

@@ -1,0 +1,66 @@
+{
+  "rootDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+  "expectedRootDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+  "project": {
+    "name": "chromium",
+    "testDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e",
+    "expectedTestDir": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e",
+    "testMatch": [
+      "apps/web/tests/e2e/classic-runtime.spec.ts"
+    ],
+    "timeout": 60000,
+    "retries": 0
+  },
+  "selectedTests": [
+    {
+      "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "test": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+      "project": "chromium"
+    },
+    {
+      "testId": "c1221f8f363362ddeabe-678e4b727b3674f8fea7",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "test": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+      "project": "chromium"
+    },
+    {
+      "testId": "c1221f8f363362ddeabe-26e907d0b652e2074825",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "test": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+      "project": "chromium"
+    }
+  ],
+  "selection": {
+    "mode": "CANONICAL_MAIN",
+    "canonicalMainSelected": true,
+    "canonicalMainMatches": 1,
+    "modularSmokeMatches": 1,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+        "project": "chromium"
+      },
+      {
+        "testId": "c1221f8f363362ddeabe-678e4b727b3674f8fea7",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+        "project": "chromium"
+      },
+      {
+        "testId": "c1221f8f363362ddeabe-26e907d0b652e2074825",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+        "project": "chromium"
+      }
+    ]
+  },
+  "canonicalMainIdentity": {
+    "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "title": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+    "project": "chromium"
+  },
+  "status": "PASS"
+}

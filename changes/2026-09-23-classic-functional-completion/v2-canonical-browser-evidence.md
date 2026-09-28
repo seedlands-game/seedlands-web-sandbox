@@ -1,5 +1,79 @@
 # V2 Canonical Browser 证据
 
+## Browser-24 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-24`
+
+BUILD15 identity 更正：已提交 `549dfeca` 中 `v2-artifact-build-15/delivery-validation.json` 与当前工作树字节一致，
+真实 SHA-256 为 `3c77e382c9abe14fe840f07af73c44507ce7a1f1055c9c8d22f7839c4b697e26`；此前 checkpoint 中的
+`50eaadec...da9b` 是 delivery 写入 final selfcheck 字段前的旧值。本更正不修改 BUILD15 已提交原件。
+
+结论：**FAIL_BEFORE_TEST_DISCOVERY。** 唯一授权命令在 BUILD15 source
+`556c9b76fb4447c49ad7d6f7a76bd7233d0011e6` / tree `45ef275288163c3880bd9ea75d28c62996f3723a` 上 exit 1。
+Playwright 在收集测试时把两份 change evidence snapshot 中的 `classic-runtime.spec.ts` 也纳入 `testMatch`；两份 snapshot
+的相对 `./classic-support/visual-rebuild` 不存在，收集失败。receipt 因而是 `selection.mode=NON_MAIN`、
+`canonicalMainSelected=false`、`canonicalMainMatches=0`、`attempts=[]`、`runnerOutcome=failed`。没有启动 canonical
+Chromium attempt，不能把它记作 attempt 0 的产品失败或通过。
+
+C0-C5、完整 V1、V2 checkpoints、独立 bag counts、equipment pointer、save/restore、visual 与 non-Classic smoke 本轮均
+`NOT_STARTED`；new reference、death/drop/respawn、16 armor/194 matrix、V3/V4 仍 `NOT_RUN/NOT_RECORDED`。没有附件，
+也没有 trace 产物；trace disposition 为 `NOT_PRODUCED_BEFORE_TEST_DISCOVERY_FAILURE`，不是 PASS 下的
+`NOT_RETAINED_BY_CONFIG`，也不是 Browser23 的 `TRACE_INCOMPLETE`。
+
+唯一 artifact postcheck `v2-canonical-browser-24-artifact-postcheck` PASS，仍绑定 BUILD15 的 source、lock、artifact、
+builtAt、receipt 与 276-file map。本轮未重建、未执行第二 attempt、未增加 timeout、未修复 selector/source、未运行 Cua、
+CI、部署或合并。Browser23 以下历史正文在本次追加前为 64,589 bytes、SHA-256
+`d19ec067355f7278d460aef24ab533d8deb1bf535e73c1ffde65946a4dc2c45f`，追加后保持不变。Browser23 仍是正式
+FAIL/TRACE_INCOMPLETE，不借本轮覆盖。唯一有效历史包装改变仍是 `test-0-error-context.md -> .md.log`；
+`artifact-readback.json`、`playwright-attachments.json`、`receipt-readback.json`、`result-summary.json` 保持原 `.json`。
+
+## Browser-23 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-23`
+
+结论：**FAIL。唯一 attempt 的 C0-C3、完整 V1、V2、C4、C5、重开后玻璃和 V5 钻石块断言链均留下完成
+记录，但 Playwright 主测试超过 `720,000ms` 总 timeout，context teardown 又超过 `30,000ms`，runner exit 1。**
+Classic 视觉测试独立 PASS，non-Classic smoke SKIPPED；receipt 中 detailed record 的局部 `status=PASS` 不能覆盖
+runner 与 aggregate receipt FAIL。
+
+验收树 `/private/tmp/seedlands-v2-acceptance-0eafd427`，source/tree
+`0eafd4273bc1f5a23e7d147ded37801436074015` / `a1cbf676594be93a86c77afcbb59dacc1611899e`；
+source/lock/artifact digest 为 `4a280a632e0273b0d77d8637c78f542e8d4e0519280bd784d7a33c7d08accaa8`、
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`；artifact receipt
+`73e3eaa9a0bc431d431f0c1a24ae2f60b1e15fcad0e421b6c8dd3b5d505fec7c`，builtAt
+`2026-09-28T15:34:20.824Z`，map `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`。
+
+唯一实际 Browser 命令使用 runId `v2-canonical-browser-23-0eafd427`，单 worker、retry 0；机器窗口 UTC
+`2026-09-28T15:44:56.686Z` 至 `15:58:58.586Z`、waitedMs `1`、exit `1`、measurement
+`NOT_RECORDED`。运行前两次 shell 编排错误均在 Playwright 启动前退出；只有一个实际 Chromium attempt。
+
+V2 `ready-to-save` receipt 有 19 个 checkpoint。每格资源采矿后 fixture 独立断言 bag `itemCount` 增长；汇总
+checkpoint 明确记录 wood `3`、cobblestone `3`、iron-block `4`。木镐、石镐、36 ingot 解包和五件铁甲完成，最终
+剩余 7 ingot；四槽 click/Shift、wrong-slot zero-change、swap、detach/store、quick-move、close 和 workbench 回收入包均有
+对应 checkpoint。石镐耐久 `132 -> 128 -> 127`。不以 `worldItems=0` 证明入包。
+
+C5 记录 runtime/actor epoch `1/1 -> 2/2`，actor lifetime 仍 `1`；inventory revision `143` restore 保持，
+continued 为 `145`；四槽铁甲、armorPoints `15` 与石镐耐久 `127` 恢复。V1 media restore/eject/audio idle 是已完成
+C5 调用链中的断言，但未单独序列化到 restoreEvidence。对象 new reference 没有断言或记录；death、equipment drop、
+respawn 均 `NOT_RUN`。detailed record 的 `pageErrors=[]`、`failedResponses=[]` 已保存。Cua/人类听觉未运行，性能
+`NOT_MEASURED`。
+
+主 test 在 `+718,819ms` 完成 C5，`+718,822ms` 开始重开后玻璃；`+720,000ms` timeout 触发。afterEach
+在 `+720,773ms` 写 failure record；清理中的在途调用随后完成玻璃、V5 钻石块、世界删除、audio release、detailed
+evidence 和最终断言，context close 于 `+762,283ms` 完成并伴随 30s timeout。因此本轮证明的是完整断言链留下证据但
+canonical budget FAIL，不是产品 GREEN。
+
+原 trace 为 `1,269,815,136` bytes、SHA-256
+`fa61f3c1962a0134a85c9cb72eee911f141804f04cc39f764a3d949ca5fbcc48`，分为 25 个最大 50 MiB 分片并
+重组同 SHA；但 `zipinfo` exit 9 且缺中央目录，分片一致不证明 ZIP 完整。task-owned 副本的单次 `zip -FF` 无恢复
+文件并以 exit 130 终止；局部 header 仅恢复首个文件名，明确标 `RECOVERED_PARTIAL_METADATA_ONLY`。可解析的
+Playwright HTML report 派生 ZIP独立完整校验，仅用于 step/附件映射，不替代 trace。
+
+唯一 artifact postcheck PASS，未重跑；同 source/lock/artifact/builtAt、276 map/277 disk。验收树 tracked/index
+clean，4273/owned browser-preview/机器锁为 0；BUILD09-14 tree/dist 和 Git32 backup 保留。本阶段未运行第二 attempt、
+Browser24、Cua、build、修复、CI、Git/index、push、deploy 或 merge。
+
 ## Browser-22 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-22`
