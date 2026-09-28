@@ -1,0 +1,5 @@
+13661f6e3201e77944cce686fb8a7aef79139b43e6ba64227f97fa9e43e3db44  apps/web/tests/e2e/classic-support/harness.ts
+934d1d90bdcab91af76d53ab419a6f31ea141bec5a6705743c7ce9c7f5e99b6f  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+a2b421981fff144fba9a53eaab8a29680dcb79b50cf6137173e6b8bbdff7365a  apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts
+1c63ffa6e8b1a97b7dd8d003ac86f14e3929884462e040fb77b5d973fb687761  changes/2026-09-23-classic-functional-completion/spec.md
+e8a6e13443deb560118b4eb205c018386e483331eee99e40ae9ba045ef22e538  changes/2026-09-23-classic-functional-completion/equipment-mining-aim-contract.md

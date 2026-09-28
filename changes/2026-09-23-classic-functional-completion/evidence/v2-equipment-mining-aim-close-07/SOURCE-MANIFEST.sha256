@@ -1,0 +1,5 @@
+39fb66a9cd7d6cfa5c795316df51a4cf6bc320cb8214e2e87029ad08fe58869d  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+d3be23a0748961cb94d65f8637ba99f362ca43cc58d2df2f85d44948e871abd3  apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts
+3dd9c32f009c089d216ff9c289aa8cbaffc2ec7a45931c79de7aada822ea41e9  changes/2026-09-23-classic-functional-completion/spec.md
+a45984d3df9a5d053e99418e5f2d32162f7d989e22ce94750671de5b009b73cd  changes/2026-09-23-classic-functional-completion/equipment-mining-aim-contract.md
+a1aa3229694e81f2a176750fb2a88031147f2c2a076afd0b204a8a58cef6bada  changes/2026-09-23-classic-functional-completion/equipment-mining-aim-evidence.md

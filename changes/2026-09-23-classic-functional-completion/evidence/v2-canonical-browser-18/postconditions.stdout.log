@@ -1,0 +1,16 @@
+capturedAt=2026-09-28T04:29:56Z
+sourceSha=4de6383e431df6f1b08fb6297e1b9c7ab95143a6
+sourceTree=04fa698407463b167125ba86b5403d3f57a767e7
+trackedChanges=0
+indexClean=true
+artifactReceiptSha256=a0200fe0eb3b182c50f22535c104e753a0045c0a9c96f86e3d04e5cb52c875fd
+distFilesIncludingReceipt=277
+distSymlinks=0
+port4273Listening=false
+ownedPlaywrightChromiumPreviewProcesses=0
+benchmarkLockPresent=false
+acceptanceTreePreserved=true
+backupRef=refs/task-backups/git32-evidence-a402b016
+backupRefSha=a402b01623354a5c78e41260354a0fdd7c35394c
+historicalAcceptanceTreesAbsentBeforeBrowser18Lease=true
+historicalAcceptanceTreesDeletedByThisTask=false

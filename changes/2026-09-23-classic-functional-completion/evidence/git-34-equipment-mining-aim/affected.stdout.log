@@ -1,0 +1,17 @@
+1:19:31 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git34-equipment-mining-aim - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git34-equipment-mining-aim
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 21ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 13ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/target-aim.test.ts (11 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+ Test Files  7 passed (7)
+      Tests  73 passed (73)
+   Start at  13:19:32
+   Duration  1.18s (transform 409ms, setup 0ms, import 678ms, tests 51ms, environment 0ms)
+

@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-MINING-AIM-CLOSE-07",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "4dccab8980b546dc577ac5ace8c9d8131782b324",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "2acd5807d8303d5b6f01da213fa3b878efe2374ab7820a7441183b47c9dcfeeb",
+    "validatedEntries": 5
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 35,
+    "sha256": "b68ac9053322c417d7c643bfcf2936a3f653c424c5fdda7faf8398fdd82d42fa",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "browser18Input": {
+    "target": [80, 31, 2],
+    "failurePlayer": [80.65967559814453, 32.599998474121094, -0.4997326731681824],
+    "failureView": [-481.16999999999973, -17.689999999999987],
+    "targetCenterDistanceMeters": 3.1990450215938315,
+    "lastRecordedPhase": "resources-placed",
+    "mouseMoves": 180,
+    "mouseButtons": 0,
+    "lastTargets": ["84,31,2", "84,30,1"],
+    "all180TargetValuesRecorded": false
+  },
+  "implementation": {
+    "owner": "canonical V2 equipment fixture consumer",
+    "resourceMiningPreaim": true,
+    "workbenchReclaimPreaim": true,
+    "preaimHelper": "aimAtVoxelWithRealMouse",
+    "miningOwnerReused": "mineVoxel",
+    "preaimBudget": 180,
+    "secondCorrectionBudgetAdded": false,
+    "fallbackAdded": false,
+    "routeOrTimeoutChanged": false
+  },
+  "red": {
+    "window": "v2-equipment-mining-aim-close-07-red-03",
+    "status": "EXPECTED_FAIL_1_OF_24",
+    "failed": 1,
+    "passed": 23,
+    "reason": "Both V2 mining consumers lacked the required exact pre-aim before reusing mineVoxel.",
+    "stdoutSha256": "7e9159d360c7706c41ab0bff22037f7abbe9c3007cc8bd341e11da451686381d",
+    "receiptSha256": "45cae10fc32e25e2876d6c61225343bb9dc2b2fca91382f25768a8eba7e4824f"
+  },
+  "green": {
+    "window": "v2-equipment-mining-aim-close-07-green-final-02",
+    "status": "PASS_1_FILE_24_TESTS",
+    "stdoutSha256": "042084dec79bf03b9e11a8af1d42bcae8ac7c1fc1a2b6ade6d33b630244da81e",
+    "receiptSha256": "45ab7845b31096abea79abb8d2dcbd0905b8a918b23eda1e513709a6835f704d"
+  },
+  "affected": {
+    "window": "v2-equipment-mining-aim-close-07-affected-final",
+    "status": "PASS_7_FILES_70_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "cbed9f9a84d1b480957803dcf73a189c99efbc5849f52279559652310435c22a",
+    "receiptSha256": "673675d24f6313abbcd16e7f9c02d6595883ccad51910e587f34c80d0a2888bb"
+  },
+  "static": {
+    "classicTypes": {
+      "window": "v2-equipment-mining-aim-close-07-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "1a7b33b3ee824bc02ef2ed2d5b25fd3c2301f16a610ab087735aa1378fc19b66"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-mining-aim-close-07-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "b7a66325bce593192fe904d502a4becea7c7f82e791988e24500e3c705e87642"
+    },
+    "eslint": {
+      "window": "v2-equipment-mining-aim-close-07-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "4cac301ec67779ffa31cd041be37d3d05ac9cd8fdf757b03b436242511fccc6d"
+    },
+    "format": {
+      "window": "v2-equipment-mining-aim-close-07-format-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "1c42df860870dea967f4658cb15e880535f0b62604fffb41ccf240793c2650c3"
+    },
+    "scopedDiff": {
+      "window": "v2-equipment-mining-aim-close-07-scoped-diff",
+      "status": "PASS_5_PATHS",
+      "stdoutSha256": "e9b482bf3df3adbc6e977a93fd498f09af21101e31010299f89fb8d8e8a7fbed",
+      "receiptSha256": "e112a1b96ce37eaed38476e71103b5026f0e69cdb78b1c0142623bc9d534da21"
+    }
+  },
+  "finalSelfcheck": {
+    "window": "v2-equipment-mining-aim-close-07-final-selfcheck",
+    "status": "PASS",
+    "stdoutSha256": "bad433d0de3101a071bd121284af1180983980799c973df2f4f63e02e520334b",
+    "receiptSha256": "18baf45f64e300d6f61848ff57b7fd4e009530ccc9974d5de3e177023b99eb1c"
+  },
+  "intermediateFailures": {
+    "redCollectionFailureRetained": true,
+    "red02ModelFailureRetained": true,
+    "initialFormatFailureRetained": true,
+    "initialMetadataFormatFailureRetained": true
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "publicHarnessChanged": false,
+    "genericAimChanged": false,
+    "genericMineVoxelChanged": false,
+    "routeChanged": false,
+    "scenarioJsonChanged": false,
+    "v1Changed": false,
+    "saveSchemaChanged": false,
+    "browser19Run": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The change only composes existing private fixture aim and mining helpers; no owner or public protocol changes."
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["build", "browser19", "cua", "devserver", "ci", "git", "index", "push", "deploy", "merge"]
+}

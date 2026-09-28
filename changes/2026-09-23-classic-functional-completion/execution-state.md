@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T04:08:37Z
+更新时间：2026-09-28T05:26:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -72,6 +72,14 @@ detached staged tree 的 6 files / 46 tests、Classic/root test types 与目标�
 artifactDigest `f6f1ea67...cfa4`、276 项 map 与磁盘一致且与 BUILD08 相同；artifact evidence 待本阶段第三笔独立
 提交。Browser18/Cua/devserver/CI 均未运行。fixture/static/artifact GREEN 不外推为 Browser 产品 GREEN。恢复开始前
 历史 V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除；当前仅保留新 BUILD09 tree/dist。
+当前 Equipment mining aim checkpoint：Browser18 已真实通过完整 V1、workbench、10 格 resource 与
+`resources-placed`，随后首格 wood `[80,31,2]` 在旧 pitch-only aim 中耗尽 180 moves，left mouse mining input
+未发送；采矿/pickup、两把镐、iron unpack、五件铁甲、pointer、C4/C5/save 均未触达。Close07 的外部 pre-aim
+预算证明被 Close08 supersede；Close08 让 `mineVoxel` 只选择一次 default/injected aim callback，V2 注入 existing full
+aim，reject 零 mouse down 且无 fallback。GIT34 detached tree 的 7 files / 73 tests、Classic/root test types、3 TS
+ESLint、5 路径 format/scoped diff 全 PASS，代码提交 `a987a672df865f4687898ed15b3b5e7f239d6273` 已本地生成。
+GIT34 evidence/state 随包含本文的第二笔提交交付，精确远端 SHA 以最终 checkpoint 读回为准；BUILD10 明确留待
+独立阶段，Browser19/Cua/devserver/CI 未运行。
 
 ## 恢复规则
 

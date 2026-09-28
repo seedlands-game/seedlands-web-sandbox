@@ -1,0 +1,69 @@
+12:38:25 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (24 tests | 2 failed) 7ms
+     ✓ reproduces Browser-18 pitch-only oscillation and converges with one full correction budget 2ms
+     ✓ keeps 'wood-block:80:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:80:1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:82:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:82:1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:84:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'wood-block:84:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:86:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:86:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:88:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:88:1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:90:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'stone-block:90:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:92:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:92:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:94:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:94:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:96:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:96:1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:98:-1' visible from the finite route boundary 0ms
+     ✓ keeps 'iron-block:98:1' visible from the finite route boundary 0ms
+     ✓ keeps the reclaimed workbench visible from its mining approach 0ms
+     × requires one exact pre-aim before both V2 mining consumers reuse mineVoxel 1ms
+     × keeps the correction mechanism content-neutral 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts > Classic V2 equipment mining aim > requires one exact pre-aim before both V2 mining consumers reuse mineVoxel
+AssertionError: expected -1 to be greater than or equal to 0
+ ❯ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:107:22
+    105|       const preaim = consumer.indexOf('await aimAtVoxelWithRealMouse(p…
+    106|       const mine = consumer.indexOf('await mineVoxel(page,');
+    107|       expect(preaim).toBeGreaterThanOrEqual(0);
+       |                      ^
+    108|       expect(mine).toBeGreaterThan(preaim);
+    109|       expect(consumer.split('aimAtVoxelWithRealMouse(')).toHaveLength(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts > Classic V2 equipment mining aim > keeps the correction mechanism content-neutral
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts:124:47
+    122|       x === target[0] && y === target[1] && z === target[2] ? Voxel.St…
+    123|     );
+    124|     expect(matchesVoxelAim(observed, target)).toBe(true);
+       |                                               ^
+    125|   });
+    126| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 22 passed (24)
+   Start at  12:38:25
+   Duration  153ms (transform 59ms, setup 0ms, import 73ms, tests 7ms, environment 0ms)
+

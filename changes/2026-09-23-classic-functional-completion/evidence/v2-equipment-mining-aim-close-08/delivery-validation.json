@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-MINING-AIM-CLOSE-08",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "4dccab8980b546dc577ac5ace8c9d8131782b324",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "f8c6c1e377c5ec969c0b96c9ab86d3228072425c23c31c877dc9fed5b70e7126",
+    "validatedEntries": 6
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 50,
+    "sha256": "59551bbb1730f6389d408a610aa7c5283c1a2e79aa29d1e796cf4e65ef158c75",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-MINING-AIM-CLOSE-07",
+    "sourceManifestSha256": "2acd5807d8303d5b6f01da213fa3b878efe2374ab7820a7441183b47c9dcfeeb",
+    "evidenceManifestSha256": "b68ac9053322c417d7c643bfcf2936a3f653c424c5fdda7faf8398fdd82d42fa",
+    "deliverySha256": "c34a151876cca83c6dfb54e9bd14322be33ba1eb99f824bb5ea8f94d52d10546",
+    "harnessBeforeSha256": "bb719afb6416be3a7b29f6d231824a736951e0500a32b5e7017194f497cd0a6f",
+    "archivedByteEqual": true,
+    "supersededClaims": [
+      "separate pre-aim proves the legacy guard consumes no second budget",
+      "floorless null-stopping model fully reproduces the legacy helper"
+    ]
+  },
+  "browser18Input": {
+    "target": [80, 31, 2],
+    "recordedFailurePose": [80.65967559814453, 32.599998474121094, -0.4997326731681824],
+    "recordedFailureView": [-481.16999999999973, -17.689999999999987],
+    "recordedMouseMoves": 180,
+    "recordedMouseButtons": 0,
+    "recordedLastTargets": ["84,31,2", "84,30,1"],
+    "all180TargetValuesRecorded": false
+  },
+  "implementation": {
+    "mineVoxelAimType": "(page: Page, target: Point) => Promise<unknown>",
+    "defaultAim": "adjustPitchToTarget",
+    "injectedAim": "aimAtVoxelWithRealMouse",
+    "callbackCalls": 1,
+    "callbackAfterRangeAndPointerLock": true,
+    "callbackBeforeMouseDown": true,
+    "rejectStopsBeforeMouseDown": true,
+    "fallbackAdded": false,
+    "secondCorrectionBudgetAdded": false,
+    "miningAndDropFlowCopied": false
+  },
+  "red": {
+    "window": "v2-equipment-mining-aim-close-08-red",
+    "status": "EXPECTED_FAIL_3_OF_27",
+    "failed": 3,
+    "passed": 24,
+    "reason": "Consumers still pre-aimed separately, injected aim was ignored, and reject did not stop the legacy guard.",
+    "stdoutSha256": "e1c8f6eec5588080579cab3743d1605c1d2e9b3595a59620c036629d6d4a32f6",
+    "receiptSha256": "5930dc80f7c0c9d81b0c4146a4def1ecc9735a45ebb3bda07ce8c3ffd9a0ce69"
+  },
+  "green": {
+    "window": "v2-equipment-mining-aim-close-08-green-final-02",
+    "status": "PASS_1_FILE_27_TESTS",
+    "stdoutSha256": "14aa3fb8dffd2374ebb2fd6599524ecce4583817b456f02c81a9f20a3a22c795",
+    "receiptSha256": "67885ec53439983a4f1d829bb868623739a42518595e408a9383f7dc1431fb64"
+  },
+  "affected": {
+    "window": "v2-equipment-mining-aim-close-08-affected-final-02",
+    "status": "PASS_7_FILES_73_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "aca7fd4b86224d6c247d85a3e76a8cb336aca8419928b7cea3dc0c4a2aae56c6",
+    "receiptSha256": "602069fe22480fdf6813476b20936dc5ebaf19eea6d88e801ca5bbd212e610db"
+  },
+  "static": {
+    "classicTypes": {
+      "window": "v2-equipment-mining-aim-close-08-classic-types-final",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "20605c92395b570c6859e91dad5c8806eddca228f3bbbb0ad2eb3939c612921a"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-mining-aim-close-08-root-types-final",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "786726f32fa313cc2f2d504140e25d8f3217f9de42b396ac618b41030e1be54b"
+    },
+    "eslint": {
+      "window": "v2-equipment-mining-aim-close-08-eslint-final",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "cf2a3e36727f8e3fdfd41849ada16b7a4a929f9e419adc3c9700369efa2ec049"
+    },
+    "format": {
+      "window": "v2-equipment-mining-aim-close-08-format-final-02",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "48500651c8f1c0739ebfc0c2d7ceaf933583266e5aaee998002f769df6cfed9e"
+    },
+    "scopedDiff": {
+      "window": "v2-equipment-mining-aim-close-08-scoped-diff-final",
+      "status": "PASS_6_PATHS",
+      "stdoutSha256": "25a3ef086359295d8678e18637c0eaa29f751da77927acd226c6d6c8c17106f8",
+      "receiptSha256": "c4164d7abe4199463111fb2d17d11848881e3d9fab89684395cbc0887f8fcd46"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-mining-aim-close-08-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "0b7d1eb26f492030461022e3a7b12913eeaf34abcb5f2266b028727cc6a0df01"
+    }
+  },
+  "finalSelfcheck": {
+    "window": "v2-equipment-mining-aim-close-08-final-selfcheck",
+    "status": "PASS",
+    "stdoutSha256": "d35a00e88c79f8443f3b6fa80feee79d3797d5967e7eeef8e3d479c20b0b8e66",
+    "receiptSha256": "6d70178f868820b7e605f09c9f9f0aaa1959b7193d38075f7253ba0a221948de"
+  },
+  "intermediateEvidenceRetained": true,
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "genericAimChanged": false,
+    "targetAimChanged": false,
+    "genericMineFlowChanged": false,
+    "routeChanged": false,
+    "scenarioJsonChanged": false,
+    "v1Changed": false,
+    "saveSchemaChanged": false,
+    "browser19Run": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This change adds one optional fixture callback at the existing mineVoxel aim seam and changes no production owner or public protocol."
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index", "push", "build", "browser19", "cua", "devserver", "ci", "deploy", "merge"]
+}
