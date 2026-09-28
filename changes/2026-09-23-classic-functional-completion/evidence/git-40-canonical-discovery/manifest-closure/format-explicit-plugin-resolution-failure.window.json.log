@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git40-manifest-closure-format-02",
+  "pid": 92068,
+  "startedAt": "2026-09-28T23:04:38.596Z",
+  "windowId": "git40-manifest-closure-format-02",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-40-canonical-discovery/manifest-closure/format.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T23:04:38.703Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T23:04:38.597Z",
+      "loadAverage": [
+        2.28662109375,
+        2.80078125,
+        3.236328125
+      ],
+      "freeMemoryBytes": 204439552,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T23:04:38.701Z",
+      "loadAverage": [
+        2.28662109375,
+        2.80078125,
+        3.236328125
+      ],
+      "freeMemoryBytes": 201228288,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
