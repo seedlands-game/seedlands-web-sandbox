@@ -1,0 +1,27 @@
+./README.md: FAILED
+shasum: ./SOURCE-MANIFEST.sha256: No such file or directory
+./SOURCE-MANIFEST.sha256: FAILED open or read
+shasum: ./diagnosis.json: No such file or directory
+./diagnosis.json: FAILED open or read
+shasum: ./format-pre-window.json.log: No such file or directory
+./format-pre-window.json.log: FAILED open or read
+shasum: ./format-pre.stdout.log: No such file or directory
+./format-pre.stdout.log: FAILED open or read
+shasum: ./format-write-02-window.json.log: No such file or directory
+./format-write-02-window.json.log: FAILED open or read
+shasum: ./format-write-02.stdout.log: No such file or directory
+./format-write-02.stdout.log: FAILED open or read
+shasum: ./format-write-window.json.log: No such file or directory
+./format-write-window.json.log: FAILED open or read
+shasum: ./format-write.stdout.log: No such file or directory
+./format-write.stdout.log: FAILED open or read
+shasum: ./route-condition-timeline.tsv: No such file or directory
+./route-condition-timeline.tsv: FAILED open or read
+shasum: ./source-validation.stdout.log: No such file or directory
+./source-validation.stdout.log: FAILED open or read
+shasum: ./workbench-route-sample-timeline.json: No such file or directory
+./workbench-route-sample-timeline.json: FAILED open or read
+shasum: ./workbench-route-timeline.json: No such file or directory
+./workbench-route-timeline.json: FAILED open or read
+shasum: WARNING: 12 listed files could not be read
+shasum: WARNING: 1 computed checksum did NOT match

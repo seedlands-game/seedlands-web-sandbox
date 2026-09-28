@@ -1,0 +1,7 @@
+Checking formatting...
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-22/result-summary.json
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-22/diagnosis.json
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-22/trace-readback.json
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-22/network-summary.json
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-22/collector-readback.md
+[warn] Code style issues found in 5 files. Run Prettier with --write to fix.

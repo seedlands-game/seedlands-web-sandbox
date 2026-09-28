@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "kind": "PACKAGING_ONLY_BYTE_PRESERVING_RENAME",
+  "rawBytesChanged": false,
+  "entries": [
+    {
+      "oldPath": "evidence/v2-canonical-browser-22/workbench-route-analysis.json",
+      "newPath": "evidence/v2-canonical-browser-22/workbench-route-analysis.json.log",
+      "sha256": "8914babc67319028805618e9d7b412ea79208c2a08075b28e2db1a8d06dfb6d0"
+    },
+    {
+      "oldPath": "evidence/v2-canonical-browser-22/workbench-route-calls.json",
+      "newPath": "evidence/v2-canonical-browser-22/workbench-route-calls.json.log",
+      "sha256": "19be23dc41569aec1c64ace90b1bf58cdc0c27e6a846c7e0942b12ad5eaea06c"
+    },
+    {
+      "oldPath": "evidence/v2-canonical-browser-22/workbench-route-snapshots.json",
+      "newPath": "evidence/v2-canonical-browser-22/workbench-route-snapshots.json.log",
+      "sha256": "42d36740e5a56d815ba3c02eeb6e336cc64857ed4fc35811ffddd7ba12784003"
+    },
+    {
+      "oldPath": "evidence/v2-canonical-browser-22/workbench-route-summary.json",
+      "newPath": "evidence/v2-canonical-browser-22/workbench-route-summary.json.log",
+      "sha256": "83029cbc0511cb3b8a5c1ff7c26933e67184d3fb07399a668a1b5ddc39989a79"
+    }
+  ],
+  "priorApprovedIdentities": {
+    "browser22": {
+      "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+      "evidenceManifestSha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+      "deliverySha256": "4cca1534c53cefdcec329b3d161911870dbf2b00fbc48ee4126dc5a8762cebf4"
+    },
+    "map01": {
+      "sourceManifestSha256": "40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11",
+      "evidenceManifestSha256": "c627fc471c55eee7c7cfc3d367610bb0b3f72bd64e0815d487c57c5cd85a4b4c",
+      "deliverySha256": "ba13b9c41eea62b534524c50a1e4b23603262bf7a25c32617487fa163c1b7579"
+    }
+  }
+}

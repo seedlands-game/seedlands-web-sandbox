@@ -1,0 +1,5 @@
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+changes/2026-09-23-classic-functional-completion/spec.md

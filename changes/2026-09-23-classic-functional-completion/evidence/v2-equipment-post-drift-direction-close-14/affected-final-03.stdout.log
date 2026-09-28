@@ -1,0 +1,24 @@
+10:27:40 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 20ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (12 tests) 17ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 14ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts (18 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (17 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts (7 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-exit-face.test.ts (8 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/target-aim.test.ts (11 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts (7 tests) 2ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts (3 tests) 2ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+ Test Files  14 passed (14)
+      Tests  145 passed (145)
+   Start at  22:27:41
+   Duration  2.18s (transform 465ms, setup 0ms, import 1.21s, tests 89ms, environment 1ms)
+

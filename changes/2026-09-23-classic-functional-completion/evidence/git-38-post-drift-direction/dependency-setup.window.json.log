@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git-38-post-drift-direction-dependency-setup",
+  "pid": 14470,
+  "startedAt": "2026-09-28T14:42:01.672Z",
+  "windowId": "git-38-post-drift-direction-dependency-setup",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/dependency-setup.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T14:42:05.667Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T14:42:01.673Z",
+      "loadAverage": [
+        3.2705078125,
+        3.021484375,
+        2.88818359375
+      ],
+      "freeMemoryBytes": 113590272,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T14:42:05.665Z",
+      "loadAverage": [
+        3.56884765625,
+        3.08740234375,
+        2.912109375
+      ],
+      "freeMemoryBytes": 3805839360,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/v1-slice.ts: OK
+apps/web/tests/e2e/classic-support/door-collision-oracle.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK
+apps/web/dist/harness-artifact.json: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/route-progress.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts: OK
+SOURCE-MANIFEST.sha256: OK
+artifact-postcheck-window.json.log: OK
+artifact-postcheck.stdout.log: OK
+artifact-readback.json: OK
+canonical-error-context.md.log: OK
+canonical-window.json.log: OK
+classic-runtime-failure.json.log: OK
+classic.json.log: OK
+collector-readback.md: OK
+command.txt: OK
+diagnosis.json: OK
+drop-34.png: OK
+drop-38.png: OK
+drop-42.png: OK
+drop-45.png: OK
+drop-49.png: OK
+failure-screencast-frame.jpeg: OK
+harness-artifact.json: OK
+metadata-format-pre-window.json.log: OK
+metadata-format-pre.stdout.log: OK
+metadata-format-write-window.json.log: OK
+metadata-format-write.stdout.log: OK
+network-summary.json: OK
+playwright-last-run.json.log: OK
+postconditions.stdout.log: OK
+result-summary.json: OK
+runner.stdout.log: OK
+source-validation.stdout.log: OK
+trace-50m/canonical-trace.zip.part-aa: OK
+trace-50m/canonical-trace.zip.part-ab: OK
+trace-50m/canonical-trace.zip.part-ac: OK
+trace-50m/canonical-trace.zip.part-ad: OK
+trace-50m/canonical-trace.zip.part-ae: OK
+trace-50m/canonical-trace.zip.part-af: OK
+trace-50m/canonical-trace.zip.part-ag: OK
+trace-50m/canonical-trace.zip.part-ah: OK
+trace-50m/canonical-trace.zip.part-ai: OK
+trace-50m/canonical-trace.zip.part-aj: OK
+trace-50m/canonical-trace.zip.part-ak: OK
+trace-50m/canonical-trace.zip.part-al: OK
+trace-50m/canonical-trace.zip.part-am: OK
+trace-parts.sha256: OK
+trace-readback.json: OK
+trace-readback.txt: OK
+trace-reassembly.sha256: OK
+workbench-route-analysis.json.log: OK
+workbench-route-calls.json.log: OK
+workbench-route-inputs.json: OK
+workbench-route-snapshots.json.log: OK
+workbench-route-summary.json.log: OK
+./README.md: OK
+./SOURCE-MANIFEST.sha256: OK
+./diagnosis.json: OK
+./final-selfcheck-cwd-failure-window.json.log: OK
+./final-selfcheck-cwd-failure.stdout.log: OK
+./final-selfcheck-lock-contract-failure-window.json.log: OK
+./final-selfcheck-lock-contract-failure.stdout.log: OK
+./format-pre-window.json.log: OK
+./format-pre.stdout.log: OK
+./format-write-02-window.json.log: OK
+./format-write-02.stdout.log: OK
+./format-write-final-02-window.json.log: OK
+./format-write-final-02.stdout.log: OK
+./format-write-final-window.json.log: OK
+./format-write-final.stdout.log: OK
+./format-write-window.json.log: OK
+./format-write.stdout.log: OK
+./route-condition-timeline.tsv: OK
+./source-validation.stdout.log: OK
+./workbench-route-sample-timeline.json: OK
+./workbench-route-timeline.json: OK
+README.md: OK
+SOURCE-MANIFEST.sha256: OK
+code-staged.actual.paths: OK
+code-staged.patch: OK
+code-staged.paths: OK
+dependency-prep-initial-failure.txt: OK
+dependency-setup.stdout.log: OK
+dependency-setup.window.json.log: OK
+metadata-format.stdout.log: OK
+metadata-format.window.json.log: OK
+prior-packaging/PRIOR-MANIFEST.sha256: OK
+prior-packaging/README.md: OK
+prior-packaging/browser22/MANIFEST.sha256.log: OK
+prior-packaging/browser22/SOURCE-MANIFEST.sha256.log: OK
+prior-packaging/browser22/collector-readback.md.log: OK
+prior-packaging/browser22/delivery-validation.json.log: OK
+prior-packaging/browser22/trace-readback.json.log: OK
+prior-packaging/git38/MANIFEST.sha256.log: OK
+prior-packaging/git38/README.md.log: OK
+prior-packaging/git38/delivery-validation.json.log: OK
+prior-packaging/map01/MANIFEST.sha256.log: OK
+prior-packaging/map01/README.md.log: OK
+prior-packaging/map01/SOURCE-MANIFEST.sha256.log: OK
+prior-packaging/map01/delivery-validation.json.log: OK
+prior-packaging/map01/diagnosis.json.log: OK
+prior-packaging/map01/workbench-route-timeline.json.log: OK
+prior-packaging/raw-path-mapping.json: OK
+raw-packaging-format-write-final.stdout.log: OK
+raw-packaging-format-write-final.window.json.log: OK
+raw-packaging-format-write.stdout.log: OK
+raw-packaging-format-write.window.json.log: OK
+raw-packaging-format.stdout.log: OK
+raw-packaging-format.window.json.log: OK
+raw-packaging-selfcheck-permission-failure.stdout.log: OK
+raw-packaging-selfcheck-permission-failure.window.json.log: OK
+raw-packaging-validation.json: OK
+staged-gate.stdout.log: OK
+staged-gate.window.json.log: OK
+tracked-only-incomplete.patch: OK
+validation-argv.txt: OK
+browser22/MANIFEST.sha256.log: OK
+browser22/SOURCE-MANIFEST.sha256.log: OK
+browser22/collector-readback.md.log: OK
+browser22/delivery-validation.json.log: OK
+browser22/trace-readback.json.log: OK
+git38/MANIFEST.sha256.log: OK
+git38/README.md.log: OK
+git38/delivery-validation.json.log: OK
+map01/MANIFEST.sha256.log: OK
+map01/README.md.log: OK
+map01/SOURCE-MANIFEST.sha256.log: OK
+map01/delivery-validation.json.log: OK
+map01/diagnosis.json.log: OK
+map01/workbench-route-timeline.json.log: OK
+trace-50m/canonical-trace.zip.part-aa: OK
+trace-50m/canonical-trace.zip.part-ab: OK
+trace-50m/canonical-trace.zip.part-ac: OK
+trace-50m/canonical-trace.zip.part-ad: OK
+trace-50m/canonical-trace.zip.part-ae: OK
+trace-50m/canonical-trace.zip.part-af: OK
+trace-50m/canonical-trace.zip.part-ag: OK
+trace-50m/canonical-trace.zip.part-ah: OK
+trace-50m/canonical-trace.zip.part-ai: OK
+trace-50m/canonical-trace.zip.part-aj: OK
+trace-50m/canonical-trace.zip.part-ak: OK
+trace-50m/canonical-trace.zip.part-al: OK
+trace-50m/canonical-trace.zip.part-am: OK
+Checking formatting...
+All matched files use Prettier code style!
+STAGED_PATHS=235
+STAGED_BYTES=56246
+HEAD=PASS
+SOURCE_BROWSER22_15=PASS
+SOURCE_MAP01_11=PASS
+SOURCE_GIT38_5=PASS
+BROWSER22_MANIFEST50=PASS
+MAP01_MANIFEST21=PASS
+GIT38_MANIFEST38=PASS
+PRIOR_MANIFEST14=PASS
+PRIOR_BROWSER22_MANIFEST50_MAPPED=PASS
+PRIOR_MAP01_MANIFEST21_MAPPED=PASS
+RAW4_SHA_AND_JSON_PARSE=PASS
+TRACE_13_PARTS_BYTES_SHA=PASS
+METADATA_FORMAT=PASS
+STAGED_SCOPE_235=PASS
+ACCEPTANCE_TRACKED_AND_INDEX_CLEAN=PASS

@@ -1,0 +1,4737 @@
+{
+  "target": [
+    78.5,
+    0.5
+  ],
+  "counts": {
+    "snapshots": 140,
+    "mouseMoves": 110,
+    "keyDowns": 8,
+    "keyUps": 8
+  },
+  "firstClientReached": {
+    "kind": "snapshot",
+    "stepId": "pw:api@8880",
+    "t": 401262.172,
+    "direction": "KeyS",
+    "player": [
+      78.50784301757812,
+      32.599998474121094,
+      0.5390361547470093
+    ],
+    "server": [
+      78.49858066153473,
+      32.6,
+      0.6640361514406132
+    ],
+    "view": [
+      -903.5399999999992,
+      -20.03000000000001
+    ],
+    "tick": 20546,
+    "ack": 13854,
+    "onGround": true,
+    "colliding": false,
+    "clientReached": true,
+    "serverReached": false,
+    "clientNeighborhood": true,
+    "serverNeighborhood": false,
+    "strictGeometry": false
+  },
+  "compact": [
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8691",
+      "t": 390337.448,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8693",
+      "t": 390408.071,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1149.7599999999998,
+        -20.03000000000001
+      ],
+      "tick": 20360,
+      "ack": 13660,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8695",
+      "t": 390438.376,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8697",
+      "t": 390496.596,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1139.3599999999997,
+        -20.03000000000001
+      ],
+      "tick": 20365,
+      "ack": 13665,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8699",
+      "t": 390516.919,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8701",
+      "t": 390556.499,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1128.9599999999996,
+        -20.03000000000001
+      ],
+      "tick": 20368,
+      "ack": 13668,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8703",
+      "t": 390575.733,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8705",
+      "t": 390623.614,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1118.5599999999995,
+        -20.03000000000001
+      ],
+      "tick": 20372,
+      "ack": 13672,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8707",
+      "t": 390642.018,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8709",
+      "t": 390690.935,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1108.1599999999994,
+        -20.03000000000001
+      ],
+      "tick": 20377,
+      "ack": 13677,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8720",
+      "t": 392363.971,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8722",
+      "t": 392407.194,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1097.7599999999993,
+        -20.03000000000001
+      ],
+      "tick": 20388,
+      "ack": 13689,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8724",
+      "t": 392432.259,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8726",
+      "t": 392480.439,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1087.3599999999992,
+        -20.03000000000001
+      ],
+      "tick": 20392,
+      "ack": 13693,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8728",
+      "t": 392501.602,
+      "x": 285.76847918564596,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8730",
+      "t": 392541.355,
+      "direction": "KeyS",
+      "player": [
+        78.55076599121094,
+        32.599998474121094,
+        -0.49871936440467834
+      ],
+      "server": [
+        78.55076243809718,
+        32.6,
+        -0.4987193627433512
+      ],
+      "view": [
+        -1082.8099999999993,
+        -20.03000000000001
+      ],
+      "tick": 20395,
+      "ack": 13696,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@8732",
+      "t": 392570.127,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@8733",
+      "t": 392654.582,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8735",
+      "t": 392658.778,
+      "direction": "KeyS",
+      "player": [
+        78.52870178222656,
+        32.599998474121094,
+        -0.21547621488571167
+      ],
+      "server": [
+        78.54340882434947,
+        32.6,
+        -0.45705269607668453
+      ],
+      "view": [
+        -1082.8099999999993,
+        -20.03000000000001
+      ],
+      "tick": 20401,
+      "ack": 13702,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8737",
+      "t": 392674.181,
+      "direction": "KeyS",
+      "player": [
+        78.52870178222656,
+        32.599998474121094,
+        -0.1544552743434906
+      ],
+      "server": [
+        78.5323784037279,
+        32.6,
+        -0.2903860294100178
+      ],
+      "view": [
+        -1082.8099999999993,
+        -20.03000000000001
+      ],
+      "tick": 20404,
+      "ack": 13705,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8739",
+      "t": 392693.119,
+      "x": 283.46966276473023,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8741",
+      "t": 392738.926,
+      "direction": "KeyS",
+      "player": [
+        78.52870178222656,
+        32.599998474121094,
+        -0.05472581833600998
+      ],
+      "server": [
+        78.52870159685405,
+        32.6,
+        -0.10732323690207718
+      ],
+      "view": [
+        -1082.5499999999993,
+        -20.03000000000001
+      ],
+      "tick": 20407,
+      "ack": 13708,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8743",
+      "t": 392758.581,
+      "x": 286.63789495484286,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8745",
+      "t": 392807.525,
+      "direction": "KeyS",
+      "player": [
+        78.52870178222656,
+        32.599998474121094,
+        -0.049260444939136505
+      ],
+      "server": [
+        78.52870159685405,
+        32.6,
+        -0.049260444394136606
+      ],
+      "view": [
+        -1082.9399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20411,
+      "ack": 13712,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@8747",
+      "t": 392836.208,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@8748",
+      "t": 392920.726,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8750",
+      "t": 392924.566,
+      "direction": "KeyS",
+      "player": [
+        78.50562286376953,
+        32.599998474121094,
+        0.2339741736650467
+      ],
+      "server": [
+        78.51331454692145,
+        32.6,
+        0.0896284444947523
+      ],
+      "view": [
+        -1082.9399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20419,
+      "ack": 13720,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8752",
+      "t": 392939.843,
+      "direction": "KeyS",
+      "player": [
+        78.50562286376953,
+        32.599998474121094,
+        0.2949865758419037
+      ],
+      "server": [
+        78.51331454692145,
+        32.6,
+        0.0896284444947523
+      ],
+      "view": [
+        -1082.9399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20419,
+      "ack": 13720,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8754",
+      "t": 392958.826,
+      "x": 276.10748325467597,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8756",
+      "t": 393006.326,
+      "direction": "KeyS",
+      "player": [
+        78.50562286376953,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50562102195515,
+        32.6,
+        0.34211007574546054
+      ],
+      "view": [
+        -1081.6399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20423,
+      "ack": 13724,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8758",
+      "t": 393024.743,
+      "x": 288.2844908196977,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8760",
+      "t": 393073.973,
+      "direction": "KeyS",
+      "player": [
+        78.50562286376953,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50562102195515,
+        32.6,
+        0.40014726255172434
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20427,
+      "ack": 13728,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@8762",
+      "t": 393103.989,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@8763",
+      "t": 393189.148,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8765",
+      "t": 393191.829,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8767",
+      "t": 393206.622,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6640361547470093
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8769",
+      "t": 393225.456,
+      "x": 208.28449081969768,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8771",
+      "t": 393271.817,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7057028181072799
+      ],
+      "view": [
+        -1072.7999999999993,
+        -20.03000000000001
+      ],
+      "tick": 20439,
+      "ack": 13740,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8773",
+      "t": 393290.732,
+      "x": 128.28449081969768,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8775",
+      "t": 393340.754,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1062.3999999999992,
+        -20.03000000000001
+      ],
+      "tick": 20443,
+      "ack": 13744,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8786",
+      "t": 395035.45,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8788",
+      "t": 395092.305,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1051.999999999999,
+        -20.03000000000001
+      ],
+      "tick": 20456,
+      "ack": 13759,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8790",
+      "t": 395123.987,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8792",
+      "t": 395173.35,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1041.599999999999,
+        -20.03000000000001
+      ],
+      "tick": 20460,
+      "ack": 13763,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8794",
+      "t": 395196.286,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8796",
+      "t": 395240.773,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1031.199999999999,
+        -20.03000000000001
+      ],
+      "tick": 20465,
+      "ack": 13768,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8798",
+      "t": 395260.159,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8800",
+      "t": 395306.381,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1020.7999999999989,
+        -20.03000000000001
+      ],
+      "tick": 20468,
+      "ack": 13771,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8802",
+      "t": 395325.93,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8804",
+      "t": 395375.172,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -1010.399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20473,
+      "ack": 13776,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8815",
+      "t": 397053.172,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8817",
+      "t": 397129.2,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -999.999999999999,
+        -20.03000000000001
+      ],
+      "tick": 20484,
+      "ack": 13789,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8819",
+      "t": 397149.732,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8821",
+      "t": 397190.646,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -989.599999999999,
+        -20.03000000000001
+      ],
+      "tick": 20488,
+      "ack": 13793,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8823",
+      "t": 397219.904,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8825",
+      "t": 397256.823,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -979.199999999999,
+        -20.03000000000001
+      ],
+      "tick": 20492,
+      "ack": 13797,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8827",
+      "t": 397276.898,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8829",
+      "t": 397323.919,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -968.799999999999,
+        -20.03000000000001
+      ],
+      "tick": 20496,
+      "ack": 13801,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8831",
+      "t": 397344.329,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8833",
+      "t": 397389.625,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -958.3999999999991,
+        -20.03000000000001
+      ],
+      "tick": 20500,
+      "ack": 13805,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8844",
+      "t": 399069.735,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8846",
+      "t": 399149.579,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -947.9999999999991,
+        -20.03000000000001
+      ],
+      "tick": 20512,
+      "ack": 13818,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8848",
+      "t": 399168.496,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8850",
+      "t": 399207.233,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -937.5999999999991,
+        -20.03000000000001
+      ],
+      "tick": 20516,
+      "ack": 13822,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8852",
+      "t": 399233.019,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8854",
+      "t": 399272.637,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -927.1999999999991,
+        -20.03000000000001
+      ],
+      "tick": 20519,
+      "ack": 13825,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8856",
+      "t": 399291.308,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8858",
+      "t": 399338.902,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -916.7999999999992,
+        -20.03000000000001
+      ],
+      "tick": 20524,
+      "ack": 13830,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8860",
+      "t": 399359.65,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8862",
+      "t": 399406.624,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -906.3999999999992,
+        -20.03000000000001
+      ],
+      "tick": 20528,
+      "ack": 13834,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8873",
+      "t": 401081.571,
+      "x": 458.016116196094,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8875",
+      "t": 401124.342,
+      "direction": "KeyS",
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.48468795685382,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20538,
+      "ack": 13846,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@8877",
+      "t": 401174.348,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@8878",
+      "t": 401259.305,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8880",
+      "t": 401262.172,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": true,
+      "serverReached": false,
+      "clientNeighborhood": true,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8883",
+      "t": 401277.976,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": true,
+      "serverReached": false,
+      "clientNeighborhood": true,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8885",
+      "t": 401308.999,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20549,
+      "ack": 13857,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8887",
+      "t": 401323.974,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20550,
+      "ack": 13858,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8888",
+      "t": 401339.132,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4140361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20551,
+      "ack": 13859,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8890",
+      "t": 401359.905,
+      "x": 378.016116196094,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8892",
+      "t": 401405.482,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -893.1399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20555,
+      "ack": 13863,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8894",
+      "t": 401425.412,
+      "x": 298.016116196094,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8896",
+      "t": 401472.149,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -882.7399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20558,
+      "ack": 13866,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8898",
+      "t": 401490.795,
+      "x": 218.016116196094,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8900",
+      "t": 401540.004,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -872.3399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20563,
+      "ack": 13871,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8902",
+      "t": 401559.834,
+      "x": 138.016116196094,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8904",
+      "t": 401606.691,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -861.9399999999993,
+        -20.03000000000001
+      ],
+      "tick": 20567,
+      "ack": 13875,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8915",
+      "t": 403269.661,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8917",
+      "t": 403323.652,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -851.5399999999993,
+        -20.03000000000001
+      ],
+      "tick": 20577,
+      "ack": 13886,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8919",
+      "t": 403345.827,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8921",
+      "t": 403389.897,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -841.1399999999993,
+        -20.03000000000001
+      ],
+      "tick": 20581,
+      "ack": 13890,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8923",
+      "t": 403409.238,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8925",
+      "t": 403455.717,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -830.7399999999993,
+        -20.03000000000001
+      ],
+      "tick": 20585,
+      "ack": 13894,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8927",
+      "t": 403474.77,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8929",
+      "t": 403523.799,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -820.3399999999993,
+        -20.03000000000001
+      ],
+      "tick": 20589,
+      "ack": 13898,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8931",
+      "t": 403541.843,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8933",
+      "t": 403589.502,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -809.9399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20593,
+      "ack": 13902,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8944",
+      "t": 405280.066,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8946",
+      "t": 405357.284,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -799.5399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20606,
+      "ack": 13917,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8948",
+      "t": 405392.058,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8950",
+      "t": 405445.44,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -789.1399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20612,
+      "ack": 13923,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8952",
+      "t": 405463.429,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8954",
+      "t": 405506.35,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -778.7399999999994,
+        -20.03000000000001
+      ],
+      "tick": 20614,
+      "ack": 13925,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8956",
+      "t": 405526.375,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8958",
+      "t": 405574.265,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -768.3399999999995,
+        -20.03000000000001
+      ],
+      "tick": 20619,
+      "ack": 13930,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8960",
+      "t": 405593.437,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8962",
+      "t": 405639.742,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -757.9399999999995,
+        -20.03000000000001
+      ],
+      "tick": 20623,
+      "ack": 13934,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8973",
+      "t": 407335.623,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8975",
+      "t": 407373.636,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -747.5399999999995,
+        -20.03000000000001
+      ],
+      "tick": 20633,
+      "ack": 13945,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8977",
+      "t": 407400.036,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8979",
+      "t": 407440.938,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -737.1399999999995,
+        -20.03000000000001
+      ],
+      "tick": 20638,
+      "ack": 13950,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8981",
+      "t": 407463.879,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8983",
+      "t": 407506.612,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -726.7399999999996,
+        -20.03000000000001
+      ],
+      "tick": 20642,
+      "ack": 13954,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8985",
+      "t": 407524.26,
+      "x": 222.70095736253936,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8987",
+      "t": 407573.209,
+      "direction": "KeyS",
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20645,
+      "ack": 13957,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@8989",
+      "t": 407613.829,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@8990",
+      "t": 407696.672,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8992",
+      "t": 407699.155,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.48482675668365,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20654,
+      "ack": 13966,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8994",
+      "t": 407713.919,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.6640361547470093
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.6084805958850577
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20655,
+      "ack": 13967,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@8996",
+      "t": 407731.74,
+      "x": 142.70095736253936,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@8998",
+      "t": 407773.2,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7334805958850577
+      ],
+      "view": [
+        -713.9999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20658,
+      "ack": 13970,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9009",
+      "t": 409496.119,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9011",
+      "t": 409539.083,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -703.5999999999996,
+        -20.03000000000001
+      ],
+      "tick": 20671,
+      "ack": 13984,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9013",
+      "t": 409561.766,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9015",
+      "t": 409617.009,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -693.1999999999996,
+        -20.03000000000001
+      ],
+      "tick": 20675,
+      "ack": 13988,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9017",
+      "t": 409634.258,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9019",
+      "t": 409671.754,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -682.7999999999996,
+        -20.03000000000001
+      ],
+      "tick": 20679,
+      "ack": 13992,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9021",
+      "t": 409690.738,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9023",
+      "t": 409738.161,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -672.3999999999996,
+        -20.03000000000001
+      ],
+      "tick": 20682,
+      "ack": 13995,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9025",
+      "t": 409756.975,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9027",
+      "t": 409805.934,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -661.9999999999997,
+        -20.03000000000001
+      ],
+      "tick": 20687,
+      "ack": 14000,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9038",
+      "t": 411533.011,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9040",
+      "t": 411572.578,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -651.5999999999997,
+        -20.03000000000001
+      ],
+      "tick": 20700,
+      "ack": 14015,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9042",
+      "t": 411594.797,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9044",
+      "t": 411639.681,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -641.1999999999997,
+        -20.03000000000001
+      ],
+      "tick": 20704,
+      "ack": 14019,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9046",
+      "t": 411666.795,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9048",
+      "t": 411706.086,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -630.7999999999997,
+        -20.03000000000001
+      ],
+      "tick": 20708,
+      "ack": 14023,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9050",
+      "t": 411724.149,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9052",
+      "t": 411773.569,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -620.3999999999997,
+        -20.03000000000001
+      ],
+      "tick": 20712,
+      "ack": 14027,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9054",
+      "t": 411791.426,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9056",
+      "t": 411839.97,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -609.9999999999998,
+        -20.03000000000001
+      ],
+      "tick": 20716,
+      "ack": 14031,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9067",
+      "t": 413499.052,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9069",
+      "t": 413544.712,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -599.5999999999998,
+        -20.03000000000001
+      ],
+      "tick": 20725,
+      "ack": 14041,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9071",
+      "t": 413563.056,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9073",
+      "t": 413606.462,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -589.1999999999998,
+        -20.03000000000001
+      ],
+      "tick": 20728,
+      "ack": 14044,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9075",
+      "t": 413625.218,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9077",
+      "t": 413676.506,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -578.7999999999998,
+        -20.03000000000001
+      ],
+      "tick": 20733,
+      "ack": 14049,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9079",
+      "t": 413695.157,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9081",
+      "t": 413740.068,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -568.3999999999999,
+        -20.03000000000001
+      ],
+      "tick": 20737,
+      "ack": 14053,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9083",
+      "t": 413760.072,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9085",
+      "t": 413805.309,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -557.9999999999999,
+        -20.03000000000001
+      ],
+      "tick": 20741,
+      "ack": 14057,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9096",
+      "t": 415484.918,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9098",
+      "t": 415561.781,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -547.5999999999999,
+        -20.03000000000001
+      ],
+      "tick": 20753,
+      "ack": 14071,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9100",
+      "t": 415580.48,
+      "x": 378.73616801087405,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9102",
+      "t": 415623.489,
+      "direction": "KeyS",
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.7473694682121277
+      ],
+      "server": [
+        78.47907282969072,
+        32.6,
+        0.7473694847739465
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20756,
+      "ack": 14074,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@9104",
+      "t": 415660.155,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@9105",
+      "t": 415742.559,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9107",
+      "t": 415745.008,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49146797116592,
+        32.6,
+        0.7057028181072799
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20763,
+      "ack": 14081,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": true,
+      "serverReached": false,
+      "clientNeighborhood": true,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9110",
+      "t": 415761.089,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.50386311264111,
+        32.6,
+        0.6084805958850577
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20765,
+      "ack": 14083,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": true,
+      "serverReached": false,
+      "clientNeighborhood": true,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9112",
+      "t": 415793.881,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20766,
+      "ack": 14084,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9114",
+      "t": 415809.632,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20768,
+      "ack": 14086,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9115",
+      "t": 415823.876,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4140361514406132
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20769,
+      "ack": 14087,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9117",
+      "t": 415842.479,
+      "x": 298.73616801087405,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9119",
+      "t": 415889.729,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -534.3399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20773,
+      "ack": 14091,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9121",
+      "t": 415910.938,
+      "x": 218.73616801087405,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9123",
+      "t": 415956.554,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -523.9399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20777,
+      "ack": 14095,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9125",
+      "t": 415975.21,
+      "x": 138.73616801087405,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9127",
+      "t": 416023.688,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -513.54,
+        -20.03000000000001
+      ],
+      "tick": 20781,
+      "ack": 14099,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9138",
+      "t": 417749.865,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9140",
+      "t": 417790.686,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -503.14,
+        -20.03000000000001
+      ],
+      "tick": 20794,
+      "ack": 14114,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9142",
+      "t": 417810.682,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9144",
+      "t": 417855.237,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -492.74,
+        -20.03000000000001
+      ],
+      "tick": 20797,
+      "ack": 14117,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9146",
+      "t": 417893.238,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9148",
+      "t": 417939.974,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -482.34000000000003,
+        -20.03000000000001
+      ],
+      "tick": 20802,
+      "ack": 14122,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9150",
+      "t": 417958.569,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9152",
+      "t": 418006.14,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -471.94000000000005,
+        -20.03000000000001
+      ],
+      "tick": 20806,
+      "ack": 14126,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9154",
+      "t": 418025.945,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9156",
+      "t": 418073.883,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -461.5400000000001,
+        -20.03000000000001
+      ],
+      "tick": 20810,
+      "ack": 14130,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9167",
+      "t": 419752.603,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9169",
+      "t": 419827.466,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -451.1400000000001,
+        -20.03000000000001
+      ],
+      "tick": 20823,
+      "ack": 14145,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9171",
+      "t": 419846.468,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9173",
+      "t": 419890.047,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -440.7400000000001,
+        -20.03000000000001
+      ],
+      "tick": 20826,
+      "ack": 14148,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9175",
+      "t": 419915.521,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9177",
+      "t": 419955.401,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -430.34000000000015,
+        -20.03000000000001
+      ],
+      "tick": 20830,
+      "ack": 14152,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9179",
+      "t": 419974.459,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9181",
+      "t": 420023.177,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -419.94000000000017,
+        -20.03000000000001
+      ],
+      "tick": 20834,
+      "ack": 14156,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9183",
+      "t": 420041.891,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9185",
+      "t": 420089.16,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -409.5400000000002,
+        -20.03000000000001
+      ],
+      "tick": 20838,
+      "ack": 14159,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9196",
+      "t": 421836.079,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9198",
+      "t": 421889.531,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -399.1400000000002,
+        -20.03000000000001
+      ],
+      "tick": 20852,
+      "ack": 14176,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9200",
+      "t": 421910.319,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9202",
+      "t": 421957.529,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -388.74000000000024,
+        -20.03000000000001
+      ],
+      "tick": 20857,
+      "ack": 14180,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9204",
+      "t": 421975.526,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9206",
+      "t": 422022.179,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -378.34000000000026,
+        -20.03000000000001
+      ],
+      "tick": 20860,
+      "ack": 14183,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9208",
+      "t": 422041.667,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9210",
+      "t": 422090.496,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -367.9400000000003,
+        -20.03000000000001
+      ],
+      "tick": 20865,
+      "ack": 14188,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9212",
+      "t": 422108.537,
+      "x": 143.19111424543385,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9214",
+      "t": 422154.761,
+      "direction": "KeyS",
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.4001472625517243
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20868,
+      "ack": 14191,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@9216",
+      "t": 422183.307,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@9217",
+      "t": 422265.806,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9219",
+      "t": 422268.4,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49508457077157,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20875,
+      "ack": 14198,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9221",
+      "t": 422284.405,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6223694682121277
+      ],
+      "server": [
+        78.487596514468,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20876,
+      "ack": 14199,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9232",
+      "t": 424016.816,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9234",
+      "t": 424081.233,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -355.3300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20890,
+      "ack": 14215,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9236",
+      "t": 424101.87,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9238",
+      "t": 424143.055,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -344.93000000000035,
+        -20.03000000000001
+      ],
+      "tick": 20893,
+      "ack": 14218,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9240",
+      "t": 424161.463,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9242",
+      "t": 424206.569,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -334.53000000000037,
+        -20.03000000000001
+      ],
+      "tick": 20898,
+      "ack": 14223,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9244",
+      "t": 424224.977,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9246",
+      "t": 424272.543,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -324.1300000000004,
+        -20.03000000000001
+      ],
+      "tick": 20902,
+      "ack": 14227,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9248",
+      "t": 424291.661,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9250",
+      "t": 424339.659,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -313.7300000000004,
+        -20.03000000000001
+      ],
+      "tick": 20906,
+      "ack": 14231,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9261",
+      "t": 425985.73,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9263",
+      "t": 426056.183,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -303.33000000000044,
+        -20.03000000000001
+      ],
+      "tick": 20917,
+      "ack": 14245,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9265",
+      "t": 426078.502,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9267",
+      "t": 426123.996,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -292.93000000000046,
+        -20.03000000000001
+      ],
+      "tick": 20920,
+      "ack": 14248,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9269",
+      "t": 426145.78,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9271",
+      "t": 426192.547,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -282.5300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20924,
+      "ack": 14251,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9273",
+      "t": 426209.922,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9275",
+      "t": 426255.914,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -272.1300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20928,
+      "ack": 14255,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9277",
+      "t": 426274.811,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9279",
+      "t": 426322.614,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -261.73000000000053,
+        -20.03000000000001
+      ],
+      "tick": 20932,
+      "ack": 14259,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9290",
+      "t": 427993.108,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9292",
+      "t": 428039.67,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -251.33000000000052,
+        -20.03000000000001
+      ],
+      "tick": 20942,
+      "ack": 14271,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9294",
+      "t": 428059.202,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9296",
+      "t": 428109.391,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -240.93000000000052,
+        -20.03000000000001
+      ],
+      "tick": 20947,
+      "ack": 14276,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9298",
+      "t": 428126.71,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9300",
+      "t": 428173.632,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -230.5300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20951,
+      "ack": 14280,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9302",
+      "t": 428191.764,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9304",
+      "t": 428239.22,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -220.1300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20954,
+      "ack": 14283,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9306",
+      "t": 428258.267,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9308",
+      "t": 428306.137,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -209.7300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20959,
+      "ack": 14288,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9319",
+      "t": 430035.213,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9321",
+      "t": 430090.332,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -199.3300000000005,
+        -20.03000000000001
+      ],
+      "tick": 20971,
+      "ack": 14302,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9323",
+      "t": 430111.546,
+      "x": 357.80816409928775,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9325",
+      "t": 430156.957,
+      "direction": "KeyS",
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.5807028412818909
+      ],
+      "server": [
+        78.48010845816442,
+        32.6,
+        0.5807028181072799
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20977,
+      "ack": 14308,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "key-down",
+      "stepId": "pw:api@9327",
+      "t": 430194.536,
+      "key": "KeyS"
+    },
+    {
+      "kind": "key-up",
+      "stepId": "pw:api@9328",
+      "t": 430287.736,
+      "key": "KeyS"
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9330",
+      "t": 430291.15,
+      "direction": "KeyS",
+      "player": [
+        78.58306884765625,
+        32.599998474121094,
+        0.2995157241821289
+      ],
+      "server": [
+        78.52962480063614,
+        32.6,
+        0.49736948477394655
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20984,
+      "ack": 14315,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": true,
+      "clientNeighborhood": false,
+      "serverNeighborhood": true,
+      "strictGeometry": false
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9332",
+      "t": 430307.147,
+      "direction": "KeyS",
+      "player": [
+        78.58306884765625,
+        32.599998474121094,
+        0.2995157241821289
+      ],
+      "server": [
+        78.56525225421898,
+        32.6,
+        0.3723694847739465
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20986,
+      "ack": 14317,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9334",
+      "t": 430324.978,
+      "x": 277.80816409928775,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9336",
+      "t": 430372.131,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.19547485514090623
+      ],
+      "view": [
+        -183.3400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20989,
+      "ack": 14320,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9338",
+      "t": 430390.538,
+      "x": 197.80816409928775,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9340",
+      "t": 430439.186,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -172.94000000000048,
+        -20.03000000000001
+      ],
+      "tick": 20993,
+      "ack": 14324,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9342",
+      "t": 430456.626,
+      "x": 117.80816409928775,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9344",
+      "t": 430506.443,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -162.54000000000048,
+        -20.03000000000001
+      ],
+      "tick": 20997,
+      "ack": 14327,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9355",
+      "t": 432167.947,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9357",
+      "t": 432222.375,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -152.14000000000047,
+        -20.03000000000001
+      ],
+      "tick": 21008,
+      "ack": 14340,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9359",
+      "t": 432244.202,
+      "x": 320,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9361",
+      "t": 432289.385,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -141.74000000000046,
+        -20.03000000000001
+      ],
+      "tick": 21011,
+      "ack": 14343,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9363",
+      "t": 432308.444,
+      "x": 240,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9365",
+      "t": 432358.766,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -131.34000000000046,
+        -20.03000000000001
+      ],
+      "tick": 21016,
+      "ack": 14348,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9367",
+      "t": 432376.022,
+      "x": 160,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9369",
+      "t": 432421.89,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -120.94000000000045,
+        -20.03000000000001
+      ],
+      "tick": 21020,
+      "ack": 14352,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9371",
+      "t": 432441.845,
+      "x": 80,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9373",
+      "t": 432487.96,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -110.54000000000045,
+        -20.03000000000001
+      ],
+      "tick": 21023,
+      "ack": 14355,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    },
+    {
+      "kind": "mouse",
+      "stepId": "pw:api@9384",
+      "t": 434168.817,
+      "x": 400,
+      "y": 270
+    },
+    {
+      "kind": "snapshot",
+      "stepId": "pw:api@9386",
+      "t": 434239.422,
+      "direction": "KeyS",
+      "player": [
+        78.58699035644531,
+        32.599998474121094,
+        0.14358022809028625
+      ],
+      "server": [
+        78.58699081891291,
+        32.6,
+        0.14358022550786598
+      ],
+      "view": [
+        -100.14000000000044,
+        -20.03000000000001
+      ],
+      "tick": 21036,
+      "ack": 14370,
+      "onGround": true,
+      "colliding": false,
+      "clientReached": false,
+      "serverReached": false,
+      "clientNeighborhood": false,
+      "serverNeighborhood": false,
+      "strictGeometry": false
+    }
+  ]
+}

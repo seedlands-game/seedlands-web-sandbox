@@ -1,0 +1,1542 @@
+{
+  "target": [
+    78.5,
+    0.5
+  ],
+  "pulses": [
+    {
+      "key": "KeyS",
+      "down": "pw:api@8732",
+      "downAt": 392570.127,
+      "before": {
+        "stepId": "pw:api@8731",
+        "t": 392555.618,
+        "player": [
+          78.55076599121094,
+          32.599998474121094,
+          -0.49871936440467834
+        ],
+        "server": [
+          78.55076243809718,
+          32.6,
+          -0.4987193627433512
+        ],
+        "view": [
+          -1082.8099999999993,
+          -20.03000000000001
+        ],
+        "tick": 20396,
+        "ack": 13697,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 1.000008777311736,
+        "serverDistance": 1.0000085952830884,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@8735",
+        "t": 392658.778,
+        "player": [
+          78.52870178222656,
+          32.599998474121094,
+          -0.21547621488571167
+        ],
+        "server": [
+          78.54340882434947,
+          32.6,
+          -0.45705269607668453
+        ],
+        "view": [
+          -1082.8099999999993,
+          -20.03000000000001
+        ],
+        "tick": 20401,
+        "ack": 13702,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.7160516785610981,
+        "serverDistance": 0.9580366324410846,
+        "clientReached": false,
+        "serverReached": false
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@8747",
+      "downAt": 392836.208,
+      "before": {
+        "stepId": "pw:api@8746",
+        "t": 392822.202,
+        "player": [
+          78.52870178222656,
+          32.599998474121094,
+          -0.049260444939136505
+        ],
+        "server": [
+          78.52870159685405,
+          32.6,
+          -0.049260444394136606
+        ],
+        "view": [
+          -1082.9399999999994,
+          -20.03000000000001
+        ],
+        "tick": 20412,
+        "ack": 13713,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.5500098441643742,
+        "serverDistance": 0.5500098339466456,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@8750",
+        "t": 392924.566,
+        "player": [
+          78.50562286376953,
+          32.599998474121094,
+          0.2339741736650467
+        ],
+        "server": [
+          78.51331454692145,
+          32.6,
+          0.0896284444947523
+        ],
+        "view": [
+          -1082.9399999999994,
+          -20.03000000000001
+        ],
+        "tick": 20419,
+        "ack": 13720,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.2660852436234776,
+        "serverDistance": 0.4105874946068378,
+        "clientReached": false,
+        "serverReached": false
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@8762",
+      "downAt": 393103.989,
+      "before": {
+        "stepId": "pw:api@8761",
+        "t": 393088.959,
+        "player": [
+          78.50562286376953,
+          32.599998474121094,
+          0.4001472592353821
+        ],
+        "server": [
+          78.50562102195515,
+          32.6,
+          0.40014726255172434
+        ],
+        "view": [
+          -1083.1999999999994,
+          -20.03000000000001
+        ],
+        "tick": 20428,
+        "ack": 13729,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.10001093157838645,
+        "serverDistance": 0.10001082473279857,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@8765",
+        "t": 393191.829,
+        "player": [
+          78.48468780517578,
+          32.599998474121094,
+          0.6084805727005005
+        ],
+        "server": [
+          78.49724779591462,
+          32.6,
+          0.441813929218391
+        ],
+        "view": [
+          -1083.1999999999994,
+          -20.03000000000001
+        ],
+        "tick": 20434,
+        "ack": 13735,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.10955591250025443,
+        "serverDistance": 0.05825112411215774,
+        "clientReached": false,
+        "serverReached": true
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@8877",
+      "downAt": 401174.348,
+      "before": {
+        "stepId": "pw:api@8876",
+        "t": 401143.988,
+        "player": [
+          78.48468780517578,
+          32.599998474121094,
+          0.7473694682121277
+        ],
+        "server": [
+          78.48468795685382,
+          32.6,
+          0.7473694847739465
+        ],
+        "view": [
+          -903.5399999999992,
+          -20.03000000000001
+        ],
+        "tick": 20539,
+        "ack": 13847,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.24784292831123042,
+        "serverDistance": 0.24784293547050776,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@8880",
+        "t": 401262.172,
+        "player": [
+          78.50784301757812,
+          32.599998474121094,
+          0.5390361547470093
+        ],
+        "server": [
+          78.49858066153473,
+          32.6,
+          0.6640361514406132
+        ],
+        "view": [
+          -903.5399999999992,
+          -20.03000000000001
+        ],
+        "tick": 20546,
+        "ack": 13854,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.03981625675729993,
+        "serverDistance": 0.1640422918064936,
+        "clientReached": true,
+        "serverReached": false
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@8989",
+      "downAt": 407613.829,
+      "before": {
+        "stepId": "pw:api@8988",
+        "t": 407590.485,
+        "player": [
+          78.50784301757812,
+          32.599998474121094,
+          0.4001472592353821
+        ],
+        "server": [
+          78.50784246465534,
+          32.6,
+          0.4001472625517243
+        ],
+        "view": [
+          -724.3999999999995,
+          -20.03000000000001
+        ],
+        "tick": 20648,
+        "ack": 13960,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.10016028535770438,
+        "serverDistance": 0.10016023875662709,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@8992",
+        "t": 407699.155,
+        "player": [
+          78.47907257080078,
+          32.599998474121094,
+          0.6084805727005005
+        ],
+        "server": [
+          78.48482675668365,
+          32.6,
+          0.5390361514406132
+        ],
+        "view": [
+          -724.3999999999995,
+          -20.03000000000001
+        ],
+        "tick": 20654,
+        "ack": 13966,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.11048073110871816,
+        "serverDistance": 0.041881361391814705,
+        "clientReached": false,
+        "serverReached": true
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@9104",
+      "downAt": 415660.155,
+      "before": {
+        "stepId": "pw:api@9103",
+        "t": 415644.067,
+        "player": [
+          78.47907257080078,
+          32.599998474121094,
+          0.7473694682121277
+        ],
+        "server": [
+          78.47907282969072,
+          32.6,
+          0.7473694847739465
+        ],
+        "view": [
+          -544.7399999999999,
+          -20.03000000000001
+        ],
+        "tick": 20758,
+        "ack": 14076,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.24825311900646718,
+        "serverDistance": 0.24825311368537006,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@9107",
+        "t": 415745.008,
+        "player": [
+          78.51006317138672,
+          32.599998474121094,
+          0.5390361547470093
+        ],
+        "server": [
+          78.49146797116592,
+          32.6,
+          0.7057028181072799
+        ],
+        "view": [
+          -544.7399999999999,
+          -20.03000000000001
+        ],
+        "tick": 20763,
+        "ack": 14081,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.04031239010268344,
+        "serverDistance": 0.20587968547989932,
+        "clientReached": true,
+        "serverReached": false
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@9216",
+      "downAt": 422183.307,
+      "before": {
+        "stepId": "pw:api@9215",
+        "t": 422168.348,
+        "player": [
+          78.51006317138672,
+          32.599998474121094,
+          0.4001472592353821
+        ],
+        "server": [
+          78.51006068337871,
+          32.6,
+          0.4001472625517243
+        ],
+        "view": [
+          -365.7300000000003,
+          -20.03000000000001
+        ],
+        "tick": 20869,
+        "ack": 14192,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.10035854351555958,
+        "serverDistance": 0.10035829076843107,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@9219",
+        "t": 422268.4,
+        "player": [
+          78.48011016845703,
+          32.599998474121094,
+          0.6084805727005005
+        ],
+        "server": [
+          78.49508457077157,
+          32.6,
+          0.44181392921839097
+        ],
+        "view": [
+          -365.7300000000003,
+          -20.03000000000001
+        ],
+        "tick": 20875,
+        "ack": 14198,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.11028889360328285,
+        "serverDistance": 0.058393323912089026,
+        "clientReached": false,
+        "serverReached": true
+      }
+    },
+    {
+      "key": "KeyS",
+      "down": "pw:api@9327",
+      "downAt": 430194.536,
+      "before": {
+        "stepId": "pw:api@9326",
+        "t": 430171.68,
+        "player": [
+          78.48011016845703,
+          32.599998474121094,
+          0.5807028412818909
+        ],
+        "server": [
+          78.48010845816442,
+          32.6,
+          0.5807028181072799
+        ],
+        "view": [
+          -193.7400000000005,
+          -20.03000000000001
+        ],
+        "tick": 20977,
+        "ack": 14308,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.08311771164906878,
+        "serverDistance": 0.0831180984326109,
+        "clientReached": false,
+        "serverReached": false
+      },
+      "after": {
+        "stepId": "pw:api@9330",
+        "t": 430291.15,
+        "player": [
+          78.58306884765625,
+          32.599998474121094,
+          0.2995157241821289
+        ],
+        "server": [
+          78.52962480063614,
+          32.6,
+          0.49736948477394655
+        ],
+        "view": [
+          -193.7400000000005,
+          -20.03000000000001
+        ],
+        "tick": 20984,
+        "ack": 14315,
+        "onGround": true,
+        "colliding": false,
+        "clientDistance": 0.2170123920451399,
+        "serverDistance": 0.029741358796895618,
+        "clientReached": false,
+        "serverReached": true
+      }
+    }
+  ],
+  "candidates": [
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8765",
+      "t": 393191.829,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10955591250025443,
+      "serverDistance": 0.05825112411215774,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8765",
+      "t": 393191.829,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10955591250025443,
+      "serverDistance": 0.05825112411215774,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8767",
+      "t": 393206.622,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6640361547470093
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.16474927427615457,
+      "serverDistance": 0.05825112411215774,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8767",
+      "t": 393206.622,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6640361547470093
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "tick": 20434,
+      "ack": 13735,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.16474927427615457,
+      "serverDistance": 0.05825112411215774,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8880",
+      "t": 401262.172,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.03981625675729993,
+      "serverDistance": 0.1640422918064936,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8880",
+      "t": 401262.172,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.03981625675729993,
+      "serverDistance": 0.1640422918064936,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8883",
+      "t": 401277.976,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.018286700588146555,
+      "serverDistance": 0.1640422918064936,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8883",
+      "t": 401277.976,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20546,
+      "ack": 13854,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.018286700588146555,
+      "serverDistance": 0.1640422918064936,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8885",
+      "t": 401308.999,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20549,
+      "ack": 13857,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.08632088748044076,
+      "serverDistance": 0.01828646942914441,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8885",
+      "t": 401308.999,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20549,
+      "ack": 13857,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.08632088748044076,
+      "serverDistance": 0.01828646942914441,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8887",
+      "t": 401323.974,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20550,
+      "ack": 13858,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10016028535770438,
+      "serverDistance": 0.05871220558685115,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8887",
+      "t": 401323.974,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "tick": 20550,
+      "ack": 13858,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10016028535770438,
+      "serverDistance": 0.05871220558685115,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@8992",
+      "t": 407699.155,
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.48482675668365,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20654,
+      "ack": 13966,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.11048073110871816,
+      "serverDistance": 0.041881361391814705,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@8992",
+      "t": 407699.155,
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.48482675668365,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "tick": 20654,
+      "ack": 13966,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.11048073110871816,
+      "serverDistance": 0.041881361391814705,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9107",
+      "t": 415745.008,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49146797116592,
+        32.6,
+        0.7057028181072799
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20763,
+      "ack": 14081,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.04031239010268344,
+      "serverDistance": 0.20587968547989932,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9107",
+      "t": 415745.008,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49146797116592,
+        32.6,
+        0.7057028181072799
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20763,
+      "ack": 14081,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.04031239010268344,
+      "serverDistance": 0.20587968547989932,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9110",
+      "t": 415761.089,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.50386311264111,
+        32.6,
+        0.6084805958850577
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20765,
+      "ack": 14083,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.019343161893243224,
+      "serverDistance": 0.10854935892420145,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9110",
+      "t": 415761.089,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.50386311264111,
+        32.6,
+        0.6084805958850577
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20765,
+      "ack": 14083,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.019343161893243224,
+      "serverDistance": 0.10854935892420145,
+      "clientReached": true,
+      "serverReached": false,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9112",
+      "t": 415793.881,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20766,
+      "ack": 14084,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.08655085273432384,
+      "serverDistance": 0.04031176589212094,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9112",
+      "t": 415793.881,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20766,
+      "ack": 14084,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.08655085273432384,
+      "serverDistance": 0.04031176589212094,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9114",
+      "t": 415809.632,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20768,
+      "ack": 14086,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10035854351555958,
+      "serverDistance": 0.05904943846514623,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9114",
+      "t": 415809.632,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4001472592353821
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "tick": 20768,
+      "ack": 14086,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.10035854351555958,
+      "serverDistance": 0.05904943846514623,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9219",
+      "t": 422268.4,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49508457077157,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20875,
+      "ack": 14198,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.11028889360328285,
+      "serverDistance": 0.058393323912089026,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9219",
+      "t": 422268.4,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49508457077157,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20875,
+      "ack": 14198,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.11028889360328285,
+      "serverDistance": 0.058393323912089026,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9221",
+      "t": 422284.405,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6223694682121277
+      ],
+      "server": [
+        78.487596514468,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20876,
+      "ack": 14199,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.12397536912357472,
+      "serverDistance": 0.020657617618094922,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9221",
+      "t": 422284.405,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6223694682121277
+      ],
+      "server": [
+        78.487596514468,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "tick": 20876,
+      "ack": 14199,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.12397536912357472,
+      "serverDistance": 0.020657617618094922,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyS",
+      "stepId": "pw:api@9330",
+      "t": 430291.15,
+      "player": [
+        78.58306884765625,
+        32.599998474121094,
+        0.2995157241821289
+      ],
+      "server": [
+        78.52962480063614,
+        32.6,
+        0.49736948477394655
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20984,
+      "ack": 14315,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.2170123920451399,
+      "serverDistance": 0.029741358796895618,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    },
+    {
+      "key": "KeyW",
+      "stepId": "pw:api@9330",
+      "t": 430291.15,
+      "player": [
+        78.58306884765625,
+        32.599998474121094,
+        0.2995157241821289
+      ],
+      "server": [
+        78.52962480063614,
+        32.6,
+        0.49736948477394655
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "tick": 20984,
+      "ack": 14315,
+      "onGround": true,
+      "colliding": false,
+      "clientDistance": 0.2170123920451399,
+      "serverDistance": 0.029741358796895618,
+      "clientReached": false,
+      "serverReached": true,
+      "strictGeometry": false
+    }
+  ],
+  "nearest": [
+    {
+      "stepId": "pw:api@8885",
+      "t": 401308.999,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.50784246465534,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.08632088748044076,
+      "serverDistance": 0.01828646942914441,
+      "tick": 20549,
+      "ack": 13857
+    },
+    {
+      "stepId": "pw:api@8883",
+      "t": 401277.976,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.018286700588146555,
+      "serverDistance": 0.1640422918064936,
+      "tick": 20546,
+      "ack": 13854
+    },
+    {
+      "stepId": "pw:api@9110",
+      "t": 415761.089,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4834806025028229
+      ],
+      "server": [
+        78.50386311264111,
+        32.6,
+        0.6084805958850577
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.019343161893243224,
+      "serverDistance": 0.10854935892420145,
+      "tick": 20765,
+      "ack": 14083
+    },
+    {
+      "stepId": "pw:api@9221",
+      "t": 422284.405,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6223694682121277
+      ],
+      "server": [
+        78.487596514468,
+        32.6,
+        0.48348059588505765
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.12397536912357472,
+      "serverDistance": 0.020657617618094922,
+      "tick": 20876,
+      "ack": 14199
+    },
+    {
+      "stepId": "pw:api@9330",
+      "t": 430291.15,
+      "player": [
+        78.58306884765625,
+        32.599998474121094,
+        0.2995157241821289
+      ],
+      "server": [
+        78.52962480063614,
+        32.6,
+        0.49736948477394655
+      ],
+      "view": [
+        -193.7400000000005,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.2170123920451399,
+      "serverDistance": 0.029741358796895618,
+      "tick": 20984,
+      "ack": 14315
+    },
+    {
+      "stepId": "pw:api@8880",
+      "t": 401262.172,
+      "player": [
+        78.50784301757812,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49858066153473,
+        32.6,
+        0.6640361514406132
+      ],
+      "view": [
+        -903.5399999999992,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.03981625675729993,
+      "serverDistance": 0.1640422918064936,
+      "tick": 20546,
+      "ack": 13854
+    },
+    {
+      "stepId": "pw:api@9112",
+      "t": 415793.881,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.4140361547470093
+      ],
+      "server": [
+        78.51006068337871,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.08655085273432384,
+      "serverDistance": 0.04031176589212094,
+      "tick": 20766,
+      "ack": 14084
+    },
+    {
+      "stepId": "pw:api@9107",
+      "t": 415745.008,
+      "player": [
+        78.51006317138672,
+        32.599998474121094,
+        0.5390361547470093
+      ],
+      "server": [
+        78.49146797116592,
+        32.6,
+        0.7057028181072799
+      ],
+      "view": [
+        -544.7399999999999,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.04031239010268344,
+      "serverDistance": 0.20587968547989932,
+      "tick": 20763,
+      "ack": 14081
+    },
+    {
+      "stepId": "pw:api@8992",
+      "t": 407699.155,
+      "player": [
+        78.47907257080078,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.48482675668365,
+        32.6,
+        0.5390361514406132
+      ],
+      "view": [
+        -724.3999999999995,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.11048073110871816,
+      "serverDistance": 0.041881361391814705,
+      "tick": 20654,
+      "ack": 13966
+    },
+    {
+      "stepId": "pw:api@8765",
+      "t": 393191.829,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.10955591250025443,
+      "serverDistance": 0.05825112411215774,
+      "tick": 20434,
+      "ack": 13735
+    },
+    {
+      "stepId": "pw:api@8767",
+      "t": 393206.622,
+      "player": [
+        78.48468780517578,
+        32.599998474121094,
+        0.6640361547470093
+      ],
+      "server": [
+        78.49724779591462,
+        32.6,
+        0.441813929218391
+      ],
+      "view": [
+        -1083.1999999999994,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.16474927427615457,
+      "serverDistance": 0.05825112411215774,
+      "tick": 20434,
+      "ack": 13735
+    },
+    {
+      "stepId": "pw:api@9219",
+      "t": 422268.4,
+      "player": [
+        78.48011016845703,
+        32.599998474121094,
+        0.6084805727005005
+      ],
+      "server": [
+        78.49508457077157,
+        32.6,
+        0.44181392921839097
+      ],
+      "view": [
+        -365.7300000000003,
+        -20.03000000000001
+      ],
+      "clientDistance": 0.11028889360328285,
+      "serverDistance": 0.058393323912089026,
+      "tick": 20875,
+      "ack": 14198
+    }
+  ],
+  "final": {
+    "stepId": "pw:api@9386",
+    "t": 434239.422,
+    "player": [
+      78.58699035644531,
+      32.599998474121094,
+      0.14358022809028625
+    ],
+    "server": [
+      78.58699081891291,
+      32.6,
+      0.14358022550786598
+    ],
+    "view": [
+      -100.14000000000044,
+      -20.03000000000001
+    ],
+    "tick": 21036,
+    "ack": 14370,
+    "onGround": true,
+    "colliding": false,
+    "clientDistance": 0.3668819645644289,
+    "serverDistance": 0.3668820767278803,
+    "clientReached": false,
+    "serverReached": false
+  }
+}

@@ -1,0 +1,15 @@
+fdaff96aba7d5c2482ca1c3e25e78572bd747352c9c91d7c15c8ad9b0a88c075  playwright.config.ts
+45d3c922c746e50c553dd7bea30ea822867787f749fdf320851c909459c3ddce  scripts/harness/classic.mjs
+644f421d7d31a7aefc63675e4702cbf72eab4c8b1f50899e3709c98db1941fd9  apps/web/tests/e2e/classic-runtime.spec.ts
+d7b7a041a0c1f38abd44c76f5997645672526c3fca15452eed5176c33935f659  apps/web/tests/e2e/classic-support/harness.ts
+a03089144111494c50af05de1fa6299652e2e8a265272b2a5afb4356d434992c  apps/web/tests/e2e/classic-support/harness-snapshot.ts
+699f86d37a1e4e2f35930a5a2cdfba153be35b6257decc21f76947c5f62989d6  apps/web/tests/e2e/classic-support/v1-slice.ts
+dad835dd253afa0b37d53e2a83cad566c9c58e983bf84a72fcea57d094c521c8  apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+997d43dbee99baee440b1a5bc695fb06857b441a3619cfd44acb5cead37d94b6  apps/web/tests/e2e/classic-support/target-aim.ts
+3b374b50582d098e4e08252bf540b2e44ed0548aada398fd96c9b4c1235efa66  apps/web/tests/e2e/classic-support/mouse-input.ts
+3ef6f3217c628b79bc117d533ebfa662a941b67fd1872a8d846c430bab13f84e  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+934d1d90bdcab91af76d53ab419a6f31ea141bec5a6705743c7ce9c7f5e99b6f  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+9f179f9ab2c66b90d4cd32ec236d38d364dfdd02b478bb87d7dce995cf513310  apps/web/tests/e2e/classic-support/equipment-journey.ts
+a25ef6f214337513f86918f39c77249165b00e7eb2ca5fe044fb02eb968d3559  apps/web/tests/e2e/classic-support/scenario.ts
+6cd7df6451b96f995f1eb412c1a29b209574b9bc013dc0fcab295e0514a58320  playbooks/classic/scenarios/canonical-runtime-v11.json
+2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388  apps/web/dist/harness-artifact.json

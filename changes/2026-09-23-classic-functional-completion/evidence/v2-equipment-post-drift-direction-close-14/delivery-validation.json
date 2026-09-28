@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-POST-DRIFT-DIRECTION-CLOSE-14",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baselineSha": "658e059d5f769f7506620264cefbacd211554d89",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "ad414351a8ba3085e89b3192516e13dc85817b946c656e8de6890db6ee500192"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 84,
+    "sha256": "94f987a3ce5a7027abda699511964a8e79d6e490a6c9d11a9abaa81fb0f2e112",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format-final.stdout.log",
+      "metadata-format-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "inputs": {
+    "map01": {
+      "sourceManifestSha256": "40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11",
+      "evidenceManifestSha256": "c627fc471c55eee7c7cfc3d367610bb0b3f72bd64e0815d487c57c5cd85a4b4c",
+      "deliverySha256": "ba13b9c41eea62b534524c50a1e4b23603262bf7a25c32617487fa163c1b7579"
+    },
+    "browser22": {
+      "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+      "evidenceManifestSha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+      "deliverySha256": "4cca1534c53cefdcec329b3d161911870dbf2b00fbc48ee4126dc5a8762cebf4",
+      "status": "FAIL",
+      "woodPickups": "PASS_3",
+      "remainingV2": "NOT_REACHED"
+    },
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN"
+  },
+  "rejectedClose13": {
+    "status": "UNAPPROVED_REJECTED_REAL_DRIVER_DEADLINE_UNREACHABLE",
+    "archivedFiles": 20,
+    "snapshotManifestSha256": "953279a278b5038d8bba9f8dee000bf666791d4be765d6af03268be1d2ecf1e7",
+    "sourceAndRawCmpPass": true,
+    "originalRawPreserved": true,
+    "catchPresentInFinalController": false,
+    "priorGreenUsedAsClose14Proof": false
+  },
+  "red": {
+    "window": "v2-equipment-post-drift-direction-close-14-red",
+    "status": "EXPECTED_FAIL_4_OF_7",
+    "passed": 3,
+    "failed": 4,
+    "exitCode": 1,
+    "reason": "The baseline x-only controller selected KeyS after validated drift instead of the expected one-shot KeyW. Driver error identity and two real aim-helper A/B cases already passed.",
+    "stdoutSha256": "61afe8d3e080dd2959700b8ea06291222fc46c19327427facd689f6151428495",
+    "receiptSha256": "ccd7b5c6099dbd3f829394a8dd14af580bfc2fe8e2fa2378aa48f407308bbc87"
+  },
+  "implementation": {
+    "nextDirectionLocalOnly": true,
+    "hintConsumedAtLoopEntry": true,
+    "hintArmedOnlyAfterValidatedDrift": true,
+    "directionSharedByWalkArrivalAndWaitValidation": true,
+    "ordinaryLoopUsesExistingXRule": true,
+    "driverErrorCaught": false,
+    "classifierOrArrivalPredicateChanged": false,
+    "harnessAimMouseJourneyProductionOrScenarioChanged": false,
+    "budgetToleranceCoordinatesChanged": false
+  },
+  "green": {
+    "window": "v2-equipment-post-drift-direction-close-14-green-final-03",
+    "status": "PASS_1_FILE_7_TESTS",
+    "stdoutSha256": "e6411dafe448ee5d3e3c1adfd0c4111742afe70c13cbae61dd34c7c346b2f0ad",
+    "receiptSha256": "d4f4a6669f62a86e7db03d1c2b75d8c49036c82d4e29e805bf17c6b0253c6338"
+  },
+  "affected": {
+    "window": "v2-equipment-post-drift-direction-close-14-affected-final-03",
+    "status": "PASS_14_FILES_145_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "532d0c0adbf8c932b9b4db9e2338a84e277710015ebe2182c5020af618a7de0f",
+    "receiptSha256": "4f377fc244438cdde1b403992a085bf0157a0cf528efb45449890002f33a358c"
+  },
+  "static": {
+    "classicTypes": {
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "090799e7ba72f21324fbefed3d3299a11e55348aaf36344da2cff4c796522dd5"
+    },
+    "rootTypes": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "58cd07bcb9df166473378933c00f1917b8b4dc366fc0a0be7a4f1fb8e9caa891"
+    },
+    "eslint": {
+      "status": "PASS",
+      "files": 3,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "6e850ec2b01e5b07a71c32d81e26714eefea8b6f68f862d515b6ac1e8bd345f5"
+    },
+    "format": {
+      "status": "PASS",
+      "paths": 5,
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "23c9aa14355160ebe2062245b988cd03e937df737f2d8a68937ccd2e3aab4c84"
+    },
+    "scope": {
+      "status": "PASS",
+      "stdoutSha256": "cf5ce9d7fe84fa01f76790b3109a84c276bee4ecc328b06d35b0824cb0375948",
+      "receiptSha256": "8e614eb53fa8e9d0c7fbde2cffd7a3319fc1011977bbf3c2a997a04a92f47fba"
+    }
+  },
+  "retainedIntermediateEvidence": {
+    "classicTypesFirst": "FAIL_TS7022_EXPLICIT_ROUTE_DIRECTION_REQUIRED",
+    "eslintFirstAndSecond": "FAIL_THREE_TRACE_NUMBER_LITERALS_LOSE_PRECISION",
+    "formatFirst": "FAIL_NEW_TEST_REQUIRED_PRETTIER",
+    "metadataFormatFirst": "FAIL_REPORT_FORMAT_AND_TXT_HAS_NO_PRETTIER_PARSER",
+    "scopeFirst": "FAIL_UNTRACKED_FILES_NOT_IN_GIT_DIFF_NAME_ONLY",
+    "scopeSecond": "FAIL_NEXT_DIRECTION_EXPECTED_COUNT_3_ACTUAL_4",
+    "ignoreOrSuppressionAdded": false
+  },
+  "finalSelfcheck": {
+    "status": "PASS",
+    "stdoutSha256": "0e54e1ee8ae182a2cc2b3a39039b6d1a95f1921ec3cb271d67ef284a3e085667",
+    "receiptSha256": "d3ba6d3d846700172aed40c201334043bb6bd6f8c59b2cfcc925b50ec6543630",
+    "machineLockReleasedAfterCheck": true
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "harnessChanged": false,
+    "targetAimChanged": false,
+    "mouseInputChanged": false,
+    "journeySupportChanged": false,
+    "routeProgressChanged": false,
+    "scenarioChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "browser22EvidenceChanged": false,
+    "browser22Status": "FAIL",
+    "browser23Run": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "V2 fixture internal direction state only; no new owner, public API, or directory responsibility."
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "conservative120PercentAiHours": 2.4,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index-write", "push", "build", "browser23", "cua", "devserver", "ci", "deploy", "merge"]
+}

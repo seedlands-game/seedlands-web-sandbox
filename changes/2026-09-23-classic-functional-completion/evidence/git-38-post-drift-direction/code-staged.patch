@@ -1,0 +1,330 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts b/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+index 091b39b8..55e6bf11 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+@@ -126,7 +126,7 @@ describe('Classic V2 arrival during route aim', () => {
+       }),
+     ).rejects.toThrow('Browser21 drift correction sentinel');
+ 
+-    expect(directions).toEqual(['KeyS', 'KeyS']);
++    expect(directions).toEqual(['KeyS', 'KeyW']);
+     expect(waits).toBe(1);
+     expect(calls).toMatchObject({ reads: 2, moves: 0, down: 0, up: 0 });
+   });
+diff --git a/apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts b/apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+new file mode 100644
+index 00000000..183ca6d2
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+@@ -0,0 +1,198 @@
++import { describe, expect, it } from 'vitest';
++import {
++  classifyEquipmentRouteWait,
++  followEquipmentRoute,
++  type EquipmentRouteSnapshot,
++} from './equipment-resource-route';
++import { horizontalMouseCorrectionToRoute } from './target-aim';
++import type { Point, RoutePoint } from './scenario';
++
++const TARGET: RoutePoint = [78.5, 0.5];
++
++const routeSnapshot = (
++  player: Point,
++  physicsTick: number,
++  ack: number,
++  serverPlayerPosition: Point,
++  yaw: number,
++): EquipmentRouteSnapshot & Readonly<{ viewAngles: readonly [number, number] }> => ({
++  player,
++  serverPlayerPosition,
++  viewAngles: [yaw, -20.03],
++  onGround: true,
++  colliding: false,
++  authority: { physicsTick, acknowledgedInputSequence: ack },
++});
++
++const OUTER_8674 = routeSnapshot(
++  [78.55076599121094, 32.599998474121094, -0.49871936440467834],
++  20342,
++  13641,
++  [78.55076243809718, 32.6, -0.4987193627433512],
++  -1170.56,
++);
++const WALK_8880 = routeSnapshot(
++  [Number('78.50784301757812'), 32.599998474121094, Number('0.5390361547470093')],
++  20546,
++  13854,
++  [78.49858066153473, 32.6, 0.6640361514406132],
++  -903.5399999999992,
++);
++const WAIT_8883 = routeSnapshot(
++  [Number('78.50784301757812'), 32.599998474121094, Number('0.4834806025028229')],
++  20546,
++  13854,
++  [78.49858066153473, 32.6, 0.6640361514406132],
++  -903.5399999999992,
++);
++const DRIFT_8885 = routeSnapshot(
++  [Number('78.50784301757812'), 32.599998474121094, Number('0.4140361547470093')],
++  20549,
++  13857,
++  [78.50784246465534, 32.6, 0.48348059588505765],
++  -903.5399999999992,
++);
++const WALK_9107 = routeSnapshot(
++  [78.51006317138672, 32.599998474121094, 0.5390361547470093],
++  20763,
++  14081,
++  [78.49146797116592, 32.6, 0.7057028181072799],
++  -544.7399999999999,
++);
++const WAIT_9110 = routeSnapshot(
++  [78.51006317138672, 32.599998474121094, 0.4834806025028229],
++  20765,
++  14083,
++  [78.50386311264111, 32.6, 0.6084805958850577],
++  -544.7399999999999,
++);
++const DRIFT_9112 = routeSnapshot(
++  [78.51006317138672, 32.599998474121094, 0.4140361547470093],
++  20766,
++  14084,
++  [78.51006068337871, 32.6, 0.5390361514406132],
++  -544.7399999999999,
++);
++
++const classifyStream = (snapshots: readonly EquipmentRouteSnapshot[]) => {
++  let index = 0;
++  return async (baseline: EquipmentRouteSnapshot, direction: 'KeyW' | 'KeyS') => {
++    while (index < snapshots.length) {
++      const current = snapshots[index++]!;
++      const result = classifyEquipmentRouteWait(baseline, current, TARGET, direction);
++      if (result) return result;
++    }
++    throw new Error('Recorded wait stream ended without a classified result.');
++  };
++};
++
++describe('Classic V2 post-drift route direction', () => {
++  it.each([
++    {
++      name: 'first Browser22 outer wait',
++      initial: OUTER_8674,
++      walked: WALK_8880,
++      waits: [WAIT_8883, DRIFT_8885],
++    },
++    {
++      name: 'second Browser22 outer wait counterfactual fixture',
++      initial: DRIFT_8885,
++      walked: WALK_9107,
++      waits: [WAIT_9110, DRIFT_9112],
++    },
++  ])('reverses one next movement after $name validates drift', async ({ initial, walked, waits }) => {
++    const sentinel = new Error('post-drift direction sentinel');
++    const directions: string[] = [];
++
++    await expect(
++      followEquipmentRoute(TARGET, {
++        now: () => 1000,
++        observe: async () => initial,
++        walk: async (direction) => {
++          directions.push(direction);
++          if (directions.length === 1) return walked;
++          throw sentinel;
++        },
++        waitForProgress: classifyStream(waits),
++      }),
++    ).rejects.toBe(sentinel);
++
++    expect(directions).toEqual(['KeyS', 'KeyW']);
++  });
++
++  it('consumes the reverse hint once before returning to the x-based direction rule', async () => {
++    const sentinel = new Error('one-shot direction sentinel');
++    const ordinary = routeSnapshot([78.6, 32.6, 0.2], 20550, 13858, [78.6, 32.6, 0.2], -900);
++    const directions: string[] = [];
++
++    await expect(
++      followEquipmentRoute(TARGET, {
++        now: () => 1000,
++        observe: async () => OUTER_8674,
++        walk: async (direction) => {
++          directions.push(direction);
++          if (directions.length === 1) return WALK_8880;
++          if (directions.length === 2) return ordinary;
++          throw sentinel;
++        },
++        waitForProgress: classifyStream([WAIT_8883, DRIFT_8885]),
++      }),
++    ).rejects.toBe(sentinel);
++
++    expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
++  });
++
++  it('reverses from the key actually used after each consecutive validated drift', async () => {
++    const sentinel = new Error('alternating direction sentinel');
++    const keyWReached = routeSnapshot([78.49, 32.6, 0.52], 20560, 13870, [78.49, 32.6, 0.7], -900);
++    const keyWDrift = routeSnapshot([78.49, 32.6, 0.414], 20561, 13871, [78.49, 32.6, 0.52], -900);
++    const directions: string[] = [];
++    let waits = 0;
++
++    await expect(
++      followEquipmentRoute(TARGET, {
++        now: () => 1000,
++        observe: async () => OUTER_8674,
++        walk: async (direction) => {
++          directions.push(direction);
++          if (directions.length === 1) return WALK_8880;
++          if (directions.length === 2) return keyWReached;
++          throw sentinel;
++        },
++        waitForProgress: async (baseline, direction) => {
++          waits += 1;
++          return waits === 1
++            ? classifyStream([DRIFT_8885])(baseline, direction)
++            : classifyStream([keyWDrift])(baseline, direction);
++        },
++      }),
++    ).rejects.toBe(sentinel);
++
++    expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
++  });
++
++  it('keeps driver rejection identity and does not enter the wait path', async () => {
++    const rejection = new Error('Real input route timed out before 78.5,0.5.');
++    let waits = 0;
++    const pending = followEquipmentRoute(TARGET, {
++      now: () => 1000,
++      observe: async () => OUTER_8674,
++      walk: async () => Promise.reject(rejection),
++      waitForProgress: async () => {
++        waits += 1;
++        return { kind: 'drift', snapshot: DRIFT_8885 };
++      },
++    });
++
++    await expect(pending).rejects.toBe(rejection);
++    expect(waits).toBe(0);
++  });
++
++  it.each([DRIFT_8885, DRIFT_9112])('shows the recorded drift is cheaper to correct with KeyW', (current) => {
++    const keyW = horizontalMouseCorrectionToRoute(current.player, current.viewAngles[0], TARGET, 'KeyW');
++    const keyS = horizontalMouseCorrectionToRoute(current.player, current.viewAngles[0], TARGET, 'KeyS');
++
++    expect(Math.abs(keyW)).toBeLessThan(16);
++    expect(Math.abs(keyS)).toBe(80);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+index f512f978..7e3b4282 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+@@ -124,8 +124,10 @@ export async function followEquipmentRoute(
+   const deadline = driver.now() + EQUIPMENT_ROUTE_TIMEOUT_MS;
+   let baseline = await driver.observe();
+   if (!baseline) throw new Error('Classic snapshot is unavailable before the equipment route.');
++  let nextDirection: RouteDirection | null = null;
+   while (driver.now() < deadline) {
+-    const direction = equipmentRouteDirection(baseline.player, target);
++    const direction: RouteDirection = nextDirection ?? equipmentRouteDirection(baseline.player, target);
++    nextDirection = null;
+     const remainingBeforeWalk = deadline - driver.now();
+     if (remainingBeforeWalk <= 0) break;
+     const walked = await driver.walk(direction, remainingBeforeWalk);
+@@ -150,6 +152,7 @@ export async function followEquipmentRoute(
+         throw new Error('Equipment route wait returned a non-matching snapshot.');
+       if (result.kind === 'arrival') return result.snapshot;
+       baseline = result.snapshot;
++      nextDirection = direction === 'KeyW' ? 'KeyS' : 'KeyW';
+       continue;
+     }
+     baseline = walked;
+diff --git a/changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md b/changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+new file mode 100644
+index 00000000..1a42eb48
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+@@ -0,0 +1,63 @@
++# V2 Post-Drift Direction 合同
++
++阶段：`V2-EQUIPMENT-POST-DRIFT-DIRECTION-CLOSE-14`
++
++状态：实现前合同冻结。依据 MAP01 SOURCE11
++`40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11`、MANIFEST21
++`c627fc471c55eee7c7cfc3d367610bb0b3f72bd64e0815d487c57c5cd85a4b4c`、delivery
++`ba13b9c41eea62b534524c50a1e4b23603262bf7a25c32617487fa163c1b7579`。
++
++## 被拒绝的 Close-13
++
++Close-13 提议在 `driver.walk` 抛出同目标 route timeout 且 outer deadline 尚有剩余时 observe/classify。真实
++`walkEquipmentRoute` 使用 `Date.now`；outer 计算 remaining 后，inner `walkTo` 才用稍后的 `Date.now()+remaining` 建
++deadline，因此 inner deadline 不早于 outer deadline。Browser22 在 inner deadline 越界后抛错，回到 outer 时该分支
++必不可达。其未批准 source/test/spec/contract 与 raw 已原字节归档到本阶段 `rejected-close13/`；原 raw 目录保留。
++不得恢复该 catch，也不得以提前 reject 的 stub 证明真实 driver。
++
++## 行为
++
++1. `followEquipmentRoute` 保持单一 target 与原 45 秒 deadline。默认每轮仍用
++   `equipmentRouteDirection(baseline.player,target)`。
++2. 只有 `waitForProgress` 返回后，且现有 `classifyEquipmentRouteWait` 对相同 wait baseline、target、active key 重新验证
++   为 `drift`，才将 `baseline` 设为该同一 snapshot，并把下一轮一次性 direction hint 设为刚使用 key 的反向。
++3. 下一轮开始时优先消费该 hint，并立即清空。该 key 同时传给真实 `driver.walk` 和本轮后续
++   `matchesEquipmentRouteArrival` / `classifyEquipmentRouteWait`，避免输入方向与验收方向不一致。
++4. hint 轮若返回普通 non-arrival 且未进入 wait，下一轮恢复 x-based direction。若又产生 validated drift，则根据该轮
++   实际使用 key 再设置一次反向 hint，可有界交替但不保留陈旧 hint。
++5. arrival 立即返回；null/mismatch/error 不设置 hint。`driver.walk` rejection 保持原对象直接传播，不 catch、不 observe、
++   不 retry。
++
++## 不变量
++
++- route 45s、wait 20s、pulse 80ms、jump=false、`.06/.08/+-0.45`、18 moves/19 observations、mouse step80、
++  sensitivity0.13、坐标与 pickup itemCount 断言全部不变。
++- `matchesEquipmentRouteArrival` 与 `classifyEquipmentRouteWait` 本体不放宽；改变 movement crossing key 不扩大 client/server
++  双投影 finite neighborhood。
++- `harness.ts`、`target-aim.ts`、`mouse-input.ts`、`equipment-journey-support.ts`、`route-progress.ts`、scenario、
++  production、Browser22/MAP01、tasks/state 全部只读。
++- 不加第二 walk/helper、exception fallback、teleport、Harness 写口或新通用策略框架。
++
++## RED / GREEN
++
++- 主 RED 直接调用真实 `followEquipmentRoute` 和真实 classifier，重放 Browser22
++  `@8674 -> @8880 -> @8883(stale/null) -> @8885(drift)`；下一 `driver.walk` 必须同 target 使用 KeyW，并以 sentinel
++  结束，不能 stub 出 arrival。旧 x-only 实现唯一失败为收到 KeyS。
++- 独立 counterfactual fixture 重放 `@8885 -> @9107 -> @9110 -> @9112`，明确这是旧轨迹输入而非新策略因果实测；
++  下一轮同样反向。用真实 `horizontalMouseCorrectionToRoute` 比较 @8885/@9112 两个 key 的校正量，不复制算法。
++- 验证 hint 真正一次性消费、连续 validated drift 按刚用 key 反转；arrival 立即返回；stale/ackback/ungrounded/
++  colliding/one-sided 不冒充 strict；driver rejection 保留原对象；各 await 后 deadline 越界仍失败，共享 deadline 不重置。
++- 保留两方向 finite neighborhood、overshoot、mining-distance、Close12 typed handoff、Close10 refresh/default 等回归。
++
++## Ownership、闭包与预算
++
++运行逻辑只改 `equipment-resource-route.ts`；先撤除已归档的 Close13 catch 与对应 test hunks，再优先新增
++`equipment-post-drift-direction.test.ts`。现有 `equipment-resource-route.test.ts` 仅保留基线兼容；如
++`equipment-arrival-during-aim.test.ts` 硬编码 drift 后 KeyS，只窄改期望为 KeyW，保留同 snapshot/零输入/sentinel。
++文档只改当前 spec、本合同、`post-drift-direction-evidence.md` 与 Close14 evidence。
++
++affected 以既有 13 files / 138 tests 闭包为下界并加入新测试，实际数如实记录；另跑 Classic/root test types、变更 TS
++ESLint、精确 Prettier/scoped diff。全部默认 machine lock、Vitest `maxWorkers=1`。
++
++预算：AI 1-2h、硬上限 3h，传统 0.25-0.5 PD；120% 容量 AI 2.4h、传统 0.6 PD。credits、费率、
++API 等价费用、额度与占比 unknown。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 48f315d5..2e386530 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -259,6 +259,15 @@ PASS 不能证明正常格式达标。format closure 先保存该 release 原字
+ typed handoff、默认路径和 deadline 调用次序均不改。本片新增 inline suppression 清零并恢复正常 Prettier 格式；新增
+ 测试侧类型职责同步记入 `docs/code-map.md`，不改变生产架构或公共协议。
+ 
++Browser-22 唯一 canonical attempt 已完成 C0-C3、完整 V1、V2 resources placement 与三格 wood 的真实
++leftdown、voxel clear、drop 和独立 inventory itemCount 增量；随后返回 workbench approach `[78.5,0.5]` 时于
++`walkTo` 的 observe-after-await deadline 失败。未准出的 Close-13 timeout catch 已由 MAP01 证明对真实 driver 不可达并
++撤回，其原字节和 raw 保留为 rejected evidence。Close-14 只在 existing outer wait result 经现有 classifier 重新验证为
++drift 后，为紧接的一轮保存一次与刚使用 direction 相反的 key；下一轮消费即清空，baseline 仍为该 drift 同一对象，
++target 和共享 45 秒 deadline 不变。普通 loop 继续按 client x 选择方向；arrival/null/invalid/error 不设置 hint，driver
++异常原样传播。该策略不放宽双投影 finite neighborhood、freshness/readiness、.06/.08/+-0.45 或任何输入/aim 预算。
++Browser-22 保持正式 FAIL；fixture deterministic/static GREEN 不等于 Browser-23 或产品 GREEN。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T08:10:00Z
+更新时间：2026-09-28T15:12:00Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,9 +10,13 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：`GIT-27-CLASSIC-DEATH-AND-NEEDS` 已远端交付，代码提交
-`c3ba7ea9fa83522ee1927791efa2add719980797`、证据提交 `b2b07417ec01870c4ce20befdf29f433f26fc88d`。
-BUILD03 唯一 build/artifact verify 已 PASS，证据随独立 artifact evidence 提交交付；Browser/Cua/CI/deploy 均未运行。
+当前 Git/Docs checkpoint：`GIT-38-POST-DRIFT-DIRECTION` 的代码提交
+`550adf8a352cd1c24aff5b2f3885b8b970c69bd7` 已生成；精确五路径 patch `e864ea67...931c` 在
+`658e059d...d89` detached staged tree 通过 `14 files / 145 tests`、Classic/root test types、3 TS ESLint、
+5 路径标准 Prettier 与 scope。第二笔 evidence 首次自然 hook 被四份 Browser22 mechanical raw 的 `.json` 扩展名阻断，
+没有产生提交；恢复阶段仅做原字节 `.json.log` 改名、prior-packaging 和 identity 重冻，不重跑行为门禁。Browser22/
+MAP01/Close14/GIT38 evidence 和本文件随第二笔提交冻结，远端 identity 以后续 readback 为准；BUILD14/Browser23/
+Cua/CI/deploy/merge 未运行。
 当前 Equipment checkpoint：`V2-EQUIPMENT-HARNESS-ORACLE-01` 与
 `V2-CANONICAL-EQUIPMENT-FIXTURE-CLOSE-02` 已在 GIT28 detached staged tree 组合验证；observability `8/8`、scenario
 `7/7`、Web/Svelte/root/Classic test types 与目标静态均 PASS，原 oracle Classic-types 并行阻塞已关闭。代码提交
@@ -129,6 +133,17 @@ tree `f9159062...d47b` 已完成唯一 build 与唯一 artifact verify。sourceD
 MP3 source/public/dist identity 一致。BUILD09/10/11/12/13 tree/dist 与 Git32 backup ref 保留。Browser21 仍 FAIL，
 但完整 V1、resources 和首 wood pickup 已真实通过；后续 V2 未到达，Browser19 首 iron pickup 未证明。BUILD13
 evidence 随本提交冻结，精确提交/远端 SHA 待本阶段收尾读回；Browser22/Cua/devserver/CI watch/deploy/merge 未运行。
+当前 Browser22/Close14/GIT38 checkpoint：Browser22 唯一 attempt 在 BUILD13 artifact 上完成 C0-C3、完整 V1、
+resources placement 与三格 wood 独立入包后，于 workbench approach `[78.5,0.5]` route 的 observe-after-await
+deadline 正式 FAIL；后续 V2/C4/C5/save 未到。MAP01 证明两次 validated drift 后 x-only 继续选 KeyS，造成约 178 度
+转向；22 个真实 1500ms Pointer Lock cooldown 占该 45.708s leg 的 33.087s。未准出的 Close13 catch 对真实 nested
+deadline 不可达，已归档 rejected 原件并撤除。Close14 只给 validated drift 后的下一轮一次性反向 key；新测试 `7/7`、
+affected `14 files / 145 tests`、Classic/root test types、3 TS ESLint、5 路径 Prettier/scope PASS。GIT38 detached
+staged tree `48b06d94...49ec`、patch `e864ea67...931c` 通过相同门禁；代码 commit
+`550adf8a352cd1c24aff5b2f3885b8b970c69bd7` 已生成。evidence/state 随本提交冻结，精确远端 SHA 待最终读回；
+第一次 evidence commit 自然 hook 因四份 mechanical raw 使用 `.json` 后缀失败且未创建提交；恢复只做四份 raw 原字节
+`.json.log` 改名、旧 metadata 归档与 Browser22/MAP01/GIT38 packaging identity 重冻。BUILD14/Browser23/Cua/
+devserver/CI/deploy/merge 未运行。
 
 ## 恢复规则
 

@@ -1,0 +1,14 @@
+a55905d79dde9e194bd080f9c1c36f923407b0c580016ece46796cc0081b415e  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/README.md
+3f532357c0e96135151b8a6f32e855528478fd8e693b1b9f0e330f10ba7ab454  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/SOURCE-MANIFEST.sha256
+20f1c5268dd0ef2c1b202a8362d2b1865904227ccf10d4e8a532eb735a5b1766  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/code-staged.actual.paths
+e864ea671ef5eb7a3382bd8eb9380fdd15aec449f8e699fba33ea9456df5931c  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/code-staged.patch
+20f1c5268dd0ef2c1b202a8362d2b1865904227ccf10d4e8a532eb735a5b1766  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/code-staged.paths
+7fa67d923ca4a27633bc08f18bd97f12a28083aed2279b5f9f50e08ab57a1130  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/dependency-prep-initial-failure.txt
+f7333b6bb5012bc3e59bf3bcbe57166bddd4e330ec2a9b6be27c99498196c572  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/dependency-setup.stdout.log
+b09a360abc86a708285c3ea241a880013b3913397ec7567b4f7d4033e2171c32  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/dependency-setup.window.json.log
+4bb9b8bfe9883899a74fe2e305d8c6d6ae1dd1141c81ec874036b8f2a563c241  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/metadata-format.stdout.log
+302de4599d291bffe310b3bcc0b00d1ed80570afc1ae5a3da4e2ed858647d5cb  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/metadata-format.window.json.log
+ccb2a18ffd0d0d5cf57a9509c23d8ee4ea99692b645a2a05c22185cfcdf52532  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/staged-gate.stdout.log
+44c84c208184fb1cbfb2b1be7296a15fab673d16b1ad409c5ce2875d6dbca555  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/staged-gate.window.json.log
+85f78895ef0b4265fab2723a146a92ba4601e3acbda38859e91ceeedfc54392d  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/tracked-only-incomplete.patch
+de977eec416975e2c48e03ea89c80cff3dcf2ccb8bc5a8cf0f566779370b3f85  changes/2026-09-23-classic-functional-completion/evidence/git-38-post-drift-direction/validation-argv.txt

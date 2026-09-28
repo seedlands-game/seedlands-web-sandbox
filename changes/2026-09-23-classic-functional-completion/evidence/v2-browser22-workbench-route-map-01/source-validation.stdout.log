@@ -1,0 +1,11 @@
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/route-progress.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts: OK

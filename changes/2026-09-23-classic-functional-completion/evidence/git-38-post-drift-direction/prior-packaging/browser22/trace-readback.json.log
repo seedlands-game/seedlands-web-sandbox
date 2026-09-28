@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "originalTrace": {
+    "sizeBytes": 667031083,
+    "sha256": "9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19"
+  },
+  "parts": {
+    "directory": "trace-50m",
+    "count": 13,
+    "maximumBytes": 52428800,
+    "manifest": "trace-parts.sha256",
+    "reassembledSha256": "9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19",
+    "reassemblyValidated": true
+  },
+  "recordTypes": {
+    "after": 17205,
+    "before": 17205,
+    "console": 1,
+    "context-options": 2,
+    "error": 1,
+    "event": 1,
+    "frame-snapshot": 16168,
+    "input": 2109,
+    "log": 7301,
+    "screencast-frame": 17117
+  },
+  "mechanicalExports": [
+    "workbench-route-calls.json",
+    "workbench-route-summary.json",
+    "workbench-route-analysis.json",
+    "workbench-route-snapshots.json",
+    "workbench-route-inputs.json"
+  ]
+}

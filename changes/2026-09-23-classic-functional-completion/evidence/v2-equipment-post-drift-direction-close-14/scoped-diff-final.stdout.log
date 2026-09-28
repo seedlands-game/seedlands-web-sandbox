@@ -1,0 +1,11 @@
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+changes/2026-09-23-classic-functional-completion/spec.md
+apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+INDEX_EMPTY=PASS
+CLOSE13_CONTROLLER_AND_TEST_RESTORED_TO_HEAD=PASS
+CLOSE13_CONTRACT_REMOVED_FROM_WORKING_SET=PASS
+CLOSE13_RAW_PRESERVED=PASS
+REJECTED_CLOSE13_ARCHIVE20=PASS
+NEW_SUPPRESSIONS=0

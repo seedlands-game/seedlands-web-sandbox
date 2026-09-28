@@ -1,0 +1,4 @@
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-22-8ae9e354 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+
+This was the only canonical Browser22 invocation. Attempt 0 was consumed and failed. No retry was run.
+
