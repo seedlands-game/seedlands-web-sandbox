@@ -1,0 +1,13 @@
+sourceSha=908d0d82881e3e8c7dff7ee27cf3a4785013f37a
+sourceTree=eb8a5d9a3cc423378f243e93804a6284f64539e6
+acceptanceTree=/private/tmp/seedlands-v2-acceptance-908d0d82
+trackedClean=true
+indexClean=true
+distAbsent=true
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+internalPackagesResolveInsideAcceptanceTree=true
+thirdPartyDependenciesReusedOffline=true
+downloadedPackages=0
+taskStateEnvironment=/private/tmp/seedlands-v2-acceptance-908d0d82/.pnpm-task-run-state-v1
+taskStatePersisted=false
+build12PreexistingReceipt=false
