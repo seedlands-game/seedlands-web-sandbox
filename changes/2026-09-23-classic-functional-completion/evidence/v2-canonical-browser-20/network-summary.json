@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "resourceSnapshots": 241,
+  "httpStatusAtLeast400": 0,
+  "statusCounts": {
+    "200": 241
+  },
+  "failedUrls": []
+}

@@ -1,0 +1,251 @@
+5:14:36 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts (18 tests | 17 failed) 16ms
+     × does not silently accept the exact Browser20 13-observation prefix 3ms
+     × covers the fixed-pose full yaw domain for 'W +X +180 wrap' 1ms
+     × covers the fixed-pose full yaw domain for 'W -X -180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'W +Z +180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'W -Z +180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'S +X -180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'S -X +180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'S +Z +180 wrap' 0ms
+     × covers the fixed-pose full yaw domain for 'S -Z -180 wrap' 0ms
+     ✓ recovers after a transient null within the shared observation bound 0ms
+     × fails unavailable after 19 persistent null observations without moving 0ms
+     × fails exhaustion after 18 no-response moves and the final observation 0ms
+     × fails closed for 'non-finite target' without mutating source input 0ms
+     × fails closed for 'non-finite player' without mutating source input 0ms
+     × fails closed for 'non-finite yaw' without mutating source input 0ms
+     × rejects an exact zero route vector but accepts an aligned finite near-zero vector 0ms
+     × propagates helper exhaustion before 'default' walk input 7ms
+     × propagates helper exhaustion before 'Close10 refresh' walk input 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > does not silently accept the exact Browser20 13-observation prefix
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:92:5
+     90|         move: async (dx, dy) => moves.push([dx, dy]),
+     91|       }),
+     92|     ).rejects.toThrow('route aim observation remained unavailable');
+       |     ^
+     93|
+     94|     expect(read).toBe(19);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'W +X +180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'W -X -180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'W +Z +180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'W -Z +180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'S +X -180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'S -X +180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'S +Z +180 wrap'
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > covers the fixed-pose full yaw domain for 'S -Z -180 wrap'
+AssertionError: expected 12 to be 18 // Object.is equality
+
+- Expected
++ Received
+
+- 18
++ 12
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:127:19
+    125|     });
+    126|
+    127|     expect(moves).toBe(18);
+       |                   ^
+    128|     expect(reads).toBe(19);
+    129|     expect(Math.abs(horizontalMouseCorrectionToRoute([0, 32.6, 0], yaw…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > fails unavailable after 19 persistent null observations without moving
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:168:5
+    166|         },
+    167|       }),
+    168|     ).rejects.toThrow('route aim observation remained unavailable');
+       |     ^
+    169|     expect({ reads, moves }).toEqual({ reads: 19, moves: 0 });
+    170|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > fails exhaustion after 18 no-response moves and the final observation
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:187:5
+    185|         },
+    186|       }),
+    187|     ).rejects.toThrow('route aim did not converge');
+       |     ^
+    188|     expect({ reads, moves }).toEqual({ reads: 19, moves: 18 });
+    189|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > fails closed for 'non-finite target' without mutating source input
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > fails closed for 'non-finite player' without mutating source input
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > fails closed for 'non-finite yaw' without mutating source input
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:224:5
+    222|         },
+    223|       }),
+    224|     ).rejects.toThrow(message);
+       |     ^
+    225|
+    226|     expect(target).toEqual(targetBefore);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > rejects an exact zero route vector but accepts an aligned finite near-zero vector
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:240:5
+    238|         move: async () => undefined,
+    239|       }),
+    240|     ).rejects.toThrow('route aim direction is undefined');
+       |     ^
+    241|
+    242|     let moves = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > propagates helper exhaustion before 'default' walk input
+AssertionError: promise resolved "{ player: [ 1, 32.6, +0 ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 2,
++     "commitSequence": 1,
++     "physicsTick": 2,
++   },
++   "colliding": false,
++   "interactionAttempts": 1,
++   "onGround": true,
++   "player": [
++     1,
++     32.6,
++     0,
++   ],
++   "serverPlayerPosition": [
++     1,
++     32.6,
++     0,
++   ],
++   "viewAngles": [
++     -89.74,
++     -20,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:265:5
+    263|     await expect(
+    264|       walkTo(page, target, { key: 'KeyW', timeout: 45_000, pulseMs: 0,…
+    265|     ).rejects.toThrow('route aim did not converge');
+       |     ^
+    266|     expect(calls).toMatchObject({ down: 0, up: 0, moves: 18 });
+    267|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts > Classic shared route aim bounded contract > propagates helper exhaustion before 'Close10 refresh' walk input
+AssertionError: promise resolved "{ player: [ 1, 32.6, +0 ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 2,
++     "commitSequence": 1,
++     "physicsTick": 2,
++   },
++   "colliding": false,
++   "interactionAttempts": 1,
++   "onGround": true,
++   "player": [
++     1,
++     32.6,
++     0,
++   ],
++   "serverPlayerPosition": [
++     1,
++     32.6,
++     0,
++   ],
++   "viewAngles": [
++     -89.74,
++     -20,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/route-aim-contract.test.ts:265:5
+    263|     await expect(
+    264|       walkTo(page, target, { key: 'KeyW', timeout: 45_000, pulseMs: 0,…
+    265|     ).rejects.toThrow('route aim did not converge');
+       |     ^
+    266|     expect(calls).toMatchObject({ down: 0, up: 0, moves: 18 });
+    267|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  17 failed | 1 passed (18)
+   Start at  17:14:36
+   Duration  310ms (transform 48ms, setup 0ms, import 202ms, tests 16ms, environment 0ms)
+

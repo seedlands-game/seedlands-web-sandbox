@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "traceRecordTypes": {
+    "after": 4069,
+    "before": 4069,
+    "console": 1,
+    "context-options": 2,
+    "error": 1,
+    "event": 1,
+    "frame-snapshot": 3466,
+    "input": 489,
+    "log": 1460,
+    "screencast-frame": 4877
+  },
+  "consoleEvents": 1,
+  "consoleTypes": {
+    "log": 1
+  },
+  "testErrorEvents": 1
+}

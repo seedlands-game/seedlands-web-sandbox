@@ -1,0 +1,21 @@
+GIT-36-ROUTE-AIM-BOUNDED
+Validation tree: /private/tmp/seedlands-git36-route-aim-bounded
+Baseline HEAD: 266f82cbcef5770d51b6d907723cb84f952d35a9
+Code commit: 38c3f5e55a2e6609650cded507b90b54bff893a5
+Source tree: aac28b80430c29d11f8c5eb30999aed71e24c77c
+Staged paths: 4
+Staged patch SHA-256: 2ffd10c7fd133374d6b1e54f531eb37f402b20885cc00fff6dae13ed128406a2
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+
+Single staged-gate reservation command body:
+
+affected
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts apps/web/tests/e2e/classic-support/door-exit-face.test.ts apps/web/tests/e2e/classic-support/door-readiness.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts --maxWorkers=1
+
+classic-types: pnpm typecheck:classic
+root-types: pnpm exec tsc -p tsconfig.test.json --noEmit
+eslint: pnpm exec eslint apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+format: pnpm exec prettier --check apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/route-aim-contract.md
+scoped-diff: git diff --check --cached -- apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/route-aim-contract.md
+
+All validation commands ran serially inside one default benchmark-window reservation. Vitest used maxWorkers=1. The detached tree installed dependencies offline with the frozen lockfile; root and apps/web @seedlands workspace links resolved relatively inside the detached tree.

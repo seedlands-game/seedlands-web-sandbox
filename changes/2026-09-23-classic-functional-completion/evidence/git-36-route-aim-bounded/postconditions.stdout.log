@@ -1,0 +1,22 @@
+GIT-36-ROUTE-AIM-BOUNDED staged-tree postconditions
+baseline=266f82cbcef5770d51b6d907723cb84f952d35a9
+validationTree=/private/tmp/seedlands-git36-route-aim-bounded
+validationTreeHead=266f82cbcef5770d51b6d907723cb84f952d35a9
+codeCommit=38c3f5e55a2e6609650cded507b90b54bff893a5
+sourceTree=aac28b80430c29d11f8c5eb30999aed71e24c77c
+stagedPaths=4
+stagedPatchSha256=2ffd10c7fd133374d6b1e54f531eb37f402b20885cc00fff6dae13ed128406a2
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+dependencySetup=pnpm install --offline --frozen-lockfile --ignore-scripts
+dependencySetupExitCode=0
+rootWorkspaceLinksInsideTree=true
+webWorkspaceLinksInsideTree=true
+stagedGateWindow=git-36-route-aim-bounded-staged-gate
+stagedGateExitCode=0
+affected=PASS_12_FILES_131_TESTS
+classicTypes=PASS
+rootTypes=PASS
+eslint=PASS_2_TS
+format=PASS_4_PATHS
+scopedDiff=PASS_4_PATHS
+mainIndexAfterCodeCommit=EMPTY

@@ -1,0 +1,22 @@
+5:34:08 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git36-route-aim-bounded - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git36-route-aim-bounded
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (17 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/scenario.test.ts (7 tests) 5ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (12 tests) 17ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests) 21ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (27 tests) 12ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-aim-contract.test.ts (18 tests) 4ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-exit-face.test.ts (8 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/target-aim.test.ts (11 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts (3 tests) 2ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/route-progress.test.ts (2 tests) 1ms
+
+ Test Files  12 passed (12)
+      Tests  131 passed (131)
+   Start at  17:34:08
+   Duration  1.86s (transform 443ms, setup 0ms, import 1.01s, tests 81ms, environment 0ms)
+

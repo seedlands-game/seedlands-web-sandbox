@@ -1,0 +1,475 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "source": "Playwright 0-trace.trace serialized evaluate/mouse calls",
+  "intervalMs": [112269, 114501],
+  "routeTarget": [71.4925, 0.5],
+  "planInitialObservation": {
+    "callId": "call@2875",
+    "stepId": "pw:api@2082",
+    "startTime": 98361.639,
+    "endTime": 98363.78,
+    "position": [67.32670621695529, 32.6, 0.6780099244880817],
+    "player": null,
+    "serverPlayerPosition": [67.32670621695529, 32.6, 0.6780099244880817],
+    "viewAngles": [-86.74999999999997, -26.79],
+    "onGround": true,
+    "colliding": false,
+    "physicsTick": 12255,
+    "acknowledgedInputSequence": 5483
+  },
+  "approachReturnSnapshot": {
+    "callId": "call@3533",
+    "stepId": "pw:api@2375",
+    "startTime": 112247.881,
+    "endTime": 112257.243,
+    "position": [69.5975040602879, 32.6, 0.626796087343078],
+    "player": [69.45709228515625, 32.599998474121094, 0.4731168746948242],
+    "serverPlayerPosition": [69.5975040602879, 32.6, 0.626796087343078],
+    "viewAngles": [41.17000000000004, -26.79],
+    "onGround": true,
+    "colliding": false,
+    "physicsTick": 12529,
+    "acknowledgedInputSequence": 5765
+  },
+  "approachFinalInput": {
+    "down": {
+      "callId": "call@3529",
+      "startTime": 112161.643,
+      "method": "keyboardDown",
+      "params": {
+        "key": "KeyW"
+      },
+      "stepId": "pw:api@2372",
+      "endTime": 112162.549
+    },
+    "up": {
+      "callId": "call@3531",
+      "startTime": 112244.99,
+      "method": "keyboardUp",
+      "params": {
+        "key": "KeyW"
+      },
+      "stepId": "pw:api@2373",
+      "endTime": 112246.346
+    }
+  },
+  "correctionObservations": [
+    {
+      "index": 0,
+      "callId": "call@3535",
+      "stepId": "pw:api@2377",
+      "startTime": 112269.759,
+      "endTime": 112272.478,
+      "position": [69.55583739362123, 32.6, 0.5851294206764114],
+      "acknowledgedInputSequence": 5766,
+      "physicsTick": 12530,
+      "physicsHz": 60,
+      "viewAngles": [41.17000000000004, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -87.48308318071645,
+      "rawMouseDx": 989.6391013901268,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 411.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 1,
+      "callId": "call@3545",
+      "stepId": "pw:api@2381",
+      "startTime": 112329.423,
+      "endTime": 112331.797,
+      "position": [69.39230994509148, 32.6, 0.38707929317700357],
+      "acknowledgedInputSequence": 5771,
+      "physicsTick": 12535,
+      "physicsHz": 60,
+      "viewAngles": [30.77000000000004, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.07765297220776,
+      "rawMouseDx": 952.6742536323676,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 491.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 2,
+      "callId": "call@3555",
+      "stepId": "pw:api@2385",
+      "startTime": 112376.588,
+      "endTime": 112379.067,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5774,
+      "physicsTick": 12538,
+      "physicsHz": 60,
+      "viewAngles": [20.37000000000004, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 872.8628722416938,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 571.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 3,
+      "callId": "call@3565",
+      "stepId": "pw:api@2389",
+      "startTime": 112427.928,
+      "endTime": 112430.092,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5776,
+      "physicsTick": 12540,
+      "physicsHz": 60,
+      "viewAngles": [9.97000000000004, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 792.8628722416938,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 651.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 4,
+      "callId": "call@3575",
+      "stepId": "pw:api@2393",
+      "startTime": 112477.204,
+      "endTime": 112479.119,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5780,
+      "physicsTick": 12544,
+      "physicsHz": 60,
+      "viewAngles": [-0.42999999999996064, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 712.8628722416937,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 731.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 5,
+      "callId": "call@3585",
+      "stepId": "pw:api@2397",
+      "startTime": 112530.343,
+      "endTime": 112532.305,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5783,
+      "physicsTick": 12547,
+      "physicsHz": 60,
+      "viewAngles": [-10.829999999999961, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 632.8628722416938,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 811.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 6,
+      "callId": "call@3595",
+      "stepId": "pw:api@2401",
+      "startTime": 112577.378,
+      "endTime": 112579.386,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5785,
+      "physicsTick": 12549,
+      "physicsHz": 60,
+      "viewAngles": [-21.22999999999996, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 552.8628722416937,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 891.9721077764466,
+        "y": 270
+      }
+    },
+    {
+      "index": 7,
+      "callId": "call@3605",
+      "stepId": "pw:api@2405",
+      "startTime": 112627.483,
+      "endTime": 112629.552,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5788,
+      "physicsTick": 12552,
+      "physicsHz": 60,
+      "viewAngles": [-31.62999999999996, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 472.86287224169376,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 560,
+        "y": 270
+      }
+    },
+    {
+      "index": 8,
+      "callId": "call@3635",
+      "stepId": "pw:api@2418",
+      "startTime": 114277.861,
+      "endTime": 114280.302,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5797,
+      "physicsTick": 12559,
+      "physicsHz": 60,
+      "viewAngles": [-42.02999999999996, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 392.86287224169376,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 640,
+        "y": 270
+      }
+    },
+    {
+      "index": 9,
+      "callId": "call@3645",
+      "stepId": "pw:api@2422",
+      "startTime": 114330.06,
+      "endTime": 114335.546,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5799,
+      "physicsTick": 12561,
+      "physicsHz": 60,
+      "viewAngles": [-52.42999999999996, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 312.8628722416938,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 720,
+        "y": 270
+      }
+    },
+    {
+      "index": 10,
+      "callId": "call@3655",
+      "stepId": "pw:api@2426",
+      "startTime": 114394.45,
+      "endTime": 114396.642,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5803,
+      "physicsTick": 12565,
+      "physicsHz": 60,
+      "viewAngles": [-62.829999999999956, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 232.86287224169382,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 800,
+        "y": 270
+      }
+    },
+    {
+      "index": 11,
+      "callId": "call@3665",
+      "stepId": "pw:api@2430",
+      "startTime": 114443.957,
+      "endTime": 114446.133,
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "acknowledgedInputSequence": 5806,
+      "physicsTick": 12569,
+      "physicsHz": 60,
+      "viewAngles": [-73.22999999999996, -26.79],
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 152.86287224169376,
+      "clampedMouseDx": 80,
+      "followingMouseMove": {
+        "x": 880,
+        "y": 270
+      }
+    }
+  ],
+  "assertionObservation": {
+    "index": 12,
+    "callId": "call@3675",
+    "stepId": "pw:api@2434",
+    "startTime": 114493.45,
+    "endTime": 114495.526,
+    "position": [69.39230994509148, 32.6, 0.38617787241326273],
+    "acknowledgedInputSequence": 5809,
+    "physicsTick": 12572,
+    "physicsHz": 60,
+    "viewAngles": [-83.62999999999997, -26.79],
+    "onGround": true,
+    "colliding": false,
+    "targetYaw": -93.10217339142015,
+    "rawMouseDx": 72.86287224169372,
+    "clampedMouseDx": 72.86287224169372,
+    "followingMouseMove": null
+  },
+  "mouseMoves": [
+    {
+      "callId": "call@3541",
+      "stepId": "pw:api@2379",
+      "startTime": 112279.248,
+      "endTime": 112289.923,
+      "x": 411.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3551",
+      "stepId": "pw:api@2383",
+      "startTime": 112335.544,
+      "endTime": 112339.361,
+      "x": 491.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3561",
+      "stepId": "pw:api@2387",
+      "startTime": 112383.046,
+      "endTime": 112391.222,
+      "x": 571.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3571",
+      "stepId": "pw:api@2391",
+      "startTime": 112435.36,
+      "endTime": 112440.413,
+      "x": 651.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3581",
+      "stepId": "pw:api@2395",
+      "startTime": 112483.378,
+      "endTime": 112490.322,
+      "x": 731.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3591",
+      "stepId": "pw:api@2399",
+      "startTime": 112536.407,
+      "endTime": 112541.166,
+      "x": 811.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3601",
+      "stepId": "pw:api@2403",
+      "startTime": 112583.42,
+      "endTime": 112590.133,
+      "x": 891.9721077764466,
+      "y": 270
+    },
+    {
+      "callId": "call@3631",
+      "stepId": "pw:api@2416",
+      "startTime": 114232.203,
+      "endTime": 114241.136,
+      "x": 560,
+      "y": 270
+    },
+    {
+      "callId": "call@3641",
+      "stepId": "pw:api@2420",
+      "startTime": 114284.414,
+      "endTime": 114289.309,
+      "x": 640,
+      "y": 270
+    },
+    {
+      "callId": "call@3651",
+      "stepId": "pw:api@2424",
+      "startTime": 114344.922,
+      "endTime": 114357.827,
+      "x": 720,
+      "y": 270
+    },
+    {
+      "callId": "call@3661",
+      "stepId": "pw:api@2428",
+      "startTime": 114400.88,
+      "endTime": 114406.197,
+      "x": 800,
+      "y": 270
+    },
+    {
+      "callId": "call@3671",
+      "stepId": "pw:api@2432",
+      "startTime": 114450.412,
+      "endTime": 114456.87,
+      "x": 880,
+      "y": 270
+    }
+  ],
+  "pointerLockTransitions": [
+    {
+      "callId": "call@3613",
+      "stepId": "pw:api@2408",
+      "startTime": 112636.513,
+      "endTime": 112637.423,
+      "method": "waitForFunction",
+      "params": {
+        "expression": "() => document.pointerLockElement === null",
+        "isFunction": true,
+        "arg": {
+          "value": {
+            "v": "undefined"
+          },
+          "handles": []
+        },
+        "timeout": 10000
+      }
+    },
+    {
+      "callId": "call@3615",
+      "stepId": "pw:api@2409",
+      "startTime": 112638.258,
+      "endTime": 114140.836,
+      "method": "waitForTimeout",
+      "params": {
+        "waitTimeout": 1500
+      }
+    },
+    {
+      "callId": "call@3629",
+      "stepId": "pw:api@2415",
+      "startTime": 114228.323,
+      "endTime": 114230.947,
+      "method": "waitForFunction",
+      "params": {
+        "expression": "() => {\n    var _document$pointerLock;\n    return ((_document$pointerLock = document.pointerLockElement) === null || _document$pointerLock === void 0 ? void 0 : _document$pointerLock.id) === 'game';\n  }",
+        "isFunction": true,
+        "arg": {
+          "value": {
+            "v": "undefined"
+          },
+          "handles": []
+        },
+        "timeout": 10000
+      }
+    }
+  ]
+}

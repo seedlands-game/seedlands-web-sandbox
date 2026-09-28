@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-BROWSER20-ROUTE-AIM-CONTRACT-MAP-01",
+  "status": "READ_ONLY_CONTRACT_MAP_COMPLETE",
+  "baselineSha": "266f82cbcef5770d51b6d907723cb84f952d35a9",
+  "build11SourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+  "browser20": {
+    "status": "FAIL",
+    "sourceManifestSha256": "0419909a5bf74910cce09b540a7ffd7040d7a960eb1ea2782d19e680cfdd9591",
+    "evidenceManifestSha256": "d77403b9bccf928df5438e2fe2f27380719d26205ca578298a8fd57b3f66ca6c",
+    "deliverySha256": "59431a5bbf81a5720592076120caac1a6bd5db71f4a2bdeb830cb05d9ded7621",
+    "failedAt": "V1 closed-door probe before KeyW input",
+    "receivedMouseDx": 72.86287224169372,
+    "v2Reached": false,
+    "productionDefectClaimed": false,
+    "close10RegressionClaimed": false
+  },
+  "math": {
+    "productionSensitivityDegreesPerUnit": 0.13,
+    "maximumMouseStepUnits": 80,
+    "maximumYawDegreesPerMove": 10.4,
+    "maximumNormalizedYawErrorDegrees": 180,
+    "existingMaximumMoves": 12,
+    "existingCoverageDegrees": 124.8,
+    "fixedPoseMinimumMovesForFullYawDomain": 18,
+    "requiredFinalObservation": true,
+    "dynamicConvergenceProvenByFixedPoseBound": false
+  },
+  "browser20Sequence": {
+    "recordedCorrectionObservations": 12,
+    "recordedCorrectionMoves": 12,
+    "recordedAssertionObservationAfterMoves": true,
+    "positionsInterpolated": false,
+    "pointerLockBoundaryResets": 1,
+    "allGroundedAndNonColliding": true,
+    "lastRecordedMoveAfterAssertion": "NOT_RECORDED",
+    "observationAfterHypotheticalThirteenthMove": "NOT_RECORDED"
+  },
+  "consumers": {
+    "direct": [
+      "apps/web/tests/e2e/classic-support/harness.ts:walkTo",
+      "apps/web/tests/e2e/classic-support/v1-slice.ts:expectClosedDoorBlocks"
+    ],
+    "walkToIndirectGroups": [
+      "classic-runtime canonical route",
+      "mineVoxel approach",
+      "crafting station approach",
+      "V2 equipment resource/workbench route",
+      "V1 water/door/jukebox routes"
+    ],
+    "existingAsyncFullDomainTest": false
+  },
+  "recommendation": {
+    "selected": "shared-helper-bounded-fail-closed",
+    "maximumMoves": 18,
+    "maximumObservations": 19,
+    "success": "an actual observation yields abs(horizontalMouseCorrectionToRoute(...)) < 1",
+    "failure": [
+      "persistent missing observation within the shared observation bound, or a non-finite observation",
+      "zero-length horizontal route vector",
+      "still misaligned after the final observation",
+      "mouse no response leading to bounded exhaustion"
+    ],
+    "closedDoorOnlyRejected": true,
+    "secondCallOrFallback": false,
+    "timeoutStepSensitivityOrToleranceChange": false
+  },
+  "proposedOwnership": {
+    "implementation": [
+      "apps/web/tests/e2e/classic-support/target-aim.ts",
+      "apps/web/tests/e2e/classic-support/route-aim-contract.test.ts"
+    ],
+    "defaultReadOnly": [
+      "apps/web/tests/e2e/classic-support/harness.ts",
+      "apps/web/tests/e2e/classic-support/v1-slice.ts",
+      "apps/web/tests/e2e/classic-support/mouse-input.ts",
+      "apps/web/tests/e2e/classic-support/route-progress.ts"
+    ]
+  },
+  "notRun": [
+    "implementation",
+    "test",
+    "build",
+    "browser21",
+    "git",
+    "push",
+    "cua",
+    "ci",
+    "deploy",
+    "merge"
+  ]
+}

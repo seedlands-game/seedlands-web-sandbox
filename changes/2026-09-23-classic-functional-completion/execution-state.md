@@ -101,6 +101,12 @@ tree `345682c2...c9cc` 完成唯一 build 与唯一 artifact verify。sourceDige
 Pack lock 与 MP3 source/public/dist identity 一致。BUILD09/10/11 tree/dist 与 Git32 backup ref 保留。Browser19 FAIL、
 首 iron pickup 未证明及后续未到达事实不变；BUILD11 evidence 随本提交冻结，精确提交/远端 SHA 以最终 checkpoint
 读回为准。Browser20/Cua/devserver/CI/deploy/merge 未运行。
+当前 route aim checkpoint：Browser20 在完整 C0-C3 后、V1 closed-door `KeyW` probe 发出前 FAIL；旧 shared
+helper 的 12 moves 只覆盖 `124.8°` 且最后 move 后不观察，V2 未到达，不能从 Browser19 历史补写进展。Close11
+已用 18 moves/19 observations 和 invalid/zero/null/exhaustion fail-closed 合同关闭 fixture/static 缺口。GIT36
+detached staged tree 精确四路径 patch `2ffd10c7...6a2` 通过 `12 files / 131 tests`、Classic/root test types、2 TS
+ESLint、四路径 format/scope；代码 commit 为 `38c3f5e55a2e6609650cded507b90b54bff893a5`。evidence/state 随本
+提交冻结，精确提交与远端 identity 以本阶段收尾读回为准；BUILD12/Browser21/Cua/devserver/CI/deploy/merge 未运行。
 
 ## 恢复规则
 

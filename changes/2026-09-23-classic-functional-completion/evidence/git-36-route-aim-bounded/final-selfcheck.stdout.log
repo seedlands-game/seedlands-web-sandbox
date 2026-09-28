@@ -1,0 +1,18 @@
+apps/web/tests/e2e/classic-support/route-aim-contract.test.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+changes/2026-09-23-classic-functional-completion/route-aim-contract.md: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/code-staged.patch: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/code-staged.paths: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/staged-gate-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/staged-gate.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/validation-argv.txt: OK
+FINAL_SELFCHECK_PASS
