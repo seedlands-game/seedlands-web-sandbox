@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-canonical-browser-25-artifact-postcheck",
+  "pid": 39651,
+  "startedAt": "2026-09-28T23:55:47.892Z",
+  "windowId": "v2-canonical-browser-25-artifact-postcheck",
+  "evidencePath": "/private/tmp/seedlands-v2-canonical-browser-25-run/artifact-postcheck-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T23:55:53.013Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T23:55:47.893Z",
+      "loadAverage": [
+        4.07958984375,
+        3.9296875,
+        3.5048828125
+      ],
+      "freeMemoryBytes": 11267981312,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T23:55:52.896Z",
+      "loadAverage": [
+        4.31298828125,
+        3.98046875,
+        3.52490234375
+      ],
+      "freeMemoryBytes": 10064887808,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T23:55:53.011Z",
+      "loadAverage": [
+        4.31298828125,
+        3.98046875,
+        3.52490234375
+      ],
+      "freeMemoryBytes": 11315871744,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

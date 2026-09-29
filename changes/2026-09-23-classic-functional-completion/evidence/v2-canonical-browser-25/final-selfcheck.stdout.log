@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "manifest": "/private/tmp/browser25-acceptance-source.sha256",
+  "root": "/private/tmp/seedlands-v2-acceptance-fdb53c07",
+  "expectedCount": 5,
+  "lineCount": 5,
+  "validEntryCount": 5,
+  "verifiedCount": 5,
+  "errors": []
+}
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "manifest": "/private/tmp/browser25-main-source.sha256",
+  "root": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+  "expectedCount": 1,
+  "lineCount": 1,
+  "validEntryCount": 1,
+  "verifiedCount": 1,
+  "errors": []
+}
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "manifest": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-25/MANIFEST.sha256",
+  "root": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-25",
+  "expectedCount": 84,
+  "lineCount": 84,
+  "validEntryCount": 84,
+  "verifiedCount": 84,
+  "errors": []
+}
+Checking formatting...
+All matched files use Prettier code style!
+BROWSER25_FINAL_SELFCHECK=PASS

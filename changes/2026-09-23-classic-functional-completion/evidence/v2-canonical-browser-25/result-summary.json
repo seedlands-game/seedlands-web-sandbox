@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-25",
+  "status": "PASS",
+  "runId": "v2-canonical-browser-25-fdb53c07",
+  "sourceSha": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+  "runnerOutcome": "passed",
+  "selection": {
+    "mode": "CANONICAL_MAIN",
+    "canonicalMainSelected": true,
+    "canonicalMainMatches": 1,
+    "modularSmokeMatches": 1,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+        "project": "chromium"
+      },
+      {
+        "testId": "c1221f8f363362ddeabe-678e4b727b3674f8fea7",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+        "project": "chromium"
+      },
+      {
+        "testId": "c1221f8f363362ddeabe-26e907d0b652e2074825",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+        "project": "chromium"
+      }
+    ]
+  },
+  "terminalAttemptCount": 1,
+  "tests": [
+    {
+      "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+      "title": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+      "project": "chromium",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "outcome": "expected",
+      "durationMs": 728444,
+      "results": [
+        {
+          "retry": 0,
+          "status": "passed",
+          "durationMs": 728444,
+          "errorCount": 0,
+          "attachmentCount": 8
+        }
+      ]
+    },
+    {
+      "testId": "c1221f8f363362ddeabe-678e4b727b3674f8fea7",
+      "title": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+      "project": "chromium",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "outcome": "expected",
+      "durationMs": 32471,
+      "results": [
+        {
+          "retry": 0,
+          "status": "passed",
+          "durationMs": 32471,
+          "errorCount": 0,
+          "attachmentCount": 47
+        }
+      ]
+    },
+    {
+      "testId": "c1221f8f363362ddeabe-26e907d0b652e2074825",
+      "title": "非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation",
+      "project": "chromium",
+      "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "outcome": "skipped",
+      "durationMs": 135,
+      "results": [
+        {
+          "retry": 0,
+          "status": "skipped",
+          "durationMs": 135,
+          "errorCount": 0,
+          "attachmentCount": 0
+        }
+      ]
+    }
+  ],
+  "playwrightStats": {
+    "total": 3,
+    "expected": 2,
+    "unexpected": 0,
+    "flaky": 0,
+    "skipped": 1,
+    "ok": true
+  },
+  "traceDisposition": "NOT_RETAINED_BY_CONFIG",
+  "performance": "NOT_MEASURED",
+  "productCompleteClaimed": false
+}

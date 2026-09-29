@@ -22,10 +22,11 @@
 
 ## A0：Architecture Approved
 
-当前交付 checkpoint：GIT40 与 manifest closure 已推送至
-`fdb53c07c0da14c7f523473e4f33060a385f23ff`；BUILD16 在该 source 的 clean detached tree 上唯一 build 和
-artifact verify 均 PASS，证据待本片语义提交。Browser24 仍为 discovery 前 FAIL/Chromium 0，Close17 仅 static
-GREEN；Browser25 未运行。
+当前交付 checkpoint：GIT40、manifest closure 与 BUILD16 evidence 已远端交付至
+`783e106fb5fcba4869bcc8d0aab68ada1df827a7`。Browser25 已由 root 独立验收：唯一 canonical attempt 和
+Classic visual PASS，默认 non-Classic smoke SKIPPED；C0-C5、完整 V1 与 V2 的 19 个 checkpoint PASS。GIT41 只提交
+Browser25 冻结 evidence、累计报告和当前状态，不改实现或测试。Browser24 保持 discovery 前 FAIL/Chromium 0，
+Browser23 保持 FAIL/TRACE_INCOMPLETE；完整 16 armor/194 matrix、V3/V4、Cua/人类听觉与性能仍未完成。
 
 架构、owner/API/失败/保存/第二配置/矩阵/预算/preview 已形成并获用户批准。历史 hash 仅为历史快照；用户本轮已批准现有目标和执行安排，不能虚构其曾审核某个 SHA，也不重复请求 hash/IMPLEMENT。
 

@@ -1,0 +1,8 @@
+7d154897b63d8dd976e049c937ff0036fe8fb548f8e5b19e96c5e7c8498608d7  ./README.md
+cf5ebbce92506af03105a6ea6561d571f277f9c2dad4c9f95eed010a22163c8d  ./SOURCE-MANIFEST.sha256
+e4299f3feb1df52e9d42ff6a674905637c34a559c13636996e1cdf6effd0af3c  ./evidence.paths
+e08f4ea32e722016c004ccc2fb0527095101f2dadfe488acb55c629cdaa9c655  ./final-selfcheck-workspace-sparse-failure.stdout.log
+1b5e6460c739fa87792221f1d9cba0808e112449bcc1c2df9275571c1c6a0868  ./final-selfcheck-workspace-sparse-failure.window.json.log
+5779884e8b7b36aebb75722d94af7ba1d0b74ae02b6ad51b1692e32212c8e293  ./final-selfcheck.zsh
+9d4869f6267ce3caa222275bfb2b4ae90f3034db694bb6ea66d5dccc31beb6c8  ./metadata-format.stdout.log
+7a8271a80644d7773f515afb1149b183fc333b520ae3e9274e646b87b3268ceb  ./metadata-format.window.json.log
