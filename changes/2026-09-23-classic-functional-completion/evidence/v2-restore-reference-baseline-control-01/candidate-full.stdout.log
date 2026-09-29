@@ -1,0 +1,41 @@
+11:19:53 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-reference-candidate-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-reference-candidate-01
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (11 tests) 1785ms
+     ✓ resolves detached references across a non-Classic restore without mutating state  890ms
+     ✓ validates and authorizes before resolving or observing existence  443ms
+     ✓ captures a request before queued execution  447ms
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (10 tests | 1 failed) 35772ms
+     ✓ runs the Headless wall clock through the serialized queue and cannot rearm after stop  2345ms
+     ✓ returns structured validation errors for malformed method arguments without throwing  2581ms
+     ✓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate  2629ms
+     ✓ keeps one world identity across commands, inspection and deterministic paused advancement  2797ms
+     ✓ restores a portable checkpoint atomically with a new epoch  5337ms
+     ✓ rejects an operation submitted behind a restore against its captured epoch  5407ms
+     ✓ rejects a waiting barrier when restore replaces its epoch  5131ms
+     ✓ rejects stale frontiers and bounds trace retention  2481ms
+     ✓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints  4707ms
+     × authorizes action ids against their actual actor owner 2356ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (7 tests) 109ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > authorizes action ids against their actual actor owner
+AssertionError: expected null not to be null
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:340:25
+    338|     });
+    339|     const foreign = source.runtime.server.getActorAction('foreign');
+    340|     expect(foreign).not.toBeNull();
+       |                         ^
+    341|     const checkpoint = await source.world.checkpoint({ kind: 'export' …
+    342|     if (!checkpoint.ok || !foreign) throw new Error('fixture unavailab…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 27 passed (28)
+   Start at  11:19:53
+   Duration  39.79s (transform 1.20s, setup 0ms, import 1.88s, tests 37.67s, environment 0ms)
+

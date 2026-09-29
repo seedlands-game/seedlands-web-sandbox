@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-POST-BROWSER25-ACCEPTANCE-GAP-MAP-01",
+  "status": "PASS_AFTER_SELFCHECK_FIXES",
+  "identity": {
+    "committedHead": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "committedTree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "build16Acceptance": "/private/tmp/seedlands-v2-acceptance-fdb53c07",
+    "build16Source": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+    "build16Tree": "ecc7940708bca8ea1d01e8df50337fa536d27d18",
+    "build16PackSha256": "f1ab2b68bfc0ca9c1e945a554dbc539ae6c6034411a1917083795e155010cd7b"
+  },
+  "browser25": {
+    "status": "PASS_ROOT_INDEPENDENTLY_ACCEPTED",
+    "result": "2 passed / 1 skipped",
+    "sourceManifestSha256": "c0d37c2742c8a9627c4839d0cde0c1d5eb7dd17cdfff4c39bd13c7064d8c49eb",
+    "evidenceManifestSha256": "78b45e794bb2688cb75acf4756df80fc6691b456e7881eff14f210c713722a2c",
+    "deliverySha256": "f227181902cecbe52d7b45e666c8ac9c4a0cc8e227b38df56f84988ac2942838",
+    "trace": "NOT_RETAINED_BY_CONFIG",
+    "productGreenClaimed": false
+  },
+  "result": {
+    "earlyI22DeathRedStillOpen": false,
+    "deathImplementationPresent": true,
+    "deathBrowserAcceptancePresent": false,
+    "headlessOldReferenceRejectionPresent": true,
+    "browserOldReferenceRejectionPresent": false,
+    "armorDefinitions": 16,
+    "catalogItems": 194,
+    "catalogRecipes": 134,
+    "complete16ArmorMatrixPresent": false,
+    "complete194BehaviorMatrixPresent": false,
+    "recommendedSlice": "V2-BROWSER-DEATH-REFERENCE-01",
+    "recommendedSliceHardLimitHours": 3
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 92,
+    "gitShowEntries": 62,
+    "acceptanceEntries": 1,
+    "workingEntries": 29,
+    "sha256": "7e1ddef19507041f4aa6a47db6a31d682e4f26ad390635fc2d53ef3f8b3463e0",
+    "roots": {
+      "gitShow": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+      "acceptance": "/private/tmp/seedlands-v2-acceptance-fdb53c07",
+      "working": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox"
+    }
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 8,
+    "sha256": "32b4200297692443e9cab619f904326112dc78461b6cc8dd0eb8d2aa8b568530",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format-final.stdout.log",
+      "metadata-format-final.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log",
+      "final-selfcheck-02.stdout.log",
+      "final-selfcheck-02.window.json.log",
+      "final-selfcheck-03.stdout.log",
+      "final-selfcheck-03.window.json.log",
+      "final-selfcheck-04.stdout.log",
+      "final-selfcheck-04.window.json.log",
+      "final-selfcheck-05.stdout.log",
+      "final-selfcheck-05.window.json.log",
+      "final-selfcheck-06.stdout.log",
+      "final-selfcheck-06.window.json.log"
+    ],
+    "exclusionReason": "Avoid self-reference and allow the final validation receipt to attest the already sealed content."
+  },
+  "format": {
+    "runId": "v2-post-browser25-gap-map-01-format",
+    "status": "PASS",
+    "exitCode": 0,
+    "scope": ["README.md", "diagnosis.json"],
+    "ignoreOrSuppressionAdded": false
+  },
+  "selfcheck": {
+    "runId": "v2-post-browser25-gap-map-01-final-selfcheck-06",
+    "status": "PASS_AFTER_SCRIPT_FIXES",
+    "sourceEntriesExpected": 92,
+    "manifestEntriesExpected": 8,
+    "strictLowerHexRequired": true,
+    "uniqueLogicalPathsRequired": true,
+    "allHashesRequired": true,
+    "outputsExcludedFromManifest": true,
+    "firstAttempt": "FAIL_EXIT_127_ZSH_SPECIAL_PATH",
+    "firstAttemptCause": "The local variable path overwrote zsh PATH before the first SOURCE hash command.",
+    "firstAttemptMutationFromEvidenceFailure": false,
+    "secondAttempt": "FAIL_EXIT_1_CURRENT_WINDOW_NOT_YET_WRITTEN",
+    "secondAttemptCause": "The child asserted the post-run file count before benchmark-window could write the current window receipt.",
+    "secondAttemptMutationFromEvidenceFailure": false,
+    "thirdAttempt": "FAIL_DELIVERY_MANIFEST_ENTRY_COUNT_STALE",
+    "thirdAttemptCause": "The delivery still declared the pre-script manifest count of 7 while the sealed manifest contained 8 entries.",
+    "thirdAttemptMutationFromEvidenceFailure": false,
+    "fourthAttempt": "FAIL_SOURCE_WORKING_HASH_TRANSCRIPTION",
+    "fourthAttemptCause": "The working hash for packages/stdlib/tests/server/transport-model.test.ts contained one manually transcribed character error; the working file itself was not changed.",
+    "fourthAttemptMutationFromEvidenceFailure": false,
+    "finalAttempt": "PASS_BY_EXIT_ZERO",
+    "finalRunId": "v2-post-browser25-gap-map-01-final-selfcheck-06"
+  },
+  "workspace": {
+    "preexistingDirtyEntries": 38,
+    "finalExpectedStatusEntries": 39,
+    "relevantTrackedModified": 9,
+    "relevantUntracked": 20,
+    "otherProtectedDirtyEntries": 9,
+    "indexExpectedEmpty": true,
+    "onlyNewStatusEntry": "?? changes/2026-09-23-classic-functional-completion/evidence/v2-post-browser25-acceptance-gap-map-01/"
+  },
+  "budget": {
+    "targetMinutes": "45-60",
+    "hardLimitHours": 2,
+    "traditionalPdRange": "0.1-0.25",
+    "recommendedHours120Percent": 1.2,
+    "recommendedTraditionalPd120Percent": 0.3,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "sourceModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "gitOrIndexWrite": false,
+    "specTasksOrExecutionStateModified": false,
+    "historicalEvidenceModified": false,
+    "longTermDocsUpdated": false,
+    "productGreenClaimed": false
+  },
+  "notRun": [
+    "implementation",
+    "behavior tests",
+    "build",
+    "artifact",
+    "Browser26",
+    "Cua",
+    "CI",
+    "Git/index/commit/push/PR",
+    "deploy",
+    "merge"
+  ]
+}

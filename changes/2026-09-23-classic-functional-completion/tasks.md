@@ -22,11 +22,12 @@
 
 ## A0：Architecture Approved
 
-当前交付 checkpoint：GIT40、manifest closure 与 BUILD16 evidence 已远端交付至
-`783e106fb5fcba4869bcc8d0aab68ada1df827a7`。Browser25 已由 root 独立验收：唯一 canonical attempt 和
-Classic visual PASS，默认 non-Classic smoke SKIPPED；C0-C5、完整 V1 与 V2 的 19 个 checkpoint PASS。GIT41 只提交
-Browser25 冻结 evidence、累计报告和当前状态，不改实现或测试。Browser24 保持 discovery 前 FAIL/Chromium 0，
-Browser23 保持 FAIL/TRACE_INCOMPLETE；完整 16 armor/194 matrix、V3/V4、Cua/人类听觉与性能仍未完成。
+当前交付 checkpoint：GIT41 已远端交付至 `01c650793c79ac34e6184da48b5a4c94a5f161c2`；Browser25 已由
+root 独立验收：唯一 canonical attempt 和 Classic visual PASS，默认 non-Classic smoke SKIPPED；C0-C5、完整 V1 与
+V2 的 19 个 checkpoint PASS。GIT42 正在交付通用 restore reference observability 与 action-owner 旧 fixture
+修复；deterministic/static 已完成，新的 Browser artifact 与 canonical 验收仍待后续独立阶段。Browser24 保持 discovery
+前 FAIL/Chromium 0，Browser23 保持 FAIL/TRACE_INCOMPLETE；death/drop/respawn、完整 16 armor/194 matrix、V3/V4、
+Cua/人类听觉与性能仍未完成。
 
 架构、owner/API/失败/保存/第二配置/矩阵/预算/preview 已形成并获用户批准。历史 hash 仅为历史快照；用户本轮已批准现有目标和执行安排，不能虚构其曾审核某个 SHA，也不重复请求 hash/IMPLEMENT。
 
@@ -594,6 +595,18 @@ GIT-40 只提交两笔：第一笔为 `playwright.config.ts`、`docs/ci-testing.
 `canonical-discovery-contract.md`；第二笔为 Close17/Browser24 evidence、累计 Browser 报告、本 evidence 摘要、
 tasks/execution-state 窄状态。隔离 detached tree 执行真实 discovery list、selection、Classic/root types、配置 ESLint、
 4-path 正常 Prettier 与 scope；不重跑 16 focused/145 behavior，不运行 build、Browser25、Cua 或 CI。
+
+### GIT-42-RESTORE-REFERENCE
+
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer。状态：`PENDING_NATURAL_HOOK`。通用
+`WorldHarnessPort.inspect` 新增 `entity-reference` 只读 variant，严格 validation 与 `world.entity/read` 授权先于当前
+Authority owner resolve；既有 equipment restore consumer 显式记录 old stale/new current 后才继续原 UI。clean HEAD
+control 证明旧 action-owner 测试失败来自 retired `settler` fixture；本片改用已注册 passive `cow` 并同时断言两条命令
+内层成功与 action identity，原四条权限拒绝不变。GIT42 detached delivery tree 已通过 focused/session/adapter
+`3 files / 28 tests`、stdlib/Web production types、root/Classic test types、8 TS ESLint、12-path Prettier/scope；现仅待
+三笔自然 hooks、非破坏分支推进、push 与 PR #41 读回。真实 Browser 对 old stale/new current/UI continuation 为
+`NOT_RUN`；必须由
+后续新 committed source artifact 和 root 唯一租约验收。
 
 ### RESTORE-OWNER-CLOSE-01
 

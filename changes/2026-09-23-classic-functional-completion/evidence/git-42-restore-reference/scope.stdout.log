@@ -1,0 +1,1 @@
+PASS tests=28/28 types=4 eslintTs=8 prettierPaths=12 stagedPaths=12

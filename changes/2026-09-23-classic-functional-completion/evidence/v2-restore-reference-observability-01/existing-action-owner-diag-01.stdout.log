@@ -1,0 +1,39 @@
+10:12:30 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-restore-reference-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-restore-reference-01
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (13 tests | 1 failed | 12 skipped) 2203ms
+     ↓ resolves detached entity references across non-Classic restore without mutating state
+     ↓ validates and authorizes entity-reference inspection before resolving or observing existence
+     ↓ captures an entity-reference request before queued execution
+     ↓ runs the Headless wall clock through the serialized queue and cannot rearm after stop
+     ↓ returns structured validation errors for malformed method arguments without throwing
+     ↓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate
+     ↓ keeps one world identity across commands, inspection and deterministic paused advancement
+     ↓ restores a portable checkpoint atomically with a new epoch
+     ↓ rejects an operation submitted behind a restore against its captured epoch
+     ↓ rejects a waiting barrier when restore replaces its epoch
+     ↓ rejects stale frontiers and bounds trace retention
+     ↓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints
+     × authorizes action ids against their actual actor owner 2202ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > authorizes action ids against their actual actor owner
+AssertionError: expected null not to be null
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:557:25
+    555|     });
+    556|     const foreign = source.runtime.server.getActorAction('foreign');
+    557|     expect(foreign).not.toBeNull();
+       |                         ^
+    558|     const checkpoint = await source.world.checkpoint({ kind: 'export' …
+    559|     if (!checkpoint.ok || !foreign) throw new Error('fixture unavailab…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 skipped (13)
+   Start at  10:12:30
+   Duration  3.53s (transform 1.01s, setup 0ms, import 1.25s, tests 2.20s, environment 0ms)
+

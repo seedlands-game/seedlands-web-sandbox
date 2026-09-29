@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-HARNESS-ACTION-OWNER-FIXTURE-CLOSE-01",
+  "status": "PASS",
+  "identity": {
+    "head": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "tree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "candidateRoot": "/private/tmp/seedlands-v2-action-owner-candidate-01",
+    "candidateTrackedDifferences": 9,
+    "candidateUntrackedFiles": 3,
+    "candidateComposition": "HEAD plus approved reference11 plus one action-owner test fixture modification"
+  },
+  "baselineRed": {
+    "reusedWithoutRerun": true,
+    "stage": "V2-RESTORE-REFERENCE-BASELINE-CONTROL-01",
+    "sourceManifestSha256": "27b1ec6c4bfc176fa878e351ebb0035b7d1411d9855c7f7c5c87671621074cf1",
+    "evidenceManifestSha256": "6d8f64b1d3da2aefd2891bd2535537981547c448b3f2acf31422ccdeb446c1a3",
+    "deliverySha256": "6af1d46fccbb7e9884bcb481a933dc93d5c7fca0e1431cd0a9d6b357c430ac3e",
+    "controlResult": "1 failed / 9 skipped at getActorAction foreign null",
+    "referenceCandidateResult": "1 failed / 9 skipped at the identical assertion",
+    "classification": "PREEXISTING_REPRODUCED"
+  },
+  "fixtureChange": {
+    "file": "apps/web/tests/integration/runtime/server/world-harness-session.test.ts",
+    "test": "authorizes action ids against their actual actor owner",
+    "archetypeBefore": "settler",
+    "archetypeAfter": "cow",
+    "cowRegisteredInHeadClassicProfile": true,
+    "spawnOuterAndInnerSuccessAsserted": true,
+    "spawnEntityIdentityAsserted": true,
+    "startOuterAndInnerSuccessAsserted": true,
+    "actionIdentityAndPendingStatusAsserted": true,
+    "permissionDenialAssertionsPreserved": 4,
+    "seedPositionTimeoutChanged": false,
+    "productionChanged": false
+  },
+  "dependencyBinding": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "firstRun": "FAIL_EVIDENCE_TEE_DIRECTORY_MISSING_AFTER_INSTALL_SUCCEEDED",
+    "firstRunProductOrDependencyFailure": false,
+    "finalRunId": "v2-action-owner-candidate-install-02",
+    "finalStatus": "PASS_ALREADY_UP_TO_DATE",
+    "downloads": 0,
+    "scriptsRun": false,
+    "lockfileChanged": false,
+    "workspaceLinksVerifiedInsideCandidate": 6
+  },
+  "tests": {
+    "candidateFull": {
+      "runId": "v2-action-owner-candidate-full-01",
+      "status": "PASS",
+      "files": 3,
+      "passed": 28,
+      "focusedReference": 11,
+      "worldHarnessSession": 10,
+      "browserAuthorityAdapter": 7
+    },
+    "rootTestTypes": {
+      "runId": "v2-action-owner-root-test-types-01",
+      "status": "PASS"
+    },
+    "classicTestTypes": {
+      "runId": "v2-action-owner-classic-test-types-01",
+      "status": "PASS"
+    },
+    "eslint": {
+      "runId": "v2-action-owner-eslint-01",
+      "status": "PASS",
+      "scope": "world-harness-session.test.ts",
+      "suppressionAdded": false
+    },
+    "prettier": {
+      "runId": "v2-action-owner-format-01",
+      "status": "PASS",
+      "scope": "world-harness-session.test.ts",
+      "ignoreAdded": false
+    },
+    "productionTypesRerun": false,
+    "productionTypesReason": "no production source changed and the approved reference production bytes were already verified"
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 29,
+    "gitShowEntries": 12,
+    "workingEntries": 17,
+    "sha256": "7f91df8303701cc58f16b85b36e100ed2f35d2cdc8473c6bee19b5c244dbb275"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 18,
+    "sha256": "d28bf5ed1929c592c32e07f8f8f84bb58240b0e8a2ed323ece425f48e6ddd335",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format*.stdout.log",
+      "metadata-format*.window.json.log",
+      "final-selfcheck*.stdout.log",
+      "final-selfcheck*.window.json.log"
+    ]
+  },
+  "workspace": {
+    "protectedDirtyEntries": 236,
+    "protectedDirtyManifestSha256": "6e34e010ba11792a6bce9cc81ade5b46a8cb660c089b884bc9cf5994cb9ba22b",
+    "indexExpectedEmpty": true,
+    "otherDirtyPreserved": true,
+    "candidateRemoveAfterSeal": true
+  },
+  "selfcheck": {
+    "runId": "v2-action-owner-final-selfcheck-02",
+    "status": "PASS",
+    "sourceEntriesValidated": 29,
+    "evidenceEntriesValidated": 18,
+    "protectedDirtyEntriesValidated": 236,
+    "candidateScopeValidated": "9 tracked plus 3 untracked",
+    "workspaceLinksValidated": 6,
+    "closureValidated": "28/28 PASS",
+    "headTreeAndEmptyIndexRequired": true,
+    "currentWindowExcludedFromManifest": true
+  },
+  "budget": {
+    "targetMinutes": 45,
+    "hardLimitHours": 1,
+    "traditionalPd": 0.1,
+    "aiRecommended120PercentHours": 0.9,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "productionModified": false,
+    "onlyTargetTestModified": true,
+    "existingSpecTasksStateDocsModified": false,
+    "referenceImplementationModifiedByThisSlice": false,
+    "historicalEvidenceModified": false,
+    "gitOrIndexWrite": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "devServerRun": false,
+    "ciRun": false,
+    "productGreenClaimed": false
+  },
+  "notRun": [
+    "production types",
+    "build",
+    "artifact",
+    "Browser",
+    "Cua",
+    "dev server",
+    "CI",
+    "Git/index/commit/push/PR",
+    "deploy",
+    "merge"
+  ]
+}
