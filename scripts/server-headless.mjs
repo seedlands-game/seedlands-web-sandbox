@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { buildGameplayPacks } from './build-gameplay-packs.mjs';
 import { loadVerifiedPackArtifacts } from './pack-integrity.mjs';
+import { permissionsForProductPlaybook } from './product-pack-admissions.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 function optionsFromArgs(args) {
@@ -27,6 +28,14 @@ function optionsFromArgs(args) {
 const options = optionsFromArgs(process.argv.slice(2));
 const { lockPath } = await buildGameplayPacks(undefined, options.playbook);
 const packArtifacts = await loadVerifiedPackArtifacts(lockPath);
+const playbook = packArtifacts.find((artifact) => artifact.manifest.kind === 'playbook');
+if (!playbook) throw new Error('Headless product Pack has no Playbook.');
+const approvedPlaybook = {
+  id: playbook.manifest.id,
+  version: playbook.manifest.version,
+  integrity: playbook.integrity,
+  permissions: permissionsForProductPlaybook(playbook.manifest.id),
+};
 const moduleRunner = await createServer({
   root,
   appType: 'custom',
@@ -58,7 +67,7 @@ try {
   session = await HeadlessSession.create({
     seedText: options.seed,
     platform: nodeCorePlatform,
-    createComposition: () => assembleProductPacks(packArtifacts),
+    createComposition: () => assembleProductPacks(packArtifacts, { approvedPlaybook }),
   });
   await session.world.clock({ kind: 'pause' });
   const interactive = options.repl || Boolean(process.stdin.isTTY && process.stdout.isTTY && !options.json);

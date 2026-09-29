@@ -252,6 +252,33 @@ describe('PlayCanvas water transition adapter', () => {
     vi.unstubAllGlobals();
   });
 
+  it('binds the current chunk light brick to the temporary water transition', () => {
+    const setParameter = vi.fn();
+    const transition = {
+      instance: { visible: true, setParameter } as unknown as pc.MeshInstance,
+      setProgress: vi.fn(),
+      destroy: vi.fn(),
+    };
+    const adapter = createPlayCanvasChunkAdapter(
+      eventApp(),
+      () => ({}) as pc.StandardMaterial,
+      telemetry,
+      undefined,
+      undefined,
+      () => transition,
+    );
+    const previous = resource(waterPart(8));
+    const current = resource(waterPart(4));
+    current.blockLightTexture = {} as pc.Texture;
+    current.blockLightOrigin = new Float32Array([16, -16, -16]);
+    current.blockLightSize = 64;
+
+    expect(adapter.prepareReplacement?.(previous, current, task)).toBe(true);
+    expect(setParameter).toHaveBeenCalledWith('texture_blockLight', current.blockLightTexture);
+    expect(setParameter).toHaveBeenCalledWith('uBlockLightOrigin', current.blockLightOrigin);
+    expect(setParameter).toHaveBeenCalledWith('uBlockLightSize', 64);
+  });
+
   it('skips an identical static surface and supersedes an active morph with one cleanup', () => {
     vi.stubGlobal('performance', { now: () => 0 });
     const firstDestroy = vi.fn();

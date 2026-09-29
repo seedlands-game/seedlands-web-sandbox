@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-13",
+  "classification": "canonical-fixture-v1-door-lower-center-occluded-by-upper",
+  "failedAt": "v1-door-lower-reopen-real-mouse-reacquire-before-click",
+  "source": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 293,
+    "aimFile": "apps/web/tests/e2e/classic-support/aim.ts",
+    "aimLine": 61
+  },
+  "expectedTarget": [70, 31, 0],
+  "lastObservedTargets": [
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0],
+    [70, 32, 0]
+  ],
+  "failureSnapshot": {
+    "playerEye": [71.475830078125, 32.60000228881836, 0.502830982208252],
+    "viewAngles": [-270.17999999999995, -48.37],
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 15,
+    "worldRevision": 144,
+    "physicsTick": 13682,
+    "acknowledgedInputSequence": 6917,
+    "commitSequence": 62113
+  },
+  "geometry": {
+    "requestedLowerCenter": [70.5, 31.5, 0.5],
+    "eastDoorPlaneX": 71,
+    "rayParameterAtEastDoorPlane": 0.4876157117838379,
+    "rayHeightAtEastDoorPlane": 32.063623889792346,
+    "firstDoorVoxelY": 32
+  },
+  "authorityDispatchObservedForFailedLowerReopen": false,
+  "summary": "After the open-door traversal and the real upper-half close click, the fixture aimed at the lower voxel center without an adjacent face. From the recorded east-side eye position, that ray reaches the east door plane inside the upper voxel, so the production target remained the upper half through the fixed 180 corrections. The lower reopen click was never sent.",
+  "productBoundary": "This run does not establish an Authority structure rejection or a V2 equipment defect. A narrow V1 fixture follow-up should choose an actually visible lower face, for example an exact lower target with an east-side adjacent cell derived from the door geometry, or a farther real-input position whose ray enters the lower voxel. Root must freeze the choice before implementation."
+}

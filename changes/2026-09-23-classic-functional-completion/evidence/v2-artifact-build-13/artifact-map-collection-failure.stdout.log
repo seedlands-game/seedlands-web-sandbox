@@ -1,0 +1,6 @@
+V2-ARTIFACT-BUILD-13 artifact map collection attempt 1
+status=VALIDATOR_FAILED_AFTER_MAPS_BEFORE_RECEIPT_COPY
+error=cp: apps/web/dist/harness-artifact.json: No such file or directory
+cause=The shell had changed directory to apps/web/dist before using the root-relative receipt path.
+impact=Both receipt and disk maps were generated successfully; no build, artifact verify, source, dist file, or existing evidence file was changed.
+retry=The receipt was copied from the acceptance tree root and the existing maps were compared without rebuilding or re-verifying.

@@ -18,9 +18,14 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'queryNearbyEntities',
   'getActorModeState',
   'acknowledgeBlockCommit',
+  'structureTargets',
+  'mediaTargets',
+  'mediaProjections',
+  'takeCommittedMediaFacts',
   'bindModuleOperations',
   'invokeModuleOperation',
   'invokeActorModuleOperation',
+  'resolveItemInteraction',
   'getNearbyStations',
   'listStationRecipes',
   'hasGameplayComposition',
@@ -45,10 +50,28 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'pickupItem',
   'dropItem',
   'placeVoxel',
+  'useFluidContainer',
   'useSelectedItem',
+  'fireSelectedRangedItem',
+  'shearSheep',
+  'tameWolf',
+  'toggleWolfSitting',
+  'dyeSheep',
+  'regrowSheepWool',
+  'lifeSkills',
+  'vehicles',
+  'navigationItems',
+  'crops',
+  'structures',
+  'finalEntities',
+  'progress',
+  'gameplayDifficulty',
+  'getPlayerArmorPoints',
+  'specialDamage',
   'attackEntity',
   'getCombatState',
   'applyDamage',
+  'setDifficulty',
   'healPlayer',
   'setHungerForDebug',
   'respawnPlayer',
@@ -75,6 +98,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'updateStarterEcologyVersion',
   'simulationMetrics',
   'restoredGameplayVersion',
+  'restoredSnapshotMigrationReports',
 ] as const satisfies readonly (keyof GameServerGameplayHost)[];
 
 export type GameServerGameplayApi = Pick<GameServerGameplayHost, (typeof GAME_SERVER_GAMEPLAY_API)[number]>;
@@ -82,7 +106,7 @@ export type GameServerGameplayApi = Pick<GameServerGameplayHost, (typeof GAME_SE
 export function installGameServerGameplayApi(target: object, host: GameServerGameplayHost): void {
   const prototype = GameServerGameplayHost.prototype;
   for (const name of GAME_SERVER_GAMEPLAY_API) {
-    const descriptor = Object.getOwnPropertyDescriptor(prototype, name);
+    const descriptor = Object.getOwnPropertyDescriptor(prototype, name) ?? Object.getOwnPropertyDescriptor(host, name);
     if (!descriptor) throw new Error(`Gameplay host API descriptor is missing: ${name}`);
     Object.defineProperty(
       target,

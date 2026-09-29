@@ -27,7 +27,7 @@ it('parses bounded mode controls and rejects malformed options', () => {
     success: true,
     command: { type: 'set-creative-slot', slot: 2, itemId: 'wood-block' },
   });
-  for (const input of ['/gamemode admin', '/fly maybe', '/creative-slot 8 wood-block'])
+  for (const input of ['/gamemode admin', '/fly maybe', '/creative-slot 9 wood-block'])
     expect(parseSlashCommand(input).success).toBe(false);
 });
 it('executes through an ordinary self principal in the actual Headless Harness', async () => {

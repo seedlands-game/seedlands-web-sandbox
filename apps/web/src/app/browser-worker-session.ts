@@ -8,6 +8,8 @@ import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-typ
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
 import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
 import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
 import type { WasmWorkerSelection } from '../compute/wasm-kernel-contract';
 
@@ -31,6 +33,8 @@ type Options = Readonly<{
   authorityTransportFaults?: AuthorityTransportFaults;
   onSnapshot: (snapshot: AuthoritySnapshot) => void;
   onGameplay: (view: AuthorityGameplayView) => void;
+  onMediaProjection?: (projection: readonly MediaPlaybackProjectionV1[]) => void;
+  onMediaFacts?: (batch: MediaPlaybackCommittedBatchV1) => void;
   onPlayerDeath: () => void;
   onCommit: (commit: WorldCommitResult) => void;
   onUnknownChunk: (key: string) => void;
@@ -97,14 +101,17 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
       options.onGameplay(view);
       if (view.player.lifecycle === 'dead') options.onPlayerDeath();
     },
+    onMediaProjection: options.onMediaProjection,
+    onMediaFacts: options.onMediaFacts,
     onCommit: options.onCommit,
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
-    onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology }) =>
-      compute.findSafeSpawn(seed, generatorVersion, provider, starterEcology),
+    onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology, voxelSemantics }) =>
+      compute.findSafeSpawn(seed, generatorVersion, provider, starterEcology, voxelSemantics),
     onAuthorityChunkNeeded: generateAuthorityChunk,
     onUnknownChunk: options.onUnknownChunk,
     onInputDecision: options.onInputDecision,
     onFatal: options.onFatal,
+    requestTimeoutMs: options.harnessEnabled ? 30_000 : undefined,
     onWorldEpochChanged: (nextEpoch, ready) => {
       authorityGeneration += 1;
       authorityReady = ready;

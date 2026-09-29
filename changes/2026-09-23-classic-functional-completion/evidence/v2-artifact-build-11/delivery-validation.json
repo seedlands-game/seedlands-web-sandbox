@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-11",
+  "status": "PASS",
+  "buildSource": {
+    "sourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+    "sourceTree": "345682c2280824a294b5531b3a6654a71764c9cc",
+    "sourceDigest": "773a32909250c868ab5757a0366282562bbae296db71ce509e48bb77a40448d1",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-73e8d4da"
+  },
+  "artifact": {
+    "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+    "builtAt": "2026-09-28T08:08:13.435Z",
+    "artifactFiles": 276,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "receiptSha256": "af9a738e68d28cf09f21c956fde8bd2e54697838e38efa70548482ff83c8955e",
+    "receiptMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "diskMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+    "mapsEqual": true,
+    "missing": 0,
+    "extra": 0,
+    "mismatched": 0
+  },
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReusedOffline": true,
+    "downloadedPackages": 0,
+    "taskStateEnvironmentInsideAcceptanceTree": true,
+    "taskStatePersisted": false
+  },
+  "dependencySetup": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "window": "v2-artifact-build-11-dependency-setup",
+    "startedAt": "2026-09-28T08:07:03.714Z",
+    "endedAt": "2026-09-28T08:07:07.693Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "cee457fbe1f9e58cfcc67128255b2429d0103150717fb21d6319cfff4025c163",
+    "receiptSha256": "cdab87caf7c59de02785ad6cd8007616fb9f6d54b60b044a4684a576030f93c2"
+  },
+  "build": {
+    "command": "pnpm build",
+    "window": "v2-artifact-build-11-build",
+    "startedAt": "2026-09-28T08:07:48.966Z",
+    "endedAt": "2026-09-28T08:08:16.802Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "a96e9cd5466beddae0af48ae654fafef6c3b9f63170509d00c1b0815e9eda621",
+    "receiptSha256": "971c8b75ec1d047adfd6c9ec78d1c9e8531cfb3c7d07ee2d2f7ef69ac2f43fb9"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "window": "v2-artifact-build-11-artifact-verify",
+    "startedAt": "2026-09-28T08:08:24.024Z",
+    "endedAt": "2026-09-28T08:08:27.822Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "5c95c67082a8bc6dcba47e147e33f61b7c92c3b3f65790307710dfe2b3a2ecc8",
+    "receiptSha256": "48e2ef90c8c2c522daed9366bd7c34526ec08a195d5ca4287a2aac1207c1db75"
+  },
+  "packLock": {
+    "sourceAndDistEqual": true,
+    "sha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f"
+  },
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourcePublicAndDistMatch": true,
+    "packLockEntryCount": 1,
+    "packLockMatches": true
+  },
+  "artifactDigestRelation": {
+    "sameAsBuild10": true,
+    "mapDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "reason": "GIT35 changes only the canonical fixture, tests, spec, contract, and evidence; the source identity advances while the independently compared production artifact map remains byte-identical."
+  },
+  "sourceManifest": {
+    "scope": "final-delivery-documents",
+    "note": "This manifest binds the final artifact evidence report, tasks, and execution-state; buildSource separately binds the earlier clean source used to produce dist.",
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "f8b8df80f226e9fe077a527c7380b6f2c70eb96596f3ea57e8a8fc43d2cf8b64"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 17,
+    "sha256": "4db0ad19d957dfe8e418bbaafc9d33370cc0a3ea0c14ed3906f5092c62a8a7db",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "metadataFormat": {
+    "window": "v2-artifact-build-11-metadata-format",
+    "status": "PASS",
+    "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "receiptSha256": "6f0b00ffff90d0e7b117e306b8ef89f2d939e9c95dbdd7caf0e26b7ccfee3c76"
+  },
+  "metadataFinal": {
+    "window": "v2-artifact-build-11-metadata-final",
+    "status": "PASS",
+    "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "receiptSha256": "b55f7dce17d4e21a7f0d8e488d4a9dfb5893680f6feae9a0e5210e9822620aca"
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "240230e7a23bc064e7a732d35a9c4ce657cf2b97a6b0303311b84f79dc4d2011",
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "build11TreePreserved": true,
+    "backupRefPreserved": true
+  },
+  "boundaries": {
+    "browser19Status": "FAIL",
+    "firstIronInventoryPickup": "NOT_PROVEN",
+    "remainingV2PointerC4C5Save": "NOT_REACHED",
+    "browser20Run": false,
+    "productGreenClaimed": false,
+    "performanceMeasured": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "BUILD11 records an artifact for an already-reviewed fixture-only change and does not alter architecture ownership or public product protocols."
+  },
+  "notRun": ["browser20", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

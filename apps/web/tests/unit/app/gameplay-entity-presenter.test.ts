@@ -12,6 +12,7 @@ const animationState = vi.hoisted(() => ({
 vi.mock('../../../src/app/gameplay/appearance-runtime', () => ({
   getAppearanceAnimationBindings: () => animationState.bindings,
   getAppearanceModelBlob: () => animationState.blob,
+  getPackActorPresentation: () => null,
 }));
 
 vi.mock('../../../src/app/gameplay/glb-model-resource', () => ({
@@ -51,12 +52,12 @@ const item = (y: number): GameplayEntity => ({
   stack: { itemId: 'dirt-block', count: 1 },
 });
 
-const settler = (x: number): GameplayEntity => ({
-  id: 'settler',
+const pig = (x: number): GameplayEntity => ({
+  id: 'pig',
   type: 'npc',
   kind: 'npc',
   lifecycle: 'active',
-  archetype: 'settler',
+  archetype: 'pig',
   position: [x, 0, 0],
 });
 
@@ -71,6 +72,16 @@ describe('玩法实体的独立表现时钟', () => {
     animationState.bindings = {};
     animationState.blob = undefined;
     animationState.addGlbModel.mockReset();
+    animationState.addGlbModel.mockImplementation(async (_app: pc.Application, parent: pc.Entity) => {
+      const entity = new pc.Entity('default-pig');
+      parent.addChild(entity);
+      return {
+        entity,
+        animationClips: ['idle', 'move', 'attack', 'hurt'],
+        playback: { play: vi.fn(), locate: vi.fn() },
+        release: vi.fn(),
+      };
+    });
   });
 
   it('每50ms前进2cm的慢速目标不会在快照回调跳动，并在中间渲染帧继续前进', () => {
@@ -165,29 +176,73 @@ describe('玩法实体的独立表现时钟', () => {
     expect(recovered).toBeLessThan(before);
   });
 
-  it('居民双段手臂通过同侧肩部 pivot 摆动，手掌不会脱离袖子', () => {
+  it('未覆盖物种默认装载专属GLB并保持米制比例', async () => {
     const root = new pc.Entity('root');
-    const presenter = new GameplayEntityPresenter({ root } as pc.Application);
-    reconcileFrame(presenter, [settler(0)], 0);
-    reconcileFrame(presenter, [settler(1)], 0.1);
-
-    const leftPivot = root.findByName('arm-left-pivot')!;
-    const leftSleeve = root.findByName('arm-left-sleeve')!;
-    const leftHand = root.findByName('arm-left-hand')!;
-    expect(leftPivot).not.toBeNull();
-    expect(leftSleeve.parent).toBe(leftPivot);
-    expect(leftHand.parent).toBe(leftPivot);
-    expect(leftPivot.getLocalEulerAngles().x).not.toBe(0);
-    expect(leftSleeve.getLocalEulerAngles().length()).toBeCloseTo(0);
-    expect(leftHand.getLocalEulerAngles().length()).toBeCloseTo(0);
+    const app = { root } as pc.Application;
+    const presenter = new GameplayEntityPresenter(app);
+    reconcileFrame(presenter, [pig(0)], 0);
+    await vi.waitFor(() => expect(root.findByName('default-pig')).not.toBeNull());
+    expect(animationState.addGlbModel).toHaveBeenCalledWith(
+      app,
+      expect.any(pc.Entity),
+      'seedlands:model/actor/pig',
+      expect.any(AbortSignal),
+      undefined,
+      'authored',
+      undefined,
+    );
+    expect(root.findByName('fallback-body')).toBeNull();
+    presenter.dispose();
   });
 
-  it('居民模型只消费游戏启动时保存的绑定与 Blob 快照', async () => {
+  it('实体移除后异步模型结果释放且不重新挂载', async () => {
+    const root = new pc.Entity('root');
+    const app = { root } as pc.Application;
+    const release = vi.fn();
+    let complete: ((value: unknown) => void) | undefined;
+    animationState.addGlbModel.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          complete = resolve;
+        }),
+    );
+    const presenter = new GameplayEntityPresenter(app);
+    reconcileFrame(presenter, [pig(0)], 0);
+    reconcileFrame(presenter, [], 0);
+    complete?.({
+      entity: new pc.Entity(),
+      animationClips: ['idle'],
+      playback: { play: vi.fn(), locate: vi.fn() },
+      release,
+    });
+    await vi.waitFor(() => expect(release).toHaveBeenCalledOnce());
+    expect(root.children).toHaveLength(0);
+    presenter.dispose();
+  });
+
+  it('加载失败通过既有app事件反馈且不回退黑盒', async () => {
+    const root = new pc.Entity('root');
+    const fire = vi.fn();
+    const app = { root, fire } as unknown as pc.Application;
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    animationState.addGlbModel.mockRejectedValue(new Error('HTTP 404'));
+    const presenter = new GameplayEntityPresenter(app);
+    reconcileFrame(presenter, [pig(0)], 0);
+    await vi.waitFor(() =>
+      expect(fire).toHaveBeenCalledWith('seedlands:asset-error', expect.stringContaining('HTTP 404')),
+    );
+    expect(root.findByName('fallback-body')).toBeNull();
+    expect(root.findByName('asset-error:pig')).not.toBeNull();
+    presenter.dispose();
+    error.mockRestore();
+  });
+
+  it('猪模型只消费游戏启动时保存的绑定与 Blob 快照', async () => {
     const root = new pc.Entity('root');
     const app = { root } as pc.Application;
     const blob = new Blob(['startup-snapshot'], { type: 'model/gltf-binary' });
     animationState.bindings = {
-      settler: { modelId: 'glb:settler', clips: { idle: 'Idle' } },
+      pig: { modelId: 'glb:pig', clips: { idle: 'Idle' } },
     };
     animationState.blob = blob;
     animationState.addGlbModel.mockImplementation(async (_app: pc.Application, parent: pc.Entity) => {
@@ -202,16 +257,17 @@ describe('玩法实体的独立表现时钟', () => {
     });
     const presenter = new GameplayEntityPresenter(app);
 
-    reconcileFrame(presenter, [settler(0)], 0);
+    reconcileFrame(presenter, [pig(0)], 0);
 
     await vi.waitFor(() => expect(animationState.addGlbModel).toHaveBeenCalledOnce());
     expect(animationState.addGlbModel).toHaveBeenCalledWith(
       app,
       expect.any(pc.Entity),
-      'glb:settler',
+      'glb:pig',
       expect.any(AbortSignal),
       blob,
       'feet',
+      undefined,
     );
     presenter.dispose();
   });

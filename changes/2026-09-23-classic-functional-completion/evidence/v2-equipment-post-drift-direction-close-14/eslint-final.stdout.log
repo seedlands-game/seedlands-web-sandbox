@@ -1,0 +1,8 @@
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts
+  35:4  error  This number literal will lose precision at runtime  no-loss-of-precision
+  42:4  error  This number literal will lose precision at runtime  no-loss-of-precision
+  49:4  error  This number literal will lose precision at runtime  no-loss-of-precision
+
+✖ 3 problems (3 errors, 0 warnings)
+

@@ -14,7 +14,8 @@ function validateRequirement(requirement: MiningToolRequirement): void {
   if (
     (requirement.preferredTool !== null &&
       requirement.preferredTool !== 'axe' &&
-      requirement.preferredTool !== 'pickaxe') ||
+      requirement.preferredTool !== 'pickaxe' &&
+      requirement.preferredTool !== 'shovel') ||
     !Number.isSafeInteger(requirement.minimumTier) ||
     requirement.minimumTier < 0 ||
     (requirement.minimumTier > 0 && requirement.preferredTool === null)

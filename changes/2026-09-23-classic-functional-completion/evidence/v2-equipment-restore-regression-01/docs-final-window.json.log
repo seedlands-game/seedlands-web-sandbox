@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-restore-docs-final",
+  "pid": 79254,
+  "startedAt": "2026-09-25T12:26:14.996Z",
+  "windowId": "v2-equipment-restore-docs-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-restore-regression-01/docs-final-window.json.log",
+  "waitedMs": 2,
+  "endedAt": "2026-09-25T12:26:15.267Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:26:14.998Z",
+      "loadAverage": [
+        2.884765625,
+        3.32861328125,
+        3.34423828125
+      ],
+      "freeMemoryBytes": 1102217216,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:26:15.266Z",
+      "loadAverage": [
+        2.884765625,
+        3.32861328125,
+        3.34423828125
+      ],
+      "freeMemoryBytes": 1102217216,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

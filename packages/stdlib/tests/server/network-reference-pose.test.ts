@@ -104,8 +104,20 @@ describe('projectEntityPoseReference', () => {
         publicationSequence: 0,
       }),
     ).toThrow(/archetype/i);
-    expect(() =>
+    expect(
       projectEntityPoseReference(snapshot([entity('bad', { type: 'npc', archetype: 'grazer' })]), {
+        publicationSequence: 0,
+      }),
+    ).toMatchObject({
+      entities: [expect.objectContaining({ type: 'npc', archetype: 'grazer' })],
+    });
+    expect(() =>
+      projectEntityPoseReference(snapshot([entity('bad', { archetype: 'sample:unregistered' })]), {
+        publicationSequence: 0,
+      }),
+    ).not.toThrow();
+    expect(() =>
+      projectEntityPoseReference(snapshot([entity('bad', { archetype: 'invalid archetype' as never })]), {
         publicationSequence: 0,
       }),
     ).toThrow(/archetype/i);

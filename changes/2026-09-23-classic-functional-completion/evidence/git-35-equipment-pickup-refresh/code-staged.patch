@@ -1,0 +1,448 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts b/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..498aa0f8226cc77228b2e7e38b6ea5d2524d014f
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+@@ -0,0 +1,304 @@
++import type { Page } from '@playwright/test';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import {
++  classifyEquipmentRouteWait,
++  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++  EQUIPMENT_RESOURCE_WALK_OPTIONS,
++  followEquipmentRoute,
++  matchesEquipmentRouteArrival,
++} from './equipment-resource-route';
++import { walkTo, type ClassicSnapshot } from './harness';
++import type { Point, RoutePoint } from './scenario';
++
++const TARGET: RoutePoint = [92.5, 2.5];
++const BROWSER19_CURRENT: Point = [92.49510192871094, 32.599998474121094, 2.2007970809936523];
++const BROWSER19_STRICT: Point = [92.49810791015625, 32.599998474121094, 2.442101240158081];
++const KEY_S_TARGET_YAW = 1.8717187781891766;
++
++const routeSnapshot = (
++  player: Point,
++  tick: number,
++  ack: number,
++  options: Readonly<{
++    server?: Point;
++    view?: readonly [number, number];
++    onGround?: boolean;
++    colliding?: boolean;
++  }> = {},
++): ClassicSnapshot =>
++  ({
++    player,
++    serverPlayerPosition: options.server ?? player,
++    viewAngles: options.view ?? [KEY_S_TARGET_YAW, -20.03],
++    onGround: options.onGround ?? true,
++    colliding: options.colliding ?? false,
++    interactionAttempts: 39,
++    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
++  }) as ClassicSnapshot;
++
++function routePage(
++  options: Readonly<{
++    initial: ClassicSnapshot;
++    correction: ClassicSnapshot | null;
++    refreshed: ClassicSnapshot | null;
++    afterPulse?: ClassicSnapshot;
++    onRead?: (read: number) => void;
++  }>,
++) {
++  const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false };
++  const page = {
++    evaluate: async (callback: (...args: unknown[]) => unknown) => {
++      const source = String(callback);
++      if (!source.includes('snapshot()')) throw new Error('Unexpected evaluate callback');
++      calls.reads += 1;
++      options.onRead?.(calls.reads);
++      if (calls.reads === 1) return options.initial;
++      if (calls.pressed) return options.afterPulse ?? options.refreshed;
++      if (calls.reads === 2) return options.correction;
++      return options.refreshed;
++    },
++    keyboard: {
++      down: async (key: string) => {
++        expect(key).toBe('KeyS');
++        calls.down += 1;
++        calls.pressed = true;
++      },
++      up: async (key: string) => {
++        expect(key).toBe('KeyS');
++        calls.up += 1;
++      },
++    },
++    locator: () => ({
++      boundingBox: async () => {
++        calls.moves += 1;
++        return { x: 0, y: 0, width: 960, height: 540 };
++      },
++    }),
++    mouse: { move: async () => undefined },
++  } as unknown as Page;
++  return { calls, page };
++}
++
++afterEach(() => {
++  vi.restoreAllMocks();
++});
++
++describe('Classic V2 pickup route post-correction refresh', () => {
++  it('returns the Browser19 strict correction snapshot before sending pulse 9', async () => {
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const { calls, page } = routePage({ initial, correction: strict, refreshed: strict });
++
++    const result = await walkTo(page, TARGET, {
++      key: 'KeyS',
++      timeout: 45_000,
++      ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
++      refreshAfterCorrection: true,
++    });
++
++    expect(calls).toMatchObject({ reads: 3, down: 0, up: 0, moves: 0 });
++    expect(result).toBe(strict);
++  });
++
++  it('does not send input when correction exhausts the original deadline', async () => {
++    let now = 1_000;
++    vi.spyOn(Date, 'now').mockImplementation(() => now);
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const { calls, page } = routePage({
++      initial,
++      correction: strict,
++      refreshed: strict,
++      onRead: (read) => {
++        if (read === 2) now = 46_001;
++      },
++    });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        refreshAfterCorrection: true,
++      }),
++    ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
++    expect(calls).toMatchObject({ reads: 2, down: 0, up: 0 });
++  });
++
++  it('does not send input when the refresh await exhausts the original deadline', async () => {
++    let now = 1_000;
++    vi.spyOn(Date, 'now').mockImplementation(() => now);
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const { calls, page } = routePage({
++      initial,
++      correction: strict,
++      refreshed: strict,
++      onRead: (read) => {
++        if (read === 3) now = 46_001;
++      },
++    });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        refreshAfterCorrection: true,
++      }),
++    ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
++    expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
++  });
++
++  it('fails closed when the post-correction refresh is unavailable', async () => {
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const { calls, page } = routePage({ initial, correction: strict, refreshed: null, afterPulse: strict });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        refreshAfterCorrection: true,
++      }),
++    ).rejects.toThrow('Classic snapshot is unavailable after route correction.');
++    expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
++  });
++
++  it('continues with the original pulse when the refreshed client has not arrived', async () => {
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const notReached = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
++      view: [0.8592819133153222, -20.03],
++    });
++    const reached = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
++    const { calls, page } = routePage({ initial, correction: notReached, refreshed: notReached, afterPulse: reached });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        refreshAfterCorrection: true,
++      }),
++    ).resolves.toStrictEqual(reached);
++    expect(calls).toMatchObject({ reads: 4, down: 1, up: 1 });
++  });
++
++  it.each([
++    { name: 'omitted', options: {} },
++    { name: 'false', options: { refreshAfterCorrection: false } },
++  ])('keeps the $name default path and snapshot read count', async ({ options }) => {
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    const { calls, page } = routePage({ initial, correction: strict, refreshed: strict, afterPulse: strict });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        ...options,
++      }),
++    ).resolves.toStrictEqual(strict);
++    expect(calls).toMatchObject({ reads: 3, down: 1, up: 1 });
++  });
++
++  it.each([
++    { name: 'omitted', options: {} },
++    { name: 'false', options: { refreshAfterCorrection: false } },
++  ])('keeps the $name default path when correction crosses the deadline', async ({ options }) => {
++    let now = 1_000;
++    vi.spyOn(Date, 'now').mockImplementation(() => now);
++    const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const corrected = routeSnapshot([92.497, 32.6, 2.3], 27121, 20546, {
++      view: [0.8592819133153222, -20.03],
++    });
++    const reached = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
++    const { calls, page } = routePage({
++      initial,
++      correction: corrected,
++      refreshed: corrected,
++      afterPulse: reached,
++      onRead: (read) => {
++        if (read === 2) now = 46_001;
++      },
++    });
++
++    await expect(
++      walkTo(page, TARGET, {
++        key: 'KeyS',
++        timeout: 45_000,
++        ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++        pulseMs: 0,
++        ...options,
++      }),
++    ).resolves.toStrictEqual(reached);
++    expect(calls).toMatchObject({ reads: 3, down: 1, up: 1 });
++  });
++
++  it('returns a refreshed client arrival to the existing outer bounded wait when the server is late', async () => {
++    let waitCalls = 0;
++    const outerBaseline = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const serverLate = routeSnapshot(BROWSER19_STRICT, 27121, 20546, {
++      server: [92.49811121062714, 32.6, 2.3],
++    });
++    const strict = routeSnapshot(BROWSER19_STRICT, 27124, 20549);
++    const { calls, page } = routePage({ initial: outerBaseline, correction: serverLate, refreshed: serverLate });
++
++    const result = await followEquipmentRoute(TARGET, {
++      now: () => 1_000,
++      observe: async () => outerBaseline,
++      walk: (_direction, timeout) =>
++        walkTo(page, TARGET, {
++          key: 'KeyS',
++          timeout,
++          ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++          pulseMs: 0,
++          refreshAfterCorrection: true,
++        }),
++      waitForProgress: async (baseline, direction) => {
++        waitCalls += 1;
++        expect(classifyEquipmentRouteWait(baseline, strict, TARGET, direction)?.kind).toBe('arrival');
++        return { kind: 'arrival', snapshot: strict };
++      },
++    });
++
++    expect(result).toBe(strict);
++    expect(calls).toMatchObject({ down: 0, up: 0 });
++    expect(waitCalls).toBe(1);
++  });
++
++  it('keeps stale, unready, and one-sided snapshots out of strict arrival', () => {
++    const baseline = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
++    const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
++    expect(matchesEquipmentRouteArrival(baseline, { ...strict, onGround: false }, TARGET, 'KeyS')).toBe(false);
++    expect(matchesEquipmentRouteArrival(baseline, { ...strict, colliding: true }, TARGET, 'KeyS')).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        baseline,
++        { ...strict, authority: { ...strict.authority, physicsTick: baseline.authority.physicsTick } },
++        TARGET,
++        'KeyS',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(baseline, { ...strict, serverPlayerPosition: [92.5, 32.6, 2.3] }, TARGET, 'KeyS'),
++    ).toBe(false);
++  });
++
++  it('enables refresh only for the V2 equipment walk options', () => {
++    expect(EQUIPMENT_RESOURCE_WALK_OPTIONS).toMatchObject({
++      tolerance: 0.06,
++      corridorTolerance: 0.08,
++      pulseMs: 80,
++      jump: false,
++      refreshAfterCorrection: true,
++    });
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+index a43d783236b02ec8e3988500c62dc36f4bd627e9..f512f97852f2df2ca862713621a9c6f644797978 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+@@ -10,6 +10,7 @@ export const EQUIPMENT_RESOURCE_ROUTE_OPTIONS = Object.freeze({
+ export const EQUIPMENT_RESOURCE_WALK_OPTIONS = Object.freeze({
+   ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
+   jump: false,
++  refreshAfterCorrection: true,
+ });
+ export const EQUIPMENT_ROUTE_TIMEOUT_MS = 45_000;
+ // Matches mineVoxel's existing approach tolerance, contains one 80ms pulse (max 0.36m),
+diff --git a/apps/web/tests/e2e/classic-support/harness.ts b/apps/web/tests/e2e/classic-support/harness.ts
+index c863f68f8ab7969b49213ae825a67c6ecc076817..e0228b4df4fed7d66b9cc84a1ae8901ccd435684 100644
+--- a/apps/web/tests/e2e/classic-support/harness.ts
++++ b/apps/web/tests/e2e/classic-support/harness.ts
+@@ -273,22 +273,29 @@ export async function walkTo(
+     corridorTolerance?: number;
+     timeout?: number;
+     pulseMs?: number;
++    refreshAfterCorrection?: boolean;
+   }> = {},
+ ): Promise<ClassicSnapshot> {
+   const key = options.key ?? 'KeyW';
+-  const tolerance = options.tolerance ?? 0.65;
+-  const corridorTolerance = options.corridorTolerance ?? 1.5;
++  const { tolerance = 0.65, corridorTolerance = 1.5 } = options;
+   const deadline = Date.now() + (options.timeout ?? 45_000);
+   let current = await snapshot(page);
+   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+-    if (Date.now() >= deadline) throw new Error(`Real input route timed out before ${target.join(',')}.`);
++    if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+     await correctMouseToRoute({
+       target,
+       direction: key,
+       observe: () => snapshot(page),
+       move: (dx, dy) => moveMouseBy(page, dx, dy),
+     });
++    if (options.refreshAfterCorrection) {
++      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
++      if ((current = await snapshot(page)) === null)
++        throw new Error('Classic snapshot is unavailable after route correction.');
++      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
++      if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
++    }
+     const segmentStart = current;
+     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
+     await page.keyboard.down(key);
+diff --git a/changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md b/changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..3ba83863ecbf06509e8f9a0643e501b4896772a8
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md
+@@ -0,0 +1,60 @@
++# V2 首个 Iron Pickup Route 刷新合同
++
++阶段：`V2-EQUIPMENT-PICKUP-REFRESH-CLOSE-10`
++
++状态：Close-09 被本节精确 supersede；Close-10 fixture/deterministic/static GREEN。Browser-19 保持 FAIL，
++Browser-20 未运行。
++
++Close-09 的 SOURCE6 `114047959f5b42bf7f2b0dcf6db4239bc6b4d1959de2fb8251da652e3c2ca4a5`、
++MANIFEST79 `709a6ebbd0c543020920b72ffea65932f4a3f41ed2749be166860baca3829d62` 与 delivery
++`02f5a71308c04374fbcfc261ea6597fa4db8776b5c1c30c5986a7ff16326b867` 的原件保留在 Close-10
++`prior-release/`。Close-09 的真实测试结果继续成立，但其无条件 post-correction deadline check 改变了省略/false
++调用的旧行为，因此“generic default behavior 未改变”由本阶段精确取代。
++
++## Browser19 RED
++
++Browser19 已完成完整 V1、10 格 resource placement、wood/stone 各三格 mining/drop/pickup、木镐/石镐，并完成首个
++iron `[92,31,2]` 的真实 leftdown、voxel `21 -> 0` 与可展示 drop。随后 `mineResources` 对 pickup waypoint
++`[92.5,2.5]` 的 `followEquipmentRoute` 失败；首个 iron 的 inventory pickup 未证明。
++
++完整 trace 将 45 秒 outer route 分为三次 `driver.walk`，真实 driver 都是 generic `walkTo`，pulse 为 11/3/3；
++三个 outer baseline 的 client x 均大于 92.5，故固定 KeyS，trace 也记录 17 个 KeyS down/up、0 个 KeyW。
++
++最早漏接 snapshot 是 `pw:api@15023`，位于 driver1 第 9 pulse 前的 `correctMouseToRoute.observe`：client/server
++分别为 `[92.498108,32.6,2.442101]` / `[92.498111,32.6,2.442101]`，tick/ack `27121/20546`，
++grounded/non-colliding；KeyS 下双方 distance 均约 `0.05793 < .06`，finite `.45/.08` 与相对旧 current/outer
++baseline 的 freshness 均通过。horizontal correction `dx≈0.294<1` 后 helper 返回 void；`walkTo` 未刷新旧 current
++`@15013`，继续发送 pulse 9。driver3 的 `@15548` 再次 strict 到达，correction 跨过共享 deadline 后仍发送 pulse 17。
++
++## 冻结行为
++
++1. `walkTo` options 新增私有可选 `refreshAfterCorrection?: boolean`，默认 false。
++2. 仅 `EQUIPMENT_RESOURCE_WALK_OPTIONS` 设置 `refreshAfterCorrection: true`。
++3. 只有 true 分支在 `await correctMouseToRoute` 后检查原 deadline；仍在预算才调用已有 `snapshot(page)`，await 返回后
++   再检查同一 deadline。null 稳定 fail closed，不使用旧 current 发键。
++4. refreshed snapshot 赋给 current；仍在预算且 client 满足原 `reachedRouteTarget` 时返回该同一对象，否则才发送原
++   pulse。generic helper 仍只控制 client movement；server late 继续由 outer strict/bounded wait 处理。
++5. 省略/false 保持原路径和 snapshot 调用次数；不修改 `correctMouseToRoute`、`target-aim.ts` 或其他 caller。
++6. 不改变共享 45 秒、20 秒 poll、80ms、`jump=false`、`.06/.08/±.45`、方向规则、坐标、route、fallback 或
++   pickup `itemCount > before` 断言。
++7. true 分支 correction 或 refresh 跨 deadline 均零 keydown；不能把 deadline 后 arrived 当 PASS。省略/false 不新增
++   correction 后的 `Date.now()` 读取或 timeout 分支，保持 Close-09 之前的默认 pulse 语义。
++
++## RED / GREEN
++
++- RED-A：fake Page 实际调用 exported `walkTo`，初始 current=Browser19 `@15013`，correction/refresh=
++  `@15023`，true 应直接返回 refreshed 对象，keyboard down/up=0。旧实现忽略 option 并发送 KeyS，行为 RED。
++- RED-B：fake Date.now 让 correction 后或 refresh await 后跨 deadline；两者均应抛原 route timeout 且 keyboard=0。
++- RED-C：refresh=null 稳定拒绝且 keyboard=0。
++- GREEN 正例：refresh 未到达时继续原 pulse；省略/false 保持原 pulse 与原 snapshot read count。
++- Close-10 RED：省略与显式 false 在 correction 返回时越过 deadline、旧 current 未到达时，仍须发送原单次 pulse，
++  再由既有 `waitForSnapshot` 返回到达样本；Close-09 的无条件检查会提前抛 timeout。fake clock 不产生真实等待。
++- Outer 正反例：client reached/server late 由既有 bounded wait 取得 strict arrival；stale、unready、one-sided 不得冒充
++  strict。
++
++## 边界与预算
++
++- 只改 fixture/harness test code，不改 production、V1、scenario JSON、aim/mouse/mining callback、save schema 或公共 API。
++- fixture/static GREEN 不代表 Browser19 改写或 Browser20 GREEN；Browser19 FAIL 与 iron inventory pickup NOT PROVEN 保持。
++- AI 预计 1-2 小时，硬上限 3 小时；传统 0.25-0.5 PD。credits、费率、API 等价费用、额度与占比 unknown。
++- 长期 docs 不更新：本片只修 canonical fixture 的可选读取边界，不改变架构 owner 或公共协议。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 7a5022827b862a76744f13fd5c0dd0c840de6bcc..bb8e66345d3cc90cebf1ed0ff27f8441fea98e7e 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -215,6 +215,18 @@ target-card 与 `aimedVoxelTarget()` 同轮双读回，并使用原 180 次完
+ 和 `ensurePointerLock` 后、left mouse down 前只调用一次；reject 立即停止且不得 fallback 到旧 aim。不得复制
+ `mineVoxel` 的输入/掉落流程、修改通用 aim/target trace、增加路线或 timeout。确定性 control 必须包含真实 scenario
+ floor；旧 helper 的 null observation 分支必须实际调用 `mouseCorrectionToVoxel`，不得人为保持 view 不变。
++Browser-19 已越过该 aim 缺口，并完成 wood/stone 全链、木石镐与首个 iron clear/drop；首 iron pickup waypoint
++`[92.5,2.5]` 在 V2 route 内失败。完整 trace 证明 generic `walkTo` 的 `correctMouseToRoute.observe` 已在 pulse 9
++前读到严格满足现有条件的 `@15023`，但 helper 返回 void 后旧 current 仍触发 KeyS。Close-09 只为 `walkTo` options
++增加默认 false 的 `refreshAfterCorrection`；仅 V2 equipment walk options 开启。true 分支在 correction 后与 refresh
++await 后都检查同一原 deadline，以已有 `snapshot(page)` 刷新 current；null fail closed，仍在预算且 client reached 才
++返回，否则发送原 pulse。outer 双投影/freshness/readiness、45s/20s/80ms、jump=false、.06/.08/±.45、方向、坐标和
++pickup inventory 断言均保持；不得改 aim、fallback 或将 Browser19 FAIL 静态改写为 GREEN。
++Close-10 精确取代 Close-09 的默认兼容声明：Close-09 把 correction 后的第一次 deadline check 放在 true 分支外，
++使省略/false 也新增提前 timeout。该检查必须移入 `refreshAfterCorrection=true` 分支，refresh await 后的第二次检查
++保持；省略/false 在 correction 返回时即使越过 deadline，仍按原实现发送该轮 pulse 并由既有 wait 取得新样本。
++Close-09 的原 SOURCE/MANIFEST/delivery、合同、报告、源码与测试字节归档到 Close-10 `prior-release/`；其真实
++RED/GREEN/static 结果不抹去，但不得继续声称当时 generic default deadline 行为未改变。
+ 
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命

@@ -18,6 +18,41 @@ function setup(hook?: (value: unknown) => void, persistence?: MemoryGamePersiste
   const modules = [
     defineContentModule({
       moduleId: 'test:content',
+      voxels: [
+        {
+          id: 'test:air',
+          storageId: 0,
+          solid: false,
+          targetable: false,
+          renderable: false,
+          meshKind: 'cube',
+          emission: 0,
+          lightCost: 1,
+          faceMaterials: [1, 1, 1, 1, 1, 1],
+        },
+        {
+          id: 'test:bench-voxel',
+          storageId: 10,
+          solid: true,
+          targetable: true,
+          renderable: true,
+          meshKind: 'cube',
+          emission: 0,
+          lightCost: 16,
+          faceMaterials: [1, 1, 1, 1, 1, 1],
+        },
+        {
+          id: 'test:stone-voxel',
+          storageId: 3,
+          solid: true,
+          targetable: true,
+          renderable: true,
+          meshKind: 'cube',
+          emission: 0,
+          lightCost: 16,
+          faceMaterials: [1, 1, 1, 1, 1, 1],
+        },
+      ],
       items: [
         {
           id: 'test:bench',
@@ -141,6 +176,7 @@ it('rejects raw creation and destruction before any part of the world edit commi
     expect(placed.success, JSON.stringify(placed)).toBe(true);
   }
   const before = server.freezePortableSaveSnapshot();
+  expect(() => server.prepareVoxelEdit('fixture', [2, 60, 0], 0)).toThrow(/station-aware/);
   expect(() => server.editBatch({ actorId: 'fixture', edits: [{ x: 2, y: 60, z: 0, value: 0 }] })).toThrow(
     /station-aware/,
   );

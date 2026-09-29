@@ -19,6 +19,10 @@ import {
   importResidentCheckpoint,
 } from '../../../client/character/resident-checkpoint-transfer';
 import { ResidentBridge } from '../../../client/character/resident-bridge';
+import {
+  browserGameplayFailureMessage,
+  isLegacyGameplayProvenanceUnknown,
+} from '../../../client/persistence/legacy-gameplay-provenance-error';
 
 export type CompanionState = Readonly<{
   characters: readonly CharacterState[];
@@ -211,13 +215,16 @@ export class CompanionSession {
     try {
       await action(authority);
     } catch (error) {
-      if (generation === this.generation)
+      if (generation === this.generation) {
+        const message = browserGameplayFailureMessage(error);
         this.publish({
-          error:
-            error instanceof Error && /[\u4e00-\u9fff]/u.test(error.message)
+          error: isLegacyGameplayProvenanceUnknown(error)
+            ? message
+            : error instanceof Error && /[\u4e00-\u9fff]/u.test(error.message)
               ? error.message
               : '操作暂未完成，请稍后再试。',
         });
+      }
     } finally {
       if (generation === this.generation) this.publish({ busy: false });
     }
@@ -449,6 +456,7 @@ export class CompanionSession {
         }
         if (!result.ok) {
           if (!alreadyPending) this.timelines.finishRestore(restoreWorldId);
+          if (isLegacyGameplayProvenanceUnknown(result.error.message)) throw new Error(result.error.message);
           throw new Error('世界存档恢复失败，原世界保持不变');
         }
         keepPaused = true;

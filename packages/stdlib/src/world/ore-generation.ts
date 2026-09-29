@@ -2,6 +2,8 @@ import type { VoxelId } from './voxel';
 
 export const COAL_ORE_SALT = 0x434f414c;
 export const IRON_ORE_SALT = 0x49524f4e;
+export const GOLD_ORE_SALT = 0x474f4c44;
+export const DIAMOND_ORE_SALT = 0x4449414d;
 
 const STONE_VOXEL = 3;
 const COAL_ORE_VOXEL = 14;
@@ -31,6 +33,10 @@ export function oreVoxel(
   const groupX = Math.floor(x / 2);
   const groupY = Math.floor(y / 2);
   const groupZ = Math.floor(z / 2);
+  if (generatorVersion >= 5 && y >= 0) {
+    if (y < 16 && depth >= 12 && oreHash(seed, groupX, groupY, groupZ, DIAMOND_ORE_SALT) % 997 < 8) return 20;
+    if (y < 32 && depth >= 8 && oreHash(seed, groupX, groupY, groupZ, GOLD_ORE_SALT) % 997 < 24) return 19;
+  }
   if (depth >= 8 && oreHash(seed, groupX, groupY, groupZ, IRON_ORE_SALT) % 97 < 6) return IRON_ORE_VOXEL as VoxelId;
   if (depth >= 4 && oreHash(seed, groupX, groupY, groupZ, COAL_ORE_SALT) % 97 < 10) return COAL_ORE_VOXEL as VoxelId;
   return baseVoxel;

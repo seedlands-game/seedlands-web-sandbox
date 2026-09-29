@@ -7,6 +7,7 @@ export function traceVoxelRay(
   from: Position,
   to: Position,
   getVoxel: (x: number, y: number, z: number) => number | undefined,
+  solid: (voxel: number) => boolean = isSolid,
 ): VoxelRayResult {
   const delta = to.map((value, index) => value - from[index]);
   const length = Math.sqrt(delta.reduce((total, value) => total + value ** 2, 0));
@@ -24,7 +25,7 @@ export function traceVoxelRay(
     if (voxel.join(',') === sourceVoxel || voxel.join(',') === targetVoxel) continue;
     const value = getVoxel(...voxel);
     if (value === undefined) return 'unavailable';
-    if (isSolid(value)) return 'blocked';
+    if (solid(value)) return 'blocked';
   }
   return 'clear';
 }

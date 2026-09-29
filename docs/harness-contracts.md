@@ -1,6 +1,14 @@
 # Harness 合同
 
-本页保留原 `harness/contracts.json`、`scripts/harness/plan.mjs`、`scripts/harness/run.mjs` 与 `apps/web/dist/harness-artifact.json` 的设计合同，**不是 2026-09-16 架构冻结阶段的可执行入口**。相应代码和运行证据暂存于后续 Draft PR；当前命令以根 `package.json` 和 [CI 测试边界](ci-testing.md) 为准。下文描述的是待 Classic 完成后重新审核、恢复的设计，不表示已实现或已验收。
+唯一 `apps/web/tests/e2e/classic-runtime.spec.ts`、根 `pnpm build`/`pnpm harness:artifact`/`pnpm harness:classic` 及 `scripts/harness/artifact.mjs`、`classic.mjs` 已经落盘；2026-09-20 起这些 production artifact 与 Classic 入口不再只是 09-16 架构冻结期的延期草案。`harness/contracts.json`、`scripts/harness/plan.mjs`、`scripts/harness/run.mjs` 和 `verify:affected`/`verify:all` 尚未落盘，因此下文 Owner registry、Plan 和通用 Runner stages 仍是延期设计，不能作为当前命令引用。当前可执行入口只以根 `package.json` 和 [CI 测试边界](ci-testing.md) 为准。入口存在不表示某次 build、Chromium 或产品旅程已经执行或通过；每次结论必须绑定当次 source、artifact 与 receipt。
+
+2026-09-23 Classic V1 继续复用这条唯一 canonical 线路。`?harness` BrowserProductHarness 可以增加只读 geometry、postrender mesh 和 Media/audio oracle；它们只能观察正式 owner 已接受的状态，不能代操作、代渲染或代播放。具体冻结签名见当前 change 的 `v1-harness-contract.md`。真实浏览器仍需由后续单例租约运行并生成回执，本次合同接线的 Vitest/typecheck 不替代该证据。
+
+2026-09-29 起，`WorldHarnessPort.inspect` 的 `entity-reference` variant 是 Headless 与 Browser Worker 共用的只读
+Authority lifetime oracle。请求携带完整 `EntityLifetimeReference`，使用 `world.entity/read` 和 reference `entityId` 先授权，
+再由当前 Authority owner 返回 `current | stale`；合法 stale 不是 unavailable。Harness 只返回 detached reference 副本，
+不得用客户端 epoch 比较代替 owner resolve，也不得借该查询增加写口、Classic 规则或协议版本。具体正反例与 Browser
+consumer 边界见当前 change 的 `restore-reference-observability-contract.md`。
 
 ## Owner registry
 

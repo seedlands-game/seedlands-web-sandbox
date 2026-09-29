@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-combat-regression-root-01",
+  "pid": 69525,
+  "startedAt": "2026-09-25T15:21:32.324Z",
+  "windowId": "v2-death-combat-regression-root-01",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-combat-integration-01/regression-root-01-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:21:32.807Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:21:32.325Z",
+      "loadAverage": [
+        3.7607421875,
+        3.3828125,
+        3.32763671875
+      ],
+      "freeMemoryBytes": 1142538240,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:21:32.806Z",
+      "loadAverage": [
+        3.7607421875,
+        3.3828125,
+        3.32763671875
+      ],
+      "freeMemoryBytes": 1142538240,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

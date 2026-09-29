@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-direct-vitals-legacy-player-01",
+  "pid": 2028,
+  "startedAt": "2026-09-25T15:57:30.088Z",
+  "windowId": "v2-death-direct-vitals-legacy-player-01",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/legacy-player-01-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:57:31.829Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:57:30.089Z",
+      "loadAverage": [
+        3.63720703125,
+        3.7490234375,
+        3.849609375
+      ],
+      "freeMemoryBytes": 754745344,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:57:31.827Z",
+      "loadAverage": [
+        3.505859375,
+        3.7197265625,
+        3.83837890625
+      ],
+      "freeMemoryBytes": 743702528,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

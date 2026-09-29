@@ -1,0 +1,11 @@
+head=cb4941bfd1801422802463bc7bbc41dd7d8e9484
+tree=0ce6d40c340f153007a8d8bc24742f635222fb29
+tracked_dirty=0
+index_dirty=0
+dist_files=277
+dist_symlinks=0
+artifact_receipt_sha256=a02e67c6c2694bfbb188d81ae8d74b554f6604c773389d952a4c5e40c222f682
+port4273=clear
+owned_playwright_chromium_preview_processes=0
+benchmark_lock=absent
+backup=refs/task-backups/git32-evidence-a402b016 a402b01623354a5c78e41260354a0fdd7c35394c

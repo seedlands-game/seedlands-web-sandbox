@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-DOOR-READINESS-SNAPSHOT-CLOSE-01",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "ccb600c3e4b9ec4948700f3cffedf59158df6e78",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "98e3464148269cf06374ec225bace4bc387fc92864ecd46e229ee790997e4756",
+    "validatedEntries": 7
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 24,
+    "sha256": "358234189898daff743a7c1b366678e205d6ae788737d3a39c430b3d932b8194",
+    "validatedEntries": 24,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "browser14Red": {
+    "window": "f7a53699-300d-429c-a308-8c48399036df",
+    "status": "FAIL_BEFORE_LOWER_EXIT_FACE",
+    "diagnosisSha256": "c0fbef61c89865a6fd289be6f2a36a86d2f2c81a9ef2c9a7e907e0e81a7fc438",
+    "individualReadinessFalseField": "NOT_RECORDED",
+    "lowerExitFaceReached": false,
+    "v2Reached": false
+  },
+  "implementation": {
+    "entryAndExitUseSameContract": true,
+    "baselineSource": "the corresponding walkTo returned snapshot",
+    "matchingSnapshotSource": "the structured-clone returned by existing waitForSnapshot",
+    "clientReadinessOnly": true,
+    "clientAndServerCompleteVoxelBoundaryRequiredInSameSnapshot": true,
+    "physicsTickStrictlyAdvanced": true,
+    "acknowledgedInputSequenceNonDecreasing": true,
+    "independentAuthorityReadinessClaimed": false,
+    "crossOwnerAtomicityClaimed": false,
+    "runtimeHarnessChanged": false,
+    "walkOrPollingAlgorithmChanged": false,
+    "routeAimOrBudgetChanged": false,
+    "productionChanged": false
+  },
+  "validation": {
+    "red": {
+      "window": "v1-door-readiness-snapshot-close-01-red",
+      "status": "EXPECTED_FAIL",
+      "testsPassed": 1,
+      "testsFailed": 1,
+      "reason": "The legacy client-only condition selected physicsTick 102 while server x=70.99 remained inside the exit voxel.",
+      "stdoutSha256": "aa4b372cff97c63616d56b61ab3c78029541f5351d54a19c3621e0b8555501e0",
+      "receiptSha256": "eb689e8320084e2a43cbd0e15b951fae39f92d9013fe3e430f532ae9a60ff2fd"
+    },
+    "green": {
+      "window": "v1-door-readiness-snapshot-close-01-green",
+      "status": "PASS",
+      "files": 1,
+      "tests": 3,
+      "maxWorkers": 1,
+      "stdoutSha256": "43f357b1fa06964b337be54c927190c02e6883c6997993f0067c9000c5e1e29a",
+      "receiptSha256": "a8009551242296fb44a481a35a8ca882acae702d74290f02d0d4584c62155e1e"
+    },
+    "affected": {
+      "window": "v1-door-readiness-snapshot-close-01-affected",
+      "status": "PASS",
+      "files": 5,
+      "tests": 41,
+      "maxWorkers": 1,
+      "stdoutSha256": "e5876d9f3e8b40dcf2f69f43ede07ab4f0cd40e820d6ab1351f99cbaf4f0ab61",
+      "receiptSha256": "3545257afb3514458b41304638eb4261dbc4a1a473648ea1e3deeb4be81c864b"
+    },
+    "classicTestTypes": {
+      "window": "v1-door-readiness-snapshot-close-01-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "dc39d1fab3bdd7d8f48af616899268db86d5ca2f18c59c23317c795ad9d74d57"
+    },
+    "rootTestTypes": {
+      "window": "v1-door-readiness-snapshot-close-01-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "b12a681dc5f15e62bad95e162d474699d92330eb5de9c1941f32ac7d0957da86"
+    },
+    "eslint": {
+      "window": "v1-door-readiness-snapshot-close-01-eslint",
+      "status": "PASS",
+      "files": 4,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "c285167a64dae2ac9b5267d7f092bee9175ea97d0eac46825e8b3da5baf8ebb4"
+    },
+    "formatWrite": {
+      "window": "v1-door-readiness-snapshot-close-01-format-write",
+      "status": "PASS",
+      "stdoutSha256": "d63412f04d15c040e08ea983b2b1e32ac960cb8972cecd5bd1992950b7c0db4c",
+      "receiptSha256": "c075428987c9da8e1f9122e5f06a734854bdd43928f2147e66d693d4ba603f69"
+    },
+    "static": {
+      "window": "v1-door-readiness-snapshot-close-01-static",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "4a48eecaa009b4dd43ff1cf59d1af11c76410573770a0809d8ad2f3975397257"
+    },
+    "evidenceFinal": {
+      "window": "v1-door-readiness-snapshot-close-01-evidence-final",
+      "status": "PASS",
+      "stdoutSha256": "2a06cd538155851faa55e83e9ef091a11033cf06eb2151d834d1f9ec29ab5eea",
+      "receiptSha256": "3de9e7e03d0c5f7222e6ff5090449bb9ce938e66ee3cbe66351e4a818ab839b6"
+    },
+    "metadataFormat": {
+      "window": "v1-door-readiness-snapshot-close-01-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "35290bf6189c4a192a6518149edb9b83eb0e5a108f5e17cd6f9b721c5e3fe488",
+      "receiptSha256": "3b05039289bd35dcccd9951c3dc942b464de1b40e1f1cb3aed518f65c04fa002"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser13ExitFaceProductValidated": false,
+    "browser15Authorized": false,
+    "buildRun": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This change only corrects canonical fixture observation timing and does not change public ownership, protocol, or architecture."
+  },
+  "budget": {
+    "stageLimitHours": 3,
+    "hardLimitHours": 6,
+    "traditionalEstimatePd": "0.25-0.5",
+    "creditsAndApiEquivalentCost": "UNKNOWN",
+    "rateAndQuotaShare": "UNKNOWN"
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}

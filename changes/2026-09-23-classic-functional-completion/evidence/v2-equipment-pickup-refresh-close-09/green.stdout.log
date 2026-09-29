@@ -1,0 +1,248 @@
+3:12:08 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (10 tests | 6 failed) 9ms
+     ✓ returns the Browser19 strict correction snapshot before sending pulse 9 1ms
+     × does not send input when correction exhausts the original deadline 4ms
+     × does not send input when the refresh await exhausts the original deadline 1ms
+     × fails closed when the post-correction refresh is unavailable 0ms
+     × continues with the original pulse when the refreshed client has not arrived 1ms
+     × keeps the 'omitted' default path and snapshot read count 0ms
+     × keeps the 'false' default path and snapshot read count 0ms
+     ✓ returns a refreshed client arrival to the existing outer bounded wait when the server is late 0ms
+     ✓ keeps stale, unready, and one-sided snapshots out of strict arrival 0ms
+     ✓ enables refresh only for the V2 equipment walk options 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > does not send input when correction exhausts the original deadline
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20538,
++     "commitSequence": 1,
++     "physicsTick": 27112,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "serverPlayerPosition": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:121:5
+    119|         refreshAfterCorrection: true,
+    120|       }),
+    121|     ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
+       |     ^
+    122|     expect(calls).toMatchObject({ reads: 2, down: 0, up: 0 });
+    123|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > does not send input when the refresh await exhausts the original deadline
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20538,
++     "commitSequence": 1,
++     "physicsTick": 27112,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "serverPlayerPosition": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:146:5
+    144|         refreshAfterCorrection: true,
+    145|       }),
+    146|     ).rejects.toThrow('Real input route timed out before 92.5,2.5.');
+       |     ^
+    147|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
+    148|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > fails closed when the post-correction refresh is unavailable
+AssertionError: promise resolved "{ player: [ …(3) ], …(6) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 20538,
++     "commitSequence": 1,
++     "physicsTick": 27112,
++   },
++   "colliding": false,
++   "interactionAttempts": 39,
++   "onGround": true,
++   "player": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "serverPlayerPosition": [
++     92.49510192871094,
++     32.599998474121094,
++     2.2007970809936523,
++   ],
++   "viewAngles": [
++     1.8717187781891766,
++     -20.03,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:162:5
+    160|         refreshAfterCorrection: true,
+    161|       }),
+    162|     ).rejects.toThrow('Classic snapshot is unavailable after route cor…
+       |     ^
+    163|     expect(calls).toMatchObject({ reads: 3, down: 0, up: 0 });
+    164|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > continues with the original pulse when the refreshed client has not arrived
+AssertionError: expected { player: [ …(3) ], …(6) } to strictly equal { player: [ …(3) ], …(6) }
+
+- Expected
++ Received
+
+@@ -1,23 +1,23 @@
+  {
+    "authority": {
+-     "acknowledgedInputSequence": 20549,
++     "acknowledgedInputSequence": 20538,
+      "commitSequence": 1,
+-     "physicsTick": 27124,
++     "physicsTick": 27112,
+    },
+    "colliding": false,
+    "interactionAttempts": 39,
+    "onGround": true,
+    "player": [
+-     92.49810791015625,
++     92.49510192871094,
+      32.599998474121094,
+-     2.442101240158081,
++     2.2007970809936523,
+    ],
+    "serverPlayerPosition": [
+-     92.49810791015625,
++     92.49510192871094,
+      32.599998474121094,
+-     2.442101240158081,
++     2.2007970809936523,
+    ],
+    "viewAngles": [
+      1.8717187781891766,
+      -20.03,
+    ],
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:179:5
+    177|         refreshAfterCorrection: true,
+    178|       }),
+    179|     ).resolves.toStrictEqual(reached);
+       |     ^
+    180|     expect(calls).toMatchObject({ reads: 4, down: 1, up: 1 });
+    181|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > keeps the 'omitted' default path and snapshot read count
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > keeps the 'false' default path and snapshot read count
+AssertionError: expected { player: [ …(3) ], …(6) } to strictly equal { player: [ …(3) ], …(6) }
+
+- Expected
++ Received
+
+@@ -1,23 +1,23 @@
+  {
+    "authority": {
+-     "acknowledgedInputSequence": 20546,
++     "acknowledgedInputSequence": 20538,
+      "commitSequence": 1,
+-     "physicsTick": 27121,
++     "physicsTick": 27112,
+    },
+    "colliding": false,
+    "interactionAttempts": 39,
+    "onGround": true,
+    "player": [
+-     92.49810791015625,
++     92.49510192871094,
+      32.599998474121094,
+-     2.442101240158081,
++     2.2007970809936523,
+    ],
+    "serverPlayerPosition": [
+-     92.49810791015625,
++     92.49510192871094,
+      32.599998474121094,
+-     2.442101240158081,
++     2.2007970809936523,
+    ],
+    "viewAngles": [
+      1.8717187781891766,
+      -20.03,
+    ],
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:192:7
+    190|       await expect(
+    191|         walkTo(page, TARGET, { key: 'KeyS', timeout: 45_000, pulseMs: …
+    192|       ).resolves.toStrictEqual(strict);
+       |       ^
+    193|       expect(calls).toMatchObject({ reads: 3, down: 1, up: 1 });
+    194|     },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 4 passed (10)
+   Start at  15:12:08
+   Duration  308ms (transform 55ms, setup 0ms, import 196ms, tests 9ms, environment 0ms)
+

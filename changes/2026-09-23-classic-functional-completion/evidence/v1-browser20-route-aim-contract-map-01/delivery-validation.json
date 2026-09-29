@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-BROWSER20-ROUTE-AIM-CONTRACT-MAP-01",
+  "status": "READ_ONLY_DIAGNOSIS_COMPLETE",
+  "baselineSha": "266f82cbcef5770d51b6d907723cb84f952d35a9",
+  "build11SourceSha": "73e8d4da504e3d21290fc82208b7e2516521515a",
+  "build11TreeSha": "345682c2280824a294b5531b3a6654a71764c9cc",
+  "browser20Input": {
+    "sourceManifestSha256": "0419909a5bf74910cce09b540a7ffd7040d7a960eb1ea2782d19e680cfdd9591",
+    "evidenceManifestSha256": "d77403b9bccf928df5438e2fe2f27380719d26205ca578298a8fd57b3f66ca6c",
+    "deliverySha256": "59431a5bbf81a5720592076120caac1a6bd5db71f4a2bdeb830cb05d9ded7621",
+    "status": "FAIL",
+    "v2Reached": false
+  },
+  "sourceManifest": {
+    "entries": 19,
+    "sha256": "5848879ef25500c0c786ada0d86d84e91c17c06f3ed8b96912e341ac6061525a"
+  },
+  "evidenceManifest": {
+    "entries": 4,
+    "sha256": "7f788fe22817bb678067f9731a986fc3bb56ed144f651756440f5f70ff0e49b4",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "result": {
+    "productionSensitivityDegreesPerUnit": 0.13,
+    "maximumMouseStepUnits": 80,
+    "existingMoveCoverageDegrees": 124.8,
+    "fixedPoseFullYawMinimumMoves": 18,
+    "finalObservationRequired": true,
+    "browser20RecordedObservations": 13,
+    "browser20RecordedMoves": 12,
+    "pointerLockBoundaryResets": 1,
+    "selectedCandidate": "shared helper bounded fail-closed contract",
+    "candidateImplemented": false,
+    "dynamicConvergenceClaimed": false
+  },
+  "consumerMap": {
+    "directConsumers": 2,
+    "directConsumerNames": [
+      "harness.ts:walkTo",
+      "v1-slice.ts:expectClosedDoorBlocks"
+    ],
+    "closedDoorOnlyCandidateRejected": true
+  },
+  "boundaries": {
+    "sourceModified": false,
+    "browser20EvidenceModified": false,
+    "cumulativeBrowserReportModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "browserRun": false,
+    "gitOrIndexWrite": false,
+    "performanceMeasured": false
+  },
+  "notRun": [
+    "implementation",
+    "test",
+    "build",
+    "browser21",
+    "git",
+    "push",
+    "cua",
+    "ci",
+    "deploy",
+    "merge"
+  ]
+}

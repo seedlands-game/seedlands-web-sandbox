@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-DEATH-POLICY-SPINE-01",
+  "status": "CHECKPOINT_READY",
+  "baseline": "a39f7ba6d18b602305372093c43757be83a6125e",
+  "metadata": {
+    "createdInThisStage": true,
+    "sourceManifestEntries": 10,
+    "evidenceManifestEntries": 39,
+    "evidenceDirectoryTotalFilesIncludingManifest": 40
+  },
+  "files": {
+    "packages/stdlib/src/server/gameplay/modules/death-inventory-policy-module.ts": "b4b20ee254098ab428d312718920ab5d79a51a83b100504b5ab29d80731da3c6",
+    "packages/stdlib/src/server/gameplay/death-inventory-settlement.ts": "f0ffac5b22459010499e7f62dfd670a124c2b5a42052543473c53f0e496b7f0c",
+    "packages/stdlib/src/server/composition/mod-api.ts": "625258e7d2d761838cc3456409d07ce65c6ab3e993fb57ba0becf2ac96ff4c26",
+    "packages/stdlib/tests/server/death-inventory-policy-module.test.ts": "3431317ad97ea70f195d07668739dd2d668bb6d3dcf9bba345c4523e217cbcae",
+    "packages/stdlib/tests/server/death-inventory-settlement-series.test.ts": "52ad6343262423aed927f001e09a754280da3bc2849bc71dba0539278addd02b",
+    "packages/stdlib/tests/server/equipment-spine-contract.test.ts": "80ef082aeaf5a5ae1edc4e7ffa2b44cc574243d4ce75e29363633d868b054a2d",
+    "changes/2026-09-23-classic-functional-completion/death-policy-contract.md": "d728a3fe8b137b97aa016f2650edcde8b6e6503c09e85b6b33b667fb6bea1ed1",
+    "changes/2026-09-23-classic-functional-completion/death-policy-evidence.md": "cc49d6533d81807dc9dbd5fb932d48175fff7d27fae4ba11cc4fc2c18d80aa12",
+    "changes/2026-09-23-classic-functional-completion/tasks.md": "b63a4886f83f470dc8c374efeebdc38931a42e0fb66cdadbb3d27a865e78e067",
+    "changes/2026-09-23-classic-functional-completion/execution-state.md": "e1a4f4f053eddf14eb2c8198b9b7bb3791d7fdddda9b44072f309e8f721b7a75"
+  },
+  "sharedFileOwnership": {
+    "path": "packages/stdlib/src/server/composition/mod-api.ts",
+    "fullFileHashIncludesConcurrentTransportDirty": true,
+    "ownedChange": "25-line death capability, settlement and type export hunk adjacent to armor exports",
+    "ownedHunkSnapshot": "mod-api-death-exports.ts.log",
+    "excludedChange": "46-line route and transport export hunk"
+  },
+  "red": {
+    "window": "bd970aa3-470e-41ba-8ae8-bea7a97bb43b",
+    "status": "EXPECTED_FAIL",
+    "exitCode": 1,
+    "files": 1,
+    "failed": 1,
+    "reason": "health-only authority drift was accepted between candidate build and prepare",
+    "stdoutSha256": "412524dac71a793b7f6ef7f7e13a15eaee2868acacc63ce5caf81702b40f66d5",
+    "receiptSha256": "30bccf6d08b27b5a73faf4eaa04036ddabb9235ba35e01395f0cb563a9159431"
+  },
+  "tests": {
+    "window": "b72d7b48-f7ea-474b-b30d-1366c231562e",
+    "status": "PASS",
+    "files": 3,
+    "passed": 25,
+    "maxWorkers": 1,
+    "stdoutSha256": "3e6cc78d2f9ab5e66f60e5ca2b3222e0d66545a395ae7071af465efee062e3ec",
+    "receiptSha256": "11f38c6c45ab2352099f98d41306fd61802ea89ba4100948e8b96740fd7121e5"
+  },
+  "static": {
+    "stdlibTypes": {
+      "window": "c74ba153-9ad1-4a9e-b352-3ca3260f3cc0",
+      "status": "PASS",
+      "receiptSha256": "8f2216837c46742b520dc06dfe478e05e2ceb6c7e737775860c9d084b1ed5b04"
+    },
+    "rootTestTypes": {
+      "window": "2646cb99-2c83-40ce-9929-f2f9778a2b76",
+      "status": "PASS",
+      "receiptSha256": "591863c4b5578244d1ec8e0d737b243c3c1f4963f465b8ae57ea7d2d9a3d31de"
+    },
+    "eslint": {
+      "window": "a37585f4-1212-48a3-8df5-c5b65e059e61",
+      "status": "PASS",
+      "receiptSha256": "a2c2c180d263f5718e83dfeb567c62d486ba7742fd3cb9edcad2582cb931d2d8"
+    },
+    "format": {
+      "window": "e58f309a-21a5-4101-858a-fed4f5865051",
+      "status": "PASS",
+      "receiptSha256": "ea6aa80ce3116e2375b5b23b6dca55894d49d6b24b402e5345452c7fbfaaafa8"
+    },
+    "docsFormat": {
+      "window": "6795c3ec-0720-4d26-8e92-910cbad71748",
+      "status": "PASS",
+      "receiptSha256": "85ce236f135f4b7a1889dabbddef43f305fa0f62bcf92b6ed71d43ee8e935b21"
+    },
+    "scopedDiff": {
+      "window": "f846f34e-fff5-4a68-8c1c-9b32cf1740b4",
+      "status": "PASS",
+      "receiptSha256": "473704f3b3463ac942b80cefa2434a671c556b1757c01699ceb8804ffffb9fa3"
+    }
+  },
+  "notImplemented": [
+    "classic-policy-installation",
+    "death-inventory-policy-unavailable-producer-receipt",
+    "combat-death-producer",
+    "needs-death-producer",
+    "vitals-death-producer",
+    "autonomy-death-producer",
+    "npc-intrinsic-drop-wiring"
+  ],
+  "notRun": ["classic-test-types", "build", "browser", "cua", "devserver", "ci", "git-stage", "git-commit", "git-push"]
+}

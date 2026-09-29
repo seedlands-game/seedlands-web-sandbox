@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARRIVAL-DURING-AIM-CLOSE-12",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 8,
+    "sha256": "c75666b03c3201b58fbd9d8a9e03f971ffb3f9d8716cfb24f3d2723ef4da4f9b"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 30,
+    "sha256": "a8f5d291fcb5da489b2c554ab6a52425573e1ff239f53bcec73dcf177952c8ed",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "metadata-final.stdout.log",
+      "metadata-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "inputs": {
+    "map01": {
+      "sourceManifestSha256": "50c8c21b93c186427a27e47623e151b736bc17528fb4319a8aae2b6e35d991f3",
+      "evidenceManifestSha256": "486c335f220d9bacb1ea4019c81db44f7df36129e32c9b59d86c7410125e73a0",
+      "deliverySha256": "0e32bc91a71db284838265ecb5192fefb72dc7540c2c7a3eeca2537655538fc6"
+    },
+    "browser21": {
+      "sourceManifestSha256": "fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001",
+      "evidenceManifestSha256": "83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8",
+      "deliverySha256": "93c572c0a698bc55cf969b226242946073392326722a6233bb2318e027ab9d72",
+      "status": "FAIL",
+      "firstWoodPickup": "PASS",
+      "remainingV2": "NOT_REACHED"
+    },
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN"
+  },
+  "red": {
+    "window": "v2-arrival-during-aim-close-12-red",
+    "status": "EXPECTED_FAIL_6_OF_7",
+    "passed": 1,
+    "failed": 6,
+    "exitCode": 1,
+    "reason": "The old helper discarded the Browser21 client-reached observation, returned void, lacked typed terminal outcomes and did not enforce the V2 observation/move deadline boundaries.",
+    "stdoutSha256": "88a8e470852da24a4836a8a7249d731692eaf77c7bf3c00098ae90d67991902e",
+    "receiptSha256": "0ab07b966f067e75cc551b87a6861a4ccdeb920d1a958c3451af7cc587c06adc"
+  },
+  "implementation": {
+    "typedOutcomes": ["angle-aligned", "route-reached"],
+    "genericObservationPreserved": true,
+    "optionalReadOnlyTerminalPredicate": true,
+    "terminalBeforeZeroAngleAndMove": true,
+    "v2OnlyViaExistingRefreshFlag": true,
+    "sameSnapshotHandedOff": true,
+    "trueObservationAndMoveDeadlineChecks": true,
+    "defaultPathAddsDateReadOrSnapshot": false,
+    "defaultDirectAimStillStrict": true,
+    "outerStrictWaitDriftOwnerChanged": false,
+    "maximumMoves": 18,
+    "maximumObservations": 19,
+    "fallbackOrSecondHelperAdded": false,
+    "budgetStepSensitivityToleranceOrCoordinatesChanged": false
+  },
+  "green": {
+    "window": "v2-arrival-during-aim-close-12-green",
+    "status": "PASS_1_FILE_7_TESTS",
+    "stdoutSha256": "68514f333ac7e703b9ea946b8e28f9dddb9525c5fa2aeb4258c0c8c445b24ab1",
+    "receiptSha256": "5e118b45d15f5d2997c4d476f66941a29cdc2555fc659cbef84fbda900aedb4c"
+  },
+  "affected": {
+    "window": "v2-arrival-during-aim-close-12-affected-03",
+    "status": "PASS_13_FILES_138_TESTS",
+    "maxWorkers": 1,
+    "stdoutSha256": "f02183b4a7cd84f74641df2a41fa3430ddf67a31c56a864138a4c13ec823817c",
+    "receiptSha256": "a6f40d0edb17587cd57d55c349b23e65c74b68e4d578cf4110a838f5bf2bc43e"
+  },
+  "static": {
+    "classicTypes": {
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "31ee407cd85546b9040626f8adb0fddd551668ec5a311a420d6a0478b9a3de80"
+    },
+    "rootTypes": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "4805b71fa494b6f545e3a3bccf788cc6dc76f9dd6a004a5b57fe9466fdaaee85"
+    },
+    "eslint": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "062d252e5e0a47e2b0eb0b587a89bd83ceb23595bec0d6280d9631d8db14c9f6"
+    },
+    "format": {
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "e385fe294d469c4b790a84e8d4a8b14a77ca1f825625612746c50e626b2e1ba4"
+    },
+    "scopedDiff": {
+      "status": "PASS",
+      "stdoutSha256": "07ef2de413a3424e46cbdafeedc4d18c9c560e95fbd23c7a703d16e297b505c2",
+      "receiptSha256": "483875008426d2db8abee62035d9f1b4ec00ce1c297094513084611ca3a6f145"
+    }
+  },
+  "retainedIntermediateEvidence": {
+    "affectedFirst": "FAIL_3_OF_138_CLOSE10_TRUE_PATH_EXPECTATIONS",
+    "affectedSecond": "FAIL_1_OF_138_REFRESH_DEADLINE_TEST_DATA",
+    "eslintFirst": "FAIL_HARNESS_MAX_LINES",
+    "finalEquivalentFormattingOnlyAfterAffected": true,
+    "affectedRerunAfterEquivalentFormatting": false,
+    "prettierIgnoreChanged": false
+  },
+  "boundaries": {
+    "fixtureOnly": true,
+    "productionChanged": false,
+    "equipmentRouteControllerChanged": false,
+    "equipmentJourneyChanged": false,
+    "v1SliceChanged": false,
+    "mouseInputChanged": false,
+    "routeProgressChanged": false,
+    "scenarioChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "browser21EvidenceChanged": false,
+    "browser21Status": "FAIL",
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN",
+    "browser22Run": false,
+    "longTermDocsUpdated": false
+  },
+  "budget": {
+    "traditionalPd": "0.25-0.5",
+    "aiActiveHours": "1-2",
+    "hardLimitHours": 3,
+    "conservative120PercentAiHours": 2.4,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quota": "unknown"
+  },
+  "notRun": ["git", "index", "push", "build", "browser22", "cua", "devserver", "ci", "deploy", "merge"]
+}

@@ -1,6 +1,5 @@
 import { projectAuthorityGameplayView } from './authority-gameplay-view';
 import { bindModuleCommandPort, type WorldModuleBinding } from '../commands/module-command';
-import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
@@ -8,7 +7,6 @@ import type {
   AuthorityActionResult,
   AuthorityGameplayView,
   AuthorityMeshPayload,
-  AuthorityReady,
 } from '../protocol/authority-worker-protocol';
 import { GameServer } from '../game-server';
 import type { WorkerCanonicalResult, WorldCommitResult } from '../game-server-types';
@@ -26,11 +24,10 @@ import type { AuthorityTransactionIdentity, AuthorityTransactionReceipt } from '
 import { AuthorityResidencyRuntime, type AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 import { advanceAuthoritySession, advancePausedAuthoritySession } from './authority-session-advance';
 import { withAuthorityResidencyDiagnostics } from './authority-snapshot-diagnostics';
+import { projectAuthorityReady } from './authority-ready';
 import { AuthorityMutationPreparation, unavailableWorldCommit } from './authority-mutation-preparation';
 import { applyAuthorityPlayerAction, unavailableAuthorityPlayerAction } from './authority-player-action';
-import { queueBodyRecoveriesAfterCommit } from './authority-geometry-recovery';
 import { AuthorityCanonicalPreparation, createAuthorityCanonicalRouter } from './authority-canonical-preparation';
-import { prepareAuthorityMeshPayload } from './authority-mesh-payload';
 import type { AuthorityRuntimeOptions } from './authority-runtime-options';
 import { AuthorityLogicCandidates } from './authority-logic-candidates';
 import { acceptLogicIntentBatch, isValidLogicIntent, applyBoundLogicAction } from './authority-logic-intent-acceptance';
@@ -40,6 +37,16 @@ import {
   captureAuthorityStateVersion,
   type AuthorityStateVersion,
 } from './authority-state-version';
+import {
+  assertAuthorityRuntimeGeometry,
+  prepareAuthorityRuntimeMesh,
+  queueAuthorityRuntimeRecoveries,
+} from './authority-runtime-geometry';
+import { createAuthorityStructureTargetPort } from './authority-structure-runtime';
+import { createAuthorityMediaTargetPort } from './authority-media-runtime';
+import { createAuthoritySessionServerPort } from './authority-session-server-port';
+import { cloneMediaPlaybackCommittedBatchV1 } from '../protocol/media-playback-protocol';
+import type { MediaPlaybackCommittedBatchV1 } from '../protocol/media-playback-protocol';
 
 export type * from './authority-runtime-types';
 export type { AuthorityRuntimeOptions } from './authority-runtime-options';
@@ -60,6 +67,8 @@ export class AuthorityRuntime {
   private readonly residency: AuthorityResidencyRuntime;
   private readonly mutationPreparation: AuthorityMutationPreparation;
   private readonly canonicalPreparation: AuthorityCanonicalPreparation;
+  private readonly structureTargets;
+  private readonly mediaTargets;
 
   private constructor(
     private readonly options: AuthorityRuntimeOptions,
@@ -72,10 +81,13 @@ export class AuthorityRuntime {
     this.currentTimeMs = options.startTimeMs;
     this.transactions = new TransactionDeduplicator(options.epoch);
     this.residency = new AuthorityResidencyRuntime(server);
+    this.structureTargets = createAuthorityStructureTargetPort(server);
+    this.mediaTargets = createAuthorityMediaTargetPort(server);
     this.mutationPreparation = new AuthorityMutationPreparation(
       server,
       (key) => this.requestUnknownChunk(key),
       options.platform.timers,
+      this.structureTargets,
     );
     this.canonicalPreparation = new AuthorityCanonicalPreparation(
       server,
@@ -87,55 +99,15 @@ export class AuthorityRuntime {
     const player = server.getEntity(playerId);
     if (!player) throw new Error(`Authority player is missing: ${playerId}`);
     this.initialBodyPosition = [...player.position];
-    const serverPort = {
-      get worldRevision() {
-        return server.worldRevision;
-      },
-      get mutationCount() {
-        return server.mutationCount;
-      },
-      get worldTime() {
-        return server.worldTime;
-      },
-      get fluidDiagnostics() {
-        return server.fluidDiagnostics;
-      },
-      getEntity: (id: string) => {
-        const entity = server.getEntity(id);
-        return !entity || entity.type === 'station' ? null : { ...entity, type: entity.type };
-      },
-      getActorModeState: (id: string) => server.getActorModeState(id),
-      createEntityReference: (id: string) => server.createEntityReference(id),
-      resolveEntityReference: (reference: EntityLifetimeReference) => server.resolveEntityReference(reference) !== null,
-      queryEntities: () =>
-        server
-          .queryEntities()
-          .flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
-      updateEntity: (id: string, update: Parameters<GameServer['updateEntity']>[1]) =>
-        server.updateEntityWithoutSnapshot(id, update),
-      updateEntities: (updates: Parameters<GameServer['updateEntitiesWithoutSnapshot']>[0]) =>
-        server.updateEntitiesWithoutSnapshot(updates),
-      advanceGameplayRules: (seconds: number) => {
-        const result = server.advanceGameplayRules(seconds);
-        result.commits.forEach((commit) => this.recordWorldCommit(commit));
-        return result;
-      },
-      gameplayAdvanceCommitUpperBound: (seconds: number) => server.gameplayAdvanceCommitUpperBound(seconds),
-      advanceWorldClock: (hours: number) => server.advanceClock(hours),
-      setPhysicsActiveChunks: (keys: readonly string[]) => server.setPhysicsActiveChunks(keys),
-      queryPickupTargets: () =>
-        server
-          .queryEntities({ type: 'player' })
-          .filter((entity) => server.getPlayerState(entity.id).lifecycle === 'alive')
-          .map((entity) => ({ id: entity.id, position: [...entity.position] as [number, number, number] })),
-      pickupItem: (playerId: string, itemId: string) => server.pickupItem(playerId, itemId),
-    };
+    const serverPort = createAuthoritySessionServerPort(server, (commit) => this.recordWorldCommit(commit));
     this.session = new AuthoritySession({
       epoch: options.epoch,
       playerId,
       server: serverPort,
       bodyConfigFor: (entity) => bodyConfigFor(bodyKindForEntity(entity)),
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
+      voxelSemantics: server.voxelSemantics,
+      voxelGeometry: server.voxelGeometry,
       frequencies: this.frequencies,
       startTimeMs: options.startTimeMs,
       execution: server.authorityExecution,
@@ -152,6 +124,7 @@ export class AuthorityRuntime {
   }
 
   static async create(options: AuthorityRuntimeOptions): Promise<AuthorityRuntime> {
+    assertAuthorityRuntimeGeometry(options);
     const unknownChunks = createAuthorityCanonicalRouter();
     const server = new GameServer({
       seedText: options.seedText,
@@ -192,22 +165,18 @@ export class AuthorityRuntime {
     return runtime;
   }
 
-  ready(): AuthorityReady {
-    const camp = this.server.queryPois(this.initialBodyPosition, 40, 'camp')[0];
-    return {
+  ready() {
+    return projectAuthorityReady({
+      server: this.server,
       playerId: this.playerId,
       playerBodyPosition: [...this.initialBodyPosition],
       isNew: this.newPlayer,
-      seed: this.server.seed,
       seedText: this.options.seedText,
-      generatorVersion: this.server.generatorVersion,
-      ...(this.server.worldgenProvider ? { worldgenProvider: this.server.worldgenProvider } : {}),
-      worldTime: this.server.worldTime,
       frequencies: this.frequencies,
-      snapshot: withAuthorityResidencyDiagnostics(this.session.currentSnapshot, this.residency.diagnostics),
+      snapshot: this.session.currentSnapshot,
+      residency: this.residency.diagnostics,
       gameplay: this.view(),
-      ...(camp ? { campPosition: [...camp.position] as [number, number, number] } : {}),
-    };
+    });
   }
 
   wake(nowMs: number): AuthoritySnapshot {
@@ -371,10 +340,11 @@ export class AuthorityRuntime {
   resume(nowMs: number): void {
     this.session.resume(nowMs);
     this.currentTimeMs = nowMs;
+    this.requestLogicObservation();
   }
 
   async prepareMesh(cx: number, cy: number, cz: number): Promise<AuthorityMeshPayload> {
-    return prepareAuthorityMeshPayload(this.server, this.options.platform.now, cx, cy, cz);
+    return prepareAuthorityRuntimeMesh(this.server, this.options.platform.now, cx, cy, cz);
   }
 
   prepareHarnessChunks(chunks: readonly (readonly [number, number, number])[]): Promise<boolean> {
@@ -432,8 +402,13 @@ export class AuthorityRuntime {
     if (!this.session.playerBindingCurrent) return rejectStale('stale-control-binding');
     if (target && !this.server.resolveEntityReference(target)) return rejectStale('stale-target-lifetime');
     const before = captureAuthorityStateVersion(this.server);
-    const result = applyAuthorityPlayerAction(this.server, this.playerId, submittedAction, (commit) =>
-      this.recordWorldCommit(commit),
+    const result = applyAuthorityPlayerAction(
+      this.server,
+      this.playerId,
+      submittedAction,
+      (commit) => this.recordWorldCommit(commit),
+      this.structureTargets,
+      this.mediaTargets,
     );
     this.commitIfServerChanged(before);
     return { submittedAction, result, gameplay: this.view(), commits: this.takeCommits() };
@@ -516,6 +491,14 @@ export class AuthorityRuntime {
     return this.pendingCommits.splice(0);
   }
 
+  takeMediaFacts(worldEpoch: string): readonly MediaPlaybackCommittedBatchV1[] {
+    return Object.freeze(
+      this.server
+        .takeCommittedMediaFacts()
+        .map((batch) => cloneMediaPlaybackCommittedBatchV1({ version: 1, worldEpoch, ...batch }, worldEpoch)),
+    );
+  }
+
   private requestFluidWork(): void {
     const snapshot = this.server.requestFluidWork();
     if (snapshot) this.options.onFluidWork?.(snapshot);
@@ -527,9 +510,7 @@ export class AuthorityRuntime {
 
   private recordWorldCommit(commit: WorldCommitResult): void {
     this.pendingCommits.push(commit);
-    queueBodyRecoveriesAfterCommit(commit, this.server.queryEntities(), (entityId, maxDistance) =>
-      this.session.requestBodyRecovery(entityId, 'external-geometry-change', maxDistance),
-    );
+    queueAuthorityRuntimeRecoveries(commit, this.server, this.session);
   }
 
   private currentChunkRevisions(reads: readonly Readonly<{ key: string; revision: number }>[]): boolean {

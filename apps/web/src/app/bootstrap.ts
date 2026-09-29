@@ -71,7 +71,6 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       generalWorkerCount: sessionConfig.generalWorkerCount,
     });
     const actions: UiActionPort = {
-      companion: game.companion,
       startWorld: (seed, quality, openMode, actorMode) => application.start(seed, quality, openMode, actorMode),
       startMeleeShowcase: (quality) => application.startMeleeShowcase(quality),
       resetMeleeShowcase: () => game.prepareMeleeShowcase().catch(() => undefined),
@@ -85,7 +84,6 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),
       inventoryPointer: (command) => game.inventoryPointer(command),
-      craftRecipe: (recipeId) => game.craftRecipe(recipeId),
       useInventoryItem: (slot) => game.useInventoryItem(slot),
       respawn: () => game.respawn(),
       toggleMap: () => game.toggleMap(),
@@ -110,8 +108,10 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
     await application.initialize(options.resourceReady ?? Promise.resolve());
     await installPersistenceHarness();
     const onButtonClick = (event: MouseEvent) => {
-      if ((event.target as Element)?.closest('button'))
-        void audio.unlock().then(() => audio.play('hover', { scope: 'ui' }));
+      const button = (event.target as Element)?.closest('button');
+      void audio.unlock().then(() => {
+        if (button) audio.play('hover', { scope: 'ui' });
+      });
     };
     document.addEventListener('click', onButtonClick);
     persistExperimentalClientOptions(localStorage, experiments.options);

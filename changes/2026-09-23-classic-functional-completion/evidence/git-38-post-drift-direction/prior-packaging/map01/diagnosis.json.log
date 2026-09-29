@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER22-WORKBENCH-ROUTE-MAP-01",
+  "status": "READ_ONLY_CONTRACT_MAP_COMPLETE",
+  "browser22Input": {
+    "sourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+    "treeSha": "f91590626a01d1a6b2d771e27fdb74b5d022d47b",
+    "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+    "evidenceManifestSha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+    "deliverySha256": "4cca1534c53cefdcec329b3d161911870dbf2b00fbc48ee4126dc5a8762cebf4",
+    "status": "FAIL"
+  },
+  "failedLeg": {
+    "target": [78.5, 0.5],
+    "outerDirection": "KeyS",
+    "outerStartObservation": "pw:api@8674",
+    "lastCompletedObservation": "pw:api@9386",
+    "wallMs": 45707.761,
+    "outerIterations": 3,
+    "walkReturns": 2,
+    "walkRejects": 1,
+    "mouseMoves": 111,
+    "keyboardPulses": 8,
+    "groundedWaits": 8,
+    "outerWaits": 2,
+    "pointerLockUnlocks": 22,
+    "fixed1500msCooldowns": 22
+  },
+  "wallClockAttribution": {
+    "diagnosticNotPerformanceBenchmark": true,
+    "fixedPointerCooldown": { "milliseconds": 33086.562, "percent": 72.387 },
+    "mouseCorrectionPipelineExcludingCooldown": { "milliseconds": 9588.054, "percent": 20.977 },
+    "keyboardPulse": { "milliseconds": 698.73, "percent": 1.529 },
+    "groundedWait": { "milliseconds": 123.605, "percent": 0.27 },
+    "outerWait": { "milliseconds": 94.576, "percent": 0.207 },
+    "unattributed": { "milliseconds": 2116.234, "percent": 4.63 },
+    "categoriesDisjoint": true
+  },
+  "mouseInputReadback": {
+    "playwrightMouseMoveParameters": "ABSOLUTE_CANVAS_COORDINATES",
+    "requestedMovementX": "NOT_RECORDED_DIRECTLY",
+    "all111MovesHaveSubsequentNonzeroYawDelta": true,
+    "productionSensitivityDegreesPerUnit": 0.13,
+    "exactMovementXClaimed": false,
+    "inputRejectionClaimed": false
+  },
+  "outerIterationReadback": [
+    {
+      "iteration": 1,
+      "baseline": "pw:api@8674",
+      "walkReturn": "pw:api@8880",
+      "waitPolls": ["pw:api@8883", "pw:api@8885"],
+      "result": "DRIFT_INFERRED_FROM_EXISTING_CLASSIFIER_AND_NEXT_BASELINE",
+      "nextBaseline": "pw:api@8885"
+    },
+    {
+      "iteration": 2,
+      "baseline": "pw:api@8885",
+      "walkReturn": "pw:api@9107",
+      "waitPolls": ["pw:api@9110", "pw:api@9112"],
+      "result": "DRIFT_INFERRED_FROM_EXISTING_CLASSIFIER_AND_NEXT_BASELINE",
+      "nextBaseline": "pw:api@9112"
+    },
+    {
+      "iteration": 3,
+      "baseline": "pw:api@9112",
+      "walkReturn": null,
+      "lastObservation": "pw:api@9386",
+      "result": "INNER_DRIVER_DEADLINE_REJECTION"
+    }
+  ],
+  "criticalSamples": [
+    {
+      "stepId": "pw:api@8880",
+      "role": "walk-return",
+      "clientReached": true,
+      "serverReached": false,
+      "freshnessVsOuterBaseline": "fresh",
+      "outerStrict": false
+    },
+    {
+      "stepId": "pw:api@8883",
+      "role": "outer-wait-poll-1",
+      "clientReached": true,
+      "serverReached": false,
+      "freshnessVsWalkReturn": "stale-equal-tick-and-ack",
+      "classifier": null
+    },
+    {
+      "stepId": "pw:api@8885",
+      "role": "outer-wait-poll-2-and-next-baseline",
+      "clientReached": false,
+      "serverReached": true,
+      "freshnessVsWalkReturn": "fresh",
+      "classifier": "drift"
+    },
+    {
+      "stepId": "pw:api@8887",
+      "role": "next-inner-walk-initial-observation",
+      "clientReached": false,
+      "serverReached": true,
+      "freshnessVsNextBaseline": "fresh",
+      "outerStrict": false
+    }
+  ],
+  "close13Reachability": {
+    "proposal": "catch exact inner route-timeout only while driver.now() is still before the outer deadline, then observe and classify",
+    "realDriverNow": "Date.now",
+    "outerDeadline": "outerStart + 45000",
+    "innerTimeoutArgument": "outerDeadline - Date.now immediately before driver.walk",
+    "innerDeadline": "Date.now inside walkTo + timeoutArgument",
+    "ordering": "innerDeadline is greater than or equal to outerDeadline because inner Date.now is sampled after the outer remaining calculation",
+    "browser22ThrowBoundary": "inner observe returns and Date.now >= innerDeadline",
+    "thereforeOuterBudgetRemainingAtCatch": false,
+    "browser22RepairableByProposal": false,
+    "earlyRejectingStubRepresentsRealDriverContract": false
+  },
+  "earliestEvidenceBackedWaste": {
+    "stepId": "pw:api@8885",
+    "xResidual": 0.007843017578125,
+    "zResidual": -0.08596384525299072,
+    "currentRuleDirection": "KeyS",
+    "yawDeltaDegreesForKeyW": 1.673018689434457,
+    "yawDeltaDegreesForKeyS": -178.32698131056577,
+    "effect": "The next iteration rotates nearly 180 degrees although the existing view is already aligned within 1.7 degrees for the opposite movement key."
+  },
+  "selectedCandidate": {
+    "name": "reverse the next V2 movement key after a validated outer drift",
+    "summary": "When waitForProgress returns a result that the existing classifier validates as drift, carry exactly one next-direction hint equal to the opposite of the just-used key. The next loop keeps the same target, baseline, deadline, walk driver and strict predicates; it consumes the hint once instead of recomputing direction from the tiny x residual. All other loop entries continue to use the existing x-based direction rule.",
+    "whyNarrowestEvidenceBacked": "waitForProgress is entered only after the client reached the waypoint. A subsequently validated drift therefore records departure from that reached state. Browser22 @8885 and @9112 are both such fresh client-drift/server-reached samples; recomputing from x selects KeyS even though the existing yaw is within 1.7 or 1.9 degrees of KeyW and about 178 degrees from KeyS. Reversing only this post-drift next key addresses the first proven waste without changing shared aim, mouse safety, generic walk, timeout composition or route tolerances.",
+    "browserSuccessClaimed": false
+  },
+  "redDesign": [
+    "Replay Browser22 @8674 as baseline and @8880 as the first walk result through real followEquipmentRoute and real classifyEquipmentRouteWait; @8883 must remain null, @8885 must classify drift, and the next driver.walk call for the same target must use KeyW instead of the current KeyS. Terminate with a sentinel rather than fabricating arrival.",
+    "Replay @8885 -> @9107 -> @9110 -> @9112 and require the same validated-drift one-shot reversal. Assert that a normal non-wait loop still uses equipmentRouteDirection and that arrival/null/error paths do not arm a direction hint.",
+    "Use the real horizontalMouseCorrectionToRoute helper to prove @8885 and @9112 are near-aligned for KeyW but near the 180-degree bound for KeyS; do not copy its angle algorithm into the test.",
+    "A real walkTo integration test may observe the selected key and existing correction helper with a fake Page, but it must state that simulated snapshots do not prove production input or physics. Browser validation remains a later single canonical attempt.",
+    "Verify null, stale, unready and one-sided snapshots never become strict arrival, and no timeout/corridor/tolerance/coordinate/input budget changes are made."
+  ],
+  "ownership": {
+    "required": [
+      "apps/web/tests/e2e/classic-support/equipment-resource-route.ts",
+      "apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts or a new focused post-drift-direction test",
+      "current change contract/evidence"
+    ],
+    "readOnlyUnlessRootExpands": [
+      "apps/web/tests/e2e/classic-support/harness.ts",
+      "apps/web/tests/e2e/classic-support/equipment-journey-support.ts",
+      "apps/web/tests/e2e/classic-support/target-aim.ts",
+      "apps/web/tests/e2e/classic-support/mouse-input.ts",
+      "production and scenario files"
+    ]
+  },
+  "estimate": {
+    "implementationAiHours": "1-2",
+    "implementationHardCapHours": 3,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentAiHours": 2.4,
+    "conservative120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "testsRun": false,
+    "buildRun": false,
+    "browserRun": false,
+    "gitOrIndexWrite": false,
+    "close13DirtyModified": false,
+    "browser22EvidenceModified": false,
+    "cumulativeBrowserReportModified": false,
+    "firstFinalSelfcheckFailedDueToManifestCwd": true,
+    "secondFinalSelfcheckFailedDueToCheckingLockAbsenceWhileHoldingLock": true
+  }
+}

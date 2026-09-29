@@ -1,0 +1,15 @@
+d2ded761592f78a370a932122490313da9ee49a59863165dff9406b13c023934  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/SOURCE-MANIFEST.sha256
+fc201b51909de0a290ef9f6bea8b5a5e2cd839746efb009fb2af665ec096f9c7  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/artifact-map-compare.stdout.log
+9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/artifact-map.sha256.log
+b6b4f9eca9b718abc14df793c4418700fb7704378c4bc9451708432288cafb31  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/artifact-verify.stdout.log
+ffd82759295ed5599f211160184b6dc9d6553d3d18e1eed861b679b26d433fbb  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/artifact-verify.window.json.log
+827a7ce8eecee3f875897264a9706fefdb7a480479bb8f443be273478ade80e3  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/build.stdout.log
+be015368db46932ab019eac2e5c692387a35cb3a4db0e70e7068799eccebcc2b  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/build.window.json.log
+9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/dist-files.sha256.log
+fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/harness-artifact.json.log
+60e100dcf00173b820b7d6103d3e8cd835a62ec24436ffea72d6a52cc1f3174c  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/metadata-format-final.stdout.log
+f72e2a642406d0580fedd80614c6d008b4141cf3d7499fcb691816de98de3440  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/metadata-format-final.window.json.log
+4fe01c50ee1d1db70909d3fb7af67d5b6f85a847ab86530cbf465f1c8f72ac8d  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/metadata-format.stdout.log
+727d7cc35964e475df9652ed4720c801d6f04a8b2670b26d5a6d75b3ec9cd892  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/metadata-format.window.json.log
+8a5a43d60aa6a1496eac1c405ffb3d57f081411209615d1c9e32eda89e97a789  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/postconditions.stdout.log
+043190b91e197a9be657330378b6f7da012e153d84e45d674ebb74e444051ef2  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-04/validation-argv.txt

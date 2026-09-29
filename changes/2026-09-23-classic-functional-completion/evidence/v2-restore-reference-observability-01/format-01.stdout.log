@@ -1,0 +1,10 @@
+packages/stdlib/src/server/harness/world-harness-contract.ts 41ms (unchanged)
+packages/stdlib/src/server/harness/world-harness-validation.ts 19ms
+packages/stdlib/src/server/harness/world-harness-operations.ts 6ms (unchanged)
+packages/stdlib/src/server/harness/authority-world-harness.ts 32ms (unchanged)
+apps/web/tests/integration/runtime/server/world-harness-session.test.ts 32ms
+apps/web/tests/unit/client/browser-authority-world-harness.test.ts 19ms (unchanged)
+apps/web/tests/e2e/classic-support/equipment-journey.ts 13ms
+apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts 4ms
+changes/2026-09-23-classic-functional-completion/spec.md 88ms (unchanged)
+changes/2026-09-23-classic-functional-completion/restore-reference-observability-contract.md 11ms (unchanged)

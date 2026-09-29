@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { definePack } from '@seedlands/stdlib/mod-api';
+import { defineBlockActionsModule, definePack } from '@seedlands/stdlib/mod-api';
 import {
   assembleWorldPacks,
   createGameplayActorAuthority,
@@ -7,8 +7,8 @@ import {
 } from '@seedlands/stdlib/host';
 import { GameServer } from '../../../../fixtures/classic/content';
 import { WorldResourceAuthorizer } from '../../../../../../../packages/stdlib/src/server/harness/world-authorization';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function setup(
   resource: 'seedlands.inventory' | 'seedlands.block-actor' | 'seedlands.combat',
@@ -17,7 +17,10 @@ function setup(
   const moduleId =
     resource === 'seedlands.inventory' ? 'seedlands:inventory-actions-module' : 'seedlands:block-actions-module';
   // This partial composition tests operation permissions, not dependent behavior providers.
-  const modules = pack.modules
+  const modules = classicGameplayDomainModules(
+    ['seedlands:inventory-actions-module', 'seedlands:overworld-block-rules', 'seedlands:overworld-combat-rules'],
+    [defineBlockActionsModule()],
+  )
     .filter((module) => module.descriptor.id !== 'seedlands:behavior-registry-module')
     .map((module) =>
       module.descriptor.id === moduleId && denial === 'module'
@@ -103,7 +106,7 @@ function setup(
   server.spawnPlayer({ id: 'player', position: [0.5, 60, 0.5] });
   server.giveItem('player', { itemId: 'wood-block', count: 2 });
   const food = server.spawnWorldItem([1.2, 60, 0.5], { itemId: 'berry', count: 2 });
-  server.spawnAutonomousActor({ id: 'target', archetype: 'night-stalker', position: [0.5, 60, 1.5] });
+  server.spawnAutonomousActor({ id: 'target', archetype: 'zombie', position: [0.5, 60, 1.5] });
   const invoke = (operationId: string) =>
     server.invokeModuleOperation(
       initial,

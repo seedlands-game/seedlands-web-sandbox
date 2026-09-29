@@ -7,6 +7,7 @@ import type { RecipeRegistry } from '../recipe-registry';
 import type { StationContent } from '../station-content';
 import type { CraftingProviderV1 } from './crafting-provider';
 import { createVoxelGameplayRegistry } from '../voxel-gameplay';
+import type { VoxelSemanticsRegistry } from '../../../world/voxel-semantics';
 
 export const ITEMS_CAPABILITY = 'seedlands:items';
 export const RECIPES_CAPABILITY = 'seedlands:recipes';
@@ -14,6 +15,7 @@ export const ACTOR_PROFILES_CAPABILITY = 'seedlands:actor-profiles';
 export const MELEE_DEFINITIONS_CAPABILITY = 'seedlands:melee-definitions';
 export const STATION_CONTENT_CAPABILITY = 'seedlands:station-content';
 export const CONTENT_CRAFTING_CAPABILITY = 'seedlands:content-crafting';
+export const VOXEL_SEMANTICS_CAPABILITY = 'seedlands:voxel-semantics';
 
 export const GAMEPLAY_CONTENT_CAPABILITIES = Object.freeze([
   ITEMS_CAPABILITY,
@@ -22,6 +24,7 @@ export const GAMEPLAY_CONTENT_CAPABILITIES = Object.freeze([
   MELEE_DEFINITIONS_CAPABILITY,
   STATION_CONTENT_CAPABILITY,
   CONTENT_CRAFTING_CAPABILITY,
+  VOXEL_SEMANTICS_CAPABILITY,
 ]);
 
 const assemble = (read: <Value>(id: string) => Value): GameplayContent => {
@@ -31,6 +34,7 @@ const assemble = (read: <Value>(id: string) => Value): GameplayContent => {
   const meleeDefinitions = read<readonly MeleeDefinition[]>(MELEE_DEFINITIONS_CAPABILITY);
   const stations = read<StationContent | null>(STATION_CONTENT_CAPABILITY);
   const crafting = read<CraftingProviderV1 | null>(CONTENT_CRAFTING_CAPABILITY);
+  const voxelSemantics = read<VoxelSemanticsRegistry>(VOXEL_SEMANTICS_CAPABILITY);
   return Object.freeze({
     items,
     recipes,
@@ -38,6 +42,7 @@ const assemble = (read: <Value>(id: string) => Value): GameplayContent => {
     meleeDefinitions,
     crafting,
     voxelGameplay: createVoxelGameplayRegistry(),
+    voxelSemantics,
     ...(stations ? { stations } : {}),
   });
 };

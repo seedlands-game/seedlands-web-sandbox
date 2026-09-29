@@ -1,0 +1,5 @@
+Checking formatting...
+[warn] changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-19/result-summary.json
+[warn] changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-19/route-trace-summary.json
+[warn] Code style issues found in 3 files. Run Prettier with --write to fix.

@@ -1,0 +1,17 @@
+eb6de94fe6921fe7c53d9ade59e6a64dd5200b54113921b3dedc9b494758a729  ./README.md
+27b1ec6c4bfc176fa878e351ebb0035b7d1411d9855c7f7c5c87671621074cf1  ./SOURCE-MANIFEST.sha256
+66ba549e036352fa41997989d12a3bf08d60251fe5ca087308e239716873ffd6  ./candidate-full.stdout.log
+cd8241813440b0a7a533361ab0061b9808983105e722fbe81a2ad5e9eef1491f  ./candidate-full.window.json.log
+c988228f42459e7b6f3920e46162a82ad01f30fe44d5513d8d000ef5b24324a8  ./candidate-install.stdout.log
+22378ebd8ec9f68bf61dd6437872de28a76a19bfec3d51398fb702665bf08a2d  ./candidate-install.window.json.log
+b213292bc64d5c1db13e0825f7fb626e746c8790b401cb3a2d4bd77314c190dd  ./candidate-old-case.stdout.log
+69ed1ae76b329bb5e1ef75a02cfd562f7f00647d32095aaab399754da08af7b2  ./candidate-old-case.window.json.log
+f28a28232e0b40ae4bd395e1b067a5caba4e0ba16f0ade7bd19e52b12532b182  ./control-install.stdout.log
+0e95b69d6d7e4bd30f688acb0f3bcd5ac639b390a79d520d6e8d0051f80bb192  ./control-install.window.json.log
+1be2f795b459e4f2323b867b12bd2d5cfc4ff2553b16d429c83258da4c5f5713  ./control-old-case.stdout.log
+23fe538e723d6847129d3eba4e9f885c47043dbcbda546e9daca7a03375a50b2  ./control-old-case.window.json.log
+90dec6d8edbfb7252cfc422f4f576c2d61fd2ec07d4cb1bd6b0a5b070be4a12d  ./dirty-preflight.tsv
+60f2b0815fa0194af77b6e82d2d253139ce92ccc8a86e8c20370fa9ef3f71a6a  ./final-selfcheck.zsh
+6db55f2b0d9107029b22f6d293eec9c7057413f25bfb8573421802f51e7403e8  ./identity.json
+459696919625b525107aafeead798336a8e182c7121d53b6ead9833095f92568  ./link-resolution.stdout.log
+9b11cfb47b2cefaa6a0998733866478eecc7fb48fdf2549364896c518171e67f  ./tree-identity.stdout.log

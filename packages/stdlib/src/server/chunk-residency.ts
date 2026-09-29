@@ -42,7 +42,7 @@ export type CanonicalChunkResidencyDiagnostics = Readonly<{
   oversubscribed: boolean;
 }>;
 
-type PinOwner = 'streaming' | 'physics' | 'fluid' | 'stations';
+type PinOwner = 'streaming' | 'physics' | 'fluid' | 'stations' | 'media';
 
 const assertLimit = (value: number, name: string, allowZero = false) => {
   if (!Number.isSafeInteger(value) || value < (allowZero ? 0 : 1))
@@ -52,6 +52,7 @@ const assertLimit = (value: number, name: string, allowZero = false) => {
 export class CanonicalChunkResidency {
   readonly limits: CanonicalChunkResidencyLimits;
   private readonly pins: Record<PinOwner, Set<string>> = {
+    media: new Set(),
     stations: new Set(),
     streaming: new Set(),
     physics: new Set(),

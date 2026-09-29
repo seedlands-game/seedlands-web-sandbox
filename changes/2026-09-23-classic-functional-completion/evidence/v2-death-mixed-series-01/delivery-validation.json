@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-DEATH-MIXED-SERIES-01 + PREDECESSOR-CAPTURE",
+  "status": "CHECKPOINT_READY",
+  "baseline": "9f5a6ff49cccb1e5ecb9fae9ae0ab9277f42769e",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 10,
+    "sha256": "159917734e0371f08c6e0c0a8aad282ffecea82a039f5e892dee84eac9472c1e"
+  },
+  "publicContract": {
+    "signature": "prepareDeathInventorySettlementSeriesV1(entities, { candidates, additionalActorReplacements?: readonly { source: DeathInventorySettlementSourceV1; replacement: PreparedActorReplacement }[], intrinsicDrops? })",
+    "candidatesMinimum": 1,
+    "entityPrepareCalls": 1,
+    "entriesPerSegment": 128,
+    "seriesSegmentBudget": 192,
+    "additionalActorsMustRemainAlive": true,
+    "sourceFrontier": ["reference", "epoch", "lifetime", "health", "complete-actor-components"],
+    "publicExportSnapshotSha256": "df730051517148094edf0d01e1e650c02b866805b5875c2fa3c9b267de72a1c8"
+  },
+  "red": {
+    "window": "f8ab75d1-9d94-416f-86b3-5d456195fa8d",
+    "status": "EXPECTED_FAIL",
+    "files": 1,
+    "failed": 1,
+    "passed": 12,
+    "reason": "old API ignored the explicit survivor replacement",
+    "stdoutSha256": "07ef415d3eafef19d567ce9e89a2259c6f33504d3ee91eb56aea14530d06c602",
+    "receiptSha256": "dbeb2f0fa21a9943376f00e484ad500e0276669a0ab871f365ace08541a37479"
+  },
+  "tests": {
+    "window": "6b5c53d5-c295-42ae-a237-3218908934af",
+    "status": "PASS",
+    "files": 4,
+    "passed": 38,
+    "maxWorkers": 1,
+    "stdoutSha256": "d795cfe9fb326a7326430c4bbc1552ac2560fdf434c94ba9ed68377ca154ccce",
+    "receiptSha256": "f101ce7bc3b0282ec1978fa18aad3daf8f4d2d60d32c710984634cd3571b0374"
+  },
+  "static": {
+    "stdlibTypes": {
+      "window": "ae53be17-15da-4d41-a4e8-f3795a708deb",
+      "status": "PASS",
+      "receiptSha256": "9cf442761d2bcd6722456b33f85298ba6371dca464360ad3c5d34ae889727b75"
+    },
+    "rootTestTypes": {
+      "window": "e3ad8993-a41e-446a-9f49-6cc1c7756a71",
+      "status": "PASS",
+      "receiptSha256": "17db4dda3ae3d778b74e2e3fcc94b2609e6d746431fb99bba077e4bfaa90bacd"
+    },
+    "classicTestTypes": {
+      "window": "6cea3100-bad2-4e80-954f-28767087eb78",
+      "status": "PASS",
+      "receiptSha256": "1cb88141b543519a267b5be9a8ca926db0ac55f61b42a7060e7d1c1b7b4bcf71"
+    },
+    "eslint": {
+      "window": "b517b0a4-fe23-4326-8b7c-b9d67a596312",
+      "status": "PASS",
+      "receiptSha256": "59bc68a0a97d1677f4f05c108b1c8170a47218b2f0f1e12d8ab17bf495c68187"
+    },
+    "format": {
+      "window": "38e830ae-1438-4876-b5a5-d142d8a0cb64",
+      "status": "PASS",
+      "receiptSha256": "e4be975d512bd2d37176d669e7cb547b017e9e7c2f434cf580083f1a5d67214b"
+    },
+    "scopedDiff": {
+      "window": "fb1e061d-0edf-46e0-84a7-6de45135a023",
+      "status": "PASS",
+      "receiptSha256": "7d83f50f2e72ed676f8e6522814e0e2d2a9439038e915cc895e02428dc68cdbc"
+    }
+  },
+  "predecessorCapture": {
+    "window": "551425ae-8b02-4947-b4e4-f52d9a889f90",
+    "status": "PASS",
+    "sourceSha": "1bbe3a60d55ffa5d05e405377624fbbd942e6327",
+    "sourceTree": "4d70cef0e00c8617290159e1aa83a685126b1fc4",
+    "artifactReceiptSha256": "aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a",
+    "packLockSha256": "fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332",
+    "identityCanonicalSha256": "e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a",
+    "identityFileSha256": "ebad22c315758e0b9e305aaff6ba7c0c4adc7026ac506fb6dfe4b82abd1db405",
+    "canonicalBytes": 39998,
+    "modules": 22,
+    "capabilities": 28,
+    "cleanBefore": true,
+    "cleanAfter": true
+  },
+  "sharedFileOwnership": {
+    "path": "packages/stdlib/src/server/composition/mod-api.ts",
+    "fullFileHashIncludesConcurrentTransportDirty": true,
+    "ownedChange": "one DeathInventoryAdditionalActorReplacementV1 type export",
+    "ownedHunkSnapshot": "mod-api-death-mixed-export.ts.log",
+    "excludedChange": "route and transport exports"
+  },
+  "notImplemented": [
+    "classic-death-policy-installation",
+    "classic-v4-predecessor-declaration",
+    "pre-media-migration-update",
+    "gameplay-runtime-policy-wiring",
+    "needs-producer",
+    "vitals-producer",
+    "combat-producer-integration",
+    "autonomy-effects-atomic-composition"
+  ],
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "git-stage", "git-commit", "git-push"]
+}

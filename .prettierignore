@@ -28,3 +28,12 @@ changes/2026-09-09-developer-world-harness/contracts/
 changes/2026-09-11-kernel-modules-playbooks-harness/spec.md
 changes/2026-09-11-kernel-modules-playbooks-harness/s0/
 changes/2026-09-11-kernel-modules-playbooks-harness/legacy-e2e/
+
+# Exact frozen Beta reference files retain contract-snapshot.json byte identity.
+changes/2026-09-16-classic-beta173-parity/build-recipe-fixture-candidates.mjs
+changes/2026-09-16-classic-beta173-parity/build-reference-cases.mjs
+changes/2026-09-16-classic-beta173-parity/items.md
+changes/2026-09-16-classic-beta173-parity/recipe-fixture-candidates.json
+changes/2026-09-16-classic-beta173-parity/recipe-source-bindings.mjs
+changes/2026-09-16-classic-beta173-parity/reference-worklist.md
+changes/2026-09-16-classic-beta173-parity/verify-recipe-fixture-candidates.mjs

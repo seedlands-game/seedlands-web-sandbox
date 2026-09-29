@@ -8,6 +8,7 @@ import type { BodyState } from '@seedlands/stdlib/physics';
 import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import { CollisionDebugRenderer } from './collision-debug-renderer';
 import type * as pc from 'playcanvas';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export class CollisionDebugRuntime {
   private readonly renderer: CollisionDebugRenderer;
@@ -61,6 +62,7 @@ export class CollisionDebugRuntime {
     snapshot: AuthoritySnapshot | null,
     prediction: Readonly<{ state: BodyState; physicsTick: number }> | null,
     target: VoxelTarget | null,
+    voxelGeometry?: VoxelGeometryResolver,
   ): void {
     if (!this.enabled || !snapshot) return;
     this.batch = createCollisionDebugBatch(
@@ -95,7 +97,7 @@ export class CollisionDebugRuntime {
         truncatedBodyCount: 0,
       },
       snapshot.player.body.position,
-      { includeContacts: this.includeContacts, includeSensors: this.includeSensors },
+      { includeContacts: this.includeContacts, includeSensors: this.includeSensors, voxelGeometry },
     );
     this.renderer.update(this.batch);
   }

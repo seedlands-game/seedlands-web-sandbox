@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git-34-equipment-mining-aim-classic-types",
+  "pid": 95943,
+  "startedAt": "2026-09-28T05:19:55.839Z",
+  "windowId": "git-34-equipment-mining-aim-classic-types",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-34-equipment-mining-aim/classic-types.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T05:19:59.745Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T05:19:55.840Z",
+      "loadAverage": [
+        2.84912109375,
+        2.75146484375,
+        2.986328125
+      ],
+      "freeMemoryBytes": 2872852480,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T05:19:59.744Z",
+      "loadAverage": [
+        2.86083984375,
+        2.75537109375,
+        2.986328125
+      ],
+      "freeMemoryBytes": 2761932800,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

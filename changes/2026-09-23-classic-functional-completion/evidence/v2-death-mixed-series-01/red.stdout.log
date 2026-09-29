@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts (13 tests | 1 failed) 23ms
+     × commits a surviving actor replacement in the same frontier as a death 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts > death inventory settlement series > commits a surviving actor replacement in the same frontier as a death
+AssertionError: expected 20 to be 17 // Object.is equality
+
+- Expected
++ Received
+
+- 17
++ 20
+
+ ❯ packages/stdlib/tests/server/death-inventory-settlement-series.test.ts:189:58
+    187|     prepared.validate();
+    188|     prepared.apply();
+    189|     expect(entities.actorStateAccess('survivor').hunger).toBe(17);
+       |                                                          ^
+    190|     expect(entities.actorStateAccess('dead').lifecycle).toBe('dead');
+    191|     expect(entities.query({ type: 'world-item' }).map(({ stack }) => s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 12 passed (13)
+   Start at  23:29:26
+   Duration  266ms (transform 142ms, setup 0ms, import 172ms, tests 23ms, environment 0ms)
+

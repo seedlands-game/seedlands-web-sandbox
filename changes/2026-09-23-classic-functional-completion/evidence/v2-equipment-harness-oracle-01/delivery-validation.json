@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-HARNESS-ORACLE-01",
+  "status": "CHECKPOINT_READY_WITH_EXTERNAL_TYPE_BLOCK",
+  "baseline": "484ddf39d7e3bb881dd3d3cbaec775bd091c220d",
+  "interface": "HarnessApi.equipmentSnapshot(): HarnessEquipmentSnapshot | null",
+  "metadata": {
+    "sourceManifestEntries": 9,
+    "evidenceManifestEntries": 63,
+    "deliveryExcludedFromEvidenceManifestToAvoidSelfReference": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "961b6090670451f1c51c02e737e0c5b24a4e989aa35bf31cc041a39113d20aff"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 63,
+    "sha256": "87a404ee7cbd922a64c41b7e3916b0b601aa05d19d979ab5218cd6c42ec05e50"
+  },
+  "red": {
+    "window": "29fc24ee-927a-4fae-96dd-c7352a846c2f",
+    "status": "EXPECTED_FAIL",
+    "exitCode": 1,
+    "files": 1,
+    "passed": 6,
+    "failed": 2,
+    "reason": "The executable null stub could not return a valid equipment projection or current data after an epoch change.",
+    "stdoutSha256": "8744940a1a76b8a093965b66dd1eccc5ef7ad29160c425bca23c94a121033401",
+    "receiptSha256": "2db7cd091288b65272b4247fdae20d88b269d50a172fa61ea409e9e7e2720e81"
+  },
+  "tests": {
+    "window": "80c28569-3e45-4d7a-be5c-6718446c3cc7",
+    "status": "PASS",
+    "files": 1,
+    "passed": 8,
+    "maxWorkers": 1,
+    "stdoutSha256": "bde22f88ceb2e11b42bc194c625653c983df6b8db5ddb03adabe46d382e669c8",
+    "receiptSha256": "eec4683aa7841aa97bce3c4af0b21a9faea1ae9af5204db9b78bd659dfec6ff0"
+  },
+  "static": {
+    "webTypes": {
+      "window": "84e77631-c574-4c7d-b646-1b16a4de9eb4",
+      "status": "PASS",
+      "stdoutSha256": "de2eadc087365c97488536269215a60a4451195fc08f761c21e6c622a9a3be9d",
+      "receiptSha256": "bc353490952cad5fa1cbcc5cb1a04658b0a5e38a4dc291823d8b08c953c1df2a"
+    },
+    "rootTestTypes": {
+      "window": "a3e03794-454b-4a00-bfeb-20a73925e119",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "32b6bba705fe05c17937c8d57722801e1d7971f52e66d60aa9d6bf25d093aea8"
+    },
+    "classicTestTypes": {
+      "window": "4e8b992e-ce1c-4916-9a30-123cbfe0d238",
+      "status": "BLOCKED_BY_CONCURRENT_OWNER",
+      "exitCode": 2,
+      "stdoutSha256": "0e828685ce233d988877bbe4106b244dfc506fd8cadaebcc244fcdc6fb95b240",
+      "receiptSha256": "b3f329cf1156f7458778520099974844a55b671c09814bc06c08ba1812f3e054",
+      "diagnostics": [
+        "apps/web/tests/e2e/classic-support/harness.ts:171 TS2339",
+        "apps/web/tests/e2e/classic-support/scenario.test.ts:129 TS2339",
+        "apps/web/tests/e2e/classic-support/scenario.test.ts:129 TS7006 (total)",
+        "apps/web/tests/e2e/classic-support/scenario.test.ts:129 TS7006 (stack)"
+      ]
+    },
+    "eslint": {
+      "window": "512add6c-8898-4c70-a6a9-822fc9d462d7",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "b4ad6c296da7dea9864f5f83afbb6489aeceaf7da21928294b63ea75beaa111d"
+    },
+    "format": {
+      "window": "bb45e76b-c7b8-472b-8eec-5c4719cc17fd",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "88c42bc14905b04b26a9083d000231c74a3b3048d99a37afcabfded7e7833b9b"
+    },
+    "deliveryFormat": {
+      "initialWindow": "ecbe529e-bbc0-41d8-aa3a-d55e6f9f4187",
+      "initialStatus": "EXPECTED_FAIL",
+      "initialExitCode": 1,
+      "initialReason": "The newly created delivery JSON required repository Prettier formatting.",
+      "initialStdoutSha256": "8cdf689bc83578265e43ed76e829f04fab21e3deb4cfb5b2af269349a5ce8f1e",
+      "initialReceiptSha256": "6da1734ad65596a2afd1289b590ad5c758044f5792413f72ea46e0fe0a5369e5",
+      "writeWindow": "83605fda-5b8a-4538-8cde-2d67689d7581",
+      "writeStatus": "PASS",
+      "writeStdoutSha256": "7c4cd3e6243f4ae776af0b0b65ece2de71aea35b30020b20df462d5fc7895b36",
+      "writeReceiptSha256": "83cfc457a749965d2ea9a8292f30ab00a38316f4473540bbc15dc478fa554569",
+      "finalWindow": "ced3b399-21de-42bd-9a4b-404b43ea471d",
+      "finalStatus": "PASS",
+      "finalStdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "finalReceiptSha256": "48c9a9880547ed16fccd27362681322a112129247cfda74811ca512fe4a34057"
+    },
+    "deliveryCheckpointFormat": {
+      "window": "bd6e9bc0-6d62-4353-97d0-aa544520835f",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "55f189996065151d7a3fa3b10eaec8fcc39ab6fb263d578ea49e6d6048b733f1"
+    },
+    "deliveryFinalFormat": {
+      "window": "a84e8cb8-32ea-4e62-a2e8-cda4821cdd19",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "6b2086fd04f05d8c1aaeb1c2e5f157c96d8afb10e6e15766a063dbc9528fc647"
+    },
+    "scopedDiff": {
+      "window": "0f260551-903e-4a7e-bafc-ad349af4b437",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "1b1a9e82c19294c22361b99783a557557ad660231e82542ca38a51c50eb9de7e"
+    }
+  },
+  "boundaries": {
+    "authorityWrites": false,
+    "checkpointExported": false,
+    "persistentStateAdded": false,
+    "browserJourneyValidated": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The existing Authority, Web, and Harness ownership boundaries did not change."
+  },
+  "budget": {
+    "traditionalPd": "0.5-1",
+    "aiExpectedHours": "2-3",
+    "aiBudget120PercentHours": 3.6,
+    "aiActualActiveHoursApprox": 0.5,
+    "credits": "unknown",
+    "apiEquivalentCost": "unknown",
+    "rate": "unknown",
+    "quotaDenominator": "unknown",
+    "quotaShare": "unknown"
+  },
+  "notRun": ["build", "browser", "cua", "ci", "git-stage", "git-commit", "git-push", "deploy"]
+}

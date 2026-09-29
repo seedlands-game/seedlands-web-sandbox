@@ -2,7 +2,7 @@ export type HeldAction = 'idle' | 'mine' | 'attack' | 'place' | 'eat';
 
 export type ItemVisualKind =
   | Readonly<{ kind: 'voxel-block'; faces: 6 }>
-  | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' }>;
+  | Readonly<{ kind: 'lantern' | 'berry-cluster' | 'plank' | 'wood-axe' | 'stone-pickaxe' | 'wood-sword' }>;
 
 const blockItems = new Set([
   'dirt-block',
@@ -13,15 +13,49 @@ const blockItems = new Set([
   'workbench',
   'chest',
   'furnace',
+  'plank',
+  'cobblestone',
+  'glass',
+  'raw-iron',
+  'gold-ore',
+  'diamond-ore',
+  'iron-block',
+  'gold-block',
+  'diamond-block',
+  'sandstone',
+  'stone-bricks',
 ]);
 
 export function itemVisualKind(itemId: string): ItemVisualKind {
   if (blockItems.has(itemId)) return { kind: 'voxel-block', faces: 6 };
   if (itemId === 'lantern') return { kind: 'lantern' };
   if (itemId === 'berry') return { kind: 'berry-cluster' };
-  if (itemId === 'plank') return { kind: 'plank' };
   if (itemId === 'wood-axe') return { kind: 'wood-axe' };
-  if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe'].includes(itemId)) return { kind: 'stone-pickaxe' };
+  if (['stone-pickaxe', 'wood-pickaxe', 'iron-pickaxe', 'gold-pickaxe', 'diamond-pickaxe'].includes(itemId))
+    return { kind: 'stone-pickaxe' };
+  if (
+    [
+      'wood-shovel',
+      'stone-shovel',
+      'iron-shovel',
+      'gold-shovel',
+      'diamond-shovel',
+      'stone-axe',
+      'iron-axe',
+      'gold-axe',
+      'diamond-axe',
+      'stone-sword',
+      'iron-sword',
+      'gold-sword',
+      'diamond-sword',
+      'wood-hoe',
+      'stone-hoe',
+      'iron-hoe',
+      'gold-hoe',
+      'diamond-hoe',
+    ].includes(itemId)
+  )
+    return { kind: 'stone-pickaxe' };
   return { kind: 'plank' };
 }
 

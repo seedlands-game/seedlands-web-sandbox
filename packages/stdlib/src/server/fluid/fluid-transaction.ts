@@ -1,6 +1,8 @@
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex, Voxel } from '../../world/voxel';
-import { isFluidCandidateResultValid } from './fluid-candidate-validator';
+import { fluidCandidateWorkId, normalizeFluidCandidateResult } from './fluid-candidate-validator';
+import { prepareFluidCandidateSettlement } from './fluid-candidate-settlement';
 import { FluidPriorityFrontier } from './fluid-priority-frontier';
+import * as FluidEditEffects from './fluid-edit-effect-plan';
 
 export const FLUID_TRANSACTION_PROTOCOL_VERSION = 1 as const;
 export const FLUID_FRONTIER_BATCH_SIZE = 128;
@@ -93,7 +95,8 @@ const cloneChunk = (chunk: FluidChunkSnapshot): FluidChunkSnapshot => ({
   voxels: chunk.voxels.slice(),
   fluid: chunk.fluid.slice(),
 });
-const fluidForWater = (fluid: number) => fluid || 0x88;
+const isFluidVoxel = (voxel: number) => voxel === Voxel.Water || voxel === Voxel.Lava;
+const fluidValue = (voxel: number, fluid: number) => (isFluidVoxel(voxel) ? fluid || 0x88 : fluid);
 
 /**
  * Computes one bounded propagation candidate from transferred data only. It has
@@ -141,27 +144,27 @@ function computeFluidCandidateFromChunks(
   };
   const cell = (position: FluidPosition) => {
     const value = read(position);
-    if (!value || value.voxel !== Voxel.Water) return value;
-    return { ...value, fluid: fluidForWater(value.fluid) };
+    if (!value || !isFluidVoxel(value.voxel)) return value;
+    return { ...value, fluid: fluidValue(value.voxel, value.fluid) };
   };
-  const suppliedLevel = (position: FluidPosition): number => {
+  const suppliedLevel = (position: FluidPosition, kind: number, decay: number): number => {
     const [x, y, z] = position;
     const above = cell([x, y + 1, z]);
-    if (above?.voxel === Voxel.Water) return 8;
+    if (above?.voxel === kind) return 8;
     let best = 0;
     for (const candidate of horizontal(position)) {
       const neighbor = cell(candidate);
-      if (neighbor?.voxel === Voxel.Water) best = Math.max(best, (neighbor.fluid & 0x0f) - 1);
+      if (neighbor?.voxel === kind) best = Math.max(best, (neighbor.fluid & 0x0f) - decay);
     }
     return best;
   };
-  const place = (position: FluidPosition, level: number) => {
+  const place = (position: FluidPosition, kind: number, level: number) => {
     const previous = read(position);
     if (!previous) return;
-    if (previous.voxel !== Voxel.Air && previous.voxel !== Voxel.Water) return;
+    if (previous.voxel !== Voxel.Air && previous.voxel !== kind) return;
     const nextFluid = Math.max(1, Math.min(8, level));
-    if (previous.voxel === Voxel.Water && previous.fluid === nextFluid) return;
-    write(position, { voxel: Voxel.Water, fluid: nextFluid });
+    if (previous.voxel === kind && previous.fluid === nextFluid) return;
+    write(position, { voxel: kind, fluid: nextFluid });
     neighborhood(position).forEach(activate);
   };
 
@@ -171,19 +174,33 @@ function computeFluidCandidateFromChunks(
   // required.
   for (const position of [...(snapshot.cleanupFrontier ?? []), ...snapshot.frontier]) {
     const current = cell(position);
-    if (!current || current.voxel !== Voxel.Water) continue;
+    if (!current || !isFluidVoxel(current.voxel)) continue;
+    const kind = current.voxel;
+    const other = kind === Voxel.Water ? Voxel.Lava : Voxel.Water;
+    const decay = kind === Voxel.Lava ? 2 : 1;
+    const reactionNeighbor = horizontal(position)
+      .map(cell)
+      .find((neighbor) => neighbor?.voxel === other);
+    if (reactionNeighbor) {
+      write(position, {
+        voxel: kind === Voxel.Lava && (current.fluid & 0x80) !== 0 ? Voxel.Obsidian : Voxel.Cobblestone,
+        fluid: 0,
+      });
+      neighborhood(position).forEach(activate);
+      continue;
+    }
     const level = current.fluid & 0x0f;
     const source = (current.fluid & 0x80) !== 0;
     if (!source) {
       const unknownReadsBefore = unknownReadCount;
-      let desired = suppliedLevel(position);
+      let desired = suppliedLevel(position, kind, decay);
       const [x, y, z] = position;
       const above = cell([x, y + 1, z]);
       const strongerSide = horizontal(position).some((candidate) => {
         const neighbor = cell(candidate);
-        return neighbor?.voxel === Voxel.Water && (neighbor.fluid & 0x0f) > level;
+        return neighbor?.voxel === kind && (neighbor.fluid & 0x0f) > level;
       });
-      if (above?.voxel !== Voxel.Water && !strongerSide) desired = Math.min(desired, level - 1);
+      if (above?.voxel !== kind && !strongerSide) desired = Math.min(desired, level - decay);
       // Unknown local cells may contain a stronger supporting source. They are
       // never proof that a current level can shrink; leave it intact and retry
       // after the authority can provide that one-hop dependency. A known local
@@ -198,7 +215,7 @@ function computeFluidCandidateFromChunks(
         continue;
       }
       if (desired !== level) {
-        write(position, { voxel: Voxel.Water, fluid: desired });
+        write(position, { voxel: kind, fluid: desired });
         neighborhood(position).forEach(activate);
       }
     }
@@ -207,11 +224,11 @@ function computeFluidCandidateFromChunks(
     const belowCell = cell(below);
     if (!belowCell) continue;
     if (belowCell.voxel === Voxel.Air) {
-      place(below, 8);
+      place(below, kind, 8);
       activate(position);
       continue;
     }
-    if (belowCell.voxel === Voxel.Water) continue;
+    if (belowCell.voxel === kind) continue;
     const settled = cell(position);
     const settledLevel = settled ? settled.fluid & 0x0f : 0;
     if (settledLevel <= 1) continue;
@@ -220,11 +237,11 @@ function computeFluidCandidateFromChunks(
       if (!targetCell) continue;
       if (
         targetCell.voxel === Voxel.Air ||
-        (targetCell.voxel === Voxel.Water &&
+        (targetCell.voxel === kind &&
           (targetCell.fluid & 0x80) === 0 &&
-          (targetCell.fluid & 0x0f) < settledLevel - 1)
+          (targetCell.fluid & 0x0f) < settledLevel - decay)
       )
-        place(target, settledLevel - 1);
+        place(target, kind, settledLevel - decay);
     }
   }
 
@@ -289,12 +306,12 @@ type AuthorityOptions = {
 
 /** Owns frontier leases and admission checks; writes remain in the authority's atomic apply callback. */
 export class FluidTransactionAuthority {
-  private readonly frontier = new FluidPriorityFrontier();
-  private readonly cleanupFrontier: FluidPosition[] = [];
-  private readonly cleanupQueued = new Set<string>();
+  private frontier = new FluidPriorityFrontier();
+  private cleanupFrontier: FluidPosition[] = [];
+  private cleanupQueued = new Set<string>();
   private readonly leases = new Map<string, FluidAuthoritySnapshot>();
   private readonly leaseInteractiveCounts = new Map<string, number>();
-  private readonly rescanJobs = new Map<string, number>();
+  private rescanJobs = new Map<string, number>();
   private nextWorkId = 1;
   private nextCommitSequence = 1;
   private acceptedCandidateCount = 0;
@@ -355,6 +372,20 @@ export class FluidTransactionAuthority {
     return accepted;
   }
 
+  prepareEditEffects(effects: readonly FluidEditEffects.FluidEditEffect[], priority: FluidActivationPriority) {
+    return FluidEditEffects.createPreparedFluidEditEffects(
+      () => this.editQueueState(),
+      (prepared) => {
+        this.frontier = prepared.frontier;
+        this.cleanupFrontier = prepared.cleanupFrontier;
+        this.cleanupQueued = prepared.cleanupQueued;
+        this.rescanJobs = prepared.rescanJobs;
+      },
+      effects,
+      priority,
+    );
+  }
+
   requestFluidWork(): FluidAuthoritySnapshot | null {
     if (this.leases.size) return null;
     this.pumpRescans();
@@ -384,13 +415,17 @@ export class FluidTransactionAuthority {
     return snapshot;
   }
 
-  commitFluidCandidate(candidate: FluidCandidate): FluidCandidateCommit {
-    const lease = this.leases.get(candidate.workId);
+  commitFluidCandidate(input: FluidCandidate): FluidCandidateCommit {
+    const workId = fluidCandidateWorkId(input);
+    const lease = workId === null ? undefined : this.leases.get(workId);
+    if (!lease) return this.rejectCandidate(undefined, 'work-id');
+    const candidate = normalizeFluidCandidateResult(lease, input);
+    if (!candidate) return this.rejectCandidate(lease, 'invalid-result');
     if (candidate.protocolVersion !== FLUID_TRANSACTION_PROTOCOL_VERSION || candidate.epoch !== this.epoch) {
       return this.rejectCandidate(lease, 'epoch');
     }
     if (
-      !lease ||
+      candidate.workId !== lease.workId ||
       !sameFrontier(lease.frontier, candidate.consumedFrontier) ||
       !sameFrontier(lease.cleanupFrontier ?? [], candidate.consumedCleanupFrontier ?? [])
     ) {
@@ -407,9 +442,6 @@ export class FluidTransactionAuthority {
     ) {
       return this.rejectCandidate(lease, 'read-set');
     }
-    if (!isFluidCandidateResultValid(lease, candidate)) {
-      return this.rejectCandidate(lease, 'invalid-result');
-    }
     if (
       candidate.writes.some((write) => {
         const current = this.options.readCell(write.position);
@@ -418,17 +450,19 @@ export class FluidTransactionAuthority {
     ) {
       return this.rejectCandidate(lease, 'cell-conflict');
     }
+    const settlement = prepareFluidCandidateSettlement(this.editQueueState(), candidate, lease);
+    const commitSequence = this.nextCommitSequence;
+    const result = Object.freeze({ accepted: true, commitSequence } as const);
     this.options.apply(candidate);
+    this.frontier = settlement.frontier;
+    this.cleanupFrontier = settlement.cleanupFrontier;
+    this.cleanupQueued = settlement.cleanupQueued;
+    this.rescanJobs = settlement.rescanJobs;
     this.leases.delete(candidate.workId);
     this.leaseInteractiveCounts.delete(candidate.workId);
-    candidate.nextFrontier.forEach((position) => this.enqueue(position));
-    candidate.nextCleanupFrontier?.forEach((position) => this.enqueueCleanup(position));
-    if (candidate.needsRescan)
-      [...candidate.consumedFrontier, ...(candidate.consumedCleanupFrontier ?? [])].forEach((position) =>
-        this.scheduleRescan(chunkKeyFor(position)),
-      );
     this.acceptedCandidateCount += 1;
-    return { accepted: true, commitSequence: this.nextCommitSequence++ };
+    this.nextCommitSequence = commitSequence + 1;
+    return result;
   }
 
   abortLease(workId: string, _reason: string): boolean {
@@ -439,30 +473,18 @@ export class FluidTransactionAuthority {
   }
 
   private enqueue(position: FluidPosition, priority: FluidActivationPriority = 'ordinary'): boolean {
-    if (!isActivePosition(position)) return true;
-    if (this.frontier.has(position)) {
-      this.frontier.enqueue(position, priority);
-      return true;
-    }
-    if (this.pending >= this.maxQueue) {
-      this.scheduleRescan(chunkKeyFor(position));
-      return false;
-    }
-    this.frontier.enqueue(position, priority);
-    return true;
+    return FluidEditEffects.enqueueFluidEditPosition(this.editQueueState(), position, priority);
   }
 
-  private enqueueCleanup(position: FluidPosition): boolean {
-    if (!isActivePosition(position)) return true;
-    const key = positionKey(position);
-    if (this.cleanupQueued.has(key)) return true;
-    if (this.pending >= this.maxQueue) {
-      this.scheduleRescan(chunkKeyFor(position));
-      return false;
-    }
-    this.cleanupQueued.add(key);
-    this.cleanupFrontier.push([...position] as FluidPosition);
-    return true;
+  private editQueueState(): FluidEditEffects.FluidEditQueueState {
+    return {
+      frontier: this.frontier,
+      cleanupFrontier: this.cleanupFrontier,
+      cleanupQueued: this.cleanupQueued,
+      rescanJobs: this.rescanJobs,
+      leasedCount: this.pending - this.frontier.pending - this.cleanupFrontier.length,
+      maxQueue: this.maxQueue,
+    };
   }
 
   private returnLease(lease: FluidAuthoritySnapshot): void {
@@ -489,10 +511,6 @@ export class FluidTransactionAuthority {
     return { accepted: false, reason };
   }
 
-  private scheduleRescan(key: string): void {
-    if (!this.rescanJobs.has(key)) this.rescanJobs.set(key, 0);
-  }
-
   private pumpRescans(): void {
     let remaining = RESCAN_SCAN_BUDGET;
     for (const [key, cursor] of [...this.rescanJobs]) {
@@ -501,7 +519,7 @@ export class FluidTransactionAuthority {
       if (!chunk) continue;
       let nextCursor = cursor;
       while (nextCursor < chunk.voxels.length && remaining && this.pending < this.maxQueue) {
-        if (chunk.voxels[nextCursor] === Voxel.Water) {
+        if (isFluidVoxel(chunk.voxels[nextCursor])) {
           const x = nextCursor % CHUNK_SIZE;
           const yz = Math.floor(nextCursor / CHUNK_SIZE);
           const z = yz % CHUNK_SIZE;

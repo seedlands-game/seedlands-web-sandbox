@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git-34-equipment-mining-aim-scoped-diff",
+  "pid": 2726,
+  "startedAt": "2026-09-28T05:23:19.630Z",
+  "windowId": "git-34-equipment-mining-aim-scoped-diff",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-34-equipment-mining-aim/scoped-diff.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T05:23:19.728Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T05:23:19.631Z",
+      "loadAverage": [
+        4.2099609375,
+        3.5537109375,
+        3.287109375
+      ],
+      "freeMemoryBytes": 6836813824,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T05:23:19.727Z",
+      "loadAverage": [
+        4.2099609375,
+        3.5537109375,
+        3.287109375
+      ],
+      "freeMemoryBytes": 6825000960,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

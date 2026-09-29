@@ -9,7 +9,7 @@ import {
   readGameSaveCheckpoint,
   type GameSaveCheckpoint,
 } from '@seedlands/stdlib/server/persistence/game-save-checkpoint';
-import { GENERATOR_VERSION, Voxel, chunkKey, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
+import { GENERATOR_VERSION, chunkKey } from '@seedlands/stdlib/world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
 import {
   parseBrowserPersistenceLoadBatchResult,
@@ -20,8 +20,11 @@ import {
   type BrowserPersistenceLoadToken,
   type BrowserPersistenceNeighborhoodLease,
 } from './browser-persistence-load-registry';
-import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
-import type { SerializedChunkSnapshot } from './browser-world-save';
+import {
+  type BrowserChunkOpenOptions,
+  validLegacySnapshot,
+  voxelStorageIdsForOpen,
+} from './browser-chunk-persistence-open';
 import {
   prepareBrowserPersistenceNeighborhood,
   type BrowserPersistenceLoadCoordinate,
@@ -38,6 +41,7 @@ import type {
 } from './browser-persistence-worker-contract';
 import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
 import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import { requestWorldDirectory, type StoredWorldSummary } from './browser-world-directory';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
@@ -92,15 +96,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     };
   }
 
-  static async open(
-    seedText: string,
-    options: {
-      databaseName?: string;
-      legacySnapshots?: readonly SerializedChunkSnapshot[];
-      openMode?: WorldOpenMode;
-      provider: KernelWorldgenProviderIdentity;
-    },
-  ): Promise<BrowserChunkPersistence> {
+  static async open(seedText: string, options: BrowserChunkOpenOptions): Promise<BrowserChunkPersistence> {
     const persistence = new BrowserChunkPersistence(seedText, null, options.provider);
     let initialized: InitResult;
     try {
@@ -111,6 +107,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
         seedText,
         openMode: options.openMode ?? 'continue',
         provider: options.provider,
+        voxelStorageIds: voxelStorageIdsForOpen(options),
       })) as InitResult;
       assertWorldgenProviderIdentity(options.provider, initialized.provider, initialized.generatorVersion);
     } catch (error) {
@@ -126,15 +123,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     persistence.corpusSummaryValue = initialized.corpusSummary;
     if (options.legacySnapshots?.length && !initialized.legacyMigrated) {
       for (const snapshot of options.legacySnapshots)
-        if (
-          snapshot.seedText !== seedText ||
-          snapshot.generatorVersion !== persistence.generatorVersion ||
-          snapshot.key !== chunkKey(snapshot.cx, snapshot.cy, snapshot.cz) ||
-          !Number.isInteger(snapshot.revision) ||
-          snapshot.revision < 0 ||
-          snapshot.voxels.length !== 32 ** 3 ||
-          !snapshot.voxels.every((voxel) => Number.isInteger(voxel) && voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID)
-        )
+        if (!validLegacySnapshot(snapshot, seedText, persistence.generatorVersion, options))
           throw new Error(`Legacy Chunk snapshot is invalid for ${snapshot.key}.`);
       const snapshots: ChunkSnapshot[] = options.legacySnapshots.map(({ voxels, fluid, ...snapshot }) => ({
         ...snapshot,
@@ -166,6 +155,11 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       persistence.dispose();
     }
   }
+
+  static listWorlds = (databaseName = 'seedlands-chunks-v1') =>
+    requestWorldDirectory<readonly StoredWorldSummary[]>({ kind: 'list-worlds', databaseName });
+  static deleteWorld = (worldId: string, databaseName = 'seedlands-chunks-v1') =>
+    requestWorldDirectory<{ deleted: true; worldId: string }>({ kind: 'delete-world', databaseName, worldId });
 
   private playerValue: [number, number, number] | null = null;
   private gameplaySnapshotValue: unknown = null;

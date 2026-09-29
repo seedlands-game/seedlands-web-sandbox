@@ -42,7 +42,9 @@ export class WorldCheckpointRuntime {
     }
     let snapshot: FrozenGameSaveSnapshot;
     try {
-      snapshot = this.options.clone(validatePortableCheckpoint(request.snapshot));
+      snapshot = this.options.clone(
+        validatePortableCheckpoint(request.snapshot, this.options.runtime().server.voxelSemantics),
+      );
     } catch (cause) {
       throw new InvalidCheckpointFailure(cause instanceof Error ? cause.message : String(cause));
     }

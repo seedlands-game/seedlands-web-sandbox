@@ -1,0 +1,59 @@
+3:55:55 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts (16 tests | 6 failed) 5ms
+     × requires leaving the Browser-11 target cell before a strict upper entry face can be observed 1ms
+     × derives and reaches the near-side entry face for [ 67, 32.6, 0.5 ] 0ms
+     × derives and reaches the near-side entry face for [ 74, 32.6, 0.5 ] 0ms
+     × derives and reaches the near-side entry face for [ 70.5, 32.6, -3 ] 0ms
+     × derives and reaches the near-side entry face for [ 70.5, 32.6, 4 ] 0ms
+     × keeps strict upper and lower faces observable from the existing post-traverse side 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > requires leaving the Browser-11 target cell before a strict upper entry face can be observed
+TypeError: doorEntryAdjacent is not a function
+ ❯ apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts:156:22
+    154|   it('requires leaving the Browser-11 target cell before a strict uppe…
+    155|     const upper: Point = [70, 32, 0];
+    156|     const adjacent = doorEntryAdjacent(plan, upper);
+       |                      ^
+    157|     const browser11Eye: Point = [70.49249900007506, 32.6, 0.4973390537…
+    158|     const contact = twoCellDoorTarget(browser11Eye, [-90.1299999999999…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > derives and reaches the near-side entry face for [ 67, 32.6, 0.5 ]
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > derives and reaches the near-side entry face for [ 74, 32.6, 0.5 ]
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > derives and reaches the near-side entry face for [ 70.5, 32.6, -3 ]
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > derives and reaches the near-side entry face for [ 70.5, 32.6, 4 ]
+TypeError: doorEntryAdjacent is not a function
+ ❯ apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts:177:22
+    175|     const directionalPlan = createClosedDoorProbePlan({ door, collisio…
+    176|     const upper: Point = [door[0], door[1] + 1, door[2]];
+    177|     const adjacent = doorEntryAdjacent(directionalPlan, upper);
+       |                      ^
+    178|
+    179|     for (const normalError of [-0.059, 0.059])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts > Classic closed-door collision oracle > keeps strict upper and lower faces observable from the existing post-traverse side
+TypeError: doorEntryAdjacent is not a function
+ ❯ apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts:204:24
+    202|
+    203|     for (const target of [upper, door]) {
+    204|       const adjacent = doorEntryAdjacent(farSidePlan, target);
+       |                        ^
+    205|       const result = convergeDoorAim(afterTraverse, [-90, -20], door, …
+    206|       expect(result.attempt).toBeLessThanOrEqual(180);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 10 passed (16)
+   Start at  15:55:55
+   Duration  171ms (transform 68ms, setup 0ms, import 83ms, tests 5ms, environment 0ms)
+

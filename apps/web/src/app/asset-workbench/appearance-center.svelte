@@ -238,7 +238,7 @@
       refresh();
       notify(
         apply
-          ? '已应用外观快照并生成 10 个物品高清缩略图；下次进入世界生效。'
+          ? `已应用外观快照并生成 ${Object.keys(editor.project.thumbnails).length} 个物品高清缩略图；下次进入世界生效。`
           : '草稿已保存到此浏览器，游戏外观尚未改变。',
       );
     } catch (error) {

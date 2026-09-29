@@ -1,0 +1,185 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-25",
+  "status": "PASS",
+  "identity": {
+    "sourceSha": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+    "sourceTree": "ecc7940708bca8ea1d01e8df50337fa536d27d18",
+    "sourceDigest": "80ec89b82c297f451902bd5661b56c31ef6d1be76774bd93a3fcd11c10d0c574",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+    "builtAt": "2026-09-28T23:19:29.712Z",
+    "artifactReceiptSha256": "5af78cfc542d641f4e6bf5cd0e503a616db2c146db4d8f53b187af2a1eb86702",
+    "artifactMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6"
+  },
+  "preflight": {
+    "mainHead": "783e106fb5fcba4869bcc8d0aab68ada1df827a7",
+    "mainIndexEmpty": true,
+    "acceptanceTrackedAndIndexClean": true,
+    "runIdPreviouslyAbsent": true,
+    "port4273Listening": false,
+    "ownedProcesses": 0,
+    "machineLockFree": true,
+    "ciSet": false,
+    "selectorSet": false,
+    "benchmarkSet": false,
+    "modularSet": false,
+    "workers": 1,
+    "retries": 0,
+    "mainTimeoutMs": 900000,
+    "projectTimeoutMs": 60000,
+    "projectTestDir": "./apps/web/tests/e2e",
+    "traceMode": "retain-on-failure"
+  },
+  "canonicalRun": {
+    "command": "env -u CI -u PWDEBUG -u SEEDLANDS_E2E_HEADED -u SEEDLANDS_E2E_ALLOW_HEADED -u SEEDLANDS_CHROME_PATH -u SEEDLANDS_PACK_SMOKE -u SEEDLANDS_CLASSIC_BENCHMARK -u SEEDLANDS_BENCHMARK -u SEEDLANDS_BENCHMARK_MODE -u SEEDLANDS_CLASSIC_GREP -u PLAYWRIGHT_WORKERS SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-25-fdb53c07 SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-25-fdb53c07 SEEDLANDS_RESERVATION_EVIDENCE=/private/tmp/seedlands-v2-canonical-browser-25-run/canonical-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic",
+    "startedAt": "2026-09-28T23:41:41.725Z",
+    "endedAt": "2026-09-28T23:55:04.117Z",
+    "waitedMs": 1,
+    "exitCode": 0,
+    "status": "PASS",
+    "runnerStdoutSha256": "3849fe043ffa9330edeedc211302d1acfb2b1602ae62a5baa5d41c98f602bd12",
+    "windowSha256": "92ea5f54390ec4b26189722be9bfeb2aba415e787c29b05461db67e8dec34ccf",
+    "workers": 1,
+    "retries": 0,
+    "canonicalAttempts": 1
+  },
+  "receipt": {
+    "path": "classic.json.log",
+    "sha256": "b64956a1d687601b289aae72c3a7ed4645c1a90ca540f15c53f004a4dd257997",
+    "status": "PASS",
+    "selectionMode": "CANONICAL_MAIN",
+    "canonicalMainSelected": true,
+    "canonicalMainMatches": 1,
+    "attempts": 1,
+    "runnerOutcome": "passed",
+    "testOutcome": "passed",
+    "assertionEvidenceStatus": "PASS",
+    "failureEvidencePresent": false,
+    "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+    "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "test": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+    "project": "chromium",
+    "retry": 0
+  },
+  "v2": {
+    "phase": "ready-to-save",
+    "checkpoints": 19,
+    "resourceCounts": {
+      "woodBlock": 3,
+      "cobblestone": 3,
+      "ironBlock": 4
+    },
+    "craftedArmorItems": 5,
+    "armorPoints": 15,
+    "stonePickaxeDurabilitySequence": [132, 128, 127],
+    "preSaveInventoryRevision": 143,
+    "restoredInventoryRevision": 143,
+    "continuedInventoryRevision": 145,
+    "runtimeEpochSequence": ["seedlands:classic-canonical-runtime-v11:1", "seedlands:classic-canonical-runtime-v11:2"],
+    "actorEpochSequence": [1, 2],
+    "actorLifetimeSequence": [1, 1]
+  },
+  "playwright": {
+    "tests": 3,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 1,
+    "mainDurationMs": 728444,
+    "visualDurationMs": 32471,
+    "pageErrors": 0,
+    "failedResponses": 0,
+    "lastRunSha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "reportHtmlSha256": "cb36b9060bf20b904e93e13808c65e7bc0e5d8a4d5a277ffd08d74f32a96b823",
+    "reportZipSha256": "077cee5762e95b57284b79724eace930f24eaf6a7eeb1971a60291390b6c026e",
+    "reportZipIntegrity": "PASS",
+    "mappedAttachments": 55
+  },
+  "reportDerivation": {
+    "status": "PASS",
+    "preFinalFailures": ["wrong attachment data root", "wrong report summary root"],
+    "failureOutputsWereNotRedirected": true,
+    "canonicalOrArtifactCommandRerun": false
+  },
+  "trace": {
+    "status": "NOT_RETAINED_BY_CONFIG",
+    "traceZipCount": 0,
+    "repairRun": false
+  },
+  "artifactPostcheck": {
+    "runId": "v2-canonical-browser-25-artifact-postcheck",
+    "startedAt": "2026-09-28T23:55:47.892Z",
+    "endedAt": "2026-09-28T23:55:53.013Z",
+    "exitCode": 0,
+    "status": "PASS",
+    "stdoutSha256": "dd612878df8e49ae217b36aeea158bb02ecb18b7c6e3e39b3d993c1cf3d240a6",
+    "windowSha256": "d1b429a76c2f1799f276fe81a7f1b9e9fc6686567190c2b50a037942b816181a",
+    "identityUnchanged": true,
+    "artifactFiles": 276,
+    "diskFilesIncludingReceipt": 277,
+    "missingExtraMismatchSymlinks": 0,
+    "packAndMp3Unchanged": true
+  },
+  "historicalTail": {
+    "startsAt": "## Browser-24 正式验收",
+    "bytes": 66845,
+    "sha256": "b5f25ee4c270dfa9e8765268ddaa5ccecb66a717ab7b3b7bc1ca1df4a8d117af",
+    "preserved": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "c0d37c2742c8a9627c4839d0cde0c1d5eb7dd17cdfff4c39bd13c7064d8c49eb"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 84,
+    "sha256": "78b45e794bb2688cb75acf4756df80fc6691b456e7881eff14f210c713722a2c",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "finalSelfcheck": {
+    "runId": "v2-canonical-browser-25-final-selfcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-29T00:12:31.713Z",
+    "endedAt": "2026-09-29T00:12:32.867Z",
+    "exitCode": 0,
+    "stdoutSha256": "41a1b53f1d90efcda14dbfc19be13ef30f49cca817bebb1c304a40b27e7105d1",
+    "windowSha256": "a452002bedbb84c7f9076def3ffb98d5508383e2c2bcb458363e55ecc1852c18",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "boundaries": {
+    "browser24Status": "FAIL_BEFORE_TEST_DISCOVERY_CHROMIUM_ZERO",
+    "browser23Status": "FAIL_TIMEOUT_TRACE_INCOMPLETE",
+    "newReferenceAsserted": false,
+    "deathDropRespawnAsserted": false,
+    "complete16Armor194MatrixAsserted": false,
+    "v3V4Run": false,
+    "cuaOrHumanAudioRun": false,
+    "performanceMeasured": false,
+    "implementationChanged": false,
+    "gitOrIndexWrite": false
+  },
+  "postconditions": {
+    "acceptanceTrackedAndIndexClean": true,
+    "port4273Listening": false,
+    "ownedProcesses": 0,
+    "machineLockFree": true,
+    "build09Through16Preserved": true,
+    "git32BackupRefPreserved": true
+  },
+  "finalOwnedPathCount": 89,
+  "maxEvidenceFileBytes": 19499461,
+  "budget": {
+    "traditionalPd": "about 0.1-0.25",
+    "aiTargetHours": 1,
+    "hardLimitHours": 3,
+    "recommendedAt120PercentHours": 1.2,
+    "recommendedAt120PercentTraditionalPd": 0.3,
+    "creditsRateAndQuota": "unknown"
+  }
+}

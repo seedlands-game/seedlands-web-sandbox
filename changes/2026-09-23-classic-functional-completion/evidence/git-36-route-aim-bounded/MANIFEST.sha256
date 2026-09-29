@@ -1,0 +1,13 @@
+6f52bf44b7423986cf5e56e01f44eec945e6f7da9672a45fea2738961c23cd94  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/SOURCE-MANIFEST.sha256
+d67ee7b4a1f0d7fe930d38ee8258e798d40d3f8f504450244c4efe4d73f72383  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/affected.stdout.log
+d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/classic-types.stdout.log
+2ffd10c7fd133374d6b1e54f531eb37f402b20885cc00fff6dae13ed128406a2  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/code-staged.patch
+d3022db36db1fbdb6527860e1bbd493012712eaf6dfcb1b113f631886b729558  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/code-staged.paths
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/eslint.stdout.log
+17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/format.stdout.log
+51786c53e5596774d09e8b4f7d6ec4fc5978902903061dfe2fbc15daf6d2987c  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/postconditions.stdout.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/root-types.stdout.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/scoped-diff.stdout.log
+d9b7087566a5b8d4c2e0a906f10811d4afc378c12ddb7117e73627f53f9f21d0  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/staged-gate-window.json.log
+34a6f75479473402f392502eef2eab2949eb275c270ac130a8b22847a68a7466  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/staged-gate.stdout.log
+3e7b3ac65f9b42babbd84c36fc71c61e2e9cb222bfaf17981148790d6c10ec70  changes/2026-09-23-classic-functional-completion/evidence/git-36-route-aim-bounded/validation-argv.txt

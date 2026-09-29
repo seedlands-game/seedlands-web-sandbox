@@ -80,7 +80,7 @@
   let packageInput = $state<HTMLInputElement>(undefined!);
   let imageInput = $state<HTMLInputElement>(undefined!);
   let reimportInput = $state<HTMLInputElement>(undefined!);
-  let animationTarget = $state<AppearanceAnimationTarget>('settler');
+  let animationTarget = $state<AppearanceAnimationTarget>('pig');
   const hex = (rgb: Rgb) => `#${rgb.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   const isNative = (value: Asset | undefined): value is PixelTexture | PixelModel =>
     value?.type === 'pixel-texture' || value?.type === 'extruded-pixel-model';

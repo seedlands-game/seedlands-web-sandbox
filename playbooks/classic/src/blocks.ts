@@ -1,4 +1,17 @@
-import type { VoxelGameplayDefinition } from '@seedlands/stdlib/mod-api';
+import type { VoxelGameplayDefinition, VoxelSemanticsDefinition } from '@seedlands/stdlib/mod-api';
+import {
+  FaceMaterial,
+  Voxel,
+  faceMaterialFor,
+  isRenderable,
+  isSolid,
+  isTargetable,
+} from '@seedlands/stdlib/world/voxel';
+import { voxelEmission, voxelLightCost } from '@seedlands/stdlib/world/voxel-light';
+import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
+import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
+import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
+import { classicWoodenDoorVariants } from './structures';
 
 /** Version 1 content preserves the supported numeric voxel palette. */
 const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.freeze({
@@ -20,14 +33,14 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   [1]: {
     voxel: 1,
     hardnessSeconds: 0.35,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'dirt-block', count: 1 },
     replaceable: false,
   },
   [2]: {
     voxel: 2,
     hardnessSeconds: 0.35,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'dirt-block', count: 1 },
     replaceable: false,
   },
@@ -36,7 +49,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     minimumTier: 1,
     hardnessSeconds: 2.4,
     preferredTool: 'pickaxe',
-    drop: { itemId: 'stone-block', count: 1 },
+    drop: { itemId: 'cobblestone', count: 1 },
     replaceable: false,
   },
   [4]: {
@@ -56,7 +69,7 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
   [6]: {
     voxel: 6,
     hardnessSeconds: 0.3,
-    preferredTool: null,
+    preferredTool: 'shovel',
     drop: { itemId: 'sand-block', count: 1 },
     replaceable: false,
   },
@@ -91,6 +104,267 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
     drop: { itemId: 'coal', count: 1 },
     replaceable: false,
   },
+  [17]: {
+    voxel: 17,
+    hardnessSeconds: 2,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'cobblestone', count: 1 },
+    replaceable: false,
+  },
+  [19]: {
+    voxel: 19,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 3,
+    drop: { itemId: 'gold-ore', count: 1 },
+    replaceable: false,
+  },
+  [20]: {
+    voxel: 20,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 3,
+    drop: { itemId: 'diamond', count: 1 },
+    replaceable: false,
+  },
+  [21]: {
+    voxel: 21,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 2,
+    drop: { itemId: 'iron-block', count: 1 },
+    replaceable: false,
+  },
+  [22]: {
+    voxel: 22,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 3,
+    drop: { itemId: 'gold-block', count: 1 },
+    replaceable: false,
+  },
+  [23]: {
+    voxel: 23,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 3,
+    drop: { itemId: 'diamond-block', count: 1 },
+    replaceable: false,
+  },
+  [24]: {
+    voxel: 24,
+    hardnessSeconds: 1.6,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'sandstone', count: 1 },
+    replaceable: false,
+  },
+  [25]: {
+    voxel: 25,
+    hardnessSeconds: 2.2,
+    preferredTool: 'pickaxe',
+    minimumTier: 1,
+    drop: { itemId: 'stone-bricks', count: 1 },
+    replaceable: false,
+  },
+  [26]: {
+    voxel: 26,
+    hardnessSeconds: 0.6,
+    preferredTool: 'shovel',
+    drop: { itemId: 'dirt-block', count: 1 },
+    replaceable: false,
+  },
+  [27]: { voxel: 27, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
+  [28]: {
+    voxel: 28,
+    hardnessSeconds: 10,
+    preferredTool: 'pickaxe',
+    minimumTier: 4,
+    drop: { itemId: 'obsidian', count: 1 },
+    replaceable: false,
+  },
+  [29]: { voxel: 29, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: true },
+  [30]: {
+    voxel: 30,
+    hardnessSeconds: 0.01,
+    preferredTool: null,
+    drop: { itemId: 'tnt', count: 1 },
+    replaceable: false,
+  },
+  [31]: {
+    voxel: 31,
+    hardnessSeconds: 0.05,
+    preferredTool: null,
+    drop: { itemId: 'sapling', count: 1 },
+    replaceable: true,
+  },
+  [32]: {
+    voxel: 32,
+    hardnessSeconds: 0.05,
+    preferredTool: null,
+    drop: { itemId: 'wheat-seeds', count: 1 },
+    replaceable: true,
+  },
+  [33]: {
+    voxel: 33,
+    hardnessSeconds: 0.05,
+    preferredTool: null,
+    drop: { itemId: 'flower', count: 1 },
+    replaceable: true,
+  },
+  [34]: {
+    voxel: 34,
+    hardnessSeconds: 0.05,
+    preferredTool: null,
+    drop: { itemId: 'mushroom', count: 1 },
+    replaceable: true,
+  },
+  [35]: {
+    voxel: 35,
+    hardnessSeconds: 0.1,
+    preferredTool: null,
+    drop: { itemId: 'sugar-cane', count: 1 },
+    replaceable: true,
+  },
+  [36]: {
+    voxel: 36,
+    hardnessSeconds: 0.4,
+    preferredTool: null,
+    drop: { itemId: 'cactus', count: 1 },
+    replaceable: false,
+  },
+  [37]: { voxel: 37, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
+  [38]: { voxel: 38, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
+  [39]: {
+    voxel: 39,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'rail', count: 1 },
+    replaceable: true,
+  },
+  [40]: {
+    voxel: 40,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'powered-rail', count: 1 },
+    replaceable: true,
+  },
+  [41]: {
+    voxel: 41,
+    hardnessSeconds: 0.7,
+    preferredTool: 'pickaxe',
+    drop: { itemId: 'detector-rail', count: 1 },
+    replaceable: true,
+  },
+  [42]: { voxel: 42, hardnessSeconds: null, preferredTool: null, drop: null, replaceable: false },
+  [43]: {
+    voxel: 43,
+    hardnessSeconds: 0.6,
+    preferredTool: 'shovel',
+    drop: { itemId: 'gravel', count: 1 },
+    replaceable: false,
+  },
+  [44]: {
+    voxel: 44,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 2,
+    drop: { itemId: 'blue-dye', count: 4 },
+    replaceable: false,
+  },
+  [45]: {
+    voxel: 45,
+    hardnessSeconds: 0.6,
+    preferredTool: 'shovel',
+    drop: { itemId: 'clay', count: 4 },
+    replaceable: false,
+  },
+  [46]: { voxel: 46, hardnessSeconds: 0.5, preferredTool: 'pickaxe', drop: null, replaceable: false },
+  [47]: {
+    voxel: 47,
+    hardnessSeconds: 0.3,
+    preferredTool: 'shovel',
+    drop: { itemId: 'snowball', count: 4 },
+    replaceable: false,
+  },
+  [48]: {
+    voxel: 48,
+    hardnessSeconds: 3,
+    preferredTool: 'pickaxe',
+    minimumTier: 2,
+    drop: { itemId: 'lapis-block', count: 1 },
+    replaceable: false,
+  },
+  ...Object.fromEntries(
+    (
+      [
+        [49, 'slab'],
+        [50, 'wood-stairs'],
+        [51, 'cobblestone-stairs'],
+        [52, 'wooden-door'],
+        [53, 'ladder'],
+        [54, 'torch'],
+        [55, 'bed'],
+        [56, 'sign'],
+        [57, 'fence'],
+        [58, 'cake'],
+      ] as const
+    ).map(([voxel, itemId]) => [
+      voxel,
+      { voxel, hardnessSeconds: 0.7, preferredTool: null, drop: { itemId, count: 1 }, replaceable: false },
+    ]),
+  ),
+  ...Object.fromEntries(
+    (
+      [
+        [59, 'dead-bush', 0.05, null],
+        [60, 'wool', 0.8, null],
+        [61, 'red-flower', 0.05, null],
+        [62, 'red-mushroom', 0.05, null],
+        [63, 'bricks', 2, 'pickaxe'],
+        [64, 'bookshelf', 1.5, 'axe'],
+        [65, 'mossy-cobblestone', 2, 'pickaxe'],
+        [66, 'note-block', 1.2, 'axe'],
+        [67, 'jukebox', 2, 'axe'],
+        [68, 'pumpkin', 1, 'axe'],
+        [69, 'jack-o-lantern', 1, 'axe'],
+        [70, 'trapdoor', 1, 'axe'],
+        [71, 'furnace', 2.4, 'pickaxe'],
+        [72, 'redstone-dust', 3, 'pickaxe'],
+        [73, 'redstone-dust', 3, 'pickaxe'],
+      ] as const
+    ).map(([voxel, itemId, hardnessSeconds, preferredTool]) => [
+      voxel,
+      {
+        voxel,
+        hardnessSeconds,
+        preferredTool,
+        drop: { itemId, count: voxel >= 72 ? 4 : 1 },
+        replaceable: voxel === 59 || voxel === 61 || voxel === 62,
+      },
+    ]),
+  ),
+  ...Object.fromEntries(
+    woolVoxelColors.slice(1).map(([id, , voxel]) => [
+      voxel,
+      {
+        voxel,
+        hardnessSeconds: 0.8,
+        preferredTool: null,
+        drop: { itemId: `${id}-wool`, count: 1 },
+        replaceable: false,
+      },
+    ]),
+  ),
+  [18]: { voxel: 18, hardnessSeconds: 0.3, preferredTool: null, drop: null, replaceable: false },
+  [16]: {
+    voxel: 16,
+    hardnessSeconds: 1.2,
+    preferredTool: 'axe',
+    drop: { itemId: 'plank', count: 1 },
+    replaceable: false,
+  },
   [15]: {
     voxel: 15,
     hardnessSeconds: 3.2,
@@ -102,7 +376,96 @@ const definitions: Readonly<Record<number, VoxelGameplayDefinition>> = Object.fr
 });
 
 export const overworldBlocks: readonly VoxelGameplayDefinition[] = Object.freeze(
-  Object.values(definitions).map((definition) =>
+  [
+    ...Object.values(definitions),
+    ...classicWoodenDoorVariants.map(({ storageId }) => ({
+      voxel: storageId,
+      hardnessSeconds: 0.7,
+      preferredTool: null,
+      drop: null,
+      replaceable: false,
+    })),
+  ].map((definition) =>
     Object.freeze({ ...definition, drop: definition.drop ? Object.freeze({ ...definition.drop }) : null }),
   ),
 );
+
+const classicVoxelName = new Map<number, string>(
+  Object.entries(Voxel).map(([name, storageId]) => [storageId as number, name]),
+);
+const materialForFace = (storageId: number, axis: number, positive: boolean) =>
+  faceMaterialFor(storageId, axis, positive) ?? FaceMaterial.Stone;
+
+/**
+ * Compatibility registration for the complete v11 compact palette. The legacy
+ * helpers are only used to snapshot unchanged Classic semantics into the Pack;
+ * composed consumers use the frozen registry rather than their switches.
+ */
+export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Object.freeze([
+  ...Array.from({ length: 89 }, (_, storageId) => {
+    const name = classicVoxelName.get(storageId);
+    if (!name) throw new Error(`Classic voxel ID is missing: ${storageId}`);
+    return Object.freeze({
+      id: `seedlands:classic/${name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`).replace(/^-/, '')}`,
+      storageId,
+      solid: isSolid(storageId),
+      targetable: isTargetable(storageId),
+      renderable: isRenderable(storageId),
+      meshKind: hasVoxelModelGeometry(storageId)
+        ? 'model'
+        : storageId === Voxel.Water
+          ? 'water'
+          : storageId === Voxel.Glass
+            ? 'glass'
+            : storageId === Voxel.Ice
+              ? 'ice'
+              : 'cube',
+      emission: voxelEmission(storageId),
+      lightCost: voxelLightCost(storageId),
+      faceMaterials: [
+        materialForFace(storageId, 0, false),
+        materialForFace(storageId, 0, true),
+        materialForFace(storageId, 1, false),
+        materialForFace(storageId, 1, true),
+        materialForFace(storageId, 2, false),
+        materialForFace(storageId, 2, true),
+      ] as VoxelSemanticsDefinition['faceMaterials'],
+      materialCategories: Object.freeze(
+        [
+          ...new Set([
+            materialForFace(storageId, 0, false),
+            materialForFace(storageId, 0, true),
+            materialForFace(storageId, 1, false),
+            materialForFace(storageId, 1, true),
+            materialForFace(storageId, 2, false),
+            materialForFace(storageId, 2, true),
+          ]),
+        ].map((material) => [material, renderCategoryForMaterial(material)] as const),
+      ),
+    });
+  }),
+  ...classicWoodenDoorVariants.map(({ storageId, orientation, open, role }) =>
+    Object.freeze({
+      id: `seedlands:classic/wooden-door/${orientation}/${open ? 'open' : 'closed'}/${role}`,
+      storageId,
+      solid: !open,
+      targetable: true,
+      renderable: true,
+      // Public V1 does not yet admit Pack model geometry above the legacy 0-88 palette.
+      meshKind: 'cube' as const,
+      emission: 0,
+      lightCost: 1,
+      faceMaterials: Object.freeze([
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+        FaceMaterial.WoodenDoor,
+      ]) as VoxelSemanticsDefinition['faceMaterials'],
+      materialCategories: Object.freeze([
+        Object.freeze([FaceMaterial.WoodenDoor, renderCategoryForMaterial(FaceMaterial.WoodenDoor)] as const),
+      ]),
+    }),
+  ),
+]);

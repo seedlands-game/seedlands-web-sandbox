@@ -11,8 +11,8 @@ import { GameServer } from '../../../../fixtures/classic/content';
 import { WorldResourceAuthorizer } from '../../../../../../../packages/stdlib/src/server/harness/world-authorization';
 import { defineFeedingActionsModule } from '../../../../../../../packages/stdlib/src/server/gameplay/modules/feeding-actions-module';
 import { defineFeedingRulesModule } from '../../../../../../../packages/stdlib/src/server/gameplay/modules/feeding-rules-module';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function setup(
   options: {
@@ -41,9 +41,8 @@ function setup(
       });
     },
   };
-  const modules = [
-    ...pack.modules.filter((module) => !module.descriptor.id.includes('feeding')),
-    ...(options.provider === false
+  const feedingModules =
+    options.provider === false
       ? []
       : [
           (() => {
@@ -64,13 +63,19 @@ function setup(
           })(),
           defineFeedingRulesModule({
             moduleId: 'test:feeding-rules',
-            eligibleArchetypes: ['grazer'],
+            eligibleArchetypes: ['pig'],
             deficitThreshold: 50,
             restore: 'full',
           }),
-        ]),
-    ...(options.veto ? [extra] : []),
-  ];
+        ];
+  const replacements = [...feedingModules, ...(options.veto ? [extra] : [])];
+  const modules = classicGameplayDomainModules(
+    [
+      ...(options.provider === false ? ['seedlands:overworld-content'] : ['test:feeding-rules']),
+      ...(options.veto ? ['test:feeding-veto'] : []),
+    ],
+    replacements,
+  );
   const root = definePack({ id: 'test:feeding-world', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -130,7 +135,7 @@ function setup(
   server.spawnPlayer({ id: 'player', position: [3.5, 60, 0.5] });
   server.spawnAutonomousActor({
     id: 'grazer',
-    archetype: 'grazer',
+    archetype: 'pig',
     position: [0.5, 60, 0.5],
     registration: { hunger: 60 },
   });

@@ -35,8 +35,12 @@ describe('W07 有序流体候选对等', () => {
             chunk.voxels[voxelIndex(x, 9, z)] = next() % 9 ? 3 : 0;
             if (next() % 3 === 0) {
               const index = voxelIndex(x, 10, z);
-              chunk.voxels[index] = 8;
+              chunk.voxels[index] = scene % 4 === 3 && x % 3 === 0 ? 27 : 8;
               chunk.fluid[index] = [0, 0x88, 1, 3, 7, 8][next() % 6];
+              if (chunk.voxels[index] === 27 && x + 1 < 32 && z % 5 === 0) {
+                chunk.voxels[voxelIndex(x + 1, 10, z)] = 8;
+                chunk.fluid[voxelIndex(x + 1, 10, z)] = 0x88;
+              }
               if (frontier.length < 128) frontier.push([chunk.cx * 32 + x, 10, z]);
             }
           }

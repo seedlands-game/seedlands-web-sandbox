@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "receipt": "classic.json",
+    "trace": "canonical-trace.zip",
+    "errorContext": "canonical-error-context.md"
+  },
+  "stage": "V1 水桶、跨 Chunk 木门与唱片机均通过正式玩家输入",
+  "completedStages": ["C0", "C1", "C2", "C3"],
+  "selectedItemId": "water-bucket",
+  "actorPosition": [65.95881945378738, 32.600001, 2.4981569866156805],
+  "hit": [68, 30, 2],
+  "adjacent": [68, 31, 2],
+  "targetCard": "68,30,2",
+  "rightClickObserved": true,
+  "feedback": "无法交互 · blocked",
+  "targetVoxelAfterAction": 0,
+  "expectedTargetVoxel": 8,
+  "interactionAttempts": 11,
+  "worldRevision": 14,
+  "actionCompletionCount": 13,
+  "actionFailureCount": 0,
+  "hitLosSampledVoxels": [
+    [68, 30, 2],
+    [67, 30, 2],
+    [67, 31, 2],
+    [66, 31, 2],
+    [66, 32, 2]
+  ],
+  "adjacentLosSampledVoxels": [
+    [68, 31, 2],
+    [67, 31, 2],
+    [67, 32, 2],
+    [66, 32, 2]
+  ],
+  "firstBlockingCell": [67, 30, 2],
+  "classification": "item interaction hit LOS uses actor feet instead of playerInteractionOrigin",
+  "sourceLocations": [
+    "packages/stdlib/src/server/gameplay/modules/item-interaction-module.ts:277",
+    "packages/stdlib/src/server/gameplay/gameplay-geometry.ts:15",
+    "packages/stdlib/src/server/gameplay/voxel-ray.ts:18"
+  ]
+}

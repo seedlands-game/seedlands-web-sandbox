@@ -1,0 +1,6 @@
+dad835dd253afa0b37d53e2a83cad566c9c58e983bf84a72fcea57d094c521c8  apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+2103dda84332a0f5fee3221b5610893336caa979dac39684a0b5d11f7e9327c0  apps/web/tests/e2e/classic-support/door-readiness.test.ts
+bb719afb6416be3a7b29f6d231824a736951e0500a32b5e7017194f497cd0a6f  apps/web/tests/e2e/classic-support/harness.ts
+699f86d37a1e4e2f35930a5a2cdfba153be35b6257decc21f76947c5f62989d6  apps/web/tests/e2e/classic-support/v1-slice.ts
+1624a39bf5a0b528685b43bafc268b34bc8dfe802be4f44bdaeceac468533bad  changes/2026-09-23-classic-functional-completion/door-readiness-contract.md
+c088ffd6cab22286cf8a30adc7bd84a4611e2a3d126bf8b219a286f9f1a01a89  changes/2026-09-23-classic-functional-completion/spec.md

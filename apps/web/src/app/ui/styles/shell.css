@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgb(5 8 12 / 72%);
+  background: rgb(0 0 0 / 62%);
   pointer-events: auto;
 }
 .shell-dialog {
@@ -13,11 +13,11 @@
   max-height: calc(100dvh - 48px);
   overflow: auto;
   padding: 32px;
-  color: var(--text-primary, #eee4d0);
+  color: var(--ui-color-content, #f4f4f4);
 }
 .shell-dialog h2 {
   margin: 5px 0 14px;
-  font-family: Georgia, 'Songti SC', serif;
+  font-family: var(--ui-font-display, ui-monospace, monospace);
   font-size: 32px;
   letter-spacing: 0.06em;
 }
@@ -29,7 +29,7 @@
   line-height: 1.7;
 }
 .shell-dialog .muted {
-  color: #b5afa2;
+  color: #ddd;
   font-size: 13px;
 }
 .pause-actions {
@@ -38,8 +38,8 @@
   margin-top: 24px;
 }
 .pause-actions button:first-child {
-  border-color: #d5b269;
-  background: #574528;
+  border-color: #f4f4f4;
+  background: #707070;
 }
 .pause-toggle {
   position: fixed;
@@ -57,7 +57,7 @@
 .settings-grid label {
   display: grid;
   gap: 7px;
-  color: #e0d4ba;
+  color: #eee;
   font-size: 14px;
 }
 .volume-control span {
@@ -65,7 +65,7 @@
   justify-content: space-between;
 }
 .volume-control output {
-  color: #adccca;
+  color: #eee;
   font-variant-numeric: tabular-nums;
 }
 .volume-control input {
@@ -75,7 +75,7 @@
   margin: 0;
   border: 0;
   background: transparent;
-  accent-color: #d4b071;
+  accent-color: #dedede;
 }
 .settings-grid > label:last-child {
   grid-column: 1 / -1;
@@ -91,11 +91,11 @@
 }
 .reference-music {
   padding: 16px 0;
-  border-top: 1px solid #66563a;
+  border-top: 2px solid #333;
 }
 .reference-music p {
   font-size: 12px;
-  color: #bdb4a3;
+  color: #ddd;
 }
 .reference-music label {
   font-size: 13px;
@@ -178,11 +178,11 @@
   line-height: 1.7;
 }
 .control-guide dt {
-  color: #d4b071;
+  color: #fff;
 }
 .control-guide dd {
   margin: 0;
-  color: #d9d3c6;
+  color: #e4e4e4;
 }
 @media (max-width: 720px) {
   .shell-scrim {

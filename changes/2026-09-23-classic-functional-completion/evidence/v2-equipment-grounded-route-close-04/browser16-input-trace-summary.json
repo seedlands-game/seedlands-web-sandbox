@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04",
+  "sourceTrace": {
+    "path": "/private/tmp/seedlands-v2-acceptance-65938068/test-results/apps-web-tests-e2e-classic-5f18c-程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+    "sha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+    "members": ["test.trace", "0-trace.trace"]
+  },
+  "method": "Stream test.trace for KeyS down/up events in the failed 78.5,-0.5 leg, then stream 0-trace.trace and select the first grounded, non-colliding snapshot after each keyup and before the next KeyS down. No browser or runtime was started.",
+  "aggregate": {
+    "pulses": 53,
+    "pulsesWithStrictNegativeServerDeltaX": 53,
+    "baselineServer": [98.46307392576774, 32.6, -0.5003726518984848],
+    "finalMatchedServer": [85.832521192864, 32.73666766666667, -0.5109755187512944],
+    "totalServerDeltaX": -12.630552732903752,
+    "firstDownMs": 330729.27,
+    "lastDownMs": 373286.246,
+    "baselineToFinalMatchedMs": 43306.81400000001,
+    "keySHoldMs": { "min": 82.74800000002142, "max": 91.68800000002375, "average": 85.69205660377476 },
+    "spaceHoldMs": { "min": 82.8410000000149, "max": 91.0229999999865, "average": 85.52066037736785 },
+    "pulseStartIntervalMs": { "min": 751.2430000000168, "max": 900.9440000000177, "average": 818.403384615384 }
+  },
+  "baseline": {
+    "traceEventId": "call@11889",
+    "timeMs": 330722.838,
+    "client": [98.46307373046875, 32.599998474121094, -0.5003726482391357],
+    "server": [98.46307392576774, 32.6, -0.5003726518984848],
+    "physicsTick": 22020,
+    "ack": 15184,
+    "view": [269.97000000000025, -28.090000000000003]
+  },
+  "samples": [
+    {
+      "pulse": 1,
+      "keyDownEventId": "pw:api@7445",
+      "keyDownMs": 330729.27,
+      "keyUpEventId": "pw:api@7447",
+      "keyUpMs": 330815.473,
+      "matchedEventId": "call@11913",
+      "matchedMs": 331474.8,
+      "client": [98.23807525634766, 32.60000228881836, -0.5005689859390259],
+      "server": [98.23807392576774, 32.635000000000005, -0.5005690014324417],
+      "physicsTick": 22065,
+      "ack": 15229,
+      "serverDeltaX": -0.22500000000000853
+    },
+    {
+      "pulse": 2,
+      "keyDownEventId": "pw:api@7467",
+      "keyDownMs": 331502.044,
+      "keyUpEventId": "pw:api@7469",
+      "keyUpMs": 331587.161,
+      "matchedEventId": "call@11939",
+      "matchedMs": 332259.789,
+      "client": [98.01307678222656, 32.60000228881836, -0.500765323638916],
+      "server": [98.01307392576773, 32.600001, -0.5007653509663985],
+      "physicsTick": 22112,
+      "ack": 15276,
+      "serverDeltaX": -0.22500000000000853
+    },
+    {
+      "pulse": 3,
+      "keyDownEventId": "pw:api@7489",
+      "keyDownMs": 332285.229,
+      "keyUpEventId": "pw:api@7491",
+      "keyUpMs": 332370.148,
+      "matchedEventId": "call@11965",
+      "matchedMs": 333040.017,
+      "client": [97.78807067871094, 32.60000228881836, -0.5009617209434509],
+      "server": [97.78807392576772, 32.600001, -0.5009617005003554],
+      "physicsTick": 22159,
+      "ack": 15322,
+      "serverDeltaX": -0.22500000000000853
+    },
+    {
+      "pulse": 26,
+      "keyDownEventId": "pw:api@8017",
+      "keyDownMs": 351219.704,
+      "keyUpEventId": "pw:api@8019",
+      "keyUpMs": 351303.881,
+      "matchedEventId": "call@12585",
+      "matchedMs": 351962.351,
+      "client": [92.27418518066406, 32.60000228881836, -0.5055955648422241],
+      "server": [92.27418597776271, 32.73666766666667, -0.5055955468414504],
+      "physicsTick": 23294,
+      "ack": 16457,
+      "serverDeltaX": -0.22500000000000853
+    },
+    {
+      "pulse": 27,
+      "keyDownEventId": "pw:api@8039",
+      "keyDownMs": 351983.745,
+      "keyUpEventId": "pw:api@8041",
+      "keyUpMs": 352068.949,
+      "matchedEventId": "call@12611",
+      "matchedMs": 352741.85,
+      "client": [92.04918670654297, 32.60000228881836, -0.5057919025421143],
+      "server": [92.0491859777627, 32.635001, -0.5057918963754072],
+      "physicsTick": 23341,
+      "ack": 16504,
+      "serverDeltaX": -0.22500000000000853
+    },
+    {
+      "pulse": 53,
+      "keyDownEventId": "pw:api@8635",
+      "keyDownMs": 373286.246,
+      "keyUpEventId": "pw:api@8637",
+      "keyUpMs": 373371.83,
+      "matchedEventId": "call@13311",
+      "matchedMs": 374029.652,
+      "client": [85.83251953125, 32.60000228881836, -0.5109755396842957],
+      "server": [85.832521192864, 32.73666766666667, -0.5109755187512944],
+      "physicsTick": 24618,
+      "ack": 17781,
+      "serverDeltaX": -0.22500000000000853
+    }
+  ],
+  "limits": {
+    "authorityAckAloneProvesDirectionalInputApplied": false,
+    "browser16ResultChanged": false,
+    "browser17Run": false,
+    "performanceMeasured": false
+  }
+}

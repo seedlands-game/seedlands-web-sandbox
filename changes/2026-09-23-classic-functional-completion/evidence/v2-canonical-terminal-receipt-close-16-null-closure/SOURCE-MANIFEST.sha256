@@ -1,0 +1,6 @@
+9dba96cb4202d279b58a838b98ba39ad1fcf9ed8c0f20eefdd71cde9dc9ae774  scripts/harness/classic-receipt.mjs
+d64b5f565e9522dc18bd4588229008f5984e38d9d25f4cdf494f6a4abfd1f983  scripts/harness/classic-receipt.test.mjs
+f6c6d09ea3a36081f473d22bb9810032afe4dde71145aea1fb5d4ef58d09da68  apps/web/tests/e2e/classic-support/canonical-reporter.test.ts
+c31f2b609e45d9842423c8ac6e718de55d590899658df3a5e15a6f97390d6cd2  changes/2026-09-23-classic-functional-completion/spec.md
+2c9a54cceb5b31ead564a0174b965a90e58fed70c641f73220e0b428dcb0bfca  changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md
+35e51f429f09106b9081fa7798780026c7cf38908c17590414e10cd7d94b10a0  changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-evidence.md

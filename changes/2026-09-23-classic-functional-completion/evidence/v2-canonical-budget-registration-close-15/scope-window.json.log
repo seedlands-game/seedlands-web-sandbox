@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-close15-scope",
+  "pid": 68705,
+  "startedAt": "2026-09-28T17:26:50.542Z",
+  "windowId": "v2-close15-scope",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/scope-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T17:26:50.636Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T17:26:50.544Z",
+      "loadAverage": [
+        2.77294921875,
+        2.98583984375,
+        2.8466796875
+      ],
+      "freeMemoryBytes": 8265154560,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T17:26:50.635Z",
+      "loadAverage": [
+        2.77294921875,
+        2.98583984375,
+        2.8466796875
+      ],
+      "freeMemoryBytes": 8261763072,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

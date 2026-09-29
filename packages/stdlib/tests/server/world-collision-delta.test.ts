@@ -7,23 +7,27 @@ import { FLUID_TRANSACTION_PROTOCOL_VERSION, type FluidCandidate } from '../../s
 import { CHUNK_SIZE, Voxel, voxelIndex } from '../../src/world/voxel';
 
 describe('权威世界提交碰撞增量', () => {
-  it('单格放水携带连续revision与最终voxel/fluid字节', () => {
+  it.each([
+    [Voxel.Water, 0x88],
+    [Voxel.Lava, 0x88],
+    [Voxel.Stone, 0],
+  ])('单格编辑为voxel=%i时携带对应的source fluid=%i', (voxel, fluid) => {
     const server = new GameServer({
       worldgenProvider: testWorldgenExecutableProvider,
       platform: testCorePlatform,
       seedText: 'collision-delta-single',
     });
-    const index = voxelIndex(1, 20, 1);
-    server.getChunk(0, 0, 0);
+    const index = voxelIndex(1, 4, 1);
+    server.getChunk(0, 3, 0);
 
-    const result = server.edit(1, 20, 1, Voxel.Water, 'player-edit');
+    const result = server.edit(1, 100, 1, voxel, 'player-edit');
 
     expect(result.collisionDelta).toEqual([
       {
-        key: '0,0,0',
+        key: '0,3,0',
         previousRevision: 0,
         revision: 1,
-        cells: [{ index, voxel: Voxel.Water, fluid: 0x88 }],
+        cells: [{ index, voxel, fluid }],
       },
     ]);
   });
@@ -41,7 +45,7 @@ describe('权威世界提交碰撞增量', () => {
     const result = server.editBatch({
       actorId: 'fixture',
       edits: [
-        { x: 1, y: 100, z: 1, value: Voxel.Stone },
+        { x: 1, y: 100, z: 1, value: Voxel.Lava },
         { x: 2, y: 100, z: 2, value: unchanged },
         { x: 33, y: 100, z: 1, value: Voxel.Dirt },
       ],
@@ -52,7 +56,7 @@ describe('权威世界提交碰撞增量', () => {
         key: '0,3,0',
         previousRevision: 0,
         revision: 1,
-        cells: [{ index: voxelIndex(1, 4, 1), voxel: Voxel.Stone, fluid: 0 }],
+        cells: [{ index: voxelIndex(1, 4, 1), voxel: Voxel.Lava, fluid: 0x88 }],
       },
       {
         key: '1,3,0',
@@ -101,8 +105,10 @@ describe('权威世界提交碰撞增量', () => {
       candidate,
       chunks,
       worldRevision: 8,
-      addMutationCount: () => undefined,
-      setWorldRevision: () => undefined,
+      prepareCommitMetadata: () => ({
+        validate() {},
+        apply() {},
+      }),
     });
 
     expect(result.collisionDelta).toEqual([

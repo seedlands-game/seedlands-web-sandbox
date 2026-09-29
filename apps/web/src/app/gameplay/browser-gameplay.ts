@@ -1,11 +1,12 @@
+import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { BrowserInventoryPointer } from './browser-inventory-pointer';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
-import type { VoxelTarget } from '../../client/presentation/voxel-target';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
-import { entityHitDistance } from '../../client/presentation/entity-hit-volume';
+import type { VoxelTarget } from '../../client/presentation/voxel-target';
+import { nearestEntityHit } from '../../client/presentation/entity-hit-volume';
 import type * as pc from 'playcanvas';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { voxelNames } from '@seedlands/stdlib/world/voxel';
@@ -22,12 +23,20 @@ import type {
 import { PLAYER_FEET_OFFSET } from '../player/player-view-offsets';
 import type { CommandResult, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import { createMeleeShowcaseIds, meleeShowcaseCommands, MELEE_SHOWCASE_PLAYER_CAMERA } from './melee-action-showcase';
-import { executeBrowserModeCommand, type BrowserModeCommandExecutor } from './browser-gameplay-actions';
+import {
+  executeBrowserModeCommand,
+  rejectOutOfBoundsBrowserBreak,
+  type BrowserModeCommandExecutor,
+} from './browser-gameplay-actions';
 import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-command';
 import type { ActorMode } from '../ui/ui-contracts';
+import { performVoxelTargetInteraction } from '../player/secondary-interaction';
+import { canTargetFluidSource } from './fluid-source-target-selection';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
+  voxelGeometry?: VoxelGeometryResolver;
   performAction(action: AuthorityAction): Promise<AuthorityActionResult>;
 }>;
 
@@ -49,6 +58,7 @@ type Options = {
   executeModeCommand: BrowserModeCommandExecutor;
   onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
+  sampleBlockLight?: (position: readonly [number, number, number]) => number;
 };
 
 export class BrowserGameplay {
@@ -57,12 +67,14 @@ export class BrowserGameplay {
   private readonly viewmodel: FirstPersonViewmodel;
   private readonly outline: VoxelTargetOutline;
   private readonly breakOverlay: VoxelBreakOverlay;
+  // prettier-ignore
   private aimTarget: VoxelTarget | null = null;
   private gestureSeconds = 0;
   private inventoryOpen = false;
   private inventoryClosing = false;
   readonly stations: BrowserStations;
   private readonly inventoryPointerClient: BrowserInventoryPointer;
+  // prettier-ignore
   private previousProjection: GameplayUiProjection | undefined;
   private previousHealth: number | null = null;
   private lastCombatResultSequence: number | null = null;
@@ -79,8 +91,13 @@ export class BrowserGameplay {
       succeeded: (message) => this.feedback(message, 'success'),
       failed: (message) => this.feedback(message, 'error'),
     });
-    this.presenter = new GameplayEntityPresenter(options.app, (id) => this.itemDefinition(id) ?? null);
-    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera);
+    this.presenter = new GameplayEntityPresenter(
+      options.app,
+      (id) => this.itemDefinition(id) ?? null,
+      options.sampleBlockLight,
+      options.authority.voxelGeometry,
+    );
+    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera, undefined, options.authority.voxelGeometry);
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
   }
@@ -88,11 +105,12 @@ export class BrowserGameplay {
   setSuspended(suspended: boolean): void {
     this.viewmodel.setVisible(!suspended && !this.blocksInput);
   }
-
-  setAimTarget(target: VoxelTarget | null): void {
-    this.aimTarget = target?.inRange ? target : null;
-  }
-
+  // prettier-ignore
+  setAimTarget(target: VoxelTarget | null): void { this.aimTarget = target?.inRange ? target : null; }
+  // prettier-ignore
+  canTargetFluidSource(): boolean { return canTargetFluidSource(this.options.authority.gameplay); }
+  // prettier-ignore
+  aimedVoxelTargetForHarness(): Pick<VoxelTarget, 'position' | 'adjacent'> | null { return this.aimTarget ? { position: this.aimTarget.position, adjacent: this.aimTarget.adjacent } : null; }
   prepareMeleeShowcase(): Promise<void> {
     return (this.showcasePreparation ??= this.prepareMeleeShowcaseInstance()
       .catch((error: unknown) => {
@@ -207,14 +225,14 @@ export class BrowserGameplay {
     const projection = projectGameplayUi(
       {
         revision: view.gameplayRevision,
-        cursor: view.inventory?.cursor,
-        inventoryIdentity: JSON.stringify(view.inventory?.actor),
+        inventoryView: view.inventory,
         player: {
           combat: player.combat,
           lifecycle: player.lifecycle,
           health: player.health,
           hunger: player.hunger,
           selectedHotbarSlot: player.selectedSlot,
+          hotbarSize: player.hotbarSize,
           inventory: player.inventory,
           mode: player.mode,
           creativeCatalog: player.creativeCatalog,
@@ -226,6 +244,9 @@ export class BrowserGameplay {
         recipes: view.recipes,
         inventoryOpen: this.inventoryOpen,
         craftableRecipeIds: view.craftableRecipeIds,
+        progress: view.progress,
+        armorPoints: view.armorPoints,
+        oxygen: { value: 20, max: 20, visible: false },
         target:
           this.aimTarget && !this.blocksInput
             ? {
@@ -247,20 +268,14 @@ export class BrowserGameplay {
       ...projection.interaction,
       presentedEntities: entities.map((entity) => ({
         id: entity.id,
-        type: entity.type as 'world-item' | 'creature' | 'npc',
+        type: entity.type as 'world-item' | 'creature' | 'npc' | 'falling-block' | 'painting',
         position: [...entity.position] as [number, number, number],
         ...(entity.archetype ? { archetype: entity.archetype } : {}),
         ...(actorStates.get(entity.id) ? { behavior: actorStates.get(entity.id)!.behavior } : {}),
         label:
           entity.type === 'world-item' && entity.stack
             ? `${this.itemDefinition(entity.stack.itemId)?.name ?? entity.stack.itemId}掉落物`
-            : entity.archetype === 'grazer'
-              ? '温顺林鹿'
-              : entity.archetype === 'night-stalker'
-                ? '夜行兽'
-                : entity.archetype === 'settler'
-                  ? '营地居民'
-                  : '生物',
+            : (classicCreatureDefinition(entity.archetype ?? '')?.name ?? '生物'),
       })),
     });
   }
@@ -338,25 +353,17 @@ export class BrowserGameplay {
     return this.inventoryPointerClient.send(command);
   }
 
-  craftRecipe(recipeId: string): void {
-    void this.inventoryPointerClient.craft(recipeId).then((ok) => {
-      if (ok) this.present({ kind: 'craft' });
-    });
-  }
-
   attackTarget(
     origin: readonly [number, number, number],
     direction: readonly [number, number, number],
     maxDistance: number,
   ): boolean {
-    const target = this.options.authority.gameplay.entities
-      .filter((entity) => entity.type === 'creature' || entity.type === 'npc')
-      .map((entity) => ({
-        entity,
-        distance: entityHitDistance(entity.position, entity.archetype, origin, direction, maxDistance),
-      }))
-      .filter((hit): hit is typeof hit & { distance: number } => hit.distance !== null)
-      .sort((left, right) => left.distance - right.distance)[0]?.entity;
+    const target = nearestEntityHit(
+      this.options.authority.gameplay.entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc'),
+      origin,
+      direction,
+      maxDistance,
+    );
     if (!target) return false;
     void this.action({ type: 'attack', targetId: target.id }, (result) => {
       if (!result.success) {
@@ -377,18 +384,17 @@ export class BrowserGameplay {
     return true;
   }
 
-  beginBreak(position: [number, number, number]): void {
-    if (position[1] <= BROWSER_MIN_BUILD_Y) return this.feedback('已到达浏览器世界底层；保留基底石层', 'error');
-    if (position[1] > BROWSER_MAX_BUILD_Y) return this.feedback(`采集高度限 1–${BROWSER_MAX_BUILD_Y} 层`, 'error');
-    void this.action({ type: 'begin-break', position }, (result) => {
-      if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error');
-    });
-  }
+  // prettier-ignore
+  attackTargetsForHarness() { return this.options.authority.gameplay.entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc'); }
 
+  beginBreak(position: [number, number, number]): Promise<void> {
+    if (rejectOutOfBoundsBrowserBreak(position, this.feedback.bind(this))) return Promise.resolve();
+    // prettier-ignore
+    return this.action({ type: 'begin-break', position }, (result) => { if (!result.success) this.feedback(`无法采集 · ${result.reason}`, 'error'); });
+  }
   cancelBreak(): void {
     void this.action({ type: 'cancel-break' });
   }
-
   place(position: [number, number, number]): void {
     if (position[1] < BROWSER_MIN_BUILD_Y || position[1] > BROWSER_MAX_BUILD_Y)
       return this.feedback(`建造高度限 ${BROWSER_MIN_BUILD_Y}–${BROWSER_MAX_BUILD_Y} 层；物品已保留`, 'error');
@@ -418,15 +424,16 @@ export class BrowserGameplay {
     });
   }
 
-  useTarget(position: [number, number, number]): boolean {
-    if (this.stations.open(position)) {
-      this.inventoryOpen = true;
-      this.options.releaseInput();
-      this.refresh();
-      return true;
-    }
-    return false;
-  }
+  // prettier-ignore
+  async useTarget(target: Pick<VoxelTarget, 'position' | 'adjacent'>, intent: 'use' | 'alternate'): Promise<'handled' | 'fallback'> {
+    return performVoxelTargetInteraction({
+      gameplay: this.options.authority.gameplay, target, intent,
+      openStation: (position) => { if (!this.stations.open(position)) return false;
+        this.inventoryOpen = true; this.options.releaseInput(); this.refresh(); return true;
+      },
+      perform: (action) => this.options.authority.performAction(action), refresh: () => this.refresh(),
+      succeeded: this.options.queueSave, failed: (reason) => this.feedback(`无法交互 · ${reason}`, 'error')
+    }); }
 
   useHeldItem(): boolean {
     const player = this.options.authority.gameplay.player;

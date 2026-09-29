@@ -43,6 +43,8 @@ export type KernelWorldgenProvider = Readonly<{
   identity: KernelWorldgenProviderIdentity;
   generate(input: KernelWorldgenGenerateInput): KernelGeneratedChunk;
   sampleVoxel(input: KernelWorldgenSampleInput): number;
+  /** Pack-owned compatibility rule for persisted identities from older implementations. */
+  acceptsStoredIdentity?(candidate: KernelWorldgenProviderIdentity, generatorVersion: number): boolean;
 }>;
 
 export type KernelWorldgenProviderRegistry = Readonly<{
@@ -91,10 +93,13 @@ export function worldgenProviderIdentityKey(identity: KernelWorldgenProviderIden
 export function freezeWorldgenProvider(provider: KernelWorldgenProvider): KernelWorldgenProvider {
   if (typeof provider?.generate !== 'function' || typeof provider?.sampleVoxel !== 'function')
     throw new TypeError('World-generation provider executable ports are incomplete.');
+  if (provider.acceptsStoredIdentity !== undefined && typeof provider.acceptsStoredIdentity !== 'function')
+    throw new TypeError('World-generation provider compatibility port is invalid.');
   return Object.freeze({
     identity: freezeWorldgenProviderIdentity(provider.identity),
     generate: provider.generate,
     sampleVoxel: provider.sampleVoxel,
+    ...(provider.acceptsStoredIdentity ? { acceptsStoredIdentity: provider.acceptsStoredIdentity } : {}),
   });
 }
 

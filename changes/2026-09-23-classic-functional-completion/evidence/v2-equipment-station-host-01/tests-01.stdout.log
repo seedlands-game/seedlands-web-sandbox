@@ -1,0 +1,994 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-station-equipment-host.test.ts (9 tests | 2 failed) 49ms
+     × rejects an actor change after prepare without applying the candidate 5ms
+     × rejects a station change after prepare without applying the actor candidate 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-station-equipment-host.test.ts > registered station equipment host > rejects an actor change after prepare without applying the candidate
+AssertionError: expected { version: 4, revision: 1, …(18) } to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "authoritySession": {
+    "activeTimeMs": 0,
+    "fluidPeriods": 0,
+    "gameplayPeriods": 0,
+    "integratedPhysicsTimeMs": 0,
+    "paused": false,
+    "physicsDebtMs": 0,
+    "physicsTick": 0,
+    "scheduler": null,
+    "version": 1,
+    "worldClockRate": 0.04,
+  },
+  "composition": {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipes",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-content",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "sample:boots",
+          "storageId": "sample:boots",
+        },
+        {
+          "id": "sample:filler",
+          "storageId": "sample:filler",
+        },
+        {
+          "id": "sample:greaves",
+          "storageId": "sample:greaves",
+        },
+        {
+          "id": "sample:suit",
+          "storageId": "sample:suit",
+        },
+        {
+          "id": "sample:visor",
+          "storageId": "sample:visor",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "sample:station-equipment-content",
+          "packId": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [],
+      "resources": [
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [],
+      "schemaVersion": 2,
+      "stateCodecs": [
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+      ],
+      "voxels": [],
+    },
+    "packLock": [
+      {
+        "id": "sample:station-equipment",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "manifestDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "sample:station-equipment",
+    "version": 1,
+  },
+  "coordinateSchema": {
+    "entityOrigin": "body-feet-center",
+    "units": "voxel",
+    "version": 1,
+  },
+  "crops": {
+    "crops": [],
+    "tick": 0,
+    "version": 1,
+  },
+  "difficulty": {
+    "revision": 0,
+    "value": "normal",
+    "version": 1,
+  },
+  "entityStore": {
+    "actors": [
+      {
+        "controlRevision": 0,
+        "controlSource": "player",
+        "creativeCatalog": {
+          "hotbar": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
+          "revision": 0,
+          "selectedSlot": 0,
+          "version": 1,
+        },
+        "entityId": "pilot",
+        "equipment": {
+          "armor": {
+            "boots": null,
+            "chestplate": null,
+            "helmet": null,
+            "leggings": null,
+          },
+          "hotbarSize": 8,
+          "selectedSlot": 0,
+        },
+        "flight": {
+          "enabled": false,
+          "revision": 0,
+          "version": 1,
+        },
+        "inventory": [
+          {
+            "count": 1,
+            "itemId": "sample:filler",
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "inventoryCursor": {
+          "craftingGrid": [
+            null,
+            null,
+            null,
+            null,
+          ],
+          "origin": null,
+          "revision": 1,
+          "stack": {
+            "count": 1,
+            "instance": {
+              "durability": 13,
+            },
+            "itemId": "sample:visor",
+          },
+          "version": 1,
+        },
+        "inventoryRevision": 1,
+        "lifecycle": "alive",
+        "mode": {
+          "revision": 0,
+          "value": "survival",
+          "version": 1,
+        },
+        "needs": {
+          "healingAccumulator": 0,
+          "hunger": 20,
+          "hungerAccumulator": 0,
+          "hungerMeaning": "satiety",
+          "maxHunger": 20,
+          "starvationAccumulator": 0,
+        },
+        "player": {
+          "breakAction": null,
+          "spawnPosition": [
+            0.5,
+            0,
+            0.5,
+          ],
+        },
+      },
+    ],
+    "entities": [
+      {
+        "health": 20,
+        "id": "pilot",
+        "kind": "player",
+        "lifecycle": "active",
+        "maxHealth": 20,
+        "position": [
+          0.5,
+          0,
+          0.5,
+        ],
+        "type": "player",
+      },
+      {
+        "id": "workbench",
+        "kind": "station",
+        "lifecycle": "active",
+        "position": [
+          2,
+          0,
+          0,
+        ],
+        "type": "station",
+      },
+    ],
+    "identities": [
+      {
+        "entityId": "pilot",
+        "lifetime": 1,
+      },
+      {
+        "entityId": "workbench",
+        "lifetime": 2,
+      },
+    ],
+    "issuedIds": [
+      "pilot",
+      "workbench",
+    ],
+    "lifetimeHighWater": 2,
+    "sequence": 0,
+    "stations": [
+      {
+        "entityId": "workbench",
+        "grid": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "kind": "workbench",
+        "revision": 0,
+        "version": 1,
+        "voxel": 11,
+      },
+    ],
+    "version": 2,
+  },
+  "environment": {
+    "dungeonSpawners": [],
+    "fires": [],
+    "lightning": [],
+    "naturalSpawnSeconds": 0,
+    "naturalSpawnTick": 0,
+    "nextLightningId": 1,
+    "nextTntId": 1,
+    "openedDungeonChests": [],
+    "seed": 0,
+    "tick": 0,
+    "tnt": [],
+    "version": 1,
+    "weather": "clear",
+    "weatherSeconds": 300,
+  },
+  "finalEntities": {
+    "falling": [],
+    "paintings": [],
+    "sequence": 0,
+    "version": 1,
+  },
+  "gameplayTime": 0,
+  "lifeSkills": {
+    "eggSequence": 0,
+    "fishing": [],
+    "fishingSequence": 0,
+    "version": 1,
+  },
+  "moduleSchedule": {
+    "systems": [
+      {
+        "id": "seedlands:furnace-system",
+        "remainder": 0,
+      },
+    ],
+    "time": 0,
+    "version": 1,
+  },
+  "navigationItems": {
+    "maps": [],
+    "sequence": 0,
+    "version": 1,
+  },
+  "physicsSchema": {
+    "bodyRegistryVersion": 1,
+    "version": 1,
+  },
+  "progress": {
+    "players": [],
+    "version": 1,
+  },
+  "projectiles": {
+    "nextId": 1,
+    "projectiles": [],
+    "version": 1,
+  },
+  "revision": 1,
+  "simulation": {
+    "actions": {
+      "actions": [],
+      "sequence": 0,
+      "version": 2,
+    },
+    "actors": [],
+    "behaviorAccumulator": 0,
+    "combat": {
+      "actionSequence": 0,
+      "combatants": [],
+      "resultSequence": 0,
+      "version": 3,
+    },
+    "needsAccumulator": 0,
+    "perceptionAccumulator": 0,
+    "pois": {
+      "pois": [],
+      "sequence": 0,
+      "version": 1,
+    },
+    "starterEcologyVersion": 0,
+    "stepAccumulator": 0,
+    "time": 0,
+    "version": 1,
+  },
+  "vehicles": {
+    "sequence": 0,
+    "vehicles": [],
+    "version": 1,
+  },
+  "version": 4,
+  "worldTime": 12,
+}
+
+ ❯ packages/stdlib/tests/server/registered-station-equipment-host.test.ts:346:46
+    344|       false,
+    345|     );
+    346|     expect(fixture.runtime.createSnapshot()).toEqual(concurrent);
+       |                                              ^
+    347|     expect(fixture.runtime.getInventoryPointerView('pilot').armor.helm…
+    348|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-station-equipment-host.test.ts > registered station equipment host > rejects a station change after prepare without applying the actor candidate
+AssertionError: expected { version: 4, revision: 1, …(18) } to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+{
+  "authoritySession": {
+    "activeTimeMs": 0,
+    "fluidPeriods": 0,
+    "gameplayPeriods": 0,
+    "integratedPhysicsTimeMs": 0,
+    "paused": false,
+    "physicsDebtMs": 0,
+    "physicsTick": 0,
+    "scheduler": null,
+    "version": 1,
+    "worldClockRate": 0.04,
+  },
+  "composition": {
+    "definitionMap": {
+      "capabilities": [
+        {
+          "id": "seedlands:actor-profiles",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:items",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:recipes",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions",
+          "moduleId": "seedlands:station-actions-module",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-content",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "moduleId": "sample:station-equipment-content",
+          "version": "1.0.0",
+        },
+      ],
+      "items": [
+        {
+          "id": "sample:boots",
+          "storageId": "sample:boots",
+        },
+        {
+          "id": "sample:filler",
+          "storageId": "sample:filler",
+        },
+        {
+          "id": "sample:greaves",
+          "storageId": "sample:greaves",
+        },
+        {
+          "id": "sample:suit",
+          "storageId": "sample:suit",
+        },
+        {
+          "id": "sample:visor",
+          "storageId": "sample:visor",
+        },
+      ],
+      "lifecycles": [],
+      "modules": [
+        {
+          "id": "sample:station-equipment-content",
+          "packId": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actions-module",
+          "packId": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+      ],
+      "operations": [
+        {
+          "executionKind": "system",
+          "id": "seedlands:furnace-advance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.furnace-clock",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-craft",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+        {
+          "executionKind": "actor",
+          "id": "seedlands:station-transfer",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+        },
+      ],
+      "packs": [
+        {
+          "id": "sample:station-equipment",
+          "version": "1.0.0",
+        },
+      ],
+      "recipes": [],
+      "resources": [
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute",
+          ],
+        },
+      ],
+      "rules": [],
+      "schemaVersion": 2,
+      "stateCodecs": [
+        {
+          "id": "seedlands:furnace-world",
+          "moduleId": "seedlands:station-actions-module",
+          "partitions": 8,
+          "resource": "seedlands.furnace-clock",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-actor",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station-actor",
+          "version": "1.0.0",
+        },
+        {
+          "id": "seedlands:station-instance",
+          "moduleId": "seedlands:station-actions-module",
+          "resource": "seedlands.station",
+          "version": "1.0.0",
+        },
+      ],
+      "systems": [
+        {
+          "definition": {
+            "after": [],
+            "before": [],
+            "cadence": "every-advance",
+            "id": "seedlands:furnace-system",
+            "operationId": "seedlands:furnace-advance",
+          },
+          "moduleId": "seedlands:station-actions-module",
+        },
+      ],
+      "voxels": [],
+    },
+    "packLock": [
+      {
+        "id": "sample:station-equipment",
+        "integrity": {
+          "algorithm": "sha256",
+          "entryDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "manifestDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "resources": [],
+        },
+        "version": "1.0.0",
+      },
+    ],
+    "playbookId": "sample:station-equipment",
+    "version": 1,
+  },
+  "coordinateSchema": {
+    "entityOrigin": "body-feet-center",
+    "units": "voxel",
+    "version": 1,
+  },
+  "crops": {
+    "crops": [],
+    "tick": 0,
+    "version": 1,
+  },
+  "difficulty": {
+    "revision": 0,
+    "value": "normal",
+    "version": 1,
+  },
+  "entityStore": {
+    "actors": [
+      {
+        "controlRevision": 0,
+        "controlSource": "player",
+        "creativeCatalog": {
+          "hotbar": [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+          ],
+          "revision": 0,
+          "selectedSlot": 0,
+          "version": 1,
+        },
+        "entityId": "pilot",
+        "equipment": {
+          "armor": {
+            "boots": null,
+            "chestplate": null,
+            "helmet": null,
+            "leggings": null,
+          },
+          "hotbarSize": 8,
+          "selectedSlot": 0,
+        },
+        "flight": {
+          "enabled": false,
+          "revision": 0,
+          "version": 1,
+        },
+        "inventory": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "inventoryCursor": {
+          "craftingGrid": [
+            null,
+            null,
+            null,
+            null,
+          ],
+          "origin": null,
+          "revision": 1,
+          "stack": {
+            "count": 1,
+            "instance": {
+              "durability": 11,
+            },
+            "itemId": "sample:visor",
+          },
+          "version": 1,
+        },
+        "inventoryRevision": 1,
+        "lifecycle": "alive",
+        "mode": {
+          "revision": 0,
+          "value": "survival",
+          "version": 1,
+        },
+        "needs": {
+          "healingAccumulator": 0,
+          "hunger": 20,
+          "hungerAccumulator": 0,
+          "hungerMeaning": "satiety",
+          "maxHunger": 20,
+          "starvationAccumulator": 0,
+        },
+        "player": {
+          "breakAction": null,
+          "spawnPosition": [
+            0.5,
+            0,
+            0.5,
+          ],
+        },
+      },
+    ],
+    "entities": [
+      {
+        "health": 20,
+        "id": "pilot",
+        "kind": "player",
+        "lifecycle": "active",
+        "maxHealth": 20,
+        "position": [
+          0.5,
+          0,
+          0.5,
+        ],
+        "type": "player",
+      },
+      {
+        "id": "workbench",
+        "kind": "station",
+        "lifecycle": "active",
+        "position": [
+          2,
+          0,
+          0,
+        ],
+        "type": "station",
+      },
+    ],
+    "identities": [
+      {
+        "entityId": "pilot",
+        "lifetime": 1,
+      },
+      {
+        "entityId": "workbench",
+        "lifetime": 2,
+      },
+    ],
+    "issuedIds": [
+      "pilot",
+      "workbench",
+    ],
+    "lifetimeHighWater": 2,
+    "sequence": 0,
+    "stations": [
+      {
+        "entityId": "workbench",
+        "grid": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "kind": "workbench",
+        "revision": 1,
+        "version": 1,
+        "voxel": 11,
+      },
+    ],
+    "version": 2,
+  },
+  "environment": {
+    "dungeonSpawners": [],
+    "fires": [],
+    "lightning": [],
+    "naturalSpawnSeconds": 0,
+    "naturalSpawnTick": 0,
+    "nextLightningId": 1,
+    "nextTntId": 1,
+    "openedDungeonChests": [],
+    "seed": 0,
+    "tick": 0,
+    "tnt": [],
+    "version": 1,
+    "weather": "clear",
+    "weatherSeconds": 300,
+  },
+  "finalEntities": {
+    "falling": [],
+    "paintings": [],
+    "sequence": 0,
+    "version": 1,
+  },
+  "gameplayTime": 0,
+  "lifeSkills": {
+    "eggSequence": 0,
+    "fishing": [],
+    "fishingSequence": 0,
+    "version": 1,
+  },
+  "moduleSchedule": {
+    "systems": [
+      {
+        "id": "seedlands:furnace-system",
+        "remainder": 0,
+      },
+    ],
+    "time": 0,
+    "version": 1,
+  },
+  "navigationItems": {
+    "maps": [],
+    "sequence": 0,
+    "version": 1,
+  },
+  "physicsSchema": {
+    "bodyRegistryVersion": 1,
+    "version": 1,
+  },
+  "progress": {
+    "players": [],
+    "version": 1,
+  },
+  "projectiles": {
+    "nextId": 1,
+    "projectiles": [],
+    "version": 1,
+  },
+  "revision": 1,
+  "simulation": {
+    "actions": {
+      "actions": [],
+      "sequence": 0,
+      "version": 2,
+    },
+    "actors": [],
+    "behaviorAccumulator": 0,
+    "combat": {
+      "actionSequence": 0,
+      "combatants": [],
+      "resultSequence": 0,
+      "version": 3,
+    },
+    "needsAccumulator": 0,
+    "perceptionAccumulator": 0,
+    "pois": {
+      "pois": [],
+      "sequence": 0,
+      "version": 1,
+    },
+    "starterEcologyVersion": 0,
+    "stepAccumulator": 0,
+    "time": 0,
+    "version": 1,
+  },
+  "vehicles": {
+    "sequence": 0,
+    "vehicles": [],
+    "version": 1,
+  },
+  "version": 4,
+  "worldTime": 12,
+}
+
+ ❯ packages/stdlib/tests/server/registered-station-equipment-host.test.ts:371:46
+    369|       false,
+    370|     );
+    371|     expect(fixture.runtime.createSnapshot()).toEqual(concurrent);
+       |                                              ^
+    372|     expect(fixture.runtime.getInventoryPointerView('pilot').armor.helm…
+    373|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 7 passed (9)
+   Start at  18:56:40
+   Duration  911ms (transform 652ms, setup 0ms, import 791ms, tests 49ms, environment 0ms)
+

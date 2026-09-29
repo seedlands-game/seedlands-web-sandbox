@@ -31,29 +31,51 @@ export const ItemIds = Object.freeze({
 export type ItemId = string;
 export type ItemStack = { itemId: ItemId; count: number; instance?: ItemInstanceState };
 export type PlaceItemCapability = Readonly<{ type: 'place'; voxel: number }>;
-export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore: number }>;
+export type ConsumeItemCapability = Readonly<{ type: 'consume'; hungerRestore?: number; healthRestore?: number }>;
 export type MineItemCapability = Readonly<{
   type: 'mine';
-  tool: 'axe' | 'pickaxe';
+  tool: 'axe' | 'pickaxe' | 'shovel';
   multiplier: number;
   /** Omitted legacy tiers are interpreted as tier zero by mining policy. */
   tier?: number;
 }>;
 export type MeleeItemCapability = Readonly<{ type: 'melee'; definitionId: string }>;
-export type ItemCapability = PlaceItemCapability | ConsumeItemCapability | MineItemCapability | MeleeItemCapability;
+export type TillItemCapability = Readonly<{ type: 'till' }>;
+export type ArmorItemCapability = Readonly<{
+  type: 'armor';
+  slot: 'helmet' | 'chestplate' | 'leggings' | 'boots';
+  points: number;
+}>;
+export type RangedItemCapability = Readonly<{
+  type: 'ranged';
+  ammunitionItemId: string;
+  damage: number;
+  speed: number;
+  lifetimeSeconds: number;
+}>;
+export type FluidContainerItemCapability = Readonly<{ type: 'fluid-container'; fluid: 'empty' | 'water' | 'lava' }>;
+export type ItemCapability =
+  | PlaceItemCapability
+  | ConsumeItemCapability
+  | MineItemCapability
+  | MeleeItemCapability
+  | TillItemCapability
+  | ArmorItemCapability
+  | RangedItemCapability
+  | FluidContainerItemCapability;
 export type ItemCapabilityType = ItemCapability['type'];
 export type ItemCapabilityOf<Type extends ItemCapabilityType> = Extract<ItemCapability, { type: Type }>;
 
 export type ItemDefinition = Readonly<{
   id: ItemId;
   name: string;
-  itemType: 'block' | 'resource' | 'food' | 'tool';
+  itemType: 'block' | 'resource' | 'food' | 'tool' | 'armor';
   stackLimit: number;
   durability?: ItemDurabilityDefinition;
   capabilities: readonly ItemCapability[];
   /** Compatibility projections for existing presentation consumers. */
   placesVoxel?: number;
-  toolKind?: 'axe' | 'pickaxe';
+  toolKind?: 'axe' | 'pickaxe' | 'shovel';
   hungerRestore?: number;
 }>;
 
@@ -80,7 +102,7 @@ export const isItemId = (value: unknown): value is ItemId => typeof value === 's
 
 const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   if (!isItemId(input.id) || !input.name.trim()) throw new TypeError(`Item identity is invalid: ${String(input.id)}`);
-  if (!['block', 'resource', 'food', 'tool'].includes(input.itemType))
+  if (!['block', 'resource', 'food', 'tool', 'armor'].includes(input.itemType))
     throw new TypeError(`Item type is invalid: ${input.id}`);
   if (!Number.isSafeInteger(input.stackLimit) || input.stackLimit <= 0)
     throw new TypeError(`Item stack limit is invalid: ${input.id}`);
@@ -91,7 +113,7 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       Array.isArray(input.durability) ||
       Object.keys(input.durability).length !== 1 ||
       !Object.hasOwn(input.durability, 'max') ||
-      input.itemType !== 'tool' ||
+      (input.itemType !== 'tool' && input.itemType !== 'armor') ||
       input.stackLimit !== 1 ||
       !Number.isSafeInteger(input.durability.max) ||
       input.durability.max <= 0
@@ -100,15 +122,18 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
   }
   const seen = new Set<ItemCapabilityType>();
   const capabilities = input.capabilities.map((source) => {
-    if (!['place', 'consume', 'mine', 'melee'].includes(source.type))
+    if (!['place', 'consume', 'mine', 'melee', 'till', 'armor', 'ranged', 'fluid-container'].includes(source.type))
       throw new TypeError(`Item capability is invalid: ${input.id}`);
     if (seen.has(source.type)) throw new TypeError(`Duplicate ${source.type} capability: ${input.id}`);
     seen.add(source.type);
     if (source.type === 'place' && (!Number.isSafeInteger(source.voxel) || source.voxel <= Voxel.Air))
       throw new TypeError(`Place capability is invalid: ${input.id}`);
-    if (source.type === 'consume' && (!Number.isFinite(source.hungerRestore) || source.hungerRestore <= 0))
-      throw new TypeError(`Consume capability is invalid: ${input.id}`);
-    if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe')
+    if (source.type === 'consume') {
+      const amounts = [source.hungerRestore, source.healthRestore].filter((value) => value !== undefined);
+      if (!amounts.length || amounts.some((value) => !Number.isFinite(value) || value! <= 0))
+        throw new TypeError(`Consume capability is invalid: ${input.id}`);
+    }
+    if (source.type === 'mine' && source.tool !== 'axe' && source.tool !== 'pickaxe' && source.tool !== 'shovel')
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (
       source.type === 'mine' &&
@@ -119,6 +144,26 @@ const defineItem = (input: ItemDefinitionInput): ItemDefinition => {
       throw new TypeError(`Mine capability is invalid: ${input.id}`);
     if (source.type === 'melee' && !source.definitionId.trim())
       throw new TypeError(`Melee capability is invalid: ${input.id}`);
+    if (
+      source.type === 'armor' &&
+      (!['helmet', 'chestplate', 'leggings', 'boots'].includes(source.slot) ||
+        !Number.isSafeInteger(source.points) ||
+        source.points <= 0)
+    )
+      throw new TypeError(`Armor capability is invalid: ${input.id}`);
+    if (
+      source.type === 'ranged' &&
+      (!isItemId(source.ammunitionItemId) ||
+        !Number.isFinite(source.damage) ||
+        source.damage <= 0 ||
+        !Number.isFinite(source.speed) ||
+        source.speed <= 0 ||
+        !Number.isFinite(source.lifetimeSeconds) ||
+        source.lifetimeSeconds <= 0)
+    )
+      throw new TypeError('Ranged capability is invalid: ' + input.id);
+    if (source.type === 'fluid-container' && !['empty', 'water', 'lava'].includes(source.fluid))
+      throw new TypeError('Fluid container capability is invalid: ' + input.id);
     return Object.freeze({ ...source });
   });
   const place = capabilities.find((value): value is PlaceItemCapability => value.type === 'place');
@@ -148,6 +193,13 @@ export function createItemDefinitionRegistry(
     if (melee && (!meleeDefinitionExists || !meleeDefinitionExists(melee.definitionId)))
       throw new TypeError(`Item ${input.id} references unknown melee definition: ${melee.definitionId}`);
     registered.set(input.id, definition);
+  }
+  for (const definition of registered.values()) {
+    const ranged = definition.capabilities.find(
+      (candidate): candidate is RangedItemCapability => candidate.type === 'ranged',
+    );
+    if (ranged && !registered.has(ranged.ammunitionItemId))
+      throw new TypeError('Item ' + definition.id + ' references unknown ammunition: ' + ranged.ammunitionItemId);
   }
   const values = Object.freeze([...registered.values()]);
   const require = (id: string) => {

@@ -14,6 +14,13 @@ import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layo
 
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
 import type { ToolModel } from '../../client/presentation/asset-types';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
+
+const heldItemScale = Object.freeze({
+  tool: 0.72,
+  other: 0.5,
+  narrowToolMultiplier: 0.88,
+});
 
 export class FirstPersonViewmodel {
   private releaseDraft: (() => void) | null = null;
@@ -37,8 +44,9 @@ export class FirstPersonViewmodel {
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
     assets?: GameplayModelAssets,
+    voxelGeometry?: VoxelGeometryResolver,
   ) {
-    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app, voxelGeometry);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);
@@ -87,7 +95,7 @@ export class FirstPersonViewmodel {
     if (itemId) {
       const itemDefinition = definition ?? requireClassicItemDefinition(itemId);
       this.heldTool = itemDefinition.itemType === 'tool';
-      const scale = this.heldTool ? 0.95 : 0.55;
+      const scale = this.heldTool ? heldItemScale.tool : heldItemScale.other;
       this.assets.addItem(this.item, itemId, scale, undefined, definition);
       this.applyLayer(this.item);
     }
@@ -96,7 +104,7 @@ export class FirstPersonViewmodel {
   setHeldDefinition(definition: ToolModel): void {
     this.setHeldItem(null);
     this.heldTool = true;
-    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.95);
+    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, heldItemScale.tool);
     this.applyLayer(this.item);
   }
 
@@ -127,7 +135,7 @@ export class FirstPersonViewmodel {
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
     if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
     const narrowTool = this.heldTool && this.app.graphicsDevice.width < this.app.graphicsDevice.height;
-    const itemScale = narrowTool ? 0.79 : 1;
+    const itemScale = narrowTool ? heldItemScale.narrowToolMultiplier : 1;
     this.item.setLocalScale(itemScale, itemScale, itemScale);
     this.item.setLocalEulerAngles(0, 0, narrowTool ? -16 : 0);
     const authoritativePose = combatViewmodelPose(this.combat);

@@ -1,0 +1,7 @@
+0f66cfa301fbae8ddadd80e72864e8c8e05978e54ca7bca4b1214e85fe2eda01  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/SOURCE-MANIFEST.sha256
+cf16b7d61bc4596d9ab73f5e846835ec063a1c224d8d6b550d61967151337b0e  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/STAGED-PATHS.txt
+5bafd3f6ccd12aad7bbe7a5b84a34e329fee890696726ca57bf10a822f04e06a  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/delivery-validation.json
+fb606e436c87158ef5bfe262cb9a8a723b54d04c44b9630ec8b56adac4c8523d  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/delivery-window.json.log
+815c43d0163594201e74e84e61b56c7cacdabaaaf6a2d7b9b7ac3ba7b6f0e7ec  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/delivery.stdout.log
+d3401bc5854177d5488b736ef9d55476d74b455698795f8fbc89e2bcdec65910  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/state-window.json.log
+f6b87a3322bb30ae357bd23fe9753d68b78ff782c623456c61be0aee71d4ee9d  changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/state.stdout.log

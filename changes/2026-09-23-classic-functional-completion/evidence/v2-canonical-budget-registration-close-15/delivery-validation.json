@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BUDGET-REGISTRATION-CLOSE-15",
+  "status": "STATIC_GREEN_BROWSER24_NOT_RUN",
+  "baselineSha": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f",
+  "inputs": {
+    "browser23": {
+      "status": "FAIL",
+      "sourceManifestSha256": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+      "evidenceManifestSha256": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+      "deliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+      "mainTimeoutMs": 720000,
+      "C5CompletedOffsetMs": 718819,
+      "finalAssertionsOffsetMs": 727316,
+      "traceStatus": "INCOMPLETE_MISSING_EOCD_AND_CENTRAL_DIRECTORY"
+    },
+    "budgetMap01": {
+      "sourceManifestSha256": "64ce50ef3284e12a92a410600c1dc6b663330fdf0f3954d91adb50cbfc2fbc68",
+      "evidenceManifestSha256": "554fb4aabcce039eb93870b695143f8403edb154a3b314fc793d5fbecf4ead55",
+      "deliverySha256": "828f23d14b54d51f19d5fd66d6454da8322b2210526d73f80713d412e992da61"
+    },
+    "frozenInputsModified": false
+  },
+  "implementation": {
+    "canonicalMainTimeoutBeforeMs": 720000,
+    "canonicalMainTimeoutAfterMs": 900000,
+    "derivation": "727316 * 1.2 = 872779.2, rounded up to 900000",
+    "chromiumProjectTimeoutBefore": "IMPLICIT_DEFAULT_30000",
+    "chromiumProjectTimeoutAfterMs": 60000,
+    "performanceOrStabilityClaimed": false,
+    "businessStepsAssertionsOrSafetyBudgetsChanged": false,
+    "receiptRunnerOrZipBehaviorChanged": false
+  },
+  "playwrightSlotReadback": {
+    "version": "1.62.1",
+    "dependencyRoot": "/private/tmp/seedlands-v2-acceptance-0eafd427",
+    "afterHooks": {
+      "line": 1650,
+      "initializer": "calculateMaxTimeout(project.timeout, testInfo.timeout)",
+      "mainEffectiveSlotMs": 900000
+    },
+    "workerTeardown": {
+      "line": 1690,
+      "initializer": "project.timeout",
+      "slotMs": 60000
+    },
+    "traceStop": {
+      "line": 1713,
+      "initializer": "project.timeout",
+      "slotMs": 60000
+    },
+    "totalFinalizationWallTimePromise": false,
+    "preserved": {
+      "visualTimeoutMs": 240000,
+      "modularTimeoutMs": 90000,
+      "workers": 1,
+      "retriesExpression": "process.env.CI ? 1 : 0",
+      "trace": "retain-on-failure",
+      "actionTimeoutMs": 10000,
+      "navigationTimeoutMs": 30000,
+      "webServerTimeoutMs": 30000
+    }
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "258ac9faf2329f7c5f07565795bb93c769e7e87b55bfc213f6f8edf7775ab138"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 23,
+    "sha256": "f512cfa8907a48689936b5b8c02d1fed99fe588b6a1f3d432d1380a69875dfad",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "verification": {
+    "structure": {
+      "status": "PASS",
+      "readbackSha256": "e2ae9154238e2f243e3265f425ec53787eb4c091363f5fd06a1bff26e3d52e99",
+      "receiptSha256": "0823d2b49b8466a46bec9790e97eefb786dc0ea94c5520a857d8c0e9d962b386"
+    },
+    "classicTypes": {
+      "status": "PASS",
+      "command": "pnpm typecheck:classic",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "2dca1e6354352fb405efd12cd555f239e1be6f1ddb4e88f03cc4171732f60890"
+    },
+    "rootTypes": {
+      "status": "PASS",
+      "command": "pnpm typecheck",
+      "stdoutSha256": "6bc06e71ab3431a2cbbd0f4d02d1096fa833867f1f3601601106eee5de2e4dd1",
+      "receiptSha256": "e81f5f920291c7d269e241b2b48664405edffe62ffb6d6ee579c9721dd0f9089"
+    },
+    "eslint": {
+      "status": "PASS",
+      "files": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "bd649c06e014979ae88f062ce494574abe1e86f1766aa54620f07928f2365803"
+    },
+    "format": {
+      "status": "PASS",
+      "stdoutSha256": "6953599ba6238768f1bad7433d1171547eb9cb73d58e266a85fc6156e7f6bfd7",
+      "receiptSha256": "7d7083ccba05d4c3a121b610e5fbb38c3074dcc1c39f58e496d7c5e960ecb18c"
+    },
+    "scope": {
+      "status": "PASS",
+      "stdoutSha256": "0224f7663ec7ba7cc5ff1a61745058ca0726f293d10075b659e8575a29116fc7",
+      "receiptSha256": "27bf522e6632c01a08e998a2734db0c62954b06c4c467c7afdd9e0222b255166"
+    },
+    "reusedBehaviorClosure": "14_FILES_145_TESTS_NOT_RERUN"
+  },
+  "retainedIntermediateEvidence": [
+    {
+      "attempt": 1,
+      "status": "FAIL_CHECKER_WHITESPACE_REGEX_ESCAPING",
+      "stdoutSha256": "88482bee52c056b9ecb23de06d262712154a21e66dce9ece7ad372ba4b67f783",
+      "receiptSha256": "0ea9fe9c2b54209a0caefea8527fcc68eaf0a7fef7eb155348186e4f4faf51d3"
+    },
+    {
+      "attempt": 2,
+      "status": "FAIL_MAIN_WORKTREE_PLAYWRIGHT_TOP_LEVEL_LINK_ASSUMPTION",
+      "stdoutSha256": "de5592563d1bfc3c86a6417a8a5c728ae6a881305835f98d75f1da594fd14d31",
+      "receiptSha256": "a10281311b8f957a1b3cd1012f1f33fada44cb811eaebf61c2726cefe1eb449e"
+    },
+    {
+      "attempt": 3,
+      "status": "FAIL_ACCEPTANCE_PLAYWRIGHT_TOP_LEVEL_LINK_ASSUMPTION",
+      "stdoutSha256": "c01b59510c08c2cc201c969c0876a73f394f9436e97852a049e5e7603b28b171",
+      "receiptSha256": "dee66123a266d060e735dd9ec8ca96af3a9867354d49aea82a7199524e9687cb"
+    }
+  ],
+  "finalSelfcheck": {
+    "status": "PASS",
+    "stdoutSha256": "609008ba8ba419cb8ad837f8e35b6991989c06cbde069f06513486287f1a2668",
+    "receiptSha256": "1c269ab2f4ffd471d53f088f23ae4b3104ed03f950557a04b0c0025a0880498c",
+    "sourceEntriesValidated": 5,
+    "manifestEntriesValidated": 23,
+    "browser23IdentityUnchanged": true,
+    "budgetMap01IdentityUnchanged": true,
+    "indexEmpty": true,
+    "machineLockReleasedAfterCheck": true
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "scenarioChanged": false,
+    "routeAimMouseChanged": false,
+    "receiptOrRunnerChanged": false,
+    "zipValidationChanged": false,
+    "historicalBrowser23OrMapChanged": false,
+    "cumulativeBrowserReportChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "gitOrIndexWrite": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "Existing canonical fixture budget registration only; no owner, public API, or production architecture change."
+  },
+  "budget": {
+    "traditionalPdMaximum": 0.25,
+    "aiTargetHoursMaximum": 1,
+    "aiHardLimitHours": 1.5,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "notRun": [
+    "behavior-tests",
+    "build",
+    "artifact",
+    "browser24",
+    "cua",
+    "devserver",
+    "ci",
+    "git",
+    "index-write",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

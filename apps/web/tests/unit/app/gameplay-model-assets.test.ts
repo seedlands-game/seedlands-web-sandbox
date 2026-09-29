@@ -168,6 +168,26 @@ describe('玩法物品共享网格资源', () => {
     assets.dispose();
   });
 
+  it('Structure 木门通过显式像素资产进入正式物品渲染器', async () => {
+    const { GameplayModelAssets } = await import('../../../src/app/gameplay/gameplay-model-assets');
+    const { builtinAssets } = await import('../../../src/client/presentation/asset-catalog');
+    const pc = await import('playcanvas');
+    const assets = new GameplayModelAssets({ graphicsDevice: {} } as never, builtinAssets);
+    const parent = new pc.Entity('wooden-door');
+    const before = state.meshes.length;
+
+    try {
+      assets.addItem(parent, 'wooden-door');
+      expect(parent.children).toHaveLength(1);
+      expect(firstChild(parent).render.meshInstances).toHaveLength(1);
+      expect(state.meshes).toHaveLength(before + 1);
+      expect(state.meshes.at(-1)?.positions.length).toBeGreaterThan(0);
+      expect(state.meshes.at(-1)?.indices.length).toBeGreaterThan(36);
+    } finally {
+      assets.dispose();
+    }
+  });
+
   it('构造器按资源 ID 优先使用传入的模型材质与像素贴图', async () => {
     const { GameplayModelAssets } = await import('../../../src/app/gameplay/gameplay-model-assets');
     const texture = {
@@ -364,8 +384,8 @@ describe('玩法物品共享网格资源', () => {
     const pc = await import('playcanvas');
     const app = { graphicsDevice: {} } as never;
     const texture = {
-      id: 'custom:grazer-fur',
-      name: '食草兽毛皮像素',
+      id: 'custom:player-cloth',
+      name: '玩家衣料像素',
       revision: 1,
       source: 'user' as const,
       type: 'pixel-texture' as const,
@@ -380,8 +400,8 @@ describe('玩法物品共享网格资源', () => {
       },
     };
     const material = {
-      id: 'custom:grazer-fur-material',
-      name: '食草兽毛皮材质',
+      id: 'custom:player-cloth-material',
+      name: '玩家衣料材质',
       revision: 1,
       source: 'user' as const,
       type: 'material' as const,
@@ -397,19 +417,19 @@ describe('玩法物品共享网格资源', () => {
     setAppearanceResources(app, {
       schemaVersion: 1,
       assets: [texture, material],
-      materialBindings: { 'seedlands:model/actor/grazer': { 'seedlands:material/model/fur': material.id } },
+      materialBindings: { 'seedlands:model/actor/player': { 'seedlands:material/model/cloth': material.id } },
       thumbnails: {},
     });
     const assets = new GameplayModelAssets(app);
-    const parent = new pc.Entity('grazer');
+    const parent = new pc.Entity('player');
 
     assets.addBox(
       parent,
-      'body',
-      'fur',
+      'torso',
+      'cloth',
       { x: 0, y: 0, z: 0 },
       { x: 1, y: 1, z: 1 },
-      { modelId: 'seedlands:model/actor/grazer' },
+      { modelId: 'seedlands:model/actor/player' },
     );
 
     expect((firstChild(parent).render.material as { diffuseMap: { name: string } }).diffuseMap.name).toBe(texture.id);

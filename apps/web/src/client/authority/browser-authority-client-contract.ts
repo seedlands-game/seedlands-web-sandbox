@@ -20,6 +20,8 @@ import type {
 } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type { BehaviorUpdateRequest } from '@seedlands/stdlib/runtime/behavior-control-protocol';
+import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
+import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 export type BoundCharacterControlPort = Readonly<{
   binding: ControlBinding;
@@ -54,6 +56,8 @@ export type AuthorityWorkerPort = {
 export type AuthorityClientOptions = Readonly<{
   onSnapshot?: (snapshot: AuthoritySnapshot) => void;
   onGameplay?: (view: AuthorityGameplayView) => void;
+  onMediaProjection?: (projection: readonly MediaPlaybackProjectionV1[]) => void;
+  onMediaFacts?: (batch: MediaPlaybackCommittedBatchV1) => void;
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;

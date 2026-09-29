@@ -73,7 +73,12 @@ function snapshotDefinition(raw: unknown): VoxelGameplayDefinition {
       value.hardnessSeconds > 1e6)
   )
     throw new TypeError('Block rule hardness is invalid.');
-  if (value.preferredTool !== null && value.preferredTool !== 'axe' && value.preferredTool !== 'pickaxe')
+  if (
+    value.preferredTool !== null &&
+    value.preferredTool !== 'axe' &&
+    value.preferredTool !== 'pickaxe' &&
+    value.preferredTool !== 'shovel'
+  )
     throw new TypeError('Block rule preferred tool is invalid.');
   if (
     hasTier &&

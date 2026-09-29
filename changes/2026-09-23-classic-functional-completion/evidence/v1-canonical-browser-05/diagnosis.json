@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-05-0d199371",
+  "status": "FAIL",
+  "sourceSha": "0d19937123506d5e6b30af8ad9ebdf40aad28509",
+  "sourceDigest": "44a0e80f849cae44124228f464d6e7916801440aff2db6fd1cb84e95573cffb2",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "a91a3528abc9b8154f16e48fd0bf41be8c834bb3226e389fbb7550245b5a1f02",
+  "artifactReceiptSha256": "e41beefb89468632986960b4e7adcca5218a7e15eed63bd43937f274271a8637",
+  "performanceWindowId": "319d5d90-396a-4e4d-84f9-caaccf4fdabb",
+  "commandExitCode": 1,
+  "playwright": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 1
+  },
+  "passed": [
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "v1-audio-settings",
+    "v1-water-bucket-place-source",
+    "v1-empty-bucket-collect-source",
+    "classic-visual"
+  ],
+  "failedAt": "v1-route-to-door-before-placement",
+  "notReached": [
+    "v1-door-place-toggle-mesh-collision",
+    "v1-media-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 179,
+    "helperFile": "apps/web/tests/e2e/classic-support/harness.ts",
+    "helperLine": 297,
+    "targetXZ": [67.5, 0.5],
+    "player": [67.47733306884766, 34.70000076293945, 0.42802944779396057],
+    "serverPlayerPosition": [67.47733613801189, 34.700001000000036, 0.4280294621806095],
+    "serverPlayerVelocity": [0, 0, 0],
+    "onGround": false,
+    "colliding": false,
+    "mode": "creative",
+    "flightEnabled": true,
+    "selectedItem": "bucket",
+    "worldRevision": 141,
+    "interactionAttempts": 12
+  },
+  "diagnosis": {
+    "classification": "canonical-route-jump-in-creative-flight",
+    "summary": "选择水桶时正式切换创造模式并启用飞行；随后门路线仍以 jump:true 按下 Space，使玩家升至 y=34.7。x/z 已到门 approach，速度归零且无碰撞，但 onGround 持续为 false，因此 walkTo 的 acknowledgedInputSequence 前进且 onGround 且非碰撞条件在20秒内不能成立。",
+    "productBoundary": "水桶放置source与空桶收source的正式voxel断言均已通过；门放置动作尚未发生，不能据此判断门、媒体、C4/C5或恢复合同。"
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "files": 276,
+    "treeClean": true
+  },
+  "originalEvidenceSha256": {
+    "classicReceipt": "322cc3a21f502f3fd246b3169a753b26ec44f2284d21c08eacb822656b151770",
+    "errorContext": "734ea10e15da2203932d000953ed5260a6780f08b471d6c60361397de72a5854",
+    "trace": "977dcaa7b32e99010dd8c93d85469661c8aa95ad4c56a82412658a160ba32fee",
+    "performanceWindow": "a969ac79399721c1f904a692fdfb6a4a8d82737842694b6e681c496df1285978",
+    "failurePage": "d8df0d0632e65266db12529f263f2ce71837cb0103225f8cb4c34c4cecfb063f",
+    "playwrightLastRun": "5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110"
+  }
+}

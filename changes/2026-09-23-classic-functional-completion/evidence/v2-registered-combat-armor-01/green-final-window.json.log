@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-registered-combat-armor-green-final",
+  "pid": 87443,
+  "startedAt": "2026-09-25T12:32:13.887Z",
+  "windowId": "v2-registered-combat-armor-green-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-registered-combat-armor-01/green-final-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T12:32:15.212Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:32:13.888Z",
+      "loadAverage": [
+        3.52197265625,
+        3.3740234375,
+        3.34326171875
+      ],
+      "freeMemoryBytes": 931364864,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:32:15.211Z",
+      "loadAverage": [
+        3.52197265625,
+        3.3740234375,
+        3.34326171875
+      ],
+      "freeMemoryBytes": 945045504,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

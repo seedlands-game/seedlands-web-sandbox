@@ -1,5 +1,6 @@
 import { GAMEPLAY_CONTENT_CAPABILITIES, gameplayContentFromRegistration } from './content-capabilities';
 import { STATION_RESOURCE } from './station-action-model';
+import { MEDIA_PLAYBACK_CAPABILITY, MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
 import { Voxel } from '../../../world/voxel';
 import { createInventoryCandidate } from './inventory-api';
@@ -68,13 +69,14 @@ const targetPosition = (target: unknown) => {
   return validateBlockPosition(value.position, 'Block authorization target');
 };
 
-export function defineBlockActionsModule(options: Readonly<{ stations?: boolean }> = {}): ModModule {
+export function defineBlockActionsModule(options: Readonly<{ stations?: boolean; media?: boolean }> = {}): ModModule {
   return Object.freeze({
     descriptor: {
       id: 'seedlands:block-actions-module',
       version: '1.0.0',
       requires: [
         ...(options.stations ? [{ id: 'seedlands:station-actions', version: '1.0.0' }] : []),
+        ...(options.media ? [{ id: MEDIA_PLAYBACK_CAPABILITY, version: '1.0.0' }] : []),
         ...GAMEPLAY_CONTENT_CAPABILITIES.map((id) => ({ id, version: '1.0.0' })),
       ],
       provides: [{ id: BLOCK_ACTIONS_CAPABILITY, version: '1.0.0' }],
@@ -85,6 +87,7 @@ export function defineBlockActionsModule(options: Readonly<{ stations?: boolean 
       ],
       permissions: [
         ...(options.stations ? [{ resource: STATION_RESOURCE, operations: ['execute' as const] }] : []),
+        ...(options.media ? [{ resource: MEDIA_PLAYBACK_RESOURCE, operations: ['execute' as const] }] : []),
         { resource: BLOCK_ACTOR_RESOURCE, operations: ['read', 'execute'] },
         { resource: BLOCK_VOXEL_RESOURCE, operations: ['read', 'execute'] },
         { resource: BLOCK_CLOCK_RESOURCE, operations: ['read', 'execute'] },

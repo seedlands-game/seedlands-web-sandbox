@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-route-driver-reject-recovery-close-13-eslint",
+  "pid": 42856,
+  "startedAt": "2026-09-28T13:20:15.935Z",
+  "windowId": "v2-route-driver-reject-recovery-close-13-eslint",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-route-driver-reject-recovery-close-13/eslint-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T13:20:17.578Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T13:20:15.936Z",
+      "loadAverage": [
+        3.59814453125,
+        2.77880859375,
+        2.85302734375
+      ],
+      "freeMemoryBytes": 823394304,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T13:20:17.576Z",
+      "loadAverage": [
+        3.59814453125,
+        2.77880859375,
+        2.85302734375
+      ],
+      "freeMemoryBytes": 899907584,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+--- /tmp/git39-evidence-expected-before-selfcheck.paths	2026-09-29 03:50:48
++++ /tmp/git39-evidence-staged-before-selfcheck.paths	2026-09-29 03:50:48
+@@ -28,6 +28,7 @@
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-selfcheck-02-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-selfcheck-03-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-selfcheck-04-window.json.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-selfcheck-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-validation-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/final-validation.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-browser23-canonical-budget-map-01/format-delivery-window.json.log
+@@ -103,6 +104,8 @@
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/command.txt
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/delivery-validation.json
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/diagnosis.json
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/final-selfcheck.stdout.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/final-selfcheck.window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/harness-artifact.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/main-step-timeline.json
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/metadata-format.stdout.log
+@@ -177,6 +180,8 @@
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/delivery-validation.json
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/eslint-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/eslint.stdout.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/final-selfcheck-window.json.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/final-selfcheck.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/format-final-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/format-final.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/format-window.json.log
+@@ -196,6 +201,8 @@
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/SOURCE-MANIFEST.sha256
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/delivery-validation.json
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/diagnosis.json
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/final-selfcheck-window.json.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/final-selfcheck.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/final-static-scope-failure-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/final-static-scope-failure.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/green-failure-window.json.log
+@@ -261,6 +268,8 @@
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/eslint-failure.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/eslint-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/eslint.stdout.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/final-selfcheck-window.json.log
++changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/final-selfcheck.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/format-final-02-window.json.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/format-final-02.stdout.log
+ changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/format-final-window.json.log
+DIFF_EXIT=1

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-40-CANONICAL-DISCOVERY",
+  "status": "PASS_STRICT_MANIFEST_CLOSURE",
+  "baseline": "549dfecad3f6a8c6ba5c5179382f1af39101c1ff",
+  "codeCommit": {
+    "sha": "ed6ea030cfacc517aab337b32993803c50ed3ab7",
+    "tree": "82f107c43297e02a416cbce7903826b06c820d0d",
+    "paths": 4,
+    "naturalHook": "PASS"
+  },
+  "dependencySetup": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "status": "PASS",
+    "downloaded": 0,
+    "workspaceLinksInsideDetachedTree": true
+  },
+  "stagedGate": {
+    "runId": "git40-staged-gate-02",
+    "status": "PASS",
+    "exitCode": 0,
+    "playwrightDiscovery": "PASS_ONE_CANONICAL_FILE_THREE_TESTS",
+    "canonicalSelection": "CANONICAL_MAIN_ONE_MATCH",
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslint": "PASS_PLAYWRIGHT_CONFIG",
+    "format": "PASS_4_PATHS_NORMAL_PRETTIER",
+    "scope": "PASS_4_PATHS",
+    "stdoutSha256": "29862f2185e56d918530ddb37873400627bb7e44e6c67512642243876196f5b6",
+    "windowSha256": "6d1eab227bfc9e2718274a5b7531e3c2151e88046c64ae2588bbc1cbb26cc91e"
+  },
+  "retainedOrchestrationFailure": {
+    "status": "FAIL_BEFORE_ANY_GATE_COMMAND",
+    "cause": "Nested shell interpolation expanded the temporary output variable before the locked script started.",
+    "stdoutSha256": "42d31bd40937c05ede6b0ddf1deb45c4c25131e4fef0646580a0bf822584665d",
+    "windowSha256": "8e437c815b827cf04fb120403e4da91baa011f8a7b5b36ce0be612027704c892",
+    "productOrValidationFailure": false
+  },
+  "frozenEvidence": {
+    "browser24": {
+      "sourceManifestSha256": "ad8b5a66672e967ed0f73b839c1354f54e922edd69fc92ade94833b778bf7b1a",
+      "evidenceManifestSha256": "4cf5e544d22d3826ecdaa6292607ed118fd1890257b1f388d36bd3847cbfa44f",
+      "deliverySha256": "4073de5c997a03dd4c251dcfd0ae0028ce59788cdeb4959481aec5e7edd13576",
+      "status": "FAIL_BEFORE_TEST_DISCOVERY_CHROMIUM_ZERO"
+    },
+    "close17": {
+      "sourceManifestSha256": "b67b0a48bf7c7ee2ba41a6dfbd5d7394b3ca9aa7ffccaaa704f668071e2ae403",
+      "evidenceManifestSha256": "791017d6c245f3f241cff8c0ac5f07f679c30110e9fb24edaf34a67f544b0852",
+      "deliverySha256": "8c4cb1879f1fca5638d23890ab6ab73c599a1c081ffda33ff805b2ff3926f3dc",
+      "status": "PASS_STATIC_DISCOVERY_BOUNDARY"
+    },
+    "browser23Status": "FAIL_TIMEOUT_TRACE_INCOMPLETE"
+  },
+  "reusedEvidence": {
+    "focusedTests": "GIT39 16/16 PASS",
+    "behaviorTests": "14 files / 145 tests PASS",
+    "rerun": false
+  },
+  "sourceManifest": {
+    "entries": 4,
+    "sha256": "922f1859ff33d8d1fe4cfad1ce6613e7d16c57057977924f2fd4c4556c4d4120"
+  },
+  "evidenceManifest": {
+    "entries": 39,
+    "sha256": "bd38a8b14f12a772ce9e7281642e95117e66e14409c2f3fe112e5fac12db89e6",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log",
+      "manifest-closure/strict-green.stdout.json.log",
+      "manifest-closure/strict-green.stderr.log",
+      "manifest-closure/strict-green.window.json.log"
+    ]
+  },
+  "secondCommit": {
+    "exactAllowlistPaths": 75,
+    "maxStagedBlobBytes": 515775,
+    "status": "READY_FOR_NATURAL_HOOK"
+  },
+  "finalSelfcheck": {
+    "runId": "git40-final-selfcheck",
+    "status": "SUPERSEDED_WARNING_SKIPPED_ONE_ENTRY",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "manifestClosure": {
+    "publishedManifestSha256": "289b0c5f8441d8272e386ca2f42131be26425e2a62ba8e7de24129a2017dfb6d",
+    "publishedDeliverySha256": "5ff72f342e65195b604d28b7f791ae0aba918e6f246badb2f461b26b9c2dd641",
+    "selectionActualSha256": "7156c9366d06b66ae5649a39176b3ddbdb9658de6a63267e2a25f455baee57",
+    "oldLineDigestCharacters": 62,
+    "oldManifestDeclaredEntries": 17,
+    "oldManifestStrictValidEntries": 16,
+    "oldManifestStrictVerifiedEntries": 0,
+    "oldManifestStrictStatus": "FAIL",
+    "oldManifestStrictExitCode": 1,
+    "priorManifestSha256": "21890daced658dccf7596743160419ac571f45598d00ba42640e21b76ea1bd07",
+    "currentManifestStrictStatus": "PASS",
+    "currentManifestStrictVerifiedEntries": 39,
+    "strictGreenOutputsExcludedFromManifest": true,
+    "closureCommitExactPaths": 28
+  },
+  "boundaries": {
+    "browser25Run": false,
+    "build16Run": false,
+    "browserOrDevServerRun": false,
+    "ciRepairRun": false,
+    "deployOrMergeRun": false,
+    "longTermDocsUpdated": true
+  }
+}

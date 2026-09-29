@@ -3,8 +3,29 @@ import { FakeAuthorityWorker, frequencies, ready } from './fixtures/browser-auth
 import { testWorldgenProvider } from './fixtures/worldgen-provider';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import type { AuthorityResponse } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/blocks';
+import { LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN } from '../../../src/client/persistence/legacy-gameplay-provenance-error';
 
 describe('BrowserAuthorityClient', () => {
+  it('preserves a legacy provenance code from Worker fatal through startup rejection', async () => {
+    const worker = new FakeAuthorityWorker();
+    const fatal = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onFatal: fatal });
+    const starting = client.start({
+      seedText: 'legacy',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies,
+    });
+    const message = `${LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN}: missing source`;
+
+    worker.emit({ kind: 'authority-fatal', protocolVersion: 1, epoch: 'world:1', error: message });
+
+    await expect(starting).rejects.toThrow(message);
+    expect(fatal).toHaveBeenCalledWith(expect.objectContaining({ message }));
+  });
+
   it('把迟到/非法输入与重同步要求显式反馈预测层', () => {
     const worker = new FakeAuthorityWorker();
     const decisions = vi.fn();
@@ -72,6 +93,7 @@ describe('BrowserAuthorityClient', () => {
       generatorVersion: 3,
       provider: testWorldgenProvider,
       starterEcology: null,
+      voxelSemantics: overworldVoxelSemantics,
     } as const;
     worker.emit(needed);
     worker.emit(needed);
@@ -81,6 +103,7 @@ describe('BrowserAuthorityClient', () => {
         generatorVersion: 3,
         provider: testWorldgenProvider,
         starterEcology: null,
+        voxelSemantics: overworldVoxelSemantics,
       }),
     );
     expect(bootstrap).toHaveBeenCalledTimes(1);

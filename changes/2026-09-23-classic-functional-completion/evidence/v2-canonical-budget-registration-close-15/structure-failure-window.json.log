@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-close15-structure",
+  "pid": 64228,
+  "startedAt": "2026-09-28T17:22:04.059Z",
+  "windowId": "v2-close15-structure",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/structure-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T17:22:04.215Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T17:22:04.060Z",
+      "loadAverage": [
+        3.64501953125,
+        3.04736328125,
+        2.8046875
+      ],
+      "freeMemoryBytes": 8058961920,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T17:22:04.213Z",
+      "loadAverage": [
+        3.64501953125,
+        3.04736328125,
+        2.8046875
+      ],
+      "freeMemoryBytes": 8055291904,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

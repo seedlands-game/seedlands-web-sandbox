@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git22-state-final",
+  "pid": 11862,
+  "startedAt": "2026-09-25T12:53:30.212Z",
+  "windowId": "git22-state-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-22-restore-regression/state-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T12:53:30.437Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:53:30.213Z",
+      "loadAverage": [
+        2.77880859375,
+        3.232421875,
+        3.3212890625
+      ],
+      "freeMemoryBytes": 216711168,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:53:30.435Z",
+      "loadAverage": [
+        2.77880859375,
+        3.232421875,
+        3.3212890625
+      ],
+      "freeMemoryBytes": 206536704,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

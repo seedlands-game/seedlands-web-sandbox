@@ -32,7 +32,8 @@ export { createGameplaySystemAuthority } from './gameplay-system-authority';
 
 export { createGameplayActorAuthority, type ModuleActorAuthority } from './gameplay-actor-authority';
 
-export { assembleProductPacks, ALTERNATIVE_PRODUCT_PERMISSIONS } from './product-playbooks';
+export { assembleProductPacks } from './product-playbooks';
+export type { ProductPackAdmission } from './product-playbooks';
 export type { AssembleProductPackOptions, ProductExtensionAdmission } from './product-playbooks';
 export { worldgenProviderForComposition, WORLDGEN_PROVIDER_CAPABILITY } from '../worldgen/standard-worldgen-module';
 export type { StandardWorldgenProvider } from '../worldgen/standard-worldgen-module';

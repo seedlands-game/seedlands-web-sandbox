@@ -1,7 +1,9 @@
-import { CHUNK_SIZE, Voxel, floorDiv, mod, remeshChunkKeysForEdit, voxelIndex } from '../world/voxel';
+import { CHUNK_SIZE, floorDiv, mod, remeshChunkKeysForEdit, voxelIndex } from '../world/voxel';
+import { isFluidVoxel } from './fluid/fluid-cell-state';
 import type { ServerChunk, VoxelRegionChanged, WorldCommitResult, WorldSemanticEvent } from './game-server-types';
 import { compareChunkKeys } from './world-transaction-commit';
 import { SINGLE_EDIT_METRICS, SINGLE_EDIT_NOOP_METRICS } from './world-edit-metrics';
+import type { PreparedWorldCommitMetadata } from './world-edit-batch-plan';
 
 const EMPTY_SEMANTIC_EVENTS: readonly WorldSemanticEvent[] = Object.freeze([]);
 
@@ -13,20 +15,21 @@ export function commitSingleWorldEdit(options: {
   value: number;
   worldRevision: number;
   getChunk(cx: number, cy: number, cz: number): ServerChunk;
-  setWorldRevision(revision: number): void;
-  addMutationCount(count: number): void;
+  prepareCommitMetadata(worldRevision: number, mutationCount: number): PreparedWorldCommitMetadata;
 }): WorldCommitResult {
   const { actorId, x, y, z, value } = options;
   const chunk = options.getChunk(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE));
   const result = createSingleWorldEditResult({ actorId, x, y, z, value, worldRevision: options.worldRevision, chunk });
   if (!result.committed) return result;
+  const metadata = options.prepareCommitMetadata(result.worldRevision, 1);
+  metadata.validate();
   const index = voxelIndex(mod(x, CHUNK_SIZE), mod(y, CHUNK_SIZE), mod(z, CHUNK_SIZE));
+  metadata.apply();
   chunk.voxels[index] = value;
+  chunk.fluid[index] = isFluidVoxel(value) ? 0x88 : 0;
   chunk.revision += 1;
   chunk.dirty = true;
   chunk.materialized = true;
-  options.setWorldRevision(result.worldRevision);
-  options.addMutationCount(1);
   return result;
 }
 
@@ -50,6 +53,14 @@ export function createSingleWorldEditResult(options: {
       semanticEvents: EMPTY_SEMANTIC_EVENTS,
       metrics: SINGLE_EDIT_NOOP_METRICS,
     };
+  if (
+    !Number.isSafeInteger(options.worldRevision) ||
+    options.worldRevision < 0 ||
+    options.worldRevision >= Number.MAX_SAFE_INTEGER
+  )
+    throw new RangeError('World edit revision capacity is exhausted or invalid.');
+  if (!Number.isSafeInteger(chunk.revision) || chunk.revision < 0 || chunk.revision >= Number.MAX_SAFE_INTEGER)
+    throw new RangeError('World edit Chunk revision capacity is exhausted or invalid.');
   const worldRevision = options.worldRevision + 1;
   const meshChunks = remeshChunkKeysForEdit(x, y, z);
   if (meshChunks.length > 1) meshChunks.sort(compareChunkKeys);
@@ -74,7 +85,7 @@ export function createSingleWorldEditResult(options: {
         key: chunk.key,
         previousRevision,
         revision: chunk.revision + 1,
-        cells: [{ index, voxel: value, fluid: value === Voxel.Water ? 0x88 : 0 }],
+        cells: [{ index, voxel: value, fluid: isFluidVoxel(value) ? 0x88 : 0 }],
       },
     ],
     metrics: SINGLE_EDIT_METRICS[meshChunks.length],

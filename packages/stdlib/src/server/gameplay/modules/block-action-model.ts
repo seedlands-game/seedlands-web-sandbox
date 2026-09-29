@@ -4,6 +4,7 @@ import { Voxel } from '../../../world/voxel';
 import type { GameplayContent } from '../gameplay-content';
 import type { InventorySlot } from '../inventory';
 import type { ItemDefinitionRegistry, ItemStack } from '../item-registry';
+import type { FluidCell } from '../../fluid/fluid-cell';
 
 export const BLOCK_ACTIONS_CAPABILITY = 'seedlands:block-actions';
 export const BLOCK_RULES_CAPABILITY = 'seedlands:block-rules';
@@ -48,7 +49,12 @@ export type BlockActorProjectionV1 = Readonly<{
   creativeCatalog: Readonly<{ hotbar: readonly (string | null)[]; selectedSlot: number }>;
   breakAction: BlockBreakActionV1 | null;
 }>;
-export type BlockVoxelProjectionV1 = Readonly<{ version: 1; position: BlockPosition; voxel: number }>;
+export type BlockVoxelProjectionV1 = Readonly<{
+  version: 1;
+  position: BlockPosition;
+  voxel: number;
+  fluid?: FluidCell | null;
+}>;
 export type BlockWorldEntryV1 = Readonly<{
   reference: EntityLifetimeReference;
   breakAction: BlockBreakActionV1 | null;
@@ -328,9 +334,29 @@ export function validateBlockActorProjection(raw: unknown, items: ItemDefinition
 }
 
 export function validateBlockVoxelProjection(raw: unknown): BlockVoxelProjectionV1 {
-  const value = blockData(raw, ['version', 'position', 'voxel'], 'Block voxel projection');
+  const hasFluid = Boolean(raw) && typeof raw === 'object' && Object.hasOwn(raw as object, 'fluid');
+  const value = blockData(
+    raw,
+    ['version', 'position', 'voxel', ...(hasFluid ? ['fluid'] : [])],
+    'Block voxel projection',
+  );
   if (value.version !== 1 || !voxelId(value.voxel)) throw new TypeError('Block voxel projection is invalid.');
-  return Object.freeze({ version: 1, position: validateBlockPosition(value.position), voxel: value.voxel });
+  let fluid: FluidCell | null | undefined;
+  if (hasFluid) {
+    if (value.fluid === null) fluid = null;
+    else {
+      const cell = blockData(value.fluid, ['level', 'source'], 'Block fluid cell');
+      if (!safeInteger(cell.level, 1, 8) || typeof cell.source !== 'boolean')
+        throw new TypeError('Block fluid cell is invalid.');
+      fluid = Object.freeze({ level: cell.level, source: cell.source });
+    }
+  }
+  return Object.freeze({
+    version: 1,
+    position: validateBlockPosition(value.position),
+    voxel: value.voxel,
+    ...(fluid === undefined ? {} : { fluid }),
+  });
 }
 
 export function validateBlockWorldProjection(raw: unknown): BlockWorldProjectionV1 {

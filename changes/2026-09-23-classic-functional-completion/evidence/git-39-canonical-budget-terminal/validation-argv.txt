@@ -1,0 +1,20 @@
+GIT-39-CANONICAL-BUDGET-TERMINAL
+baseline=2db4c5fd8cf81294d164b128d667f73fa7e5f01f
+stagedTree=/private/tmp/seedlands-git39-canonical-budget-terminal
+codePaths=13
+
+dependency-setup
+pnpm install --offline --frozen-lockfile --ignore-scripts
+
+staged-gate
+node --test scripts/harness/classic-receipt.test.mjs
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/canonical-reporter.test.ts --maxWorkers=1
+env -u SEEDLANDS_RESERVATION_EVIDENCE -u SEEDLANDS_PERFORMANCE_WINDOW_EVIDENCE -u SEEDLANDS_RESERVATION_RUN -u SEEDLANDS_PERFORMANCE_WINDOW_ID -u SEEDLANDS_PERFORMANCE_MEASUREMENT_DECLARATION -u SEEDLANDS_PERFORMANCE_WINDOW_RESERVED pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/engineering/performance-window.test.ts --maxWorkers=1
+pnpm typecheck:classic
+pnpm typecheck
+pnpm exec eslint apps/web/tests/e2e/classic-runtime.spec.ts apps/web/tests/e2e/classic-support/evidence.ts apps/web/tests/e2e/classic-support/canonical-reporter.ts apps/web/tests/e2e/classic-support/canonical-reporter.test.ts playwright.config.ts scripts/harness/classic.mjs scripts/harness/classic-receipt.mjs scripts/harness/classic-receipt.test.mjs
+pnpm exec prettier --check apps/web/tests/e2e/classic-runtime.spec.ts apps/web/tests/e2e/classic-support/evidence.ts apps/web/tests/e2e/classic-support/canonical-reporter.ts apps/web/tests/e2e/classic-support/canonical-reporter.test.ts playwright.config.ts scripts/harness/classic.mjs scripts/harness/classic-receipt.mjs scripts/harness/classic-receipt.d.mts scripts/harness/classic-receipt.test.mjs changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md docs/code-map.md
+git diff --cached --check
+
+All validation commands run serially inside one default benchmark-window reservation. Vitest uses maxWorkers=1.
+Only the existing performance-window consumer subprocess clears inherited reservation variables so its nested temporary-repository reservation test does not resolve the outer absolute evidence path inside its temporary root.

@@ -1,0 +1,5 @@
+3f8b89d9824498b1a86210fda235bef7e6b66ec8518cbf6edb4d6e4e796ca488  changes/2026-09-23-classic-functional-completion/equipment-restore-evidence.md
+53538a0bc0e74bec22a53a46328a14eecadeaecc190dd3338a034821351b1982  changes/2026-09-23-classic-functional-completion/execution-state.md
+6746147d47a46acbde1a017ad5e4e112ba9f9a8c21fa5c710fff84e83806aeb1  changes/2026-09-23-classic-functional-completion/tasks.md
+8ab253ffb59b82fc89229b08499fd36d946e5dc4ed4d932e5195481aa3c2945c  changes/2026-09-23-classic-functional-completion/equipment-restore-contract.md
+bd1fad4b683c3f52bf42df32973f6a08d4697be9ec71ade6bf31658580920ab5  packages/stdlib/tests/server/equipment-pointer-restore.test.ts

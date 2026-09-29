@@ -1,16 +1,33 @@
-/* Living World reference composition: compact icon deck, brass trim, obsidian, turquoise. */
+#ui {
+  --classic-slot-size: clamp(40px, 5.2vw, 56px);
+  --classic-slot-gap: 3px;
+  --classic-slot-icon-inset: 6px;
+  --classic-slot-border: 1px solid #373737;
+  --classic-slot-surface: #4a4a4a;
+  --classic-slot-hover-surface: #575757;
+  --classic-slot-selected: #f4f4f4;
+}
+
 #survival-deck {
-  --slot-size: clamp(42px, 7.1vw, 88px);
   position: absolute;
   left: 50%;
   bottom: 34px;
   transform: translateX(-50%);
-  width: calc(8 * var(--slot-size) + 48px);
-  max-width: calc(100vw - 32px);
+  width: fit-content;
+  max-width: calc(100vw - 16px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   filter: drop-shadow(0 3px 4px #0008);
+}
+#world-progress {
+  position: absolute;
+  top: 64px;
+  left: 16px;
+  width: auto;
+  padding: 6px 10px;
+  color: #e4c47e;
+  font-size: 11px;
 }
 #held-item-name {
   height: 24px;
@@ -54,6 +71,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  image-rendering: pixelated;
 }
 .vital-empty {
   filter: grayscale(1) brightness(0.26);
@@ -61,14 +79,13 @@
 #hotbar {
   position: static;
   transform: none;
-  width: 100%;
+  width: fit-content;
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
-  gap: 4px;
-  padding: 5px;
-  border-width: 5px;
-  border-image-width: 11px;
-  background: #101514ed;
+  grid-template-columns: repeat(var(--hotbar-columns, 9), var(--classic-slot-size));
+  gap: var(--classic-slot-gap);
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 #hotbar li {
   display: block;
@@ -79,31 +96,30 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: var(--slot-size);
-  min-height: 38px;
+  height: var(--classic-slot-size);
+  min-height: 0;
   min-width: 0;
-  padding: 4px;
-  border: 2px solid transparent;
+  padding: 0;
+  border: var(--classic-slot-border);
   border-radius: 0;
-  background:
-    linear-gradient(#02070770, #02070770),
-    url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
-  box-shadow:
-    inset 0 0 0 1px #080b0a,
-    inset 0 0 16px #0009;
+  background: var(--classic-slot-surface);
+  image-rendering: pixelated;
+  box-shadow: inset 1px 1px 0 #626262;
 }
 #ui #hotbar .game-slot.active {
-  border-color: #ffdd84;
-  background: url('/assets/ui/obsidian-hotbar-slot.png') center / 100% 100%;
-  box-shadow:
-    inset 0 0 0 1px #9c7335,
-    0 0 10px #eaba5480;
+  outline: 2px solid var(--classic-slot-selected);
+  outline-offset: -2px;
+  background: var(--classic-slot-hover-surface);
+  transform: none;
+  box-shadow: none;
 }
 #hotbar .slot-swatch {
   position: absolute;
-  inset: 4px;
+  inset: var(--classic-slot-icon-inset);
   width: auto;
   height: auto;
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
 }
 #hotbar .item-icon {
@@ -116,21 +132,18 @@
   display: none;
 }
 #hotbar .slot-key {
-  top: auto;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #151817;
-  padding: 1px 4px;
-  font:
-    11px Georgia,
-    serif;
-  color: #d1c7ad;
+  top: 2px;
+  left: 3px;
+  padding: 0;
+  background: transparent;
+  font: 10px/1 var(--ui-font-mono);
+  color: #fff;
+  text-shadow: 1px 1px 0 #000;
 }
 #hotbar .slot-count {
   right: 3px;
-  bottom: 9px;
-  color: #fff3d4;
+  bottom: 3px;
+  color: #fff;
   font-size: 15px;
 }
 #world-clock {
@@ -139,14 +152,11 @@
   bottom: auto;
   transform: none;
   padding: 10px 14px;
-  font:
-    12px Georgia,
-    'Songti SC',
-    serif;
+  font: 12px var(--ui-font-mono);
   border-width: 6px;
   border-color: transparent;
   border-image-width: 12px;
-  color: #dfc692;
+  color: #f4f4f4;
 }
 #target-card {
   position: absolute;
@@ -155,37 +165,29 @@
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 240px;
-  padding: 6px 12px;
-  border-width: 7px;
-  border-image-width: 16px;
-  color: #f8edd5;
+  gap: 7px;
+  min-width: 168px;
+  padding: 4px 8px;
+  border-width: 4px;
+  border-image-width: 10px;
+  color: #f4f4f4;
 }
 #target-card .item-icon {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-}
-#target-card .target-crest {
-  width: 34px;
-  height: 40px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
 }
 .target-details {
   display: grid;
-  gap: 4px;
-  min-width: 100px;
+  gap: 2px;
+  min-width: 112px;
 }
 .target-details strong {
-  font:
-    16px Georgia,
-    'Songti SC',
-    serif;
+  font: 12px var(--ui-font-mono);
 }
 #target-card small {
   font-size: 10px;
-  color: #b4b6a5;
+  color: #ddd;
   letter-spacing: 0.05em;
 }
 #target-card #break-progress {
@@ -193,7 +195,7 @@
   transform: none;
   display: block;
   width: 100%;
-  height: 6px;
+  height: 5px;
   padding: 0;
   margin: 0;
   border: 0;
@@ -280,10 +282,10 @@
   min-height: auto;
 }
 #ui .pause-actions .game-button:first-child {
-  background: #164440;
+  background: #707070;
   box-shadow:
-    inset 0 0 0 1px #568c7e,
-    inset 0 0 18px #061e1f;
+    inset 2px 2px 0 #aaa,
+    inset -2px -2px 0 #3b3b3b;
 }
 #ui .map-toggle {
   position: absolute;
@@ -301,14 +303,14 @@
   min-height: 32px;
 }
 .shell-scrim {
-  background: #03060780;
-  backdrop-filter: blur(2px);
+  background: rgb(0 0 0 / 62%);
+  backdrop-filter: none;
 }
 .shell-dialog {
   border-width: 14px;
   border-image-width: 22px;
   padding: 24px 28px;
-  background: #0d1415;
+  background: #5b5b5b;
 }
 .shell-dialog[data-kind='pause'] {
   width: min(380px, 100%);
@@ -317,26 +319,22 @@
 }
 .menu-crest {
   display: block;
-  width: 160px;
-  height: 62px;
+  width: 172px;
+  height: 32px;
   object-fit: contain;
+  image-rendering: pixelated;
   margin: -6px auto 10px;
 }
 #ui .shell-dialog h2 {
-  font:
-    24px Georgia,
-    'Songti SC',
-    serif;
+  font: 24px var(--ui-font-display);
   letter-spacing: 0.12em;
-  color: #ead6aa;
+  color: #fff;
 }
 #ui .shell-dialog .eyebrow {
   text-align: center;
-  font:
-    9px Georgia,
-    serif;
+  font: 9px var(--ui-font-mono);
   letter-spacing: 0.15em;
-  color: #a38b5d;
+  color: #ddd;
 }
 .shell-dialog .pause-subtitle {
   font-size: 12px;
@@ -484,6 +482,13 @@
   }
   .shell-dialog {
     padding: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  #ui {
+    --classic-slot-size: 32px;
+    --classic-slot-icon-inset: 4px;
   }
 }
 

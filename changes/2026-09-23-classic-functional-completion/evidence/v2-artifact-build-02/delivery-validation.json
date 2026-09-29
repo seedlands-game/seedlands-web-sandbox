@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-02",
+  "status": "PASS",
+  "sourceSha": "1bbe3a60d55ffa5d05e405377624fbbd942e6327",
+  "sourceTree": "4d70cef0e00c8617290159e1aa83a685126b1fc4",
+  "sourceDigest": "021861359f16eb748ddc8dfd4bcde9a4d4738ecd3f8a1b98079d11024b3be2e5",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "7e0d5f80a2751b914ff16f24af6d967dbc300b31b7f11db532c9c947596c0a78",
+  "builtAt": "2026-09-25T14:30:17.636Z",
+  "artifactFiles": 276,
+  "distFilesIncludingReceipt": 277,
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-1bbe3a60",
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideAcceptanceTree": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "argv": ["pnpm", "build"],
+    "window": "8894f626-5da4-4e7e-8844-a188b3d6d58f",
+    "startedAt": "2026-09-25T14:29:55.261Z",
+    "endedAt": "2026-09-25T14:30:19.167Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "b1d9df8e6a62ed149664f12687237442b12e9d98daa3d2e478ec93529b7b15d4",
+    "receiptSha256": "edf5a87a32bfcbf591d2e35ad6020c78fbe42bbcf390280834258f7b917600ec"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "argv": ["pnpm", "harness:artifact"],
+    "window": "0c7ede3b-213b-4238-902a-d6781392dbd1",
+    "startedAt": "2026-09-25T14:30:29.214Z",
+    "endedAt": "2026-09-25T14:30:31.121Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "48a3845546335c557edbb6b1fbe9d0f3cb475f88140ab0790df35c116a421b0e",
+    "receiptSha256": "bf45e24fb6fca63fe643437daf266ae25bf20be8f569be348b5be6b5849c1853"
+  },
+  "artifactReceiptSha256": "aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a",
+  "artifactMapSha256": "97ce89ea528f129ca4de0c978f8e37406186dd87181eb5613dbe21833e1f6adb",
+  "diskFileMapSha256": "97ce89ea528f129ca4de0c978f8e37406186dd87181eb5613dbe21833e1f6adb",
+  "artifactMapMatchesDisk": true,
+  "packLockSha256": "fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "f6af1ffafbb4c5e997bc7297e2ac8b0cc2ba25b1a781f879e7c9dd04698bd470"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 12,
+    "directoryTotalFilesIncludingManifest": 13
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "8323361d20d2f7d781408186d58cbecac728c2c5103bf12b47be2fe10c502887",
+    "acceptanceTreePreserved": true,
+    "previousV2TreePreserved": true,
+    "v1AcceptanceTreesPreserved": 9
+  },
+  "includedCapabilities": ["equipment-web-ui", "registered-combat-armor", "death-policy-spine"],
+  "notIncluded": ["classic-death-policy", "death-producers", "npc-intrinsic-drops"],
+  "notRun": ["browser", "cua", "ci", "deploy", "merge"]
+}

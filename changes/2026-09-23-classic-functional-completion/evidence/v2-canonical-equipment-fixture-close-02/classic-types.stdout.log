@@ -1,0 +1,3 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/equipment-journey.ts(130,7): error TS2304: Cannot find name 'sameActor'.
+[ELIFECYCLE] Command failed with exit code 2.

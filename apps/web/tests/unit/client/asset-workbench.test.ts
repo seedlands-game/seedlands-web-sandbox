@@ -13,21 +13,59 @@ describe('统一资产目录与有界适配', () => {
     );
     for (const binding of builtinItemBindings) {
       expect(binding.name).toBe(listItemDefinitions().find((item) => item.id === binding.itemId)?.name);
-      expect(builtinAssets.some((a) => a.id === binding.iconId)).toBe(true);
+      expect(
+        builtinAssets.some((a) => a.id === binding.iconId) || binding.iconId === `builtin:image:${binding.itemId}`,
+        `${binding.itemId}:${binding.iconId}`,
+      ).toBe(true);
       expect(builtinAssets.some((a) => a.id === binding.modelId)).toBe(true);
       if (builtinAssets.find((a) => a.id === binding.modelId)?.type === 'extruded-pixel-model')
-        expect(acceptsPixelItem(listItemDefinitions().find((item) => item.id === binding.itemId)!)).toBe(true);
+        expect(
+          acceptsPixelItem(listItemDefinitions().find((item) => item.id === binding.itemId)!),
+          binding.itemId,
+        ).toBe(true);
     }
     expect(assetAdapter('image-texture').editable).toBe(false);
     expect(assetAdapter('builtin-item-model').editable).toBe(false);
     expect(assetAdapter('extruded-pixel-model').editable).toBe(true);
     for (const item of listItemDefinitions()) {
-      expect(acceptsPixelItem(item)).toBe(
-        ['tool', 'resource'].includes(item.itemType) && item.placesVoxel === undefined,
+      expect(acceptsPixelItem(item), item.id).toBe(
+        (['tool', 'resource', 'food', 'armor'].includes(item.itemType) && item.placesVoxel === undefined) ||
+          (item.itemType === 'block' &&
+            item.placesVoxel !== undefined &&
+            (item.id === 'wool' ||
+              item.id.endsWith('-wool') ||
+              ['sapling', 'flower', 'mushroom', 'sugar-cane', 'dead-bush', 'red-flower', 'red-mushroom'].includes(
+                item.id,
+              ))) ||
+          (item.id === 'wooden-door' && item.itemType === 'block' && item.placesVoxel === undefined),
       );
     }
     expect(acceptsPixelItem({ id: 'wood-axe', itemType: 'tool', placesVoxel: 1 })).toBe(false);
     expect(acceptsPixelItem({ id: 'custom-tool', itemType: 'tool' })).toBe(true);
+    expect(acceptsPixelItem({ id: 'red-wool', itemType: 'block', placesVoxel: 87 })).toBe(true);
+    expect(acceptsPixelItem({ id: 'wool', itemType: 'block', placesVoxel: 60 })).toBe(true);
+    for (const color of [
+      'white',
+      'orange',
+      'magenta',
+      'light-blue',
+      'yellow',
+      'lime',
+      'pink',
+      'gray',
+      'light-gray',
+      'cyan',
+      'purple',
+      'blue',
+      'brown',
+      'green',
+      'red',
+      'black',
+    ]) {
+      const binding = builtinItemBindings.find((candidate) => candidate.itemId === `${color}-wool`)!;
+      expect(builtinAssets.find((asset) => asset.id === binding.modelId)?.type).toBe('extruded-pixel-model');
+      expect(binding.iconId).toBe(`builtin:texture:${color}-wool:detail`);
+    }
   });
   it('复制模型包含独立贴图，并在导出导入后可重建同一模型', () => {
     const binding = builtinItemBindings.find((b) => b.itemId === 'stone-pickaxe')!;

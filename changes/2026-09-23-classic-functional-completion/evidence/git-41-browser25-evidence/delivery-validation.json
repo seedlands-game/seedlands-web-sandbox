@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-41-BROWSER25-EVIDENCE",
+  "status": "PASS_PENDING_NATURAL_HOOK",
+  "baseline": "783e106fb5fcba4869bcc8d0aab68ada1df827a7",
+  "browser25": {
+    "source": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+    "sourceTree": "ecc7940708bca8ea1d01e8df50337fa536d27d18",
+    "sourceManifestSha256": "c0d37c2742c8a9627c4839d0cde0c1d5eb7dd17cdfff4c39bd13c7064d8c49eb",
+    "evidenceManifestSha256": "78b45e794bb2688cb75acf4756df80fc6691b456e7881eff14f210c713722a2c",
+    "deliverySha256": "f227181902cecbe52d7b45e666c8ac9c4a0cc8e227b38df56f84988ac2942838",
+    "supersededDeliverySha256": "3d790c9de1cdd459f74532f20ec8f625c859dd17451bd7bdb40f600c035dcf2c",
+    "supersessionReason": "The final delivery records the complete command already frozen in command.txt; no browser command or evidence bytes were rerun.",
+    "status": "PASS_ROOT_INDEPENDENTLY_ACCEPTED",
+    "trace": "NOT_RETAINED_BY_CONFIG"
+  },
+  "sourceManifest": {
+    "entries": 6,
+    "sha256": "cf5ebbce92506af03105a6ea6561d571f277f9c2dad4c9f95eed010a22163c8d"
+  },
+  "evidenceManifest": {
+    "entries": 8,
+    "sha256": "ebc825ce8d014b54cd450ae17f3eca125a79f1c825c076836c0966b5f10ba39d",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "commitScope": {
+    "browser25Files": 88,
+    "browser25AndCumulativePaths": 89,
+    "statePaths": 2,
+    "git41EvidencePaths": 12,
+    "totalPaths": 103,
+    "exactAllowlist": "evidence.paths",
+    "maxBlobBytes": 19499461
+  },
+  "validation": {
+    "browser25Manifest": "PASS_84_OF_84_STRICT",
+    "browser25Source": "PASS_6_OF_6_ROOT_ACCEPTED",
+    "browser25Delivery": "PASS_FINAL_COMMAND_COMPLETE",
+    "browser24AndBelowTail": "PASS_66845_BYTES_SHA256_B5F25EE4",
+    "metadataFormat": "PASS",
+    "scopeAndBlobAudit": "PASS",
+    "retainedWorkspaceSparseFailure": "FAIL_BEFORE_PRETTIER_EXECUTION",
+    "naturalHook": "PENDING"
+  },
+  "reusedEvidence": {
+    "browser25": "2 passed / 1 skipped; C0-C5, full V1 and V2 19 checkpoints PASS",
+    "rerun": false
+  },
+  "unverified": [
+    "new object reference",
+    "death/drop/respawn",
+    "complete 16 armor / 194 item matrix",
+    "V3/V4",
+    "Cua/human auditory acceptance",
+    "performance"
+  ],
+  "budget": {
+    "targetHours": 1,
+    "hardLimitHours": 2,
+    "traditionalPdRange": "0.1-0.25",
+    "recommendedBudgetHours120Percent": 1.2,
+    "recommendedTraditionalPd120Percent": 0.3,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "browserRerun": false,
+    "buildRerun": false,
+    "artifactRerun": false,
+    "testRerun": false,
+    "implementationChanged": false,
+    "longTermDocsUpdated": false,
+    "productGreenClaimed": false,
+    "ciRepairRun": false,
+    "deployOrMergeRun": false
+  }
+}

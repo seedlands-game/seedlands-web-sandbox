@@ -1,0 +1,28 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts (22 tests | 1 failed) 9ms
+     × builds station-context equipment candidates for the registered station host to commit 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-pointer-behavior.test.ts > equipment inventory pointer candidate > builds station-context equipment candidates for the registered station host to commit
+TypeError: Unknown station kind: bench
+ ❯ Object.create packages/stdlib/src/server/gameplay/ecs-station-state.ts:88:30
+     86|       assertEntityId(entityId);
+     87|       const definition = byKind.get(kind);
+     88|       if (!definition) throw new TypeError(`Unknown station kind: ${St…
+       |                              ^
+     89|       const base = { version: 1 as const, entityId, revision: 0, kind,…
+     90|       if (kind === 'workbench') return freezeStation({ ...base, kind, …
+ ❯ stationCandidate packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:95:56
+ ❯ packages/stdlib/tests/server/equipment-pointer-behavior.test.ts:441:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 33 passed (34)
+   Start at  18:42:54
+   Duration  502ms (transform 194ms, setup 0ms, import 286ms, tests 17ms, environment 0ms)
+

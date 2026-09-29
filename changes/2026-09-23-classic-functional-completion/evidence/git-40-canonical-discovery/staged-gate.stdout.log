@@ -1,0 +1,15 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+$ pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit && tsc -p tsconfig.classic-tests.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /private/tmp/seedlands-git40-canonical-discovery/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+$ tsc -p tsconfig.json --noEmit
+Checking formatting...
+All matched files use Prettier code style!
+GIT40_STAGED_GATE=PASS

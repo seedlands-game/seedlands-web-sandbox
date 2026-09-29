@@ -9,6 +9,7 @@ import type { GameplayPersistence } from '../persistence/gameplay-persistence';
 import type { LogicObservation } from '../logic/logic-protocol';
 import type { AuthorityFrequencies, AuthorityInitialWorldBootstrap } from './authority-runtime-types';
 import type { KernelWorldgenProvider } from '@seedlands/kernel/spatial';
+import type { VoxelGeometryRegistryV1 } from '../../world/voxel-geometry';
 
 export type AuthorityPersistence = ChunkPersistence &
   Partial<GameplayPersistence> & { metrics?: () => Readonly<{ recordBytes: number }> };
@@ -24,6 +25,7 @@ export type AuthorityRuntimeOptions = Readonly<{
   persistence?: AuthorityPersistence;
   generatorVersion?: number;
   worldgenProvider?: KernelWorldgenProvider;
+  voxelGeometry?: VoxelGeometryRegistryV1;
   initialWorldTime: number;
   startTimeMs: number;
   startClock?: () => number;

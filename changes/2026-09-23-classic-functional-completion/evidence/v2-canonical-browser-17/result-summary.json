@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-17",
+  "runId": "v2-canonical-browser-17-cb4941bf",
+  "status": "FAIL",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-cb4941bf",
+  "sourceSha": "cb4941bfd1801422802463bc7bbc41dd7d8e9484",
+  "treeSha": "0ce6d40c340f153007a8d8bc24742f635222fb29",
+  "sourceDigest": "ec6301aec3c1de8f61579c1e305626a675f76be10fb40aaf2b1b350efc1c9a17",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "a02e67c6c2694bfbb188d81ae8d74b554f6604c773389d952a4c5e40c222f682",
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "builtAt": "2026-09-26T06:29:08.702Z",
+  "performanceWindowId": "v2-canonical-browser-17-cb4941bf",
+  "startedAt": "2026-09-26T07:07:54.237Z",
+  "endedAt": "2026-09-26T07:13:43.802Z",
+  "commandExitCode": 1,
+  "measurementStatus": "NOT_RECORDED",
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1, "workers": 1, "retries": 0, "canonicalMainAttempts": 1 },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_DURING_RESOURCE_STRIP_BEFORE_PHASE_RESOURCES_PLACED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED",
+    "visual": "PASS",
+    "nonClassicSmoke": "SKIPPED"
+  },
+  "v2Reached": [
+    "started-equipment-snapshot-recorded",
+    "workbench-placed",
+    "three-wood-resource-voxels-placed",
+    "three-stone-resource-voxels-placed",
+    "first-iron-resource-voxel-placed"
+  ],
+  "notReached": [
+    "second-through-fourth-iron-resource-placement",
+    "resources-placed-phase",
+    "wood-stone-iron-mining-and-pickup",
+    "wood-and-stone-pickaxe-crafting",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "C4",
+    "C5",
+    "before-v2EquipmentPreSave",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "equipment-restore-and-new-epoch-pointer"
+  ],
+  "notObserved": [
+    "equipment-durability-loss",
+    "death",
+    "equipment-drop",
+    "respawn",
+    "human-audible-audio",
+    "Cua",
+    "performance"
+  ],
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "traceReadback": {
+    "consoleEvents": { "log": 1, "warning": 0, "error": 0 },
+    "pageErrorEvents": 0,
+    "networkEntries": 810,
+    "httpStatusAtLeast400": 0
+  },
+  "trace": {
+    "sizeBytes": 480136175,
+    "parts": 10,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "341dbe30467b4f1a5dc008182fe67f92ea4ed565de8fda44d95de0b810d61544",
+    "reassemblyValidated": true
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-17-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-26T07:20:40.769Z",
+    "endedAt": "2026-09-26T07:20:43.599Z",
+    "files": 276
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016"
+  }
+}

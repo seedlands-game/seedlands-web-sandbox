@@ -1,0 +1,90 @@
+10:20:48 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts (7 tests | 4 failed) 6ms
+     × reverses one next movement after 'first Browser22 outer wait' validates drift 4ms
+     × reverses one next movement after 'second Browser22 outer wait counterfa…' validates drift 0ms
+     × consumes the reverse hint once before returning to the x-based direction rule 0ms
+     × reverses from the key actually used after each consecutive validated drift 0ms
+     ✓ keeps driver rejection identity and does not enter the wait path 0ms
+     ✓ shows the recorded drift is cheaper to correct with KeyW 0ms
+     ✓ shows the recorded drift is cheaper to correct with KeyW 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts > Classic V2 post-drift route direction > reverses one next movement after 'first Browser22 outer wait' validates drift
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts > Classic V2 post-drift route direction > reverses one next movement after 'second Browser22 outer wait counterfa…' validates drift
+AssertionError: expected [ 'KeyS', 'KeyS' ] to deeply equal [ 'KeyS', 'KeyW' ]
+
+- Expected
++ Received
+
+  [
+    "KeyS",
+-   "KeyW",
++   "KeyS",
+  ]
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts:120:24
+    118|     ).rejects.toBe(sentinel);
+    119|
+    120|     expect(directions).toEqual(['KeyS', 'KeyW']);
+       |                        ^
+    121|   });
+    122|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts > Classic V2 post-drift route direction > consumes the reverse hint once before returning to the x-based direction rule
+AssertionError: expected [ 'KeyS', 'KeyS', 'KeyS' ] to deeply equal [ 'KeyS', 'KeyW', 'KeyS' ]
+
+- Expected
++ Received
+
+  [
+    "KeyS",
+-   "KeyW",
++   "KeyS",
+    "KeyS",
+  ]
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts:142:24
+    140|     ).rejects.toBe(sentinel);
+    141|
+    142|     expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
+       |                        ^
+    143|   });
+    144|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts > Classic V2 post-drift route direction > reverses from the key actually used after each consecutive validated drift
+AssertionError: expected [ 'KeyS', 'KeyS', 'KeyW' ] to deeply equal [ 'KeyS', 'KeyW', 'KeyS' ]
+
+- Expected
++ Received
+
+  [
+    "KeyS",
+-   "KeyW",
+    "KeyS",
++   "KeyW",
+  ]
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts:183:24
+    181|     ).rejects.toBe(sentinel);
+    182|
+    183|     expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
+       |                        ^
+    184|   });
+    185|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  22:20:48
+   Duration  131ms (transform 30ms, setup 0ms, import 38ms, tests 6ms, environment 0ms)
+

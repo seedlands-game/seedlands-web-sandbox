@@ -10,8 +10,6 @@ import {
   defineBlockRulesModule,
   defineModeModule,
   defineNeedsModule,
-  defineFeedingActionsModule,
-  defineFeedingRulesModule,
   defineCombatModule,
   defineCombatRulesModule,
   defineNeedsRulesModule,
@@ -19,13 +17,22 @@ import {
   defineRecipeCraftingModule,
   defineBehaviorRegistryModule,
   defineStandardWorldgenModule,
+  defineVoxelGeometryModule,
+  defineMediaPlaybackModuleV1,
 } from '@seedlands/stdlib/mod-api';
-import { overworldBlocks } from './blocks';
+import { overworldBlocks, overworldVoxelSemantics } from './blocks';
 import { overworldItems } from './items';
 import { overworldRecipes } from './recipes';
 import { overworldMeleeDefinitions } from './combat';
-import { overworldActorProfiles, overworldDefaultPlayerMeleeDefinitionId, overworldStarterEcology } from './actors';
+import { overworldActorProfiles, overworldDefaultPlayerMeleeDefinitionId } from './actors';
 import { classicWorldgenProvider } from './worldgen';
+import { classicRetiredActorsMigration } from './retired-actors-migration';
+import { classicItemInteractionModules } from './item-interactions';
+import { classicWoodenDoorGeometryDescriptors } from './structure-descriptors';
+import { classicStructureDefinitionModule } from './structures';
+import { classicStructureActionsModule } from './structure-actions';
+import { classicMedia } from './media';
+import { classicDeathInventoryPolicyModule } from './death-inventory-policy';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -38,6 +45,8 @@ export const pack = definePack({
   version: '1.0.0',
   kind: 'playbook',
   entry: 'overworld.mjs',
+  resources: ['playbooks/classic/presentation.json', 'playbooks/classic/assets/audio/to-far-shores.mp3'],
+  presentation: { path: 'playbooks/classic/presentation.json' },
   modules: [
     defineStandardWorldgenModule({
       moduleId: 'seedlands:overworld-worldgen',
@@ -47,6 +56,7 @@ export const pack = definePack({
       moduleId: 'seedlands:overworld-content',
       craftingProvider: true,
       items: overworldItems.map((item) => ({ ...item, id: namespaceId(item.id), storageId: item.id })),
+      voxels: overworldVoxelSemantics,
       recipes: overworldRecipes.map((recipe) => ({
         ...recipe,
         id: namespaceId(recipe.id),
@@ -60,10 +70,7 @@ export const pack = definePack({
         ...(profile.deathDrop ? { deathDrop: namespaceStack(profile.deathDrop) } : {}),
       })),
       defaultPlayerMeleeDefinitionId: overworldDefaultPlayerMeleeDefinitionId,
-      starterEcology: {
-        ...overworldStarterEcology,
-        initialItem: namespaceStack(overworldStarterEcology.initialItem),
-      },
+      snapshotMigration: classicRetiredActorsMigration,
       stations: {
         ...overworldStations,
         recipes: overworldStations.recipes.map((recipe) =>
@@ -89,20 +96,30 @@ export const pack = definePack({
         fuels: overworldStations.fuels.map((fuel) => ({ ...fuel, itemId: namespaceId(fuel.itemId) })),
       },
     }),
+    defineVoxelGeometryModule({
+      moduleId: 'seedlands:overworld-voxel-geometry',
+      descriptors: classicWoodenDoorGeometryDescriptors,
+    }),
+    classicStructureDefinitionModule,
+    classicStructureActionsModule,
+    defineMediaPlaybackModuleV1({ moduleId: 'seedlands:overworld-media', definition: classicMedia }),
+    classicDeathInventoryPolicyModule,
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
-    defineInventoryModule(),
+    defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),
     defineInventoryActionsModule(),
     defineBehaviorRegistryModule({
       permissions: [
         { resource: 'seedlands.inventory', operations: ['execute'] },
         { resource: 'seedlands.inventory-item', operations: ['execute'] },
         { resource: 'seedlands.combat', operations: ['execute'] },
+        { resource: 'seedlands.structure', operations: ['execute'] },
       ],
     }),
     defineStationActionsModule(),
     defineForageModule({ sourceVoxel: 5, drop: { itemId: 'berry', count: 1 }, intervalSeconds: 120 }),
-    defineBlockActionsModule({ stations: true }),
+    defineBlockActionsModule({ stations: true, media: true }),
+    ...classicItemInteractionModules,
     defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules', voxelDefinitions: overworldBlocks }),
     defineModeModule(),
     defineCombatModule(),
@@ -110,23 +127,14 @@ export const pack = definePack({
       moduleId: 'seedlands:overworld-combat-rules',
       profile: { damageMultiplier: 1, immuneTargetModes: ['creative'] },
     }),
-    defineFeedingActionsModule(),
-    defineFeedingRulesModule({
-      moduleId: 'seedlands:overworld-feeding-rules',
-      eligibleArchetypes: ['grazer'],
-      deficitThreshold: 50,
-      restore: 'full',
-    }),
     defineNeedsModule(),
     defineNeedsRulesModule({
       moduleId: 'seedlands:overworld-needs-rules',
       profiles: {
         satiety: {
-          enabledModes: ['survival'],
+          enabledModes: [],
           hungerEverySeconds: 120,
-          hungerDelta: -1,
-          heal: { threshold: 16, everySeconds: 10, amount: 1, hungerCost: 1 },
-          starvation: { threshold: 0, everySeconds: 15, damage: 1 },
+          hungerDelta: 0,
         },
         deficit: { enabledModes: ['survival'], hungerEverySeconds: 5, hungerDelta: 1 },
       },

@@ -1,0 +1,26 @@
+11:46:18 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-action-owner-candidate-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-action-owner-candidate-01
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (11 tests) 1697ms
+     ✓ resolves detached references across a non-Classic restore without mutating state  841ms
+     ✓ validates and authorizes before resolving or observing existence  431ms
+     ✓ captures a request before queued execution  422ms
+ ✓ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (10 tests) 37269ms
+     ✓ runs the Headless wall clock through the serialized queue and cannot rearm after stop  2253ms
+     ✓ returns structured validation errors for malformed method arguments without throwing  2484ms
+     ✓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate  2521ms
+     ✓ keeps one world identity across commands, inspection and deterministic paused advancement  2693ms
+     ✓ restores a portable checkpoint atomically with a new epoch  5085ms
+     ✓ rejects an operation submitted behind a restore against its captured epoch  5104ms
+     ✓ rejects a waiting barrier when restore replaces its epoch  4966ms
+     ✓ rejects stale frontiers and bounds trace retention  2442ms
+     ✓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints  4657ms
+     ✓ authorizes action ids against their actual actor owner  5062ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (7 tests) 110ms
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  11:46:18
+   Duration  41.04s (transform 1.09s, setup 0ms, import 1.72s, tests 39.08s, environment 0ms)
+

@@ -1,0 +1,47 @@
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (1.123583ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.134833ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.128125ms)
+✖ different retries remain visible and the unique-attempt gate rejects them (0.519042ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.109208ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.070042ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 41.035708
+
+✖ failing tests:
+
+test at scripts/harness/classic-receipt.test.mjs:118:1
+✖ different retries remain visible and the unique-attempt gate rejects them (0.519042ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /exactly one/. Input:
+  
+  'Error: Classic terminal receipt did not finish with a passing runner outcome.'
+  
+      at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:131:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: Classic terminal receipt did not finish with a passing runner outcome.
+        at validateClassicRunReceipt (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.mjs:194:11)
+        at file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:133:7
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/scripts/harness/classic-receipt.test.mjs:131:10)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1402:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+        at Test.postRun (node:internal/test_runner/test:1542:19)
+        at Test.run (node:internal/test_runner/test:1467:12),
+    expected: /exactly one/,
+    operator: 'throws',
+    diff: 'simple'
+  }

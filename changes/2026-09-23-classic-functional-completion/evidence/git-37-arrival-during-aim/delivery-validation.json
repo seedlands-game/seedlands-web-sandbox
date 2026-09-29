@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-37-ARRIVAL-DURING-AIM",
+  "status": "EVIDENCE_FROZEN",
+  "baseline": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+  "codeCommit": "99b895067324ae930fd5dbd6bb227c578c499c8d",
+  "sourceTree": "fd5cd21572509cf7b57536947bf3d88d23c7ad5a",
+  "stagedPatchSha256": "8d55c757e842d65ce710f3e4af83f5e404516bcc9388fa578b63017a1116f4b5",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "34c3c0e1ddd49f6a7ceb4cf83407676b16763ae4d8058ab3ac4575a18246b945"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 9,
+    "sha256": "bcf2b5e683a97c8f41a963eff2187c1fc5f6ff3fee6eb790b7bf0da2a8fff23d",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json", "final-selfcheck.stdout.log"]
+  },
+  "frozenInputs": {
+    "browser21": {
+      "sourceManifestSha256": "fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001",
+      "evidenceManifestSha256": "83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8",
+      "deliverySha256": "93c572c0a698bc55cf969b226242946073392326722a6233bb2318e027ab9d72",
+      "status": "FAIL_AFTER_FIRST_WOOD_PICKUP",
+      "laterV2": "NOT_REACHED"
+    },
+    "map01": {
+      "sourceManifestSha256": "50c8c21b93c186427a27e47623e151b736bc17528fb4319a8aae2b6e35d991f3",
+      "evidenceManifestSha256": "486c335f220d9bacb1ea4019c81db44f7df36129e32c9b59d86c7410125e73a0",
+      "deliverySha256": "0e32bc91a71db284838265ecb5192fefb72dc7540c2c7a3eeca2537655538fc6"
+    },
+    "close12PriorRelease": {
+      "sourceManifestSha256": "c75666b03c3201b58fbd9d8a9e03f971ffb3f9d8716cfb24f3d2723ef4da4f9b",
+      "evidenceManifestSha256": "a8f5d291fcb5da489b2c554ab6a52425573e1ff239f53bcec73dcf177952c8ed",
+      "deliverySha256": "f01dbc717f2640855db38aeb81c8fc93845af8128fd77ba173bda3286353e019",
+      "supersededForFormattingClaim": true
+    },
+    "formatClosure": {
+      "sourceManifestSha256": "c30ea54a3e32e34e904d92c9f996e5143f4352d8b5ed1601eab43bbe13c5452a",
+      "evidenceManifestSha256": "833fbaf473a20b2af1d0216e12e8abf36e379ca5a3b53d8e37104a3878e5203d",
+      "deliverySha256": "b09f02544ebe60066fa2358dd49cd7f43ac98a33d390f7d8315b660fd86fbe37"
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git37-arrival-during-aim",
+    "head": "24dc3a1daca6e629ca273ea07aeae50eb4be868a",
+    "stagedPaths": 9,
+    "patchSha256": "8d55c757e842d65ce710f3e4af83f5e404516bcc9388fa578b63017a1116f4b5",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReusedOffline": true,
+    "dependencySetup": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "dependencySetupExitCode": 0,
+    "dependencySetupStdout": "NOT_RECORDED_AS_FILE"
+  },
+  "stagedGate": {
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "3ade6edbe6f796be093df783b9c58b49ecd5e54539349afdb0a8c3e87d3e468a",
+    "receiptSha256": "a8ba96949f53eca16198bd1fc82cc3387da7c43e2a93d7b77a63341e8ef20d75",
+    "affected": "PASS_13_FILES_138_TESTS",
+    "maxWorkers": 1,
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslint": "PASS_6_TS",
+    "format": "PASS_9_PATHS_NORMAL_PRETTIER",
+    "scopedDiff": "PASS_9_PATHS",
+    "newInlineSuppressions": 0
+  },
+  "behavior": {
+    "typedTerminalHandoff": true,
+    "sameObservationReturned": true,
+    "terminalEnabledOnlyForV2RefreshPath": true,
+    "outerStrictOwnerChanged": false,
+    "defaultCallerBehaviorChanged": false,
+    "productionChanged": false,
+    "normalizedRuntimeEquivalentAfterFormatClosure": true
+  },
+  "browserFacts": {
+    "browser21": "FAIL_AFTER_C0_C3_FULL_V1_RESOURCES_AND_FIRST_WOOD_PICKUP",
+    "browser21LaterV2": "NOT_REACHED",
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN",
+    "build13": "NOT_RUN",
+    "browser22": "NOT_RUN"
+  },
+  "diagnostics": [
+    "The first combined detached-tree command did not start because its requested cwd did not exist. No tree, patch application, or test attempt occurred; no stable stdout file exists.",
+    "Dependency setup exited 0 and its benchmark receipt is preserved, but command stdout was not redirected to a stable file and was not recreated."
+  ],
+  "boundaries": {
+    "longTermDocsUpdated": true,
+    "longTermDocsReason": "docs/code-map.md records the new test-only ClassicSnapshot type owner; production architecture and public protocols are unchanged.",
+    "backupRefPushed": false
+  },
+  "notRun": ["build13", "browser22", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "0517dd86-ca99-4632-8ec4-662a2dd7fff0",
+  "pid": 46809,
+  "startedAt": "2026-09-25T06:47:41.955Z",
+  "windowId": "0517dd86-ca99-4632-8ec4-662a2dd7fff0",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-closed-door-oracle-close-01/eslint-fixed-2-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T06:47:42.955Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T06:47:41.956Z",
+      "loadAverage": [
+        3.74951171875,
+        3.3408203125,
+        3.26513671875
+      ],
+      "freeMemoryBytes": 945274880,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T06:47:42.954Z",
+      "loadAverage": [
+        3.74951171875,
+        3.3408203125,
+        3.26513671875
+      ],
+      "freeMemoryBytes": 920829952,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

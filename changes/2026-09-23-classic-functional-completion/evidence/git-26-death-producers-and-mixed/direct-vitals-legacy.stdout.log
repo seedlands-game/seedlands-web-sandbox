@@ -1,0 +1,31 @@
+12:34:45 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git26-death - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git26-death
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/gameplay-atomic-vitals.test.ts (5 tests | 1 failed) 22ms
+     × keeps a killed NPC entity and registration when its drop allocation fails 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/gameplay-atomic-vitals.test.ts > actual player vitals transaction > keeps a killed NPC entity and registration when its drop allocation fails
+RangeError: Unknown actor profile: grazer
+ ❯ Object.require packages/stdlib/src/server/gameplay/actor-profile.ts:136:25
+    134|   const require = (archetype: ActorArchetype) => {
+    135|     const profile = profiles.get(archetype);
+    136|     if (!profile) throw new RangeError(`Unknown actor profile: ${arche…
+       |                         ^
+    137|     return profile;
+    138|   };
+ ❯ AutonomyRuntime.validateActorRegistration packages/stdlib/src/server/simulation/autonomy-runtime.ts:164:24
+ ❯ Module.spawnGameplayAutonomous packages/stdlib/src/server/gameplay/gameplay-runtime-lifecycle.ts:61:22
+ ❯ GameplayRuntime.spawnAutonomous packages/stdlib/src/server/gameplay/gameplay-runtime.ts:396:29
+ ❯ apps/web/tests/integration/runtime/server/gameplay-atomic-vitals.test.ts:45:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  00:34:45
+   Duration  1.16s (transform 843ms, setup 0ms, import 1.05s, tests 22ms, environment 0ms)
+

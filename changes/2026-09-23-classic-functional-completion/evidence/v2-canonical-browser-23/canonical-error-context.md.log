@@ -1,0 +1,68 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: apps/web/tests/e2e/classic-runtime.spec.ts >> Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景
+- Location: apps/web/tests/e2e/classic-runtime.spec.ts:73:1
+
+# Error details
+
+```
+Test timeout of 720000ms exceeded.
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - main:
+    - region [ref=e2]:
+      - paragraph [ref=e3]: PROCEDURAL FANTASY WORLD
+      - heading "Seedlands" [level=1] [ref=e4]
+      - paragraph [ref=e5]: 走进一个由 Seed 苏醒、会随脚步延展的体素秘境。
+      - generic [ref=e6]:
+        - generic [ref=e7]: 草原
+        - generic [ref=e8]: 森林
+        - generic [ref=e9]: 山脉
+        - generic [ref=e10]: 河湖
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - text: 世界 Seed
+          - textbox "世界 Seed" [ref=e13]:
+            - /placeholder: 留空创建随机世界
+            - text: classic-canonical-runtime-v11
+        - generic [ref=e14]:
+          - text: 视觉质量
+          - combobox "视觉质量" [ref=e15]:
+            - option "Low · 省电" [selected]
+            - option "Medium · 均衡"
+            - option "High · 精致"
+      - generic [ref=e16]:
+        - text: 世界版本
+        - combobox "世界版本" [ref=e17]:
+          - option "默认继续（优先已有新版）" [selected]
+          - option "明确继续旧版 v2"
+          - option "明确继续旧版 v3"
+          - option "新建或进入新版 v11（保留旧档）"
+      - generic [ref=e18]:
+        - text: 新世界模式
+        - combobox "新世界模式 只作用于首次创建；继续已有世界时保留存档模式。" [ref=e19]:
+          - option "生存 · 采集、合成与资源消耗" [selected]
+          - option "创造 · 内容目录、飞行与即时编辑"
+        - generic [ref=e20]: 只作用于首次创建；继续已有世界时保留存档模式。
+      - button "推荐起点：林间河岸" [ref=e21] [cursor=pointer]:
+        - text: 推荐起点：林间河岸
+        - generic [ref=e22]: 森林 · 河水 · 营地
+      - button "进入世界" [ref=e23] [cursor=pointer]
+      - button "木剑动作体验场" [ref=e24] [cursor=pointer]:
+        - text: 木剑动作体验场
+        - generic [ref=e25]: 木剑已装备 · 两段斜劈 · 玩家受击反馈
+      - generic [ref=e26]:
+        - button "设置" [ref=e27] [cursor=pointer]
+        - button "操作指南" [ref=e28] [cursor=pointer]
+      - generic [ref=e29]: 旧版世界不会自动改变；可明确继续 v2 / v3，或保留旧档并进入同名 Seed 的 v11 世界。
+```

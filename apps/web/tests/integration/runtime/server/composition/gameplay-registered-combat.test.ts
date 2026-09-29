@@ -1,14 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { definePack, type ModModule } from '@seedlands/stdlib/mod-api';
+import { defineDeathInventoryPolicyModuleV1, definePack, type ModModule } from '@seedlands/stdlib/mod-api';
 import {
   assembleWorldPacks,
   createGameplaySystemAuthority,
   createGameplayActorAuthority,
 } from '@seedlands/stdlib/host';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { WorldResourceAuthorizer } from '../../../../../../../packages/stdlib/src/server/harness/world-authorization';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
+
+const compositionResources = new WeakMap<GameplayRuntime, ReturnType<typeof assembleWorldPacks>['resources']>();
+const resourcesFor = (world: GameplayRuntime) => {
+  const resources = compositionResources.get(world);
+  if (!resources) throw new Error('Combat fixture composition resources are unavailable.');
+  return resources;
+};
 
 function setup(
   withCombat = false,
@@ -16,14 +23,29 @@ function setup(
   alias = 'test-player',
   allowOrigins: boolean | (() => boolean) = true,
 ) {
-  const modules = pack.modules.filter(
-    (module) =>
-      withCombat ||
-      !['seedlands:behavior-registry-module', 'seedlands:combat-module', 'seedlands:overworld-combat-rules'].includes(
-        module.descriptor.id,
-      ),
-  );
-  modules.push(...extra);
+  const deathPolicy = defineDeathInventoryPolicyModuleV1({
+    moduleId: 'test:registered-combat-death-policy',
+    definition: {
+      version: 1,
+      actors: {
+        player: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'retain' },
+        creature: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
+        npc: { inventory: 'drop', cursor: 'drop', crafting: 'drop', armor: 'drop', actor: 'despawn' },
+      },
+    },
+  });
+  const extensions = withCombat ? [deathPolicy, ...extra] : extra;
+  const modules = [
+    ...classicGameplayDomainModules(
+      [
+        'seedlands:inventory-actions-module',
+        'seedlands:mode-module',
+        ...(withCombat ? ['seedlands:overworld-combat-rules'] : []),
+        ...extensions.map((module) => module.descriptor.id),
+      ],
+      extensions,
+    ),
+  ];
   const selected = definePack({ id: 'test:no-combat', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -54,9 +76,10 @@ function setup(
   });
   world.spawnPlayer({ id: 'alice', position: [0, 0, 0] });
   world.spawnAutonomous(
-    { id: 'wolf', type: 'creature', archetype: 'night-stalker', position: [0, 0, 1] },
-    { archetype: 'night-stalker' },
+    { id: 'wolf', type: 'creature', archetype: 'zombie', position: [0, 0, 1] },
+    { archetype: 'zombie' },
   );
+  compositionResources.set(world, composition.resources);
   return world;
 }
 describe('registered Combat is the actual composed consumer', () => {
@@ -75,12 +98,12 @@ describe('registered Combat is the actual composed consumer', () => {
   it('advances an NPC windup through the registered world system and settles damage once', () => {
     const world = setup(true);
     const before = world.entities.get('alice')!.health!;
-    expect(world.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw').success).toBe(true);
+    expect(world.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw').success).toBe(true);
     expect(world.entities.get('alice')!.health).toBe(before);
     world.advanceRules(0.3);
-    expect(world.entities.get('alice')!.health).toBe(before - 2);
+    expect(world.entities.get('alice')!.health).toBe(before - 3);
     world.createSnapshot();
-    expect(world.entities.get('alice')!.health).toBe(before - 2);
+    expect(world.entities.get('alice')!.health).toBe(before - 3);
   });
 
   it('rejects an after-rule candidate without consuming Actions, Combat, ECS or revision', () => {
@@ -128,13 +151,13 @@ describe('registered Combat is the actual composed consumer', () => {
   });
   it('restores an NPC windup under a different host alias and damages exactly once', () => {
     const source = setup(true);
-    expect(source.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw').success).toBe(true);
+    expect(source.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw').success).toBe(true);
     source.advanceRules(0.1);
     const target = setup(true, [], 'other-host-player');
     target.restoreSnapshot(source.createSnapshot());
     const before = target.entities.get('alice')!.health!;
     target.advanceRules(0.2);
-    expect(target.entities.get('alice')!.health).toBe(before - 2);
+    expect(target.entities.get('alice')!.health).toBe(before - 3);
     expect(target.simulation.combat.peekPendingHits()).toEqual([]);
   });
   it('cancels a restored player action if its durable subject is no longer authorized', () => {
@@ -167,8 +190,8 @@ describe('registered Combat is the actual composed consumer', () => {
       source.entities.update('wolf', { health: 5 });
       const originalTarget = source.entities.createReference('wolf')!;
       source.spawnAutonomous(
-        { id: 'wolf-two', type: 'creature', archetype: 'night-stalker', position: [1, 0, 0] },
-        { archetype: 'night-stalker' },
+        { id: 'wolf-two', type: 'creature', archetype: 'zombie', position: [1, 0, 0] },
+        { archetype: 'zombie' },
       );
       source.giveItem('alice', { itemId: 'wood-sword', count: 1 });
       const attack = source.attackEntity('alice', 'wolf');
@@ -223,7 +246,7 @@ describe('registered Combat is the actual composed consumer', () => {
         },
       },
     ]);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -243,7 +266,7 @@ describe('registered Combat is the actual composed consumer', () => {
     const saved = world.createSnapshot();
     saved.entityStore.sequence = Number.MAX_SAFE_INTEGER;
     world.restoreSnapshot(saved);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -279,7 +302,7 @@ describe('registered Combat is the actual composed consumer', () => {
       if (failed) throw new TypeError('host resolver broken');
       return true;
     });
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -325,7 +348,7 @@ describe('registered Combat is the actual composed consumer', () => {
           },
         ],
       },
-      world.resources,
+      resourcesFor(world),
     );
     const execution = world.bindModuleOperations(authorization, {
       principalId: 'transfer',
@@ -362,7 +385,7 @@ describe('registered Combat is the actual composed consumer', () => {
           { effect: 'allow', resources: ['seedlands.ruleset'], operations: ['read'], scope: 'any' },
         ],
       },
-      world.resources,
+      resourcesFor(world),
     );
     const result = world.invokeModuleOperation(
       authorization,
@@ -397,7 +420,7 @@ describe('registered Combat is the actual composed consumer', () => {
         },
       },
     ]);
-    const binding = createGameplayActorAuthority(world.resources, { playerAlias: 'test-player' }).forActor(
+    const binding = createGameplayActorAuthority(resourcesFor(world), { playerAlias: 'test-player' }).forActor(
       'alice',
       'player',
     )!;
@@ -439,7 +462,7 @@ describe('registered Combat is the actual composed consumer', () => {
     const world = setup();
     const before = world.createSnapshot();
     expect(world.attackEntity('alice', 'wolf')).toEqual({ success: false, reason: 'combat-unavailable' });
-    expect(world.simulation.requestActorCombat('wolf', 'alice', 'night-stalker-claw')).toEqual({
+    expect(world.simulation.requestActorCombat('wolf', 'alice', 'zombie-claw')).toEqual({
       success: false,
       reason: 'combat-unavailable',
     });

@@ -2,7 +2,7 @@ import { expect, it } from 'vitest';
 import { builtinAssets, builtinItemBindings } from '../../../src/client/presentation/asset-catalog';
 import { assetDependencies } from '../../../src/client/presentation/asset-adapters';
 import { Voxel, FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
-import { terrainMaterials } from '../../../src/client/presentation/terrain-assets';
+import { builtinTerrainTextures, terrainMaterials } from '../../../src/client/presentation/terrain-assets';
 import { actorModelDefinitions } from '../../../src/client/presentation/actor-model-definitions';
 import { listItemDefinitions } from '../../fixtures/classic/content';
 
@@ -30,4 +30,133 @@ it('当前视觉目录覆盖全部方块、面、物品、角色和手臂，引�
   expect(builtinAssets.some((a) => a.type === 'builtin-arm-model')).toBe(true);
   for (const asset of builtinAssets)
     for (const id of assetDependencies(asset)) expect(ids.has(id), `${asset.id} → ${id}`).toBe(true);
+});
+
+it('Classic 像素源保留植物轮廓、桶内容和十六色羊毛的独立视觉语义', () => {
+  const texture = (id: string) => builtinAssets.find((asset) => asset.id === id);
+  const terrainFor = (face: FaceMaterial) =>
+    builtinTerrainTextures.find(
+      (candidate) => candidate.id === terrainMaterials.find((material) => material.faceMaterial === face)?.textureId,
+    )!;
+  for (const face of [
+    FaceMaterial.Sapling,
+    FaceMaterial.TallGrass,
+    FaceMaterial.Flower,
+    FaceMaterial.Mushroom,
+    FaceMaterial.SugarCane,
+    FaceMaterial.DeadBush,
+    FaceMaterial.RedFlower,
+    FaceMaterial.RedMushroom,
+  ]) {
+    const terrain = terrainFor(face);
+    expect(terrain, `missing terrain texture ${face}`).toBeDefined();
+    expect(terrain.payload.pixels).toContain(0);
+    expect(terrain.payload.pixels.filter((pixel) => pixel !== 0).length).toBeLessThan(180);
+  }
+  const mushroom = terrainFor(FaceMaterial.Mushroom);
+  const redMushroom = terrainFor(FaceMaterial.RedMushroom);
+  const bounds = (pixels: readonly number[]) => {
+    const filled = pixels.flatMap((pixel, index) => (pixel === 0 ? [] : [[index % 16, Math.floor(index / 16)]]));
+    return {
+      minX: Math.min(...filled.map(([x]) => x)),
+      maxX: Math.max(...filled.map(([x]) => x)),
+      minY: Math.min(...filled.map(([, y]) => y)),
+      maxY: Math.max(...filled.map(([, y]) => y)),
+    };
+  };
+  expect(bounds(mushroom.payload.pixels)).toEqual({ minX: 4, maxX: 11, minY: 5, maxY: 15 });
+  expect(bounds(redMushroom.payload.pixels)).toEqual(bounds(mushroom.payload.pixels));
+  expect(mushroom.payload.palette[2][0] - mushroom.payload.palette[2][1]).toBeLessThan(50);
+  expect(mushroom.payload.pixels.slice(0, 10 * 16).filter((pixel) => pixel === 3)).toHaveLength(0);
+  expect(redMushroom.payload.pixels.slice(0, 10 * 16).filter((pixel) => pixel === 3)).toHaveLength(3);
+  const pixelAt = (face: FaceMaterial, x: number, y: number) => terrainFor(face).payload.pixels[y * 16 + x];
+  expect(pixelAt(FaceMaterial.WoodenDoor, 0, 0)).toBe(3);
+  expect(pixelAt(FaceMaterial.WoodenDoor, 11, 8)).toBe(4);
+  expect(pixelAt(FaceMaterial.Ladder, 0, 4)).toBe(0);
+  expect(pixelAt(FaceMaterial.Ladder, 2, 4)).not.toBe(0);
+  expect(pixelAt(FaceMaterial.Ladder, 8, 6)).toBe(2);
+  expect(pixelAt(FaceMaterial.Fence, 3, 3)).toBe(3);
+  expect(pixelAt(FaceMaterial.Fence, 5, 4)).toBe(1);
+  expect(terrainMaterials.find((material) => material.faceMaterial === FaceMaterial.Ladder)?.renderMode).toBe('cutout');
+  expect(pixelAt(FaceMaterial.TallGrass, 4, 5)).toBe(3);
+  expect(pixelAt(FaceMaterial.TallGrass, 7, 4)).toBe(0);
+  expect(pixelAt(FaceMaterial.TallGrass, 11, 7)).toBe(3);
+  expect(pixelAt(FaceMaterial.Flower, 7, 5)).toBe(3);
+  expect(pixelAt(FaceMaterial.Flower, 5, 5)).toBe(1);
+  expect(pixelAt(FaceMaterial.Flower, 7, 8)).toBe(1);
+  expect(pixelAt(FaceMaterial.Mushroom, 5, 9)).toBe(4);
+  expect(pixelAt(FaceMaterial.Mushroom, 7, 10)).toBe(3);
+  const topGrass = terrainFor(FaceMaterial.GrassTop);
+  const sideGrass = terrainFor(FaceMaterial.GrassSide);
+  expect(pixelAt(FaceMaterial.GrassTop, 2, 2)).toBe(2);
+  expect(pixelAt(FaceMaterial.GrassTop, 8, 4)).toBe(4);
+  expect(topGrass.payload.palette.slice(1).map(([, green]) => green)).toSatisfy(
+    (greens) => Math.max(...greens) - Math.min(...greens) <= 30,
+  );
+  expect(pixelAt(FaceMaterial.GrassSide, 3, 1)).toBe(5);
+  expect(pixelAt(FaceMaterial.GrassSide, 3, 4)).toBeLessThanOrEqual(3);
+  expect(sideGrass.payload.palette.slice(1).map(([, green]) => green)).toSatisfy(
+    (greens) => Math.max(...greens) - Math.min(...greens) <= 58,
+  );
+  const bucketTextures = ['bucket', 'water-bucket', 'milk-bucket', 'lava-bucket'].map((id) =>
+    texture(`builtin:texture:${id}:detail`)!,
+  );
+  expect(new Set(bucketTextures.map((asset) => JSON.stringify((asset as { payload: unknown }).payload))).size).toBe(4);
+  const woolTextures = [
+    'white',
+    'orange',
+    'magenta',
+    'light-blue',
+    'yellow',
+    'lime',
+    'pink',
+    'gray',
+    'light-gray',
+    'cyan',
+    'purple',
+    'blue',
+    'brown',
+    'green',
+    'red',
+    'black',
+  ].map((color) => texture(`builtin:texture:${color}-wool:detail`)!);
+  expect(new Set(woolTextures.map((asset) => JSON.stringify((asset as { payload: unknown }).payload))).size).toBe(16);
+  expect(texture('builtin:texture:leather:detail')).not.toEqual(texture('builtin:texture:raw-porkchop:detail'));
+});
+
+it('植物、食物与桶内容使用语义色板，工具仍保留原有材质色板', () => {
+  const texture = (id: string) => builtinAssets.find((asset) => asset.id === `builtin:texture:${id}:detail`);
+  const paletteOf = (id: string) => {
+    const asset = texture(id);
+    if (!asset || asset.type !== 'pixel-texture') throw new Error(`missing pixel source: ${id}`);
+    return asset.payload.palette;
+  };
+  const flower = paletteOf('flower');
+  expect(flower[16]).toEqual([190, 52, 48]);
+  expect(flower[8]).toEqual([68, 124, 57]);
+  expect(paletteOf('red-mushroom')[16]).toEqual([190, 52, 48]);
+  expect(paletteOf('sugar-cane')[9]).toEqual([91, 154, 70]);
+  expect(paletteOf('water-bucket')[18]).toEqual([42, 109, 145]);
+  expect(paletteOf('lava-bucket')[16]).toEqual([190, 52, 48]);
+  expect(paletteOf('golden-apple')[13]).toEqual([219, 171, 43]);
+  expect(paletteOf('redstone-dust')[16]).toEqual([190, 52, 48]);
+  expect(paletteOf('compass')[18]).toEqual([42, 109, 145]);
+  expect(paletteOf('clock')[16]).toEqual([190, 52, 48]);
+  expect(paletteOf('painting')[18]).toEqual([42, 109, 145]);
+  expect(paletteOf('cocoa-beans')[2]).toEqual([103, 62, 37]);
+  expect(paletteOf('wood-pickaxe')[8]).toEqual([97, 116, 119]);
+});
+
+it('红石、指南针、时钟、画作和可可豆保持各自的像素结构', () => {
+  const pixelsOf = (id: string) => {
+    const asset = builtinAssets.find((candidate) => candidate.id === `builtin:texture:${id}:detail`);
+    if (!asset || asset.type !== 'pixel-texture') throw new Error(`missing pixel source: ${id}`);
+    return asset.payload.pixels;
+  };
+  const compass = pixelsOf('compass');
+  expect(compass[7 * 32 + 16]).toBe(16);
+  expect(compass[22 * 32 + 12]).toBe(18);
+  expect(pixelsOf('redstone-dust').filter((color) => color === 16).length).toBeGreaterThan(12);
+  expect(pixelsOf('painting')).toContain(18);
+  expect(pixelsOf('cocoa-beans').filter((color) => color === 2).length).toBeGreaterThan(10);
 });

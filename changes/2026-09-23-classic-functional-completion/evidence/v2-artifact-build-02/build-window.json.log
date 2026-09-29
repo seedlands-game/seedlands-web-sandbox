@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "8894f626-5da4-4e7e-8844-a188b3d6d58f",
+  "pid": 19752,
+  "startedAt": "2026-09-25T14:29:55.261Z",
+  "windowId": "8894f626-5da4-4e7e-8844-a188b3d6d58f",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-02/build-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T14:30:19.167Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T14:29:55.262Z",
+      "loadAverage": [
+        2.62841796875,
+        2.86328125,
+        3.154296875
+      ],
+      "freeMemoryBytes": 85098496,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:30:00.265Z",
+      "loadAverage": [
+        2.73779296875,
+        2.8818359375,
+        3.1591796875
+      ],
+      "freeMemoryBytes": 176324608,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:30:05.266Z",
+      "loadAverage": [
+        2.9189453125,
+        2.9169921875,
+        3.169921875
+      ],
+      "freeMemoryBytes": 73531392,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:30:10.268Z",
+      "loadAverage": [
+        3.08544921875,
+        2.951171875,
+        3.18017578125
+      ],
+      "freeMemoryBytes": 845594624,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:30:15.271Z",
+      "loadAverage": [
+        3.3984375,
+        3.01806640625,
+        3.2021484375
+      ],
+      "freeMemoryBytes": 80166912,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T14:30:19.166Z",
+      "loadAverage": [
+        3.4462890625,
+        3.0341796875,
+        3.20654296875
+      ],
+      "freeMemoryBytes": 2136047616,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

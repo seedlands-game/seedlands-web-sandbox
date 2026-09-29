@@ -1,4 +1,3 @@
-import { createChunkKernel, makeChunkStaged } from '../compute/chunk-kernel';
 import { createHaloKernel, createHaloStaged } from '../compute/halo-kernel';
 import { createMeshKernelInput, runMeshDescriptorKernel } from '../compute/mesh-kernel';
 import { createMeshPackKernel, runMeshPackKernel } from '../compute/mesh-pack-kernel';
@@ -7,13 +6,15 @@ import { batchCompactMeshData } from '@seedlands/stdlib/world/mesh-batching';
 import type { WorldComputeKernels } from '@seedlands/stdlib/server/compute/world-compute-task';
 import type { WorkerKernelState } from './wasm-kernel-loader';
 import { createWorldgenProviderRegistry } from '@seedlands/kernel/spatial';
-import { createClassicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
+import type { KernelWorldgenProvider } from '@seedlands/kernel/spatial';
 
-export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernels {
+export function worldKernelAdapter(
+  state: WorkerKernelState,
+  worldgenProvider: KernelWorldgenProvider,
+): WorldComputeKernels {
   const { memory, selected } = state;
-  const generateChunk = memory && selected.includes('w02') ? createChunkKernel(memory) : makeChunkStaged;
   const kernels: WorldComputeKernels = {
-    providers: createWorldgenProviderRegistry([createClassicWorldgenProvider(generateChunk)]),
+    providers: createWorldgenProviderRegistry([worldgenProvider]),
     prepareHalo: createHaloStaged,
     now: () => performance.now(),
   };
@@ -21,10 +22,10 @@ export function worldKernelAdapter(state: WorkerKernelState): WorldComputeKernel
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
   if (selected.includes('w04') || selected.includes('w05'))
     kernels.meshChunk = (options) => {
-      if (memory.failed) return meshChunk(options);
+      if (options.geometry || memory.failed || !options.semantics) return meshChunk(options);
       try {
         const input = createMeshKernelInput(options);
-        return runMeshDescriptorKernel(memory, input.window, input.fluidWindow);
+        return runMeshDescriptorKernel(memory, input.window, input.fluidWindow, options.semantics);
       } catch {
         memory.failed = true;
         return meshChunk(options);

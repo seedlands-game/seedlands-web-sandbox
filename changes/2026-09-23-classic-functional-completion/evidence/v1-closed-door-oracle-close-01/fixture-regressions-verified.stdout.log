@@ -1,0 +1,3 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 --reporter=json --outputFile=changes/2026-09-23-classic-functional-completion/evidence/v1-closed-door-oracle-close-01/fixture-regressions-verified.json.log
+2:40:37 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+JSON report written to /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v1-closed-door-oracle-close-01/fixture-regressions-verified.json.log

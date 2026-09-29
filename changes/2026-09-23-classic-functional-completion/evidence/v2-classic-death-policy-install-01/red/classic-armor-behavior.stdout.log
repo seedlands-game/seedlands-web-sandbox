@@ -1,0 +1,32 @@
+1:05:19 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts (6 tests | 1 failed) 59ms
+   × Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player 13ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts > Classic direct Vitals 致死一次结算四容器、剩余护甲耐久并保留 player
+TypeError: Registered Structure host ports are unavailable.
+ ❯ createRegisteredGameplayStructure packages/stdlib/src/server/gameplay/gameplay-structure-runtime.ts:31:11
+     29|   if (!enabled) return null;
+     30|   if (!options.callbacks.getLoadedCell || !options.callbacks.prepareVo…
+     31|     throw new TypeError('Registered Structure host ports are unavailab…
+       |           ^
+     32|   const composition = options.composition!;
+     33|   const semantics = gameplayContentFromComposition(composition).voxelS…
+ ❯ createGameplayRegisteredRuntimes packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts:91:21
+ ❯ new GameplayRuntime packages/stdlib/src/server/gameplay/gameplay-runtime.ts:163:24
+ ❯ new GameplayRuntime apps/web/tests/fixtures/classic/content.ts:117:5
+ ❯ createFullClassicWorld apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts:38:10
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts:122:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  01:05:19
+   Duration  1.21s (transform 864ms, setup 0ms, import 1.07s, tests 59ms, environment 0ms)
+

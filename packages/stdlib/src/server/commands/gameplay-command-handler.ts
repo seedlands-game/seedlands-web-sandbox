@@ -166,7 +166,11 @@ export async function executeGameplayCommand(
     case 'select-slot': {
       const state = server.getActorModeState(playerId(source));
       if (server.hasGameplayComposition && state?.mode === 'creative') {
-        if (!Number.isSafeInteger(command.slot) || command.slot < 0 || command.slot >= 8)
+        if (
+          !Number.isSafeInteger(command.slot) ||
+          command.slot < 0 ||
+          command.slot >= state.creativeCatalog.hotbar.length
+        )
           throw new TypeError('Creative slot is invalid.');
         return executeModeCommand(
           source,

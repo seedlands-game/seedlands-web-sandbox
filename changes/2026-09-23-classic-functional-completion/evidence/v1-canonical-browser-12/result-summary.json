@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "stage": "V1-CANONICAL-BROWSER-12",
+  "runId": "v1-canonical-browser-12-87e64e0b",
+  "status": "PASS",
+  "sourceSha": "87e64e0b244a971540227b2d829b950362797816",
+  "sourceDigest": "c5a6bafe5ba3c7b96b78f79502083795426cdca32826f181f84416baf46c6c3b",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e",
+  "artifactReceiptSha256": "551dc1c4bbac44a590f2899a68bc483d22ede667a140bda123bae9d2a57fe6c7",
+  "performanceWindowId": "2401a5ed-b68b-48c7-93f5-138046e9629a",
+  "startedAt": "2026-09-25T08:28:40.549Z",
+  "endedAt": "2026-09-25T08:34:09.921Z",
+  "commandExitCode": 0,
+  "playwright": { "passed": 2, "failed": 0, "skipped": 1, "retries": 0 },
+  "stages": { "C0": "PASS", "C1": "PASS", "C2": "PASS", "C3": "PASS", "C4": "PASS", "C5": "PASS" },
+  "v1": {
+    "audioSettings": "PASS",
+    "waterPlaceAndCollect": "PASS",
+    "doorClosedProbeAndEntryRetreat": "PASS",
+    "doorToggleMeshCollisionTraverseAndBothHalves": "PASS",
+    "jukeboxPlaceAndRecordInsert": "PASS",
+    "mediaFactProjectionAndHeadlessAudio": "PASS",
+    "restoreEpochStateAndResume": "PASS",
+    "ejectStopAndWorldAudioRelease": "PASS"
+  },
+  "restoreEvidence": {
+    "beforeAuthorityEpoch": "seedlands:classic-canonical-runtime-v11:1:world:0",
+    "afterAuthorityEpoch": "seedlands:classic-canonical-runtime-v11:2:world:0",
+    "doorBeforeAndAfter": [95, 96],
+    "jukeboxBeforeAndAfter": 67,
+    "worldRevisionBeforeAndAfter": 146
+  },
+  "pageErrors": [],
+  "failedResponses": [],
+  "artifactPostCheck": {
+    "status": "PASS",
+    "windowId": "fc715cf2-caaf-4eea-9c16-e5ed80a73557",
+    "files": 276,
+    "diskFilesIncludingReceipt": 277,
+    "treeClean": true
+  },
+  "notRun": ["cua-human-audio", "ci", "build"]
+}

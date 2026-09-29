@@ -4,6 +4,7 @@ import type { ComputeWorkerPort } from '../../../src/client/compute/compute-work
 import type { ComputeLane } from '../../../../../packages/stdlib/src/runtime/compute-task-queue';
 import { CHUNK_SIZE } from '../../../../../packages/stdlib/src/world/voxel';
 import { testWorldgenProvider } from './fixtures/worldgen-provider';
+import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/blocks';
 
 class FakeWorker implements ComputeWorkerPort {
   onmessage: ((event: MessageEvent<unknown>) => void) | null = null;
@@ -29,12 +30,17 @@ describe('BrowserComputeRuntime', () => {
       onFluidCandidate: () => undefined,
     });
 
-    const finding = runtime.findSafeSpawn(7, 3, testWorldgenProvider, null);
+    const finding = runtime.findSafeSpawn(7, 3, testWorldgenProvider, null, overworldVoxelSemantics);
     const general = workers.find(({ lane }) => lane === 'general')!.worker;
     const task = (general.posts[0] as { task: { taskId: number; category: string; payload: unknown } }).task;
     expect(task).toMatchObject({
       category: 'chunk-generation',
-      payload: { kind: 'find-safe-spawn', provider: testWorldgenProvider, starterEcology: null },
+      payload: {
+        kind: 'find-safe-spawn',
+        provider: testWorldgenProvider,
+        starterEcology: null,
+        voxelSemantics: overworldVoxelSemantics,
+      },
     });
     general.onmessage?.({
       data: {

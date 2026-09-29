@@ -1,0 +1,54 @@
+Checking formatting...
+All matched files use Prettier code style!
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/pickup-refresh-contract.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/affected.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/affected.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/classic-types.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/code-staged.patch: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/code-staged.paths: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/dependency-setup.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/eslint.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format-final.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/evidence-format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/final-selfcheck-01.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/final-selfcheck-01.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/root-types.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/scoped-diff.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/git-35-equipment-pickup-refresh/validation-argv.txt: OK
+{
+  "status": "PASS",
+  "codeCommit": "1afd8e6ba111936d7d04c449ea234cc2f573cac8",
+  "sourceTree": "dd63b1a168fe5633bc2052ec9dab8b707eb3d80c",
+  "patchSha256": "7264b34a917ba6dfd1090ee4845590184f95cc3efc16f5f75a3d4aa8f022fb3e",
+  "sourceManifest": {
+    "entries": 5,
+    "sha256": "b2c4a472ef766b41d788f801f249d8a4a4f7bd2814e5b896f2c36140f3e0620a"
+  },
+  "evidenceManifest": {
+    "entries": 25,
+    "sha256": "e78e7913881cd327038fb6eda4b64db62a82696e23f175a9cdc156df4f57a2da"
+  },
+  "affected": "PASS_7_FILES_74_TESTS",
+  "static": "PASS",
+  "firstSelfcheck": "RETAINED_METADATA_FAIL",
+  "browser19": "FAIL",
+  "firstIronInventoryPickup": "NOT_PROVEN",
+  "build11Run": false,
+  "browser20Run": false,
+  "indexClean": true
+}

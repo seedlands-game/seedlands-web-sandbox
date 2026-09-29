@@ -1,0 +1,54 @@
+12:56:55 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts (2 tests | 2 failed) 4ms
+     × keeps the longest Browser-16 leg grounded and reachable inside the existing 45 second budget 3ms
+     × keeps every frozen V2 leg on the supported floor and clear of uncleared fixture voxels 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts > Classic V2 equipment grounded route > keeps the longest Browser-16 leg grounded and reachable inside the existing 45 second budget
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts:119:50
+    117| describe('Classic V2 equipment grounded route', () => {
+    118|   it('keeps the longest Browser-16 leg grounded and reachable inside t…
+    119|     expect(EQUIPMENT_RESOURCE_WALK_OPTIONS.jump).toBe(false);
+       |                                                  ^
+    120|     const result = simulateProductionGroundRoute(EQUIPMENT_RESOURCE_WA…
+    121|     expect(result.distance).toBeGreaterThanOrEqual(LONGEST_BROWSER_16_…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts > Classic V2 equipment grounded route > keeps every frozen V2 leg on the supported floor and clear of uncleared fixture voxels
+AssertionError: expected 50 to be 34 // Object.is equality
+
+- Expected
++ Received
+
+- 34
++ 50
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts:166:25
+    164|     });
+    165|
+    166|     expect(legs.length).toBe(34);
+       |                         ^
+    167|     for (const leg of legs) {
+    168|       expect(routeNeighborhoodInsideFloor(leg.from, leg.to)).toBe(true…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  12:56:55
+   Duration  157ms (transform 59ms, setup 0ms, import 72ms, tests 4ms, environment 0ms)
+

@@ -2,6 +2,7 @@ import { CHUNK_SIZE, chunkKey, floorDiv, remeshChunkKeysForEdit } from '../../wo
 import type { ServerChunk, WorldCommitResult } from '../game-server-types';
 import { compareChunkKeys } from '../world-transaction-commit';
 import type { FluidCandidate, FluidCellWrite } from './fluid-transaction';
+import type { PreparedWorldCommitMetadata } from '../world-edit-batch-plan';
 
 const emptyResult = (worldRevision: number): WorldCommitResult => ({
   committed: false,
@@ -29,9 +30,10 @@ export function commitFluidCandidate(options: {
   candidate: FluidCandidate;
   chunks: Map<string, ServerChunk>;
   worldRevision: number;
-  addMutationCount(count: number): void;
-  setWorldRevision(revision: number): void;
+  prepareCommitMetadata(worldRevision: number, mutationCount: number): PreparedWorldCommitMetadata;
 }): WorldCommitResult {
+  const inputMutationCount = options.candidate.consumedFrontier.length;
+  const canonicalWriteCount = options.candidate.writes.length;
   const writesByChunk = new Map<string, FluidCellWrite[]>();
   for (const write of options.candidate.writes) {
     const [x, y, z] = write.position;
@@ -46,6 +48,21 @@ export function commitFluidCandidate(options: {
   if (!plans.length) return emptyResult(options.worldRevision);
   if (plans.some((plan) => !plan.chunk)) throw new Error('Accepted fluid candidate references an unloaded chunk.');
   const worldRevision = options.worldRevision + 1;
+  if (
+    !Number.isSafeInteger(options.worldRevision) ||
+    options.worldRevision < 0 ||
+    options.worldRevision >= Number.MAX_SAFE_INTEGER
+  )
+    throw new RangeError('Fluid world revision capacity is exhausted or invalid.');
+  for (const plan of plans)
+    if (
+      !Number.isSafeInteger(plan.chunk!.revision) ||
+      plan.chunk!.revision < 0 ||
+      plan.chunk!.revision >= Number.MAX_SAFE_INTEGER
+    )
+      throw new RangeError(`Fluid Chunk revision capacity is exhausted or invalid: ${plan.key}`);
+  const metadata = options.prepareCommitMetadata(worldRevision, canonicalWriteCount);
+  metadata.validate();
   const meshChunks = new Set<string>();
   let min: [number, number, number] | null = null;
   let max: [number, number, number] | null = null;
@@ -66,6 +83,38 @@ export function commitFluidCandidate(options: {
       fluid: write.fluid,
     })),
   }));
+  const result: WorldCommitResult = {
+    committed: true,
+    worldRevision,
+    structuralChange: {
+      type: 'voxel-region-changed',
+      actorId: 'fluid-v2',
+      worldRevision,
+      mutationCount: canonicalWriteCount,
+      chunks: plans.map((plan) => plan.key),
+      chunkRevisions: plans.map((plan) => ({ key: plan.key, revision: plan.chunk!.revision + 1 })),
+      meshChunks: [...meshChunks].sort(compareChunkKeys),
+      bounds: { min: min!, max: max! },
+    },
+    semanticEvents: [],
+    collisionDelta,
+    metrics: {
+      timingStatus: 'not-collected-hot-path',
+      inputMutationCount,
+      canonicalWriteCount,
+      dirtyChunkCount: plans.length,
+      meshInvalidationCount: meshChunks.size,
+      structuralEventCount: 1,
+      semanticEventCount: 0,
+      mutationPayloadBytes: canonicalWriteCount * 18,
+      mutationCapacityBytes: canonicalWriteCount * 18,
+      validationMs: 0,
+      resolveMs: 0,
+      applyMs: 0,
+      commitMs: 0,
+    },
+  };
+  metadata.apply();
   for (const { writes, chunk } of plans) {
     for (const write of writes) {
       const index = fluidWriteIndex(chunk!, write);
@@ -76,39 +125,7 @@ export function commitFluidCandidate(options: {
     chunk!.dirty = true;
     chunk!.materialized = true;
   }
-  options.setWorldRevision(worldRevision);
-  options.addMutationCount(options.candidate.writes.length);
-  return {
-    committed: true,
-    worldRevision,
-    structuralChange: {
-      type: 'voxel-region-changed',
-      actorId: 'fluid-v2',
-      worldRevision,
-      mutationCount: options.candidate.writes.length,
-      chunks: plans.map((plan) => plan.key),
-      chunkRevisions: plans.map((plan) => ({ key: plan.key, revision: plan.chunk!.revision })),
-      meshChunks: [...meshChunks].sort(compareChunkKeys),
-      bounds: { min: min!, max: max! },
-    },
-    semanticEvents: [],
-    collisionDelta,
-    metrics: {
-      timingStatus: 'not-collected-hot-path',
-      inputMutationCount: options.candidate.consumedFrontier.length,
-      canonicalWriteCount: options.candidate.writes.length,
-      dirtyChunkCount: plans.length,
-      meshInvalidationCount: meshChunks.size,
-      structuralEventCount: 1,
-      semanticEventCount: 0,
-      mutationPayloadBytes: options.candidate.writes.length * 18,
-      mutationCapacityBytes: options.candidate.writes.length * 18,
-      validationMs: 0,
-      resolveMs: 0,
-      applyMs: 0,
-      commitMs: 0,
-    },
-  };
+  return result;
 }
 
 const compareWrites = (left: FluidCellWrite, right: FluidCellWrite) =>

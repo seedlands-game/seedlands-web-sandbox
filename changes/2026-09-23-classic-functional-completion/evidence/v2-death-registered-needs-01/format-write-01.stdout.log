@@ -1,0 +1,5 @@
+packages/stdlib/src/server/gameplay/modules/needs-state-port.ts 39ms
+packages/stdlib/src/server/gameplay/gameplay-runtime.ts 32ms (unchanged)
+packages/stdlib/tests/server/registered-needs-death.test.ts 28ms
+changes/2026-09-23-classic-functional-completion/spec.md 58ms (unchanged)
+changes/2026-09-23-classic-functional-completion/death-needs-contract.md 5ms (unchanged)

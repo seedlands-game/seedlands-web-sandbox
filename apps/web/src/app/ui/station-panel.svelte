@@ -21,6 +21,7 @@
     onactivate: (address: InventoryUiSlot) => void;
     oncraft: (batch: boolean) => void;
   } = $props();
+  let recipeBookOpen = $state(false);
   const result = $derived(station.recipes.find((recipe) => recipe.matchesGrid));
 </script>
 
@@ -86,21 +87,23 @@
     </div>
   {/if}
   {#if station.kind === 'workbench'}
-    <details class="station-recipe-book">
+    <details class="station-recipe-book" bind:open={recipeBookOpen}>
       <summary>配方手册 <span>查看摆放图</span></summary>
-      <div class="station-recipes">
-        {#each station.recipes as recipe (recipe.id)}
-          <article>
-            <strong>{recipe.name}</strong>
-            {#if recipe.pattern.length}<div class="recipe-pattern" aria-label={`${recipe.name}摆放图`}>
-                {#each recipe.pattern as item (item.slot)}<span title={item.name}
-                    ><ItemIcon itemId={item.itemId} /></span
-                  >{/each}
-              </div>{/if}
-            <small>{recipe.requirements}</small>
-          </article>
-        {/each}
-      </div>
+      {#if recipeBookOpen}
+        <div class="station-recipes">
+          {#each station.recipes as recipe (recipe.id)}
+            <article data-recipe={recipe.id}>
+              <strong>{recipe.name}</strong>
+              {#if recipe.pattern.length}<div class="recipe-pattern" aria-label={`${recipe.name}摆放图`}>
+                  {#each recipe.pattern as item (item.slot)}<span title={item.name}
+                      ><ItemIcon itemId={item.itemId} /></span
+                    >{/each}
+                </div>{/if}
+              <small>{recipe.requirements}</small>
+            </article>
+          {/each}
+        </div>
+      {/if}
     </details>
   {/if}
 </section>

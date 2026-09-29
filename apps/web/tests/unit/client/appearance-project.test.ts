@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { builtinAssets } from '../../../src/client/presentation/asset-catalog';
+import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
+import { terrainMaterial } from '../../../src/client/presentation/terrain-assets';
 import {
+  MAX_APPEARANCE_THUMBNAILS,
   createEmptyAppearanceProject,
   resolveAppearanceAssets,
   validateAppearanceProject,
 } from '../../../src/client/presentation/appearance-project';
+import { builtinItemBindings } from '../../../src/client/presentation/asset-catalog';
 import {
   decodeAppearancePackage,
   encodeAppearancePackage,
@@ -55,6 +59,32 @@ function staticTriangleGlb(): Blob {
 }
 
 describe('外观项目', () => {
+  it('当前完整物品目录的派生缩略图不受用户资产上限阻断', () => {
+    expect(builtinItemBindings.length).toBeGreaterThan(128);
+    expect(builtinItemBindings.length).toBeLessThanOrEqual(MAX_APPEARANCE_THUMBNAILS);
+    const thumbnail = 'data:image/png;base64,AA==';
+    const project = validateAppearanceProject({
+      ...createEmptyAppearanceProject(),
+      thumbnails: Object.fromEntries(builtinItemBindings.map(({ modelId }) => [modelId, thumbnail])),
+    });
+    expect(Object.keys(project.thumbnails)).toHaveLength(builtinItemBindings.length);
+  });
+
+  it('旧火炬纹理覆盖在没有显式火头覆盖时兼容继承到火头', () => {
+    const handleId = terrainMaterial(FaceMaterial.Torch)!.textureId;
+    const flameId = terrainMaterial(FaceMaterial.TorchFlame)!.textureId;
+    const handle = builtinAssets.find((asset) => asset.id === handleId)!;
+    if (handle.type !== 'pixel-texture') throw new Error('Missing torch texture fixture');
+    const override = {
+      ...structuredClone(handle),
+      source: 'user' as const,
+      revision: handle.revision + 1,
+      payload: { ...structuredClone(handle.payload), palette: [[3, 2, 1], ...handle.payload.palette.slice(1)] },
+    };
+    const resolved = resolveAppearanceAssets({ ...createEmptyAppearanceProject(), assets: [override] });
+    expect(resolved.find((asset) => asset.id === flameId)).toEqual({ ...override, id: flameId });
+  });
+
   it('接受受限的用户覆盖，并把模型材质覆盖投影为原材质标识', () => {
     const model = builtinAssets.find((asset) => asset.type === 'builtin-actor-model')!;
     const material = builtinAssets.find(
@@ -157,14 +187,14 @@ describe('动画项目包的模型引用', () => {
   it('拒绝不存在的模型和片段，允许真实片段往返', async () => {
     const project = {
       ...createEmptyAppearanceProject(),
-      animationBindings: { settler: { modelId: 'actor', clips: { idle: 'Idle' } } },
+      animationBindings: { pig: { modelId: 'actor', clips: { idle: 'Idle' } } },
     };
     await expect(encodeAppearancePackage(project, [])).rejects.toThrow(/模型/);
-    const bytes = await readFile(new URL('../../../public/models/voxel-settler-animated.glb', import.meta.url));
+    const bytes = await readFile(new URL('../../fixtures/skinned-actor.glb', import.meta.url));
     const models = [{ id: 'actor', name: '角色.glb', revision: 1, blob: new Blob([new Uint8Array(bytes)]) }];
     const encoded = await encodeAppearancePackage(project, models);
     expect((await decodeAppearancePackage(encoded)).project.animationBindings).toEqual(project.animationBindings);
-    const invalid = { ...project, animationBindings: { settler: { modelId: 'actor', clips: { attack: 'Missing' } } } };
+    const invalid = { ...project, animationBindings: { pig: { modelId: 'actor', clips: { attack: 'Missing' } } } };
     await expect(encodeAppearancePackage(invalid, models)).rejects.toThrow(/片段/);
     const payload = JSON.parse(await encoded.text()) as { project: typeof invalid };
     payload.project = invalid;

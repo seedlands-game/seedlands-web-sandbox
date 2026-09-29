@@ -1,0 +1,323 @@
+diff --git a/apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts b/apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts
+index b5bae8e0359d797e2db11d53445699f5f8d62f85..d13916040fb82ce427c207a2051729145d0a59a7 100644
+--- a/apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts
++++ b/apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts
+@@ -204,26 +204,26 @@ describe('Classic closed-door collision oracle', () => {
+     expect(result.observed).toMatchObject({ position: upper, adjacent });
+   });
+ 
+-  it('keeps strict upper and lower faces observable from the existing post-traverse side', () => {
+-    const afterTraverse: Point = [door[0] + 1.5, 32.6, door[2] + 0.5];
++  it('keeps strict upper and lower faces observable from the ideal post-traverse point', () => {
++    const idealPostTraverse: Point = [door[0] + 1.5, 32.6, door[2] + 0.5];
+     const farSidePlan = createClosedDoorProbePlan({
+       door,
+       collision,
+-      playerPosition: afterTraverse,
++      playerPosition: idealPostTraverse,
+       playerHalfWidth,
+     });
+     const upper: Point = [door[0], door[1] + 1, door[2]];
+-    const upperCenter = convergeDoorAim(afterTraverse, [-90, -20], door, upper);
++    const upperCenter = convergeDoorAim(idealPostTraverse, [-90, -20], door, upper);
+     expect(upperCenter.attempt).toBeLessThanOrEqual(180);
+     expect(upperCenter.observed).toMatchObject({ position: upper, adjacent: [71, 32, 0] });
+ 
+-    const lowerCenter = convergeDoorAim(afterTraverse, [-90, -20], door, door);
++    const lowerCenter = convergeDoorAim(idealPostTraverse, [-90, -20], door, door);
+     expect(lowerCenter.attempt).toBeLessThanOrEqual(180);
+     expect(lowerCenter.observed).toMatchObject({ position: door, adjacent: [71, 31, 0] });
+ 
+     for (const target of [upper, door]) {
+       const adjacent = doorEntryAdjacent(farSidePlan, target);
+-      const result = convergeDoorAim(afterTraverse, [-90, -20], door, target, adjacent);
++      const result = convergeDoorAim(idealPostTraverse, [-90, -20], door, target, adjacent);
+       expect(result.attempt).toBeLessThanOrEqual(180);
+       expect(result.observed).toMatchObject({ position: target, adjacent });
+     }
+diff --git a/apps/web/tests/e2e/classic-support/door-collision-oracle.ts b/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+index a977154a1327abc2b71946a3e8c28085bf9f3d6c..0fdb7da943652caa3ca94038d0560a2424fec136 100644
+--- a/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
++++ b/apps/web/tests/e2e/classic-support/door-collision-oracle.ts
+@@ -89,12 +89,26 @@ export function doorEntryAdjacent(plan: ClosedDoorProbePlan, target: Point): Poi
+   return Object.freeze(adjacent);
+ }
+ 
++export function doorExitAdjacent(plan: ClosedDoorProbePlan, target: Point): Point {
++  if (!finitePoint(target) || !target.every(Number.isInteger))
++    throw new TypeError('Door exit target must contain finite integer coordinates.');
++  const adjacent = [...target] as [number, number, number];
++  adjacent[plan.normalAxis] += plan.direction;
++  return Object.freeze(adjacent);
++}
++
+ export function isOutsideDoorTargetOnEntrySide(plan: ClosedDoorProbePlan, target: Point, position: Point): boolean {
+   if (!finitePoint(target) || !finitePoint(position)) return false;
+   const nearBoundary = target[plan.normalAxis] + (plan.direction === 1 ? 0 : 1);
+   return plan.direction * (position[plan.normalAxis] - nearBoundary) < 0;
+ }
+ 
++export function isOutsideDoorTargetOnExitSide(plan: ClosedDoorProbePlan, target: Point, position: Point): boolean {
++  if (!finitePoint(target) || !finitePoint(position)) return false;
++  const exitBoundary = target[plan.normalAxis] + (plan.direction === 1 ? 1 : 0);
++  return plan.direction * (position[plan.normalAxis] - exitBoundary) > 0;
++}
++
+ export function assessClosedDoorProbe(
+   plan: ClosedDoorProbePlan,
+   before: ClosedDoorProbeObservation,
+diff --git a/apps/web/tests/e2e/classic-support/door-exit-face.test.ts b/apps/web/tests/e2e/classic-support/door-exit-face.test.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..951eaca4d1fe2555b069fc9e1373a974b9ff19f9
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/door-exit-face.test.ts
+@@ -0,0 +1,135 @@
++import { describe, expect, it } from 'vitest';
++import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
++import { Voxel } from '@seedlands/stdlib/world/voxel';
++import { traceVoxelTarget, type VoxelTarget } from '../../../src/client/presentation/voxel-target';
++import {
++  createClosedDoorProbePlan,
++  doorExitAdjacent,
++  isOutsideDoorTargetOnExitSide,
++  type ClosedDoorProbePlan,
++} from './door-collision-oracle';
++import { reachedRouteTarget } from './route-progress';
++import { matchesVoxelAim, mouseCorrectionToPoint, voxelAimPoint } from './target-aim';
++import type { Point } from './scenario';
++
++const lower: Point = [70, 31, 0];
++const upper: Point = [70, 32, 0];
++const browser13Eye: Point = [71.475830078125, 32.60000228881836, 0.502830982208252];
++const browser13View = [-270.17999999999995, -48.37] as const;
++const playerBody = bodyConfigFor('player').localAabb;
++const playerHalfWidth = Math.max(-playerBody.min.x, playerBody.max.x, -playerBody.min.z, playerBody.max.z);
++
++const directionForView = ([yaw, pitch]: readonly [number, number]): [number, number, number] => {
++  const yawRadians = (yaw * Math.PI) / 180;
++  const pitchRadians = (pitch * Math.PI) / 180;
++  const horizontal = Math.cos(pitchRadians);
++  return [-Math.sin(yawRadians) * horizontal, Math.sin(pitchRadians), -Math.cos(yawRadians) * horizontal];
++};
++
++const targetDoor = (player: Point, view: readonly [number, number]): VoxelTarget | null =>
++  traceVoxelTarget(
++    [...player],
++    directionForView(view),
++    (x, y, z) =>
++      x === lower[0] && z === lower[2] && (y === lower[1] || y === upper[1]) ? (y === lower[1] ? 93 : 94) : Voxel.Air,
++    (voxel) => voxel === 93 || voxel === 94,
++  );
++
++const applyCorrection = (
++  view: readonly [number, number],
++  correction: Readonly<{ dx: number; dy: number }>,
++): readonly [number, number] => [view[0] - correction.dx * 0.13, view[1] - correction.dy * 0.13];
++
++const converge = (player: Point, initialView: readonly [number, number], target: Point, adjacent?: Point) => {
++  let view = initialView;
++  for (let attempt = 1; attempt <= 180; attempt += 1) {
++    const observed = targetDoor(player, view);
++    if (matchesVoxelAim(observed, target, adjacent)) return { attempt, observed };
++    view = applyCorrection(view, mouseCorrectionToPoint(player, view, voxelAimPoint(target, adjacent)));
++  }
++  return { attempt: 180, observed: targetDoor(player, view) };
++};
++
++const planFor = (collision: Readonly<{ min: Point; max: Point }>, playerPosition: Point): ClosedDoorProbePlan =>
++  createClosedDoorProbePlan({ door: lower, collision, playerPosition, playerHalfWidth });
++
++describe('Classic door exit face', () => {
++  it('reproduces Browser-13 center occlusion and converges on the strict lower exit face', () => {
++    const plan = planFor({ min: [0.8125, 0, 0], max: [1, 1, 1] }, [67, 32.6, 0.5]);
++    const center = converge(browser13Eye, browser13View, lower);
++    expect(center.attempt).toBe(180);
++    expect(center.observed).toMatchObject({ position: upper });
++
++    const adjacent = doorExitAdjacent(plan, lower);
++    const strict = converge(browser13Eye, browser13View, lower, adjacent);
++    expect(strict.attempt).toBeLessThanOrEqual(180);
++    expect(strict.observed).toMatchObject({ position: lower, adjacent });
++  });
++
++  it('retains the narrower ideal-eye center result without treating it as the Browser-13 domain', () => {
++    const idealEye: Point = [71.5, 32.6, 0.5];
++    const result = converge(idealEye, [-90, -20], lower);
++    expect(result.attempt).toBeLessThanOrEqual(180);
++    expect(result.observed).toMatchObject({ position: lower, adjacent: [71, 31, 0] });
++  });
++
++  it.each([
++    {
++      collision: { min: [0.8125, 0, 0] as Point, max: [1, 1, 1] as Point },
++      player: [67, 32.6, 0.5] as Point,
++      expected: [71, 31, 0] as Point,
++    },
++    {
++      collision: { min: [0.8125, 0, 0] as Point, max: [1, 1, 1] as Point },
++      player: [74, 32.6, 0.5] as Point,
++      expected: [69, 31, 0] as Point,
++    },
++    {
++      collision: { min: [0, 0, 0.8125] as Point, max: [1, 1, 1] as Point },
++      player: [70.5, 32.6, -3] as Point,
++      expected: [70, 31, 1] as Point,
++    },
++    {
++      collision: { min: [0, 0, 0.8125] as Point, max: [1, 1, 1] as Point },
++      player: [70.5, 32.6, 4] as Point,
++      expected: [70, 31, -1] as Point,
++    },
++  ])('derives an orthogonal exit adjacent for $player', ({ collision, player, expected }) => {
++    const directionalPlan = planFor(collision, player);
++    const adjacent = doorExitAdjacent(directionalPlan, lower);
++    expect(adjacent).toEqual(expected);
++    expect(adjacent.reduce((sum, value, axis) => sum + Math.abs(value - lower[axis]), 0)).toBe(1);
++
++    const exitCenter: [number, number, number] = [adjacent[0] + 0.5, 32.6000001, adjacent[2] + 0.5];
++    const boundary: [number, number, number] = [lower[0] + 0.5, 32.5999999, lower[2] + 0.5];
++    boundary[directionalPlan.normalAxis] =
++      lower[directionalPlan.normalAxis] + (directionalPlan.direction === 1 ? 1 : 0);
++    expect(isOutsideDoorTargetOnExitSide(directionalPlan, lower, exitCenter)).toBe(true);
++    expect(isOutsideDoorTargetOnExitSide(directionalPlan, lower, boundary)).toBe(false);
++  });
++
++  it('requires the complete target voxel exit boundary across the tightened route domain', () => {
++    const plan = planFor({ min: [0.8125, 0, 0], max: [1, 1, 1] }, [67, 32.6, 0.5]);
++    const route = [lower[0] + 1.5, lower[2] + 0.5] as const;
++    const adjacent = doorExitAdjacent(plan, lower);
++    for (const position of [
++      [71.441, 32.60000228881836, 0.5],
++      [71.5, 32.599998474121094, 0.579],
++      [71.53, 32.6, 0.421],
++    ] as Point[]) {
++      expect(reachedRouteTarget(position, route, 'KeyW', 0.06, 0.08)).toBe(true);
++      expect(isOutsideDoorTargetOnExitSide(plan, lower, position)).toBe(true);
++      const result = converge(position, browser13View, lower, adjacent);
++      expect(result.attempt).toBeLessThanOrEqual(180);
++      expect(result.observed).toEqual(expect.objectContaining({ position: lower, adjacent }));
++    }
++    expect(isOutsideDoorTargetOnExitSide(plan, lower, [70.99, 32.6, 0.5])).toBe(false);
++    expect(isOutsideDoorTargetOnExitSide(plan, lower, [71, 32.6, 0.5])).toBe(false);
++  });
++
++  it('rejects malformed targets instead of fabricating an exit face', () => {
++    const plan = planFor({ min: [0.8125, 0, 0], max: [1, 1, 1] }, [67, 32.6, 0.5]);
++    expect(() => doorExitAdjacent(plan, [70, 31.5, 0])).toThrow('finite integer');
++    expect(isOutsideDoorTargetOnExitSide(plan, lower, [Number.NaN, 32.6, 0.5])).toBe(false);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/v1-slice.ts b/apps/web/tests/e2e/classic-support/v1-slice.ts
+index dbe2e79b6e8eff5593998dc0e367fea7ac9f4231..3757530aed7cfe2e4221e9fdaf678e98583b5ae4 100644
+--- a/apps/web/tests/e2e/classic-support/v1-slice.ts
++++ b/apps/web/tests/e2e/classic-support/v1-slice.ts
+@@ -12,7 +12,9 @@ import {
+   assessClosedDoorProbe,
+   createClosedDoorProbePlan,
+   doorEntryAdjacent,
++  doorExitAdjacent,
+   isOutsideDoorTargetOnEntrySide,
++  isOutsideDoorTargetOnExitSide,
+   type ClosedDoorProbePlan,
+   type ClosedDoorProbeObservation,
+ } from './door-collision-oracle';
+@@ -285,12 +287,23 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
+   expect((await voxelGeometry(page, opened[0]))?.collision).toHaveLength(0);
+   const openedMesh = await expectDoorMesh(page, opened[0], 2, worldEpoch);
+   expect(openedMesh.chunkRevision).toBeGreaterThan(closedMesh.chunkRevision);
+-  await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], { jump: true });
++  const traversed = await walkTo(page, [door.lower[0] + 1.5, door.lower[2] + 0.5], {
++    jump: true,
++    tolerance: 0.06,
++    corridorTolerance: 0.08,
++    pulseMs: 80,
++  });
++  const authorityTraversed = await doorAuthorityObservation(page);
++  expect(traversed.onGround && !traversed.colliding).toBe(true);
++  expect(authorityTraversed.onGround && !authorityTraversed.colliding).toBe(true);
++  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, traversed.player)).toBe(true);
++  expect(isOutsideDoorTargetOnExitSide(closedDoorPlan, door.lower, authorityTraversed.position)).toBe(true);
+ 
+   await aimAtVoxelWithRealMouse(page, door.upper);
+   await clickCanvasCenter(page, 'right');
+   await expect.poll(() => doorPair(page)).toEqual(placed);
+-  await aimAtVoxelWithRealMouse(page, door.lower);
++  const exitAdjacent = doorExitAdjacent(closedDoorPlan, door.lower);
++  await aimAtVoxelWithRealMouse(page, door.lower, exitAdjacent);
+   await clickCanvasCenter(page, 'right');
+   await expect.poll(() => doorPair(page)).toEqual(opened);
+ 
+diff --git a/changes/2026-09-23-classic-functional-completion/door-exit-face-contract.md b/changes/2026-09-23-classic-functional-completion/door-exit-face-contract.md
+new file mode 100644
+index 0000000000000000000000000000000000000000..6f781e901c281bc1ec18524898ae5e6ccd0acafe
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/door-exit-face-contract.md
+@@ -0,0 +1,48 @@
++# V1 门出口面闭环合同
++
++阶段：`V1-DOOR-EXIT-FACE-CLOSE-01 / V1-DOOR-EXIT-FACE-CLOSE-02`
++
++状态：fixture、确定性与静态验证完成；Browser-13 保持 FAIL，真实 Browser GREEN 待新 identity。
++
++## Close-02 收口
++
++- Close-01 的 `.06/.08` 到达域测试只证明三个实际位置满足 route 与完整 voxel 出口谓词，未从这些 position
++  运行瞄准闭环；该结论不得表述为“整个到达域已证明 lower face 收敛”。
++- 同一 position 循环必须复用 `doorExitAdjacent(plan, lower)` 与 Browser-13 view，逐点调用既有 `converge`，
++  并要求 180 次内得到 exact lower position 与 exact non-null exit adjacent。不得增加预算、改变模拟或新增算法。
++- Close-01 合同、证据和 SOURCE/MANIFEST/delivery 在修改前原字节保存到
++  `evidence/v1-door-exit-face-close-02/prior-release/`；本段及新 evidence 明确 supersession，不重写旧 PASS 含义。
++
++## Browser-13 RED
++
++- 唯一窗口 `ca001977-b334-4fbc-962f-254c2bc44a46` 在 V2 开始前失败。玩家 eye 为
++  `[71.475830078125,32.60000228881836,0.502830982208252]`，view 为
++  `[-270.17999999999995,-48.37]`；期望 lower `[70,31,0]`，最后 12 次只观察 upper `[70,32,0]`。
++- 从该 eye 指向 lower center `[70.5,31.5,0.5]` 的射线在门东侧平面 `x=71` 时高度为
++  `32.063623889792346`，会先进入 upper voxel。失败发生在 lower 右键前，不能把累计
++  `interactionAttempts=15` 当作该动作已分派。
++- 旧确定性用例只证明理想 eye `[71.5,32.6,0.5]` 与初始 view `[-90,-20]` 可在 14 次内命中 lower center；
++  该结论保留但不外推到 Browser-13 真值。
++
++## 可验证行为
++
++1. `doorExitAdjacent(plan, target)` 只由同一 `ClosedDoorProbePlan.normalAxis/direction` 推导：在法向轴加
++   `direction`，其余坐标不变。本例 lower 得到 `[71,31,0]`。输入 target 必须是有限整数。
++2. 穿门仍以真实键盘走向现有 `[door.lower[0]+1.5,door.lower[2]+0.5]`；仅把参数收紧为
++   `tolerance=0.06`、`corridorTolerance=0.08`、`pulseMs=80`，沿用既有 45 秒默认 timeout。
++3. walk 完成后，client snapshot 与 Authority observation 都必须 `onGround && !colliding`，并由纯谓词确认其
++   法向位置严格越过 lower 完整 voxel 的出口边界；不能只证明越过薄 collision box。
++4. upper 关闭仍走现有真实 Pointer Lock/右键。lower 重开必须调用
++   `aimAtVoxelWithRealMouse(page, door.lower, doorExitAdjacent(plan, door.lower))`；只有同轮 target-card、Harness
++   target 与非空正交 adjacent 精确匹配才点击，随后原 opened pair 断言不变。
++5. 确定性测试使用生产 `traceVoxelTarget`、实际门 pair `93/94` 和 Browser-13 eye/view，证明 center 控制在
++   180 次内不能得到 lower，而 exit face 能收敛；覆盖 X/Z 两轴正负方向、真实/理想 eye、`.06/.08` 到达域、
++   小 y 浮点误差和完整 voxel 出口判定。
++
++## 范围与停止线
++
++- 只修改 `v1-slice.ts`、`door-collision-oracle.ts`、其定向测试和本 change 文档；不改 production、
++  `aim.ts`、`target-aim.ts`、mouse/harness/scenario、V2 equipment helper、坐标、timeout 或预算。
++- 原 closed probe、entry face、upper/lower 覆盖、Media、V2、C0-C5 均保留。若现有真实输入无法在冻结路线内证明
++  exit face，则停止并交 root，不添加 fallback。
++- 本阶段预算上限 3 小时；传统工作量约 0.25-0.5 PD。credits、费率、API 等价费用和额度占比 unknown。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 52a379d119cf3f69dcb6f4729b866e2b576ade96..d1c2b1c75fd4ed9427fd317937c0297ed49f0f59 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -137,6 +137,15 @@ identity；C5 必须把 C4
+ baseline。不得修改坐标、timeout、瞄准预算、V1 路线或生产 oracle；本收口仍不提供 Browser、实战耐久、死亡掉落
+ 或重生证据。
+ 
++Browser-13 在 V2 前暴露 V1 门出口侧 lower center 被 upper 遮挡：真实 eye
++`[71.475830078125,32.60000228881836,0.502830982208252]` 指向 lower center 的射线在门东侧平面仍位于 upper
++voxel，180 次校正只能观察 `[70,32,0]`，lower click 未发送。V1 door exit face 子片必须复用同一
++`ClosedDoorProbePlan.normalAxis/direction` 推导出口侧正交 adjacent；穿门仍走原 `[lower.x+1.5,lower.z+0.5]`
++目标，但使用已审阅的 `.06/.08/80ms` 参数，并在真实 client/Authority 均 grounded、non-colliding 且越过完整
++target voxel 出口边界后，保留 upper 真实关闭，再以 lower+exit adjacent 的同轮 exact target/face 读回发送右键。
++不得增加路线、timeout、180 aim 预算或修改生产 ray/aim；V2、Media 与 C0-C5 顺序不变，确定性/static GREEN 不等于
++Browser GREEN。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-34-EQUIPMENT-MINING-AIM",
+  "status": "EVIDENCE_FROZEN",
+  "baseline": "4dccab8980b546dc577ac5ace8c9d8131782b324",
+  "codeCommit": "a987a672df865f4687898ed15b3b5e7f239d6273",
+  "sourceTree": "85b1156726457866f5c53011fd72deff01b3ffb1",
+  "stagedPatchSha256": "86e6b0f21fe17d58bb0889520126ac5b4c9e5d02f7f1176961600a7effb250c3",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "58e0927d988559de57e33066eaa495e6d0b2510382b3cdf7649ca11a4ea0dc9c"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 19,
+    "sha256": "3eb229dbcf1b115680c2442acdc829bbc973365bb90c1cec8cfaced029f39c0d",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "frozenInputs": {
+    "close08": {
+      "sourceManifestSha256": "f8c6c1e377c5ec969c0b96c9ab86d3228072425c23c31c877dc9fed5b70e7126",
+      "evidenceManifestSha256": "59551bbb1730f6389d408a610aa7c5283c1a2e79aa29d1e796cf4e65ef158c75",
+      "deliverySha256": "21ae942a886634fac9860c5015f4d704797ee9499ba400bd2f2d93e06b63622e"
+    },
+    "browser18": {
+      "sourceManifestSha256": "4edb9c9c77f0eb28894cbf8bbc9574bbb47561a6f3f00d5358037c5af3eaa6c3",
+      "evidenceManifestSha256": "47184fbf8a0a940f1fd7bac4e46234410db8d066c45b1493435433902903806c",
+      "deliverySha256": "525756c4d184db85af6a521c4755e2765bcdb0994cf9821ef79fb54fd673c4f0",
+      "status": "FAIL_AFTER_RESOURCES_PLACED_BEFORE_FIRST_MINING_INPUT",
+      "traceBytes": 438432955,
+      "traceParts": 9,
+      "traceMaxPartBytes": 52428800,
+      "traceSha256": "93321ab6b0deefa228ed7e84c125a0269a8b88ab23d36c67f7d74298c7fa420e"
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git34-equipment-mining-aim",
+    "head": "4dccab8980b546dc577ac5ace8c9d8131782b324",
+    "stagedPaths": 5,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "affected": {
+      "window": "git-34-equipment-mining-aim-affected",
+      "status": "PASS_7_FILES_73_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "22039d3afb6afbfe1d220a6473380af0ce4f191041b5611457f41e0ed6366320",
+      "receiptSha256": "b78ef330e371c6b556c7a57c19c26d32e1743c7f74aad64578d6fed351f26eb3"
+    }
+  },
+  "static": {
+    "classicTypes": {
+      "window": "git-34-equipment-mining-aim-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "1d9c22f02830d05ea36f87fe320cf6948e052804a69202195c77ccbdde7c6a1c"
+    },
+    "rootTypes": {
+      "window": "git-34-equipment-mining-aim-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "9565022be5d7710b1d14d211315e3b873de80139e4668eaf50927d33a1372449"
+    },
+    "eslint": {
+      "window": "git-34-equipment-mining-aim-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "1e42d7e0cfc628ab9cbcd795d23d82f462d6c11156632d30f4a9c34019f78c6e"
+    },
+    "format": {
+      "window": "git-34-equipment-mining-aim-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "68f5fff20a87c36dec7244e28aae02f1a9ffb01d78effd00764147b8a5b626b8"
+    },
+    "scopedDiff": {
+      "window": "git-34-equipment-mining-aim-scoped-diff",
+      "status": "PASS_5_PATHS",
+      "stdoutSha256": "e16d26ae6fab00cc472938c34695b5e06bdd989db7e5a5623cbd62880ff2f9a9",
+      "receiptSha256": "cbd2c6f9b6b311dd098934307fa091810996e87b340d24e3d72eb4f1185156e0"
+    },
+    "metadataFormat": {
+      "window": "git-34-equipment-mining-aim-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "6a7c761d0c0ebf1c69b75a509be0b805be636fb26200e9d74b05f78665ba8f37"
+    }
+  },
+  "finalSelfcheck": {
+    "window": "git-34-equipment-mining-aim-final-selfcheck",
+    "status": "PASS",
+    "stdoutSha256": "4361736dbac3ef82e9804b2707bb65d99fe9533244d434b9060e0349d732bae1",
+    "receiptSha256": "cc2de980611030d000bc180e0a56b65ed2b492820ebea892fdecb20ed86b6024"
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "browser19Run": false,
+    "build10Run": false,
+    "productGreenClaimed": false,
+    "longTermDocsUpdated": false
+  },
+  "notRun": ["build10", "browser19", "cua", "devserver", "ci", "deploy", "merge"]
+}

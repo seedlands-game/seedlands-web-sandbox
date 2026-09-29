@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "a84e8cb8-32ea-4e62-a2e8-cda4821cdd19",
+  "pid": 52817,
+  "startedAt": "2026-09-25T20:28:06.371Z",
+  "windowId": "a84e8cb8-32ea-4e62-a2e8-cda4821cdd19",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-harness-oracle-01/green/delivery-format-final2.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T20:28:06.707Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T20:28:06.372Z",
+      "loadAverage": [
+        2.64208984375,
+        3.19921875,
+        3.22216796875
+      ],
+      "freeMemoryBytes": 166150144,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T20:28:06.705Z",
+      "loadAverage": [
+        2.64208984375,
+        3.19921875,
+        3.22216796875
+      ],
+      "freeMemoryBytes": 258211840,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

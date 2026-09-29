@@ -3,6 +3,8 @@ import type { AuthorityMeshPayload } from '@seedlands/stdlib/server/protocol/aut
 import type { PendingMeshTask } from '../app-contracts';
 import type { MeshRequestPriority } from './mesh-request-priority';
 import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import type { VoxelSemanticsDefinition } from '@seedlands/stdlib/world/voxel-semantics';
+import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 
 export type MeshDispatchRequest = Readonly<{
   traceId: string;
@@ -42,6 +44,8 @@ export type WorkerInput = Readonly<{
   fluid?: Uint8Array;
   overlays: readonly WorkerOverlay[];
   preparationDiagnostics?: WorkerPreparationDiagnostics;
+  voxelSemantics?: readonly VoxelSemanticsDefinition[];
+  voxelGeometry?: readonly VoxelGeometryDefinitionV1[];
 }>;
 
 export type MeshTaskDispatch = Readonly<{
@@ -162,6 +166,8 @@ export function createWorkerFirstDispatch(
       haloRevision: task.haloRevision,
       generatorVersion: task.generatorVersion,
       provider: prepared.provider,
+      ...(prepared.voxelSemantics ? { voxelSemantics: prepared.voxelSemantics } : {}),
+      ...(prepared.voxelGeometry ? { voxelGeometry: prepared.voxelGeometry } : {}),
       ...(prepared.canonical ? { canonical: prepared.canonical.buffer } : {}),
       ...(prepared.fluid ? { fluid: prepared.fluid.buffer } : {}),
       overlays: prepared.overlays.map((overlay) => ({

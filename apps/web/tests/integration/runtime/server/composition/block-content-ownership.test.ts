@@ -1,10 +1,10 @@
 import { expect, it } from 'vitest';
-import { definePack, defineBlockRulesModule } from '@seedlands/stdlib/mod-api';
+import { defineBlockActionsModule, definePack, defineBlockRulesModule } from '@seedlands/stdlib/mod-api';
 import { assembleWorldPacks } from '@seedlands/stdlib/host';
 import { GameServer } from '../../../../fixtures/classic/content';
 import { executeGameplayCommand } from '../../../../../../../packages/stdlib/src/server/commands/gameplay-command-handler';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function world(hardness: number, omitRules = false) {
   const definitions = [
@@ -17,8 +17,9 @@ function world(hardness: number, omitRules = false) {
     },
   ];
   const rules = defineBlockRulesModule({ moduleId: 'test:block-rules', voxelDefinitions: definitions });
-  const modules = pack.modules.flatMap((module) =>
-    module.descriptor.id === 'seedlands:overworld-block-rules' ? (omitRules ? [] : [rules]) : [module],
+  const modules = classicGameplayDomainModules(
+    [omitRules ? 'seedlands:overworld-content' : 'test:block-rules'],
+    [defineBlockActionsModule(), rules],
   );
   const root = definePack({ id: 'test:block-world', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(

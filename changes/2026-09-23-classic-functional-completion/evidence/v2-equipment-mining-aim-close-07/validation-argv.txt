@@ -1,0 +1,27 @@
+V2-EQUIPMENT-MINING-AIM-CLOSE-07
+baseline=4dccab8980b546dc577ac5ace8c9d8131782b324
+owned editable paths=5
+
+credible-red
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-red-03 SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/red-03-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/red-03.stdout.log'
+
+green-final
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-green-final-02 SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/green-final-02-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/green-final-02.stdout.log'
+
+affected-final
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-affected-final SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/affected-final-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 2>&1 | tee <evidence>/affected-final.stdout.log'
+
+classic-types
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-classic-types SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/classic-types-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm typecheck:classic 2>&1 | tee <evidence>/classic-types.stdout.log'
+
+root-types
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-root-types SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/root-types-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec tsc -p tsconfig.test.json --noEmit 2>&1 | tee <evidence>/root-types.stdout.log'
+
+eslint
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-eslint SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/eslint-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec eslint apps/web/tests/e2e/classic-support/equipment-journey-support.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts 2>&1 | tee <evidence>/eslint.stdout.log'
+
+format-final
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-format-final SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/format-final-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec prettier --check <five owned editable paths> 2>&1 | tee <evidence>/format-final.stdout.log'
+
+scoped-diff
+env SEEDLANDS_RESERVATION_RUN=v2-equipment-mining-aim-close-07-scoped-diff SEEDLANDS_RESERVATION_EVIDENCE=<evidence>/scoped-diff-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'git diff --check on five owned paths; require each path dirty; require harness.ts, aim.ts, target-aim.ts, scenario.test.ts and canonical-runtime-v11.json clean'

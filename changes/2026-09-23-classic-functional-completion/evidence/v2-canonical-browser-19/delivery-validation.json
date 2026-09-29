@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-19",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-19-f282da95",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-f282da95",
+  "sourceSha": "f282da95833c5ff568b8b7a4caac7d7a7513514f",
+  "treeSha": "ad93a8e1afdbb461a32f7c87ab4b860fd44a2074",
+  "sourceDigest": "c8463ed87574e1ff1ad4d1c06beb4649fc518ee6815e071a289aec1187c0e865",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "fd010be92fce57ffebb254b0eb2b653a385922d22234856d85317074e39d79e0",
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "builtAt": "2026-09-28T05:47:05.058Z",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "315d511e23cc9d7572bac0db3fc3f051af69c93f7f7ec56045d3c26f9ccefe00",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 52,
+    "sha256": "80fbb2c5b731a3f9659b1c5c46bf3d1fe805ae34f4ba30f53ee44b720dd64268",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "window": {
+    "id": "25700431-601a-4f4d-a294-d90574e3d4f7",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T05:59:07.361Z",
+    "endedAt": "2026-09-28T06:12:37.996Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "35a0465c00d1fe12af2414f41867ae8688346bcd616199defa30c2ee111f7c60"
+  },
+  "playwright": {
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1,
+    "mainStatus": "FAIL",
+    "nonClassicStatus": "SKIPPED_BY_RECEIPT",
+    "visualStatus": "NOT_RECORDED_IN_CLASSIC_RECEIPT",
+    "runnerStdoutFile": "NOT_RECORDED_AS_FILE"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_FIRST_IRON_CLEAR_AND_DROP_BEFORE_PICKUP",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v2-first-iron-pickup-route-timeout",
+    "target": [92.5, 2.5],
+    "resourceTarget": [92, 31, 2],
+    "sourceLocation": "apps/web/tests/e2e/classic-support/equipment-resource-route.ts:130",
+    "lastRecordedV2Phase": "stone-pickaxe",
+    "firstIronMouseDownSent": true,
+    "firstIronVoxelCleared": true,
+    "firstIronDropObserved": true,
+    "firstIronInventoryPickupConfirmed": false,
+    "routeKeySPulses": 17,
+    "routeKeyWPulses": 0,
+    "routeMouseMoves": 118,
+    "controllerBranchSerialized": false,
+    "diagnosisSha256": "6c2d17dc8fc805fedb4f6dc694ce7cf848566c59a8c0aec06cc11f5ff4cba1e6"
+  },
+  "notReached": [
+    "first-iron-inventory-pickup-confirmation",
+    "remaining-three-iron-mining-and-pickup",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "wrong-slot-no-change",
+    "swap-quickmove-and-close-settlement",
+    "C4",
+    "before-v2EquipmentPreSave",
+    "C5",
+    "save-restore-and-epoch-rotation"
+  ],
+  "notObserved": ["durability-1", "death", "equipment-drop", "respawn", "Cua", "human-audible-audio", "performance"],
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "routeControllerBranch": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "traceReadback": {
+    "consoleEvents": { "log": 1, "warning": 0, "error": 0 },
+    "pageErrorEvents": 0,
+    "networkResourceSnapshots": 1331,
+    "httpStatusAtLeast400": 0
+  },
+  "trace": {
+    "sizeBytes": 1041592835,
+    "parts": 20,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "09f89b6ee5e56bddbd7721d0cc9640e5e2dd2fca38b455d550474c1c7b1edcc7",
+    "partsManifestSha256": "28598d053ab1a3cac7170430130da5f0d196e41d268fc0ec16f220b3a292eb8d",
+    "reassemblyValidated": true,
+    "filesAtLeast100MB": 0
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-19-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-28T06:20:22.389Z",
+    "endedAt": "2026-09-28T06:20:25.713Z",
+    "files": 276,
+    "receiptSha256": "41e102866f6e8d762ce354afb90330d02d899433c9eb133f84befeb350eb7632",
+    "stdoutSha256": "e1c17455c136104b313fb50fae3d61d640cf9cbe2e4d0a996b3bac95e3b537aa"
+  },
+  "metadata": {
+    "initialFormatStatus": "FAIL",
+    "initialFormatStdoutSha256": "3c033399289572c2ee3e7ffa0664b912b7be80a40a76821cb70fff63f9fce85b",
+    "initialFormatReceiptSha256": "bdac0444565c26d1ad18e30a85a76e9359ee57e07bfc64cc4760fd443d485e20",
+    "formatWriteStatus": "PASS",
+    "formatWriteStdoutSha256": "e3611567bb3b0694c31a999595cc47f68770a2ce48175b85033f89447177d5b6",
+    "formatWriteReceiptSha256": "2c17afdd2f52c97d05ea1ec794de71817bae8f627418e8cb9156abc9c1e672d4",
+    "finalFormatStatus": "PASS",
+    "finalFormatStdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "finalFormatReceiptSha256": "80388f6fe8eda739668d968e746bc2300372a0cc1a33ffbd0b488321150d2b5b"
+  },
+  "deliveryFormat": {
+    "initialStatus": "FAIL",
+    "initialStdoutSha256": "7dcdec65eda03a1481743114e6d2d163466aefe49e32bdea699cdb64582c15b3",
+    "initialReceiptSha256": "88d5f367392f61cf4cef04453cd3dabccc46bcb51a63d833e3208af223857c07",
+    "writeStatus": "PASS",
+    "writeStdoutSha256": "9abd5336f06a62cac0f6c1097a353412e76f85c20d25ae52b95ca9125c9a2d35",
+    "writeReceiptSha256": "5e0eb4e36ecf662bccf6168079036b436236c5ba4745789ef49b8d2df66be466",
+    "finalStatus": "PASS",
+    "finalStdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "finalReceiptSha256": "475d993b8a56613ee7a75b9ea80a7b0081fa5fe83a8ea1fd97a69bfdea66f840"
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256": "07c243071b812af0fa24856f5edb1555ef0d3044dd0807b5af04cf75168d2798"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016"
+  },
+  "notRun": [
+    "build",
+    "second-browser-attempt",
+    "browser20",
+    "close09-implementation",
+    "tests",
+    "cua",
+    "ci",
+    "git",
+    "index",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

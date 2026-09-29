@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts (12 tests | 1 failed) 22ms
+     × despawns an actor only with all four containers configured to drop 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts > death inventory settlement series > despawns an actor only with all four containers configured to drop
+AssertionError: expected null to be undefined
+
+- Expected:
+undefined
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/death-inventory-settlement-series.test.ts:250:38
+    248|     const result = prepared.apply();
+    249|     expect(result.despawnedIds).toEqual(['creature']);
+    250|     expect(entities.get('creature')).toBeUndefined();
+       |                                      ^
+    251|     expect(entities.query({ type: 'world-item' }).map(({ stack }) => s…
+    252|       { itemId: 'sample:ore-0', count: 1 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 24 passed (25)
+   Start at  21:41:19
+   Duration  583ms (transform 248ms, setup 0ms, import 340ms, tests 37ms, environment 0ms)
+

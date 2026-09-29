@@ -23,6 +23,14 @@ export class FluidChunkActivationQueue {
       if (chunk) this.schedule(chunk);
     });
   }
+  restore(chunks: ReadonlyMap<string, ServerChunk>): void {
+    this.jobs.clear();
+    this.rotation = 0;
+    for (const key of this.activeKeys) {
+      const chunk = chunks.get(key);
+      if (chunk) this.schedule(chunk);
+    }
+  }
   schedule(chunk: ServerChunk): void {
     if (this.activeKeys.has(chunk.key) && !this.jobs.has(chunk.key)) this.jobs.set(chunk.key, { chunk, cursor: 0 });
   }

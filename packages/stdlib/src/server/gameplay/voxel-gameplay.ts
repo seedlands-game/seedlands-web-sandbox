@@ -4,7 +4,7 @@ export type VoxelGameplayDefinition = Readonly<{
   voxel: number;
   hardnessSeconds: number | null;
   minimumTier?: number;
-  preferredTool: 'axe' | 'pickaxe' | null;
+  preferredTool: 'axe' | 'pickaxe' | 'shovel' | null;
   drop: Readonly<ItemStack> | null;
   replaceable: boolean;
 }>;

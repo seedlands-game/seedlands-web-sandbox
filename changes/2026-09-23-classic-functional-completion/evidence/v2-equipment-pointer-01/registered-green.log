@@ -1,0 +1,43 @@
+6:24:22 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts (3 tests | 1 failed | 2 skipped) 15ms
+     × equips a non-Classic registered visor through the real inventory pointer action 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts > V2 equipment behavior RED > equips a non-Classic registered visor through the real inventory pointer action
+AssertionError: expected { success: true, value: { …(6) } } to deeply equal { success: true }
+
+- Expected
++ Received
+
+  {
+    "success": true,
++   "value": {
++     "actorId": "pilot",
++     "cursorRevision": 2,
++     "inventoryRevision": 3,
++     "kind": "pointer",
++     "success": true,
++     "version": 1,
++   },
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts:99:20
+     97|     });
+     98|
+     99|     expect(result).toEqual({ success: true });
+       |                    ^
+    100|     expect(runtime.getInventoryPointerView('pilot').armor.helmet).toEq…
+    101|       itemId: 'sample:visor',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  18:24:22
+   Duration  1.16s (transform 864ms, setup 0ms, import 1.07s, tests 15ms, environment 0ms)
+

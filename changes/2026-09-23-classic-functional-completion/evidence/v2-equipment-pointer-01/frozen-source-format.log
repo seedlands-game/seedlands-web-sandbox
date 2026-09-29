@@ -1,0 +1,5 @@
+packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts 61ms (unchanged)
+packages/stdlib/src/server/gameplay/modules/inventory-pointer-slot-state.ts 10ms (unchanged)
+packages/stdlib/tests/server/equipment-pointer-behavior.test.ts 26ms (unchanged)
+apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts 7ms (unchanged)
+changes/2026-09-23-classic-functional-completion/equipment-pointer-contract.md 17ms (unchanged)

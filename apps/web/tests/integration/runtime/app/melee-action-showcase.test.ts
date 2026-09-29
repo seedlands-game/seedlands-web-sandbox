@@ -22,7 +22,7 @@ it('体验场只清理所属目标并在夜间重建三只静止目标与一只�
     ...ids.dummies,
   ]);
   expect(commands).toContainEqual(
-    expect.objectContaining({ type: 'spawn-actor', id: ids.hostile, archetype: 'night-stalker' }),
+    expect.objectContaining({ type: 'spawn-actor', id: ids.hostile, archetype: 'zombie' }),
   );
   expect(new Set(MELEE_SHOWCASE_ENTITY_IDS).size).toBe(4);
   expect(commands).toContainEqual({ type: 'time-set', hours: 22 });

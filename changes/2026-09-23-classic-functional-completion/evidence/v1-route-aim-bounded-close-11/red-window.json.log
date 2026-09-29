@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v1-route-aim-bounded-close-11-red",
+  "pid": 11412,
+  "startedAt": "2026-09-28T09:14:35.865Z",
+  "windowId": "v1-route-aim-bounded-close-11-red",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-route-aim-bounded-close-11/red-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T09:14:36.940Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T09:14:35.866Z",
+      "loadAverage": [
+        2.5244140625,
+        2.65380859375,
+        2.7451171875
+      ],
+      "freeMemoryBytes": 1058865152,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T09:14:36.938Z",
+      "loadAverage": [
+        2.5244140625,
+        2.65380859375,
+        2.7451171875
+      ],
+      "freeMemoryBytes": 1018593280,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

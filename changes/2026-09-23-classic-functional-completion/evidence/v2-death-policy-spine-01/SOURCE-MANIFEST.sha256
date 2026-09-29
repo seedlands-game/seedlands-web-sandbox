@@ -1,0 +1,10 @@
+b4b20ee254098ab428d312718920ab5d79a51a83b100504b5ab29d80731da3c6  packages/stdlib/src/server/gameplay/modules/death-inventory-policy-module.ts
+f0ffac5b22459010499e7f62dfd670a124c2b5a42052543473c53f0e496b7f0c  packages/stdlib/src/server/gameplay/death-inventory-settlement.ts
+625258e7d2d761838cc3456409d07ce65c6ab3e993fb57ba0becf2ac96ff4c26  packages/stdlib/src/server/composition/mod-api.ts
+3431317ad97ea70f195d07668739dd2d668bb6d3dcf9bba345c4523e217cbcae  packages/stdlib/tests/server/death-inventory-policy-module.test.ts
+52ad6343262423aed927f001e09a754280da3bc2849bc71dba0539278addd02b  packages/stdlib/tests/server/death-inventory-settlement-series.test.ts
+80ef082aeaf5a5ae1edc4e7ffa2b44cc574243d4ce75e29363633d868b054a2d  packages/stdlib/tests/server/equipment-spine-contract.test.ts
+d728a3fe8b137b97aa016f2650edcde8b6e6503c09e85b6b33b667fb6bea1ed1  changes/2026-09-23-classic-functional-completion/death-policy-contract.md
+cc49d6533d81807dc9dbd5fb932d48175fff7d27fae4ba11cc4fc2c18d80aa12  changes/2026-09-23-classic-functional-completion/death-policy-evidence.md
+b63a4886f83f470dc8c374efeebdc38931a42e0fb66cdadbb3d27a865e78e067  changes/2026-09-23-classic-functional-completion/tasks.md
+e1a4f4f053eddf14eb2c8198b9b7bb3791d7fdddda9b44072f309e8f721b7a75  changes/2026-09-23-classic-functional-completion/execution-state.md

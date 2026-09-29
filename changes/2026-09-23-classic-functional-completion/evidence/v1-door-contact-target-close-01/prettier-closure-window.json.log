@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "2ec5186f-b655-4a13-a56d-f3467d784ac5",
+  "pid": 90835,
+  "startedAt": "2026-09-25T07:23:50.406Z",
+  "windowId": "2ec5186f-b655-4a13-a56d-f3467d784ac5",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-door-contact-target-close-01/prettier-closure-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T07:23:50.834Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T07:23:50.407Z",
+      "loadAverage": [
+        2.79052734375,
+        3.37890625,
+        3.45361328125
+      ],
+      "freeMemoryBytes": 274317312,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T07:23:50.833Z",
+      "loadAverage": [
+        2.79052734375,
+        3.37890625,
+        3.45361328125
+      ],
+      "freeMemoryBytes": 304807936,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

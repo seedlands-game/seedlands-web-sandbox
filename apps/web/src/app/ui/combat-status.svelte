@@ -3,8 +3,10 @@
   let { combat }: { combat: CombatUiProjection | undefined } = $props();
 </script>
 
-{#if combat}
-  <div id="combat-status" data-phase={combat.phase} aria-label="战斗节奏" class:ready={combat.phase === 'ready'}>
+{#if combat?.phase === 'ready'}
+  <div class="combat-ready-status" role="status">{combat.label}。{combat.hint}</div>
+{:else if combat}
+  <div id="combat-status" data-phase={combat.phase} aria-label="战斗节奏">
     <div class="combat-label">
       <span>{combat.label}{combat.comboStep > 0 ? ` · 第 ${combat.comboStep + 1} 击` : ''}</span>
       {#if combat.remainingSeconds > 0}<span class="combat-time">{combat.remainingSeconds.toFixed(1)}s</span>{/if}
@@ -48,15 +50,14 @@
     font-size: 10px;
     color: #d2cbc0;
   }
-  .ready {
-    opacity: 0.65;
-  }
-  .ready .combat-label {
-    justify-content: center;
-    color: #b9d6ce;
-  }
-  .ready progress {
-    opacity: 0.45;
+  .combat-ready-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   @media (max-height: 500px) {
     #combat-status {

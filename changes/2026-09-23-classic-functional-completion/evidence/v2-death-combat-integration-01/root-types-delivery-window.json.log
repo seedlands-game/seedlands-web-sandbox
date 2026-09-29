@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-combat-root-types-delivery",
+  "pid": 82053,
+  "startedAt": "2026-09-25T15:35:23.299Z",
+  "windowId": "v2-death-combat-root-types-delivery",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-combat-integration-01/root-types-delivery-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:35:26.462Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:35:23.300Z",
+      "loadAverage": [
+        5.78466796875,
+        5.14501953125,
+        4.10009765625
+      ],
+      "freeMemoryBytes": 80904192,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:35:26.460Z",
+      "loadAverage": [
+        5.6416015625,
+        5.1259765625,
+        4.09912109375
+      ],
+      "freeMemoryBytes": 981041152,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

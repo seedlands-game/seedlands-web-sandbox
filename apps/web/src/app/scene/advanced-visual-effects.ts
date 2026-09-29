@@ -3,15 +3,7 @@ import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { World } from '../world/world-runtime';
 import type { VoxelMaterials } from './voxel-materials';
 import type { LightingQualityBudget } from './advanced-lighting-budget';
-import {
-  LOCAL_LIGHT_RANGE,
-  localShadowCasterSignature,
-  localShadowNeedsUpdate,
-  reconcileLocalLightSlots,
-  selectNearestLanterns,
-  type LocalShadowCaster,
-  type VoxelPosition,
-} from './advanced-lighting-budget';
+import type { LocalShadowCaster } from './advanced-lighting-budget';
 import { StylizedPostProcessing } from './stylized-post-effect';
 import { clipReflectionProjection, reflectionTextureMatrix, setReflectedCameraPose } from './reflection-projection';
 import { reflectionPlaneAboveCamera, waterReflectionSurfaceY } from './water-reflection-plane';
@@ -32,6 +24,9 @@ export type VisualEffectsSnapshot = {
   postProcessing: boolean;
   shadowUpdateCount: number;
   shadowStableFrameCount: number;
+  blockLightReady: boolean;
+  blockLightSourceRevision: number | null;
+  blockLightRebuildCount: number;
 };
 
 class PlanarWaterReflection {
@@ -135,17 +130,10 @@ class PlanarWaterReflection {
 }
 
 export class AdvancedVisualEffects {
-  private readonly localLights: pc.Entity[];
   private readonly reflection: PlanarWaterReflection | null;
   private readonly postProcessing: StylizedPostProcessing | null;
   private scanElapsed = Number.POSITIVE_INFINITY;
-  private activeLocalLights = 0;
   private waterPlaneY: number | null = null;
-  private lightSlots: VoxelPosition[] = [];
-  private shadowWorldRevision = -1;
-  private shadowCasterSignature = '[]';
-  private shadowUpdatedThisFrame = false;
-  private shadowUpdateCount = 0;
   private shadowStableFrameCount = 0;
 
   constructor(
@@ -155,25 +143,6 @@ export class AdvancedVisualEffects {
     private readonly budget: LightingQualityBudget,
     materials: VoxelMaterials,
   ) {
-    this.localLights = Array.from({ length: budget.maxLocalLights }, (_, index) => {
-      const castsShadow = index < budget.maxShadowedLocalLights;
-      const entity = new pc.Entity(`Lantern Light ${index + 1}`);
-      entity.addComponent('light', {
-        type: 'omni',
-        color: new pc.Color(1, 0.49, 0.16),
-        intensity: 1.1,
-        range: LOCAL_LIGHT_RANGE,
-        castShadows: castsShadow,
-        shadowResolution: castsShadow ? budget.localShadowResolution : 128,
-        shadowType: pc.SHADOW_PCF1_32F,
-        shadowUpdateMode: pc.SHADOWUPDATE_NONE,
-        shadowBias: 0.18,
-        normalOffsetBias: 0.08,
-      });
-      entity.enabled = false;
-      app.root.addChild(entity);
-      return entity;
-    });
     this.reflection =
       budget.reflectionResolution > 0
         ? new PlanarWaterReflection(app, materials.water, budget.reflectionResolution, budget.reflectionFrameInterval)
@@ -191,48 +160,23 @@ export class AdvancedVisualEffects {
             : pc.TONEMAP_LINEAR;
   }
 
-  update(dt: number, shadowCasters: readonly LocalShadowCaster[] = []) {
-    this.shadowUpdatedThisFrame = false;
+  update(dt: number, _shadowCasters: readonly LocalShadowCaster[] = []) {
     this.scanElapsed += dt;
-    let slotsChanged = false;
     if (this.scanElapsed >= this.budget.scanIntervalSeconds) {
       this.scanElapsed = 0;
-      slotsChanged = this.scanNearbyVoxels();
-    }
-    const worldRevision = this.world.transactionDiagnostics.worldRevision;
-    const casterSignature = localShadowCasterSignature(
-      this.lightSlots,
-      this.budget.maxShadowedLocalLights,
-      shadowCasters,
-    );
-    const updateShadows = localShadowNeedsUpdate({
-      previousWorldRevision: this.shadowWorldRevision,
-      worldRevision,
-      previousCasterSignature: this.shadowCasterSignature,
-      casterSignature,
-      slotsChanged,
-    });
-    this.shadowWorldRevision = worldRevision;
-    this.shadowCasterSignature = casterSignature;
-    this.localLights.forEach((light) => {
-      if (light.light?.castShadows)
-        light.light.shadowUpdateMode = updateShadows ? pc.SHADOWUPDATE_THISFRAME : pc.SHADOWUPDATE_NONE;
-    });
-    if (updateShadows && this.activeLocalLights > 0 && this.budget.maxShadowedLocalLights > 0) {
-      this.shadowUpdatedThisFrame = true;
-      this.shadowUpdateCount += 1;
+      this.scanNearbyVoxels();
     }
     this.reflection?.update(this.camera, this.waterPlaneY);
-    if (this.shadowUpdatedThisFrame) this.shadowStableFrameCount = 0;
-    else this.shadowStableFrameCount += 1;
+    this.shadowStableFrameCount += 1;
   }
 
   get snapshot(): VisualEffectsSnapshot {
+    const blockLight = this.world.blockLightSnapshot;
     return {
-      activeLocalLights: this.activeLocalLights,
-      shadowedLocalLights: Math.min(this.activeLocalLights, this.budget.maxShadowedLocalLights),
-      localLightLimit: this.budget.maxLocalLights,
-      localShadowLimit: this.budget.maxShadowedLocalLights,
+      activeLocalLights: 0,
+      shadowedLocalLights: 0,
+      localLightLimit: 0,
+      localShadowLimit: 0,
       sunShadows: this.budget.sunShadowResolution > 0,
       sunShadowResolution: this.budget.sunShadowResolution,
       reflectionEnabled: this.reflection !== null,
@@ -242,33 +186,38 @@ export class AdvancedVisualEffects {
       reflectionRenderCount: this.reflection?.renderCount ?? 0,
       waterPlaneY: this.waterPlaneY,
       postProcessing: this.postProcessing !== null,
-      shadowUpdateCount: this.shadowUpdateCount,
+      shadowUpdateCount: 0,
       shadowStableFrameCount: this.shadowStableFrameCount,
+      blockLightReady: blockLight.ready,
+      blockLightSourceRevision: blockLight.ready ? this.world.transactionDiagnostics.worldRevision : null,
+      blockLightRebuildCount: blockLight.rebuildCount,
     };
   }
 
   destroy() {
-    this.localLights.forEach((light) => light.destroy());
     this.reflection?.destroy();
     this.postProcessing?.destroy();
   }
 
-  private scanNearbyVoxels(): boolean {
+  /** 0..1 block light for presentation consumers such as animated actors. */
+  sampleBlockLight(position: readonly [number, number, number]): number {
+    return this.world.sampleBlockLight(position) / 15;
+  }
+
+  private scanNearbyVoxels(): void {
     const position = this.camera.getPosition();
     const centerX = Math.floor(position.x);
     const centerY = Math.floor(position.y);
     const centerZ = Math.floor(position.z);
     const radius = Math.max(this.budget.horizontalScanRadius, this.budget.reflectionSearchRadius);
     const verticalRadius = this.budget.verticalScanRadius;
-    const lanterns: [number, number, number][] = [];
     let nearestWater: { surfaceY: number; distance: number } | null = null;
     for (let y = Math.max(0, centerY - verticalRadius); y <= centerY + verticalRadius; y += 1)
       for (let z = centerZ - radius; z <= centerZ + radius; z += 1)
         for (let x = centerX - radius; x <= centerX + radius; x += 1) {
           const horizontalDistance = (x + 0.5 - position.x) ** 2 + (z + 0.5 - position.z) ** 2;
           if (horizontalDistance > radius ** 2) continue;
-          const voxel = this.world.getVoxel(x, y, z);
-          if (voxel === Voxel.Lantern) lanterns.push([x, y, z]);
+          const voxel = this.world.getVoxelIfLoaded(x, y, z);
           if (
             this.reflection &&
             horizontalDistance <= this.budget.reflectionSearchRadius ** 2 &&
@@ -281,23 +230,6 @@ export class AdvancedVisualEffects {
             if (!nearestWater || distance < nearestWater.distance) nearestWater = { surfaceY, distance };
           }
         }
-    const selected = selectNearestLanterns([position.x, position.y, position.z], lanterns, {
-      horizontalRadius: this.budget.horizontalScanRadius,
-      verticalRadius,
-      limit: this.budget.maxLocalLights,
-    });
-    const slots = reconcileLocalLightSlots(this.lightSlots, selected, this.budget.maxLocalLights);
-    const slotsChanged =
-      slots.length !== this.lightSlots.length ||
-      slots.some((slot, index) => this.lightSlots[index]?.some((value, axis) => value !== slot[axis]));
-    this.lightSlots = slots;
-    this.activeLocalLights = slots.length;
-    this.localLights.forEach((light, index) => {
-      const voxel = slots[index];
-      light.enabled = voxel !== undefined;
-      if (voxel) light.setPosition(voxel[0] + 0.5, voxel[1] + 0.46, voxel[2] + 0.5);
-    });
     this.waterPlaneY = nearestWater?.surfaceY ?? null;
-    return slotsChanged;
   }
 }

@@ -1,16 +1,16 @@
 # 性能执行窗口
 
-本页保留后续浏览器 benchmark 和 Harness 性能采样的独占窗口设计。2026-09-16 架构冻结阶段不执行性能验收，以下脚本暂存在后续 Draft PR，当前 checkout 中不可调用。恢复前须重新审核源码、窗口和测量合同，不得把旧样本用作当前收益证据。固定职责标识为 `seedlands-performance-validator`，跨请求反复复用时才考虑经用户授权建立独立任务。
+本页定义浏览器 benchmark 和 Harness 性能采样的独占窗口。当前 Classic 真实路径入口为 `pnpm bench:runtime`，由 `scripts/benchmark-window.mjs` 持有机器级锁并调用唯一生产 C0–C5 旅程；旧样本不得用作当前收益证据。固定职责标识为 `seedlands-performance-validator`，跨请求反复复用时才考虑经用户授权建立独立任务。
 
 ## 调用
 
-待恢复的旧入口：
+兼容入口：
 
 ```text
 node scripts/with-benchmark-reservation.mjs <command> [args...]
 ```
 
-待恢复的新入口支持显式等待上限：
+当前入口支持显式等待上限：
 
 ```text
 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- <command> [args...]

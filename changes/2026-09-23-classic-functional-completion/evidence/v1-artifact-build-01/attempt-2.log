@@ -1,0 +1,30 @@
+$ node scripts/harness/artifact.mjs --build
+$ pnpm --filter @seedlands/web build
+$ pnpm packs:build && pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build
+$ node ../../scripts/build-gameplay-packs.mjs --out public/packs
+{"ok":true,"lockPath":"/private/tmp/seedlands-v1-acceptance-edafd0c9/apps/web/public/packs/packs.lock.json"}
+$ node ../../scripts/rust-kernel-artifact.mjs
+Rust source/artifact fingerprints verified.
+$ node scripts/render-prerendered-start-screen.mjs --check
+file:///private/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-prerender-quO0iC/entry.mjs:5954
+          throw new Error(`Missing builtin item material mapping: ${id}`);
+                ^
+
+Error: Missing builtin item material mapping: wooden-door
+    at file:///private/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-prerender-quO0iC/entry.mjs:5954:17
+    at file:///private/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-prerender-quO0iC/entry.mjs:5955:11
+    at file:///private/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-prerender-quO0iC/entry.mjs:5956:9
+    at Array.map (<anonymous>)
+    at file:///private/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-prerender-quO0iC/entry.mjs:5940:100
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async file:///private/tmp/seedlands-v1-acceptance-edafd0c9/apps/web/scripts/render-prerendered-start-screen.mjs:28:20
+
+Node.js v24.21.0
+[ELIFECYCLE] Command failed with exit code 1.
+/private/tmp/seedlands-v1-acceptance-edafd0c9/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 build: `pnpm packs:build && pnpm wasm:rust:verify && pnpm ssg:check && pnpm typecheck && vite build`
+Exit status 1
+[ELIFECYCLE] Command failed with exit code 1.
+BLOCKED: build:web failed: 1
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,16 @@
+10:27:33 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-restore-reference-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-restore-reference-01
+
+ ✓ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (13 tests | 10 skipped) 2127ms
+     ✓ resolves detached entity references across non-Classic restore without mutating state  827ms
+     ✓ validates and authorizes entity-reference inspection before resolving or observing existence  871ms
+     ✓ captures an entity-reference request before queued execution  428ms
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (6 tests) 3ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (8 tests | 7 skipped) 3ms
+
+ Test Files  3 passed (3)
+      Tests  10 passed | 17 skipped (27)
+   Start at  10:27:33
+   Duration  3.86s (transform 1.07s, setup 0ms, import 1.52s, tests 2.13s, environment 0ms)
+

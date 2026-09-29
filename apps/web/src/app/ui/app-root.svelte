@@ -74,6 +74,16 @@
   });
 </script>
 
+<svelte:head>
+  {#if shell.phase !== 'playing'}
+    <style>
+      #game {
+        visibility: hidden;
+      }
+    </style>
+  {/if}
+</svelte:head>
+
 <StartScreen
   {shell}
   {application}
@@ -139,9 +149,16 @@
     {#if hud.visible && debug.visible}<PresentedEntities entities={interaction.presentedEntities} />{/if}
     <div id="help" class="game-panel">
       {hud.mode === 'creative'
-        ? 'WASD 移动 · Space 上升 · Shift 下降 · 左/右键编辑 · 1–8 创造快捷栏 · E 内容目录 · M 地图'
-        : 'WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–8 快捷栏 · E 背包 · M 地图 · F3 指标 · F3+B 碰撞箱 · F4 命令'}
+        ? 'WASD 移动 · Space 上升 · Shift 下降 · 左/右键编辑 · 1–9 创造快捷栏 · E 内容目录 · M 地图'
+        : 'WASD 移动 · 空格跳跃 · 左/右键采集与放置 · 1–9 快捷栏 · E 背包 · M 地图 · F3 指标 · F3+B 碰撞箱 · F4 命令'}
     </div>
+    {#if shell.gameplay.progress}
+      <div id="world-progress" class="game-panel" aria-label="世界进度">
+        成就 {shell.gameplay.progress.achievements.length} · 采集
+        {shell.gameplay.progress.statistics['blocks-mined'] ?? 0} · 合成
+        {shell.gameplay.progress.statistics['items-crafted'] ?? 0}
+      </div>
+    {/if}
     <div id="survival-deck">
       <div id="held-item-name">
         {hud.hotbar[hud.selectedHotbarSlot]?.itemId ? hud.hotbar[hud.selectedHotbarSlot].name : ''}

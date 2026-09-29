@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-close16-null-static-final-02",
+  "pid": 60774,
+  "startedAt": "2026-09-28T19:07:32.192Z",
+  "windowId": "v2-close16-null-static-final-02",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/static-final-02-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T19:07:58.852Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T19:07:32.193Z",
+      "loadAverage": [
+        3.0146484375,
+        2.76708984375,
+        2.83544921875
+      ],
+      "freeMemoryBytes": 2957197312,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:37.195Z",
+      "loadAverage": [
+        3.49365234375,
+        2.8701171875,
+        2.87109375
+      ],
+      "freeMemoryBytes": 2161295360,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:42.197Z",
+      "loadAverage": [
+        3.4541015625,
+        2.8720703125,
+        2.87158203125
+      ],
+      "freeMemoryBytes": 2232156160,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:47.199Z",
+      "loadAverage": [
+        3.41748046875,
+        2.8740234375,
+        2.8720703125
+      ],
+      "freeMemoryBytes": 2057781248,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:52.202Z",
+      "loadAverage": [
+        3.3837890625,
+        2.8759765625,
+        2.87255859375
+      ],
+      "freeMemoryBytes": 2276556800,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:57.202Z",
+      "loadAverage": [
+        3.35302734375,
+        2.8779296875,
+        2.873046875
+      ],
+      "freeMemoryBytes": 2086518784,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T19:07:58.850Z",
+      "loadAverage": [
+        3.32470703125,
+        2.8798828125,
+        2.87353515625
+      ],
+      "freeMemoryBytes": 2837954560,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

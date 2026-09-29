@@ -2,8 +2,23 @@ import { afterEach, expect, it, vi } from 'vitest';
 import * as pc from 'playcanvas';
 import { PlayerController } from '../../../src/app/player/player-controller';
 import { applyAuthorityInputDecision } from '../../../src/app/player/game-player-controller';
+import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
+import { createVoxelGeometryRegistryV1 } from '../../../../../packages/stdlib/src/world/voxel-geometry';
+import type { World } from '../../../src/app/world/world-runtime';
+import { ready } from '../client/fixtures/browser-authority';
 
 afterEach(() => vi.unstubAllGlobals());
+
+const collisionGeometry = (collision: boolean) =>
+  createVoxelGeometryRegistryV1([
+    {
+      version: 1,
+      voxel: 500,
+      boxes: [{ min: [0.4, 0, 0], max: [0.6, 1, 1], material: FaceMaterial.WoodenDoor }],
+      collision: collision ? [{ min: [0.4, 0, 0], max: [0.6, 1, 1] }] : [],
+      occludesFullFace: false,
+    },
+  ]);
 
 it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且界面阻挡立即停止', () => {
   const canvas = {};
@@ -20,7 +35,12 @@ it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且�
     camera: new pc.Entity(),
     physicsHz: 60,
     authority: { epoch: 'test', snapshot: () => null },
-    getWorld: () => ({ getVoxel: () => 0, getFluidCell: () => null }),
+    getWorld: () => ({
+      authority: { voxelSemantics: { get: () => undefined }, voxelGeometry: undefined },
+      getChunkRevision: () => 1,
+      getVoxel: () => 0,
+      getFluidCell: () => null,
+    }),
     telemetry: {
       beginSpan: vi.fn(),
       endSpan: vi.fn(),
@@ -55,6 +75,55 @@ it('只在Authority明确作废输入队列时重同步预测', () => {
 
   applyAuthorityInputDecision(controller, { requiresResync: true });
   expect(resynchronizeInput).toHaveBeenCalledOnce();
+});
+
+it('碰撞查询每次使用当前world geometry，恢复替换后不保留旧registry', () => {
+  let geometry = collisionGeometry(false);
+  const world = {
+    authority: {
+      voxelSemantics: { get: () => undefined },
+      get voxelGeometry() {
+        return geometry;
+      },
+    },
+    getChunkRevision: () => 1,
+    getVoxel: () => 500,
+    getFluidCell: () => null,
+  } as unknown as World;
+  const controller = new PlayerController({
+    camera: new pc.Entity(),
+    canvas: {},
+    physicsHz: 60,
+    authority: { epoch: 'world:1', snapshot: () => null },
+    getWorld: () => world,
+    getEnvironment: () => null,
+    isUiBlockingInput: () => false,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  const snapshot = ready().snapshot;
+  controller.applyAuthoritySnapshot(snapshot);
+
+  expect(controller.isColliding).toBe(false);
+  geometry = collisionGeometry(true);
+  expect(controller.isColliding).toBe(true);
+});
+
+it('鼠标灵敏度即时改变真实 Pointer Lock 转向幅度', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousemove: null as null | ((event: { movementX: number; movementY: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const mouseSensitivity = { value: 0.25 };
+  const controller = new PlayerController({
+    canvas,
+    physicsHz: 60,
+    mouseSensitivity,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  documentStub.onmousemove?.({ movementX: 4, movementY: 2 });
+  expect(controller.viewAngles).toEqual([-1, -16.5]);
 });
 
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {

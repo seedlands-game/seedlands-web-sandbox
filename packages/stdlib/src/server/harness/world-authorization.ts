@@ -406,6 +406,23 @@ export const playerActionAuthorizationRequests = (
       operation: 'execute',
       target: { kind: 'voxel', position: action.position },
     });
+  if (action.type === 'interact') {
+    if (action.target.kind === 'self')
+      requests.push({
+        resource: 'world.interaction',
+        operation: 'execute',
+        target: { kind: 'entity', entityId: playerId },
+      });
+    if (action.target.kind === 'voxel')
+      for (const position of [action.target.hit, action.target.adjacent])
+        requests.push({ resource: 'world.interaction', operation: 'execute', target: { kind: 'voxel', position } });
+    if (action.target.kind === 'entity')
+      requests.push({
+        resource: 'world.interaction',
+        operation: 'execute',
+        target: { kind: 'entity', entityId: action.target.reference.entityId },
+      });
+  }
   return requests;
 };
 

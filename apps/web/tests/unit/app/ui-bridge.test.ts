@@ -115,6 +115,32 @@ describe('UiBridge retained presentation channels', () => {
     expect(bridge.metrics().staleUpdateCount).toBe(3);
   });
 
+  it('resetWorldPresentation clears retained world channels and invalidates their session', () => {
+    const { bridge } = createFixture();
+    const session = bridge.beginWorldSession('world-a');
+    session.publishHud(1, { visible: true, worldClock: 'Night · 22:00' });
+    session.publishInteraction(1, { gesture: { kind: 'attack', sequence: 1 } });
+    bridge.publishShell({
+      mapOpen: true,
+      commandOpen: true,
+      experience: 'melee-showcase',
+      gameplay: { ...bridge.shell.get().gameplay, inventoryOpen: true },
+    });
+
+    bridge.resetWorldPresentation();
+
+    expect(bridge.hud.get()).toMatchObject({ visible: false, worldClock: '' });
+    expect(bridge.interaction.get()).toMatchObject({ gesture: null, target: null, feedback: null });
+    expect(bridge.debug.get()).toMatchObject({ visible: false, text: '' });
+    expect(bridge.shell.get()).toMatchObject({
+      mapOpen: false,
+      commandOpen: false,
+      experience: null,
+      gameplay: { inventoryOpen: false, inventory: [] },
+    });
+    expect(session.publishHud(2, { visible: true })).toBe(false);
+  });
+
   it('replaces feedback timers safely and disposes world-scoped work', () => {
     const { bridge, timers, fireTimer } = createFixture();
     const session = bridge.beginWorldSession('world-a');

@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-29-DOOR-EXIT-FACE",
+  "status": "READY_FOR_PUSH",
+  "baseline": "a47d50c1a2c10f97952c454bb1b58b3a4a373af5",
+  "sourceCommit": "f5747f4944efa5cc28bf0e656a5efef748b0d584",
+  "sourceTree": "f8689344e8c17a5d6e45c80e2da0f1fb0a378e2d",
+  "stagedPatchSha256": "340523ee9b55a8f22fc71090e7c6385c05a8ae34e56ed3df99879b2e2b4a6268",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "3eedf40e38eeae43ac2b6e488d5e902bbb13131898baf4b46182e0d3ab0b06f1"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 17,
+    "sha256": "a4806107bf99df305335a5ec9972fae62ddbec73a8188444ff1efd796394a134",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "frozenInputs": {
+    "browser13": {
+      "sourceManifestSha256": "67994c3515a7d59c8aa62f59c520db0710822aac00f843cf173fd004afc47f98",
+      "sourceEntries": 14,
+      "validatedAgainst": "/private/tmp/seedlands-v2-acceptance-00009bf2",
+      "evidenceManifestSha256": "803effac1601a866cc9643c0248d1f0029f5a98434314213400b26922a1c58d9",
+      "evidenceEntries": 36,
+      "deliverySha256": "05cde937ca76ee725e4b760c6594df5f4dee41d12d4b0ebf9c0dad114eaccfe4",
+      "diagnosisSha256": "a8677c5125f34e3e6b2fc15260096b57a451300dffcb42966b8d8eb616b2b5fd",
+      "reportSha256": "dcf8ee2fa55fe08b0e21f3f7d525b0f8a43cc7dc72bb3d83bfb382c5edb61056",
+      "traceParts": 6,
+      "traceBytes": 281535240,
+      "traceSha256": "5c382e5fd523e975859b1ee3642e762382eff70a7c61af160cb42a4d4a6d3115",
+      "status": "FAIL_BEFORE_V2",
+      "lowerClickSent": false
+    },
+    "exitFaceClose01": {
+      "sourceManifestSha256": "aa321327f5ac6fab03d4cd05f23f365901001966ecbb9d90ec63eb423adc7aac",
+      "evidenceManifestSha256": "f57f863466ba273abce67768b4029600f4dc12987a1d2307692c02694662e578",
+      "deliverySha256": "f2f327ae0b7c851b01cc7f3472f3c134294774794d7744db6a647948ea970559",
+      "stillCurrentEntries": [
+        "apps/web/tests/e2e/classic-support/v1-slice.ts",
+        "apps/web/tests/e2e/classic-support/door-collision-oracle.ts",
+        "apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts",
+        "changes/2026-09-23-classic-functional-completion/spec.md"
+      ],
+      "supersededEntries": 3,
+      "supersededBy": "V1-DOOR-EXIT-FACE-CLOSE-02"
+    },
+    "exitFaceClose02": {
+      "sourceManifestSha256": "9a7de7cd5963012cd9136151b79eef1ca59196bfcc2c8baf343afc124b1a5097",
+      "sourceEntries": 3,
+      "validatedEntries": 3,
+      "evidenceManifestSha256": "a8d564cb9257a64e8bb9e267f19926d2ede4de03f5fcf8e1d2346da4ae11d729",
+      "evidenceEntries": 23,
+      "deliverySha256": "92184fc867a0a904f8cd6092b3b1df1e8543bd1ac34c2f50fa51569df1c8d10b",
+      "priorReleaseBytePreserved": true
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git29-door-exit-face",
+    "head": "a47d50c1a2c10f97952c454bb1b58b3a4a373af5",
+    "stagedPaths": 6,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "affectedDoorExitClosure": {
+      "window": "cdd44bfc-5ed1-41ff-80f6-b18ce010b6c1",
+      "status": "PASS_4_FILES_38_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "6c946127d95a631d4209288c231f19f4b5cadb9b9f4b39e2088e003b85efb878",
+      "receiptSha256": "52f44cab2a17b8b0eb6f9497d114c325c20f2dbecf5f1e9a2c4963d4fed583c1"
+    }
+  },
+  "static": {
+    "classicTestTypes": {
+      "window": "037560b7-98b8-423c-bf69-8e40da044bdc",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "c72b8e54d7ebf5d160c32f0d708e30c84b8a4fcf05c24e19421b0c23f7fbe0a9"
+    },
+    "rootTestTypes": {
+      "window": "ee2e0260-add4-45bd-b389-537536a08d61",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "1268906eb0c0ac5db3b5a464005d23c67077b6131a585347438875a9093497d6"
+    },
+    "stagedEslint": {
+      "window": "042bf5e1-bc53-4067-8047-117f66ee437c",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "949c361903c6658cd2ca9fad693c82e4f167dab93c9ce59583d995f32c4fef62"
+    },
+    "editableFormat": {
+      "window": "1ec0c4c7-c15a-4ee0-acdc-20f1acdbd6bc",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "4088e1af224d522cc4d79ee8bedc7522881dd242d97e29d1ac17787dbd0ae46d"
+    },
+    "scopedDiff": {
+      "window": "ddf7280f-0e3c-497a-88a7-4d07bdc2b035",
+      "status": "PASS_6_PATHS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "31ca03933bfc207e502164e73e0b5f045fa451a2830dfc1c6432147587f0b677"
+    },
+    "metadataFormat": {
+      "window": "c3c97f00-a61d-434a-9b33-e2b91bfe0cbd",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "75f7e5b5d700bb06106d08c141a09860575aa12fa1aa5a9c46d4c5e6ca0a88fb"
+    }
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "aimControllerChanged": false,
+    "structureRejectedBrowser13Action": false,
+    "v2DefectClaimed": false,
+    "browser14Run": false,
+    "productGreenClaimed": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This is a local canonical fixture correction and does not change public ownership or protocol architecture."
+  },
+  "notRun": ["build", "artifact", "browser14", "cua", "devserver", "ci", "deploy", "merge"]
+}

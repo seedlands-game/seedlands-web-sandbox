@@ -1,0 +1,26 @@
+12:28:02 PM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git42-restore-reference - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git42-restore-reference
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (11 tests) 1693ms
+     ✓ resolves detached references across a non-Classic restore without mutating state  841ms
+     ✓ validates and authorizes before resolving or observing existence  425ms
+     ✓ captures a request before queued execution  422ms
+ ✓ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (10 tests) 36819ms
+     ✓ runs the Headless wall clock through the serialized queue and cannot rearm after stop  2234ms
+     ✓ returns structured validation errors for malformed method arguments without throwing  2423ms
+     ✓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate  2477ms
+     ✓ keeps one world identity across commands, inspection and deterministic paused advancement  2680ms
+     ✓ restores a portable checkpoint atomically with a new epoch  5032ms
+     ✓ rejects an operation submitted behind a restore against its captured epoch  5027ms
+     ✓ rejects a waiting barrier when restore replaces its epoch  4944ms
+     ✓ rejects stale frontiers and bounds trace retention  2435ms
+     ✓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints  4587ms
+     ✓ authorizes action ids against their actual actor owner  4978ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (7 tests) 108ms
+
+ Test Files  3 passed (3)
+      Tests  28 passed (28)
+   Start at  12:28:02
+   Duration  40.56s (transform 1.07s, setup 0ms, import 1.71s, tests 38.62s, environment 0ms)
+

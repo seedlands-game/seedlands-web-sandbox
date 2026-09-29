@@ -24,6 +24,8 @@ export const createEntityComponents = () => ({
   creature: {},
   npc: {},
   station: {},
+  fallingBlock: {},
+  painting: {},
 });
 export type EntityComponents = ReturnType<typeof createEntityComponents>;
 
@@ -33,6 +35,8 @@ export function ecsEntityType(world: World, components: EntityComponents, eid: E
   if (hasComponent(world, eid, components.creature)) return 'creature';
   if (hasComponent(world, eid, components.npc)) return 'npc';
   if (hasComponent(world, eid, components.station)) return 'station';
+  if (hasComponent(world, eid, components.fallingBlock)) return 'falling-block';
+  if (hasComponent(world, eid, components.painting)) return 'painting';
   throw new Error('Entity type component is missing.');
 }
 
@@ -41,7 +45,9 @@ export function ecsEntityTypeComponent(components: EntityComponents, type: EcsEn
   if (type === 'world-item') return components.worldItem;
   if (type === 'creature') return components.creature;
   if (type === 'npc') return components.npc;
-  return components.station;
+  if (type === 'station') return components.station;
+  if (type === 'falling-block') return components.fallingBlock;
+  return components.painting;
 }
 
 const readPosition = (

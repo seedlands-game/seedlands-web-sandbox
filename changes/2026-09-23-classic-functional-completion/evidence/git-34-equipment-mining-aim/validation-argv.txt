@@ -1,0 +1,14 @@
+Validation tree: /private/tmp/seedlands-git34-equipment-mining-aim
+Baseline HEAD: 4dccab8980b546dc577ac5ace8c9d8131782b324
+Code commit: a987a672df865f4687898ed15b3b5e7f239d6273
+Source tree: 85b1156726457866f5c53011fd72deff01b3ffb1
+Staged paths: 5
+Staged patch SHA-256: 86e6b0f21fe17d58bb0889520126ac5b4c9e5d02f7f1176961600a7effb250c3
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state: XDG_STATE_HOME=/private/tmp/seedlands-git34-equipment-mining-aim/.pnpm-task-run-state-v1
+
+affected
+SEEDLANDS_RESERVATION_RUN=git-34-equipment-mining-aim-affected SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/git-34-equipment-mining-aim/affected.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts --maxWorkers=1 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/git-34-equipment-mining-aim/affected.stdout.log'
+
+classic-types / root-types / eslint / format / scoped-diff
+See the correspondingly named stdout and machine-window receipts. The scoped check asserts baseline HEAD, exact five staged paths, patch SHA-256, source tree, and git diff --cached --check.

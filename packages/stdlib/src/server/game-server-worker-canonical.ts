@@ -1,5 +1,6 @@
 import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import { CHUNK_SIZE, MAX_VOXEL_ID, Voxel, chunkKey } from '../world/voxel';
+import type { VoxelSemanticsResolver } from '../world/voxel-semantics';
 import { legacyFluid } from './fluid/fluid-cell-state';
 import type { EntityStore } from './gameplay/entity-store';
 import type { StationStateCodec } from './gameplay/ecs-station-state';
@@ -19,6 +20,7 @@ export function prepareWorkerCanonicalAdmission(
     current?: ServerChunk;
     stationCodec?: StationStateCodec;
     entities: EntityStore;
+    voxelSemantics?: VoxelSemanticsResolver;
   }>,
 ): Result {
   const { result } = input;
@@ -34,7 +36,12 @@ export function prepareWorkerCanonicalAdmission(
     result.generatorVersion !== input.generatorVersion ||
     result.key !== chunkKey(result.cx, result.cy, result.cz) ||
     result.canonical.length !== CHUNK_SIZE ** 3 ||
-    !result.canonical.every((value) => value >= Voxel.Air && value <= MAX_VOXEL_ID)
+    !result.canonical.every(
+      (value) =>
+        value >= Voxel.Air &&
+        value <= 65_535 &&
+        (input.voxelSemantics ? input.voxelSemantics.get(value) !== undefined : value <= MAX_VOXEL_ID),
+    )
   )
     return { kind: 'reject' };
   if (input.current)

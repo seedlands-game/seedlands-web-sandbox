@@ -1,6 +1,7 @@
 import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
 import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { publishPendingAuthorityMediaFacts } from './authority-media-publisher';
 
 type Post = (message: AuthorityResponse) => void;
 export const authorityErrorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -83,4 +84,5 @@ export async function transactAuthorityRequest(
     ...(receipt.result.gameplay ? { gameplay: receipt.result.gameplay } : {}),
     ...(receipt.result.commits?.length ? { commits: receipt.result.commits } : {}),
   });
+  publishPendingAuthorityMediaFacts(epoch, runtimeEpoch, current, post);
 }

@@ -8,6 +8,7 @@ import {
   type GameplayCombatReference,
   type GameplayEntityReference,
   type GameplayInventorySlotReference,
+  type GameplayItemStackReference,
   type GameplayPlayerReference,
   type GameplayViewReference,
   type PlayerCorrectionReference,
@@ -15,14 +16,19 @@ import {
   type WorldCommitReference,
 } from './network-reference-projection-types';
 import { canonicalReferenceInteger } from './network-reference-integer';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
+import { ARMOR_SLOTS } from '../gameplay/modules/armor-policy';
 
 export { NETWORK_REFERENCE_PROJECTION_VERSION } from './network-reference-projection-types';
 export type * from './network-reference-projection-types';
 
 const MAX_COLLISION_CELL_INDEX = CHUNK_SIZE ** 3;
-const allowedArchetypes = new Set(['grazer', 'night-stalker', 'settler']);
 const isPresentationEntityType = (value: string): value is GameplayEntityReference['type'] =>
-  value === 'world-item' || value === 'creature' || value === 'npc';
+  value === 'world-item' ||
+  value === 'creature' ||
+  value === 'npc' ||
+  value === 'falling-block' ||
+  value === 'painting';
 
 const assertFinite = (value: number, field: string) => {
   if (!Number.isFinite(value)) throw new TypeError(`${field} must be finite.`);
@@ -84,15 +90,46 @@ export function projectPlayerCorrectionReference(snapshot: AuthoritySnapshot): P
   };
 }
 
-const projectInventory = (inventory: AuthorityGameplayView['player']['inventory']): GameplayInventorySlotReference[] =>
-  inventory.map((slot, index) => {
-    if (slot === null) return null;
-    return {
-      slot: canonicalReferenceInteger(index),
-      itemId: assertText(slot.itemId, `inventory[${index}].itemId`),
-      count: assertNonNegativeInteger(slot.count, `inventory[${index}].count`),
-    };
+const projectStack = (
+  stack: NonNullable<AuthorityGameplayView['inventory']['slots'][number]>,
+  field: string,
+): GameplayItemStackReference =>
+  Object.freeze({
+    itemId: assertText(stack.itemId, `${field}.itemId`),
+    count: assertNonNegativeInteger(stack.count, `${field}.count`),
+    ...(stack.instance
+      ? {
+          instance: Object.freeze({
+            durability: assertNonNegativeInteger(stack.instance.durability, `${field}.durability`),
+          }),
+        }
+      : {}),
   });
+const projectInventory = (
+  inventory: AuthorityGameplayView['inventory']['slots'],
+): readonly GameplayInventorySlotReference[] =>
+  Object.freeze(
+    inventory.map((slot, index) => {
+      if (slot === null) return null;
+      return Object.freeze({
+        slot: canonicalReferenceInteger(index),
+        ...projectStack(slot, `inventory[${index}]`),
+      });
+    }),
+  );
+const projectArmor = (armor: AuthorityGameplayView['inventory']['armor']) => {
+  if (
+    !armor ||
+    Reflect.ownKeys(armor).some((slot) => typeof slot !== 'string' || !ARMOR_SLOTS.includes(slot as never)) ||
+    ARMOR_SLOTS.some((slot) => !Object.hasOwn(armor, slot))
+  )
+    throw new TypeError('gameplay.inventory.armor must contain exactly four armor slots.');
+  return Object.freeze(
+    Object.fromEntries(
+      ARMOR_SLOTS.map((slot) => [slot, armor[slot] ? projectStack(armor[slot]!, `armor.${slot}`) : null]),
+    ),
+  ) as import('./network-reference-projection-types').GameplayEquipmentReference;
+};
 const projectBreakAction = (value: AuthorityGameplayView['player']['breakAction']): GameplayBreakActionReference => {
   if (!value) return null;
   return {
@@ -157,7 +194,10 @@ export const projectCombatReference = (
     lastResult,
   };
 };
-const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerReference => {
+const projectPlayer = (
+  value: AuthorityGameplayView['player'],
+  inventory: AuthorityGameplayView['inventory'],
+): GameplayPlayerReference => {
   const combat = projectCombatReference(value.combat);
   return {
     entityId: assertText(value.entityId, 'gameplay.player.entityId'),
@@ -166,7 +206,8 @@ const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerRe
     hunger: assertFinite(value.hunger, 'gameplay.player.hunger'),
     maxHunger: assertFinite(value.maxHunger, 'gameplay.player.maxHunger'),
     lifecycle: value.lifecycle,
-    inventory: projectInventory(value.inventory),
+    inventory: projectInventory(inventory.slots),
+    armor: projectArmor(inventory.armor),
     selectedSlot: assertNonNegativeInteger(value.selectedSlot, 'gameplay.player.selectedSlot'),
     hotbarSize: assertNonNegativeInteger(value.hotbarSize, 'gameplay.player.hotbarSize'),
     breakAction: projectBreakAction(value.breakAction),
@@ -176,12 +217,10 @@ const projectPlayer = (value: AuthorityGameplayView['player']): GameplayPlayerRe
 const projectEntity = (value: AuthorityGameplayView['entities'][number]): GameplayEntityReference => {
   if (!isPresentationEntityType(value.type))
     throw new TypeError(`Entity type ${value.type} is not a presentation entity.`);
-  if (value.archetype && !allowedArchetypes.has(value.archetype))
+  if (value.archetype && !isActorArchetype(value.archetype))
     throw new TypeError(`Unsupported entity archetype ${value.archetype}.`);
-  if (value.type === 'npc' && value.archetype && value.archetype !== 'settler')
-    throw new TypeError('NPC presentation archetype must be settler.');
-  if (value.type === 'creature' && value.archetype === 'settler')
-    throw new TypeError('Creature presentation archetype cannot be settler.');
+  if (value.archetype && value.type !== 'npc' && value.type !== 'creature')
+    throw new TypeError(`${value.type} presentation entity cannot have an archetype.`);
   const combat = projectCombatReference(value.combat);
   const projected: GameplayEntityReference = {
     id: assertText(value.id, 'entity.id'),
@@ -242,7 +281,7 @@ export function projectGameplayViewReference(
     snapshotWorldRevision,
     gameplayRevision,
     gameplayTime: view.gameplayTime,
-    player: projectPlayer(view.player),
+    player: projectPlayer(view.player, view.inventory),
     craftableRecipeIds: [...craftableRecipeIds],
     entities,
   };

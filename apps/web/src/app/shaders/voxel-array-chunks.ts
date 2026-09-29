@@ -1,3 +1,5 @@
+import { voxelBlockLightGlsl } from './voxel-block-light-chunk';
+
 export const voxelArrayDiffuseGlsl = /* glsl */ `
 uniform highp sampler2DArray texture_voxelArray;
 uniform vec3 material_diffuse;
@@ -14,10 +16,10 @@ export const voxelArrayOpacityGlsl = /* glsl */ `
 uniform highp sampler2DArray texture_voxelArray;
 uniform float material_opacity;
 uniform float material_alphaDitherScale;
-uniform float uOpacityVoxelLayer;
 
 void getOpacity() {
-    vec3 voxelUv = vec3({STD_OPACITY_TEXTURE_UV}, uOpacityVoxelLayer);
+    float voxelLayer = floor(vVertexColor.a * 255.0 + 0.5);
+    vec3 voxelUv = vec3({STD_OPACITY_TEXTURE_UV}, voxelLayer);
     dAlpha = material_opacity * texture(texture_voxelArray, voxelUv).a;
 }
 `;
@@ -53,6 +55,7 @@ uniform sampler2D texture_planarReflection;
 uniform mat4 uReflectionTextureMatrix;
 uniform float uReflectionStrength;
 uniform float uReflectionWaterPlaneY;
+${voxelBlockLightGlsl}
 
 void getEmission() {
     vec4 reflectionClip = uReflectionTextureMatrix * vec4(vPositionW, 1.0);
@@ -65,7 +68,7 @@ void getEmission() {
     float fresnel = pow(1.0 - clamp(dot(max(dNormalW, vec3(0.0)), viewDirection), 0.0, 1.0), 3.0);
     float selectedWaterPlane = 1.0 - smoothstep(0.006, 0.02, abs(vPositionW.y - uReflectionWaterPlaneY));
     float reflectionMix = upwardSurface * selectedWaterPlane * mix(0.22, 1.0, fresnel);
-    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection;
+    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection + dAlbedo * blockLightAtSurface() * 0.78;
 }
 `;
 
@@ -87,10 +90,9 @@ var texture_voxelArray: texture_2d_array<f32>;
 var texture_voxelArraySampler: sampler;
 uniform material_opacity: f32;
 uniform material_alphaDitherScale: f32;
-uniform uOpacityVoxelLayer: f32;
 
 fn getOpacity() {
     let voxelUv: vec2f = {STD_OPACITY_TEXTURE_UV};
-    dAlpha = uniform.material_opacity * textureSampleBias(texture_voxelArray, texture_voxelArraySampler, voxelUv, i32(uniform.uOpacityVoxelLayer), uniform.textureBias).a;
+    dAlpha = uniform.material_opacity * textureSampleBias(texture_voxelArray, texture_voxelArraySampler, voxelUv, i32(round(vVertexColor.a * 255.0)), uniform.textureBias).a;
 }
 `;

@@ -1,0 +1,49 @@
+{
+  "status": "FAIL",
+  "sourceSha": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+  "sourceDigest": "80ec89b82c297f451902bd5661b56c31ef6d1be76774bd93a3fcd11c10d0c574",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "builtAt": "2026-09-28T23:19:29.712Z",
+  "receiptSha256": "5af78cfc542d641f4e6bf5cd0e503a616db2c146db4d8f53b187af2a1eb86702",
+  "artifactFiles": 276,
+  "diskFilesExcludingReceipt": 276,
+  "diskFilesIncludingReceipt": 277,
+  "receiptMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "diskMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "missing": [],
+  "extra": [],
+  "mismatched": [],
+  "symlinks": [],
+  "build15MapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "sameAsBuild15": true,
+  "packLock": {
+    "sourceSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+    "distSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+    "equal": true
+  },
+  "mp3": [
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-fdb53c07/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-fdb53c07/apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-fdb53c07/apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    }
+  ],
+  "packLockEntryCount": 1,
+  "packLockEntry": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "size": 2976045,
+    "contentType": "audio/mpeg"
+  }
+}

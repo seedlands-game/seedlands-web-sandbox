@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "profileId": "classic-b173-singleplayer-v16",
+  "scenarioVersion": 16,
+  "status": "DESIGN_ONLY_NOT_EXECUTABLE",
+  "referenceCaseSetVersion": 16,
+  "referenceCaseSetStatus": "PARTIAL_REFERENCE_GAP",
+  "wholeContractReview": {
+    "scopeAndDeviations": "PENDING",
+    "referenceOracle": "PENDING",
+    "caseExpectedAndFixtures": "PENDING",
+    "harnessDesign": "PENDING",
+    "independentArtAndAudioComparator": "PENDING",
+    "performanceEnvironmentAndThresholds": "PENDING"
+  },
+  "wholeContractReviewEvidence": {},
+  "registeredCaseCount": 522,
+  "registeredVariantCount": 618,
+  "registeredOpenEndedFamilyCount": 8,
+  "reference": {
+    "edition": "Minecraft Java Beta 1.7.3",
+    "clientSha1": "43db9b498cb67058d2e12d394e6507722e71bb45",
+    "runtimeOracleAllowed": false,
+    "excluded": ["redstone-circuits", "other-dimensions", "multiplayer"],
+    "assets": "independently-created"
+  },
+  "logicEnvironment": {
+    "os": "ubuntu-24.04",
+    "node": "22.12.0",
+    "pnpm": "11.25.0",
+    "tickMs": 50,
+    "clock": "fixture-controlled",
+    "random": "fixture-controlled",
+    "externalNetwork": false
+  },
+  "browserEnvironment": {
+    "os": "ubuntu-24.04",
+    "playwright": "1.62.1",
+    "browser": "playwright-installed-chromium",
+    "headless": true,
+    "maxConcurrentContexts": 1,
+    "persistentProfileReopensForP5": 1,
+    "viewport": { "width": 1280, "height": 720 },
+    "deviceScaleFactor": 1,
+    "locale": "en-US",
+    "timezoneId": "UTC",
+    "colorScheme": "light",
+    "hasTouch": false,
+    "requestedBackend": {
+      "renderer": "webgl2",
+      "wasm": true,
+      "simd": true,
+      "kernels": ["w02", "w03", "w04", "w05", "w06"]
+    },
+    "storage": "fresh-per-run-persistent-profile-reopen-same-profile-for-p5",
+    "siteOrigin": "local-production-preview",
+    "sameOriginAcrossReopenRequired": true,
+    "externalNetwork": false,
+    "actualBrowserAndImageIdentityRequired": true,
+    "actualBackendMustMatchRequested": true
+  },
+  "gameContext": {
+    "mode": "survival",
+    "difficulty": "normal",
+    "defaultSeed": "classic-b173-acceptance-v1",
+    "generatorVersion": "classic-b173-overworld-v1",
+    "viewDistanceChunks": 8,
+    "initialWorldTimeTick": 0,
+    "initialWeather": "clear",
+    "initialInventory": "empty"
+  },
+  "journeyIds": [
+    "P0-new-world",
+    "P1-first-day",
+    "P2-night-survival",
+    "P3-environment",
+    "P4-transport-and-life",
+    "P5-save-resume"
+  ],
+  "contractDecisionStates": ["REFERENCE_READY", "NO_GO"],
+  "resultStateLayer": "RUNTIME_CASE_ONLY",
+  "resultStates": ["PASS", "FAIL", "BLOCKED", "NOT_RUN", "REFERENCE_GAP", "NOT_APPLICABLE"]
+}

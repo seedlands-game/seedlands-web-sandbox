@@ -1,0 +1,4 @@
+cwd=/private/tmp/seedlands-v2-acceptance-0eafd427
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-23-0eafd427 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+
+The actual invocation also set SEEDLANDS_RESERVATION_RUN and SEEDLANDS_RESERVATION_EVIDENCE so the benchmark wrapper wrote canonical-window.json.log. Stdout and stderr were redirected together to runner.stdout.log by the caller; the wrapper exit code remained 1.

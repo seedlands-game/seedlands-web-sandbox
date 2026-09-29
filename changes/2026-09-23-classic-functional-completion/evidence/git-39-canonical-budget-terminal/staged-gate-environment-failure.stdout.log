@@ -1,0 +1,46 @@
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.908708ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.1715ms)
+✔ present non-object failure attachments fail closed without losing detailed evidence (0.660375ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.094709ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.100292ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.189875ms)
+✔ missing receipt files and ambiguous main selections fail closed (2.606958ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.193666ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 47.057084
+3:40:29 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-git39-canonical-budget-terminal - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-git39-canonical-budget-terminal
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (5 tests) 10ms
+ ❯ |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts (3 tests | 1 failed) 152ms
+   ✓ 只给持锁子进程注入测量身份并生成绑定 declaration 的 receipt 65ms
+   ✓ 子进程失败时仍写失败 receipt 并释放锁 56ms
+   × 无 declaration 的成功命令只记录 NOT_RECORDED 31ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts > 无 declaration 的成功命令只记录 NOT_RECORDED
+Error: ENOENT: no such file or directory, open '/var/folders/8_/klcwpvfn6rn1_9mmgfntpw7m0000gn/T/seedlands-measurement-window-default-OV4unT/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-39-canonical-budget-terminal/staged-gate.window.json.log'
+ ❯ apps/web/tests/integration/engineering/performance-window.test.ts:77:23
+     75|       rootDirectory: directory,
+     76|     });
+     77|     expect(JSON.parse(readFileSync(join(directory, result.evidencePath…
+       |                       ^
+     78|       status: 'PASS',
+     79|       measurement: { status: 'NOT_RECORDED' },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 7 passed (8)
+   Start at  03:40:29
+   Duration  352ms (transform 34ms, setup 0ms, import 49ms, tests 162ms, environment 0ms)
+

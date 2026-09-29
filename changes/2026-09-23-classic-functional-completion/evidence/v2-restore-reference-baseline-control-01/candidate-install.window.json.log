@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-reference-candidate-install-01",
+  "pid": 34290,
+  "startedAt": "2026-09-29T03:17:39.420Z",
+  "windowId": "v2-reference-candidate-install-01",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-baseline-control-01/candidate-install.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T03:17:40.132Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T03:17:39.421Z",
+      "loadAverage": [
+        3.71826171875,
+        3.458984375,
+        3.107421875
+      ],
+      "freeMemoryBytes": 180273152,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:17:40.130Z",
+      "loadAverage": [
+        3.71826171875,
+        3.458984375,
+        3.107421875
+      ],
+      "freeMemoryBytes": 320749568,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

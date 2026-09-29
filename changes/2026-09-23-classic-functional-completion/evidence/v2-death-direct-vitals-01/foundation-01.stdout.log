@@ -1,0 +1,32 @@
+11:58:54 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/gameplay-foundation.test.ts (12 tests | 1 failed | 11 skipped) 7ms
+     × cancels on slot changes and death, while V4 resumes bound in-flight damage once 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/gameplay-foundation.test.ts > authoritative melee runtime > cancels on slot changes and death, while V4 resumes bound in-flight damage once
+RangeError: Unknown actor profile: grazer
+ ❯ Object.require packages/stdlib/src/server/gameplay/actor-profile.ts:136:25
+    134|   const require = (archetype: ActorArchetype) => {
+    135|     const profile = profiles.get(archetype);
+    136|     if (!profile) throw new RangeError(`Unknown actor profile: ${arche…
+       |                         ^
+    137|     return profile;
+    138|   };
+ ❯ AutonomyRuntime.validateActorRegistration packages/stdlib/src/server/simulation/autonomy-runtime.ts:164:24
+ ❯ Module.spawnGameplayEntity packages/stdlib/src/server/gameplay/gameplay-runtime-lifecycle.ts:88:43
+ ❯ GameplayRuntime.spawn packages/stdlib/src/server/gameplay/gameplay-runtime.ts:381:22
+ ❯ openWorld apps/web/tests/integration/runtime/server/gameplay-foundation.test.ts:37:26
+ ❯ apps/web/tests/integration/runtime/server/gameplay-foundation.test.ts:244:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  23:58:54
+   Duration  1.18s (transform 878ms, setup 0ms, import 1.10s, tests 7ms, environment 0ms)
+

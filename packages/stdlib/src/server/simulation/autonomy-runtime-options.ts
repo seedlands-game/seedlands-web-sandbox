@@ -9,6 +9,7 @@ import type { CharacterActorDomainPort } from './character-runtime-types';
 export type AutonomyRuntimeOptions = {
   entities: EntityStore;
   getVoxel: (x: number, y: number, z: number) => number;
+  isVoxelSolid?: (voxel: number) => boolean;
   getWorldTime: () => number;
   isPlayerAlive: (id: string) => boolean;
   clone: CoreClone;

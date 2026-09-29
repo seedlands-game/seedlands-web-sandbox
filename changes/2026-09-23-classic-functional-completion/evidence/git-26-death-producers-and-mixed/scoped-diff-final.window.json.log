@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "c35ec143-2db2-4b6d-b4eb-978904fd9907",
+  "pid": 43852,
+  "startedAt": "2026-09-25T16:38:03.589Z",
+  "windowId": "c35ec143-2db2-4b6d-b4eb-978904fd9907",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/git-26-death-producers-and-mixed/scoped-diff-final.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T16:38:03.669Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T16:38:03.590Z",
+      "loadAverage": [
+        3.63427734375,
+        3.38818359375,
+        3.2275390625
+      ],
+      "freeMemoryBytes": 723992576,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T16:38:03.667Z",
+      "loadAverage": [
+        3.63427734375,
+        3.38818359375,
+        3.2275390625
+      ],
+      "freeMemoryBytes": 726827008,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

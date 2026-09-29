@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-04-23069d71",
+  "status": "FAIL",
+  "sourceSha": "23069d710086597964e0976dd6228ca4f7b1bb79",
+  "artifactDigest": "1df45ffb2a7a95b4cd02375b6b1e92a3fe92d701636f19fecd01e15127df918e",
+  "artifactReceiptSha256": "9fd52ead183af6487030fb24b6f522a84e45e46d08a335cad88f94b2aa00a1b8",
+  "performanceWindowId": "f8c8c820-8145-49b9-bffe-a83f52203fca",
+  "commandExitCode": 1,
+  "reached": ["C0", "C1", "C2", "C3", "classic-visual"],
+  "failedAt": "v1-water-bucket-place",
+  "notReached": [
+    "v1-empty-bucket-collect",
+    "v1-door-place-toggle-mesh-collision",
+    "v1-media-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 171,
+    "expectedVoxel": 8,
+    "receivedVoxel": 0,
+    "publicReason": "blocked",
+    "playerCameraPosition": [65.34008026123047, 32.60000228881836, 2.6025679111480713],
+    "serverPlayerPosition": [65.34008376511767, 32.600001, 2.602567930028762],
+    "hit": [68, 30, 2],
+    "adjacent": [68, 31, 2]
+  },
+  "diagnosis": {
+    "classification": "hit-center-line-of-sight-geometry-mismatch",
+    "originFixPresent": true,
+    "summary": "The server uses the trusted eye origin, but traces visibility to the solid hit voxel center. For this valid downward face interaction that segment crosses neighboring floor terrain, while the shared hit/adjacent face center and adjacent center remain visible.",
+    "suggestedBoundary": "Derive the shared face center from the trusted orthogonal hit-to-adjacent delta for hit visibility, retain adjacent-center LOS, Manhattan adjacency, radius, authorization, and wall-blocking checks."
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "files": 276,
+    "treeClean": true
+  },
+  "originalEvidenceSha256": {
+    "classicReceipt": "169e6670bda5fc440fe1769f6c8375f40966ec279e07caac0f89e63657457c09",
+    "errorContext": "5537a948f745541a108a24064b6c402683da83915d2729b02a7f53a420143385",
+    "trace": "0368e687a480be80c7ac0c1874df005c60359b13f9cda3c60ba19b99dbee19cd",
+    "performanceWindow": "5fa808bf046bd4c606b329fd5411df6473443da37a933927a75907e02803259a"
+  }
+}
