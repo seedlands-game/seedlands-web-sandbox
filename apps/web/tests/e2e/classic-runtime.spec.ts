@@ -407,7 +407,11 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     expect(developerEpochAfter).not.toBe(developerEpochBefore);
     await v1.verifyV1SliceAfterRestore(page, v1SliceState);
     const restoredEquipment = await equipment.verifyEquipmentJourneyAfterRestore(page, equipmentBeforeSave, (value) => {
-      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { v2Equipment: value });
+      const { referenceStatus, ...v2Equipment } = value;
+      restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+        v2Equipment,
+        ...(referenceStatus ? { referenceStatus } : {}),
+      });
     });
     const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
     const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));

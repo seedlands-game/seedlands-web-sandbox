@@ -129,6 +129,18 @@ Harness 写状态、生产 action、teleport/setView、随机 fallback、第二�
 canonical 无确定纯键鼠致死入口，因此实战耐久、死亡掉落与重生 Browser 证据保持 `NOT OBSERVED`；本 smoke
 不代表 16 件护甲或 194 项矩阵全部完成。
 
+V2 restore reference observability 子片冻结 `restore-reference-observability-contract.md`：复用既有
+`WorldHarnessPort.inspect`，新增通用只读 `entity-reference` variant，把调用方提交的完整
+`EntityLifetimeReference` 交给当前 Authority server owner 的 `resolveEntityReference`，返回 detached reference 与
+`current | stale`。请求须 exact-key、trimmed non-empty id（最长 256）及正安全整数 epoch/lifetime；malformed 请求为
+结构化 validation failure。授权严格复用 `world.entity/read` 与 reference `entityId`，且必须先于 owner resolve；未授权为
+permission failure，合法 stale/不存在实体为成功的 `stale`，不能改报 unavailable。成功/失败均不得改变
+world/gameplay/inventory revision。该接口不升级协议版本、不暴露 owner、不增加写口、Classic ID 或第二 Harness。既有
+equipment restore consumer 必须保留 restore 前 actor reference，恢复后从同一 Browser Worker RPC 依次证明 old=`stale`、
+new=`current`，并在二者通过后继续原正式 UI detach/reequip；restore evidence 须显式记录请求 reference 与状态，不能以
+epoch 变化、JS object identity 或 Headless retained-access 异常代替。Headless/Worker/focused consumer GREEN 只完成
+deterministic/static 接线，真实 Browser 仍待新 artifact 和 root 唯一租约。
+
 V2 canonical equipment fixture Close-02 修复三个已定位的夹具缺口：固定资源带的每一格必须先在 survival
 沿同一 approach 真实行走，再经正式 UI 切 creative 选择/放置，并在 voxel readback 后切回 survival 等待 Authority
 physics tick 前进且 grounded/non-colliding；equipment-origin close 的提交等待必须保持 runtime epoch 与 actor
@@ -400,6 +412,11 @@ Browser-12 唯一 canonical attempt（窗口 `2401a5ed-b68b-48c7-93f5-138046e962
 本轮及后续例行功能更新默认在验收、commit、push、PR 后继续交付 Cloudflare Pages PR preview：live check seedlands-web-sandbox、pr-<PR号> 和权限；复用 Chromium 验收的同一 apps/web/dist；读回 terminal success、deploymentId、唯一 URL、稳定 alias、commit/source/artifact identity，并校验页面、Worker、Wasm、Pack、MP3 字节。旧 migration 的 401/DNS 是历史快照。权限不足标 INFRA_BLOCKED；不创建项目、不改 production branch/DNS/域名/权限/凭据。
 
 ## 工作量与预算（修订版）
+
+`V2-RESTORE-REFERENCE-OBSERVABILITY-01` 为当前有界实施片：AI 基准 `2h`、120% 建议 `2.4h`、硬上限
+`3h`；传统工程量 `0.25-0.5 PD`、120% 建议 `0.6 PD`。单 agent、测试串行；credits、费率、API 等价费用、
+当前额度和预测占比均为 `unknown`。本片不含 build、Browser、Git、death、world-item 投影、16 armor、194 matrix、
+V3/V4。
 
 | 阶段                                     | 复用依据                                                                               | 传统正常 / 保守 |        AI 活跃正常 / 保守 |
 | ---------------------------------------- | -------------------------------------------------------------------------------------- | --------------: | ------------------------: |

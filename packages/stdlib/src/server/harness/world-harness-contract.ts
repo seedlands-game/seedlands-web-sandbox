@@ -2,7 +2,7 @@ import type { AuthorityAdvanceResult } from '../authority/authority-runtime-type
 import type { AuthorityGameplayView } from '../protocol/authority-worker-protocol';
 import type { AuthoritySnapshot } from '../authority/authority-session';
 import type { CommandResult, ServerCommand } from '../commands/command-contract';
-import type { GameplayEntity } from '../gameplay/entity-store';
+import type { EntityLifetimeReference, GameplayEntity } from '../gameplay/entity-store';
 import type { LogicIntentBatch, LogicObservation } from '../logic/logic-protocol';
 import type { FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
 import type { ActorState } from '../simulation/actor-state';
@@ -55,7 +55,8 @@ export type WorldInspectRequest =
   | Readonly<{ kind: 'voxel'; position: readonly [number, number, number] }>
   | Readonly<{ kind: 'chunk'; chunk: readonly [number, number, number] }>
   | Readonly<{ kind: 'entity'; entityId: string }>
-  | Readonly<{ kind: 'actor'; entityId: string }>;
+  | Readonly<{ kind: 'actor'; entityId: string }>
+  | Readonly<{ kind: 'entity-reference'; reference: EntityLifetimeReference }>;
 
 export type WorldInspectResult =
   | Readonly<{ kind: 'voxel'; position: readonly [number, number, number]; voxel: number; chunkRevision: number }>
@@ -67,7 +68,12 @@ export type WorldInspectResult =
       materialized: boolean;
     }>
   | Readonly<{ kind: 'entity'; entity: GameplayEntity }>
-  | Readonly<{ kind: 'actor'; actor: ActorState }>;
+  | Readonly<{ kind: 'actor'; actor: ActorState }>
+  | Readonly<{
+      kind: 'entity-reference';
+      reference: EntityLifetimeReference;
+      status: 'current' | 'stale';
+    }>;
 
 export type WorldPrepareRequest =
   | Readonly<{ kind: 'chunk'; chunk: readonly [number, number, number] }>

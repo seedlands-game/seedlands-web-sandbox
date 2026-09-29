@@ -4,6 +4,12 @@
 
 2026-09-23 Classic V1 继续复用这条唯一 canonical 线路。`?harness` BrowserProductHarness 可以增加只读 geometry、postrender mesh 和 Media/audio oracle；它们只能观察正式 owner 已接受的状态，不能代操作、代渲染或代播放。具体冻结签名见当前 change 的 `v1-harness-contract.md`。真实浏览器仍需由后续单例租约运行并生成回执，本次合同接线的 Vitest/typecheck 不替代该证据。
 
+2026-09-29 起，`WorldHarnessPort.inspect` 的 `entity-reference` variant 是 Headless 与 Browser Worker 共用的只读
+Authority lifetime oracle。请求携带完整 `EntityLifetimeReference`，使用 `world.entity/read` 和 reference `entityId` 先授权，
+再由当前 Authority owner 返回 `current | stale`；合法 stale 不是 unavailable。Harness 只返回 detached reference 副本，
+不得用客户端 epoch 比较代替 owner resolve，也不得借该查询增加写口、Classic 规则或协议版本。具体正反例与 Browser
+consumer 边界见当前 change 的 `restore-reference-observability-contract.md`。
+
 ## Owner registry
 
 `harness/contracts.json` 的 `schemaVersion` 当前为 `1`。每个 owner 必须提供唯一 `id`、至少一个 `paths` pattern 和 `contracts` 数组。
