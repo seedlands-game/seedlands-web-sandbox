@@ -1,0 +1,311 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 4d ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+. prepare$ husky
+. prepare: Done
+Done in 1s using pnpm v11.25.0
+10:04:45 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-restore-reference-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-restore-reference-01
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (13 tests | 4 failed) 35175ms
+     × resolves detached entity references across non-Classic restore without mutating state 25ms
+     × validates and authorizes entity-reference inspection before resolving or observing existence 17ms
+     × captures an entity-reference request before queued execution 16ms
+     ✓ runs the Headless wall clock through the serialized queue and cannot rearm after stop  2302ms
+     ✓ returns structured validation errors for malformed method arguments without throwing  2507ms
+     ✓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate  2544ms
+     ✓ keeps one world identity across commands, inspection and deterministic paused advancement  2756ms
+     ✓ restores a portable checkpoint atomically with a new epoch  5157ms
+     ✓ rejects an operation submitted behind a restore against its captured epoch  5132ms
+     ✓ rejects a waiting barrier when restore replaces its epoch  5081ms
+     ✓ rejects stale frontiers and bounds trace retention  2518ms
+     ✓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints  4728ms
+     × authorizes action ids against their actual actor owner 2390ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (8 tests) 110ms
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (7 tests | 7 failed) 9ms
+     × passes the exact old and current values to inspection before continuing through the existing UI driver 4ms
+     × rejects old-current before continuing the UI journey 1ms
+     × rejects new-stale before continuing the UI journey 0ms
+     × rejects permission before continuing the UI journey 0ms
+     × rejects validation before continuing the UI journey 0ms
+     × rejects transport failure before continuing the UI journey 0ms
+     × requires Authority reference inspection before the existing UI continuation 2ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > passes the exact old and current values to inspection before continuing through the existing UI driver
+AssertionError: expected [] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "kind": "entity-reference",
+-     "reference": {
+-       "entityId": "player-1",
+-       "epoch": 4,
+-       "lifetime": 2,
+-     },
+-   },
+-   {
+-     "kind": "entity-reference",
+-     "reference": {
+-       "entityId": "player-1",
+-       "epoch": 5,
+-       "lifetime": 2,
+-     },
+-   },
+- ]
++ []
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts:27:60
+     25|       continuation: 'ui-continued',
+     26|     });
+     27|     expect(inspect.mock.calls.map(([request]) => request)).toEqual([
+       |                                                            ^
+     28|       { kind: 'entity-reference', reference: oldReference },
+     29|       { kind: 'entity-reference', reference: currentReference },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > rejects old-current before continuing the UI journey
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > rejects new-stale before continuing the UI journey
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > rejects permission before continuing the UI journey
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > rejects validation before continuing the UI journey
+AssertionError: promise resolved "{ referenceStatus: { …(2) }, …(1) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "continuation": "must-not-run",
++   "referenceStatus": {
++     "current": {
++       "kind": "entity-reference",
++       "reference": {
++         "entityId": "player-1",
++         "epoch": 5,
++         "lifetime": 2,
++       },
++       "status": "current",
++     },
++     "old": {
++       "kind": "entity-reference",
++       "reference": {
++         "entityId": "player-1",
++         "epoch": 4,
++         "lifetime": 2,
++       },
++       "status": "stale",
++     },
++   },
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts:57:102
+     55|     });
+     56|     const continuation = vi.fn(async () => 'must-not-run');
+     57|     await expect(verifyRestoredActorReferences(inspect, oldReference, …
+       |                                                                                                      ^
+     58|     expect(continuation).not.toHaveBeenCalled();
+     59|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > rejects transport failure before continuing the UI journey
+AssertionError: promise resolved "{ referenceStatus: { …(2) }, …(1) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "continuation": "must-not-run",
++   "referenceStatus": {
++     "current": {
++       "kind": "entity-reference",
++       "reference": {
++         "entityId": "player-1",
++         "epoch": 5,
++         "lifetime": 2,
++       },
++       "status": "current",
++     },
++     "old": {
++       "kind": "entity-reference",
++       "reference": {
++         "entityId": "player-1",
++         "epoch": 4,
++         "lifetime": 2,
++       },
++       "status": "stale",
++     },
++   },
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts:72:5
+     70|         continuation,
+     71|       ),
+     72|     ).rejects.toThrow('transport-failed');
+       |     ^
+     73|     expect(continuation).not.toHaveBeenCalled();
+     74|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts > Classic equipment restore reference consumer > requires Authority reference inspection before the existing UI continuation
+AssertionError: expected 'export async function verifyEquipment…' to contain 'kind: \'entity-reference\''
+
+- Expected
++ Received
+
+- kind: 'entity-reference'
++ export async function verifyEquipmentJourneyAfterRestore(
++   page: Page,
++   before: HarnessEquipmentSnapshot,
++   record: (
++     value: Readonly<{
++       phase: 'restored' | 'detached' | 'continued';
++       snapshot: HarnessEquipmentSnapshot;
++       restored?: HarnessEquipmentSnapshot;
++     }>,
++   ) => void,
++ ): Promise<Readonly<{ restored: HarnessEquipmentSnapshot; continued: HarnessEquipmentSnapshot }>> {
++   const restored = await waitForEquipmentSnapshot(
++     page,
++     (value) => value.runtimeEpoch !== before.runtimeEpoch && value.actor.epoch !== before.actor.epoch,
++   );
++   record({ phase: 'restored', snapshot: restored });
++   expect(restored.actor.entityId).toBe(before.actor.entityId);
++   expect(restored.actor.lifetime).toBe(before.actor.lifetime);
++   expect(restored.inventoryRevision).toBe(before.inventoryRevision);
++   expect(restored.slots).toEqual(before.slots);
++   expect(restored.armor).toEqual(before.armor);
++   expect(restored.cursor).toEqual(before.cursor);
++   expect(restored.player).toEqual(before.player);
++   expect(restored.armorPoints).toBe(before.armorPoints);
++   expectFullIronArmor(restored);
++   const panel = await inventory(page);
++   await expectEquipmentDom(page, panel, restored);
++   const detached = await committedPointer(
++     page,
++     () => equipmentAddress(panel, 'helmet').click(),
++     (value) => value.armor.helmet === null && value.cursor.stack?.itemId === armorIds.helmet,
++   );
++   record({ phase: 'detached', snapshot: detached, restored });
++   const reequipped = await committedPointer(
++     page,
++     () => equipmentAddress(panel, 'helmet').click(),
++     (value) => value.armor.helmet?.itemId === armorIds.helmet && value.cursor.stack === null,
++   );
++   record({ phase: 'continued', snapshot: reequipped, restored });
++   expect(detached.actor).toEqual(restored.actor);
++   expect(reequipped.inventoryRevision).toBe(restored.inventoryRevision + 2);
++   expect(reequipped.armor).toEqual(restored.armor);
++   await expectEquipmentDom(page, panel, reequipped);
++   await closeInventory(page);
++   return { restored, continued: reequipped };
++ }
++
++ export async function expectEquipmentReadyForSave(
++   page: Page,
++   journey: V2EquipmentJourneyState,
++ ): Promise<HarnessEquipmentSnapshot> {
++   const current = await requireEquipmentSnapshot(page);
++   expect(inventoryState(current)).toEqual(inventoryState(journey.beforeSave));
++   expect(current.armorPoints).toBe(journey.beforeSave.armorPoints);
++   expect(await voxelAt(page, classicScenario.v2Equipment.workbench.target)).toBe(0);
++   return current;
++ }
++
++ export async function developerWorldEpoch(page: Page): Promise<unknown> {
++   const result = await page.evaluate(async () =>
++     (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.world.identity(),
++   );
++   if (!result.ok) throw new Error(`${result.error.code}: ${result.error.message}`);
++   return result.data.epoch;
++ }
++
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts:79:21
+     77|     const source = readFileSync(new URL('./equipment-journey.ts', impo…
+     78|     const restore = source.slice(source.indexOf('export async function…
+     79|     expect(restore).toContain("kind: 'entity-reference'");
+       |                     ^
+     80|     expect(restore).toContain("status: 'stale'");
+     81|     expect(restore).toContain("status: 'current'");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > resolves detached entity references across non-Classic restore without mutating state
+Error: 附近没有安全的干燥出生点，请尝试另一个 Seed。
+ ❯ runWorldComputeTask packages/stdlib/src/server/compute/world-compute-task.ts:249:36
+    247|     );
+    248|     await checkpoint(isCancelled, yieldTurn);
+    249|     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed…
+       |                                    ^
+    250|     const starterChunks = task.starterEcology
+    251|       ? new Map<string, Readonly<{ cx: number; cy: number; cz: number;…
+ ❯ Object.findInitialWorldBootstrap packages/stdlib/src/server/headless/headless-session.ts:197:24
+ ❯ AuthorityRuntime.create packages/stdlib/src/server/authority/authority-runtime.ts:150:11
+ ❯ HeadlessSession.create packages/stdlib/src/server/headless/headless-session.ts:144:21
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:29:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > validates and authorizes entity-reference inspection before resolving or observing existence
+Error: 附近没有安全的干燥出生点，请尝试另一个 Seed。
+ ❯ runWorldComputeTask packages/stdlib/src/server/compute/world-compute-task.ts:249:36
+    247|     );
+    248|     await checkpoint(isCancelled, yieldTurn);
+    249|     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed…
+       |                                    ^
+    250|     const starterChunks = task.starterEcology
+    251|       ? new Map<string, Readonly<{ cx: number; cy: number; cz: number;…
+ ❯ Object.findInitialWorldBootstrap packages/stdlib/src/server/headless/headless-session.ts:197:24
+ ❯ AuthorityRuntime.create packages/stdlib/src/server/authority/authority-runtime.ts:150:11
+ ❯ HeadlessSession.create packages/stdlib/src/server/headless/headless-session.ts:144:21
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:96:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > captures an entity-reference request before queued execution
+Error: 附近没有安全的干燥出生点，请尝试另一个 Seed。
+ ❯ runWorldComputeTask packages/stdlib/src/server/compute/world-compute-task.ts:249:36
+    247|     );
+    248|     await checkpoint(isCancelled, yieldTurn);
+    249|     if (!playerBodyPosition) throw new Error('附近没有安全的干燥出生点，请尝试另一个 Seed…
+       |                                    ^
+    250|     const starterChunks = task.starterEcology
+    251|       ? new Map<string, Readonly<{ cx: number; cy: number; cz: number;…
+ ❯ Object.findInitialWorldBootstrap packages/stdlib/src/server/headless/headless-session.ts:197:24
+ ❯ AuthorityRuntime.create packages/stdlib/src/server/authority/authority-runtime.ts:150:11
+ ❯ HeadlessSession.create packages/stdlib/src/server/headless/headless-session.ts:144:21
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:167:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > authorizes action ids against their actual actor owner
+AssertionError: expected null not to be null
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:523:25
+    521|     });
+    522|     const foreign = source.runtime.server.getActorAction('foreign');
+    523|     expect(foreign).not.toBeNull();
+       |                         ^
+    524|     const checkpoint = await source.world.checkpoint({ kind: 'export' …
+    525|     if (!checkpoint.ok || !foreign) throw new Error('fixture unavailab…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/11]⎯
+
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  11 failed | 17 passed (28)
+   Start at  10:04:45
+   Duration  37.33s (transform 1.29s, setup 0ms, import 1.80s, tests 35.29s, environment 0ms)
+

@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-restore-reference-static-scope-final",
+  "pid": 11813,
+  "startedAt": "2026-09-29T02:53:45.465Z",
+  "windowId": "v2-restore-reference-static-scope-final",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-observability-01/static-scope-final.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T02:55:24.789Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T02:53:45.466Z",
+      "loadAverage": [
+        3.22998046875,
+        3.1591796875,
+        2.9208984375
+      ],
+      "freeMemoryBytes": 7836827648,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:53:50.468Z",
+      "loadAverage": [
+        3.21142578125,
+        3.15625,
+        2.9208984375
+      ],
+      "freeMemoryBytes": 6118424576,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:53:55.470Z",
+      "loadAverage": [
+        2.9541015625,
+        3.103515625,
+        2.9033203125
+      ],
+      "freeMemoryBytes": 4407279616,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:00.473Z",
+      "loadAverage": [
+        2.87744140625,
+        3.0849609375,
+        2.89794921875
+      ],
+      "freeMemoryBytes": 2537029632,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:05.475Z",
+      "loadAverage": [
+        2.88720703125,
+        3.08349609375,
+        2.8984375
+      ],
+      "freeMemoryBytes": 1147469824,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:10.477Z",
+      "loadAverage": [
+        3.05615234375,
+        3.115234375,
+        2.91064453125
+      ],
+      "freeMemoryBytes": 302415872,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:15.479Z",
+      "loadAverage": [
+        3.21142578125,
+        3.146484375,
+        2.9228515625
+      ],
+      "freeMemoryBytes": 73777152,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:20.481Z",
+      "loadAverage": [
+        3.0341796875,
+        3.11083984375,
+        2.9111328125
+      ],
+      "freeMemoryBytes": 67371008,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:25.483Z",
+      "loadAverage": [
+        2.951171875,
+        3.09228515625,
+        2.90576171875
+      ],
+      "freeMemoryBytes": 63733760,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:30.485Z",
+      "loadAverage": [
+        2.794921875,
+        3.05712890625,
+        2.89453125
+      ],
+      "freeMemoryBytes": 63520768,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:35.487Z",
+      "loadAverage": [
+        2.57080078125,
+        3.00634765625,
+        2.87744140625
+      ],
+      "freeMemoryBytes": 70746112,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:40.489Z",
+      "loadAverage": [
+        2.36474609375,
+        2.9560546875,
+        2.8603515625
+      ],
+      "freeMemoryBytes": 60391424,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:45.490Z",
+      "loadAverage": [
+        2.41552734375,
+        2.95654296875,
+        2.86083984375
+      ],
+      "freeMemoryBytes": 67551232,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:50.491Z",
+      "loadAverage": [
+        2.3017578125,
+        2.923828125,
+        2.849609375
+      ],
+      "freeMemoryBytes": 72269824,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:54:55.493Z",
+      "loadAverage": [
+        2.27734375,
+        2.908203125,
+        2.84423828125
+      ],
+      "freeMemoryBytes": 62865408,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:00.495Z",
+      "loadAverage": [
+        2.3349609375,
+        2.90966796875,
+        2.8447265625
+      ],
+      "freeMemoryBytes": 68108288,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:05.497Z",
+      "loadAverage": [
+        2.22802734375,
+        2.8779296875,
+        2.83349609375
+      ],
+      "freeMemoryBytes": 60997632,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:10.499Z",
+      "loadAverage": [
+        2.12939453125,
+        2.8466796875,
+        2.822265625
+      ],
+      "freeMemoryBytes": 64897024,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:15.501Z",
+      "loadAverage": [
+        2.11865234375,
+        2.83251953125,
+        2.8173828125
+      ],
+      "freeMemoryBytes": 69402624,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:20.503Z",
+      "loadAverage": [
+        2.02880859375,
+        2.8017578125,
+        2.806640625
+      ],
+      "freeMemoryBytes": 60899328,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:55:24.788Z",
+      "loadAverage": [
+        2.1064453125,
+        2.8046875,
+        2.8076171875
+      ],
+      "freeMemoryBytes": 580517888,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

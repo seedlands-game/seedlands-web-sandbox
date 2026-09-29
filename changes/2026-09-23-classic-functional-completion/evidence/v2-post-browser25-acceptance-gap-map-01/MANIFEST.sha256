@@ -1,0 +1,8 @@
+b3f12f9927a28ee590e0bc33f848b51e6941481d2d030c77d471bb3efbdf22ff  ./README.md
+7e1ddef19507041f4aa6a47db6a31d682e4f26ad390635fc2d53ef3f8b3463e0  ./SOURCE-MANIFEST.sha256
+ed6497058d5def22ec4260d53d7438b838f15c42f8104a05d7d64e979e80d53a  ./coverage.tsv
+11ccdd2e58054fb6495e9ab899c824b6453abea6aab3f0c5f0515b6f62273877  ./diagnosis.json
+bdbe8dc7cd606eb03a6eac5f46594dfb30e606c17a708457eff3c9d5c24c52e1  ./dirty-boundary.tsv
+0362cdfdf417f6bbaa0bc3db4d68baa472f5883fb11cb10fcb817851f5514d97  ./final-selfcheck.zsh
+b18cfdace9fc2bd8cd78052ba4a8e7752eb03a6b253f14ee1392ab7e6e96ad26  ./metadata-format.stdout.log
+4452bd27fa6963019f3172bd5dc3a283687eef1c7c8d6e6521e2529524887bdf  ./metadata-format.window.json.log

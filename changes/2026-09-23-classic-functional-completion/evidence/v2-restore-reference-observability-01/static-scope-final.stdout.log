@@ -1,0 +1,10 @@
+Checking formatting...
+All matched files use Prettier code style!
+unexpected tracked diff: apps/web/tests/e2e/classic-runtime.spec.ts
+apps/web/tests/e2e/classic-support/equipment-journey.ts
+changes/2026-09-23-classic-functional-completion/spec.md
+docs/harness-contracts.md
+packages/stdlib/src/server/harness/authority-world-harness.ts
+packages/stdlib/src/server/harness/world-harness-contract.ts
+packages/stdlib/src/server/harness/world-harness-operations.ts
+packages/stdlib/src/server/harness/world-harness-validation.ts

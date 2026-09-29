@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-29T00:12:33Z
+更新时间：2026-09-29T04:12:02Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,14 +10,13 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：`GIT-40-CANONICAL-DISCOVERY`、manifest closure 与 BUILD16 evidence 已远端交付至
-`783e106fb5fcba4869bcc8d0aab68ada1df827a7`。Close17 的真实 discovery RED/GREEN 和严格 manifest closure 已由
-root 独立验收；BUILD16 从 source `fdb53c07...23ff` / tree `ecc79407...7d18` 唯一 build 与 artifact verify PASS，
-276 项产物 map 与 BUILD15 相同。Browser25 已由 root 独立验收：唯一 canonical attempt 与 Classic visual PASS、
-non-Classic 默认 SKIPPED；C0-C5、完整 V1、V2 19 checkpoint 与保存恢复均 PASS。当前 GIT41 仅待冻结
-Browser25 evidence 与状态并远端交付，不改实现。Browser24 保持 discovery 前 FAIL/Chromium 0，Browser23 保持
-720 秒 timeout FAIL/TRACE_INCOMPLETE；new reference、death/drop/respawn、完整 16 armor/194 matrix、V3/V4、Cua/
-人类听觉、性能均未完成。
+当前 Git/Docs checkpoint：GIT41 已远端交付至 `01c650793c79ac34e6184da48b5a4c94a5f161c2`，local/upstream/
+remote/PR head 一致，PR #41 为 Draft/Open、base `main`。BUILD16 从 source `fdb53c07...23ff` / tree
+`ecc79407...7d18` 唯一 build 与 artifact verify PASS，276 项产物 map 与 BUILD15 相同。Browser25 已由 root 独立
+验收：唯一 canonical attempt 与 Classic visual PASS、non-Classic 默认 SKIPPED；C0-C5、完整 V1、V2 19 checkpoint 与
+保存恢复均 PASS。当前 GIT42 正在交付 restore reference observability 与 action-owner fixture close；新 source 的 build/
+Browser 尚未运行。Browser24 保持 discovery 前 FAIL/Chromium 0，Browser23 保持 720 秒 timeout FAIL/
+TRACE_INCOMPLETE；death/drop/respawn、完整 16 armor/194 matrix、V3/V4、Cua/人类听觉、性能均未完成。
 
 历史 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
 两份历史 snapshot 而 exit 1，实际 Chromium attempt 为 0。`V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17` 只在唯一
@@ -357,7 +356,18 @@ Browser-12唯一canonical attempt在同一`87e64e0b...`artifact上`PASS/exit 0`�
 
 root准出时Browser-12的13-entry manifest SHA为`310049981f927c80d4250ddb5f545bb0d7d4ce05f963d50929685ea8c9d58844`。GIT-20新增文档门禁receipt/stdout后，没有重命名或改写原13文件；最终manifest按实际归档路径重算并自校验，最终SHA与条目数只在本阶段checkpoint报告，避免文档与manifest互相自引用。
 
-当前未验收：Cua与人类听觉（NOT RUN）、性能（NOT_MEASURED）、完整194矩阵、V2 death/UI/V3/V4、full deterministic、Classic headless、CI/review与PR preview。近接触薄门 origin-cell `adjacent=null` 限制仍未修。V2 spine/revision、761 pointer 与 station host 已分别形成未提交 checkpoint；共享三项当前实跑 `2 passed / 1 failed`，仅 death producer settlement 仍 RED。最终组合仍待 root 在隔离 staged tree 准出。
+当前 Restore reference checkpoint：`V2-RESTORE-REFERENCE-OBSERVABILITY-01` 已实现通用只读
+`entity-reference` inspect，复用当前 Authority owner 的 `resolveEntityReference`，authorization-before-resolve、严格
+validation、request/response 隔离与 non-Classic restore 正反例已完成；既有 equipment restore consumer 在 UI continuation
+前验证 old stale/new current 并写入 receipt。baseline-control 纠正了旧 `affected 16 passed / 1 skipped` 不能称完整
+GREEN：clean HEAD 与 reference candidate 均在 retired `settler` fixture 同点失败。`V2-HARNESS-ACTION-OWNER-FIXTURE-CLOSE-01`
+只将该用例改用已注册 passive `cow`，补齐 spawn/start 内层 success 与 identity；最终 clean candidate 的
+focused/session/adapter 为 `3 files / 28 tests PASS`；GIT42 detached delivery tree 的 stdlib/Web production types、
+root/Classic test types、8 TS ESLint 与 12-path Prettier/scope 也已 PASS。GIT42 状态
+`PENDING_NATURAL_HOOK`，现仅待三笔自然 hook、非破坏分支推进、push 与 PR #41 读回。
+Browser25 仍只证明旧 source 的 `2 passed / 1 skipped`；新 reference Browser 验收必须等待 GIT42 后的新 artifact。
+
+当前未验收：Cua与人类听觉（NOT RUN）、性能（NOT_MEASURED）、完整194矩阵、V2 death/UI/V3/V4、full deterministic、Classic headless、CI/review与PR preview。近接触薄门 origin-cell `adjacent=null` 限制仍未修。
 
 ## 终点
 

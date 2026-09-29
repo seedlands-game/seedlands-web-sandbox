@@ -1,0 +1,25 @@
+LINK	apps/web/node_modules/@seedlands/stdlib	/private/tmp/seedlands-git42-restore-reference/packages/stdlib
+LINK	apps/web/node_modules/@seedlands/kernel	/private/tmp/seedlands-git42-restore-reference/packages/kernel
+LINK	apps/web/node_modules/@seedlands/playbook-classic	/private/tmp/seedlands-git42-restore-reference/playbooks/classic
+LINK	apps/web/node_modules/@seedlands/cognition-protocol	/private/tmp/seedlands-git42-restore-reference/packages/cognition-protocol
+LINK	packages/stdlib/node_modules/@seedlands/kernel	/private/tmp/seedlands-git42-restore-reference/packages/kernel
+LINK	playbooks/classic/node_modules/@seedlands/stdlib	/private/tmp/seedlands-git42-restore-reference/packages/stdlib
+HEAD_HASH	44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169	pnpm-lock.yaml
+HEAD_HASH	8f5e50d56ab44e99f1f4775580c32ddb042c1869b3cd706eeb546e5795dd9479	packages/kernel/src/index.ts
+HEAD_HASH	d10fc6a21afa06ca78a3d9e00315dd3ddd9dec3ec769ea3d06e91b4b01efe6c9	packages/stdlib/src/server/composition/mod-api.ts
+HEAD_HASH	c714deceb581a35c088ed8c40dfa1501f34908b3258b09c66fe87824a246f89c	playbooks/classic/src/actors.ts
+HEAD_HASH	20fd7f5bc143d19d1d2bdfa81fd67b99c2ffcc43f098a4512def89efcbbf4c4c	apps/web/tests/unit/client/browser-authority-world-harness.test.ts
+STAGED_COUNT	12
+STAGED_TS_COUNT	8
+STAGED	apps/web/tests/e2e/classic-runtime.spec.ts
+STAGED	apps/web/tests/e2e/classic-support/equipment-journey.ts
+STAGED	apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts
+STAGED	apps/web/tests/integration/runtime/server/world-harness-session.test.ts
+STAGED	changes/2026-09-23-classic-functional-completion/action-owner-fixture-contract.md
+STAGED	changes/2026-09-23-classic-functional-completion/restore-reference-observability-contract.md
+STAGED	changes/2026-09-23-classic-functional-completion/spec.md
+STAGED	docs/harness-contracts.md
+STAGED	packages/stdlib/src/server/harness/authority-world-harness.ts
+STAGED	packages/stdlib/src/server/harness/world-harness-contract.ts
+STAGED	packages/stdlib/src/server/harness/world-harness-operations.ts
+STAGED	packages/stdlib/src/server/harness/world-harness-validation.ts

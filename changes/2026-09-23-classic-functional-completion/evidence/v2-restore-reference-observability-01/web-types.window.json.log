@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-restore-reference-web-types",
+  "pid": 77980,
+  "startedAt": "2026-09-29T02:19:03.210Z",
+  "windowId": "v2-restore-reference-web-types",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-observability-01/web-types.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T02:19:11.517Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T02:19:03.211Z",
+      "loadAverage": [
+        2.49609375,
+        2.50146484375,
+        2.74462890625
+      ],
+      "freeMemoryBytes": 8403763200,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:19:08.214Z",
+      "loadAverage": [
+        2.4560546875,
+        2.49267578125,
+        2.740234375
+      ],
+      "freeMemoryBytes": 8274968576,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:19:11.516Z",
+      "loadAverage": [
+        2.4560546875,
+        2.49267578125,
+        2.740234375
+      ],
+      "freeMemoryBytes": 8336670720,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-restore-reference-observability-green-focused-02",
+  "pid": 73660,
+  "startedAt": "2026-09-29T02:12:15.052Z",
+  "windowId": "v2-restore-reference-observability-green-focused-02",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-observability-01/green-focused-02.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T02:12:19.452Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T02:12:15.053Z",
+      "loadAverage": [
+        2.8203125,
+        2.86767578125,
+        2.96142578125
+      ],
+      "freeMemoryBytes": 8594522112,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T02:12:19.451Z",
+      "loadAverage": [
+        2.83447265625,
+        2.86962890625,
+        2.96142578125
+      ],
+      "freeMemoryBytes": 8729739264,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

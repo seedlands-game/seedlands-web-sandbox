@@ -1,0 +1,3 @@
+Checking formatting...
+All matched files use Prettier code style!
+PASS source=41 manifest=21 head=01c650793c79ac34e6184da48b5a4c94a5f161c2 mainIndex=0 protectedDirty=38 deliveryStaged=12 validation=28/28 hooks=PENDING currentWindow=WRITTEN_BY_WRAPPER

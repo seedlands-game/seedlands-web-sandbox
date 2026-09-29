@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-RESTORE-REFERENCE-OBSERVABILITY-01",
+  "status": "PASS",
+  "identity": {
+    "committedHead": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "committedTree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "validationTree": "/private/tmp/seedlands-v2-restore-reference-01"
+  },
+  "result": {
+    "entityReferenceInspectImplemented": true,
+    "authorityOwnerResolutionUsed": true,
+    "authorizationBeforeResolve": true,
+    "requestAndResponseDetached": true,
+    "successfulRestoreOldStaleNewCurrent": true,
+    "failedRestoreReferenceStillCurrent": true,
+    "browserWorkerGenericTransportCovered": true,
+    "classicRestoreConsumerFailClosed": true,
+    "classicRestoreReceiptShapeExtended": true,
+    "protocolVersion": 1,
+    "productGreenClaimed": false
+  },
+  "tests": {
+    "trustedRed": {
+      "runId": "v2-restore-reference-observability-red-02",
+      "status": "FAIL_EXPECTED_GAP",
+      "result": "10 failed / 1 passed / 17 skipped"
+    },
+    "focusedGreen": {
+      "runId": "v2-restore-reference-focused-green-final-05",
+      "status": "PASS",
+      "result": "1 file / 11 tests passed"
+    },
+    "affectedExisting": {
+      "runId": "v2-restore-reference-affected-tests-sealed",
+      "status": "PASS",
+      "result": "2 files / 16 passed / 1 skipped"
+    },
+    "preexistingActionOwnerGap": {
+      "runId": "v2-restore-reference-existing-action-owner-diag-01",
+      "status": "FAIL_PREEXISTING_UNTOUCHED",
+      "result": "1 failed / 12 skipped"
+    }
+  },
+  "static": {
+    "stdlibProductionTypes": "PASS",
+    "webProductionTypes": "PASS",
+    "rootTestTypes": "PASS",
+    "classicTestTypes": "PASS",
+    "targetEslint": "PASS",
+    "prettier": "PASS",
+    "ignoreOrSuppressionAdded": false
+  },
+  "metadataFormat": {
+    "runId": "v2-restore-reference-metadata-format-01",
+    "status": "PASS",
+    "firstInvocation": "FAIL_BEFORE_LOCK_OR_COMMAND",
+    "firstInvocationCause": "benchmark-window does not accept --run-id or --evidence-path flags; no receipt or file mutation occurred",
+    "retryContract": "SEEDLANDS_RESERVATION_RUN and SEEDLANDS_RESERVATION_EVIDENCE"
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 29,
+    "gitShowEntries": 18,
+    "workingEntries": 11,
+    "sha256": "ea655a87c461b82c34812b7b396839dd73544e1718378ccacdad79dd6706212c",
+    "roots": {
+      "gitShow": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+      "working": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox"
+    }
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 122,
+    "sha256": "a3982827133a7ee2e5443edc53972b3e12e25c6abefe2005c28eb237b6f55fac",
+    "includesAllNonSelfReferentialRawEvidence": true,
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format*.stdout.log",
+      "metadata-format*.window.json.log",
+      "final-selfcheck*.stdout.log",
+      "final-selfcheck*.window.json.log"
+    ],
+    "exclusionReason": "Avoid self-reference and allow final format/selfcheck receipts to attest the already sealed source and evidence content."
+  },
+  "selfcheck": {
+    "runId": "v2-restore-reference-final-selfcheck-03",
+    "status": "PASS_AFTER_SCRIPT_FIX",
+    "sourceEntriesValidated": 29,
+    "evidenceEntriesValidated": 122,
+    "strictLowerHexRequired": true,
+    "uniqueLocatorsAndPathsRequired": true,
+    "headTreeAndEmptyIndexRequired": true,
+    "sliceScopeRequired": "8 tracked modified and 3 untracked source/change files",
+    "lockOwnerRequiredDuringRun": true,
+    "outputsExcludedFromManifest": true,
+    "firstAttempt": "PASS",
+    "secondAttempt": "FAIL_LOCK_RUN_ID_HARDCODED_TO_FIRST_ATTEMPT",
+    "secondAttemptMutationFromEvidenceFailure": false,
+    "fix": "compare lock owner to the wrapper-injected current performance window id",
+    "finalAttempt": "PASS_BY_EXIT_ZERO"
+  },
+  "workspace": {
+    "preexistingCompactStatusEntries": 39,
+    "finalExpectedCompactStatusEntries": 51,
+    "sliceTrackedModified": 8,
+    "sliceUntrackedSourceOrChangeFiles": 3,
+    "sliceEvidenceDirectoryEntry": 1,
+    "otherDirtyPreserved": true,
+    "indexExpectedEmpty": true,
+    "taskOwnedValidationTreeRemoveAfterSeal": true
+  },
+  "budget": {
+    "aiBaselineHours": 2,
+    "aiRecommended120PercentHours": 2.4,
+    "aiHardLimitHours": 3,
+    "traditionalPdRange": "0.25-0.5",
+    "traditionalPdRecommended120Percent": 0.6,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "kernelModified": false,
+    "entityStoreRestoreOrGameplaySemanticsModified": false,
+    "protocolVersionChanged": false,
+    "secondHarnessHelperFallbackAdded": false,
+    "fixtureScenarioRunnerReceiptCiModified": false,
+    "deathWorldItemsArmorCatalogV3V4Implemented": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browser26Run": false,
+    "cuaRun": false,
+    "devServerRun": false,
+    "ciRun": false,
+    "gitOrIndexWrite": false,
+    "productGreenClaimed": false
+  },
+  "notRun": [
+    "build",
+    "artifact",
+    "Browser26",
+    "Playwright --list",
+    "Cua",
+    "dev server",
+    "CI",
+    "Git/index/commit/push/PR",
+    "deploy",
+    "merge"
+  ]
+}

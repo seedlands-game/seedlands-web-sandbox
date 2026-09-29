@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-42-RESTORE-REFERENCE",
+  "status": "PASS_PENDING_NATURAL_HOOK",
+  "baseline": {
+    "head": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "tree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "upstreamAheadBehind": "0/0",
+    "originMainAheadBehind": "0/215"
+  },
+  "commitPlan": {
+    "A": "reference API, existing consumer, focused tests and contracts; 10 paths",
+    "B": "action-owner fixture and narrow contract; 2 paths",
+    "C": "evidence summaries, four evidence directories, tasks/execution-state and this delivery evidence"
+  },
+  "commits": {
+    "A": {
+      "sha": "a1bc8d6f32588ae22d8d573442403a53cf59aee8",
+      "subject": "feat(harness): inspect entity lifetime references",
+      "paths": 10,
+      "naturalHooks": "PASS"
+    },
+    "B": {
+      "sha": "cc8cfb06d0040d4b35594f25673780b394d276cb",
+      "subject": "test(harness): repair action owner fixture",
+      "paths": 2,
+      "naturalHooks": "PASS"
+    },
+    "C": {
+      "sha": "PENDING",
+      "subject": "docs(change): seal restore reference evidence",
+      "naturalHooks": "PENDING"
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git42-restore-reference",
+    "kind": "detached worktree at baseline with only A+B paths overlaid and staged",
+    "stagedPaths": 12,
+    "stagedTypeScriptPaths": 8,
+    "dependencyCommand": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "dependencyStatus": "PASS_ALREADY_UP_TO_DATE",
+    "downloads": 0,
+    "scriptsRun": false,
+    "workspaceLinksInsideTree": 6,
+    "unapprovedSourceHashesMatchHead": true
+  },
+  "deliveryTreeAssembly": {
+    "firstAttempt": "FAIL_NO_CHECKOUT_INDEX_TREATED_TRACKED_FILES_AS_UNTRACKED",
+    "firstAttemptSourceOrIndexMutation": false,
+    "recovery": "repopulate the task-owned tree, initialize its own index with read-tree --reset HEAD, then remove untracked and restore tracked files",
+    "finalStatus": "PASS_12_STAGED_PATHS"
+  },
+  "validation": {
+    "runId": "git42-delivery-validation-01",
+    "status": "PASS",
+    "tests": "3 files / 28 tests PASS",
+    "stdlibProductionTypes": "PASS",
+    "webProductionTypes": "PASS with 0 Svelte errors and 0 warnings",
+    "rootTestTypes": "PASS",
+    "classicTestTypes": "PASS",
+    "eslint": "8 TypeScript paths PASS",
+    "prettier": "12 paths PASS",
+    "stagedScope": "12/12 PASS",
+    "ignoreOrSuppressionAdded": false
+  },
+  "priorEvidence": {
+    "postBrowser25Map": "root independently accepted",
+    "restoreReference": {
+      "sourceManifestSha256": "ea655a87c461b82c34812b7b396839dd73544e1718378ccacdad79dd6706212c",
+      "evidenceManifestSha256": "a3982827133a7ee2e5443edc53972b3e12e25c6abefe2005c28eb237b6f55fac",
+      "deliverySha256": "c9e350786b25de2dc3c1e9055aacf00a7d6806572abc70f84cba777fa1df4bb3",
+      "priorAffectedStatus": "16 passed / 1 skipped, not complete affected GREEN",
+      "priorCloneDependencyBinding": "UNKNOWN"
+    },
+    "baselineControl": {
+      "sourceManifestSha256": "27b1ec6c4bfc176fa878e351ebb0035b7d1411d9855c7f7c5c87671621074cf1",
+      "evidenceManifestSha256": "6d8f64b1d3da2aefd2891bd2535537981547c448b3f2acf31422ccdeb446c1a3",
+      "deliverySha256": "6af1d46fccbb7e9884bcb481a933dc93d5c7fca0e1431cd0a9d6b357c430ac3e",
+      "result": "PREEXISTING_REPRODUCED; candidate intermediate 27 passed / 1 known failure"
+    },
+    "fixtureClose": {
+      "sourceManifestSha256": "7f91df8303701cc58f16b85b36e100ed2f35d2cdc8473c6bee19b5c244dbb275",
+      "evidenceManifestSha256": "d28bf5ed1929c592c32e07f8f8f84bb58240b0e8a2ed323ece425f48e6ddd335",
+      "deliverySha256": "227102fda34609fdb5f352f603559ff471b9194b98d52b3f2507801def9fe442",
+      "result": "3 files / 28 tests PASS"
+    },
+    "browser25": "2 passed / 1 skipped on older source; does not prove the new reference probe"
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 41,
+    "gitShowEntries": 13,
+    "workingEntries": 28,
+    "sha256": "62824897a412d767e455c381e077de02f909e32787c26732ed9788ac43923b76"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 24,
+    "sha256": "1eaf454380797186143b32b50189213d859be644182dbef967aedb260aa54bd6",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format*.stdout.log",
+      "metadata-format*.window.json.log",
+      "final-selfcheck*.stdout.log",
+      "final-selfcheck*.window.json.log"
+    ]
+  },
+  "workspace": {
+    "protectedDirtyEntries": 38,
+    "protectedDirtyManifestSha256": "32eea766e03146caed9a53957ffbe84d6cff626015a0b1d57604b6f798b33b13",
+    "mainIndexExpectedEmptyBeforeBranchAdvance": true,
+    "otherDirtyPreserved": true
+  },
+  "blobAudit": {
+    "ownedFiles": 256,
+    "maximumBlobBytes": 83401,
+    "limitBytes": 100000000,
+    "status": "PASS"
+  },
+  "budget": {
+    "targetHours": 2,
+    "hardLimitHours": 3,
+    "aiRecommended120PercentHours": 2.4,
+    "traditionalPd": 0.25,
+    "traditionalPdRecommended120Percent": 0.3,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "longTermHarnessDocsUpdated": true,
+    "protocolVersion": 1,
+    "fixtureChangesProductionBehavior": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "devServerRun": false,
+    "ciRun": false,
+    "deployOrMergeRun": false,
+    "productGreenClaimed": false
+  },
+  "unverified": [
+    "new committed-source build and artifact",
+    "Browser old stale/new current/UI continuation",
+    "death/drop/respawn",
+    "complete 16 armor and 194 catalog matrices",
+    "V3/V4",
+    "Cua auditory acceptance",
+    "performance"
+  ],
+  "naturalHooks": "A_PASS_B_PASS_C_PENDING",
+  "commitPushPrReadback": "RECORDED_BY_FINAL_CHECKPOINT_NOT_SELF_REFERENTIAL_METADATA"
+}

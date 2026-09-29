@@ -1,0 +1,214 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-POST-BROWSER25-ACCEPTANCE-GAP-MAP-01",
+  "status": "MAP_ONLY_NO_IMPLEMENTATION",
+  "identity": {
+    "committedHead": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "committedTree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "build16Source": "fdb53c07c0da14c7f523473e4f33060a385f23ff",
+    "build16Tree": "ecc7940708bca8ea1d01e8df50337fa536d27d18",
+    "build16Acceptance": "/private/tmp/seedlands-v2-acceptance-fdb53c07"
+  },
+  "browser25": {
+    "status": "PASS_ROOT_INDEPENDENTLY_ACCEPTED",
+    "tests": 3,
+    "passed": 2,
+    "skipped": 1,
+    "attempts": 1,
+    "retry": 0,
+    "sourceManifestSha256": "c0d37c2742c8a9627c4839d0cde0c1d5eb7dd17cdfff4c39bd13c7064d8c49eb",
+    "evidenceManifestSha256": "78b45e794bb2688cb75acf4756df80fc6691b456e7881eff14f210c713722a2c",
+    "deliverySha256": "f227181902cecbe52d7b45e666c8ac9c4a0cc8e227b38df56f84988ac2942838",
+    "receiptSha256": "b64956a1d687601b289aae72c3a7ed4645c1a90ca540f15c53f004a4dd257997",
+    "selectionSha256": "7156c9366d6b06b66ae5649a39176b3ddbdb9658de6a63267e2a25f455baee57",
+    "covered": ["C0-C5", "full V1", "V2 19 checkpoints", "save/restore with new projection pointer continuation"],
+    "notAsserted": [
+      "old entity reference rejection",
+      "death/inventory+cursor+crafting+equipment drop/respawn",
+      "complete 16 armor matrix",
+      "complete 194 item behavior matrix",
+      "V3/V4",
+      "Cua/human auditory acceptance",
+      "performance"
+    ],
+    "trace": "NOT_RETAINED_BY_CONFIG"
+  },
+  "findings": {
+    "deathImplementation": {
+      "earlyI22Red": "SUPERSEDED_BY_LATER_IMPLEMENTATION",
+      "producerCommit": "74628290",
+      "classicPolicyCommit": "c3ba7ea9",
+      "owners": [
+        "stdlib ActorVitals direct producer",
+        "stdlib registered Combat producer",
+        "stdlib registered Needs producer",
+        "Classic Playbook death inventory policy"
+      ],
+      "deterministicEvidence": {
+        "registeredCombat": "11/11 PASS",
+        "directVitals": "11/11 PASS",
+        "registeredNeeds": "12/12 PASS",
+        "mixedSeries": "13/13 PASS",
+        "classicLineage": "4/4 PASS",
+        "classicPack": "3/3 PASS",
+        "classicWebAggregate": "18/18 PASS",
+        "noDuplication": "9/9 PASS"
+      },
+      "browserGap": "normal hostile causality, exact four-container drops, death overlay and respawn are not asserted"
+    },
+    "restoreReference": {
+      "owner": "stdlib EntityStore/EcsEntityOwner",
+      "referenceShape": ["entityId", "epoch", "lifetime"],
+      "headlessEvidence": "old reference resolves null, retained access throws stale, old pointer rejects actor-reference-stale, new pointer continues",
+      "browser25Evidence": "runtime and actor epochs changed, lifetime and restored state remained, current UI pointer continued",
+      "browserGap": "no Authority resolution of retained pre-restore reference",
+      "requiredProbe": {
+        "request": "WorldHarness inspect entity-reference with EntityLifetimeReference",
+        "result": "current or stale",
+        "readOnly": true,
+        "genericAcrossPlaybooks": true
+      }
+    },
+    "armor": {
+      "registeredDefinitions": 16,
+      "registeredRecipes": 16,
+      "tiers": 4,
+      "slots": 4,
+      "deterministicRegistrationSamples": 5,
+      "genericFullBagPointerAtomicity": true,
+      "browser25CraftedIronItems": 5,
+      "browser25EquippedIronSlots": 4,
+      "browserCombatDurabilityAsserted": false,
+      "browserDeathAsserted": false
+    },
+    "catalog": {
+      "build16UniqueItems": 194,
+      "build16UniqueRecipes": 134,
+      "capabilityCounts": {
+        "none": 60,
+        "consume": 10,
+        "place": 79,
+        "mine": 15,
+        "melee": 5,
+        "till": 5,
+        "fluid-container": 3,
+        "ranged": 1,
+        "armor": 16
+      },
+      "capabilityCountSum": 194,
+      "behaviorClosureClaimed": false,
+      "oldSpecClassificationIsCurrentCompletion": false
+    },
+    "normalDeathEntry": {
+      "productChainExists": true,
+      "chain": [
+        "natural spawn",
+        "hostile logic decision",
+        "Authority intent freshness",
+        "actor attack distance and LOS",
+        "registered Combat",
+        "Classic death policy",
+        "Web death overlay and respawn action"
+      ],
+      "canonicalTrainingCreatureCanAttackPlayer": false,
+      "developerApplyDamageAllowedForAcceptance": false,
+      "developerSpawnAllowedAsProductCausality": false,
+      "harnessOrDebugTimeWriteAllowedForAcceptance": false,
+      "naturalSpawnConstraints": {
+        "intervalSeconds": 20,
+        "distanceRange": "26-32",
+        "nightRequiredForHostile": true,
+        "maximumLight": 7,
+        "loadedVoxelAndBiomeRequired": true,
+        "meleeProfileRequired": true
+      }
+    }
+  },
+  "recommendedSlice": {
+    "id": "V2-BROWSER-DEATH-REFERENCE-01",
+    "objective": "Prove old-reference rejection and a normal hostile-caused Classic death/drop/respawn journey without privileged damage or spawn causality.",
+    "aiBaselineHours": 2.5,
+    "aiHardLimitHours": 3,
+    "aiRecommended120PercentHours": 3,
+    "traditionalPdBaseline": "0.5-0.75",
+    "traditionalPdRecommended120Percent": 0.9,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN",
+    "productionOwnership": {
+      "kernel": [],
+      "stdlibHarness": [
+        "packages/stdlib/src/server/harness/world-harness-contract.ts",
+        "packages/stdlib/src/server/harness/world-harness-validation.ts",
+        "packages/stdlib/src/server/harness/world-harness-operations.ts",
+        "packages/stdlib/src/server/harness/authority-world-harness.ts"
+      ],
+      "webObservability": [
+        "apps/web/src/app/app-contracts.ts",
+        "apps/web/src/app/gameplay/game-harness-observability.ts"
+      ],
+      "classicAcceptance": [
+        "playbooks/classic/scenarios/canonical-runtime-v11.json",
+        "apps/web/tests/e2e/classic-support/equipment-journey.ts",
+        "apps/web/tests/e2e/classic-support/equipment-journey-support.ts",
+        "apps/web/tests/e2e/classic-runtime.spec.ts"
+      ],
+      "sharedExportsCompositionCi": "NO_CHANGE_EXPECTED"
+    },
+    "redDesign": [
+      "generic current/stale entity-reference inspection with malformed, unauthorized and failed-restore negatives",
+      "immutable world-item id/stack/position projection in the existing equipment snapshot",
+      "fixed-seed natural-hostile cause under the normal world clock that rejects developer/debug time, damage and spawn shortcuts and requires a melee-capable actor"
+    ],
+    "browserDoneWhen": [
+      "old pre-restore reference is stale by Authority resolution, not inferred from epoch",
+      "new reference is current and a formal UI pointer action succeeds",
+      "normal hostile Logic/Authority/registered Combat causes armor wear and death",
+      "exact bag/cursor/crafting/equipment stacks become world items once and containers become empty",
+      "death overlay is visible and its normal respawn button restores alive state at spawn without restoring drops",
+      "the existing 900000ms main and 60000ms local budgets remain unchanged"
+    ],
+    "stopConditions": [
+      "natural hostile is not deterministic and reachable within the fixed scenario and current budgets by the three-hour cap",
+      "the probe requires a public write API, protocol version bump or unused framework",
+      "existing other-owner dirty overlaps an owned path"
+    ],
+    "separateLaterStages": ["V2-ARMOR-16-MATRIX", "V2-CATALOG-FAMILY-CLOSURE", "V3", "V4"]
+  },
+  "dirtyBoundary": {
+    "statusEntriesAtPreflight": 38,
+    "relevantTrackedModified": 9,
+    "relevantUntracked": 20,
+    "unrelatedProtected": 9,
+    "workingDirtyUsedAsCommittedCapability": false,
+    "details": "dirty-boundary.tsv"
+  },
+  "mapBudget": {
+    "targetMinutes": "45-60",
+    "hardLimitHours": 2,
+    "traditionalPdRange": "0.1-0.25",
+    "recommendedHours120Percent": 1.2,
+    "recommendedTraditionalPd120Percent": 0.3,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "sourceModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "gitOrIndexWrite": false,
+    "specTasksOrExecutionStateModified": false,
+    "longTermDocsUpdated": false,
+    "productGreenClaimed": false
+  },
+  "historicalStatus": {
+    "browser23": "FAIL_TIMEOUT_TRACE_INCOMPLETE",
+    "browser24": "FAIL_BEFORE_TEST_DISCOVERY_CHROMIUM_ZERO",
+    "browser25Trace": "NOT_RETAINED_BY_CONFIG"
+  }
+}

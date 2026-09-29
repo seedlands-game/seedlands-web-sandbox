@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-reference-control-final-selfcheck-04",
+  "pid": 50464,
+  "startedAt": "2026-09-29T03:34:52.844Z",
+  "windowId": "v2-reference-control-final-selfcheck-04",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-baseline-control-01/final-selfcheck-04.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T03:35:14.749Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T03:34:52.845Z",
+      "loadAverage": [
+        2.93408203125,
+        3.16796875,
+        3.20556640625
+      ],
+      "freeMemoryBytes": 396607488,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:34:57.848Z",
+      "loadAverage": [
+        2.85888671875,
+        3.1484375,
+        3.1982421875
+      ],
+      "freeMemoryBytes": 429146112,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:35:02.850Z",
+      "loadAverage": [
+        2.8701171875,
+        3.1455078125,
+        3.19677734375
+      ],
+      "freeMemoryBytes": 148307968,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:35:07.852Z",
+      "loadAverage": [
+        2.88037109375,
+        3.14306640625,
+        3.1953125
+      ],
+      "freeMemoryBytes": 333807616,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:35:12.854Z",
+      "loadAverage": [
+        2.9697265625,
+        3.1572265625,
+        3.19970703125
+      ],
+      "freeMemoryBytes": 363905024,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T03:35:14.748Z",
+      "loadAverage": [
+        2.9697265625,
+        3.1572265625,
+        3.19970703125
+      ],
+      "freeMemoryBytes": 410288128,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

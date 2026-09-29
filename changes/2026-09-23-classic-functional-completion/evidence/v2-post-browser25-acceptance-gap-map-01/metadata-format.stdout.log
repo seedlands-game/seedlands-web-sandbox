@@ -1,0 +1,17 @@
+Scope: all 8 workspace projects
+✓ Lockfile passes supply-chain policies (verified 4d ago)
+Lockfile is up to date, resolution step is skipped
+Already up to date
+
+devDependencies:
++ @seedlands/cognition-protocol 0.1.0 <- packages/cognition-protocol
++ @seedlands/eslint-plugin 0.1.0 <- packages/eslint-plugin
++ @seedlands/kernel 0.1.0 <- packages/kernel
++ @seedlands/playbook-classic 0.1.0 <- playbooks/classic
++ @seedlands/stdlib 0.1.0 <- packages/stdlib
+
+. prepare$ husky
+. prepare: Done
+Done in 1.5s using pnpm v11.25.0
+changes/2026-09-23-classic-functional-completion/evidence/v2-post-browser25-acceptance-gap-map-01/README.md 56ms
+changes/2026-09-23-classic-functional-completion/evidence/v2-post-browser25-acceptance-gap-map-01/diagnosis.json 11ms

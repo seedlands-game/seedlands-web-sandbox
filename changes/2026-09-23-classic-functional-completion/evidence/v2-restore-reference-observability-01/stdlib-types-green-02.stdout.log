@@ -1,0 +1,6 @@
+$ tsc -p tsconfig.json --noEmit
+src/server/harness/authority-world-harness.ts(140,76): error TS2304: Cannot find name 'integerTuple'.
+src/server/harness/authority-world-harness.ts(142,55): error TS2304: Cannot find name 'chunkKey'.
+/private/tmp/seedlands-v2-restore-reference-01/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

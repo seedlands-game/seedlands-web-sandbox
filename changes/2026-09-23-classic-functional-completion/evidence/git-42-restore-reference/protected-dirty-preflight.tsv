@@ -1,0 +1,38 @@
+ M	7811	f03047c2a69119a9f392a1b9fe3fec668b71569b86fd54007dccbfe62eed7972	.github/workflows/ci.yml
+ M	20543	9c7318166e02d9d7c084dc663ab69f6e98f7699a4b6546152163be748cae34db	README.md
+ M	17711	bb42a80a7677ce1b5db9bff2fe349b9dd9709e53d939152959078cb033020090	README.zh-CN.md
+ M	1647	626dc10d3a7403d087b835ecf8cb72261a51b413634ba69fc490ccbe3afb7f44	apps/web/index.html
+ M	8788	a60a9d7383aa4297dc89e9724b85f3a4f7734441a6bbe7bd5faebcee2b5b108f	apps/web/src/app/scene/block-light-volume.ts
+ M	3446	b4ce0970584f47f1b400ae1c7582b45f9c3d8ccfbf6e1cc6095158489691d7da	apps/web/tests/integration/runtime/server/composition/classic-lighting.test.ts
+ M	5430	ad7d68f7eb43460741934d24b96b06995d7bc90bc69670516b35efa300e00836	apps/web/tests/unit/app/block-light-volume.test.ts
+ M	6980	ef3b4be383073885364426b8abf4da0cbdad30e9a00de859ff71cca9c93793e8	package.json
+ M	12419	53a65707b3cc6d94520a43a348479e767033635b9bf5927f3b1d3bbdfcbb4a5c	packages/stdlib/src/server/composition/mod-api.ts
+ M	1349	7df6e0973300e022c40ea1084c0b273e8a130f2ac20ca24d51fe5ab0b8c456e5	packages/stdlib/src/server/gameplay/light-sampler.ts
+ M	3232	134891d6c5607268d87551a9ea7a3eba2dc1b02a32508355389bf4fadd795a3d	packages/stdlib/src/world/voxel-light.ts
+ M	3374	5df55734c62bd11e2cbd45c0814bce846b952aaa7b96e90bfe7262b5bf7c958e	packages/stdlib/tests/world/voxel-light.test.ts
+ M	3981	87056a0d0511607f2f40c20f60361fe0c3000dc5ac37dab7d0e85dea9e63e788	packages/stdlib/tests/world/voxel-semantics.test.ts
+ M	14242	123931c09a9613e4e5dcef1a7c24c2ccd89d11a183c70ea916f15306aa2da219	playbooks/classic/src/blocks.ts
+??	16906	6a772e0111ffcf82b3277280d4e4c89ffded09e0bf8ed2b3dac0ebc2c1187f74	apps/web/src/app/scene/sky-visibility-volume.ts
+??	4230	519483088d6d3484a4e6f48ef9a5d29e86cc8a9acceaa06dc0a70216297cd575	apps/web/src/app/scene/surface-lighting.ts
+??	13128	44bb0f26c8e31e4e65cf73745b106f240781e17285d62c7a3c8c0567056f9ea6	apps/web/tests/unit/app/sky-visibility-volume.test.ts
+??	1771	c34e55c58647402db0fb1b0212cccea814ddddfe6a64523bf61c4387597d3a30	apps/web/tests/unit/app/surface-lighting-contract.test.ts
+??	1806	861adbe484163a2f27afd78065d2eb40858b1c8b0131515bda39af022fbd281e	apps/web/tests/unit/app/surface-lighting-shader-source.test.ts
+??	5731	565ecaaa97e939841af997e54963b5eb7ee97f0701dd7fab58c17a7671684428	apps/web/tests/unit/app/surface-lighting.test.ts
+??	2338	a4ce9e0add6f35b326c01ab47701d4e84dbbb6d0d9f03ca36b2f1e33a3c75f96	changes/2026-09-22-hotpath-allocation-baseline/spec.md
+??	4832	546d6f58ffd168c1be89171accc1f05e4cdedae008889212135d1f27f812a524	changes/2026-09-23-cloudflare-pages-migration/spec.md
+??	8140	30aed5cc8205c17f9cf6c549899c5569c5d25db1ac116b1926f999df2a74233a	packages/stdlib/src/server/gameplay/modules/climb-surface-model.ts
+??	15813	f89307f79f251c88de83f2eae91fc2dc5566598189c1eb7de6a3d08c491e629e	packages/stdlib/src/server/gameplay/modules/route-definition.ts
+??	20934	04949e2439399c580cd9e375ff17f3edd77cdb017422620ae01bcd9160351920	packages/stdlib/src/server/gameplay/modules/stateful-block-model.ts
+??	18740	c67b37cb535ce51ff019efeea7d52447d7ab8fd9f5ebfdf091fb73b64532e06b	packages/stdlib/src/server/gameplay/modules/transport-model.ts
+??	22912	b2f657e4ab69f997c4f9dc5fd650db161a15713029c63cc4ce551901536a2305	packages/stdlib/src/server/gameplay/modules/transport-motion-model.ts
+??	12899	df44b5afe5d5b845c497bc122ceb9f798b516eac7422b681d1ecf425bc7be48f	packages/stdlib/src/server/gameplay/modules/transport-motion-values.ts
+??	5621	05122d4d5fa3a1d36570427f98d90f4e80c58ed0c8e551d2b0d390d7b90632cf	packages/stdlib/src/server/gameplay/modules/transport-relation-model.ts
+??	6223	a6d6169da3b7e0bd6bef1da898d9415d0fae9ba9504eca80f6b60d564c36724d	packages/stdlib/tests/server/climb-surface-model.test.ts
+??	10133	14177e191031c3950fafaad5d4bcd1a431c93da3af2acd1a4aac7baea51f1ee5	packages/stdlib/tests/server/route-definition-v1.test.ts
+??	8776	0507b4912a5872d7d3e8d04c7ee779197e20b9a91c2bee9d6a92a9f0e41b2f5a	packages/stdlib/tests/server/stateful-block-model.test.ts
+??	12017	e1830450ef8b811b5b50a5e91a6ae03b73beefa321708df24d4d6e048e07f330	packages/stdlib/tests/server/transport-model.test.ts
+??	20389	f09f2775fcc13bb454b147606bc6b5c68cbced31fd16567b465c5add7bd95ed8	packages/stdlib/tests/server/transport-motion-model.test.ts
+??	2554	8d22b1d152804aeecdb45775845121f96ac561ca72307d5284618636580abc2b	packages/stdlib/tests/world/voxel-light-semantics-boundary.test.ts
+??	1408	eed96df09f8b071864fc707ce1bbf1a9a10c43d17922b5cdab548a24a99e0c40	playbooks/classic/tests/voxel-light-semantics.test.ts
+??	20	b3e94f06083e92373724ff153d1c5b022fbbd041a40daa18458a65e8419b0951	reports/2026-09-23-classic-stage3/browser/appearance-before-draft-save.json
+??	46661	3e2f6339ba9127ce700f74a7089f5fb5936d15e086f7ba846bdd8799ce75b849	reports/2026-09-23-classic-stage3/browser/wool-save-reopen.webm

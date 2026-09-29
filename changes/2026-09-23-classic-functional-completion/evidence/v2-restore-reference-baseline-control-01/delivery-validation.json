@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-RESTORE-REFERENCE-BASELINE-CONTROL-01",
+  "status": "PREEXISTING_REPRODUCED_CANDIDATE_NEW_TESTS_PASS_AFFECTED_KNOWN_FAIL",
+  "identity": {
+    "head": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "tree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "controlRoot": "/private/tmp/seedlands-v2-reference-control-01",
+    "candidateRoot": "/private/tmp/seedlands-v2-reference-candidate-01",
+    "controlTrackedDifferences": 0,
+    "controlUntrackedFiles": 0,
+    "candidateTrackedDifferences": 8,
+    "candidateUntrackedFiles": 3,
+    "candidateOverlayCount": 11
+  },
+  "dependencyBinding": {
+    "installCommand": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "controlInstall": "PASS_ALREADY_UP_TO_DATE",
+    "candidateInstall": "PASS_ALREADY_UP_TO_DATE",
+    "downloads": 0,
+    "scriptsRun": false,
+    "lockfileSha256": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "workspaceLinksPerTree": 6,
+    "allWorkspaceLinksResolveInsideOwnTree": true,
+    "mainOrOtherTreeInternalPackageResolutionObserved": false,
+    "priorReferenceCloneBindingEvidence": "UNKNOWN"
+  },
+  "controlComparison": {
+    "commandIdentity": "web vitest config, exact old test name, maxWorkers=1, TZ=Asia/Shanghai, LANG/LC_ALL=en_US.UTF-8",
+    "control": {
+      "runId": "v2-reference-control-old-case-01",
+      "exitCode": 1,
+      "selected": 1,
+      "failed": 1,
+      "skipped": 9,
+      "failure": "world-harness-session.test.ts:340 expected null not to be null"
+    },
+    "candidate": {
+      "runId": "v2-reference-candidate-old-case-01",
+      "exitCode": 1,
+      "selected": 1,
+      "failed": 1,
+      "skipped": 9,
+      "failure": "world-harness-session.test.ts:340 expected null not to be null"
+    },
+    "classification": "PREEXISTING_REPRODUCED",
+    "candidateRegression": false
+  },
+  "candidateFull": {
+    "runId": "v2-reference-candidate-full-01",
+    "status": "AFFECTED_KNOWN_FAIL",
+    "exitCode": 1,
+    "filesPassed": 2,
+    "filesFailed": 1,
+    "testsPassed": 27,
+    "testsFailed": 1,
+    "focusedReference": "11/11 PASS",
+    "existingSession": "9/10 PASS",
+    "existingAdapter": "7/7 PASS",
+    "onlyFailure": "the control-reproduced action-owner fixture gap",
+    "allAffectedGreenClaimed": false
+  },
+  "failureDiagnosis": {
+    "requestedArchetype": "settler",
+    "registeredInClassicActorProfiles": false,
+    "listedAsRetired": true,
+    "spawnOwner": "GameServerGameplayHost.spawnAutonomousActor -> ActorProfileRegistry.require",
+    "innerResult": "CommandResult.success=false / COMMAND_EXECUTION_FAILED",
+    "outerResult": "WorldHarnessResult.ok=true because the transport transaction executed",
+    "testGap": "the old test checks only outer ok=true for spawn-actor and start-action, then expects an action for an actor that was never spawned",
+    "actionLifetimeExpired": false,
+    "fixImplemented": false
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 29,
+    "gitShowEntries": 18,
+    "workingEntries": 11,
+    "sha256": "27b1ec6c4bfc176fa878e351ebb0035b7d1411d9855c7f7c5c87671621074cf1"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 17,
+    "sha256": "6d8f64b1d3da2aefd2891bd2535537981547c448b3f2acf31422ccdeb446c1a3",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format*.stdout.log",
+      "metadata-format*.window.json.log",
+      "final-selfcheck*.stdout.log",
+      "final-selfcheck*.window.json.log"
+    ]
+  },
+  "preflight": {
+    "dirtyEntries": 205,
+    "manifestSha256": "90dec6d8edbfb7252cfc422f4f576c2d61fd2ec07d4cb1bd6b0a5b070be4a12d",
+    "firstScriptAttempt": "FAIL_BEFORE_ROW_WRITE_ZSH_STATUS_READONLY",
+    "firstScriptAttemptMutationFromExistingDirty": false
+  },
+  "treeIdentityCheck": {
+    "firstAttempt": "INVALID_STAT_CACHE_7090_FALSE_TRACKED_DIFFERENCES",
+    "firstAttemptUsedForConclusion": false,
+    "fix": "git update-index --refresh on each task-owned temporary index",
+    "finalResult": "CONTROL_0_0_CANDIDATE_8_3"
+  },
+  "selfcheck": {
+    "firstAttempt": "FAIL_IDENTITY_REQUIRED_FLAG_MISSING",
+    "firstAttemptCause": "selfcheck required allAffectedGreenClaimed=false while identity represented it as affectedStatus=KNOWN_FAIL_NOT_ALL_GREEN",
+    "firstAttemptMutationFromEvidenceFailure": false,
+    "secondAttempt": "FAIL_WRONG_IDENTITY_OBJECT_AFTER_MISDIAGNOSIS",
+    "secondAttemptCause": "the first diagnosis changed identity.comparison to the delivery-only field controlComparison",
+    "secondAttemptMutationFromEvidenceFailure": false,
+    "thirdAttempt": "FAIL_IDENTITY_REQUIRED_FLAG_STILL_MISSING",
+    "thirdAttemptCause": "restoring identity.comparison exposed the original missing-field assertion again",
+    "thirdAttemptMutationFromEvidenceFailure": false,
+    "fix": "validate the existing identity.candidateFull.affectedStatus field",
+    "finalRunId": "v2-reference-control-final-selfcheck-05",
+    "finalStatus": "PASS_BY_EXIT_ZERO"
+  },
+  "budget": {
+    "targetMinutes": 45,
+    "hardLimitHours": 1,
+    "traditionalPd": 0.1,
+    "aiRecommended120PercentHours": 0.9,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "productionTestSpecTasksStateDocsModified": false,
+    "historicalEvidenceModified": false,
+    "gitOrIndexWrite": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "ciRun": false,
+    "productGreenClaimed": false
+  },
+  "notRun": [
+    "types",
+    "build",
+    "artifact",
+    "Browser",
+    "Cua",
+    "dev server",
+    "CI",
+    "Git/index/commit/push/PR",
+    "deploy",
+    "merge"
+  ]
+}

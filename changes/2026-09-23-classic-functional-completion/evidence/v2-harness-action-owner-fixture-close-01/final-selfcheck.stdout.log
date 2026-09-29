@@ -1,0 +1,3 @@
+Checking formatting...
+All matched files use Prettier code style!
+PASS source=29 manifest=18 head=01c650793c79ac34e6184da48b5a4c94a5f161c2 tree=e20a8b1d85520c960096b5c898c3ffdd7e241b2a index=0 protectedDirty=236 candidate=9tracked+3untracked links=6 closure=28/28 types=2 lint=1 format=1 lock=current-owner currentWindow=WRITTEN_BY_WRAPPER

@@ -1,0 +1,21 @@
+10:44:07 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-restore-reference-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-restore-reference-01
+
+ ✓ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (10 tests | 1 skipped) 31764ms
+     ✓ runs the Headless wall clock through the serialized queue and cannot rearm after stop  2200ms
+     ✓ returns structured validation errors for malformed method arguments without throwing  2460ms
+     ✓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate  2594ms
+     ✓ keeps one world identity across commands, inspection and deterministic paused advancement  2631ms
+     ✓ restores a portable checkpoint atomically with a new epoch  4960ms
+     ✓ rejects an operation submitted behind a restore against its captured epoch  5017ms
+     ✓ rejects a waiting barrier when restore replaces its epoch  4905ms
+     ✓ rejects stale frontiers and bounds trace retention  2412ms
+     ✓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints  4585ms
+ ✓ |@seedlands/web| apps/web/tests/unit/client/browser-authority-world-harness.test.ts (7 tests) 111ms
+
+ Test Files  2 passed (2)
+      Tests  16 passed | 1 skipped (17)
+   Start at  10:44:07
+   Duration  33.37s (transform 1.05s, setup 0ms, import 1.35s, tests 31.87s, environment 0ms)
+

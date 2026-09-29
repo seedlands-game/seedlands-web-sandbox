@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git42-precommit-selfcheck-03",
+  "pid": 36875,
+  "startedAt": "2026-09-29T04:57:43.284Z",
+  "windowId": "git42-precommit-selfcheck-03",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-42-restore-reference/final-selfcheck-03.window.json.log",
+  "waitedMs": 4,
+  "endedAt": "2026-09-29T04:57:46.574Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T04:57:43.288Z",
+      "loadAverage": [
+        3.12255859375,
+        3.26953125,
+        3.07373046875
+      ],
+      "freeMemoryBytes": 641220608,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T04:57:46.572Z",
+      "loadAverage": [
+        3.9130859375,
+        3.4306640625,
+        3.1318359375
+      ],
+      "freeMemoryBytes": 564641792,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

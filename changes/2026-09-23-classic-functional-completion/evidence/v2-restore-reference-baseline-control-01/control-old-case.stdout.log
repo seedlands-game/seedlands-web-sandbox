@@ -1,0 +1,36 @@
+11:18:20 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-reference-control-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-reference-control-01
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts (10 tests | 1 failed | 9 skipped) 2300ms
+     ↓ runs the Headless wall clock through the serialized queue and cannot rearm after stop
+     ↓ returns structured validation errors for malformed method arguments without throwing
+     ↓ rejects malformed Logic mode and batches without mutating mode or consuming the candidate
+     ↓ keeps one world identity across commands, inspection and deterministic paused advancement
+     ↓ restores a portable checkpoint atomically with a new epoch
+     ↓ rejects an operation submitted behind a restore against its captured epoch
+     ↓ rejects a waiting barrier when restore replaces its epoch
+     ↓ rejects stale frontiers and bounds trace retention
+     ↓ lets later operations satisfy event-driven barriers and only ACKs persisted checkpoints
+     × authorizes action ids against their actual actor owner 2299ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/world-harness-session.test.ts > shared world harness > authorizes action ids against their actual actor owner
+AssertionError: expected null not to be null
+ ❯ apps/web/tests/integration/runtime/server/world-harness-session.test.ts:340:25
+    338|     });
+    339|     const foreign = source.runtime.server.getActorAction('foreign');
+    340|     expect(foreign).not.toBeNull();
+       |                         ^
+    341|     const checkpoint = await source.world.checkpoint({ kind: 'export' …
+    342|     if (!checkpoint.ok || !foreign) throw new Error('fixture unavailab…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 skipped (10)
+   Start at  11:18:20
+   Duration  3.75s (transform 1.09s, setup 0ms, import 1.36s, tests 2.30s, environment 0ms)
+

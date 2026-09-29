@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-post-browser25-gap-map-01-final-selfcheck-04",
+  "pid": 46263,
+  "startedAt": "2026-09-29T01:40:50.749Z",
+  "windowId": "v2-post-browser25-gap-map-01-final-selfcheck-04",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-post-browser25-acceptance-gap-map-01/final-selfcheck-04.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T01:40:52.668Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T01:40:50.750Z",
+      "loadAverage": [
+        2.6494140625,
+        2.77294921875,
+        3.005859375
+      ],
+      "freeMemoryBytes": 9023406080,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T01:40:52.666Z",
+      "loadAverage": [
+        2.75732421875,
+        2.79296875,
+        3.01123046875
+      ],
+      "freeMemoryBytes": 8963653632,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
