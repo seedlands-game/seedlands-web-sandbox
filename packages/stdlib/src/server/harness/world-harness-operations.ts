@@ -2,10 +2,12 @@ import type { AuthorityWorldOwner } from './authority-world-harness';
 import type { WorldFrontier } from './world-harness-contract';
 import { ALL_COMMAND_CAPABILITIES, type CommandSource } from '../commands/command-contract';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
-import { CHUNK_SIZE, floorDiv } from '../../world/voxel';
-import type { WorldInspectRequest } from './world-harness-contract';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
+import type { WorldInspectRequest, WorldInspectResult } from './world-harness-contract';
 import type { WorldAuthorizationRequest, WorldAuthorizationTarget, WorldPrincipal } from './world-authorization';
 import type { CharacterControlRequest } from '../../runtime/character-control-protocol';
+import { validateWorldInspectRequest, integerTuple } from './world-harness-validation';
+import { WorldOperationFailure } from './world-harness-state';
 
 export const authorizationRequest = (
   resource: WorldAuthorizationRequest['resource'],
@@ -26,17 +28,94 @@ export const inspectAuthorizationRequest = (request: WorldInspectRequest): World
       ? { kind: 'voxel', position: request.position }
       : request.kind === 'chunk'
         ? { kind: 'chunk', chunk: request.chunk }
-        : { kind: 'entity', entityId: request.entityId };
+        : request.kind === 'entity-reference'
+          ? { kind: 'entity', entityId: request.reference.entityId }
+          : { kind: 'entity', entityId: request.entityId };
   const resource =
     request.kind === 'voxel'
       ? 'world.voxel'
       : request.kind === 'chunk'
         ? 'world.chunk'
-        : request.kind === 'entity'
+        : request.kind === 'entity' || request.kind === 'entity-reference'
           ? 'world.entity'
           : 'world.actor';
   return authorizationRequest(resource, 'read', target);
 };
+
+export type CapturedWorldInspectRequest =
+  Readonly<{ ok: true; request: WorldInspectRequest }> | Readonly<{ ok: false; cause: unknown }>;
+
+export function captureWorldInspectRequest(request: unknown): CapturedWorldInspectRequest {
+  try {
+    return { ok: true, request: validateWorldInspectRequest(request) };
+  } catch (cause) {
+    return { ok: false, cause };
+  }
+}
+
+const requireCapturedInspectRequest = (captured: CapturedWorldInspectRequest): WorldInspectRequest => {
+  if (!captured.ok) throw captured.cause;
+  return captured.request;
+};
+
+export const describeWorldInspect = (captured: CapturedWorldInspectRequest) => {
+  const request = requireCapturedInspectRequest(captured);
+  return { name: `inspect:${request.kind}`, authorization: inspectAuthorizationRequest(request) };
+};
+
+export function executeWorldInspect(
+  owner: AuthorityWorldOwner,
+  captured: CapturedWorldInspectRequest,
+): WorldInspectResult {
+  const request = requireCapturedInspectRequest(captured);
+  const server = owner.runtime.server;
+  if (request.kind === 'entity-reference') {
+    if (!server.resolveEntityReference) throw new Error('Entity reference resolution is unavailable.');
+    return {
+      kind: 'entity-reference',
+      reference: { ...request.reference },
+      status: server.resolveEntityReference(request.reference) ? 'current' : 'stale',
+    };
+  }
+  if (request.kind === 'entity') {
+    const entity = server.getEntity(request.entityId);
+    if (!entity) throw new WorldOperationFailure('WORLD_ENTITY_UNAVAILABLE', 'Entity is unavailable.', 'unavailable');
+    return { kind: 'entity', entity };
+  }
+  if (request.kind === 'actor') {
+    const actor = server.getActorState(request.entityId);
+    if (!actor) throw new WorldOperationFailure('WORLD_ACTOR_UNAVAILABLE', 'Actor is unavailable.', 'unavailable');
+    return { kind: 'actor', actor };
+  }
+  if (request.kind === 'voxel') {
+    if (!integerTuple(request.position)) throw new TypeError('Voxel position must contain three integers.');
+    const loaded = server.peekLoadedVoxel(...request.position);
+    if (!loaded)
+      throw new WorldOperationFailure(
+        'WORLD_CHUNK_UNPREPARED',
+        'Voxel inspection does not implicitly generate unknown terrain.',
+        'unavailable',
+      );
+    return { kind: 'voxel', position: request.position, voxel: loaded.voxel, chunkRevision: loaded.revision };
+  }
+  if (!integerTuple(request.chunk)) throw new TypeError('Chunk position must contain three integers.');
+  const key = chunkKey(...request.chunk);
+  const baseline = server.readCollisionBaseline(key, 0);
+  if (baseline.status === 'unavailable')
+    throw new WorldOperationFailure(
+      'WORLD_CHUNK_UNPREPARED',
+      'Chunk inspection does not implicitly generate unknown terrain.',
+      'unavailable',
+    );
+  const chunk = server.getChunk(...request.chunk);
+  return {
+    kind: 'chunk',
+    chunk: request.chunk,
+    key,
+    revision: chunk.revision,
+    materialized: chunk.materialized,
+  };
+}
 
 export const characterHarnessOperation = (request: CharacterControlRequest) => {
   if (!request || typeof request !== 'object' || typeof request.kind !== 'string')

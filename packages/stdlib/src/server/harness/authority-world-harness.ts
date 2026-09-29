@@ -34,7 +34,9 @@ import {
   authorizationRequest,
   worldFrontierFor,
   commandSourceForPrincipal,
-  inspectAuthorizationRequest,
+  captureWorldInspectRequest,
+  describeWorldInspect,
+  executeWorldInspect,
   characterHarnessOperation,
 } from './world-harness-operations';
 import { worldHarnessError } from './world-harness-errors';
@@ -124,56 +126,10 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
   }
 
   inspect(request: WorldInspectRequest) {
+    const captured = captureWorldInspectRequest(request);
     return this.run(
-      () => ({ name: `inspect:${request.kind}`, authorization: inspectAuthorizationRequest(request) }),
-      async () => {
-        const server = this.options.owner().runtime.server;
-        if (request.kind === 'entity') {
-          const entity = server.getEntity(request.entityId);
-          if (!entity)
-            throw new WorldOperationFailure('WORLD_ENTITY_UNAVAILABLE', 'Entity is unavailable.', 'unavailable');
-          return { kind: 'entity' as const, entity };
-        }
-        if (request.kind === 'actor') {
-          const actor = server.getActorState(request.entityId);
-          if (!actor)
-            throw new WorldOperationFailure('WORLD_ACTOR_UNAVAILABLE', 'Actor is unavailable.', 'unavailable');
-          return { kind: 'actor' as const, actor };
-        }
-        if (request.kind === 'voxel') {
-          if (!integerTuple(request.position)) throw new TypeError('Voxel position must contain three integers.');
-          const loaded = server.peekLoadedVoxel(...request.position);
-          if (!loaded)
-            throw new WorldOperationFailure(
-              'WORLD_CHUNK_UNPREPARED',
-              'Voxel inspection does not implicitly generate unknown terrain.',
-              'unavailable',
-            );
-          return {
-            kind: 'voxel' as const,
-            position: request.position,
-            voxel: loaded.voxel,
-            chunkRevision: loaded.revision,
-          };
-        }
-        if (!integerTuple(request.chunk)) throw new TypeError('Chunk position must contain three integers.');
-        const key = chunkKey(...request.chunk);
-        const baseline = server.readCollisionBaseline(key, 0);
-        if (baseline.status === 'unavailable')
-          throw new WorldOperationFailure(
-            'WORLD_CHUNK_UNPREPARED',
-            'Chunk inspection does not implicitly generate unknown terrain.',
-            'unavailable',
-          );
-        const chunk = server.getChunk(...request.chunk);
-        return {
-          kind: 'chunk' as const,
-          chunk: request.chunk,
-          key,
-          revision: chunk.revision,
-          materialized: chunk.materialized,
-        };
-      },
+      () => describeWorldInspect(captured),
+      async () => executeWorldInspect(this.options.owner(), captured),
     );
   }
 

@@ -1,5 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 import type { HarnessEquipmentSnapshot } from '../../../src/app/app-contracts';
+import type {
+  WorldHarnessResult,
+  WorldInspectRequest,
+  WorldInspectResult,
+} from '@seedlands/stdlib/server/harness/world-harness-contract';
 import { closeInventory, inventory, voxelAt } from './harness';
 import { classicScenario } from './scenario';
 import {
@@ -27,6 +32,36 @@ export type V2EquipmentJourneyState = Readonly<{
   beforeSave: HarnessEquipmentSnapshot;
   evidence: V2EquipmentJourneyEvidence;
 }>;
+
+type ActorReference = HarnessEquipmentSnapshot['actor'];
+type ReferenceRequest = Extract<WorldInspectRequest, { kind: 'entity-reference' }>;
+type ReferenceStatus = Extract<WorldInspectResult, { kind: 'entity-reference' }>;
+type ReferenceInspectionResult = WorldHarnessResult<WorldInspectResult>;
+export type V2RestoreReferenceEvidence = Readonly<{ old: ReferenceStatus; current: ReferenceStatus }>;
+
+export async function verifyRestoredActorReferences<Value>(
+  inspect: (request: ReferenceRequest) => Promise<ReferenceInspectionResult>,
+  oldReference: ActorReference,
+  currentReference: ActorReference,
+  continueWithUi: (referenceStatus: V2RestoreReferenceEvidence) => Promise<Value>,
+): Promise<Readonly<{ referenceStatus: V2RestoreReferenceEvidence; continuation: Value }>> {
+  const expected = async (reference: ActorReference, status: ReferenceStatus['status']) => {
+    const result = await inspect({ kind: 'entity-reference', reference });
+    if (!result.ok) throw new Error(result.error.code + ': ' + result.error.message);
+    if (
+      result.data.kind !== 'entity-reference' ||
+      result.data.status !== status ||
+      !sameActor(result.data.reference, reference)
+    )
+      throw new Error('Entity reference inspection expected ' + status + ' for ' + reference.entityId + '.');
+    return result.data;
+  };
+  const referenceStatus = {
+    old: await expected(oldReference, 'stale'),
+    current: await expected(currentReference, 'current'),
+  };
+  return { referenceStatus, continuation: await continueWithUi(referenceStatus) };
+}
 
 async function exerciseEquipmentUi(page: Page, record: RecordEquipmentEvidence, steps: EquipmentStepEvidence[]) {
   const panel = await inventory(page);
@@ -168,6 +203,7 @@ export async function verifyEquipmentJourneyAfterRestore(
       phase: 'restored' | 'detached' | 'continued';
       snapshot: HarnessEquipmentSnapshot;
       restored?: HarnessEquipmentSnapshot;
+      referenceStatus?: V2RestoreReferenceEvidence;
     }>,
   ) => void,
 ): Promise<Readonly<{ restored: HarnessEquipmentSnapshot; continued: HarnessEquipmentSnapshot }>> {
@@ -175,7 +211,6 @@ export async function verifyEquipmentJourneyAfterRestore(
     page,
     (value) => value.runtimeEpoch !== before.runtimeEpoch && value.actor.epoch !== before.actor.epoch,
   );
-  record({ phase: 'restored', snapshot: restored });
   expect(restored.actor.entityId).toBe(before.actor.entityId);
   expect(restored.actor.lifetime).toBe(before.actor.lifetime);
   expect(restored.inventoryRevision).toBe(before.inventoryRevision);
@@ -185,20 +220,35 @@ export async function verifyEquipmentJourneyAfterRestore(
   expect(restored.player).toEqual(before.player);
   expect(restored.armorPoints).toBe(before.armorPoints);
   expectFullIronArmor(restored);
-  const panel = await inventory(page);
-  await expectEquipmentDom(page, panel, restored);
-  const detached = await committedPointer(
-    page,
-    () => equipmentAddress(panel, 'helmet').click(),
-    (value) => value.armor.helmet === null && value.cursor.stack?.itemId === armorIds.helmet,
+  const { continuation } = await verifyRestoredActorReferences(
+    (request) =>
+      page.evaluate(
+        async (value) =>
+          (window as unknown as import('./harness').ClassicWindow).__seedlandsHarness!.world.inspect(value),
+        request,
+      ) as Promise<ReferenceInspectionResult>,
+    before.actor,
+    restored.actor,
+    async (referenceStatus) => {
+      record({ phase: 'restored', snapshot: restored, referenceStatus });
+      const panel = await inventory(page);
+      await expectEquipmentDom(page, panel, restored);
+      const detached = await committedPointer(
+        page,
+        () => equipmentAddress(panel, 'helmet').click(),
+        (value) => value.armor.helmet === null && value.cursor.stack?.itemId === armorIds.helmet,
+      );
+      record({ phase: 'detached', snapshot: detached, restored, referenceStatus });
+      const reequipped = await committedPointer(
+        page,
+        () => equipmentAddress(panel, 'helmet').click(),
+        (value) => value.armor.helmet?.itemId === armorIds.helmet && value.cursor.stack === null,
+      );
+      record({ phase: 'continued', snapshot: reequipped, restored, referenceStatus });
+      return { panel, detached, reequipped };
+    },
   );
-  record({ phase: 'detached', snapshot: detached, restored });
-  const reequipped = await committedPointer(
-    page,
-    () => equipmentAddress(panel, 'helmet').click(),
-    (value) => value.armor.helmet?.itemId === armorIds.helmet && value.cursor.stack === null,
-  );
-  record({ phase: 'continued', snapshot: reequipped, restored });
+  const { panel, detached, reequipped } = continuation;
   expect(detached.actor).toEqual(restored.actor);
   expect(reequipped.inventoryRevision).toBe(restored.inventoryRevision + 2);
   expect(reequipped.armor).toEqual(restored.armor);

@@ -4,6 +4,7 @@ import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 import {
   WORLD_HARNESS_MAX_CHECKPOINT_BYTES,
   type WorldFrontier,
+  type WorldInspectRequest,
   type WorldLogicRequest,
 } from './world-harness-contract';
 
@@ -91,6 +92,57 @@ export function validateWorldFrontier(frontier: WorldFrontier): void {
 const record = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null;
 const safeSequence = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 0;
+
+const exactDataRecord = (value: unknown, keys: readonly string[], label: string): Record<string, unknown> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(label + ' is invalid.');
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) throw new TypeError(label + ' is invalid.');
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const actual = Reflect.ownKeys(descriptors);
+  if (
+    actual.length !== keys.length ||
+    actual.some((key) => typeof key !== 'string' || !keys.includes(key)) ||
+    keys.some((key) => {
+      const descriptor = descriptors[key];
+      return !descriptor || !descriptor.enumerable || !('value' in descriptor);
+    })
+  )
+    throw new TypeError(label + ' is invalid.');
+  return Object.fromEntries(keys.map((key) => [key, descriptors[key]!.value]));
+};
+
+export function validateWorldInspectRequest(value: unknown): WorldInspectRequest {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new TypeError('World inspect request is invalid.');
+  const kind = Object.getOwnPropertyDescriptor(value, 'kind');
+  if (!kind || !kind.enumerable || !('value' in kind)) throw new TypeError('World inspect request is invalid.');
+  if (kind.value !== 'entity-reference') return value as WorldInspectRequest;
+  const request = exactDataRecord(value, ['kind', 'reference'], 'Entity reference inspect request');
+  const reference = exactDataRecord(
+    request.reference,
+    ['entityId', 'epoch', 'lifetime'],
+    'Entity reference inspect reference',
+  );
+  if (
+    typeof reference.entityId !== 'string' ||
+    !reference.entityId.trim() ||
+    reference.entityId !== reference.entityId.trim() ||
+    reference.entityId.length > 256 ||
+    !Number.isSafeInteger(reference.epoch) ||
+    (reference.epoch as number) <= 0 ||
+    !Number.isSafeInteger(reference.lifetime) ||
+    (reference.lifetime as number) <= 0
+  )
+    throw new TypeError('Entity reference inspect reference is invalid.');
+  return Object.freeze({
+    kind: 'entity-reference',
+    reference: Object.freeze({
+      entityId: reference.entityId,
+      epoch: reference.epoch as number,
+      lifetime: reference.lifetime as number,
+    }),
+  });
+}
 
 export function validateWorldLogicRequest(value: unknown): asserts value is WorldLogicRequest {
   const request = record(value);
