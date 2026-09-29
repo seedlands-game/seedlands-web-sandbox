@@ -330,14 +330,23 @@ describe('shared world harness', () => {
       platform: testCorePlatform,
       seedText: 'world-action-owner',
     });
-    expect(
-      await source.world.command({ type: 'spawn-actor', id: 'foreign', archetype: 'settler', position: [3, 30, 3] }),
-    ).toMatchObject({ ok: true });
-    expect(await source.world.command({ type: 'start-action', entityId: 'foreign', action: 'idle' })).toMatchObject({
+    const spawned = await source.world.command({
+      type: 'spawn-actor',
+      id: 'foreign',
+      archetype: 'cow',
+      position: [3, 30, 3],
+    });
+    expect(spawned).toMatchObject({
       ok: true,
+      data: { success: true, data: { entity: { id: 'foreign', archetype: 'cow' } } },
+    });
+    const started = await source.world.command({ type: 'start-action', entityId: 'foreign', action: 'idle' });
+    expect(started).toMatchObject({
+      ok: true,
+      data: { success: true, data: { action: { actorId: 'foreign', type: 'idle', status: 'pending' } } },
     });
     const foreign = source.runtime.server.getActorAction('foreign');
-    expect(foreign).not.toBeNull();
+    expect(foreign).toMatchObject({ actorId: 'foreign', type: 'idle', status: 'pending' });
     const checkpoint = await source.world.checkpoint({ kind: 'export' });
     if (!checkpoint.ok || !foreign) throw new Error('fixture unavailable');
     const playerId = source.runtime.playerId;
