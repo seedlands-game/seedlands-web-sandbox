@@ -1,5 +1,39 @@
 # V2 Canonical Browser 证据
 
+## Browser-25 正式验收
+
+阶段：`V2-CANONICAL-BROWSER-25`
+
+结论：**PASS。** 唯一授权命令在 BUILD16 source
+`fdb53c07c0da14c7f523473e4f33060a385f23ff` / tree `ecc7940708bca8ea1d01e8df50337fa536d27d18` 的冻结
+production artifact 上 exit 0。Playwright 使用单 worker、retry 0：canonical main 与 Classic visual 通过，non-Classic
+smoke 按默认 selection 跳过，合计 `2 passed / 1 skipped`。terminal receipt 为 `PASS`，selection 是唯一
+`CANONICAL_MAIN`，仅一个 retry 0 attempt；`testOutcome=passed`、assertion evidence 为 PASS、failure evidence 不存在、
+runner outcome 为 passed，page errors 与 failed responses 均为空。
+
+C0-C5、完整 V1 以及 V2 真实资源链和装备矩阵均通过。V2 `ready-to-save` 记录 19 个 checkpoint：三格 wood、三格
+cobblestone、四格 iron block 各自经真实输入采集并独立出现 bag 增量；木镐、石镐、36 ingot 解包与五件铁甲制作完成。
+四槽 click/quick-move、wrong-slot zero-change、occupied-slot swap、detach/store、重新 quick-move、关闭 inventory 与
+workbench 回收均有独立 checkpoint。石镐耐久从 `132 -> 128 -> 127`，保存前剩余 7 ingot、workbench 1、四槽
+铁甲耐久均为 165、armorPoints 15。
+
+保存恢复后 runtime/actor epoch 从 `1/1` 变为 `2/2`，actor lifetime 保持 1；inventory revision 从保存前 143
+恢复为 143，继续交互后为 145，cursor revision 从 114 继续至 116。四槽护甲、armorPoints 15、石镐耐久 127、
+7 ingot、workbench 与五个世界 checkpoint 的 voxel/chunk/world revision 均保持；C5 后完成真实鼠标重瞄、重开
+workbench、玻璃和钻石块放置。
+
+主测试耗时 `728444ms`，未超过 900 秒；视觉测试耗时 `32471ms`。外层窗口 UTC
+`2026-09-28T23:41:41.725Z` 至 `23:55:04.117Z`，exit 0。普通 reservation window 的 measurement 为
+`NOT_RECORDED`，不宣称性能。`retain-on-failure` 在成功运行后未保留 trace，状态为
+`NOT_RETAINED_BY_CONFIG`，不是 `TRACE_INCOMPLETE`；没有为取 trace 修改配置或重跑。HTML report 的内嵌报告 ZIP
+通过一次 `unzip -t`，只证明报告容器完整。
+
+唯一外部 artifact postcheck `v2-canonical-browser-25-artifact-postcheck` PASS，source/lock/artifact/builtAt/receipt、
+276 项 map 与 277 个磁盘文件均未漂移；Pack lock 与 MP3 source/public/dist 也一致。本轮未断言 new object reference、
+death/drop/respawn、全部 16 armor/194 item matrix、V3/V4；Cua/人类听觉未运行。Browser24 保持
+`FAIL_BEFORE_TEST_DISCOVERY`/Chromium 0，Browser23 保持 `FAIL/TRACE_INCOMPLETE`。本阶段未实现、Git、build、CI
+修复、部署或合并。
+
 ## Browser-24 正式验收
 
 阶段：`V2-CANONICAL-BROWSER-24`

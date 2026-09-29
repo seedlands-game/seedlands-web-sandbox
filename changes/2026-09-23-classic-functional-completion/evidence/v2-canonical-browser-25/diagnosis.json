@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-25",
+  "status": "PASS",
+  "runner": {
+    "exitCode": 0,
+    "tests": 3,
+    "passed": 2,
+    "failed": 0,
+    "skipped": 1,
+    "workers": 1,
+    "retries": 0,
+    "mainDurationMs": 728444,
+    "visualDurationMs": 32471
+  },
+  "terminalReceipt": {
+    "status": "PASS",
+    "runnerOutcome": "passed",
+    "selectionMode": "CANONICAL_MAIN",
+    "canonicalMainMatches": 1,
+    "attempts": 1,
+    "retry": 0,
+    "testOutcome": "passed",
+    "assertionEvidenceStatus": "PASS",
+    "failureEvidencePresent": false,
+    "resultErrors": 0,
+    "receiptErrors": 0
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS",
+    "V2": "PASS_19_CHECKPOINTS",
+    "C4": "PASS",
+    "C5": "PASS",
+    "postRestoreGlass": "PASS",
+    "v5DiamondBlock": "PASS",
+    "visual": "PASS",
+    "nonClassic": "SKIPPED_BY_DEFAULT_SELECTION"
+  },
+  "v2": {
+    "woodCollected": 3,
+    "cobblestoneCollected": 3,
+    "ironBlocksCollected": 4,
+    "craftedArmorItems": 5,
+    "armorPoints": 15,
+    "stonePickaxeDurabilitySequence": [132, 128, 127],
+    "preSaveInventoryRevision": 143,
+    "restoredInventoryRevision": 143,
+    "continuedInventoryRevision": 145,
+    "runtimeEpochSequence": ["seedlands:classic-canonical-runtime-v11:1", "seedlands:classic-canonical-runtime-v11:2"],
+    "actorEpochSequence": [1, 2],
+    "actorLifetimeSequence": [1, 1]
+  },
+  "trace": {
+    "status": "NOT_RETAINED_BY_CONFIG",
+    "traceZipCount": 0,
+    "repairRun": false
+  },
+  "report": {
+    "externalAttachments": 31,
+    "inlineAttachments": 24,
+    "mappedAttachments": 55,
+    "missingArchivedAttachments": 0,
+    "embeddedZipIntegrity": "PASS",
+    "embeddedZipIsTrace": false
+  },
+  "notRunOrAsserted": [
+    "new object reference",
+    "death/drop/respawn",
+    "complete 16 armor/194 item matrix",
+    "V3/V4",
+    "Cua/human audio",
+    "performance measurement"
+  ]
+}

@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-28T23:20:13Z
+更新时间：2026-09-29T00:12:33Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,20 +10,21 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：`GIT-40-CANONICAL-DISCOVERY` 与其 manifest closure 已远端交付至
-`fdb53c07c0da14c7f523473e4f33060a385f23ff`。Close17 把唯一 Chromium project 的 Playwright 收集目录限制在
-真实 E2E owner，同时保留仓库根 Reporter identity；真实 discovery RED/GREEN 与严格 manifest closure 均已通过 root
-验收。Browser24 仍是 discovery 前 FAIL、实际 Chromium attempt 0；Browser23 仍是 720 秒 timeout FAIL 且
-TRACE_INCOMPLETE。BUILD16 已从该远端 source/tree `ecc79407...7d18` 的 clean detached tree 完成唯一 build 与唯一
-artifact verify，均 PASS；276 项产物 map 与 BUILD15 相同，证据待本片提交。Browser25、Cua、CI 修复、deploy、merge
-均未运行，artifact PASS 不等于产品 GREEN。
+当前 Git/Docs checkpoint：`GIT-40-CANONICAL-DISCOVERY`、manifest closure 与 BUILD16 evidence 已远端交付至
+`783e106fb5fcba4869bcc8d0aab68ada1df827a7`。Close17 的真实 discovery RED/GREEN 和严格 manifest closure 已由
+root 独立验收；BUILD16 从 source `fdb53c07...23ff` / tree `ecc79407...7d18` 唯一 build 与 artifact verify PASS，
+276 项产物 map 与 BUILD15 相同。Browser25 已由 root 独立验收：唯一 canonical attempt 与 Classic visual PASS、
+non-Classic 默认 SKIPPED；C0-C5、完整 V1、V2 19 checkpoint 与保存恢复均 PASS。当前 GIT41 仅待冻结
+Browser25 evidence 与状态并远端交付，不改实现。Browser24 保持 discovery 前 FAIL/Chromium 0，Browser23 保持
+720 秒 timeout FAIL/TRACE_INCOMPLETE；new reference、death/drop/respawn、完整 16 armor/194 matrix、V3/V4、Cua/
+人类听觉、性能均未完成。
 
-当前 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
+历史 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
 两份历史 snapshot 而 exit 1，实际 Chromium attempt 为 0。`V2-CANONICAL-DISCOVERY-BOUNDARY-CLOSE-17` 只在唯一
 Chromium project 增加 `testDir: './apps/web/tests/e2e'`，保留仓库根 `rootDir` 和现有 root-relative Reporter
 identity。真实 `--list --reporter=json` RED/GREEN、现有 `createCanonicalSelection`、Classic/root types、配置 ESLint、
-Prettier/scope/selfcheck 均 PASS；GREEN 只发现 canonical 文件的 main/visual/modular 三条测试。该静态结果不代表
-Browser25 或产品 GREEN。GIT-40 正在按两笔精确 allowlist 隔离交付；BUILD16/Browser25 尚未运行。
+Prettier/scope/selfcheck 均 PASS；GREEN 只发现 canonical 文件的 main/visual/modular 三条测试。该静态结果本身不代表
+Browser 产品 GREEN；后续 BUILD16 与 Browser25 的独立结果以上一段当前 checkpoint 为准。
 
 GIT39 第二笔首次 selfcheck 在 frozen Browser23 `attachments/test-0-error-context.md` 的自然 Prettier 门禁处失败，
 未创建提交。root 已准出 `GIT39-BROWSER23-RAW-PACKAGING-RECOVERY`：只把主证据副本和 detached 副本更名为

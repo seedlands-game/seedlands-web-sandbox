@@ -1,0 +1,464 @@
+{
+  "schemaVersion": 1,
+  "phase": "ready-to-save",
+  "count": 19,
+  "steps": [
+    {
+      "step": "resources-placed",
+      "inventoryRevision": 36,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": null,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "wood-collected",
+      "inventoryRevision": 39,
+      "resourceCounts": {
+        "woodBlock": 3,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": null,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "wood-pickaxe-equipped",
+      "inventoryRevision": 57,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": null,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "stone-collected",
+      "inventoryRevision": 63,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 3,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": null,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "stone-pickaxe-equipped",
+      "inventoryRevision": 73,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": 132,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "iron-blocks-collected",
+      "inventoryRevision": 81,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 4
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "five-iron-armor-crafted",
+      "inventoryRevision": 128,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 0,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "helmet-click",
+      "inventoryRevision": 130,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 2,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "chestplate-quick-move",
+      "inventoryRevision": 131,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 8,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "leggings-quick-move",
+      "inventoryRevision": 132,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 13,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "boots-quick-move",
+      "inventoryRevision": 133,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "wrong-slot-zero-change",
+      "inventoryRevision": 134,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": "iron-helmet",
+        "origin": {
+          "kind": "inventory",
+          "slot": 5
+        }
+      }
+    },
+    {
+      "step": "occupied-helmet-swap",
+      "inventoryRevision": 135,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": "iron-helmet",
+        "origin": {
+          "kind": "equipment",
+          "slot": "helmet"
+        }
+      }
+    },
+    {
+      "step": "swapped-helmet-stored",
+      "inventoryRevision": 136,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "chestplate-detached",
+      "inventoryRevision": 137,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 9,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": "iron-chestplate",
+        "origin": {
+          "kind": "equipment",
+          "slot": "chestplate"
+        }
+      }
+    },
+    {
+      "step": "chestplate-stored",
+      "inventoryRevision": 138,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 9,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "chestplate-quick-move",
+      "inventoryRevision": 139,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "equipment-origin-close",
+      "inventoryRevision": 141,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 128,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    },
+    {
+      "step": "workbench-reclaimed",
+      "inventoryRevision": 143,
+      "resourceCounts": {
+        "woodBlock": 0,
+        "cobblestone": 0,
+        "ironBlock": 0
+      },
+      "armorPoints": 15,
+      "stonePickaxeDurability": 127,
+      "cursor": {
+        "itemId": null,
+        "origin": null
+      }
+    }
+  ],
+  "preSave": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 391031,
+    "actor": {
+      "entityId": "player-1",
+      "epoch": 1,
+      "lifetime": 1
+    },
+    "inventoryRevision": 143,
+    "cursorRevision": 114,
+    "armor": {
+      "helmet": {
+        "itemId": "iron-helmet",
+        "durability": 165
+      },
+      "chestplate": {
+        "itemId": "iron-chestplate",
+        "durability": 165
+      },
+      "leggings": {
+        "itemId": "iron-leggings",
+        "durability": 165
+      },
+      "boots": {
+        "itemId": "iron-boots",
+        "durability": 165
+      }
+    },
+    "armorPoints": 15,
+    "stonePickaxeDurability": 127,
+    "ironIngotCount": 7,
+    "workbenchCount": 1
+  },
+  "restored": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:2",
+    "gameplayRevision": 407872,
+    "actor": {
+      "entityId": "player-1",
+      "epoch": 2,
+      "lifetime": 1
+    },
+    "inventoryRevision": 143,
+    "cursorRevision": 114,
+    "armor": {
+      "helmet": {
+        "itemId": "iron-helmet",
+        "durability": 165
+      },
+      "chestplate": {
+        "itemId": "iron-chestplate",
+        "durability": 165
+      },
+      "leggings": {
+        "itemId": "iron-leggings",
+        "durability": 165
+      },
+      "boots": {
+        "itemId": "iron-boots",
+        "durability": 165
+      }
+    },
+    "armorPoints": 15,
+    "stonePickaxeDurability": 127,
+    "ironIngotCount": 7,
+    "workbenchCount": 1
+  },
+  "continued": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:2",
+    "gameplayRevision": 408340,
+    "actor": {
+      "entityId": "player-1",
+      "epoch": 2,
+      "lifetime": 1
+    },
+    "inventoryRevision": 145,
+    "cursorRevision": 116,
+    "armor": {
+      "helmet": {
+        "itemId": "iron-helmet",
+        "durability": 165
+      },
+      "chestplate": {
+        "itemId": "iron-chestplate",
+        "durability": 165
+      },
+      "leggings": {
+        "itemId": "iron-leggings",
+        "durability": 165
+      },
+      "boots": {
+        "itemId": "iron-boots",
+        "durability": 165
+      }
+    },
+    "armorPoints": 15,
+    "stonePickaxeDurability": 127,
+    "ironIngotCount": 7,
+    "workbenchCount": 1
+  },
+  "worldBefore": [
+    {
+      "position": [52, 31, 0],
+      "voxel": 16,
+      "chunkRevision": 111,
+      "worldRevision": 168
+    },
+    {
+      "position": [75, 31, 0],
+      "voxel": 0,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    },
+    {
+      "position": [70, 31, 0],
+      "voxel": 95,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    },
+    {
+      "position": [70, 32, 0],
+      "voxel": 96,
+      "chunkRevision": 4,
+      "worldRevision": 168
+    },
+    {
+      "position": [76, 31, 2],
+      "voxel": 67,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    }
+  ],
+  "worldAfter": [
+    {
+      "position": [52, 31, 0],
+      "voxel": 16,
+      "chunkRevision": 111,
+      "worldRevision": 168
+    },
+    {
+      "position": [75, 31, 0],
+      "voxel": 0,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    },
+    {
+      "position": [70, 31, 0],
+      "voxel": 95,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    },
+    {
+      "position": [70, 32, 0],
+      "voxel": 96,
+      "chunkRevision": 4,
+      "worldRevision": 168
+    },
+    {
+      "position": [76, 31, 2],
+      "voxel": 67,
+      "chunkRevision": 144,
+      "worldRevision": 168
+    }
+  ]
+}
