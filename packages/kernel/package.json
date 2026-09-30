@@ -17,7 +17,7 @@
     "test:watch": "pnpm --dir ../.. exec vitest --config packages/kernel/vitest.config.ts"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   },
   "engines": {
