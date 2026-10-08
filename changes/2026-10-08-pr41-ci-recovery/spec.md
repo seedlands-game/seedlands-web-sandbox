@@ -101,6 +101,28 @@ Visual skeleton-front closeup仍FAIL：cache29、pending18、rebuild92；13项�
 
 本组审阅补充structured-clone非法metadata反例：BigInt原先先减法而抛TypeError，1 FAIL/16 PASS的RED已保存；改为先验证finite number再计算年龄，17/17 PASS。该拒绝仅回退调度tick，不修改snapshot或Authority门禁。
 
+### Browser10 内外路线进度交接
+
+精确source `98b9a115376fc7645c5c78949d1460d33d16c786`、build10的Browser10为2 FAIL/1 SKIP；C0-C3/V1完成，V2首次workbench corridor失败，visual skeleton-front仍未ready。实际轨迹在一次静止pulse后从 `[78.4337,32.6,-0.4564]` 到 `[78.5587,32.6,-0.5803]`，越过目标x但z超出原±0.08走廊。内层walkTo继续以KeyW作约180度转向，约26秒后回到目标另一侧，又开始反向转向并耗尽45秒；外层已有KeyW/KeyS选择逻辑未收到这次已完成pulse的进度。
+
+本组先验证实际walkTo与实际equipment driver组合的RED：完成、确认ack、静止、落地且无碰撞的pulse越过请求方向的x边界时，应将双端位置仍在既有±0.45 x邻域的进度交回外层，让外层按当前x选择下一次真实KeyS/KeyW；返回进度不表示到达，z不在±0.08内必须继续纠偏。仅equipment路线启用此交接；普通walkTo语义不变。保留最终双端到达、原0.06/0.08/0.45窗口、45秒deadline、80ms上限、真实键鼠及所有新鲜性/grounded/collision门禁。禁止以更宽z窗口作为成功或增加deadline。visual失败pending13中9项真实halo变化、4项尚无volume，下一修复组另行建立因果证据。
+
+### CI连击输入与渲染时钟隔离
+
+CI991正式query-player-state给出lastResult `sequence:3,comboStep:0,damage:2`；目标12HP收到5/5/2，三次均第一击。源码wood-sword第一步windup0.18/hit0.08/recovery0.24，衔接窗口0.18–0.50s；实际controller仅render update重复攻击，frame约447ms。下一定向RED使用真实安装mousedown、完整Classic registered Combat和单调假时钟：render停止，Authority仍按60Hz推进；200ms真实按住重复应在窗口内buffer第二步，结果必须literal第一击5、第二击7。对比旧447ms渲染驱动可作诊断，不调Combat时间窗，不使用绕过controller的攻击或写combat状态。
+
+候选仅将按住指针的攻击重试按200ms单调deadline排程到有界主线程timer；render与timer共享同一deadline，晚callback每次最多一次，不补积压。每次读取当前真实控制器yaw/pitch及摄像机位置、现有目标/range/LOS，正式Authority仍决定接受/衔接/伤害。鼠标松开、失焦、PointerLock丢失、隐藏、UI/暂停、模式变化、world销毁/控制器dispose必须停；矿物破坏的elapsed进度继续由原render/Authority路径负责，timer不得额外推进采掘。真实键鼠与HUD连击完整browser仍为最终门槛。
+
+### CI98 检出超时与持续回归
+
+run37800926606的Classic headless于15:27:36开始无filter的depth1 fetch，15:42:36在既有15分钟job期限被取消，测试未运行。Chromium于15:37:31开始fetch，15:43:33才checkout，15:45:01开始旅程，16:02:43被取消；终态cancelled不冒充测试FAIL或PASS。历史大证据整仓下载是独立CI环境问题，不能通过提高测试期限掩盖。
+
+保持checkout的原pinned action、精确ref、architecture/deterministic fetch-depth0、其他depth1及job权限/期限。使用该pinned action的non-cone sparse-checkout（源码自动fetch blob:none），代码/docs和历史spec保留；archives/reports/harness产物与历史evidence只按需Git blob取。直接被legacy测试读取的pre-death-v4-identity精确文件明确物化；新repair evidence物化。五个sealed原字节门禁仍运行，缺失只能用skip-worktree HEAD精确blob，不能删manifest或跳过验证。以实际Git临时小fixture测试每个checkout block的patterns：保留代码/docs/spec与必要fixture，排除历史大证据，缺失项保持indexed S且HEAD原blob仍可取，不复制真实历史。
+
+将本组真实route handoff与held attack定向合同加入原Classic headless持续回归入口并纳入测试types，保留原25个完整Classic合同，不替换或减少既有覆盖。根因图单独记录已证明/待证明与证据边界。
+
+本组checkpoint：有效held attack RED在第三次fixture完整后取得，前两次Structure port/target predicate fixture失败保留不计行为RED；GREEN联合5文件50/50、采掘另3文件34/34、单调旧gate补验14/14。完整新headless入口27文件125/125 PASS；Web生产types零错误/警告、完整Classic types（含新held attack）与9个TS/MJS scoped ESLint PASS。路线新fixture类型首轮FAIL已补齐严格字段；CI sparse首轮新evidence未物化FAIL后修正，13/13门禁PASS。根有界审阅输入生命周期、共同deadline、最终路线窗口与pinned sparse action源码，尚无本组未处理可证实finding；不代表完整PR审查或产品可合入。下一步需要光照调度因果验证，再运行新artifact唯一browser。
+
 ## 模型与预算
 
 主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。

@@ -23,6 +23,7 @@ import {
   equipmentWorkbenchMiningApproach,
   EQUIPMENT_RESOURCE_WALK_OPTIONS,
   isEquipmentMiningReady,
+  shouldYieldEquipmentRoutePulse,
 } from './equipment-resource-route';
 
 export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
@@ -190,11 +191,17 @@ async function switchToSurvival(page: Page): Promise<void> {
   await closeInventory(page);
 }
 
-async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
+export async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
   return followEquipmentRoute(target, {
     now: Date.now,
     observe: () => snapshot(page),
-    walk: (key, timeout) => walkTo(page, target, { key, timeout, ...EQUIPMENT_RESOURCE_WALK_OPTIONS }),
+    walk: (key, timeout) =>
+      walkTo(page, target, {
+        key,
+        timeout,
+        ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
+        yieldAfterSettledPulse: (current) => shouldYieldEquipmentRoutePulse(current, target, key),
+      }),
     waitForProgress: async (baseline, key, timeout) => {
       let kind: 'arrival' | 'drift' | null = null;
       const current = await waitForSnapshot(

@@ -28,6 +28,19 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Preserve source/specs; sealed historical artifacts remain exact Git blobs.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+            !/changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/*
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+            /changes/2026-10-08-pr41-ci-recovery/evidence/
+            /changes/2026-10-08-pr41-ci-recovery/evidence/**
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
@@ -47,6 +60,19 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Preserve source/specs; sealed historical artifacts remain exact Git blobs.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+            !/changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/*
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+            /changes/2026-10-08-pr41-ci-recovery/evidence/
+            /changes/2026-10-08-pr41-ci-recovery/evidence/**
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
@@ -100,6 +126,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Preserve source/specs; sealed historical artifacts remain exact Git blobs.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+            !/changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/*
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+            /changes/2026-10-08-pr41-ci-recovery/evidence/
+            /changes/2026-10-08-pr41-ci-recovery/evidence/**
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
@@ -118,6 +157,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Preserve source/specs; sealed historical artifacts remain exact Git blobs.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+            !/changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/*
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+            /changes/2026-10-08-pr41-ci-recovery/evidence/
+            /changes/2026-10-08-pr41-ci-recovery/evidence/**
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
@@ -150,6 +202,19 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Preserve source/specs; sealed historical artifacts remain exact Git blobs.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/
+            !/changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/*
+            /changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json
+            /changes/2026-10-08-pr41-ci-recovery/evidence/
+            /changes/2026-10-08-pr41-ci-recovery/evidence/**
       - name: Set up pnpm and Node.js
         uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
