@@ -37,6 +37,7 @@
     "apps/web/tests/unit/app/player-input-gates.test.ts",
     "apps/web/tests/e2e/classic-support/target-aim.test.ts",
     "apps/web/tests/e2e/classic-support/route-aim-render-independence.test.ts",
-    "apps/web/tests/unit/app/browser-gameplay-fluid-target.test.ts"
+    "apps/web/tests/unit/app/browser-gameplay-fluid-target.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-route-corridor-correction.test.ts"
   ]
 }
