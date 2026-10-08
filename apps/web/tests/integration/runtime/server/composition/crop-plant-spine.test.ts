@@ -14,12 +14,15 @@ const pack = definePack({
     defineCropInteractionModule({
       moduleId: 'sample:crops',
       plantOperationId: 'sample:plant',
+      harvestOperationId: 'sample:harvest',
+      fertilizeOperationId: 'sample:fertilize',
       seedItemId: 'sample:wood',
       soilVoxels: [3],
       emptyAboveVoxels: [0],
       waterVoxels: [4],
       matureDrops: [{ itemId: 'sample:stone', count: 2 }],
       immatureDrops: [{ itemId: 'sample:wood', count: 1 }],
+      fertilizer: { itemId: 'sample:stone', growthStages: 7 },
     }),
     defineItemInteractionModule({
       moduleId: 'sample:crop-bindings',
@@ -47,7 +50,7 @@ const approvedPlaybook = {
   permissions: verified.modules.flatMap((module) => module.descriptor.permissions ?? []),
 };
 
-it('plants with a non-Classic Pack through the same selected-item Authority and sole crop owner', async () => {
+it('plants, fertilizes and harvests a non-Classic Pack through the same Authority and sole crop owner', async () => {
   const session = await HeadlessSession.create({
     seedText: 'crop-plant-spine',
     platform: testCorePlatform,
@@ -93,6 +96,33 @@ it('plants with a non-Classic Pack through the same selected-item Authority and 
     expect(repeated.result).toMatchObject({ success: false });
     expect(server.getInventoryPointerView(playerId)).toEqual(current);
     expect(server.crops.list()).toHaveLength(1);
+    expect(server.worldRevision).toBe(worldRevision);
+    server.giveItem(playerId, { itemId: 'sample:stone', count: 1 });
+    await session.runtime.performAction({ type: 'select-hotbar', slot: 1 });
+    const useCurrentSelection = () => {
+      const currentPlayer = server.getPlayerState(playerId);
+      return session.runtime.performAction({
+        ...action,
+        expectedSelection: {
+          inventoryRevision: server.getInventoryPointerView(playerId).revision,
+          modeRevision: currentPlayer.mode!.revision,
+          creativeCatalogRevision: currentPlayer.creativeCatalog!.revision,
+          selectedSlot: currentPlayer.selectedSlot,
+        },
+      });
+    };
+    expect((await useCurrentSelection()).result).toMatchObject({
+      success: true,
+      value: { action: 'fertilize' },
+    });
+    expect(server.crops.at([0, 59, 0])?.stage).toBe(7);
+    expect(server.getInventoryPointerView(playerId).slots[1]).toBeNull();
+    expect((await useCurrentSelection()).result).toMatchObject({
+      success: true,
+      value: { action: 'harvest' },
+    });
+    expect(server.crops.list()).toEqual([]);
+    expect(server.getInventoryPointerView(playerId).slots[1]).toEqual({ itemId: 'sample:stone', count: 2 });
     expect(server.worldRevision).toBe(worldRevision);
   } finally {
     await session.dispose();

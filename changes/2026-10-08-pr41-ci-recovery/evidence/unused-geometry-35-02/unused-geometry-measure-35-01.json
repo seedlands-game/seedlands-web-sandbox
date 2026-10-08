@@ -1,0 +1,21 @@
+{
+  "windowId": "pr41-cloud-unused-geometry-measure-35-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/unused-geometry-measure-35-01-reservation.json",
+  "runId": "unused-geometry-measure-35-01",
+  "owner": "web-runtime",
+  "scenario": "classic-unused-geometry-mesh-full-prep-mesh-pack",
+  "sampleStartedAt": "2026-10-08T22:19:58.096Z",
+  "sampleCompletedAt": "2026-10-08T22:20:21.660Z",
+  "sourceSha": "28e3119bae38a4ac766fc9099ce3fdc2be3ddebb",
+  "sourceDigest": "158f1af0a0a92e3fc241683b49b93445167464275bdffb78995fcd6bdf1e507e",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "fileCount": 1987,
+  "runnerDigest": "de9eb00881790f5d8b7ff661b86558b6bebc7473a219dca27ff2aa50608596e2",
+  "dirtyCandidate": true,
+  "sourceDigestScope": "Materialized code/config paths selected before reads; historical evidence excluded.",
+  "scope": "Local complete worker mesh task including preparation and packing; not frame/browser product acceptance.",
+  "sourceIdentityUnchanged": true,
+  "processExitCode": 0,
+  "eligible": false,
+  "report": null
+}

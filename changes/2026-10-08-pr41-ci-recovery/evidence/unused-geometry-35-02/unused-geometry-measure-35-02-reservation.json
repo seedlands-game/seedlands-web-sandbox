@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "pr41-cloud",
+  "runId": "pr41-cloud-unused-geometry-measure-35-02",
+  "pid": 86194,
+  "startedAt": "2026-10-08T22:21:01.865Z",
+  "windowId": "pr41-cloud-unused-geometry-measure-35-02",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/unused-geometry-measure-35-02-reservation.json",
+  "waitedMs": 2,
+  "endedAt": "2026-10-08T22:21:26.041Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "RECORDED",
+    "path": "/workspace/pr41-recovery-20261008-root-01/unused-geometry-measure-35-02.json",
+    "format": "local",
+    "digest": "d020c752d79c324021536953e6c1a300c1b37aa269ebbd590b7d225a95e398ad",
+    "runId": "unused-geometry-measure-35-02",
+    "owner": "web-runtime",
+    "scenario": "classic-unused-geometry-mesh-full-prep-mesh-pack",
+    "sampleStartedAt": "2026-10-08T22:21:01.983Z",
+    "sampleCompletedAt": "2026-10-08T22:21:25.825Z",
+    "sourceSha": "28e3119bae38a4ac766fc9099ce3fdc2be3ddebb",
+    "sourceDigest": "158f1af0a0a92e3fc241683b49b93445167464275bdffb78995fcd6bdf1e507e",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169"
+  },
+  "samples": [
+    {
+      "at": "2026-10-08T22:21:01.867Z",
+      "loadAverage": [0.23, 0.2, 0.39],
+      "freeMemoryBytes": 17758019584,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-08T22:21:06.872Z",
+      "loadAverage": [0.29, 0.22, 0.39],
+      "freeMemoryBytes": 17404649472,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-08T22:21:11.873Z",
+      "loadAverage": [0.35, 0.23, 0.4],
+      "freeMemoryBytes": 17373724672,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-08T22:21:16.879Z",
+      "loadAverage": [0.4, 0.24, 0.4],
+      "freeMemoryBytes": 17379827712,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-08T22:21:21.885Z",
+      "loadAverage": [0.45, 0.26, 0.4],
+      "freeMemoryBytes": 17447751680,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-08T22:21:25.971Z",
+      "loadAverage": [0.49, 0.27, 0.41],
+      "freeMemoryBytes": 17733586944,
+      "totalMemoryBytes": 18882699264
+    }
+  ]
+}

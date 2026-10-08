@@ -42,12 +42,17 @@ export function readCommitSnapshot(root, ref) {
   return { sha, files, registry: registryFrom(files) };
 }
 
-export function readWorkingSnapshot(root) {
+export function readWorkingSnapshot(root, selectPath = () => true) {
   const sha = git(root, ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   const paths = git(root, ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' })
     .split('\0')
     .filter(
-      (path) => path && safePath(path) && existsSync(resolve(root, path)) && lstatSync(resolve(root, path)).isFile(),
+      (path) =>
+        path &&
+        safePath(path) &&
+        selectPath(path) &&
+        existsSync(resolve(root, path)) &&
+        lstatSync(resolve(root, path)).isFile(),
     );
   const files = Object.fromEntries(
     paths.map((path) => [path, textual(path) ? readFileSync(resolve(root, path), 'utf8') : '']),

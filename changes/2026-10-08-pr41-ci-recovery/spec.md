@@ -183,4 +183,24 @@ Browser-local pointer envelope携带递增sequence、同次gesture、绝对monot
 
 实际 registered seed interaction 后，AuthorityRuntime.view 必须从唯一 CropRuntime owner 输出只含 position/stage 的 cropStages；不得泄漏 subSeconds、内部时钟或可写 owner 引用。Authority 正常推进后新 view 反映成长，先前 view 保持独立；空记录及恢复后的记录如实投影。旧 Worker fixture 缺可选字段时仍可启动，生产投影始终输出数组。该字段经现有 Worker structured clone 与 gameplay revision 门禁交付，不新增存档/网络 wire 版本，也不改冻结 v1/v2 reference corpus 的字段合同。当前片仅证明公开投影，不证明 mesh、射线选择或正式收割。
 
+### 正式收割与骨粉子片
+
+继承当前Classic完整农业合同与194项item identity。既有bone→3 white-dye配方就是本内容目录的骨粉来源；不新增bone-meal物品或第195项。具体 fertilizer item/growthStages 由Classic crop policy声明：white-dye消耗1，使未成熟小麦到stage7；已成熟拒绝且不扣物，Creative不消耗。stdlib只处理配置，不持有这些具体标识。
+
+既有 farmland/crop cell 的 target-first right-click 经过原Authority interact action与四selection门禁。use持有种子仍走种植（重复occupied，不意外收割）；use持有配置肥料走施肥；空手/其它物品的use及alternate走收割。收割未成熟只返种子，成熟返小麦和种子；Creative只移除作物，不改变Survival背包。所有返回物必须先在detached候选里完整容纳，随后与唯一crop owner变更在同一prepared Block host原子提交。若第二种掉落无法容纳，第一种也不得漏入owner。种植/施肥/收割不制造soil WorldCommit。
+
+scope内RED先用实际正式种植→正常Authority成长→空手interact收割及既有white-dye施肥取得。负例包括满包二次产出失败、成熟肥料、stale四selection、loaded/range/LOS与prepared crop/inventory/voxel race；Creative与fresh portable restore继续通过实际入口。当前片不声称左键植物ray、mesh、土壤破坏清理或完整Browser农业完成，这些仍保持产品验收缺口。
+
+### 未使用几何配置的 Worker meshing 候选
+
+精确75f生产诊断的18个任务已有Worker阶段trace：meshing总9891.8ms、generation3424.5ms、halo2758.9ms；不同任务排队等待不可相加为critical path。原适配器只因Pack注册过任何geometry就使所有Chunk的W04/W05退回JS，即使实际canonical/halo未使用这些定义。本候选只允许在既有完整36³派生窗口确认没有任何注册geometry voxel后复用既有W04/W05；canonical、halo/AO邻居或水顶额外单元有自定义geometry时仍走原JS，失败保持原fallback/failed语义。保留seed、voxel/geometry/semantics、质量、Chunk数量、bytes与真实browser断言，不新增mesh owner。
+
+A=当前whole-task geometry→JS fallback；B=每task完整窗口检测并按实际使用选择既有kernel，唯一轴为geometry适用判断；full preparation+mesh+pack均计时。固定相同天然Chunk与含custom-body/halo/water-top负例、相同已有scalar Wasm与同一机器，warmup后A/A交错8对median差<=15%，然后AB/BA交错至少8对。主要指标为full call elapsed median，B需改善>=20%；否决项为任意输出typed-array byte、material/category/layout/order差异、custom几何误用kernel、未知/缺失输入当Air、owner buffer变更或failed状态污染。记录窗口identity、输入digest、copy bytes、所有原始样本；未达线删除生产候选而保留证据。即便通过也只证明局部meshing，组合新artifact唯一Browser仍需原完整验收。预注册时尚无RED/GREEN/A/A/AB。
+
+实施结果：ABI调用缺失RED、三文件11项GREEN；独占35-01测试断言通过但stdout原始report缺失，wrapper FAIL/eligible=false，保留。35-02只增加计时结束后的raw JSON写入，A/A偏差2.9188476%，完整任务A/B中位765.3202725/14.4374225ms，98.113545%改善；五组输出bytes/metadata与输入哈希保持，window PASS/RECORDED，候选保留。具体身份、原始样本及copy边界见 `evidence/unused-geometry-35-02/README.md`，不写成整帧或产品结论。
+
+### 构建身份读取边界
+
+现有 artifact.sourceIdentity 先调用完整 readWorkingSnapshot，读取/hash 所有物化文件，然后才选 code/config；新 build 不得全量读取历史证据。只给 readWorkingSnapshot 增加可选路径选择参数，artifact 用原 source predicate 在任何文件读/metadata 前过滤。默认 Harness snapshot 语义不变；sourceSha/sourceDigest/lockDigest 的算法、具体路径集合和源码变更拒绝规则不变。RED 用独立临时 Git fixture 和 fs read guard 拒绝历史文件读取；GREEN 还验证历史内容不影响源码摘要、源码变化仍改变摘要、默认 snapshot 继续完整捕获其输入。CI 纳入这一确定性工程合同，不能借过滤排除真实 code/config。
+
 实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。
