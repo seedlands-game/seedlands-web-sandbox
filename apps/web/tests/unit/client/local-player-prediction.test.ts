@@ -70,6 +70,38 @@ const controls = {
 };
 
 describe('生产本地玩家预测运行时', () => {
+  it.each(['capture', 'render', 'interrupt'] as const)('旧快照期间%s输入使用投递tick而不修改预测状态', (mode) => {
+    const runtime = new LocalPlayerPrediction('world:1', 60);
+    const world = new RevisionWorld();
+    const authority = new InputCommandBuffer('world:1', 'player-input');
+    authority.consumeForTick(130);
+    const request = {
+      ...controls,
+      snapshot: snapshot(100),
+      inputPhysicsTick: 130,
+      issuedAtMs: 500,
+      world,
+      elapsedSeconds: 1 / 60,
+    };
+    const command =
+      mode === 'capture'
+        ? runtime.captureInput(request)!
+        : mode === 'interrupt'
+          ? runtime.interrupt(request.snapshot, request.issuedAtMs, request.inputPhysicsTick)
+          : runtime.advance(request).commands[0];
+    expect(command.targetPhysicsTick).toBe(132);
+    expect(authority.push(command)).toBe('accepted');
+    expect(request.snapshot.physicsTick).toBe(100);
+    if (mode !== 'render') {
+      expect(runtime.physicalBody).toBeNull();
+      expect(runtime.pendingFrames).toHaveLength(0);
+    } else {
+      const control = new LocalPlayerPrediction('world:1', 60);
+      control.advance({ ...request, inputPhysicsTick: 100 });
+      expect(runtime.physicalBody).toEqual(control.physicalBody);
+    }
+  });
+
   it('即时输入和render预测共享递增序列，未预测的边沿ack不遗留旧运动', () => {
     const runtime = new LocalPlayerPrediction('world:1', 60);
     const world = new RevisionWorld();

@@ -42,7 +42,8 @@ const gameplay = {
     slots: [],
     hotbarSize: 8,
     armor: { helmet: null, chestplate: null, leggings: null, boots: null },
-    cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
+    cursor: { version: 1 as const, revision: 0, stack: null, origin: null, craftingGrid: [null, null, null, null] },
+    matchedCraftingRecipeIds: [],
   },
   gameplayRevision: 1,
   gameplayTime: 0,
@@ -123,4 +124,14 @@ export const ready = (): AuthorityReady => ({
     paused: false,
   },
   gameplay,
+});
+
+export const restoredFrontier = (epoch: string) => ({
+  worldId: 'world',
+  epoch,
+  worldRevision: 0,
+  commitSequence: 0,
+  physicsTick: 0,
+  fluidWorkSequence: 0,
+  logicObservationSequence: 0,
 });

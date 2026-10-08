@@ -7,13 +7,15 @@ import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
 import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 // prettier-ignore
-import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady, AuthorityRequest, AuthorityResponse, AuthoritySessionControlResult } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady, AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/stdlib/server/logic/logic-protocol';
 // prettier-ignore
 import type { WorldHarnessPort, WorldHarnessResult, WorldPrepareRequest } from '@seedlands/stdlib/server/harness/world-harness-contract';
 // prettier-ignore
 import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
+import { BrowserInputSchedulingClock } from './input-scheduling-tick';
+import { controlAuthoritySession } from './browser-authority-session-control';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
 import { authorityInputTransitBudgetMs, createAuthorityTransport } from './authority-transport';
@@ -46,6 +48,7 @@ export class BrowserAuthorityClient {
   private readonly chunks: BrowserAuthorityChunkClient;
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
+  private readonly inputClock = new BrowserInputSchedulingClock();
   private gameplayValue: AuthorityGameplayView | null = null;
   private readonly readyWait: ClientReadyWait<AuthorityReady>;
   private disposed = false;
@@ -177,6 +180,11 @@ export class BrowserAuthorityClient {
   get mutationCount(): number { return this.snapshotValue?.worldMutationCount ?? 0; }
   // prettier-ignore
   get physicsTick(): number { return this.snapshotValue?.physicsTick ?? 0; }
+
+  get inputPhysicsTick(): number {
+    return this.inputClock.tick(this.readyValue?.frequencies.physicsHz ?? 60);
+  }
+
   // prettier-ignore
   get commitSequence(): number { return this.snapshotValue?.commitSequence ?? 0; }
 
@@ -402,7 +410,10 @@ export class BrowserAuthorityClient {
           return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
         this.media.replaceEpoch(acceptedReady.snapshot.epoch, media.value, false);
         Object.assign(this, { runtimeEpochValue: acceptedReady.snapshot.epoch, readyValue: acceptedReady });
-        if (!readySnapshotRejection) this.snapshotValue = acceptedReady.snapshot;
+        if (!readySnapshotRejection) {
+          this.snapshotValue = acceptedReady.snapshot;
+          this.inputClock.accept(acceptedReady.snapshot);
+        }
         this.chunks.initialize(acceptedReady.snapshot.worldRevision);
         this.updateGameplay(acceptedReady.gameplay);
         this.media.publishCurrent();
@@ -416,7 +427,7 @@ export class BrowserAuthorityClient {
         this.options.onAuthorityChunkNeeded?.(message.key);
         break;
       case 'authority-snapshot':
-        this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
+        this.acceptSnapshot(message.snapshot, message.gameplay, message.commits, message.capturedAtTimeOriginMs);
         break;
       case 'authority-commits':
         return this.chunks.publish(message.commits);
@@ -513,13 +524,14 @@ export class BrowserAuthorityClient {
   }
 
   // prettier-ignore
-  private acceptSnapshot(snapshot: AuthoritySnapshot, gameplay?: AuthorityGameplayView, commits?: readonly WorldCommitResult[]): void {
+  private acceptSnapshot(snapshot: AuthoritySnapshot, gameplay?: AuthorityGameplayView, commits?: readonly WorldCommitResult[], capturedAtTimeOriginMs?: number): void {
     const media = gameplay ? this.media.tryClone(gameplay.media) : undefined;
     if (media && !media.ok) return;
     this.chunks.publish(commits);
     if (this.snapshotGate.accept(snapshot)) return;
     if (gameplay && media?.ok) this.updateGameplay(gameplay, media.value);
     this.snapshotValue = snapshot;
+    this.inputClock.accept(snapshot, capturedAtTimeOriginMs);
     this.chunks.synchronize(snapshot);
     this.options.onSnapshot?.(snapshot);
   }
@@ -541,22 +553,13 @@ export class BrowserAuthorityClient {
     for (const [cx, cy, cz] of chunks) await this.ensureChunkNeighborhood(cx, cy, cz);
   }
 
-  private async controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {
-    try {
-      const result = (await this.request(
-        { kind: paused ? 'pause-authority' : 'resume-authority' },
-        [],
-        'session-control',
-      )) as Partial<AuthoritySessionControlResult>;
-      if (result.paused !== paused || !result.snapshot || result.snapshot.paused !== paused)
-        throw new Error('Authority session control acknowledgement is invalid.');
-      this.acceptSnapshot(result.snapshot);
-      return { paused };
-    } catch (error) {
-      const failure = error instanceof Error ? error : new Error(String(error));
-      this.failAll(failure);
-      throw failure;
-    }
+  private controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {
+    return controlAuthoritySession(
+      paused,
+      () => this.request({ kind: paused ? 'pause-authority' : 'resume-authority' }, [], 'session-control'),
+      (snapshot) => this.acceptSnapshot(snapshot),
+      (error) => this.failAll(error),
+    );
   }
 
   private failAll(error: Error): void {

@@ -2,11 +2,7 @@ import * as pc from 'playcanvas';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../../client/presentation/voxel-target';
-import {
-  DRY_WATER_IMMERSION,
-  sampleWaterImmersion,
-  type WaterImmersionSnapshot,
-} from '@seedlands/stdlib/world/water-immersion';
+import { DRY_WATER_IMMERSION, type WaterImmersionSnapshot } from '@seedlands/stdlib/world/water-immersion';
 import type { PlayerControllerOptions } from './player-controller-types';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import { LocalPlayerPrediction } from '../../client/local-player-prediction';
@@ -21,6 +17,7 @@ import { performSecondaryInteraction } from './secondary-interaction';
 import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 import { createFluidAwareTargetPredicate } from './fluid-source-target';
 import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
+import { samplePlayerWaterImmersion } from './player-water-immersion';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -235,19 +232,7 @@ export class PlayerController {
     }
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
-    const cameraPosition = camera.getPosition();
-    const playerBounds = bodyConfigFor('player').localAabb;
-    const feetY = cameraPosition.y - PLAYER_FEET_OFFSET;
-    this.immersion = sampleWaterImmersion({
-      cameraPosition: [cameraPosition.x, cameraPosition.y, cameraPosition.z],
-      bodyBounds: {
-        min: [cameraPosition.x + playerBounds.min.x, feetY + playerBounds.min.y, cameraPosition.z + playerBounds.min.z],
-        max: [cameraPosition.x + playerBounds.max.x, feetY + playerBounds.max.y, cameraPosition.z + playerBounds.max.z],
-      },
-      previousCameraSubmerged: this.immersion.cameraSubmerged,
-      getVoxel: (x, y, z) => world.getVoxel(x, y, z),
-      getFluidLevel: (x, y, z) => world.getFluidCell(x, y, z)?.level ?? null,
-    });
+    this.immersion = samplePlayerWaterImmersion(camera, world, this.immersion.cameraSubmerged);
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
     if (!this.spectator) {
       const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
@@ -256,6 +241,7 @@ export class PlayerController {
         const prediction = this.prediction.advance({
           elapsedSeconds: dt,
           snapshot,
+          inputPhysicsTick: this.options.authority.inputPhysicsTick?.(),
           world: collisionWorld,
           issuedAtMs: performance.now(),
           ...samplePlayerMovementInput(camera, this.keys),
@@ -309,6 +295,7 @@ export class PlayerController {
     camera.setEulerAngles(this.pitch, this.yaw, 0);
     const command = this.prediction.captureInput({
       snapshot,
+      inputPhysicsTick: this.options.authority.inputPhysicsTick?.(),
       issuedAtMs: performance.now(),
       ...samplePlayerMovementInput(camera, this.keys),
     });
@@ -442,7 +429,10 @@ export class PlayerController {
 
   private sendNeutralInput(): void {
     const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
-    if (snapshot) this.options.authority.sendInput(this.prediction.interrupt(snapshot, performance.now()));
+    if (snapshot)
+      this.options.authority.sendInput(
+        this.prediction.interrupt(snapshot, performance.now(), this.options.authority.inputPhysicsTick?.()),
+      );
   }
 
   private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {

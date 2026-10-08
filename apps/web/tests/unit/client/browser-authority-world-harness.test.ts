@@ -1,3 +1,4 @@
+import { restoredFrontier } from './fixtures/browser-authority';
 import { describe, expect, it, vi } from 'vitest';
 import {
   BrowserAuthorityClient,
@@ -89,7 +90,8 @@ const ready = (): AuthorityReady => ({
       slots: [],
       hotbarSize: 8,
       armor: { helmet: null, chestplate: null, leggings: null, boots: null },
-      cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
+      cursor: { version: 1 as const, revision: 0, stack: null, origin: null, craftingGrid: [null, null, null, null] },
+      matchedCraftingRecipeIds: [],
     },
     gameplayRevision: 1,
     gameplayTime: 0,
@@ -275,6 +277,14 @@ describe('Browser Authority world harness', () => {
     const worker = new FakeAuthorityWorker();
     const changed = vi.fn();
     const client = new BrowserAuthorityClient(worker, 'world:1', { onWorldEpochChanged: changed });
+    worker.emit({
+      kind: 'authority-snapshot',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      snapshot: { ...ready().snapshot, physicsTick: 100, commitSequence: 100 },
+      capturedAtTimeOriginMs: performance.timeOrigin + performance.now() - 500,
+    });
+    expect(client.inputPhysicsTick).toBeGreaterThanOrEqual(130);
     const restoring = client.world.checkpoint({ kind: 'restore', snapshot: {} });
     const request = worker.posts.at(-1) as { requestId: number };
     const initialReady = ready();
@@ -305,6 +315,7 @@ describe('Browser Authority world harness', () => {
     });
     await restoring;
     expect(changed).toHaveBeenCalledWith('world:1:runtime:1', restoredReady);
+    expect(client.inputPhysicsTick).toBe(0);
     client.sendInput({
       kind: 'input',
       protocolVersion: 1,
@@ -346,7 +357,7 @@ describe('Browser Authority world harness', () => {
       protocolVersion: 1,
       epoch: 'session:1',
       requestId: request.requestId,
-      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      result: { ok: true, data: { restored: true }, frontier: restoredFrontier('runtime:2') },
       ready: restoredReady,
       runtimeEpoch: 'runtime:2',
     } as AuthorityResponse);
@@ -418,7 +429,7 @@ describe('Browser Authority world harness', () => {
       protocolVersion: 1,
       epoch: 'session:1',
       requestId: request.requestId,
-      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      result: { ok: true, data: { restored: true }, frontier: restoredFrontier('runtime:2') },
       ready: restoredReady,
       runtimeEpoch: 'runtime:2',
     } as AuthorityResponse);
@@ -475,7 +486,7 @@ describe('Browser Authority world harness', () => {
       protocolVersion: 1,
       epoch: 'session:1',
       requestId: request.requestId,
-      result: { ok: true, data: { restored: true }, frontier: { worldId: 'world', epoch: 'runtime:2' } },
+      result: { ok: true, data: { restored: true }, frontier: restoredFrontier('runtime:2') },
       ready: restoredReady,
       runtimeEpoch: 'runtime:other',
     } as AuthorityResponse);

@@ -10,7 +10,7 @@ import { InputCommandBuffer, type InputCommand } from '@seedlands/stdlib/runtime
 
 afterEach(() => vi.unstubAllGlobals());
 
-function installKeyboard() {
+function installKeyboard(inputPhysicsTick?: () => number) {
   const windowStub = {
     onkeydown: null as null | ((event: object) => void),
     onkeyup: null as null | ((event: object) => void),
@@ -20,7 +20,8 @@ function installKeyboard() {
   vi.stubGlobal('HTMLInputElement', class {});
   vi.stubGlobal('HTMLTextAreaElement', class {});
   let blocked = false;
-  const snapshot = ready().snapshot;
+  const initial = ready().snapshot;
+  const snapshot = { ...initial, player: { ...initial.player } };
   const commands: InputCommand[] = [];
   const canvas = {};
   const controller = new PlayerController({
@@ -30,6 +31,7 @@ function installKeyboard() {
     authority: {
       epoch: snapshot.epoch,
       snapshot: () => snapshot,
+      inputPhysicsTick,
       sendInput: (command: InputCommand) => commands.push(command),
     },
     getEnvironment: () => null,
@@ -69,6 +71,27 @@ it('两帧之间的100ms真实键盘脉冲仍经正式输入队列持续移动�
   expect(input.consumeForTick(startTick + 8).state.moveZ).toBe(0);
   expect(controller.predictedPhysicsState).toBeNull();
   expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+});
+
+it('旧snapshot期间真实keydown/up与失焦neutral都采用同一投递时钟', () => {
+  let schedulingTick = 130;
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard(() => schedulingTick);
+  snapshot.physicsTick = 100;
+  const input = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  input.consumeForTick(130);
+  keyDown('KeyS');
+  expect(commands[0]!.targetPhysicsTick).toBe(132);
+  expect(input.push(commands[0]!)).toBe('accepted');
+  schedulingTick = 136;
+  keyUp('KeyS');
+  expect(commands[1]!.targetPhysicsTick).toBe(138);
+  expect(input.push(commands[1]!)).toBe('accepted');
+  schedulingTick = 140;
+  controller.releaseInput();
+  expect(commands[2]!.targetPhysicsTick).toBe(142);
+  expect(input.push(commands[2]!)).toBe('accepted');
+  expect(snapshot.physicsTick).toBe(100);
+  expect(controller.predictedPhysicsState).toBeNull();
 });
 
 it('键盘边沿保留jump和movement identity，重复按下与UI阻挡不新增运动', () => {

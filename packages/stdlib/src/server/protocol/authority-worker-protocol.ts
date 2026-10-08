@@ -1,3 +1,4 @@
+import type { AuthoritySnapshotMessage } from './authority-snapshot-message';
 import type { EntityLifetimeReference, GameplayEntity } from '../gameplay/entity-store';
 import type { StationComponentV1 } from '../gameplay/ecs-station-state';
 import type { StationRecipe } from '../gameplay/modules/station-candidates';
@@ -448,14 +449,7 @@ export type AuthorityResponse =
       epoch: SessionEpoch;
       key: string;
     }>
-  | Readonly<{
-      kind: 'authority-snapshot';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      snapshot: AuthoritySnapshot;
-      gameplay?: AuthorityGameplayView;
-      commits?: readonly WorldCommitResult[];
-    }>
+  | AuthoritySnapshotMessage
   | AuthorityCommitMessage
   | import('./media-playback-protocol').AuthorityMediaFactsResponseV1
   | Readonly<{
