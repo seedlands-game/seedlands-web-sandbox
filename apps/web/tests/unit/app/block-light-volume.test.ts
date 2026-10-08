@@ -189,7 +189,8 @@ describe('浏览器方块光体积', () => {
     const applies: string[] = [];
     const cache = new ChunkBlockLightCache({
       getVoxelIfLoaded: () => Voxel.Air,
-      blockLightRevision: () => revision,
+      // Only the edited nearby halo changes; the far brick retains its identity.
+      blockLightRevision: (origin) => (origin[0] < 0 ? revision : 'initial'),
       voxelSemantics: classicContent.voxelSemantics,
     });
     cache.register('far', 4, 0, 0, { apply: () => applies.push('far') });

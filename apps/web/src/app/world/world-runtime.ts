@@ -20,6 +20,7 @@ import type { QualityProfile } from '../scene/quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from '../gameplay/fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
 import { ChunkBlockLightCache } from '../scene/block-light-volume';
+import { BlockLightRebuildPump } from '../scene/block-light-rebuild-pump';
 import {
   acceptStreamingCanonical,
   prepareStreamingNeighborhood,
@@ -63,6 +64,7 @@ export class World {
   private readonly waterTransitions = new WaterMeshTransitionTracker();
   private readonly streamingAdmissionRetry = new StreamingAdmissionRetry();
   private readonly blockLightCache: ChunkBlockLightCache;
+  private readonly blockLightRebuildPump: BlockLightRebuildPump;
   private lastCenter = '';
   private disposed = false;
 
@@ -86,6 +88,7 @@ export class World {
       blockLightRevision: (origin, size) => this.blockLightRevision(origin, size),
       voxelSemantics: authority.voxelSemantics,
     });
+    this.blockLightRebuildPump = new BlockLightRebuildPump(this.blockLightCache);
     const source: MeshTaskSource = {
       get seed() {
         return authority.seed;
@@ -342,6 +345,7 @@ export class World {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.blockLightRebuildPump.dispose();
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.scheduler.dispose();
     this.repository.dispose();
@@ -481,7 +485,7 @@ export class World {
 
   drainCommits(cameraPosition?: readonly [number, number, number]) {
     this.repository.drain();
-    if (cameraPosition) this.blockLightCache.rebuildNearest(cameraPosition);
+    if (cameraPosition) this.blockLightRebuildPump.request(cameraPosition);
   }
 
   private request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {

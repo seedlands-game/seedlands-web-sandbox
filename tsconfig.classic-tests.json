@@ -26,6 +26,9 @@
     "apps/web/tests/integration/runtime/server/composition/classic-fluid-buckets.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-environment.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-lighting.test.ts",
-    "apps/web/tests/unit/app/player-held-attack.test.ts"
+    "apps/web/tests/unit/app/player-held-attack.test.ts",
+    "apps/web/tests/unit/app/block-light-rebuild-pump.test.ts",
+    "apps/web/tests/unit/client/browser-authority-client.test.ts",
+    "apps/web/tests/unit/client/input-decision-diagnostics.test.ts"
   ]
 }

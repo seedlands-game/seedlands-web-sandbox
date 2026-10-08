@@ -216,6 +216,8 @@ export class ChunkBlockLightCache {
   }
 
   rebuildNearest(position: readonly [number, number, number]): boolean {
+    for (const entry of this.pendingEntries())
+      if (!this.dirtySinceRebuild.has(entry.key)) this.dirtySinceRebuild.set(entry.key, this.rebuildCount);
     let selected: ChunkBlockLightEntry | null = null;
     let selectedDistance = Number.POSITIVE_INFINITY;
     let selectedAge: number | null = null;
@@ -267,7 +269,7 @@ export class ChunkBlockLightCache {
 
   get snapshot(): ChunkBlockLightCacheSnapshot {
     const allocatedBrickCount = this.entries.size;
-    const pendingBrickCount = this.dirtySinceRebuild.size;
+    const pendingBrickCount = this.pendingEntries().length;
     return {
       brickCount: this.entries.size,
       allocatedBrickCount,
@@ -285,23 +287,25 @@ export class ChunkBlockLightCache {
       lastRebuildMs: this.lastRebuildMs,
       totalRebuildMs: this.totalRebuildMs,
       maxRebuildMs: this.maxRebuildMs,
-      pendingBricks: [...this.dirtySinceRebuild.keys()].flatMap((key) => {
-        const entry = this.entries.get(key);
-        return entry
-          ? [
-              {
-                key,
-                chunk: [entry.cx, entry.cy, entry.cz] as const,
-                cachedRevision: entry.snapshot?.revision ?? null,
-                currentRevision: this.reader.blockLightRevision(
-                  blockLightOriginForChunk(entry.cx, entry.cy, entry.cz),
-                  BLOCK_LIGHT_VOLUME_SIZE,
-                ),
-              },
-            ]
-          : [];
-      }),
+      pendingBricks: this.pendingEntries().map((entry) => ({
+        key: entry.key,
+        chunk: [entry.cx, entry.cy, entry.cz] as const,
+        cachedRevision: entry.snapshot?.revision ?? null,
+        currentRevision: this.reader.blockLightRevision(
+          blockLightOriginForChunk(entry.cx, entry.cy, entry.cz),
+          BLOCK_LIGHT_VOLUME_SIZE,
+        ),
+      })),
     };
+  }
+
+  /** Current Authority halo identity can change before a mesh commit invalidates it. */
+  private pendingEntries(): ChunkBlockLightEntry[] {
+    return [...this.entries.values()].filter(
+      (entry) =>
+        this.dirtySinceRebuild.has(entry.key) ||
+        chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz),
+    );
   }
 
   clear(): void {

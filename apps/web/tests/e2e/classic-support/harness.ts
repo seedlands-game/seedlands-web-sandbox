@@ -59,6 +59,8 @@ export type ChromeTrace = Readonly<{
 }>;
 
 export type HarnessApi = {
+  inputDecisionDiagnostics():
+    import('../../../src/client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;

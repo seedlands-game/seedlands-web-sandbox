@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { FakeAuthorityWorker, frequencies, ready } from './fixtures/browser-authority';
 import { testWorldgenProvider } from './fixtures/worldgen-provider';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
+import { readInputDecisionDiagnostics } from '../../../src/client/authority/input-decision-diagnostics';
 import type { AuthorityResponse } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
 import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/blocks';
 import { LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN } from '../../../src/client/persistence/legacy-gameplay-provenance-error';
@@ -72,7 +73,7 @@ describe('BrowserAuthorityClient', () => {
   it('把迟到/非法输入与重同步要求显式反馈预测层', () => {
     const worker = new FakeAuthorityWorker();
     const decisions = vi.fn();
-    new BrowserAuthorityClient(worker, 'world:1', { onInputDecision: decisions });
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onInputDecision: decisions });
     worker.emit({
       kind: 'input-decision',
       protocolVersion: 1,
@@ -99,6 +100,18 @@ describe('BrowserAuthorityClient', () => {
     });
     expect(decisions).toHaveBeenCalledWith({ sequence: 4, decision: 'late', requiresResync: true });
     expect(decisions).toHaveBeenCalledTimes(1);
+    expect(readInputDecisionDiagnostics(client)).toMatchObject({
+      totalReceipts: 1,
+      resyncReceipts: 1,
+      lastSequence: 4,
+      byDecision: { late: 1 },
+    });
+    const readback = readInputDecisionDiagnostics(client)!;
+    expect(Object.isFrozen(readback)).toBe(true);
+    expect(Object.isFrozen(readback.byDecision)).toBe(true);
+    const other = new BrowserAuthorityClient(new FakeAuthorityWorker(), 'world:2');
+    expect(readInputDecisionDiagnostics(other)).toMatchObject({ totalReceipts: 0, byDecision: {} });
+    expect(readInputDecisionDiagnostics(client)?.totalReceipts).toBe(1);
   });
 
   it('把新世界出生点生成握手交给通用计算池', async () => {

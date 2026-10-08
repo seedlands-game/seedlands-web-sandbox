@@ -18,6 +18,8 @@ import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 
 export type HarnessApi = {
+  inputDecisionDiagnostics: () =>
+    import('../../client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics: () => import('../scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   world: WorldHarnessPort;
   snapshot: () => HarnessSnapshot;

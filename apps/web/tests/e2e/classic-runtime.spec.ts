@@ -30,7 +30,7 @@ import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironme
 import { aimAtVoxelWithRealMouse } from './classic-support/aim';
 import {
   attachClassicEvidence,
-  attachClassicFailure,
+  attachClassicFailureWithInput,
   observeBrowserRuntime,
   requireAllClassicStages,
   type ClassicStage as Stage,
@@ -66,8 +66,7 @@ test.afterEach(async ({ page }, testInfo) => {
   if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
   if (modularPackSmokeEnabled) return;
   if (evidenceWritten || testInfo.title.startsWith('Classic 视觉')) return;
-  const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
-  await attachClassicFailure(testInfo, stageResults, current, benchmarkMode, restoreEvidence);
+  await attachClassicFailureWithInput(page, testInfo, stageResults, benchmarkMode, restoreEvidence);
 });
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {

@@ -15,6 +15,7 @@ import type { WorldHarnessPort, WorldHarnessResult, WorldPrepareRequest } from '
 import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { BrowserInputSchedulingClock } from './input-scheduling-tick';
+import { deliverInputDecision } from './input-decision-diagnostics';
 import { controlAuthoritySession } from './browser-authority-session-control';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -437,11 +438,7 @@ export class BrowserAuthorityClient {
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
         this.lastInputDecisionSequence = message.sequence;
-        this.options.onInputDecision?.({
-          sequence: message.sequence,
-          decision: message.decision,
-          requiresResync: message.requiresResync,
-        });
+        deliverInputDecision(this, message, this.options.onInputDecision);
         break;
       case 'authority-response': {
         if (!this.requests.has(message.requestId)) return;
