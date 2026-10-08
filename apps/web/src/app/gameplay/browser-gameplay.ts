@@ -32,6 +32,7 @@ import type { ModeCommand } from '@seedlands/stdlib/server/commands/module-comma
 import type { ActorMode } from '../ui/ui-contracts';
 import { performVoxelTargetInteraction } from '../player/secondary-interaction';
 import { canTargetFluidSource } from './fluid-source-target-selection';
+import { projectVoxelInteractionTarget } from './voxel-target-ui';
 import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export type BrowserGameplayAuthorityPort = Readonly<{
@@ -113,8 +114,13 @@ export class BrowserGameplay {
   setSuspended(suspended: boolean): void {
     this.viewmodel.setVisible(!suspended && !this.blocksInput);
   }
-  // prettier-ignore
-  setAimTarget(target: VoxelTarget | null): void { this.aimTarget = target?.inRange ? target : null; }
+  setAimTarget(target: VoxelTarget | null): void {
+    this.aimTarget = target?.inRange ? target : null;
+    this.options.session.publishTarget(
+      this.options.nextInteractionSequence(),
+      projectVoxelInteractionTarget(this.aimTarget, this.blocksInput),
+    );
+  }
   // prettier-ignore
   canTargetFluidSource(): boolean { return canTargetFluidSource(this.options.authority.gameplay); }
   // prettier-ignore
@@ -255,15 +261,7 @@ export class BrowserGameplay {
         progress: view.progress,
         armorPoints: view.armorPoints,
         oxygen: { value: 20, max: 20, visible: false },
-        target:
-          this.aimTarget && !this.blocksInput
-            ? {
-                kind: 'voxel',
-                id: this.aimTarget.position.join(','),
-                label: voxelNames[this.aimTarget.voxel] ?? '体素',
-                voxel: this.aimTarget.voxel,
-              }
-            : null,
+        target: projectVoxelInteractionTarget(this.aimTarget, this.blocksInput),
         breaking,
       },
       this.previousProjection,

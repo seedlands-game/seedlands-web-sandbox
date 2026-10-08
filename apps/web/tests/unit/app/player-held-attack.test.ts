@@ -1,12 +1,18 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import * as pc from 'playcanvas';
+import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { PlayerController } from '../../../src/app/player/player-controller';
 import { BrowserPointerAttackInput } from '../../../src/app/gameplay/pointer-attack-input';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import type { PointerAttackRequest } from '../../../src/client/authority/pointer-attack-protocol';
 import { PointerAttackInputPump } from '../../../src/worker/pointer-attack-input-pump';
+import { createAuthorityPointerAttackPump } from '../../../src/worker/authority-pointer-attack-target';
+import { BrowserAuthorityIngress } from '../../../src/worker/authority-worker-ingress';
+import { AuthorityRuntime } from '../../../../../packages/stdlib/src/server/authority/authority-runtime';
 import { GameplayRuntime, classicContent, classicOptions } from '../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../packages/stdlib/tests/support/core-platform';
+import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
+import { CHUNK_SIZE, voxelIndex } from '@seedlands/stdlib/world/voxel';
 import { FakeAuthorityWorker, frequencies, ready } from '../client/fixtures/browser-authority';
 
 afterEach(() => {
@@ -20,13 +26,14 @@ function heldAttack(
     ConstructorParameters<typeof PlayerController>[0],
     'onHeldAttackTarget' | 'onStopHeldAttack'
   > = {},
+  getVoxel: (x: number, y: number, z: number) => number = () => Voxel.Air,
 ) {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
   const world = new GameplayRuntime({
     ...classicOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 8,
-    getVoxel: () => 0,
+    getVoxel: (position: [number, number, number]) => getVoxel(...position),
     getLoadedCell: () => ({ voxel: 0, fluid: 0 }),
     prepareVoxelEdit: () => {
       throw new Error('Unexpected voxel edit');
@@ -55,6 +62,8 @@ function heldAttack(
   vi.stubGlobal('document', documentStub);
   vi.stubGlobal('window', windowStub);
   const requests: unknown[] = [];
+  const breakRequests: [number, number, number][] = [];
+  let cancelledBreaks = 0;
   let blocked = false;
   let paused = false;
   let worldAvailable = true;
@@ -72,7 +81,7 @@ function heldAttack(
         ? {
             authority: { voxelSemantics: classicContent.voxelSemantics },
             getChunkRevision: () => 1,
-            getVoxel: () => 0,
+            getVoxel,
             getFluidCell: () => null,
           }
         : null,
@@ -90,6 +99,12 @@ function heldAttack(
       requests.push(world.attackEntity('held-player', 'held-target'));
       return true;
     },
+    onBeginBreak: (position: [number, number, number]) => {
+      breakRequests.push([...position]);
+    },
+    onCancelBreak: () => {
+      cancelledBreaks += 1;
+    },
     ...heldCallbacks,
   } as unknown as ConstructorParameters<typeof PlayerController>[0]);
   controller.install();
@@ -105,6 +120,10 @@ function heldAttack(
     documentStub,
     windowStub,
     requests,
+    breakRequests,
+    get cancelledBreaks() {
+      return cancelledBreaks;
+    },
     advance,
     directions,
     press: () => documentStub.onmousedown!({ button: 0 }),
@@ -127,13 +146,61 @@ function isPointerAttackRequest(post: unknown): post is PointerAttackRequest {
   return typeof post === 'object' && post !== null && (post as { kind?: unknown }).kind === 'pointer-attack-input';
 }
 
-async function workerDrivenHeldAttack() {
+async function workerDrivenHeldAttack(
+  getVoxel?: (x: number, y: number, z: number) => number,
+  authorityTargeting = false,
+  autoPress = true,
+) {
   let browserInput: BrowserPointerAttackInput | null = null;
-  const driver = heldAttack({
-    onHeldAttackTarget: (origin, direction, maxDistance) => browserInput?.held(origin, direction, maxDistance) ?? false,
-    onStopHeldAttack: () => browserInput?.stop(),
-  });
-  const attack = vi.spyOn(driver.world, 'attackEntity');
+  const heldProbeResults: boolean[] = [];
+  const driver = heldAttack(
+    {
+      onHeldAttackTarget: (origin, direction, maxDistance) => {
+        const result = browserInput?.held(origin, direction, maxDistance) ?? false;
+        heldProbeResults.push(result);
+        return result;
+      },
+      onStopHeldAttack: () => browserInput?.stop(),
+    },
+    getVoxel,
+  );
+  const authorityRuntime = authorityTargeting
+    ? await AuthorityRuntime.create({
+        ...classicOptions(),
+        platform: testCorePlatform,
+        worldgenProvider: classicWorldgenProvider,
+        epoch: 'held-attack',
+        seedText: 'held-attack',
+        initialWorldTime: 8,
+        startTimeMs: 0,
+        initialPlayerBodyPosition: [4.5, 60, 4.5],
+        onUnknownChunk: () => undefined,
+      })
+    : null;
+  if (authorityRuntime) {
+    const canonical = new Uint16Array(CHUNK_SIZE ** 3);
+    canonical[voxelIndex(4, 29, 2)] = Voxel.Stone;
+    expect(
+      authorityRuntime.acceptGeneratedChunk({
+        key: '0,1,0',
+        cx: 0,
+        cy: 1,
+        cz: 0,
+        chunkRevision: 0,
+        generatorVersion: authorityRuntime.server.generatorVersion,
+        provider: authorityRuntime.server.worldgenProvider,
+        canonical,
+      }),
+    ).toBe(true);
+    authorityRuntime.server.spawnAutonomousActor({
+      id: 'held-target',
+      archetype: 'zombie',
+      position: [4.5, 60, 3.5],
+    });
+  }
+  const attack = authorityRuntime
+    ? vi.spyOn(authorityRuntime, 'performAction')
+    : vi.spyOn(driver.world, 'attackEntity');
   const worker = new FakeAuthorityWorker();
   const client = new BrowserAuthorityClient(worker, 'held-attack');
   const starting = client.start({
@@ -165,17 +232,26 @@ async function workerDrivenHeldAttack() {
     },
     feedback: vi.fn(),
   });
-  const pointerPump = new PointerAttackInputPump({
-    actor: () => {
-      const reference = driver.world.entities.createReference('held-player');
-      const player = driver.world.getPlayerState('held-player');
-      return reference && player.lifecycle === 'alive' ? { reference, mode: player.mode?.value ?? 'survival' } : null;
-    },
-    attack: async () => {
-      driver.world.attackEntity('held-player', 'held-target');
-      return null;
-    },
-  });
+  const ingress = authorityRuntime ? new BrowserAuthorityIngress(authorityRuntime.playerId) : null;
+  const pointerPump =
+    authorityRuntime && ingress
+      ? createAuthorityPointerAttackPump(
+          () => authorityRuntime,
+          (action) => ingress.action(action),
+        )
+      : new PointerAttackInputPump({
+          actor: () => {
+            const reference = driver.world.entities.createReference('held-player');
+            const player = driver.world.getPlayerState('held-player');
+            return reference && player.lifecycle === 'alive'
+              ? { reference, mode: player.mode?.value ?? 'survival' }
+              : null;
+          },
+          attack: async () => {
+            driver.world.attackEntity('held-player', 'held-target');
+            return null;
+          },
+        });
   let workerNow = performance.timeOrigin + performance.now();
   let postCursor = 0;
   const acceptedInputs: PointerAttackRequest[] = [];
@@ -197,12 +273,14 @@ async function workerDrivenHeldAttack() {
     }
   };
 
-  driver.press();
-  acceptPostedInputs();
-  expect(acceptedInputs[0]).toMatchObject({
-    kind: 'pointer-attack-input',
-    input: { gesture: 1, sequence: 0, direction: expect.any(Array) },
-  });
+  if (autoPress) {
+    driver.press();
+    acceptPostedInputs();
+    expect(acceptedInputs[0]).toMatchObject({
+      kind: 'pointer-attack-input',
+      input: { gesture: 1, sequence: 0, direction: expect.any(Array) },
+    });
+  }
 
   return {
     driver,
@@ -210,13 +288,16 @@ async function workerDrivenHeldAttack() {
     client,
     pointerPump,
     attack,
+    authorityRuntime,
     acceptedInputs,
+    heldProbeResults,
     advanceAuthorityOnly,
     acceptPostedInputs,
     finish: () => {
       driver.controller.dispose(false);
       acceptPostedInputs();
       client.dispose();
+      authorityRuntime?.server.disposeGameplay();
     },
   };
 }
@@ -252,6 +333,46 @@ it('held mouse sustains registered Classic attacks through the authority input p
     damage: 7,
   });
   session.finish();
+});
+
+it('turning onto a creature synchronously transfers a held mining gesture before cadence retry', async () => {
+  const session = await workerDrivenHeldAttack(
+    (x, y, z) => (y === 1 && z === -2 && x >= -1 && x <= 0 ? Voxel.Stone : Voxel.Air),
+    true,
+    false,
+  );
+  try {
+    const mousemove = session.driver.documentStub as unknown as {
+      onmousemove(event: { movementX: number; movementY: number }): void;
+    };
+
+    // Begin mining the voxel before raising the actual pointer ray onto the creature.
+    session.driver.press();
+    session.acceptPostedInputs();
+    expect(session.driver.breakRequests).toHaveLength(1);
+    expect(session.driver.breakRequests[0]?.[2]).toBe(-2);
+
+    // Raise the ray to the creature at negative Z; its loaded voxel remains behind it.
+    mousemove.onmousemove({ movementX: 0, movementY: -16 / 0.13 });
+    session.acceptPostedInputs();
+    expect(session.acceptedInputs.length).toBeGreaterThanOrEqual(2);
+    expect(session.acceptedInputs.at(-1)?.input.direction?.[2]).toBeLessThan(-0.95);
+    expect(session.heldProbeResults.at(-1)).toBe(true);
+
+    // Observe the actual render consumer before the next 200 ms attack cadence.
+    session.driver.controller.update(1 / 60, 1 / 60);
+
+    await session.advanceAuthorityOnly(12);
+    expect(session.attack).toHaveBeenCalledOnce();
+    expect(session.attack).toHaveBeenCalledWith(expect.objectContaining({ type: 'attack', targetId: 'held-target' }));
+    expect(session.authorityRuntime?.server.getCombatState(session.authorityRuntime.playerId)?.active).toMatchObject({
+      targetId: 'held-target',
+    });
+    expect(session.driver.breakRequests).toHaveLength(1);
+    expect(session.driver.cancelledBreaks).toBe(1);
+  } finally {
+    session.finish();
+  }
 });
 
 it.each(['mouseup', 'blur', 'unlock', 'hidden', 'dispose'] as const)(

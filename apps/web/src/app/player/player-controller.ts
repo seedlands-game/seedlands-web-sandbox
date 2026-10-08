@@ -46,13 +46,7 @@ export class PlayerController {
       this.stopMining();
       return;
     }
-    this.attackBlocking = captureHeldPointerAim(
-      this.options,
-      this.pitch,
-      this.yaw,
-      Math.min(3, this.traceTarget()?.distance ?? 3),
-    );
-    if (this.attackBlocking) this.cancelActiveMining();
+    this.captureHeldAttack(Math.min(3, this.traceTarget()?.distance ?? 3));
   });
   private publishedAimTarget: VoxelTarget | null = null;
   private immersion: WaterImmersionSnapshot = DRY_WATER_IMMERSION;
@@ -198,10 +192,12 @@ export class PlayerController {
         const sensitivity = this.options.mouseSensitivity?.value ?? 0.13;
         this.yaw -= event.movementX * sensitivity;
         this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * sensitivity));
+        this.options.camera.setEulerAngles(this.pitch, this.yaw, 0);
         if (this.miningHeld && this.options.onHeldAttackTarget) {
           if (this.interactionBlocked) this.stopMining();
-          else captureHeldPointerAim(this.options, this.pitch, this.yaw);
+          else this.captureHeldAttack();
         }
+        this.publishAimTarget(this.aimTarget);
       }
     };
     document.onpointerlockchange = () => {
@@ -533,6 +529,11 @@ export class PlayerController {
     this.heldAttack.stop();
     this.options.onStopHeldAttack?.();
     if (this.mining.stop()) this.options.onCancelBreak();
+  }
+
+  private captureHeldAttack(maxDistance = 3) {
+    this.attackBlocking = captureHeldPointerAim(this.options, this.pitch, this.yaw, maxDistance);
+    if (this.attackBlocking) this.cancelActiveMining();
   }
 
   private publishAimTarget(target: VoxelTarget | null) {

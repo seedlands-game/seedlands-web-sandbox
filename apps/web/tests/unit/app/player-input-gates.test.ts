@@ -35,6 +35,7 @@ function installKeyboard(inputPhysicsTick?: () => number) {
       sendInput: (command: InputCommand) => commands.push(command),
     },
     getEnvironment: () => null,
+    getWorld: () => null,
     isPaused: () => false,
     isUiBlockingInput: () => blocked,
   } as unknown as ConstructorParameters<typeof PlayerController>[0]);
@@ -235,12 +236,55 @@ it('鼠标灵敏度即时改变真实 Pointer Lock 转向幅度', () => {
   const mouseSensitivity = { value: 0.25 };
   const controller = new PlayerController({
     canvas,
+    camera: new pc.Entity(),
     physicsHz: 60,
     mouseSensitivity,
+    getWorld: () => null,
+    isUiBlockingInput: () => false,
   } as unknown as ConstructorParameters<typeof PlayerController>[0]);
   controller.install();
   documentStub.onmousemove?.({ movementX: 4, movementY: 2 });
   expect(controller.viewAngles).toEqual([-1, -16.5]);
+});
+
+it('未按住鼠标时真实 Pointer Lock 转向立即更新射线与目标卡，不依赖渲染或制造预测步', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousemove: null as null | ((event: { movementX: number; movementY: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const camera = new pc.Entity();
+  camera.setPosition(0.5, 1.5, 0.5);
+  const publish = vi.fn();
+  const world = {
+    authority: { voxelSemantics: { get: (voxel: number) => ({ targetable: voxel !== 0 }) } },
+    getVoxel: (x: number, y: number, z: number) => (x === 2 && y === 1 && z === 0 ? 1 : 0),
+    getFluidCell: () => null,
+  };
+  const controller = new PlayerController({
+    canvas,
+    camera,
+    physicsHz: 60,
+    authority: { epoch: 'pointer-aim', snapshot: () => null },
+    getWorld: () => world,
+    isUiBlockingInput: () => false,
+    canTargetFluidSource: () => false,
+    onAimTarget: publish,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  try {
+    expect(controller.aimTarget).toBeNull();
+    documentStub.onmousemove!({ movementX: 90 / 0.13, movementY: -16 / 0.13 });
+    expect(controller.viewAngles).toEqual([-90, 0]);
+    expect(controller.aimTarget?.position).toEqual([2, 1, 0]);
+    expect(publish).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ position: [2, 1, 0] }));
+    expect(controller.predictedPhysicsState).toBeNull();
+    expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+  } finally {
+    controller.dispose(false);
+  }
 });
 
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {
