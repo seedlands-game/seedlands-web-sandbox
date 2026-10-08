@@ -226,7 +226,7 @@ export async function walkTo(
           },
           move: async (dx, dy) => {
             if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-            await moveMouseBy(page, dx, dy);
+            await moveMouseBy(page, dx, dy, { waitForRender: false });
           },
           routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
         })
@@ -234,7 +234,7 @@ export async function walkTo(
           target,
           direction: key,
           observe: () => snapshot(page),
-          move: (dx, dy) => moveMouseBy(page, dx, dy),
+          move: (dx, dy) => moveMouseBy(page, dx, dy, { waitForRender: false }),
           routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
         });
     if (!options.refreshAfterCorrection && correction.kind === 'route-reached') return correction.observation;

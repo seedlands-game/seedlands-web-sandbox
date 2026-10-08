@@ -77,9 +77,17 @@ Visual skeleton-front closeup仍FAIL：cache29、pending18、rebuild92；13项�
 
 性能证据01有锁与原始A/A/AB，但未绑定正式measurement declaration；保留而不冒充完整身份收据。证据02补齐local declaration、dirty candidate source/bundle digest、window identity与原始样本，预约输出为PASS/RECORDED。A/A median43.714/44.255ms、偏差1.224%；16对交错AB/BA，A44.015ms/B11.154ms，局部完整build下降74.658%，262144输出bytes完全相同。候选source digest `624b774362cc0c3f1fa21bf9b9efd2d671ca80b2b703a8d7c857a009243867cd`，benchmark bundle digest `6d8c9ca28df83a5654fee37ffb48247b5e14ac6a6479570aee41365c94c9867c`。64³派生copy786432bytes、owner transfer0，窗口内没有其它测试/build/browser；不推导整帧收益。生产batch仅在实际BrowserAuthority mirror port可用时启用，同步捕获每chunk的现有guard，复制行到consumer-owned buffers，不引入可写owner泄漏或长期新缓存；缺port的既有严格fixture保持原逐cell读取，不制造loaded默认值。block-light consumer测试明确禁止退回per-cell并逐byte比较同源control；negative/boundary/unknown/Air/guard/stale/release/alias反例保留。
 
+### Browser08 真实转向观察与护甲覆盖
+
+精确source `3d00b3b93a32ef433b3d181cafedf200944b9ef6` 的Browser08：主旅程FAIL、视觉PASS、modular按Classic产物SKIP。C0-C3及V1全部完成；V2仍在workbench corridor `[78.5,-0.5]` 的原45s deadline失败。末端Authority/player一致于x78.673859/z−0.609932、静止/落地/无碰撞；反向修正连续80px真实mouse move各等待两次RAF，原窗口内未完成最后转向。先构造渲染帧延迟但真实mousemove已更新yaw的RED。候选仅为route转向去掉与其读取无关的双RAF；默认体素/实体/视觉mouse helper继续等待双RAF。保留真实PointerLock/鼠标事件、80px上限、18moves/19observations、失败分支、45s deadline、Authority静止及原位置窗口；不设置yaw、位置或世界状态。转向仍读取实际controller yaw，不认为发送事件就证明角度完成。新source完整Browser仍须验证，原PASS视觉不覆盖其它source。
+
+原V2要求全部16件护甲，不以四铁UI和五件metadata测试替代。本组冻结当前Classic平衡literal oracle：leather helmet/chestplate/leggings/boots = 1/3/2/1 points、max durability55；iron =2/6/5/2、165；gold=2/5/3/1、77；diamond=3/8/6/3、363。固定registered zombie-claw基础3，单件损失分别为3乘以(1−points×0.04)，测试逐行写literal预期而不从registry推导oracle。正式Authority inventory-pointer pickup→错误槽拒绝且视图不变→正确槽装备→持久化新实例恢复；完整Classic注册combat producer解析唯一hit、耐久3→2并snapshot恢复。不得改用直接applyDamage；此组headless证据不代表UI/death-drop/respawn矩阵或全物品链完成。
+
+本组初始route render依赖RED为1 FAIL/1 PASS：原18次转向额外双RAF累计28.8s；移除route专用等待后原合同等4文件40/40 PASS。补充实际walkTo两种refresh路径与实际controller mouse handler无render时的方向捕获，联合有效42例通过（原不变25例与补验17例）。护甲33例初跑即PASS，属于新增覆盖，不制造行为RED；首次格式FAIL已修。Luna并发较早types读到mouse helper旧签名而FAIL，根最终Classic types与五个TS路径scoped ESLint PASS。原trace十进制字面量触发两轮no-loss-of-precision FAIL，保留日志；改为Number原始字符串读取，不更改坐标或lint规则。完整Classic headless含新矩阵24文件95/95 PASS。将新护甲文件加入原headless命令和Classic test types，不能只运行一次然后让CI遗漏。
+
 ## 模型与预算
 
-主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（13:39 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。
+主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。
 
 ## Delivery Snapshot
 
