@@ -6,8 +6,91 @@ import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
 import { createVoxelGeometryRegistryV1 } from '../../../../../packages/stdlib/src/world/voxel-geometry';
 import type { World } from '../../../src/app/world/world-runtime';
 import { ready } from '../client/fixtures/browser-authority';
+import { InputCommandBuffer, type InputCommand } from '@seedlands/stdlib/runtime/session-protocol';
 
 afterEach(() => vi.unstubAllGlobals());
+
+function installKeyboard() {
+  const windowStub = {
+    onkeydown: null as null | ((event: object) => void),
+    onkeyup: null as null | ((event: object) => void),
+  };
+  vi.stubGlobal('window', windowStub);
+  vi.stubGlobal('document', {});
+  vi.stubGlobal('HTMLInputElement', class {});
+  vi.stubGlobal('HTMLTextAreaElement', class {});
+  let blocked = false;
+  const snapshot = ready().snapshot;
+  const commands: InputCommand[] = [];
+  const controller = new PlayerController({
+    camera: new pc.Entity(),
+    canvas: {},
+    physicsHz: 60,
+    authority: {
+      epoch: snapshot.epoch,
+      snapshot: () => snapshot,
+      sendInput: (command: InputCommand) => commands.push(command),
+    },
+    getEnvironment: () => null,
+    isPaused: () => false,
+    isUiBlockingInput: () => blocked,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  const keyDown = (code: string) => windowStub.onkeydown!({ code, target: {}, preventDefault: vi.fn() });
+  const keyUp = (code: string) => windowStub.onkeyup!({ code });
+  return {
+    controller,
+    snapshot,
+    commands,
+    keyDown,
+    keyUp,
+    block: () => {
+      blocked = true;
+    },
+  };
+}
+
+it('两帧之间的100ms真实键盘脉冲仍经正式输入队列持续移动并松开，不制造预测步', () => {
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard();
+  const input = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  const startTick = snapshot.physicsTick;
+  keyDown('KeyS');
+  expect(commands).toHaveLength(1);
+  expect(input.push(commands[0]!)).toBe('accepted');
+  for (let tick = startTick + 2; tick < startTick + 8; tick++) {
+    expect(input.consumeForTick(tick).state.moveZ).toBe(1);
+  }
+  snapshot.physicsTick = startTick + 6;
+  keyUp('KeyS');
+  expect(commands).toHaveLength(2);
+  expect(input.push(commands[1]!)).toBe('accepted');
+  expect(input.consumeForTick(startTick + 8).state.moveZ).toBe(0);
+  expect(controller.predictedPhysicsState).toBeNull();
+  expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+});
+
+it('键盘边沿保留jump和movement identity，重复按下与UI阻挡不新增运动', () => {
+  const { snapshot, commands, keyDown, keyUp, block } = installKeyboard();
+  snapshot.player.movement = { revision: 'creative:1:true:1', flightSpeed: 8 };
+  keyDown('Space');
+  keyDown('Space');
+  expect(commands).toHaveLength(1);
+  expect(commands[0]).toMatchObject({
+    movementRevision: 'creative:1:true:1',
+    edges: { jumpPressed: true },
+    state: { jumpHeld: true },
+  });
+  block();
+  keyDown('KeyW');
+  expect(commands).toHaveLength(1);
+  keyUp('Space');
+  expect(commands).toHaveLength(2);
+  expect(commands[1]).toMatchObject({
+    sequence: 1,
+    edges: { jumpPressed: false },
+    state: { moveX: 0, moveZ: 0, jumpHeld: false, verticalIntent: 0 },
+  });
+});
 
 const collisionGeometry = (collision: boolean) =>
   createVoxelGeometryRegistryV1([

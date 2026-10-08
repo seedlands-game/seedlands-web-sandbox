@@ -20,6 +20,7 @@ import { playerDamageCameraOffset } from '../../client/presentation/player-damag
 import { performSecondaryInteraction } from './secondary-interaction';
 import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 import { createFluidAwareTargetPredicate } from './fluid-source-target';
+import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -162,7 +163,7 @@ export class PlayerController {
         this.shiftWorldTime(event.code === 'BracketLeft' ? -1 : 1);
         return;
       }
-      this.keys.add(event.code);
+      if (updatePlayerMovementKeys(this.keys, event.code, true)) this.captureKeyboardInput();
       if (/^Digit[1-9]$/.test(event.code)) {
         this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
         if (this.miningHeld) this.cancelActiveMining();
@@ -170,7 +171,7 @@ export class PlayerController {
     };
     window.onkeyup = (event) => {
       this.debugTimeKeys.handleKeyUp(event.code);
-      this.keys.delete(event.code);
+      if (updatePlayerMovementKeys(this.keys, event.code, false)) this.captureKeyboardInput();
     };
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
@@ -249,12 +250,6 @@ export class PlayerController {
     });
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
     if (!this.spectator) {
-      const forward = new pc.Vec3().copy(camera.forward);
-      forward.y = 0;
-      forward.normalize();
-      const right = new pc.Vec3().copy(camera.right);
-      right.y = 0;
-      right.normalize();
       const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
       if (snapshot) {
         const collisionWorld = this.collisionWorld(world);
@@ -263,16 +258,7 @@ export class PlayerController {
           snapshot,
           world: collisionWorld,
           issuedAtMs: performance.now(),
-          forward: { x: forward.x, z: forward.z },
-          right: { x: right.x, z: right.z },
-          keys: {
-            forward: this.keys.has('KeyW'),
-            back: this.keys.has('KeyS'),
-            left: this.keys.has('KeyA'),
-            right: this.keys.has('KeyD'),
-            jump: this.keys.has('Space'),
-            crouch: this.keys.has('ShiftLeft'),
-          },
+          ...samplePlayerMovementInput(camera, this.keys),
         });
         prediction.commands.forEach((command) => this.options.authority.sendInput(command));
         this.grounded = this.prediction.grounded;
@@ -309,6 +295,24 @@ export class PlayerController {
     this.velocity.z = 0;
     this.stopMining();
     releasePointerLock();
+  }
+
+  private captureKeyboardInput() {
+    if (this.spectator) return;
+    if (this.interactionBlocked) {
+      this.sendNeutralInput();
+      return;
+    }
+    const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
+    if (!snapshot) return;
+    const camera = this.options.camera;
+    camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const command = this.prediction.captureInput({
+      snapshot,
+      issuedAtMs: performance.now(),
+      ...samplePlayerMovementInput(camera, this.keys),
+    });
+    if (command) this.options.authority.sendInput(command);
   }
 
   applyAuthoritySnapshot(snapshot: AuthoritySnapshot): void {
