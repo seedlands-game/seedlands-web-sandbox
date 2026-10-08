@@ -165,7 +165,8 @@ export type ChunkBlockLightCacheDiagnostics = ChunkBlockLightCacheSnapshot &
  */
 export class ChunkBlockLightCache {
   private readonly entries = new Map<string, ChunkBlockLightEntry>();
-  private readonly dirty = new Set<string>();
+  /** Rebuild count at first invalidation; repeated invalidation cannot reset priority. */
+  private readonly dirtySinceRebuild = new Map<string, number>();
   private rebuildCount = 0;
   private lastRebuildMs = 0;
   private totalRebuildMs = 0;
@@ -180,14 +181,14 @@ export class ChunkBlockLightCache {
     if (snapshot) sink.apply(snapshot.volume);
     const entry = { key, cx, cy, cz, sink, snapshot };
     this.entries.set(key, entry);
-    if (snapshot) this.dirty.delete(key);
+    if (snapshot) this.dirtySinceRebuild.delete(key);
     this.invalidateAround(cx, cy, cz);
     // Replacement resources share a chunk key. An old resource's delayed
     // destruction must never unregister the newer resource.
     return () => {
       if (this.entries.get(key) === entry) {
         this.entries.delete(key);
-        this.dirty.delete(key);
+        this.dirtySinceRebuild.delete(key);
         this.invalidateAround(cx, cy, cz);
       }
     };
@@ -197,7 +198,7 @@ export class ChunkBlockLightCache {
     const entry = this.entries.get(key);
     if (!entry) return;
     this.entries.delete(key);
-    this.dirty.delete(key);
+    this.dirtySinceRebuild.delete(key);
     this.invalidateAround(entry.cx, entry.cy, entry.cz);
   }
 
@@ -209,15 +210,27 @@ export class ChunkBlockLightCache {
         Math.abs(entry.cz - cz) <= 1 &&
         chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz)
       )
-        this.dirty.add(entry.key);
+        if (!this.dirtySinceRebuild.has(entry.key)) this.dirtySinceRebuild.set(entry.key, this.rebuildCount);
   }
 
   rebuildNearest(position: readonly [number, number, number]): boolean {
     let selected: ChunkBlockLightEntry | null = null;
     let selectedDistance = Number.POSITIVE_INFINITY;
-    for (const key of this.dirty) {
+    let selectedAge: number | null = null;
+    const starvationLimit = 8;
+    for (const [key, dirtySince] of this.dirtySinceRebuild) {
       const entry = this.entries.get(key);
       if (!entry) continue;
+      const isAged = this.rebuildCount - dirtySince >= starvationLimit;
+      if (
+        isAged &&
+        (selectedAge === null || dirtySince < selectedAge || (dirtySince === selectedAge && key < selected!.key))
+      ) {
+        selected = entry;
+        selectedAge = dirtySince;
+        continue;
+      }
+      if (selectedAge !== null) continue;
       const dx = entry.cx * BLOCK_LIGHT_CHUNK_CORE_SIZE + BLOCK_LIGHT_CHUNK_CORE_SIZE / 2 - position[0];
       const dy = entry.cy * BLOCK_LIGHT_CHUNK_CORE_SIZE + BLOCK_LIGHT_CHUNK_CORE_SIZE / 2 - position[1];
       const dz = entry.cz * BLOCK_LIGHT_CHUNK_CORE_SIZE + BLOCK_LIGHT_CHUNK_CORE_SIZE / 2 - position[2];
@@ -232,7 +245,7 @@ export class ChunkBlockLightCache {
     const snapshot = buildChunkBlockLightVolume(this.reader, selected.cx, selected.cy, selected.cz);
     selected.sink.apply(snapshot.volume);
     selected.snapshot = snapshot;
-    this.dirty.delete(selected.key);
+    this.dirtySinceRebuild.delete(selected.key);
     this.rebuildCount += 1;
     this.lastRebuildMs = performance.now() - started;
     this.totalRebuildMs += this.lastRebuildMs;
@@ -252,7 +265,7 @@ export class ChunkBlockLightCache {
 
   get snapshot(): ChunkBlockLightCacheSnapshot {
     const allocatedBrickCount = this.entries.size;
-    const pendingBrickCount = this.dirty.size;
+    const pendingBrickCount = this.dirtySinceRebuild.size;
     return {
       brickCount: this.entries.size,
       allocatedBrickCount,
@@ -270,7 +283,7 @@ export class ChunkBlockLightCache {
       lastRebuildMs: this.lastRebuildMs,
       totalRebuildMs: this.totalRebuildMs,
       maxRebuildMs: this.maxRebuildMs,
-      pendingBricks: [...this.dirty].flatMap((key) => {
+      pendingBricks: [...this.dirtySinceRebuild.keys()].flatMap((key) => {
         const entry = this.entries.get(key);
         return entry
           ? [
@@ -291,6 +304,6 @@ export class ChunkBlockLightCache {
 
   clear(): void {
     this.entries.clear();
-    this.dirty.clear();
+    this.dirtySinceRebuild.clear();
   }
 }

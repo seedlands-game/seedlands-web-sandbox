@@ -1,4 +1,20 @@
+import { bodyConfigFor } from '@seedlands/stdlib/physics';
+
 export type RouteDirection = 'KeyW' | 'KeyS';
+
+export function routePulseDurationMs(
+  position: readonly [number, number, number],
+  target: readonly [number, number],
+  maximumMs: number,
+): number {
+  const distance = Math.hypot(target[0] - position[0], target[1] - position[2]);
+  const { groundAcceleration: acceleration, maxHorizontalSpeed: speed } = bodyConfigFor('player');
+  if (!acceleration || !speed) throw new Error('Player route requires configured acceleration and speed.');
+  // Pulses start at rest and wait for release to settle. Include both acceleration
+  // and braking distance so a short segment does not repeatedly overshoot.
+  const seconds = distance <= (speed * speed) / acceleration ? Math.sqrt(distance / acceleration) : distance / speed;
+  return Math.min(maximumMs, seconds * 1000);
+}
 
 /** A movement pulse is complete only after Authority stops and presentation catches up. */
 export function routeInputSettled(

@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import { reachedRouteTarget, routeInputSettled } from './route-progress';
+import { reachedRouteTarget, routeInputSettled, routePulseDurationMs } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
   correctMouseToRoute,
@@ -247,12 +247,13 @@ export async function walkTo(
       if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
     }
     const segmentStart = current;
+    const pulseMs = routePulseDurationMs(current.player, target, options.pulseMs ?? 300);
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
     await page.keyboard.down(key);
     if (options.jump) await page.keyboard.down('Space');
     try {
       // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
-      await new Promise<void>((resolve) => setTimeout(resolve, options.pulseMs ?? 300));
+      await new Promise<void>((resolve) => setTimeout(resolve, pulseMs));
     } finally {
       await page.keyboard.up(key);
       if (options.jump) await page.keyboard.up('Space');
