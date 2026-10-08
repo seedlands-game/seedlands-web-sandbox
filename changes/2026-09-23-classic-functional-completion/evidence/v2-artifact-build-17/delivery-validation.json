@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-17",
+  "status": "PASS",
+  "buildSource": {
+    "sourceSha": "4052dae01d4527bd1747a60358cf59469ab1b3e2",
+    "sourceTree": "12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5",
+    "sourceDigest": "21c84cd108b96deb6187a474bddf9779e027d2095be82a404b27c4815d321671",
+    "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+    "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-4052dae0"
+  },
+  "artifact": {
+    "artifactDigest": "da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f",
+    "builtAt": "2026-09-29T05:20:40.897Z",
+    "artifactFiles": 276,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "receiptSha256": "f00fe6ff759dfa8d5f73bea92d83c25ddd0495b67d2e6cd355ed0201ee2f4043",
+    "receiptMapSha256": "766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde",
+    "diskMapSha256": "766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde",
+    "mapsEqual": true,
+    "missing": 0,
+    "extra": 0,
+    "mismatched": 0
+  },
+  "dependencySetup": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "runId": "v2-artifact-build-17-dependency-setup",
+    "startedAt": "2026-09-29T05:19:31.204Z",
+    "endedAt": "2026-09-29T05:19:31.780Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "downloadedPackages": 0,
+    "stdoutSha256": "14d6fa9376fd2b8148979ed81c28414ef2e299a32030e16ea91708718973894f",
+    "windowSha256": "3506fc03d51471408e9617a6aaaf57ddbea4cc05886c6f4136377b9ab30636b9",
+    "workspaceLinksSha256": "4a6d50290f5a8dde2e7f8b9f59ede9d11eb6ddb7871b92ae4b13102d4d8dff7b"
+  },
+  "build": {
+    "command": "pnpm build",
+    "runId": "v2-artifact-build-17-build",
+    "startedAt": "2026-09-29T05:19:53.279Z",
+    "endedAt": "2026-09-29T05:20:46.255Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "84324825a8cc3f84fc1e504d064380305787a6c3c21ba36f5936be6ec7535de8",
+    "windowSha256": "994f29e0fe175fedefb469a95034090d86fe5033484ddc3d07b68d6f4528a662"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "runId": "v2-artifact-build-17-artifact-verify",
+    "startedAt": "2026-09-29T05:20:59.035Z",
+    "endedAt": "2026-09-29T05:21:16.610Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "fc461b893188e05b6ad5e6d6b2fc032564514d531ea3d64199dc5c4111dc4b86",
+    "windowSha256": "ff68cd1b8e41a95d8817b4aebaf6a18a567a2c50215342f9e42707a441f563e6"
+  },
+  "inspection": {
+    "status": "PASS",
+    "stdoutSha256": "509c188564d7d4367b796a6e9d095ee31c18040cba7cf6ef88d446db9b2f61b7"
+  },
+  "packAndMedia": {
+    "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+    "publicAndDistPackLockEqual": true,
+    "mp3Bytes": 2976045,
+    "mp3ContentType": "audio/mpeg",
+    "mp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourcePublicDistEqual": true,
+    "packLockEntryCount": 1,
+    "packLockEntryMatches": true
+  },
+  "artifactDigestRelation": {
+    "sameAsBuild16": false,
+    "changedPaths": 10,
+    "mapDiffSha256": "f5af9f23a21cd3a1e189e94ad3bf3243938a872ab8be5f290db09564decded7d",
+    "reason": "GIT42 changes four stdlib Harness production sources; the production bundle map changes on ten actual paths."
+  },
+  "git42Delivery": {
+    "finalSha256": "b74599e40309a5a75fe91232ea15f3927e5270dff9b5b7ba4eaf41a11f353929",
+    "sourceFileModified": false
+  },
+  "sourceManifest": {
+    "scope": "final-delivery-documents",
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 4,
+    "sha256": "5577dc0d96d710bb9951f9b5a7b364bef12c7c750f0c5aa9b435796fcb122662"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 21,
+    "sha256": "103f55c68c12c9f3b5dafc80003f2065c4c35acd25b98b0f6da8cb85290f670f",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "finalSelfcheck": {
+    "runId": "v2-artifact-build-17-final-selfcheck-03",
+    "status": "PENDING_WRAPPER_RECEIPT",
+    "outputsExcludedFromManifestToAvoidSelfReference": true
+  },
+  "retainedSelfcheckFailures": [
+    {
+      "runId": "v2-artifact-build-17-final-selfcheck",
+      "status": "FAIL_DELIVERY_PRETTIER",
+      "exitCode": 1,
+      "stdoutSha256": "6e1a817abfcedd0679ef778fc8dc793c38116dd21b6816341915965a8dcaf2b3",
+      "windowSha256": "c1e8bb108078b9ecc9be4e770bf70c6bc8b8ae54e19269e729726e31eaf01a79",
+      "productOrArtifactFailure": false
+    },
+    {
+      "runId": "v2-artifact-build-17-final-selfcheck-02",
+      "status": "FAIL_SCOPE_COUNT",
+      "exitCode": 1,
+      "stdoutSha256": "129ce2ff0b7fd5220c46d3fc2a271704ec40d518b7af874bfb174631718d2133",
+      "windowSha256": "3662f074a38eaefbd913e5b16c2746441bd27e100b4706c94dc3c163d2505051",
+      "productOrArtifactFailure": false
+    }
+  ],
+  "postconditions": {
+    "acceptanceTrackedClean": true,
+    "acceptanceIndexClean": true,
+    "port4273Listening": false,
+    "acceptanceProcesses": 0,
+    "machineLockFreeAfterWrapper": "PENDING",
+    "build09Through17Preserved": true,
+    "git32BackupRefPreserved": true
+  },
+  "finalOwnedPathCount": 29,
+  "maxEvidenceFileBytes": 30750,
+  "boundaries": {
+    "browser25Source": "OLDER_SOURCE_ONLY",
+    "browser26Run": false,
+    "newReferenceBrowserStatus": "NOT_RUN",
+    "productGreenClaimed": false,
+    "performanceMeasured": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "GIT42 already updated the public Harness inspect contract; BUILD17 adds no owner, protocol, or reusable tutorial."
+  },
+  "budget": {
+    "traditionalPd": "about 0.1-0.25",
+    "aiTargetHours": 1,
+    "hardLimitHours": 2,
+    "capacityRecommendationAt120Percent": {
+      "traditionalPd": 0.3,
+      "aiHours": 2.4
+    },
+    "creditsRateAndApiEquivalentCost": "unknown",
+    "currentQuotaAndPredictedShare": "unknown"
+  },
+  "notRun": ["browser26", "other-browser", "cua", "devserver", "behavior-tests", "ci-repair", "deploy", "merge"]
+}

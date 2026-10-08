@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-artifact-build-17-build",
+  "pid": 62185,
+  "startedAt": "2026-09-29T05:19:53.279Z",
+  "windowId": "v2-artifact-build-17-build",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-17/build.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T05:20:46.255Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T05:19:53.280Z",
+      "loadAverage": [
+        3.55078125,
+        3.60986328125,
+        3.40673828125
+      ],
+      "freeMemoryBytes": 19051003904,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:19:58.282Z",
+      "loadAverage": [
+        3.74658203125,
+        3.6494140625,
+        3.421875
+      ],
+      "freeMemoryBytes": 12928892928,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:03.284Z",
+      "loadAverage": [
+        3.6064453125,
+        3.62158203125,
+        3.4130859375
+      ],
+      "freeMemoryBytes": 11350507520,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:08.284Z",
+      "loadAverage": [
+        3.7177734375,
+        3.64404296875,
+        3.42236328125
+      ],
+      "freeMemoryBytes": 8693891072,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:13.286Z",
+      "loadAverage": [
+        3.8203125,
+        3.66650390625,
+        3.43115234375
+      ],
+      "freeMemoryBytes": 7982219264,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:18.286Z",
+      "loadAverage": [
+        4.15478515625,
+        3.73828125,
+        3.45751953125
+      ],
+      "freeMemoryBytes": 7820460032,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:23.288Z",
+      "loadAverage": [
+        4.46240234375,
+        3.80859375,
+        3.48388671875
+      ],
+      "freeMemoryBytes": 7367360512,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:28.290Z",
+      "loadAverage": [
+        5.06591796875,
+        3.9443359375,
+        3.53369140625
+      ],
+      "freeMemoryBytes": 17029038080,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:33.292Z",
+      "loadAverage": [
+        4.98046875,
+        3.94482421875,
+        3.5361328125
+      ],
+      "freeMemoryBytes": 11588911104,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:38.294Z",
+      "loadAverage": [
+        4.90185546875,
+        3.9453125,
+        3.53857421875
+      ],
+      "freeMemoryBytes": 9858039808,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:43.296Z",
+      "loadAverage": [
+        4.98974609375,
+        3.97900390625,
+        3.552734375
+      ],
+      "freeMemoryBytes": 8370601984,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:20:46.253Z",
+      "loadAverage": [
+        4.98974609375,
+        3.97900390625,
+        3.552734375
+      ],
+      "freeMemoryBytes": 9345597440,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

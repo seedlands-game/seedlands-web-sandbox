@@ -22,10 +22,10 @@
 
 ## A0：Architecture Approved
 
-当前交付 checkpoint：GIT41 已远端交付至 `01c650793c79ac34e6184da48b5a4c94a5f161c2`；Browser25 已由
+当前交付 checkpoint：GIT42 已远端交付至 `4052dae01d4527bd1747a60358cf59469ab1b3e2`；Browser25 已由
 root 独立验收：唯一 canonical attempt 和 Classic visual PASS，默认 non-Classic smoke SKIPPED；C0-C5、完整 V1 与
-V2 的 19 个 checkpoint PASS。GIT42 正在交付通用 restore reference observability 与 action-owner 旧 fixture
-修复；deterministic/static 已完成，新的 Browser artifact 与 canonical 验收仍待后续独立阶段。Browser24 保持 discovery
+V2 的 19 个 checkpoint PASS。BUILD17 已从 GIT42 source 唯一 build/verifier PASS 并冻结 276 项新 production
+artifact；新 reference canonical Browser 验收仍待后续独立阶段。Browser24 保持 discovery
 前 FAIL/Chromium 0，Browser23 保持 FAIL/TRACE_INCOMPLETE；death/drop/respawn、完整 16 armor/194 matrix、V3/V4、
 Cua/人类听觉与性能仍未完成。
 
@@ -598,15 +598,15 @@ tasks/execution-state 窄状态。隔离 detached tree 执行真实 discovery li
 
 ### GIT-42-RESTORE-REFERENCE
 
-Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer。状态：`PENDING_NATURAL_HOOK`。通用
+Owner：`954ef059-b17c-4842-bf46-5ebc1807b38e`，唯一 Git writer。状态：`DELIVERED`。通用
 `WorldHarnessPort.inspect` 新增 `entity-reference` 只读 variant，严格 validation 与 `world.entity/read` 授权先于当前
 Authority owner resolve；既有 equipment restore consumer 显式记录 old stale/new current 后才继续原 UI。clean HEAD
 control 证明旧 action-owner 测试失败来自 retired `settler` fixture；本片改用已注册 passive `cow` 并同时断言两条命令
 内层成功与 action identity，原四条权限拒绝不变。GIT42 detached delivery tree 已通过 focused/session/adapter
-`3 files / 28 tests`、stdlib/Web production types、root/Classic test types、8 TS ESLint、12-path Prettier/scope；现仅待
-三笔自然 hooks、非破坏分支推进、push 与 PR #41 读回。真实 Browser 对 old stale/new current/UI continuation 为
-`NOT_RUN`；必须由
-后续新 committed source artifact 和 root 唯一租约验收。
+`3 files / 28 tests`、stdlib/Web production types、root/Classic test types、8 TS ESLint、12-path Prettier/scope 与三笔
+自然 hooks。远端/PR head 已读回为 `4052dae01d4527bd1747a60358cf59469ab1b3e2`。BUILD17 已从该 source 唯一
+build/verifier PASS，artifactDigest 为 `da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f`；真实
+Browser 对 old stale/new current/UI continuation 仍为 `NOT_RUN`，必须由 root 唯一租约验收。
 
 ### RESTORE-OWNER-CLOSE-01
 

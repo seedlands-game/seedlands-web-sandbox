@@ -1,6 +1,6 @@
 # Classic Functional Completion 执行状态
 
-更新时间：2026-09-29T04:12:02Z
+更新时间：2026-09-29T05:21:16Z
 
 状态：实施中；用户已批准当前目标与执行安排。
 
@@ -10,12 +10,12 @@
 
 Goal：未创建；本轮未提供 token budget。
 
-当前 Git/Docs checkpoint：GIT41 已远端交付至 `01c650793c79ac34e6184da48b5a4c94a5f161c2`，local/upstream/
-remote/PR head 一致，PR #41 为 Draft/Open、base `main`。BUILD16 从 source `fdb53c07...23ff` / tree
-`ecc79407...7d18` 唯一 build 与 artifact verify PASS，276 项产物 map 与 BUILD15 相同。Browser25 已由 root 独立
+当前 Git/Docs checkpoint：GIT42 已远端交付至 `4052dae01d4527bd1747a60358cf59469ab1b3e2`，local/upstream/
+remote/PR head 一致，PR #41 为 Draft/Open、base `main`。BUILD17 从该 source / tree `12ed2ba3...cd5` 唯一 build 与
+artifact verify PASS，276 项产物 map 相对 BUILD16 有 10 个真实路径变化。Browser25 已由 root 独立
 验收：唯一 canonical attempt 与 Classic visual PASS、non-Classic 默认 SKIPPED；C0-C5、完整 V1、V2 19 checkpoint 与
-保存恢复均 PASS。当前 GIT42 正在交付 restore reference observability 与 action-owner fixture close；新 source 的 build/
-Browser 尚未运行。Browser24 保持 discovery 前 FAIL/Chromium 0，Browser23 保持 720 秒 timeout FAIL/
+保存恢复均 PASS，但只覆盖旧 source；新 reference Browser 尚未运行。Browser24 保持 discovery 前 FAIL/Chromium 0，
+Browser23 保持 720 秒 timeout FAIL/
 TRACE_INCOMPLETE；death/drop/respawn、完整 16 armor/194 matrix、V3/V4、Cua/人类听觉、性能均未完成。
 
 历史 Close17 checkpoint：Browser24 在 Playwright 1.62.1 test discovery 阶段因顶层根目录收集到 Close15/Close16
@@ -364,8 +364,13 @@ GREEN：clean HEAD 与 reference candidate 均在 retired `settler` fixture 同�
 只将该用例改用已注册 passive `cow`，补齐 spawn/start 内层 success 与 identity；最终 clean candidate 的
 focused/session/adapter 为 `3 files / 28 tests PASS`；GIT42 detached delivery tree 的 stdlib/Web production types、
 root/Classic test types、8 TS ESLint 与 12-path Prettier/scope 也已 PASS。GIT42 状态
-`PENDING_NATURAL_HOOK`，现仅待三笔自然 hook、非破坏分支推进、push 与 PR #41 读回。
-Browser25 仍只证明旧 source 的 `2 passed / 1 skipped`；新 reference Browser 验收必须等待 GIT42 后的新 artifact。
+`DELIVERED`，三笔自然 hook、非破坏分支推进、push 与 PR #41 读回均完成，远端 SHA 为
+`4052dae01d4527bd1747a60358cf59469ab1b3e2`。BUILD17 从该 source 的 clean detached tree 唯一执行 build/verifier，
+均 `PASS/exit 0`；sourceDigest=`21c84cd108b96deb6187a474bddf9779e027d2095be82a404b27c4815d321671`、
+artifactDigest=`da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f`、276 files，receipt SHA-256
+`f00fe6ff759dfa8d5f73bea92d83c25ddd0495b67d2e6cd355ed0201ee2f4043`。receipt/disk map 一致，10 项 BUILD16
+差异与 Pack/MP3 identity 已冻结；acceptance tree/dist 保留。Browser25 仍只证明旧 source 的 `2 passed / 1 skipped`；
+新 reference Browser 为 `NOT_RUN`。
 
 当前未验收：Cua与人类听觉（NOT RUN）、性能（NOT_MEASURED）、完整194矩阵、V2 death/UI/V3/V4、full deterministic、Classic headless、CI/review与PR preview。近接触薄门 origin-cell `adjacent=null` 限制仍未修。
 

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-artifact-build-17-final-selfcheck",
+  "pid": 73488,
+  "startedAt": "2026-09-29T05:30:32.954Z",
+  "windowId": "v2-artifact-build-17-final-selfcheck",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-17/final-selfcheck.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-29T05:30:33.976Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-29T05:30:32.955Z",
+      "loadAverage": [
+        3.494140625,
+        3.615234375,
+        3.57080078125
+      ],
+      "freeMemoryBytes": 17605754880,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-29T05:30:33.974Z",
+      "loadAverage": [
+        3.494140625,
+        3.615234375,
+        3.57080078125
+      ],
+      "freeMemoryBytes": 17533108224,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}
