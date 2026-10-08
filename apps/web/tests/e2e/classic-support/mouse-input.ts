@@ -24,26 +24,11 @@ export async function moveMouseBy(
   dy: number,
   options: Readonly<{ waitForRender?: boolean }> = {},
 ): Promise<void> {
-  let current = mousePositions.get(page);
+  const current = mousePositions.get(page);
   if (!current) throw new Error('Real mouse movement requires a Pointer Lock baseline.');
-  const box = await page.locator('#game').boundingBox();
-  if (!box) throw new Error('Classic canvas disappeared before a real mouse movement.');
-  const candidate = { x: current.x + dx, y: current.y + dy };
-  if (
-    candidate.x < box.x + 64 ||
-    candidate.x > box.x + box.width - 64 ||
-    candidate.y < box.y + 64 ||
-    candidate.y > box.y + box.height - 64
-  ) {
-    await page.evaluate(() => document.exitPointerLock());
-    await page.waitForFunction(() => document.pointerLockElement === null);
-    // Chromium throttles rapid unlock/relock; this wait is browser input cooldown, not world readiness.
-    await page.waitForTimeout(1500);
-    const resume = page.getByRole('button', { name: '继续游戏', exact: true });
-    if (await resume.isVisible()) await resume.click();
-    await lockPointer(page);
-    current = mousePositions.get(page)!;
-  }
+  if (!(await page.evaluate(() => document.pointerLockElement?.id === 'game')))
+    throw new Error('Real mouse movement requires the Classic canvas to retain Pointer Lock.');
+  // Pointer Lock delivers relative movement while Playwright's virtual cursor crosses the viewport.
   const next = { x: current.x + dx, y: current.y + dy };
   await page.mouse.move(next.x, next.y);
   mousePositions.set(page, next);

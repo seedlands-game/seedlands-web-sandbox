@@ -86,7 +86,7 @@ function routePage() {
   let current = initial;
   let firstPulse: ClassicSnapshot | null = null;
   let yaw = -57.5;
-  let mouseX = 480;
+  let mouseX = 50_000;
   let yawAtFirstPulse: number | null = null;
   let yawAtSecondPulse: number | null = null;
   let animationFrameWaits = 0;
@@ -94,6 +94,7 @@ function routePage() {
   const keyUps: string[] = [];
   const mouseYawChanges: number[] = [];
 
+  let pointerLocked = false;
   const page = {
     locator: (selector: string) => ({
       isVisible: async () => {
@@ -104,7 +105,9 @@ function routePage() {
         if (selector !== '#game') throw new Error(`Unexpected bounds lookup: ${selector}`);
         return { x: 0, y: 0, width: 100_000, height: 10_000 };
       },
-      click: async () => undefined,
+      click: async () => {
+        pointerLocked = true;
+      },
     }),
     waitForFunction: async () => undefined,
     mouse: {
@@ -142,6 +145,7 @@ function routePage() {
     },
     evaluate: async (callback: (...args: unknown[]) => unknown) => {
       const source = String(callback);
+      if (source.includes('pointerLockElement')) return pointerLocked;
       if (source.includes('requestAnimationFrame')) animationFrameWaits += 1;
       if (!source.includes('snapshot()')) throw new Error('Unexpected evaluate callback in equipment route fake.');
       return structuredClone({ ...current, viewAngles: [yaw, current.viewAngles[1]] as const });
