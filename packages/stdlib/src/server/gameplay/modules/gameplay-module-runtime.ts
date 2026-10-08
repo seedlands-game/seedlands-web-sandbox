@@ -2,6 +2,7 @@ import { FURNACE_WORLD_COMPONENT } from './furnace-world-model';
 import { STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT } from './station-action-model';
 import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model';
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
+import { CROP_CELL_COMPONENT } from './crop-interaction-model';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import { createRegisteredOperationRuntime } from '../../composition/registered-operations';
@@ -92,7 +93,9 @@ export class GameplayModuleRuntime {
       if ((component === COMBAT_ACTOR_COMPONENT || component === COMBAT_WORLD_COMPONENT) && this.options.combat)
         return this.options.combat;
       if (
-        [BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT].includes(component) &&
+        [BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT, CROP_CELL_COMPONENT].includes(
+          component,
+        ) &&
         this.options.blocks
       )
         return this.options.blocks;

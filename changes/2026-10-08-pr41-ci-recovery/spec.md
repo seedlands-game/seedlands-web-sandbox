@@ -173,4 +173,10 @@ Browser-local pointer envelope携带递增sequence、同次gesture、绝对monot
 
 同时真实 Classic Authority 的 loaded Farmland/Air、reachable、selected wheat-seeds 与当前四 selection 值下 performAction(interact/use) 返回 item-no-interaction；成功扣种与 stage0 checkpoint 为下一正式 producer 的验收目标。Generic机制/Classic内容归属、原range/LOS/新鲜度门禁与失败原子性必须保留；植物呈现、收割、骨粉及完整恢复仍需后续独立完成。
 
+### 正式种植提交子片
+
+复用唯一 CropRuntime child owner；stdlib 接收明确 Pack soil/empty/water/seed/drop 配置，删除农业机制中的 Classic voxel/item literals。新 registered crop component 仅投影该 owner 的单位置记录，与已有 Block actor/voxel 观察走同一个 prepared host，模块不能自行写 map/inventory。正式 seed interaction 保留当前四 selection、loaded hit/adjacent/独立 above、range/LOS 与 actor authority；host重推导候选、核对精确观察集合，先验证 inventory/crop 全部participant再提交。Survival 扣一粒种子并增加 stage0 crop；Creative 增加作物但不改生存背包；重复、未知上方、错误地面/物品、过期选择或提交期世界变化均不得部分提交。
+
+本子片在土壤上记录作物，不制造 soil WorldCommit（土壤/上方 voxel 均未改变）；child仍是唯一阶段 owner。可见阶段应由该 child 的只读投影呈现，尚未实现则必须保持产品验收未完成。旧精确75f V4 composition 来自 Browser17实际checkpoint，只允许V4明确predecessor，禁止合成宽松身份迁移。非Classic内容必须能通过同一registered玩家路径种植，具体标识由自己的Pack提供。
+
 实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。

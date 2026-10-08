@@ -12,6 +12,7 @@ import { classicRetiredActorsMigration } from '../src/retired-actors-migration';
 import { pack } from '../src/pack';
 import { classicPreDeathV4CompositionIdentity } from '../src/pre-death-v4-composition-identity';
 import { classicPreTillV4CompositionIdentity } from '../src/pre-till-v4-composition-identity';
+import { classicPreCropV4CompositionIdentity } from '../src/pre-crop-v4-composition-identity';
 import { canonicalCompositionCheckpointIdentity } from '../../../packages/stdlib/src/server/composition/checkpoint-identity';
 
 const captured = (): CompositionCheckpointIdentity => {
@@ -52,6 +53,29 @@ const currentComposition = () =>
   ]);
 
 describe('Classic gameplay snapshot lineage', () => {
+  it('accepts only the exact production pre-crop V4 composition', () => {
+    const capture = JSON.parse(
+      readFileSync(
+        new URL('../../../changes/2026-10-08-pr41-ci-recovery/evidence/pre-crop-v4-browser17-01.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { sourceSha: string; runId: string; identity: CompositionCheckpointIdentity };
+    expect(capture.sourceSha).toBe('75f6cbe2a874f1f1c4998198257df3f7bfac39a7');
+    expect(capture.runId).toBe('pr41-cloud-browser-17-01');
+    expect(classicPreCropV4CompositionIdentity).toEqual(capture.identity);
+    expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, capture.identity)).toBe(true);
+    for (const version of [1, 2, 3])
+      expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, version, capture.identity)).toBe(
+        false,
+      );
+    for (const change of ['module', 'operation', 'digest'] as const) {
+      const tampered = structuredClone(capture.identity);
+      if (change === 'module') tampered.definitionMap.modules.pop();
+      if (change === 'operation') tampered.definitionMap.operations.pop();
+      if (change === 'digest') tampered.packLock[0]!.integrity.entryDigest = 'f'.repeat(64);
+      expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, tampered)).toBe(false);
+    }
+  });
   it('accepts only the exact production pre-till identity and only at gameplay V4', () => {
     const capture = JSON.parse(
       readFileSync(

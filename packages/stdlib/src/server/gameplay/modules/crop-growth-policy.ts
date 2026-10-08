@@ -1,4 +1,4 @@
-import { Voxel } from '../../../world/voxel';
+import type { CropPolicy } from './crop-policy';
 
 export type CropState = Readonly<{ stage: number; subSeconds?: number }>;
 export type CropHarvest = Readonly<{ drops: readonly Readonly<{ itemId: string; count: number }>[] }>;
@@ -9,8 +9,8 @@ export const CROP_MATURE_STAGE = 7;
 const validStage = (stage: number): boolean => Number.isSafeInteger(stage) && stage >= 0 && stage <= CROP_MATURE_STAGE;
 
 /** Plants a fresh crop; only tilled farmland accepts seeds. */
-export function plantCrop(targetVoxel: number): CropState {
-  if (targetVoxel !== Voxel.Farmland) throw new Error('crop-requires-farmland');
+export function plantCrop(targetVoxel: number, policy: CropPolicy): CropState {
+  if (!policy.soilVoxels.includes(targetVoxel)) throw new Error('crop-requires-farmland');
   return Object.freeze({ stage: 0 });
 }
 
@@ -35,14 +35,8 @@ export function advanceCrop(state: CropState, elapsedSeconds: number, secondsPer
 }
 
 /** Harvest yields wheat only when mature; seeds are always recovered. */
-export function harvestCrop(state: CropState): CropHarvest {
+export function harvestCrop(state: CropState, policy: CropPolicy): CropHarvest {
   if (!state || !validStage(state.stage)) throw new Error('crop-state-invalid');
-  const drops =
-    state.stage >= CROP_MATURE_STAGE
-      ? [
-          { itemId: 'wheat', count: 1 },
-          { itemId: 'wheat-seeds', count: 1 },
-        ]
-      : [{ itemId: 'wheat-seeds', count: 1 }];
+  const drops = state.stage >= CROP_MATURE_STAGE ? policy.matureDrops : policy.immatureDrops;
   return Object.freeze({ drops: Object.freeze(drops.map((drop) => Object.freeze(drop))) });
 }

@@ -2,9 +2,11 @@ import {
   defineFluidContainerInteractionModule,
   defineItemInteractionModule,
   defineSoilTransformInteractionModule,
+  defineCropInteractionModule,
   type SoilTransformInteractionConfig,
 } from '@seedlands/stdlib/mod-api';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { classicCropConfig } from './crop-policy';
 
 export const classicFluidContainerOperationId = 'seedlands:fluid-container-interact';
 export const classicSoilTransformConfig: SoilTransformInteractionConfig = Object.freeze({
@@ -17,6 +19,7 @@ export const classicSoilTransformConfig: SoilTransformInteractionConfig = Object
 });
 
 export const classicItemInteractionModules = [
+  defineCropInteractionModule(classicCropConfig),
   defineSoilTransformInteractionModule(classicSoilTransformConfig),
   defineFluidContainerInteractionModule({
     moduleId: 'seedlands:fluid-container-handler',
@@ -33,6 +36,13 @@ export const classicItemInteractionModules = [
     moduleId: 'seedlands:overworld-item-interactions',
     permissions: [{ resource: 'seedlands.block-voxel', operations: ['execute'] }],
     definitions: [
+      {
+        id: 'seedlands:seed-crop-interaction',
+        selector: { itemId: 'seedlands:wheat-seeds' },
+        trigger: 'voxel',
+        operationId: classicCropConfig.plantOperationId,
+        presentationKey: 'seedlands:plant-crop',
+      },
       ...['bucket', 'water-bucket', 'lava-bucket'].map((itemId) => ({
         id: `seedlands:${itemId}-voxel-interaction`,
         selector: { itemId: `seedlands:${itemId}` },

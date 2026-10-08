@@ -160,6 +160,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
     this.vitals = adapters.vitals;
     this.blocks = adapters.blocks;
     const registered = createGameplayRegisteredRuntimes({
+      crops: () => this.crops,
       callbacks,
       entities: this.entities,
       content: this.content,

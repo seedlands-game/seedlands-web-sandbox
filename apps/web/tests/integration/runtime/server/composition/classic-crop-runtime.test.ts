@@ -11,7 +11,7 @@ const cells = new Map<string, number>([
 const voxel = ([x, y, z]: [number, number, number]) => cells.get(`${x},${y},${z}`) ?? (y === 1 ? Voxel.Air : undefined);
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicGameplayDomainOptions(),
+    ...classicGameplayDomainOptions('crops'),
     platform: testCorePlatform,
     environmentSeed: 11,
     getWorldTime: () => 8,

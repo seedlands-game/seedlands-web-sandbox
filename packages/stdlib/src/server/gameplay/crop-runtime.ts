@@ -1,7 +1,7 @@
-import { Voxel } from '../../world/voxel';
 import type { EntityStore } from './entity-store';
 import { Inventory } from './inventory';
 import { advanceCrop, harvestCrop, plantCrop } from './modules/crop-growth-policy';
+import { freezeCropPolicy, type CropPolicy } from './modules/crop-policy';
 
 type Position = readonly [number, number, number];
 export type CropRecord = Readonly<{ position: Position; stage: number; subSeconds: number }>;
@@ -12,6 +12,7 @@ export type CropCheckpoint = Readonly<{
   crops: readonly CropRecord[];
 }>;
 type Context = Readonly<{
+  policy?: CropPolicy;
   seed: number;
   entities: EntityStore;
   getLoadedVoxel?(position: [number, number, number]): number | undefined;
@@ -46,6 +47,7 @@ export function validateCropCheckpoint(value: CropCheckpoint = empty()): CropChe
 }
 
 export class CropRuntime {
+  readonly #policy: CropPolicy | undefined;
   #tick = 0;
   #fractionalSeconds = 0;
   readonly #crops = new Map<string, CropRecord>();
@@ -53,21 +55,59 @@ export class CropRuntime {
     private readonly context: Context,
     checkpoint?: CropCheckpoint,
   ) {
+    this.#policy = context.policy ? freezeCropPolicy(context.policy) : undefined;
     this.restore(checkpoint);
   }
+  at(position: Position): CropRecord | null {
+    const crop = this.#crops.get(key(position));
+    return crop ? copy(crop) : null;
+  }
+  /** A participant for the registered host; it never edits inventory or publishes a second gameplay revision. */
+  preparePlant(position: Position, expected: CropRecord | null, next: CropRecord) {
+    const id = key(position),
+      previous = this.at(position),
+      candidate = copy(next);
+    if (
+      !this.#policy ||
+      expected !== null ||
+      previous !== null ||
+      key(candidate.position) !== id ||
+      candidate.stage !== 0 ||
+      candidate.subSeconds !== 0
+    )
+      throw new Error('crop-interaction-stale');
+    let validated = false,
+      used = false;
+    return {
+      validate: () => {
+        validated = false;
+        if (used || this.at(position) !== null) throw new Error('crop-interaction-stale');
+        validated = true;
+      },
+      apply: () => {
+        if (used || !validated) throw new Error('Crop participant requires validation.');
+        used = true;
+        this.#crops.set(id, candidate);
+      },
+    };
+  }
   plant(playerId: string, position: [number, number, number]) {
+    const policy = this.#policy;
+    if (!policy) return { success: false as const, reason: 'crop-policy-unavailable' };
     const entity = this.context.entities.get(playerId);
     if (entity?.type !== 'player') return { success: false as const, reason: 'invalid-player' };
     const actor = this.context.entities.actorStateAccess(playerId);
-    if (actor.inventory.slot(actor.selectedSlot)?.itemId !== 'wheat-seeds')
+    if (actor.inventory.slot(actor.selectedSlot)?.itemId !== policy.seedItemId)
       return { success: false as const, reason: 'requires-seeds' };
     if (this.#crops.has(key(position))) return { success: false as const, reason: 'occupied' };
     if (
-      this.context.getLoadedVoxel?.(position) !== Voxel.Farmland ||
-      this.context.getLoadedVoxel?.([position[0], position[1] + 1, position[2]]) !== Voxel.Air
+      !policy.soilVoxels.includes(this.context.getLoadedVoxel?.(position) ?? -1) ||
+      !policy.emptyAboveVoxels.includes(
+        this.context.getLoadedVoxel?.([position[0], position[1] + 1, position[2]]) ?? -1,
+      )
     )
       return { success: false as const, reason: 'invalid-farmland' };
-    const state = plantCrop(Voxel.Farmland);
+    const state = plantCrop(this.context.getLoadedVoxel!(position)!, policy);
     actor.inventory.removeFromSlot(actor.selectedSlot, 1);
     const crop = copy({ position, stage: state.stage, subSeconds: 0 });
     this.#crops.set(key(position), crop);
@@ -84,16 +124,17 @@ export class CropRuntime {
     for (let step = 0; step < steps; step++) {
       this.#tick++;
       for (const [id, crop] of [...this.#crops].sort(([a], [b]) => a.localeCompare(b))) {
-        if (this.context.getLoadedVoxel?.([...crop.position]) !== Voxel.Farmland) continue;
+        const policy = this.#policy;
+        if (!policy || !policy.soilVoxels.includes(this.context.getLoadedVoxel?.([...crop.position]) ?? -1)) continue;
         const hydrated = [
           [1, 0],
           [-1, 0],
           [0, 1],
           [0, -1],
-        ].some(
-          ([x, z]) =>
-            this.context.getLoadedVoxel?.([crop.position[0] + x * 2, crop.position[1], crop.position[2] + z * 2]) ===
-            Voxel.Water,
+        ].some(([x, z]) =>
+          policy.waterVoxels.includes(
+            this.context.getLoadedVoxel?.([crop.position[0] + x * 2, crop.position[1], crop.position[2] + z * 2]) ?? -1,
+          ),
         );
         if (!hydrated || ((Math.imul(this.context.seed ^ this.#tick, 0x45d9f3b) ^ id.length) >>> 0) % 3 !== 0) continue;
         const next = advanceCrop(crop, 10, 10);
@@ -103,12 +144,13 @@ export class CropRuntime {
     if (steps) this.context.changed();
   }
   harvest(playerId: string, position: [number, number, number]) {
+    if (!this.#policy) return { success: false as const, reason: 'crop-policy-unavailable' };
     const crop = this.#crops.get(key(position));
     const entity = this.context.entities.get(playerId);
     if (!crop || entity?.type !== 'player') return { success: false as const, reason: 'missing-crop' };
     const actor = this.context.entities.actorStateAccess(playerId);
     const inventory = new Inventory(actor.inventory.capacity, actor.inventory.snapshot(), actor.inventory.items);
-    const harvest = harvestCrop(crop);
+    const harvest = harvestCrop(crop, this.#policy);
     if (!harvest.drops.every((drop) => inventory.add(drop)))
       return { success: false as const, reason: 'inventory-full' };
     actor.inventory.replace(inventory.snapshot());
