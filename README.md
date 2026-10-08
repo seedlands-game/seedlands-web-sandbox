@@ -8,7 +8,7 @@ An experimental, playable browser voxel sandbox and technical foundation for the
 
 This repository is not the complete Seedlands game and is not presented as a general-purpose Seedlands engine. It is a self-contained Web prototype for deterministic terrain, chunk streaming, authoritative world state, editable voxels, persistence, and browser rendering.
 
-The deployment target is [seedlands-game.github.io/seedlands-web-sandbox](https://seedlands-game.github.io/seedlands-web-sandbox/). Once the repository is public and GitHub Pages is enabled, every successful `main` build is deployed automatically. Public builds show their short commit hash and world generator version in the lower-right corner.
+The Cloudflare Pages deployment target is [seedlands-web-sandbox.pages.dev](https://seedlands-web-sandbox.pages.dev/). After the Pages project and GitHub Actions secrets are configured, successful `main` CI runs deploy the exact Chromium-verified build; same-repository pull requests receive isolated preview deployments. Public builds show their short commit hash and world generator version in the lower-right corner.
 
 ## Current status
 
