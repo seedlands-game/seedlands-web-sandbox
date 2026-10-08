@@ -99,6 +99,8 @@ Visual skeleton-front closeup仍FAIL：cache29、pending18、rebuild92；13项�
 
 最终补验：新增原too-far-ahead拒绝反例13/13 PASS；输入相关6文件66/66 PASS，护甲死亡16/16构成82例有效闭包；完整Classic headless25文件111/111 PASS，CI选择/冻结证据12/12 PASS。测试专用types首轮因配置位于仓库外无法解析type roots失败；修正配置后暴露现有fixture缺craftingGrid/matched recipe IDs/完整frontier与直接改readonly snapshot，已修为完整fixture和测试自有副本，最终专项types PASS。原断言、输入limits与sealed bytes保持不变。新artifact/browser和新SHA CI尚未运行，不能宣布可合入。
 
+本组审阅补充structured-clone非法metadata反例：BigInt原先先减法而抛TypeError，1 FAIL/16 PASS的RED已保存；改为先验证finite number再计算年龄，17/17 PASS。该拒绝仅回退调度tick，不修改snapshot或Authority门禁。
+
 ## 模型与预算
 
 主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。

@@ -16,6 +16,10 @@ describe('Browser input scheduling age', () => {
   it.each([NaN, Infinity, -Infinity])('invalid current time %s falls back', (now) => {
     expect(inputSchedulingTick(snapshot, 60, 1_000, now)).toBe(100);
   });
+  it.each([1_000n, '1000', null, {}])('malformed structured-clone source metadata %s fails closed', (source) => {
+    expect(inputSchedulingTick(snapshot, 60, source as number, 1_500)).toBe(100);
+    expect(inputSchedulingTick(snapshot, 60, 1_000, source as number)).toBe(100);
+  });
   it('paused snapshots never extrapolate and long age stays bounded', () => {
     expect(inputSchedulingTick({ ...snapshot, paused: true }, 120, 1_000, 9_000)).toBe(100);
     expect(inputSchedulingTick(snapshot, 120, 1_000, 9_000)).toBe(340);
