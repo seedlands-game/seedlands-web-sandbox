@@ -3,11 +3,12 @@ import type { FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/flui
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
 import type { SequenceDecision } from '@seedlands/stdlib/runtime/session-protocol';
+import type { BrowserAuthorityResponse } from './pointer-attack-protocol';
+import type { AuthorityActionResult } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type {
   AuthorityGameplayView,
   AuthorityMeshPayload,
   AuthorityReady,
-  AuthorityResponse,
 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { SerializedChunkSnapshot } from '../persistence/browser-chunk-persistence';
 import type { AuthorityTransportFaults } from './authority-transport';
@@ -47,7 +48,7 @@ export type BoundCharacterControlPort = Readonly<{
 }>;
 
 export type AuthorityWorkerPort = {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;
+  onmessage: ((event: MessageEvent<BrowserAuthorityResponse>) => void) | null;
   onerror: ((event: ErrorEvent) => void) | null;
   postMessage(message: unknown, transfer?: Transferable[]): void;
   terminate(): void;
@@ -65,6 +66,7 @@ export type AuthorityClientOptions = Readonly<{
   onUnknownChunk?: (key: string) => void;
   onAuthorityChunkNeeded?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
+  onPointerAttackResult?: (result: AuthorityActionResult['result']) => void;
   onFatal?: (error: Error) => void;
   onWorldEpochChanged?: (epoch: string, ready: AuthorityReady) => void;
   requestTimeoutMs?: number;

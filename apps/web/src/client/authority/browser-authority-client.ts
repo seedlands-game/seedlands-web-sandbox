@@ -7,15 +7,26 @@ import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
 import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
 // prettier-ignore
-import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady, AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/stdlib/server/logic/logic-protocol';
 // prettier-ignore
-import type { WorldHarnessPort, WorldHarnessResult, WorldPrepareRequest } from '@seedlands/stdlib/server/harness/world-harness-contract';
+import type { WorldHarnessPort, WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 // prettier-ignore
 import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { BrowserInputSchedulingClock } from './input-scheduling-tick';
 import { deliverInputDecision } from './input-decision-diagnostics';
+import { BrowserAuthorityRequestSender } from './browser-authority-request-sender';
+import {
+  acceptPointerAttackReceipt,
+  consumePointerAttackReceipt,
+  sendPointerAttackInput,
+} from './browser-pointer-attack-client';
+import type {
+  BrowserAuthorityRequest,
+  BrowserAuthorityResponse,
+  PointerAttackDirection,
+} from './pointer-attack-protocol';
 import { controlAuthoritySession } from './browser-authority-session-control';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
@@ -28,7 +39,7 @@ import { createBoundCharacterControlPort } from './browser-character-control-por
 import type { AuthorityClientOptions, BoundCharacterControlPort, AuthoritySaveResult, AuthorityStartOptions } from './browser-authority-client-contract';
 // prettier-ignore
 import { BrowserAuthorityDirectLogic, clientFailure, type DirectLogicDiagnostics } from './browser-authority-direct-logic';
-import { createBrowserAuthorityWorldPort } from './browser-authority-world-port';
+import { createBrowserAuthorityWorldRequests } from './browser-authority-world-port';
 import { BrowserMediaFrontier } from './browser-media-frontier';
 import {
   validateInitialAuthorityReadyGeometry,
@@ -41,8 +52,7 @@ export class BrowserAuthorityClient {
   readonly mode = 'local' as const;
   readonly world: WorldHarnessPort;
   readonly estimatedInputTransitMs: number;
-  private requestSequence = 0;
-  private readonly transactionSequences = new Map<string, number>();
+  private readonly requestSender: BrowserAuthorityRequestSender;
   private readonly requests: ClientRequestRegistry;
   private snapshotGate: AuthoritySnapshotGate;
   private readonly bootstrap: AuthorityBootstrapCoordinator;
@@ -71,6 +81,15 @@ export class BrowserAuthorityClient {
     this.directLogic = new BrowserAuthorityDirectLogic(worker, epoch);
     this.estimatedInputTransitMs = authorityInputTransitBudgetMs(options.transportFaults ?? { harnessEnabled: false });
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
+    this.requestSender = new BrowserAuthorityRequestSender({
+      epoch,
+      requests: this.requests,
+      blocked: () =>
+        this.disposed
+          ? new Error('Authority client is disposed.')
+          : this.failureValue && clientFailure(this.failureValue),
+      post: (message, transfer) => this.post(message, transfer),
+    });
     this.chunks = new BrowserAuthorityChunkClient(
       epoch,
       this.requests,
@@ -86,15 +105,10 @@ export class BrowserAuthorityClient {
       (request, transfer) => this.post(request, transfer),
       (error) => this.failAll(error),
     );
-    this.world = createBrowserAuthorityWorldPort(
-      (method, ...args) => this.worldRequest(method, ...args),
-      async (request) => {
-        await this.prepareWorldRequest(request);
-        const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
-        for (const [cx, cy, cz] of chunks)
-          if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
-            throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
-      },
+    this.world = createBrowserAuthorityWorldRequests(
+      (payload) => this.request(payload),
+      (cx, cy, cz) => this.ensureChunkNeighborhood(cx, cy, cz),
+      (cx, cy, cz) => this.chunks.refreshCollisionBaseline(cx, cy, cz),
     );
     worker.onmessage = (event) => this.receive(event.data);
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
@@ -214,7 +228,7 @@ export class BrowserAuthorityClient {
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
-    return this.chunks.ensure(cx, cy, cz, ++this.requestSequence);
+    return this.chunks.ensure(cx, cy, cz, this.requestSender.nextRequestId());
   }
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
@@ -281,6 +295,10 @@ export class BrowserAuthorityClient {
 
   performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
     return this.request({ kind: 'gameplay-action', action }, [], 'gameplay-action') as Promise<AuthorityActionResult>;
+  }
+
+  sendPointerAttack(direction: PointerAttackDirection | null): void {
+    sendPointerAttackInput(this, this.epoch, this.runtimeEpochValue, direction, (message) => this.post(message));
   }
 
   character(request: CharacterControlRequest): Promise<WorldHarnessResult<CharacterControlResult>> {
@@ -353,36 +371,10 @@ export class BrowserAuthorityClient {
     transfer: Transferable[] = [],
     transactionStream?: string,
   ): Promise<unknown> {
-    if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
-    if (this.failureValue) return Promise.reject(clientFailure(this.failureValue));
-    const requestId = ++this.requestSequence;
-    const promise = this.requests.create(requestId);
-    const transaction = transactionStream
-      ? {
-          issuer: `browser:${this.epoch}`,
-          stream: transactionStream,
-          sequence: (this.transactionSequences.get(transactionStream) ?? -1) + 1,
-        }
-      : undefined;
-    if (transaction) this.transactionSequences.set(transactionStream!, transaction.sequence);
-    try {
-      this.post(
-        {
-          ...payload,
-          protocolVersion: PROTOCOL_VERSION,
-          epoch: this.epoch,
-          requestId,
-          ...(transaction ? { transaction } : {}),
-        } as AuthorityRequest,
-        transfer,
-      );
-    } catch (error) {
-      this.requests.reject(requestId, error instanceof Error ? error : new Error(String(error)));
-    }
-    return promise;
+    return this.requestSender.send(payload, transfer, transactionStream);
   }
 
-  private post(message: AuthorityRequest, transfer: Transferable[] = []): void {
+  private post(message: BrowserAuthorityRequest, transfer: Transferable[] = []): void {
     if (this.disposed || this.failureValue) return;
     this.worker.postMessage(
       message.kind === 'start-authority' ? message : { ...message, runtimeEpoch: this.runtimeEpochValue },
@@ -390,7 +382,23 @@ export class BrowserAuthorityClient {
     );
   }
 
-  private receive(message: AuthorityResponse | DirectLogicDiagnostics): void {
+  private receive(message: BrowserAuthorityResponse | DirectLogicDiagnostics): void {
+    if (message.kind === 'pointer-attack-result') {
+      if (
+        this.disposed ||
+        this.failureValue ||
+        !acceptPointerAttackReceipt(this, message, this.epoch, this.runtimeEpochValue)
+      )
+        return;
+      consumePointerAttackReceipt(message, {
+        media: this.media,
+        update: (view, media) => this.updateGameplay(view, media),
+        publish: (commits) => this.chunks.publish(commits),
+        result: (result) => this.options.onPointerAttackResult?.(result),
+        fail: (error) => this.failAll(error),
+      });
+      return;
+    }
     if (this.directLogic.receive(message, this.runtimeEpochValue, this.disposed)) return;
     if (
       this.disposed ||
@@ -536,18 +544,6 @@ export class BrowserAuthorityClient {
   private requireReady(): AuthorityReady {
     if (!this.readyValue) throw new Error('Authority client is not ready.');
     return this.readyValue;
-  }
-
-  private worldRequest<Method extends keyof WorldHarnessPort>(
-    method: Method,
-    ...args: unknown[]
-  ): ReturnType<WorldHarnessPort[Method]> {
-    return this.request({ kind: 'world-harness-rpc', method, args }) as ReturnType<WorldHarnessPort[Method]>;
-  }
-
-  private async prepareWorldRequest(request: WorldPrepareRequest): Promise<void> {
-    const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
-    for (const [cx, cy, cz] of chunks) await this.ensureChunkNeighborhood(cx, cy, cz);
   }
 
   private controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {

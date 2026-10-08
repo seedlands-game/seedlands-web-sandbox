@@ -26,7 +26,13 @@ export const authorityInputTransitBudgetMs = (options: AuthorityTransportFaults)
 const isRepeatableOutbound = (message: unknown) => {
   if (!message || typeof message !== 'object' || !('kind' in message)) return false;
   const kind = (message as { kind: unknown }).kind;
-  return kind === 'input' || kind === 'pause-authority' || kind === 'resume-authority' || 'transaction' in message;
+  return (
+    kind === 'input' ||
+    kind === 'pointer-attack-input' ||
+    kind === 'pause-authority' ||
+    kind === 'resume-authority' ||
+    'transaction' in message
+  );
 };
 
 const isDirectPortAttachment = (message: unknown) =>

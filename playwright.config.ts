@@ -32,6 +32,8 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   failOnFlakyTests: true,
+  // Artifact receipts own source identity; full PR diff metadata would fetch excluded historical evidence.
+  captureGitInfo: { commit: true, diff: false },
   reporter: [
     ['list', { printSteps: true }],
     ['html', { open: 'never' }],

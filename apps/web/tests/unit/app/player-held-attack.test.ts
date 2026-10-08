@@ -1,8 +1,13 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import * as pc from 'playcanvas';
 import { PlayerController } from '../../../src/app/player/player-controller';
+import { BrowserPointerAttackInput } from '../../../src/app/gameplay/pointer-attack-input';
+import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
+import type { PointerAttackRequest } from '../../../src/client/authority/pointer-attack-protocol';
+import { PointerAttackInputPump } from '../../../src/worker/pointer-attack-input-pump';
 import { GameplayRuntime, classicContent, classicOptions } from '../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../packages/stdlib/tests/support/core-platform';
+import { FakeAuthorityWorker, frequencies, ready } from '../client/fixtures/browser-authority';
 
 afterEach(() => {
   vi.useRealTimers();
@@ -10,7 +15,12 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function heldAttack() {
+function heldAttack(
+  heldCallbacks: Pick<
+    ConstructorParameters<typeof PlayerController>[0],
+    'onHeldAttackTarget' | 'onStopHeldAttack'
+  > = {},
+) {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] });
   const world = new GameplayRuntime({
     ...classicOptions(),
@@ -80,6 +90,7 @@ function heldAttack() {
       requests.push(world.attackEntity('held-player', 'held-target'));
       return true;
     },
+    ...heldCallbacks,
   } as unknown as ConstructorParameters<typeof PlayerController>[0]);
   controller.install();
   const advance = (ticks: number) => {
@@ -112,6 +123,104 @@ function heldAttack() {
   };
 }
 
+function isPointerAttackRequest(post: unknown): post is PointerAttackRequest {
+  return typeof post === 'object' && post !== null && (post as { kind?: unknown }).kind === 'pointer-attack-input';
+}
+
+async function workerDrivenHeldAttack() {
+  let browserInput: BrowserPointerAttackInput | null = null;
+  const driver = heldAttack({
+    onHeldAttackTarget: (origin, direction, maxDistance) => browserInput?.held(origin, direction, maxDistance) ?? false,
+    onStopHeldAttack: () => browserInput?.stop(),
+  });
+  const attack = vi.spyOn(driver.world, 'attackEntity');
+  const worker = new FakeAuthorityWorker();
+  const client = new BrowserAuthorityClient(worker, 'held-attack');
+  const starting = client.start({
+    seedText: 'held-attack',
+    openMode: 'continue',
+    legacySnapshots: [],
+    initialWorldTime: 8,
+    frequencies,
+  });
+  const authorityReady = ready();
+  worker.emit({
+    kind: 'authority-ready',
+    protocolVersion: 1,
+    epoch: 'held-attack',
+    ready: {
+      ...authorityReady,
+      snapshot: { ...authorityReady.snapshot, epoch: 'held-attack' },
+      gameplay: { ...authorityReady.gameplay, entities: driver.world.queryEntities() },
+    },
+  });
+  await starting;
+  browserInput = new BrowserPointerAttackInput({
+    authority: () => ({
+      gameplay: client.gameplay,
+      sendPointerAttack: (direction) => client.sendPointerAttack(direction),
+    }),
+    execute: () => {
+      throw new Error('Held attack must use the pointer input envelope.');
+    },
+    feedback: vi.fn(),
+  });
+  const pointerPump = new PointerAttackInputPump({
+    actor: () => {
+      const reference = driver.world.entities.createReference('held-player');
+      const player = driver.world.getPlayerState('held-player');
+      return reference && player.lifecycle === 'alive' ? { reference, mode: player.mode?.value ?? 'survival' } : null;
+    },
+    attack: async () => {
+      driver.world.attackEntity('held-player', 'held-target');
+      return null;
+    },
+  });
+  let workerNow = performance.timeOrigin + performance.now();
+  let postCursor = 0;
+  const acceptedInputs: PointerAttackRequest[] = [];
+  const acceptPostedInputs = () => {
+    const posts = worker.posts.slice(postCursor);
+    postCursor = worker.posts.length;
+    for (const post of posts)
+      if (isPointerAttackRequest(post)) {
+        expect(pointerPump.accept(post.input, workerNow)).toBe(true);
+        acceptedInputs.push(post);
+      }
+  };
+  const advanceAuthorityOnly = async (ticks: number) => {
+    for (let tick = 0; tick < ticks; tick++) {
+      driver.world.advanceRules(1 / 60);
+      workerNow += 1_000 / 60;
+      await pointerPump.service(workerNow);
+      acceptPostedInputs();
+    }
+  };
+
+  driver.press();
+  acceptPostedInputs();
+  expect(acceptedInputs[0]).toMatchObject({
+    kind: 'pointer-attack-input',
+    input: { gesture: 1, sequence: 0, direction: expect.any(Array) },
+  });
+
+  return {
+    driver,
+    worker,
+    client,
+    pointerPump,
+    attack,
+    acceptedInputs,
+    advanceAuthorityOnly,
+    acceptPostedInputs,
+    finish: () => {
+      driver.controller.dispose(false);
+      acceptPostedInputs();
+      client.dispose();
+    },
+  };
+}
+
 it('held mouse buffers the registered Classic second hit while rendering is stopped', () => {
   const driver = heldAttack();
   driver.press();
@@ -131,6 +240,56 @@ it('held mouse buffers the registered Classic second hit while rendering is stop
   });
   driver.controller.dispose(false);
 });
+
+it('held mouse sustains registered Classic attacks through the authority input pump while the main thread is blocked', async () => {
+  const session = await workerDrivenHeldAttack();
+  await session.advanceAuthorityOnly(43);
+
+  expect(session.driver.world.simulation.combat.snapshotFor('held-player').lastResult).toMatchObject({
+    sequence: 2,
+    comboStep: 1,
+    outcome: 'hit',
+    damage: 7,
+  });
+  session.finish();
+});
+
+it.each(['mouseup', 'blur', 'unlock', 'hidden', 'dispose'] as const)(
+  'worker driven held attack stops on the actual controller boundary %s',
+  async (reason) => {
+    const session = await workerDrivenHeldAttack();
+    await session.advanceAuthorityOnly(12);
+    expect(session.attack).toHaveBeenCalledOnce();
+    expect(session.driver.world.simulation.combat.snapshotFor('held-player').lastResult).toMatchObject({
+      sequence: 1,
+      comboStep: 0,
+      damage: 5,
+    });
+
+    if (reason === 'mouseup') session.driver.documentStub.onmouseup!({ button: 0 });
+    if (reason === 'blur') session.driver.windowStub.onblur!();
+    if (reason === 'unlock') {
+      session.driver.documentStub.pointerLockElement = null;
+      session.driver.documentStub.onpointerlockchange!();
+    }
+    if (reason === 'hidden') {
+      session.driver.documentStub.visibilityState = 'hidden';
+      session.driver.documentStub.onvisibilitychange!();
+    }
+    if (reason === 'dispose') session.driver.controller.dispose(false);
+    session.acceptPostedInputs();
+    expect(session.acceptedInputs.at(-1)?.input.direction).toBeNull();
+
+    await session.advanceAuthorityOnly(43);
+    expect(session.attack).toHaveBeenCalledOnce();
+    expect(session.driver.world.simulation.combat.snapshotFor('held-player').lastResult).toMatchObject({
+      sequence: 1,
+      comboStep: 0,
+      damage: 5,
+    });
+    session.finish();
+  },
+);
 
 it.each(['mouseup', 'blur', 'unlock', 'hidden', 'ui', 'pause', 'world', 'mode', 'dispose'] as const)(
   'held mouse cancels without a render on %s',

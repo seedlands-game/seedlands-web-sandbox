@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import { captureHeldPointerAim } from './held-pointer-aim';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../../client/presentation/voxel-target';
@@ -45,13 +46,10 @@ export class PlayerController {
       this.stopMining();
       return;
     }
-    const camera = this.options.camera;
-    camera.setEulerAngles(this.pitch, this.yaw, 0);
-    const position = camera.getPosition();
-    const direction = camera.forward;
-    this.attackBlocking = this.options.onAttackTarget(
-      [position.x, position.y, position.z],
-      [direction.x, direction.y, direction.z],
+    this.attackBlocking = captureHeldPointerAim(
+      this.options,
+      this.pitch,
+      this.yaw,
       Math.min(3, this.traceTarget()?.distance ?? 3),
     );
     if (this.attackBlocking) this.cancelActiveMining();
@@ -200,6 +198,10 @@ export class PlayerController {
         const sensitivity = this.options.mouseSensitivity?.value ?? 0.13;
         this.yaw -= event.movementX * sensitivity;
         this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * sensitivity));
+        if (this.miningHeld && this.options.onHeldAttackTarget) {
+          if (this.interactionBlocked) this.stopMining();
+          else captureHeldPointerAim(this.options, this.pitch, this.yaw);
+        }
       }
     };
     document.onpointerlockchange = () => {
@@ -529,6 +531,7 @@ export class PlayerController {
   private stopMining() {
     this.miningHeld = false;
     this.heldAttack.stop();
+    this.options.onStopHeldAttack?.();
     if (this.mining.stop()) this.options.onCancelBreak();
   }
 
