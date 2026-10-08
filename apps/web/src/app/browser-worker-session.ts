@@ -7,7 +7,10 @@ import type { FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/flui
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { WorldOpenMode } from '@seedlands/stdlib/runtime/world-version-policy';
-import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type {
+  AuthorityActionResult,
+  AuthorityGameplayView,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
 import type { AuthorityTransportFaults } from '../client/authority/authority-transport';
@@ -33,6 +36,7 @@ type Options = Readonly<{
   authorityTransportFaults?: AuthorityTransportFaults;
   onSnapshot: (snapshot: AuthoritySnapshot) => void;
   onGameplay: (view: AuthorityGameplayView) => void;
+  onPointerAttackResult?: (result: AuthorityActionResult['result']) => void;
   onMediaProjection?: (projection: readonly MediaPlaybackProjectionV1[]) => void;
   onMediaFacts?: (batch: MediaPlaybackCommittedBatchV1) => void;
   onPlayerDeath: () => void;
@@ -103,6 +107,7 @@ export async function startBrowserWorkerSession(options: Options): Promise<Brows
     },
     onMediaProjection: options.onMediaProjection,
     onMediaFacts: options.onMediaFacts,
+    onPointerAttackResult: options.onPointerAttackResult,
     onCommit: options.onCommit,
     onFluidWork: (snapshot: FluidAuthoritySnapshot) => compute.enqueueFluid(snapshot),
     onBootstrapGeneration: ({ seed, generatorVersion, provider, starterEcology, voxelSemantics }) =>

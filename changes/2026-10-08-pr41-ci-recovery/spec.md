@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+### Browser13 session 反馈接线
+
+`765eef9f` 的Browser13为主旅程FAIL、visual PASS、modular SKIP；C0启动卡原10秒期限失败，未到C3。原生phase显示worker约6.43秒、first-visible约2.90秒，剩余启动步骤使总量越过期限；不能增加timeout或声称持续攻击产品验收通过。
+
+组合入口复查发现Game传入攻击结果callback，但startBrowserWorkerSession未继续转发给实际BrowserAuthorityClient。先使用实际session入口、真实Authority/Logic客户端和受控worker派送重现：有效当前epoch回执已接受，feedback调用仍为0。候选只添加可选callback并转发，保持既有receipt去重/epoch/revision门禁；重复receipt只能反馈一次，不改Combat平衡。新完整browser仍待验证。
+
+启动候选：Graphics/材料准备和Authority bootstrap期间没有可玩World，loading卡始终覆盖画布，但现有app.start已不断执行全分辨率空场景render。仅在该初始化窗口关闭autoRender，保留app update与Worker/世界生成；World、Controller及frameLoop安装后、等待first-visible之前恢复autoRender。不会改变质量、可见Chunk门槛或10秒断言；是否减轻实际争用必须由新browser和phase marks判断，不能预先宣称性能收益。
+
 ### Browser12 持续指针输入补验与 CI 元数据边界
 
 worker 输入租期在 service 和新包准入时都检查；期限内没有 service 时，排队续期也不得复活已过期手势，必须真实新 mousedown。实际 release、blur、PointerLock 丢失、hidden 和 dispose 经已安装 Controller 输入链取消后，独立推进 Authority 不得新增攻击，已开始 swing 保持原结算。

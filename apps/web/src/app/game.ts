@@ -288,6 +288,7 @@ export class Game {
     this.controller.install();
     authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
+    this.app.autoRender = true;
     await bootPhase('first-visible', () => initialWorldReady);
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
