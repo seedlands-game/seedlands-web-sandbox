@@ -7,10 +7,16 @@ export function inputSchedulingTick(
   capturedAtTimeOriginMs: number | undefined,
   nowTimeOriginMs: number,
 ): number {
-  if (snapshot.paused || capturedAtTimeOriginMs === undefined) return snapshot.physicsTick;
-  const ageMs = nowTimeOriginMs - capturedAtTimeOriginMs;
-  if (!Number.isFinite(capturedAtTimeOriginMs) || capturedAtTimeOriginMs < 0 || !Number.isFinite(ageMs) || ageMs < 0)
+  if (
+    snapshot.paused ||
+    capturedAtTimeOriginMs === undefined ||
+    !Number.isFinite(capturedAtTimeOriginMs) ||
+    capturedAtTimeOriginMs < 0 ||
+    !Number.isFinite(nowTimeOriginMs)
+  )
     return snapshot.physicsTick;
+  const ageMs = nowTimeOriginMs - capturedAtTimeOriginMs;
+  if (!Number.isFinite(ageMs) || ageMs < 0) return snapshot.physicsTick;
   const tick = snapshot.physicsTick + Math.floor((Math.min(ageMs, 2_000) * physicsHz) / 1_000);
   return Number.isSafeInteger(tick) ? tick : snapshot.physicsTick;
 }
