@@ -8,6 +8,9 @@ import { MemoryGamePersistence } from '../../../../../../../packages/stdlib/src/
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
 import { classicOptions } from '../../../../fixtures/classic/content';
+import { AuthorityTickPublisher } from '../../../../../src/worker/authority-tick-publisher';
+import { BrowserAuthorityClient } from '../../../../../src/client/authority/browser-authority-client';
+import { FakeAuthorityWorker } from '../../../../unit/client/fixtures/browser-authority';
 
 type Runtime = Awaited<ReturnType<typeof create>>;
 type Position = [number, number, number];
@@ -118,6 +121,43 @@ it('plants selected wheat seeds through the Classic Authority interaction and ch
     version: 1,
     crops: [{ position: hit, stage: 0, subSeconds: 0 }],
   });
+});
+
+it('projects registered crop stages from the sole owner across Authority growth without leaking child state', async () => {
+  const runtime = await create();
+  expect(runtime.view()).toHaveProperty('cropStages', []);
+  await loadSurface(runtime);
+  await load(runtime, [put([3, 59, 0], Voxel.Water)]);
+  giveSeeds(runtime);
+  expect((await runtime.performAction(plant(runtime))).result).toMatchObject({ success: true });
+  const planted = runtime.view();
+  expect(planted).toHaveProperty('cropStages', [{ position: hit, stage: 0 }]);
+  const epoch = runtime.snapshot().epoch;
+  const worker = new FakeAuthorityWorker();
+  const client = new BrowserAuthorityClient(worker, epoch);
+  const starting = client.start({
+    seedText: 'classic-crop-authority',
+    openMode: 'continue',
+    legacySnapshots: [],
+    initialWorldTime: 8,
+    frequencies: runtime.ready().frequencies,
+  });
+  worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch, ready: structuredClone(runtime.ready()) });
+  await starting;
+  expect(client.gameplay.cropStages).toEqual([{ position: hit, stage: 0 }]);
+  runtime.advanceSession(10_000);
+  const grown = runtime.view();
+  expect(grown.cropStages?.[0]?.stage).toBeGreaterThan(0);
+  expect(grown.cropStages).toEqual(runtime.server.crops.list().map(({ position, stage }) => ({ position, stage })));
+  expect(grown.cropStages?.[0]).not.toHaveProperty('subSeconds');
+  expect(planted.cropStages).toEqual([{ position: hit, stage: 0 }]);
+  expect(grown.cropStages?.[0]?.position).not.toBe(runtime.server.crops.list()[0]?.position);
+  new AuthorityTickPublisher().publish(runtime, runtime.snapshot(), 10_000, epoch, epoch, (message) =>
+    worker.emit(structuredClone(message)),
+  );
+  expect(client.gameplay.cropStages).toEqual(grown.cropStages);
+  expect(client.gameplay.cropStages).not.toBe(grown.cropStages);
+  client.dispose();
 });
 
 it('plants in Creative while preserving the Survival inventory', async () => {
