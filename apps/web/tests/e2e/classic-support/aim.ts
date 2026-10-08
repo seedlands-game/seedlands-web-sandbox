@@ -53,7 +53,7 @@ export async function aimAtVoxelWithRealMouse(
     const { dx, dy } = playerSnapshot
       ? mouseCorrectionToPoint(playerSnapshot.player, playerSnapshot.viewAngles, aimPoint)
       : { dx: 0, dy: 12 };
-    await moveMouseBy(page, dx, dy);
+    await moveMouseBy(page, dx, dy, { waitForRender: false });
     totalX += dx;
     totalY += dy;
   }
