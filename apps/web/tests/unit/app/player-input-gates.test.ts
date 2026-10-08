@@ -22,9 +22,10 @@ function installKeyboard() {
   let blocked = false;
   const snapshot = ready().snapshot;
   const commands: InputCommand[] = [];
+  const canvas = {};
   const controller = new PlayerController({
     camera: new pc.Entity(),
-    canvas: {},
+    canvas,
     physicsHz: 60,
     authority: {
       epoch: snapshot.epoch,
@@ -40,6 +41,7 @@ function installKeyboard() {
   const keyUp = (code: string) => windowStub.onkeyup!({ code });
   return {
     controller,
+    canvas,
     snapshot,
     commands,
     keyDown,
@@ -371,4 +373,20 @@ it('窗口失焦通过生产控制器立即发送递增序号的全零输入', (
       edges: { jumpPressed: false },
     }),
   );
+});
+
+it('真实mousemove即时更新yaw，随后keyboard捕获相同方向，不等待render update', () => {
+  const { controller, canvas, commands, keyDown } = installKeyboard();
+  const mouseDocument = document as unknown as {
+    pointerLockElement: object;
+    onmousemove: (event: { movementX: number; movementY: number }) => void;
+  };
+  mouseDocument.pointerLockElement = canvas;
+  mouseDocument.onmousemove({ movementX: -80, movementY: 0 });
+  expect(controller.viewAngles).toEqual([10.4, -16]);
+  keyDown('KeyW');
+  expect(commands).toHaveLength(1);
+  expect(commands[0]!.state.moveX).toBeCloseTo(-Math.sin((10.4 * Math.PI) / 180), 6);
+  expect(commands[0]!.state.moveZ).toBeCloseTo(-Math.cos((10.4 * Math.PI) / 180), 6);
+  expect(controller.predictedPhysicsState).toBeNull();
 });

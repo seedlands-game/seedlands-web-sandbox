@@ -18,7 +18,12 @@ export async function ensurePointerLock(page: Page): Promise<void> {
   if (!(await page.evaluate(() => document.pointerLockElement?.id === 'game'))) await lockPointer(page);
 }
 
-export async function moveMouseBy(page: Page, dx: number, dy: number): Promise<void> {
+export async function moveMouseBy(
+  page: Page,
+  dx: number,
+  dy: number,
+  options: Readonly<{ waitForRender?: boolean }> = {},
+): Promise<void> {
   let current = mousePositions.get(page);
   if (!current) throw new Error('Real mouse movement requires a Pointer Lock baseline.');
   const box = await page.locator('#game').boundingBox();
@@ -42,9 +47,10 @@ export async function moveMouseBy(page: Page, dx: number, dy: number): Promise<v
   const next = { x: current.x + dx, y: current.y + dy };
   await page.mouse.move(next.x, next.y);
   mousePositions.set(page, next);
-  await page.evaluate(
-    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
-  );
+  if (options.waitForRender !== false)
+    await page.evaluate(
+      () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+    );
 }
 
 export async function clickCanvasCenter(page: Page, button: 'left' | 'right'): Promise<void> {
