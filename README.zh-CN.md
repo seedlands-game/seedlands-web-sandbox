@@ -8,7 +8,7 @@
 
 本仓库不是完整的 Seedlands 游戏，也不把自己定义为通用的 Seedlands 引擎。它是一个自包含的 Web 原型，用于验证确定性地形、Chunk streaming、权威世界状态、可编辑体素、持久化和浏览器渲染。
 
-预期部署地址为 [seedlands-game.github.io/seedlands-web-sandbox](https://seedlands-game.github.io/seedlands-web-sandbox/)。仓库公开并启用 GitHub Pages 后，`main` 每次验证成功的构建都会自动部署。线上版本右下角会显示短 commit hash 和世界生成器版本。
+Cloudflare Pages 部署目标为 [seedlands-web-sandbox.pages.dev](https://seedlands-web-sandbox.pages.dev/)。Cloudflare Pages 项目和 GitHub Actions secrets 配置完成后，`main` 的 CI 验收通过时会部署同一份经 Chromium 验收的构建；同仓库 PR 会获得隔离的预览部署。线上版本右下角会显示短 commit hash 和世界生成器版本。
 
 ## 当前状态
 
