@@ -13,11 +13,14 @@ function mousePage() {
   let currentX = 50_000;
   let arrived = false;
   let downs = 0;
+  let pointerLocked = false;
   const page = {
     locator: () => ({
       isVisible: async () => false,
       boundingBox: async () => ({ x: 0, y: 0, width: 100_000, height: 10_000 }),
-      click: async () => undefined,
+      click: async () => {
+        pointerLocked = true;
+      },
     }),
     waitForFunction: async () => undefined,
     mouse: {
@@ -35,6 +38,7 @@ function mousePage() {
       up: async () => undefined,
     },
     evaluate: async (callback: () => unknown) => {
+      if (String(callback).includes('pointerLockElement')) return pointerLocked;
       if (String(callback).includes('snapshot()')) {
         const player = arrived ? [78.5, 32.6, -0.5] : BROWSER08_PLAYER;
         return {
