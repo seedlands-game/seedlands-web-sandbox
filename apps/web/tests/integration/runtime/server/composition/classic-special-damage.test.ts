@@ -1,16 +1,19 @@
 import { expect, it } from 'vitest';
-import { GameplayRuntime } from '../../../../fixtures/classic/content';
-import { classicGameplayDomainOptions } from './classic-gameplay-domain-options';
+import { GameplayRuntime, classicOptions } from '../../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicGameplayDomainOptions(),
+    ...classicOptions(),
     platform: testCorePlatform,
     getWorldTime: () => 12,
     getVoxel: () => Voxel.Air,
+    getLoadedCell: () => ({ voxel: Voxel.Air, fluid: 0 }),
     prepareVoxelEdit: () => {
+      throw new Error('unexpected');
+    },
+    prepareVoxelEdits: () => {
       throw new Error('unexpected');
     },
   });

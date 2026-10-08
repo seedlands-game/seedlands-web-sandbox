@@ -32,7 +32,7 @@ Cloudflare Pages 部署目标为 [seedlands-web-sandbox.pages.dev](https://seedl
 
 ## 快速开始
 
-需要 Node.js 22.12 或更高版本，以及 Corepack。
+需要 Node.js 22.13 或更高版本，以及 Corepack。
 
 ```bash
 corepack enable

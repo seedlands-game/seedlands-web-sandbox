@@ -34,7 +34,7 @@ Not yet implemented are the defining systems of the full Seedlands vision: essen
 
 ## Quick start
 
-Requirements: Node.js 22.12 or newer and Corepack.
+Requirements: Node.js 22.13 or newer and Corepack.
 
 ```bash
 corepack enable

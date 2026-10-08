@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import { reachedRouteTarget } from './route-progress';
+import { reachedRouteTarget, routeInputSettled } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
   correctMouseToRoute,
@@ -234,7 +234,9 @@ export async function walkTo(
           direction: key,
           observe: () => snapshot(page),
           move: (dx, dy) => moveMouseBy(page, dx, dy),
+          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
         });
+    if (!options.refreshAfterCorrection && correction.kind === 'route-reached') return correction.observation;
     if (options.refreshAfterCorrection) {
       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
       if (correction.kind === 'route-reached') return correction.observation;
@@ -256,7 +258,11 @@ export async function walkTo(
     }
     current = await waitForSnapshot(
       page,
-      (value) => value.authority.acknowledgedInputSequence > sequenceBeforeInput && value.onGround && !value.colliding,
+      (value) =>
+        value.authority.acknowledgedInputSequence > sequenceBeforeInput &&
+        value.onGround &&
+        !value.colliding &&
+        routeInputSettled(value),
       20_000,
     );
     if (current.player[1] < segmentStart.player[1] - 2)
