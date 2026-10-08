@@ -18,7 +18,7 @@ import type { EntityStore } from '../entity-store';
 import type { GameplayContent } from '../gameplay-content';
 import type { BreakAction } from '../player-state';
 import { prepareEntityMutation } from '../prepared-entity-mutation';
-import { playerInteractionOrigin, positionsInRange, voxelCenter } from '../gameplay-geometry';
+import { positionsInRange, voxelCenter } from '../gameplay-geometry';
 import { playerOccupiesVoxelShape } from '../player-occupancy';
 import {
   buildFluidContainerInteractionCandidate,
@@ -26,6 +26,13 @@ import {
   isFluidContainerInteractionCandidate,
   type FluidContainerInteractionConfig,
 } from './fluid-container-interaction';
+import {
+  buildSoilTransformInteractionCandidate,
+  SOIL_TRANSFORM_INTERACTION_CAPABILITY,
+  isSoilTransformInteractionCandidate,
+  type SoilTransformInteractionConfig,
+} from './soil-transform-interaction';
+import { prepareVoxelInteractionCommit, voxelInteractionCells } from './voxel-interaction-commit';
 import type { createBlockStatePort } from './block-state-port';
 import type { createBlockOriginEnvironment } from './block-origin-environment';
 import { MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
@@ -168,9 +175,12 @@ export function prepareRegisteredBlockCommit(
       updates.length > 0,
     );
   }
-  if (isFluidContainerInteractionCandidate(execution.candidateValue)) {
+  if (
+    isFluidContainerInteractionCandidate(execution.candidateValue) ||
+    isSoilTransformInteractionCandidate(execution.candidateValue)
+  ) {
     if (context.kind !== 'actor' || context.target.kind !== 'voxel' || execution.resource !== BLOCK_VOXEL_RESOURCE)
-      throw new TypeError('Fluid container interaction requires an actor voxel operation.');
+      throw new TypeError('Voxel interaction requires an actor voxel operation.');
     const id = context.originalActorId;
     const validateActorExecution = () =>
       assertActorResourceExecution(options.composition, execution.authorizer, context, BLOCK_ACTOR_RESOURCE);
@@ -178,69 +188,45 @@ export function prepareRegisteredBlockCommit(
     const candidate = execution.candidateValue;
     expected([
       blockActorAddress(id),
-      blockVoxelAddress(candidate.hit.position),
-      blockVoxelAddress(candidate.adjacent.position),
+      ...voxelInteractionCells(candidate).map((cell) => blockVoxelAddress(cell.position)),
     ]);
     const currentActor = projections.actor(id);
     const currentHit = projections.voxel(candidate.hit.position);
     const currentAdjacent = projections.voxel(candidate.adjacent.position);
-    const config = options.composition.capability<FluidContainerInteractionConfig>(
-      FLUID_CONTAINER_INTERACTION_CAPABILITY,
-    );
-    const expectedCandidate = buildFluidContainerInteractionCandidate(
-      options.content.items,
-      config,
-      currentActor,
-      currentHit,
-      currentAdjacent,
-      execution.effectiveInput,
-    );
-    if (config.operationId !== execution.operationId || !same(candidate, expectedCandidate) || candidate.actorId !== id)
-      throw new Error('fluid-interaction-stale');
-    const entity = options.entities.get(id);
-    const validateCondition = () => {
-      validateActorExecution();
-      if (!entity) throw new Error('out-of-range');
-      const origin = playerInteractionOrigin(entity.position);
-      if (
-        !positionsInRange(origin, voxelCenter([...candidate.hit.position]), 5) ||
-        !positionsInRange(origin, voxelCenter([...candidate.adjacent.position]), 5)
-      )
-        throw new Error('out-of-range');
-      if (
-        !same(projections.actor(id), currentActor) ||
-        !same(projections.voxel(candidate.hit.position), currentHit) ||
-        !same(projections.voxel(candidate.adjacent.position), currentAdjacent)
-      )
-        throw new Error('fluid-interaction-stale');
-    };
-    validateCondition();
-    const world = options.prepareVoxelEdit(id, [...candidate.targetPosition], candidate.toVoxel);
-    if (!world.committed) throw new Error('world-not-changed');
-    const components = options.entities.actorComponentSnapshot(id);
-    const inventoryChanged = !same(currentActor.slots, candidate.slots);
-    const mutation = prepareEntityMutation(options.entities, {
-      actors: [
-        {
-          reference: candidate.actorReference,
-          health: options.entities.playerStateAccess(id).health,
-          components: { ...components, inventory: [...candidate.slots] },
-        },
-      ],
-    });
-    const equippedChanged = !same(
-      currentActor.slots[currentActor.equipment.selectedSlot],
-      candidate.slots[currentActor.equipment.selectedSlot],
-    );
-    const cancellation = equippedChanged ? options.simulation().prepareCancellation([id], 'slot-changed') : undefined;
-    const receipt = prepareReceipt(world.result);
-    return finalize(
-      [mutation, ...(cancellation ? [cancellation] : []), world, receipt],
-      { ...candidate.result, commit: { worldRevision: world.result.worldRevision } },
-      true,
-      inventoryChanged,
-      validateCondition,
-    );
+    let expectedCandidate;
+    let operationId: string;
+    if (candidate.kind === 'fluid-container') {
+      const config = options.composition.capability<FluidContainerInteractionConfig>(
+        FLUID_CONTAINER_INTERACTION_CAPABILITY,
+      );
+      operationId = config.operationId;
+      expectedCandidate = buildFluidContainerInteractionCandidate(
+        options.content.items,
+        config,
+        currentActor,
+        currentHit,
+        currentAdjacent,
+        execution.effectiveInput,
+      );
+    } else {
+      const config = options.composition.capability<SoilTransformInteractionConfig>(
+        SOIL_TRANSFORM_INTERACTION_CAPABILITY,
+      );
+      operationId = config.operationId;
+      expectedCandidate = buildSoilTransformInteractionCandidate(
+        options.content.items,
+        config,
+        currentActor,
+        currentHit,
+        currentAdjacent,
+        projections.voxel(candidate.above.position),
+        execution.effectiveInput,
+      );
+    }
+    if (operationId !== execution.operationId || !same(candidate, expectedCandidate) || candidate.actorId !== id)
+      throw new Error(candidate.kind === 'fluid-container' ? 'fluid-interaction-stale' : 'soil-interaction-stale');
+    const plan = prepareVoxelInteractionCommit(options, projections, prepareReceipt, candidate, validateActorExecution);
+    return finalize(plan.parts, plan.value, true, plan.inventoryChanged, plan.validateCondition);
   }
   const kind = operations.get(execution.operationId);
   if (!kind || context.kind !== 'actor') throw new TypeError('Unknown Block actor operation.');

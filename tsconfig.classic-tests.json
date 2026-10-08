@@ -38,6 +38,10 @@
     "apps/web/tests/e2e/classic-support/target-aim.test.ts",
     "apps/web/tests/e2e/classic-support/route-aim-render-independence.test.ts",
     "apps/web/tests/unit/app/browser-gameplay-fluid-target.test.ts",
-    "apps/web/tests/e2e/classic-support/equipment-route-corridor-correction.test.ts"
+    "apps/web/tests/e2e/classic-support/equipment-route-corridor-correction.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-till-authority.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/soil-transform-spine.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/item-interaction-spine.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-fluid-interactions.test.ts"
   ]
 }

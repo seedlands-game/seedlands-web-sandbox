@@ -1,3 +1,4 @@
+import type { ModuleInvocationValue } from '@seedlands/stdlib/mod-api';
 import { describe, expect, it } from 'vitest';
 import { AuthorityRuntime } from '../../../../../../../packages/stdlib/src/server/authority/authority-runtime';
 import type { AuthorityAction } from '../../../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
@@ -102,7 +103,7 @@ const action = (
 });
 const load = (runtime: Runtime, edits: readonly { x: number; y: number; z: number; value: number }[]) =>
   expect(runtime.editWorld('fluid-fixture', edits)).resolves.toMatchObject({ committed: true });
-const invokeMode = (runtime: Runtime, operationId: string, input: Record<string, unknown>) =>
+const invokeMode = (runtime: Runtime, operationId: string, input: ModuleInvocationValue) =>
   runtime.server.invokeActorModuleOperation(runtime.playerId, {
     operationId,
     target: { kind: 'entity', entityId: runtime.playerId },

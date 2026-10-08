@@ -11,6 +11,7 @@ import {
 import { classicRetiredActorsMigration } from '../src/retired-actors-migration';
 import { pack } from '../src/pack';
 import { classicPreDeathV4CompositionIdentity } from '../src/pre-death-v4-composition-identity';
+import { classicPreTillV4CompositionIdentity } from '../src/pre-till-v4-composition-identity';
 import { canonicalCompositionCheckpointIdentity } from '../../../packages/stdlib/src/server/composition/checkpoint-identity';
 
 const captured = (): CompositionCheckpointIdentity => {
@@ -51,6 +52,35 @@ const currentComposition = () =>
   ]);
 
 describe('Classic gameplay snapshot lineage', () => {
+  it('accepts only the exact production pre-till identity and only at gameplay V4', () => {
+    const capture = JSON.parse(
+      readFileSync(
+        new URL('../../../changes/2026-10-08-pr41-ci-recovery/evidence/pre-till-v4-browser15-01.json', import.meta.url),
+        'utf8',
+      ),
+    ) as { sourceSha: string; runId: string; composition: CompositionCheckpointIdentity };
+    expect(capture.sourceSha).toBe('c682770cadd194649830fc1f5e7a9ade7c77b76f');
+    expect(capture.runId).toBe('pr41-cloud-browser-15-01');
+    expect(classicPreTillV4CompositionIdentity).toEqual(capture.composition);
+    expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, capture.composition)).toBe(
+      true,
+    );
+    for (const version of [1, 2, 3]) {
+      expect(
+        matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, version, capture.composition),
+      ).toBe(false);
+    }
+    const changedOperation = structuredClone(capture.composition);
+    changedOperation.definitionMap.operations.pop();
+    const changedModule = structuredClone(capture.composition);
+    changedModule.definitionMap.modules.pop();
+    const changedDigest = structuredClone(capture.composition);
+    changedDigest.packLock[0]!.integrity.entryDigest = 'f'.repeat(64);
+    for (const composition of [changedOperation, changedModule, changedDigest]) {
+      expect(matchesGameplaySnapshotPredecessorV1(classicGameplaySnapshotPredecessors, 4, composition)).toBe(false);
+    }
+  });
+
   it('owns the exact captured c18a890 composition without a runtime fixture dependency', () => {
     expect(classicKernelMigrationCompositionIdentity).toEqual(captured());
     expect(classicGameplaySnapshotPredecessors[0]?.gameplayVersions).toEqual([1, 2, 3, 4]);
