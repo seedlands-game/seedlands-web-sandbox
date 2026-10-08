@@ -5,6 +5,7 @@ export type CropPolicy = Readonly<{
   seedItemId: string;
   matureDrops: readonly Readonly<{ itemId: string; count: number }>[];
   immatureDrops: readonly Readonly<{ itemId: string; count: number }>[];
+  fertilizer?: Readonly<{ itemId: string; growthStages: number }>;
 }>;
 
 export function freezeCropPolicy(policy: CropPolicy): CropPolicy {
@@ -35,6 +36,12 @@ export function freezeCropPolicy(policy: CropPolicy): CropPolicy {
       }),
     );
   };
+  const fertilizer = policy.fertilizer;
+  if (
+    fertilizer &&
+    (!Number.isSafeInteger(fertilizer.growthStages) || fertilizer.growthStages < 1 || fertilizer.growthStages > 7)
+  )
+    throw new TypeError('Crop fertilizer growth policy is invalid.');
   return Object.freeze({
     soilVoxels: voxels(policy.soilVoxels),
     emptyAboveVoxels: voxels(policy.emptyAboveVoxels),
@@ -42,5 +49,8 @@ export function freezeCropPolicy(policy: CropPolicy): CropPolicy {
     seedItemId: itemId(policy.seedItemId),
     matureDrops: drops(policy.matureDrops),
     immatureDrops: drops(policy.immatureDrops),
+    ...(fertilizer
+      ? { fertilizer: Object.freeze({ itemId: itemId(fertilizer.itemId), growthStages: fertilizer.growthStages }) }
+      : {}),
   });
 }

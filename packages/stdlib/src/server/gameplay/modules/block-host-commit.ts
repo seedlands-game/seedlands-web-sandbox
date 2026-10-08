@@ -36,8 +36,8 @@ import { prepareVoxelInteractionCommit, voxelInteractionCells } from './voxel-in
 import type { createBlockStatePort } from './block-state-port';
 import type { createBlockOriginEnvironment } from './block-origin-environment';
 import type { CropRuntime } from '../crop-runtime';
-import { isCropPlantCandidate } from './crop-interaction-model';
-import { prepareCropPlantCommit } from './crop-plant-commit';
+import { isCropInteractionCandidate } from './crop-interaction-model';
+import { prepareCropInteractionCommit } from './crop-plant-commit';
 import { MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
 import {
   BLOCK_BEGIN_OPERATION,
@@ -146,8 +146,8 @@ export function prepareRegisteredBlockCommit(
     };
   };
   const context = execution.context;
-  if (isCropPlantCandidate(execution.candidateValue)) {
-    const plan = prepareCropPlantCommit(options, projections, observed, execution);
+  if (isCropInteractionCandidate(execution.candidateValue)) {
+    const plan = prepareCropInteractionCommit(options, projections, observed, execution);
     return finalize(plan.parts, plan.value, true, plan.inventoryChanged, plan.validateCondition);
   }
   if (execution.operationId === BLOCK_ADVANCE_OPERATION) {

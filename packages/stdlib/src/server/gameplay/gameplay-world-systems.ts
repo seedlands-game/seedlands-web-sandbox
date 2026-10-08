@@ -79,6 +79,7 @@ export function createGameplayWorldSystems(
   if (cropPolicy) {
     for (const id of [
       cropPolicy.seedItemId,
+      ...(cropPolicy.fertilizer ? [cropPolicy.fertilizer.itemId] : []),
       ...cropPolicy.matureDrops.map((drop) => drop.itemId),
       ...cropPolicy.immatureDrops.map((drop) => drop.itemId),
     ])

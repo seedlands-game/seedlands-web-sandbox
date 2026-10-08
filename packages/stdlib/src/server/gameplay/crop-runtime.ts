@@ -64,30 +64,35 @@ export class CropRuntime {
   }
   /** A participant for the registered host; it never edits inventory or publishes a second gameplay revision. */
   preparePlant(position: Position, expected: CropRecord | null, next: CropRecord) {
+    if (expected !== null || next.stage !== 0 || next.subSeconds !== 0) throw new Error('crop-interaction-stale');
+    return this.prepareChange(position, expected, next);
+  }
+  /** The host owns inventory and publication; this participant changes only the crop child. */
+  prepareChange(position: Position, expected: CropRecord | null, next: CropRecord | null) {
     const id = key(position),
       previous = this.at(position),
-      candidate = copy(next);
+      candidate = next ? copy(next) : null;
     if (
       !this.#policy ||
-      expected !== null ||
-      previous !== null ||
-      key(candidate.position) !== id ||
-      candidate.stage !== 0 ||
-      candidate.subSeconds !== 0
+      JSON.stringify(previous) !== JSON.stringify(expected) ||
+      (candidate && key(candidate.position) !== id)
     )
       throw new Error('crop-interaction-stale');
+    if (candidate) advanceCrop(candidate, 0, 10);
     let validated = false,
       used = false;
     return {
       validate: () => {
         validated = false;
-        if (used || this.at(position) !== null) throw new Error('crop-interaction-stale');
+        if (used || JSON.stringify(this.at(position)) !== JSON.stringify(previous))
+          throw new Error('crop-interaction-stale');
         validated = true;
       },
       apply: () => {
         if (used || !validated) throw new Error('Crop participant requires validation.');
         used = true;
-        this.#crops.set(id, candidate);
+        if (candidate) this.#crops.set(id, candidate);
+        else this.#crops.delete(id);
       },
     };
   }

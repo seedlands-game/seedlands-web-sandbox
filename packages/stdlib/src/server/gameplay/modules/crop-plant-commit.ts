@@ -8,14 +8,14 @@ import type { createBlockStatePort } from './block-state-port';
 import { BLOCK_ACTOR_RESOURCE, BLOCK_VOXEL_RESOURCE, blockActorAddress, blockVoxelAddress } from './block-action-model';
 import {
   CROP_INTERACTION_CAPABILITY,
-  buildCropPlantCandidate,
+  buildCropInteractionCandidate,
   cropCellAddress,
   type CropInteractionConfig,
-  type CropPlantCandidateV1,
+  type CropInteractionCandidateV1,
 } from './crop-interaction-model';
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
-export function prepareCropPlantCommit(
+export function prepareCropInteractionCommit(
   options: BlockHostOptions,
   projections: ReturnType<typeof createBlockStatePort>,
   observed: readonly ObservedModState[],
@@ -31,7 +31,7 @@ export function prepareCropPlantCommit(
     throw new TypeError('Crop planting requires its actor and crop owner.');
   const id = context.originalActorId,
     config = options.composition.capability<CropInteractionConfig>(CROP_INTERACTION_CAPABILITY),
-    candidate = execution.candidateValue as CropPlantCandidateV1;
+    candidate = execution.candidateValue as CropInteractionCandidateV1;
   const cells = [candidate.hit, candidate.adjacent, candidate.above].filter(
     (cell, index, all) => all.findIndex((other) => same(other.position, cell.position)) === index,
   );
@@ -50,7 +50,8 @@ export function prepareCropPlantCommit(
     adjacent = projections.voxel(candidate.adjacent.position),
     above = projections.voxel(candidate.above.position),
     crop = projections.crop(candidate.cell.position);
-  const expected = buildCropPlantCandidate(
+  const expected = buildCropInteractionCandidate(
+    candidate.action,
     options.content.items,
     config,
     actor,
@@ -61,7 +62,9 @@ export function prepareCropPlantCommit(
     execution.effectiveInput,
   );
   if (
-    config.plantOperationId !== execution.operationId ||
+    { plant: config.plantOperationId, harvest: config.harvestOperationId, fertilize: config.fertilizeOperationId }[
+      candidate.action
+    ] !== execution.operationId ||
     candidate.actorId !== id ||
     !same(candidate, expected) ||
     !same(context.target.position, candidate.hit.position)
@@ -97,7 +100,7 @@ export function prepareCropPlantCommit(
     }
   };
   validateCondition();
-  const cropMutation = options.crops().preparePlant(crop.position, crop.crop, candidate.nextCrop);
+  const cropMutation = options.crops().prepareChange(crop.position, crop.crop, candidate.nextCrop);
   const inventoryChanged = !same(actor.slots, candidate.slots);
   const components = options.entities.actorComponentSnapshot(id);
   const mutation = inventoryChanged

@@ -9,14 +9,15 @@ import { readWorkingSnapshot } from './repository-snapshot.mjs';
 export const root = resolve(import.meta.dirname, '../..');
 const hash = (bytes) => createHash('sha256').update(bytes).digest('hex');
 export function sourceIdentity(directory = root) {
-  const snapshot = readWorkingSnapshot(directory);
-  const relevant = Object.entries(snapshot.files).filter(
-    ([path]) =>
+  const snapshot = readWorkingSnapshot(
+    directory,
+    (path) =>
       !/(?:^|\/)(?:dist|node_modules|coverage|test-results|playwright-report)\//.test(path) &&
       /^(?:(?:apps|packages|playbooks)\/|crates\/|wasm\/|scripts\/|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|tsconfig|playwright\.config\.ts$)/.test(
         path,
       ),
   );
+  const relevant = Object.entries(snapshot.files);
   return {
     sourceSha: snapshot.sha,
     sourceDigest: hash(

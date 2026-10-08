@@ -1,7 +1,7 @@
 import type { CropRecord } from '../crop-runtime';
 import type { ItemDefinitionRegistry } from '../item-registry';
 import type { CropPolicy } from './crop-policy';
-import { advanceCrop } from './crop-growth-policy';
+import { advanceCrop, harvestCrop } from './crop-growth-policy';
 import { createInventoryCandidate } from './inventory-api';
 import {
   validateBlockActorProjection,
@@ -14,7 +14,14 @@ import {
 
 export const CROP_INTERACTION_CAPABILITY = 'seedlands:crop-interaction';
 export const CROP_CELL_COMPONENT = 'seedlands:crop-cell';
-export type CropInteractionConfig = CropPolicy & Readonly<{ moduleId: string; plantOperationId: string }>;
+export type CropAction = 'plant' | 'harvest' | 'fertilize';
+export type CropInteractionConfig = CropPolicy &
+  Readonly<{
+    moduleId: string;
+    plantOperationId: string;
+    harvestOperationId?: string;
+    fertilizeOperationId?: string;
+  }>;
 export type CropCellProjectionV1 = Readonly<{ version: 1; position: BlockPosition; crop: CropRecord | null }>;
 export const cropCellAddress = (position: BlockPosition) => ({
   componentId: CROP_CELL_COMPONENT,
@@ -39,21 +46,23 @@ export function validateCropCellProjection(raw: unknown): CropCellProjectionV1 {
   }
   return Object.freeze({ version: 1, position, crop });
 }
-export type CropPlantCandidateV1 = Readonly<{
+export type CropInteractionCandidateV1 = Readonly<{
   version: 1;
-  kind: 'crop-plant';
+  kind: 'crop-plant' | 'crop-harvest' | 'crop-fertilize';
+  action: CropAction;
   actorId: string;
   actorReference: BlockActorProjectionV1['reference'];
   hit: BlockVoxelProjectionV1;
   adjacent: BlockVoxelProjectionV1;
   above: BlockVoxelProjectionV1;
   cell: CropCellProjectionV1;
-  nextCrop: CropRecord;
+  nextCrop: CropRecord | null;
   slots: BlockActorProjectionV1['slots'];
   creative: boolean;
-  result: Readonly<{ version: 1; success: true; action: 'plant'; actorId: string }>;
+  result: Readonly<{ version: 1; success: true; action: CropAction; actorId: string }>;
 }>;
-export function buildCropPlantCandidate(
+export function buildCropInteractionCandidate(
+  action: CropAction,
   items: ItemDefinitionRegistry,
   config: CropInteractionConfig,
   rawActor: unknown,
@@ -62,7 +71,7 @@ export function buildCropPlantCandidate(
   rawAbove: unknown,
   rawCell: unknown,
   rawInput: unknown,
-): CropPlantCandidateV1 {
+): CropInteractionCandidateV1 {
   const actor = validateBlockActorProjection(rawActor, items),
     hit = validateBlockVoxelProjection(rawHit),
     adjacent = validateBlockVoxelProjection(rawAdjacent),
@@ -88,28 +97,54 @@ export function buildCropPlantCandidate(
   if (actor.lifecycle !== 'alive') throw new Error('player-dead');
   if (!config.soilVoxels.includes(hit.voxel)) throw new Error('invalid-farmland');
   if (!config.emptyAboveVoxels.includes(above.voxel)) throw new Error('crop-above-occupied');
-  if (cell.crop) throw new Error('occupied');
   const creative = actor.mode.value === 'creative';
   const inventory = createInventoryCandidate(items, actor.slots);
   const selected = creative
     ? actor.creativeCatalog.hotbar[actor.creativeCatalog.selectedSlot]
     : inventory.slot(actor.equipment.selectedSlot)?.itemId;
-  if (selected !== config.seedItemId) throw new Error('requires-seeds');
-  if (!creative) inventory.removeFromSlot(actor.equipment.selectedSlot, 1);
+  let nextCrop: CropRecord | null;
+  if (action === 'plant') {
+    if (cell.crop) throw new Error('occupied');
+    if (selected !== config.seedItemId) throw new Error('requires-seeds');
+    if (!creative) inventory.removeFromSlot(actor.equipment.selectedSlot, 1);
+    nextCrop = Object.freeze({ position: Object.freeze([...hit.position]) as BlockPosition, stage: 0, subSeconds: 0 });
+  } else {
+    if (!cell.crop) throw new Error('missing-crop');
+    if (action === 'fertilize') {
+      if (!config.fertilizer || selected !== config.fertilizer.itemId) throw new Error('requires-fertilizer');
+      if (cell.crop.stage === 7) throw new Error('crop-mature');
+      if (!creative) inventory.removeFromSlot(actor.equipment.selectedSlot, 1);
+      nextCrop = Object.freeze({
+        position: Object.freeze([...hit.position]) as BlockPosition,
+        stage: Math.min(7, cell.crop.stage + config.fertilizer.growthStages),
+        subSeconds: 0,
+      });
+    } else {
+      const harvest = harvestCrop(cell.crop, config);
+      if (!creative && !harvest.drops.every((drop) => inventory.add(drop))) throw new Error('inventory-full');
+      nextCrop = null;
+    }
+  }
   return Object.freeze({
     version: 1,
-    kind: 'crop-plant',
+    kind: `crop-${action}`,
+    action,
     actorId: actor.reference.entityId,
     actorReference: actor.reference,
     hit,
     adjacent,
     above,
     cell,
-    nextCrop: Object.freeze({ position: Object.freeze([...hit.position]) as BlockPosition, stage: 0, subSeconds: 0 }),
+    nextCrop,
     slots: Object.freeze(inventory.snapshot()),
     creative,
-    result: Object.freeze({ version: 1, success: true, action: 'plant', actorId: actor.reference.entityId }),
+    result: Object.freeze({ version: 1, success: true, action, actorId: actor.reference.entityId }),
   });
 }
-export const isCropPlantCandidate = (raw: unknown): raw is CropPlantCandidateV1 =>
-  Boolean(raw && typeof raw === 'object' && !Array.isArray(raw) && (raw as { kind?: unknown }).kind === 'crop-plant');
+export const isCropInteractionCandidate = (raw: unknown): raw is CropInteractionCandidateV1 =>
+  Boolean(
+    raw &&
+    typeof raw === 'object' &&
+    !Array.isArray(raw) &&
+    ['crop-plant', 'crop-harvest', 'crop-fertilize'].includes(String((raw as { kind?: unknown }).kind)),
+  );

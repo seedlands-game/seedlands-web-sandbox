@@ -32,7 +32,14 @@ const voxelSemantics: readonly VoxelSemanticsDefinition[] = [
     meshKind: 'cube',
     emission: 0,
     lightCost: 1,
-    faceMaterials: Array(6).fill(FaceMaterial.Stone) as VoxelSemanticsDefinition['faceMaterials'],
+    faceMaterials: [
+      FaceMaterial.Stone,
+      FaceMaterial.Stone,
+      FaceMaterial.Stone,
+      FaceMaterial.Stone,
+      FaceMaterial.Stone,
+      FaceMaterial.Stone,
+    ],
   },
   {
     id: 'sample:panel',
@@ -43,7 +50,14 @@ const voxelSemantics: readonly VoxelSemanticsDefinition[] = [
     meshKind: 'cube',
     emission: 0,
     lightCost: 16,
-    faceMaterials: Array(6).fill(FaceMaterial.WoodenDoor) as VoxelSemanticsDefinition['faceMaterials'],
+    faceMaterials: [
+      FaceMaterial.WoodenDoor,
+      FaceMaterial.WoodenDoor,
+      FaceMaterial.WoodenDoor,
+      FaceMaterial.WoodenDoor,
+      FaceMaterial.WoodenDoor,
+      FaceMaterial.WoodenDoor,
+    ],
   },
 ];
 

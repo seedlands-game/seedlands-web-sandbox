@@ -22,9 +22,17 @@ export function worldKernelAdapter(
   if (selected.includes('w03')) kernels.prepareHalo = createHaloKernel(memory);
   if (selected.includes('w04') || selected.includes('w05'))
     kernels.meshChunk = (options) => {
-      if (options.geometry || memory.failed || !options.semantics) return meshChunk(options);
+      if (memory.failed || !options.semantics) return meshChunk(options);
+      let input: ReturnType<typeof createMeshKernelInput>;
       try {
-        const input = createMeshKernelInput(options);
+        input = createMeshKernelInput(options);
+      } catch {
+        if (!options.geometry) memory.failed = true;
+        return meshChunk(options);
+      }
+      if (options.geometry && input.window.some((voxel) => options.geometry!.get(voxel) !== undefined))
+        return meshChunk(options);
+      try {
         return runMeshDescriptorKernel(memory, input.window, input.fluidWindow, options.semantics);
       } catch {
         memory.failed = true;

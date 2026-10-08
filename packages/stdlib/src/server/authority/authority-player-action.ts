@@ -12,6 +12,7 @@ import {
   type StructureTargetPortV1,
 } from '../gameplay/modules/structure-target-dispatch';
 import type { MediaTargetPortV1 } from '../gameplay/gameplay-media-target-runtime';
+import { dispatchAuthorityCropTarget } from './authority-crop-runtime';
 
 export type AuthorityStructureTargetPort = Pick<StructureTargetPortV1, 'resolve' | 'invoke'>;
 export type AuthorityMediaTargetPort = Pick<MediaTargetPortV1, 'resolve' | 'invoke'>;
@@ -112,6 +113,7 @@ export function applyAuthorityPlayerAction(
         };
       };
       const fallback = () =>
+        dispatchAuthorityCropTarget(server, playerId, action) ??
         dispatchItemInteraction(
           {
             actor,
