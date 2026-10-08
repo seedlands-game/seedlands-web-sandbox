@@ -42,6 +42,8 @@
     "apps/web/tests/integration/runtime/server/composition/classic-till-authority.test.ts",
     "apps/web/tests/integration/runtime/server/composition/soil-transform-spine.test.ts",
     "apps/web/tests/integration/runtime/server/composition/item-interaction-spine.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-fluid-interactions.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-fluid-interactions.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-crop-runtime.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-crop-clock.test.ts"
   ]
 }

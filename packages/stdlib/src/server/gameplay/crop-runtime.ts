@@ -5,7 +5,12 @@ import { advanceCrop, harvestCrop, plantCrop } from './modules/crop-growth-polic
 
 type Position = readonly [number, number, number];
 export type CropRecord = Readonly<{ position: Position; stage: number; subSeconds: number }>;
-export type CropCheckpoint = Readonly<{ version: 1; tick: number; crops: readonly CropRecord[] }>;
+export type CropCheckpoint = Readonly<{
+  version: 1;
+  tick: number;
+  fractionalSeconds?: number;
+  crops: readonly CropRecord[];
+}>;
 type Context = Readonly<{
   seed: number;
   entities: EntityStore;
@@ -18,7 +23,16 @@ const copy = (crop: CropRecord): CropRecord =>
 const empty = (): CropCheckpoint => ({ version: 1, tick: 0, crops: [] });
 
 export function validateCropCheckpoint(value: CropCheckpoint = empty()): CropCheckpoint {
-  if (value.version !== 1 || !Number.isSafeInteger(value.tick) || value.tick < 0 || !Array.isArray(value.crops))
+  const fractionalSeconds = value.fractionalSeconds === undefined ? 0 : value.fractionalSeconds;
+  if (
+    value.version !== 1 ||
+    !Number.isSafeInteger(value.tick) ||
+    value.tick < 0 ||
+    !Number.isFinite(fractionalSeconds) ||
+    fractionalSeconds < 0 ||
+    fractionalSeconds >= 1 ||
+    !Array.isArray(value.crops)
+  )
     throw new TypeError('Crop checkpoint is invalid.');
   const positions = new Set<string>();
   const crops = value.crops.map((crop) => {
@@ -28,11 +42,12 @@ export function validateCropCheckpoint(value: CropCheckpoint = empty()): CropChe
     positions.add(key(crop.position));
     return copy(crop);
   });
-  return Object.freeze({ version: 1, tick: value.tick, crops: Object.freeze(crops) });
+  return Object.freeze({ version: 1, tick: value.tick, fractionalSeconds, crops: Object.freeze(crops) });
 }
 
 export class CropRuntime {
   #tick = 0;
+  #fractionalSeconds = 0;
   readonly #crops = new Map<string, CropRecord>();
   constructor(
     private readonly context: Context,
@@ -61,7 +76,11 @@ export class CropRuntime {
   }
   advance(seconds: number) {
     if (!Number.isFinite(seconds) || seconds <= 0) throw new TypeError('Crop advance is invalid.');
-    const steps = Math.floor(seconds);
+    const totalSeconds = this.#fractionalSeconds + seconds;
+    const roundingTolerance = Number.EPSILON * Math.max(1, totalSeconds) * 8;
+    const steps = Math.floor(totalSeconds + roundingTolerance);
+    const remainder = totalSeconds - steps;
+    this.#fractionalSeconds = Math.abs(remainder) <= roundingTolerance ? 0 : Math.max(0, remainder);
     for (let step = 0; step < steps; step++) {
       this.#tick++;
       for (const [id, crop] of [...this.#crops].sort(([a], [b]) => a.localeCompare(b))) {
@@ -103,11 +122,17 @@ export class CropRuntime {
     );
   }
   checkpoint(): CropCheckpoint {
-    return validateCropCheckpoint({ version: 1, tick: this.#tick, crops: this.list() });
+    return validateCropCheckpoint({
+      version: 1,
+      tick: this.#tick,
+      fractionalSeconds: this.#fractionalSeconds,
+      crops: this.list(),
+    });
   }
   restore(value: CropCheckpoint = empty()) {
     const checkpoint = validateCropCheckpoint(value);
     this.#tick = checkpoint.tick;
+    this.#fractionalSeconds = checkpoint.fractionalSeconds ?? 0;
     this.#crops.clear();
     for (const crop of checkpoint.crops) this.#crops.set(key(crop.position), copy(crop));
   }

@@ -167,4 +167,10 @@ Browser-local pointer envelope携带递增sequence、同次gesture、绝对monot
 
 ## Delivery Snapshot
 
+### 作物时钟与正式入口 RED（checkpoint 19）
+
+默认 Authority gameplay20Hz 每次推进0.05秒，现有 CropRuntime 的 Math.floor(seconds) 丢弃不足一秒部分；真实 Authority 累计一秒后 crop tick=0。修复只在唯一 CropRuntime owner 累计时间，旧 V1 child checkpoint 缺 fractional 字段按0恢复，新 checkpoint 验证 finite、0<=fraction<1，fresh restore 后不得丢失余量。相同总时间不同合法 cadence 应得到相同 tick/作物状态；水化、loaded 边界、seed/random与成熟上限保持。测试可用既有 crops.plant 搭建时钟前提，明确不证明正式种植。
+
+同时真实 Classic Authority 的 loaded Farmland/Air、reachable、selected wheat-seeds 与当前四 selection 值下 performAction(interact/use) 返回 item-no-interaction；成功扣种与 stage0 checkpoint 为下一正式 producer 的验收目标。Generic机制/Classic内容归属、原range/LOS/新鲜度门禁与失败原子性必须保留；植物呈现、收割、骨粉及完整恢复仍需后续独立完成。
+
 实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。
