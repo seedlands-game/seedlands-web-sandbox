@@ -89,6 +89,7 @@ const tick = () => {
       const commits = runtime.takeCommits();
       post({
         kind: 'authority-snapshot',
+        capturedAtTimeOriginMs: performance.timeOrigin + now,
         protocolVersion: PROTOCOL_VERSION,
         epoch,
         snapshot,

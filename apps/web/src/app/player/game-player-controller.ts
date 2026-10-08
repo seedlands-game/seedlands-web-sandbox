@@ -89,6 +89,7 @@ export function createGamePlayerController(options: Options): PlayerController {
     authority: {
       epoch: options.authority.epoch,
       snapshot: () => options.authority.snapshot,
+      inputPhysicsTick: () => options.authority.inputPhysicsTick,
       sendInput: (command) => options.authority.sendInput(command),
       setPlayerPosition: (position) => options.authority.setPlayerPosition(position),
     },

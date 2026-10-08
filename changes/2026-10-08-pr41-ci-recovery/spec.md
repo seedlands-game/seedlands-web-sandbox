@@ -85,6 +85,20 @@ Visual skeleton-front closeup仍FAIL：cache29、pending18、rebuild92；13项�
 
 本组初始route render依赖RED为1 FAIL/1 PASS：原18次转向额外双RAF累计28.8s；移除route专用等待后原合同等4文件40/40 PASS。补充实际walkTo两种refresh路径与实际controller mouse handler无render时的方向捕获，联合有效42例通过（原不变25例与补验17例）。护甲33例初跑即PASS，属于新增覆盖，不制造行为RED；首次格式FAIL已修。Luna并发较早types读到mouse helper旧签名而FAIL，根最终Classic types与五个TS路径scoped ESLint PASS。原trace十进制字面量触发两轮no-loss-of-precision FAIL，保留日志；改为Number原始字符串读取，不更改坐标或lint规则。完整Classic headless含新矩阵24文件95/95 PASS。将新护甲文件加入原headless命令和Classic test types，不能只运行一次然后让CI遗漏。
 
+### Browser09 输入投递时钟与护甲死亡闭包
+
+精确source `991b4b435c3afb08569cc5dddc1973d530a19a57`：Browser09主旅程FAIL、visual PASS、modular SKIP。资源条全部放置后，首次木材采集前返回 `[78.5,-0.5]` 的45s窗口失败；末端Authority约94.999734、client约95.099731，Authority静止但render呈现滞后。约844s时prediction累计12335次authority-resync；正常本地传输的inputLead只有2ticks，输入基于已排队的旧snapshot tick，真实键盘边沿虽即时捕获仍可能已被Authority消费。下一候选只修输入调度估算，不修改Authority位置、世界状态、固定physics步长、输入拒绝规则或路线期限。
+
+冻结方案：Browser Worker在周期snapshot envelope附可选跨同浏览器realm的单调绝对capture时间（performance.timeOrigin+now），不加入AuthoritySnapshot、持久化或确定性owner。Browser client仅在原epoch/order gate接受该snapshot后绑定时间；新的已接受但无时间消息清除旧估算，旧epoch/重复/倒序不得覆盖。输入调度基准为当前snapshot tick加采样年龄对应的floor ticks，年龄有限且非负、上限2000ms；paused不外推，缺失/非法/未来时间回退原tick。只作为PlayerInputStream的target基准，预测body/reconcile仍使用原snapshot；既有配置的传输lead保留。restore/new epoch清除时钟，所有原late/out-of-order/too-far-ahead与256pending门禁不变。该估算不是Authority tick或性能收益证据。
+
+先用stale snapshot tick100、Authority consumed130、input scheduling base130构造RED，期待capture与render输入target132并被原InputCommandBuffer接受；补充30/60/120Hz、paused、无时间、未来/NaN、年龄上限、旧epoch/倒序/restore清除的边界与实际BrowserClient→controller连接。新artifact完整browser必须验证，不以helper单测替代产品验收。
+
+护甲闭包另用原16行literal balance覆盖注册zombie-claw致死、inventory/cursor/crafting/armor四来源只掉落一次、耐久3→2、死亡存档新实例恢复（epoch更新/lifetime保留）、死者拒绝后续攻击、正式respawn健康20且不恢复旧armor、再次存档无重复掉落。初始health1仅fixture配置；死亡必须由注册Combat producer结算，不直接applyDamage。先运行新增覆盖，如原实现已满足则记新增PASS而不制造RED；加入正式headless选择和Classic类型检查。
+
+本组确定性RED分别2/16与3/17（旧target102，预期132），修复后capture/render/interrupt维持同一序列。7文件81/81 PASS包含原0/50/150ms transport fault覆盖、真实键盘边沿/neutral、epoch/order/restore时钟、护甲16件死亡闭包；补充world-item位置/lifetime保存验证后仍PASS。stdlib与Web生产types、Classic测试types通过。初次scoped ESLint因有效行数500上限FAIL，保留日志并按已有职责拆出水体采样和session control、独立snapshot envelope type，不降低门禁。最新 `991b4b43` CI run37794086450终态FAIL：architecture/deterministic/headless/build/static PASS，Chromium FAIL，preview SKIP；CI首次start-card10s超时，重试combat仅5/5/2伤害且未见衔接/第二击，visual两次原20s未ready。云内visual PASS不覆盖CI。连接器artifact下载引用可得但本云读取403，暂以job日志确定症状，根因尚未关闭。
+
+最终补验：新增原too-far-ahead拒绝反例13/13 PASS；输入相关6文件66/66 PASS，护甲死亡16/16构成82例有效闭包；完整Classic headless25文件111/111 PASS，CI选择/冻结证据12/12 PASS。测试专用types首轮因配置位于仓库外无法解析type roots失败；修正配置后暴露现有fixture缺craftingGrid/matched recipe IDs/完整frontier与直接改readonly snapshot，已修为完整fixture和测试自有副本，最终专项types PASS。原断言、输入limits与sealed bytes保持不变。新artifact/browser和新SHA CI尚未运行，不能宣布可合入。
+
 ## 模型与预算
 
 主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。

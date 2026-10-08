@@ -7,6 +7,49 @@ import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/bl
 import { LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN } from '../../../src/client/persistence/legacy-gameplay-provenance-error';
 
 describe('BrowserAuthorityClient', () => {
+  it('snapshot年龄仅在接受的同epoch版本上更新，缺失时间清除估算', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const now = vi.spyOn(performance, 'now').mockReturnValue(1_500);
+    try {
+      const starting = client.start({
+        seedText: 'clock',
+        openMode: 'continue',
+        legacySnapshots: [],
+        initialWorldTime: 9,
+        frequencies,
+      });
+      worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
+      await starting;
+      expect(client.inputPhysicsTick).toBe(0);
+      const current = { ...ready().snapshot, physicsTick: 100, commitSequence: 100 };
+      const publish = (snapshot: typeof current, time?: number) =>
+        worker.emit({
+          kind: 'authority-snapshot',
+          protocolVersion: 1,
+          epoch: 'world:1',
+          snapshot,
+          capturedAtTimeOriginMs: time,
+        });
+      publish(current, performance.timeOrigin + 1_000);
+      expect(client.inputPhysicsTick).toBe(130);
+      expect(client.physicsTick).toBe(100);
+      publish(current, performance.timeOrigin + 1_500);
+      publish({ ...current, physicsTick: 99 }, performance.timeOrigin + 1_500);
+      publish({ ...current, epoch: 'old', physicsTick: 900 }, performance.timeOrigin + 1_500);
+      expect(client.inputPhysicsTick).toBe(130);
+      now.mockReturnValue(1_700);
+      expect(client.inputPhysicsTick).toBe(142);
+      publish({ ...current, physicsTick: 101, commitSequence: 101 });
+      expect(client.inputPhysicsTick).toBe(101);
+      publish({ ...current, physicsTick: 102, commitSequence: 102, paused: true }, performance.timeOrigin + 1_000);
+      expect(client.inputPhysicsTick).toBe(102);
+    } finally {
+      now.mockRestore();
+      client.dispose();
+    }
+  });
+
   it('preserves a legacy provenance code from Worker fatal through startup rejection', async () => {
     const worker = new FakeAuthorityWorker();
     const fatal = vi.fn();

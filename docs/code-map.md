@@ -252,3 +252,5 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 
 - 当前恢复的 Classic 与生产 CI 边界见 docs/ci-testing.md，上述历史冻结说明不代替本轮实际执行回执。
 
 V5金钻矿沿用 world/ore-generation.ts 与 Rust generation.rs 的分组hash，在 generatorVersion=5 时追加金/钻石矿；旧版本字节保留。apps/web/src/client/persistence/stored-world-selection.ts 对选中的存档验证版本与provider身份，拒绝不兼容继续，不把旧记录过滤成新世界。矿物、工具、资源块配方仍归Classic内容文件。
+
+PR41 输入恢复修复中，[input-scheduling-tick.ts](../apps/web/src/client/authority/input-scheduling-tick.ts) 只拥有通过 epoch/order gate 的 browser snapshot 时间估算；[browser-authority-session-control.ts](../apps/web/src/client/authority/browser-authority-session-control.ts) 保持原 pause/resume 回执与失败语义；[player-water-immersion.ts](../apps/web/src/app/player/player-water-immersion.ts) 承接原 controller 的水体采样。输入调度估算不写 Authority physics tick、世界或存档状态。

@@ -45,6 +45,7 @@ export type PlayerControllerOptions = {
   authority: {
     epoch: SessionEpoch;
     snapshot: () => AuthoritySnapshot | null;
+    inputPhysicsTick?: () => number;
     sendInput: (command: InputCommand) => void;
     setPlayerPosition: (position: [number, number, number]) => Promise<unknown>;
   };
