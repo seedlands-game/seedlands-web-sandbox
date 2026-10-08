@@ -1,4 +1,5 @@
 import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
+import { copyLoadedVoxelRegion } from './loaded-voxel-region';
 import {
   cacheAuthorityCollisionBaseline,
   type AuthorityCollisionCachedChunk,
@@ -55,6 +56,10 @@ export class AuthorityCollisionBaselineClient {
 
   getChunkRevision(cx: number, cy: number, cz: number): number | null {
     return this.readableChunk(chunkKey(cx, cy, cz))?.chunkRevision ?? null;
+  }
+
+  getLoadedVoxelRegion(origin: readonly [number, number, number], size: number) {
+    return copyLoadedVoxelRegion(origin, size, (cx, cy, cz) => this.readableChunk(chunkKey(cx, cy, cz)));
   }
 
   synchronize(revisions: Readonly<Record<string, number>>): void {

@@ -1,4 +1,5 @@
 import { buildBlockLightVolume, sampleBlockLight, type BlockLightVolume } from '@seedlands/stdlib/world/voxel-light';
+import { sampleLoadedVoxelRegion, type LoadedVoxelRegion } from '../../client/authority/loaded-voxel-region';
 import type { VoxelSemanticsResolver } from '@seedlands/stdlib/world/voxel-semantics';
 import { chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 
@@ -26,9 +27,20 @@ export const encodeBlockLightLevelForR8 = (level: number) => {
 
 export type BlockLightVoxelReader = Readonly<{
   getVoxelIfLoaded(x: number, y: number, z: number): number | undefined;
+  getVoxelRegion?(origin: readonly [number, number, number], size: number): LoadedVoxelRegion;
   blockLightRevision(origin: readonly [number, number, number], size: number): string;
   voxelSemantics: VoxelSemanticsResolver;
 }>;
+
+function readBlockLightVolume(reader: BlockLightVoxelReader, origin: readonly [number, number, number]) {
+  const region = reader.getVoxelRegion?.(origin, BLOCK_LIGHT_VOLUME_SIZE);
+  return buildBlockLightVolume(
+    BLOCK_LIGHT_VOLUME_SIZE,
+    origin,
+    region ? (x, y, z) => sampleLoadedVoxelRegion(region, x, y, z) : (x, y, z) => reader.getVoxelIfLoaded(x, y, z),
+    reader.voxelSemantics,
+  );
+}
 
 export type CameraBlockLightVolume = Readonly<{
   volume: BlockLightVolume;
@@ -55,12 +67,7 @@ export function buildCameraBlockLightVolume(
   const anchor = blockLightAnchorForCamera(position);
   const origin = blockLightOriginForAnchor(anchor);
   return {
-    volume: buildBlockLightVolume(
-      BLOCK_LIGHT_VOLUME_SIZE,
-      origin,
-      (x, y, z) => reader.getVoxelIfLoaded(x, y, z),
-      reader.voxelSemantics,
-    ),
+    volume: readBlockLightVolume(reader, origin),
     revision: reader.blockLightRevision(origin, BLOCK_LIGHT_VOLUME_SIZE),
     anchor,
   };
@@ -102,12 +109,7 @@ export function buildChunkBlockLightVolume(
 ): ChunkBlockLightVolume {
   const origin = blockLightOriginForChunk(cx, cy, cz);
   return {
-    volume: buildBlockLightVolume(
-      BLOCK_LIGHT_VOLUME_SIZE,
-      origin,
-      (x, y, z) => reader.getVoxelIfLoaded(x, y, z),
-      reader.voxelSemantics,
-    ),
+    volume: readBlockLightVolume(reader, origin),
     revision: reader.blockLightRevision(origin, BLOCK_LIGHT_VOLUME_SIZE),
     chunk: [cx, cy, cz],
   };

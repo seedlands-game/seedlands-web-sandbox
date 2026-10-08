@@ -235,6 +235,10 @@ export class BrowserAuthorityClient {
     return this.chunks.getVoxel(x, y, z);
   }
 
+  getLoadedVoxelRegion(origin: readonly [number, number, number], size: number) {
+    return this.chunks.getLoadedVoxelRegion(origin, size);
+  }
+
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null {
     return this.chunks.getFluidCell(x, y, z);
   }

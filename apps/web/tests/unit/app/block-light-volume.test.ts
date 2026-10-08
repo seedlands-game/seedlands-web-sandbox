@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { copyLoadedVoxelRegion } from '../../../src/client/authority/loaded-voxel-region';
 import { classicContent } from '../../fixtures/classic/content';
 import {
   BLOCK_LIGHT_MAX_LEVEL,
@@ -15,6 +16,39 @@ import {
 } from '../../../src/app/scene/block-light-volume';
 
 describe('浏览器方块光体积', () => {
+  it('生产brick消费一次有界region，输出与逐cell正式reader完全一致且unknown仍阻光', () => {
+    const canonical = new Uint16Array(32 ** 3);
+    canonical[0] = Voxel.Lantern;
+    const cell = (x: number, y: number, z: number) =>
+      x >= 0 && x < 32 && y >= 0 && y < 32 && z >= 0 && z < 32 ? canonical[x + 32 * (z + 32 * y)] : undefined;
+    const reader = {
+      getVoxelIfLoaded: cell,
+      blockLightRevision: () => 'halo:7',
+      voxelSemantics: classicContent.voxelSemantics,
+    };
+    const control = buildChunkBlockLightVolume(reader, 0, 0, 0);
+    let regions = 0;
+    const candidate = buildChunkBlockLightVolume(
+      {
+        ...reader,
+        getVoxelIfLoaded: () => {
+          throw new Error('Per-cell Authority reader was used');
+        },
+        getVoxelRegion: (origin, size) => {
+          regions++;
+          return copyLoadedVoxelRegion(origin, size, (cx, cy, cz) =>
+            cx === 0 && cy === 0 && cz === 0 ? { canonical } : null,
+          );
+        },
+      },
+      0,
+      0,
+      0,
+    );
+    expect(regions).toBe(1);
+    expect(candidate).toEqual(control);
+  });
+
   it('重挂相同Authority halo的mesh复用已完成brick，旧资源释放不移除新资源', () => {
     let revision = 'resident:1';
     const applies: string[] = [];
