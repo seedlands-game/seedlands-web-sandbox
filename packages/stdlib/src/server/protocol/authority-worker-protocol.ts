@@ -102,6 +102,12 @@ export type AuthorityStationAction = Readonly<{
     | Readonly<{ kind: 'transfer'; from: 'actor' | 'station'; actorSlot: number; stationSlot: number; count?: number }>
   );
 
+/** Derived from the crop child owner; soil position, without simulation timing or policy. */
+export type AuthorityCropStageProjection = Readonly<{
+  position: readonly [number, number, number];
+  stage: number;
+}>;
+
 export type AuthorityGameplayView = Readonly<{
   nearbyStations?: readonly AuthorityStationView[];
   stationRecipes?: readonly StationRecipe[];
@@ -118,6 +124,7 @@ export type AuthorityGameplayView = Readonly<{
   difficulty?: import('../gameplay/difficulty-runtime').DifficultyCheckpoint;
   armorPoints?: number;
   media?: readonly import('../gameplay/modules/media-playback-model').MediaPlaybackProjectionV1[];
+  cropStages?: readonly AuthorityCropStageProjection[];
   metrics: AuthorityGameplayMetrics;
 }>;
 

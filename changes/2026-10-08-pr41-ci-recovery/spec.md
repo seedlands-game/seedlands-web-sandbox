@@ -179,4 +179,8 @@ Browser-local pointer envelope携带递增sequence、同次gesture、绝对monot
 
 本子片在土壤上记录作物，不制造 soil WorldCommit（土壤/上方 voxel 均未改变）；child仍是唯一阶段 owner。可见阶段应由该 child 的只读投影呈现，尚未实现则必须保持产品验收未完成。旧精确75f V4 composition 来自 Browser17实际checkpoint，只允许V4明确predecessor，禁止合成宽松身份迁移。非Classic内容必须能通过同一registered玩家路径种植，具体标识由自己的Pack提供。
 
+### 作物阶段公开投影子片
+
+实际 registered seed interaction 后，AuthorityRuntime.view 必须从唯一 CropRuntime owner 输出只含 position/stage 的 cropStages；不得泄漏 subSeconds、内部时钟或可写 owner 引用。Authority 正常推进后新 view 反映成长，先前 view 保持独立；空记录及恢复后的记录如实投影。旧 Worker fixture 缺可选字段时仍可启动，生产投影始终输出数组。该字段经现有 Worker structured clone 与 gameplay revision 门禁交付，不新增存档/网络 wire 版本，也不改冻结 v1/v2 reference corpus 的字段合同。当前片仅证明公开投影，不证明 mesh、射线选择或正式收割。
+
 实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。
