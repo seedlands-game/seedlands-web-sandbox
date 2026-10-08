@@ -3,6 +3,7 @@ import type { Point } from './scenario';
 export type ClassicSnapshot = Readonly<{
   player: Point;
   serverPlayerPosition: Point;
+  serverPlayerVelocity: Point;
   viewAngles: readonly [number, number];
   streamCenter: readonly [number, number];
   loadedChunks: number;

@@ -37,3 +37,9 @@ changes/2026-09-16-classic-beta173-parity/recipe-fixture-candidates.json
 changes/2026-09-16-classic-beta173-parity/recipe-source-bindings.mjs
 changes/2026-09-16-classic-beta173-parity/reference-worklist.md
 changes/2026-09-16-classic-beta173-parity/verify-recipe-fixture-candidates.mjs
+
+# Individually frozen evidence; check-frozen-evidence.mjs enforces exact original bytes.
+changes/2026-09-23-classic-functional-completion/evidence/v1-browser20-route-aim-contract-map-01/delivery-validation.json
+changes/2026-09-23-classic-functional-completion/evidence/v1-browser20-route-aim-contract-map-01/diagnosis.json
+changes/2026-09-23-classic-functional-completion/evidence/v1-browser20-route-aim-contract-map-01/README.md
+changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/pre-death-v4-identity.json

@@ -4,6 +4,7 @@ import {
   buildSurfaceTransportMotionCandidateV1,
   commitTransportMotionCandidateV1,
   deriveMountedSeatConstraintV1,
+  advanceRouteSegmentV1,
   type RouteSegmentV1,
 } from '../../src/server/composition/mod-api';
 import {

@@ -29,11 +29,12 @@ const routeSnapshot = (
   ({
     player,
     serverPlayerPosition: options.server ?? player,
+    serverPlayerVelocity: [0, 0, 0] as Point,
     viewAngles: options.view ?? [KEY_S_TARGET_YAW, -20.03],
     onGround: options.onGround ?? true,
     colliding: options.colliding ?? false,
     interactionAttempts: 39,
-    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
+    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1, residency: null },
   }) as ClassicSnapshot;
 
 function routePage(
@@ -206,7 +207,7 @@ describe('Classic V2 pickup route post-correction refresh', () => {
   it.each([
     { name: 'omitted', options: {} },
     { name: 'false', options: { refreshAfterCorrection: false } },
-  ])('keeps the $name default path and snapshot read count', async ({ options }) => {
+  ])('stops the $name default path when the route is reached during correction', async ({ options }) => {
     const initial = routeSnapshot(BROWSER19_CURRENT, 27112, 20538);
     const strict = routeSnapshot(BROWSER19_STRICT, 27121, 20546);
     const { calls, page } = routePage({ initial, correction: strict, refreshed: strict, afterPulse: strict });
@@ -220,7 +221,7 @@ describe('Classic V2 pickup route post-correction refresh', () => {
         ...options,
       }),
     ).resolves.toStrictEqual(strict);
-    expect(calls).toMatchObject({ reads: 3, down: 1, up: 1 });
+    expect(calls).toMatchObject({ reads: 2, down: 0, up: 0 });
   });
 
   it.each([

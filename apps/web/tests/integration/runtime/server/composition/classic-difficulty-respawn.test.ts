@@ -18,8 +18,12 @@ const world = () => {
     platform: testCorePlatform,
     getWorldTime: () => 12,
     getVoxel: () => 0,
+    getLoadedCell: () => ({ voxel: 0, fluid: 0 }),
     prepareVoxelEdit: () => {
       throw new Error('unexpected voxel edit');
+    },
+    prepareVoxelEdits: () => {
+      throw new Error('unexpected voxel edits');
     },
   });
   runtime.spawnPlayer({ id: 'player', position: [0, 10, 0] });

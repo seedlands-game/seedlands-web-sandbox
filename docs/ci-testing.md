@@ -2,6 +2,8 @@
 
 CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查，不能证明没有缺陷。运行入口以根 `package.json` 为准。
 
+2026-10-08 PR41 修复：CI 固定 Node22.23.3，满足 pnpm11.25 的 Node>=22.13 要求。`format:check` 先校验四个明确冻结的历史证据文件 SHA-256 原字节，再检查其余文件格式；仅这四个路径有 Prettier 例外，完整检出缺失、修改或符号链接替换均失败。稀疏检出只接受 Git 明确标记 skip-worktree 的精确 HEAD blob，不重写历史 manifest 或证据。当前真实浏览器验收状态见 `changes/2026-10-08-pr41-ci-recovery/spec.md`，静态修复不代表产品旅程已通过。
+
 ## 2026-09-20 Classic 初版恢复
 
 2026-09-20 已恢复产品施工与验收入口；其后续实现现由 `changes/2026-09-23-classic-functional-completion/spec.md` 继续。新增命令仍以 `package.json` 为准。仓库已存在唯一 `apps/web/tests/e2e/classic-runtime.spec.ts`、根 `pnpm build`/`pnpm harness:artifact`/`pnpm harness:classic` 和对应 artifact/Classic runner，不再把这些入口描述为“尚不存在”或仍冻结；是否执行及结果仍须以当次 source、artifact 和 receipt 为准。通用 `harness/contracts.json`、`plan.mjs`、`run.mjs` 与 `verify:*` selector/runner 尚未落盘，下文相应章节仍是延期设计。复用 #36 的 artifact 与唯一 Classic 线路，使用单 worker/headless/静音；运行结果绑定产物摘要，不是性能测量，也不代表 Beta 全量内容已完成。下述 09-16 冻结只描述历史基线；Kernel/stdlib 与静态检查持续执行。CI 实际运行状态以当前 workflow 与证据为准；浏览器只消费同次 build 的完整 dist 并校验身份，不重新构建。`tsconfig.classic-tests.json` 检查当前恢复的用例和浏览器配置，远端保护仍保持现状。

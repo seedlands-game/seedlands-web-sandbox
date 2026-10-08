@@ -37,7 +37,14 @@ it('树苗成长通过一次正式 editBatch 提交，阻挡时不写入', () =>
     getWorldTime: () => 12,
     getVoxel: ([x, y, z]: [number, number, number]) => cells.get([x, y, z].join(',')) ?? Voxel.Air,
     getLoadedVoxel: ([x, y, z]: [number, number, number]) => cells.get([x, y, z].join(',')) ?? Voxel.Air,
+    getLoadedCell: ([x, y, z]: [number, number, number]) => ({
+      voxel: cells.get([x, y, z].join(',')) ?? Voxel.Air,
+      fluid: 0,
+    }),
     prepareVoxelEdit: () => {
+      throw new Error('unexpected');
+    },
+    prepareVoxelEdits: () => {
       throw new Error('unexpected');
     },
     editBatch: ({ edits }: { edits?: readonly { x: number; y: number; z: number; value: number }[] }) => {

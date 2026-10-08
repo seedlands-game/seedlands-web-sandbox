@@ -15,6 +15,49 @@ import {
 } from '../../../src/app/scene/block-light-volume';
 
 describe('浏览器方块光体积', () => {
+  it('重挂相同Authority halo的mesh复用已完成brick，旧资源释放不移除新资源', () => {
+    let revision = 'resident:1';
+    const applies: string[] = [];
+    const cache = new ChunkBlockLightCache({
+      getVoxelIfLoaded: () => Voxel.Air,
+      blockLightRevision: () => revision,
+      voxelSemantics: classicContent.voxelSemantics,
+    });
+    const releaseOld = cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('old') });
+    cache.rebuildNearest([0, 0, 0]);
+    cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('replacement') });
+    releaseOld();
+    expect(applies).toEqual(['old', 'replacement']);
+    expect(cache.snapshot).toMatchObject({ brickCount: 1, pendingBrickCount: 0, ready: true, rebuildCount: 1 });
+    revision = 'resident:2';
+    cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('edited') });
+    expect(applies).toEqual(['old', 'replacement']);
+    expect(cache.snapshot.ready).toBe(false);
+    cache.rebuildNearest([0, 0, 0]);
+    expect(applies).toEqual(['old', 'replacement', 'edited']);
+  });
+  it('邻居mesh注册不使未变化的Authority halo失效，真实revision变化仍失效', () => {
+    let revision = 'fully-resident:1';
+    const applied: string[] = [];
+    const cache = new ChunkBlockLightCache({
+      getVoxelIfLoaded: () => Voxel.Air,
+      blockLightRevision: () => revision,
+      voxelSemantics: classicContent.voxelSemantics,
+    });
+    cache.register('0,0,0', 0, 0, 0, { apply: () => applied.push('first') });
+    cache.rebuildNearest([0, 0, 0]);
+    expect(cache.snapshot.ready).toBe(true);
+    cache.register('1,0,0', 1, 0, 0, { apply: () => applied.push('neighbor') });
+    expect(cache.snapshot.pendingBrickCount).toBe(1);
+    cache.rebuildNearest([0, 0, 0]);
+    expect(applied).toEqual(['first', 'neighbor']);
+    expect(cache.snapshot.ready).toBe(true);
+    revision = 'fully-resident:2';
+    cache.invalidateAround(0, 0, 0);
+    expect(cache.snapshot.pendingBrickCount).toBe(2);
+    expect(cache.snapshot.ready).toBe(false);
+  });
+
   it('将CPU的0到15光级精确编码为R8 UNORM采样值', () => {
     for (const level of [0, 1, 7, BLOCK_LIGHT_MAX_LEVEL]) {
       const sampledByWebGl = encodeBlockLightLevelForR8(level) / 255;

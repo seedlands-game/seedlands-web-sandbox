@@ -158,8 +158,13 @@ export class ChunkBlockLightCache {
   constructor(private readonly reader: BlockLightVoxelReader) {}
 
   register(key: string, cx: number, cy: number, cz: number, sink: ChunkBlockLightSink): () => void {
-    const entry = { key, cx, cy, cz, sink, snapshot: null };
+    const previous = this.entries.get(key)?.snapshot ?? null;
+    const snapshot = chunkBlockLightNeedsRefresh(previous, this.reader, cx, cy, cz) ? null : previous;
+    // A remesh replaces GPU resources, not the unchanged Authority light volume.
+    if (snapshot) sink.apply(snapshot.volume);
+    const entry = { key, cx, cy, cz, sink, snapshot };
     this.entries.set(key, entry);
+    if (snapshot) this.dirty.delete(key);
     this.invalidateAround(cx, cy, cz);
     // Replacement resources share a chunk key. An old resource's delayed
     // destruction must never unregister the newer resource.
@@ -182,7 +187,12 @@ export class ChunkBlockLightCache {
 
   invalidateAround(cx: number, cy: number, cz: number): void {
     for (const entry of this.entries.values())
-      if (Math.abs(entry.cx - cx) <= 1 && Math.abs(entry.cy - cy) <= 1 && Math.abs(entry.cz - cz) <= 1)
+      if (
+        Math.abs(entry.cx - cx) <= 1 &&
+        Math.abs(entry.cy - cy) <= 1 &&
+        Math.abs(entry.cz - cz) <= 1 &&
+        chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz)
+      )
         this.dirty.add(entry.key);
   }
 
