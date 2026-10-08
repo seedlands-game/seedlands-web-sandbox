@@ -1,0 +1,104 @@
+{
+  "status": "PASS",
+  "sourceSha": "4052dae01d4527bd1747a60358cf59469ab1b3e2",
+  "sourceTree": "12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5",
+  "sourceDigest": "21c84cd108b96deb6187a474bddf9779e027d2095be82a404b27c4815d321671",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f",
+  "builtAt": "2026-09-29T05:20:40.897Z",
+  "receiptSha256": "f00fe6ff759dfa8d5f73bea92d83c25ddd0495b67d2e6cd355ed0201ee2f4043",
+  "artifactFiles": 276,
+  "diskFilesExcludingReceipt": 276,
+  "diskFilesIncludingReceipt": 277,
+  "receiptMapSha256": "766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde",
+  "diskMapSha256": "766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde",
+  "missing": [],
+  "extra": [],
+  "mismatched": [],
+  "symlinks": [],
+  "build16MapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "build17MapSha256": "766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde",
+  "sameAsBuild16": false,
+  "changedPathCount": 10,
+  "changedPaths": [
+    ".vite/manifest.json",
+    "assets/authority-worker-BRB2R8a0.js",
+    "assets/authority-worker-Bs4yJ1_t.js",
+    "assets/bootstrap-94khWet-.js",
+    "assets/bootstrap-CVuB91mq.js",
+    "assets/chunk-persistence-benchmark-B7rhEazS.js",
+    "assets/chunk-persistence-benchmark-DkxEybrW.js",
+    "assets/game-BXNNs7qI.js",
+    "assets/game-CNo4H6ow.js",
+    "index.html"
+  ],
+  "mapDiffSha256": "f5af9f23a21cd3a1e189e94ad3bf3243938a872ab8be5f290db09564decded7d",
+  "packLock": {
+    "publicSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+    "distSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+    "equal": true
+  },
+  "mp3": [
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-4052dae0/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-4052dae0/apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "/private/tmp/seedlands-v2-acceptance-4052dae0/apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    }
+  ],
+  "packLockEntryCount": 1,
+  "packLockEntry": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "size": 2976045,
+    "contentType": "audio/mpeg"
+  },
+  "acceptance": {
+    "head": "4052dae01d4527bd1747a60358cf59469ab1b3e2",
+    "sourceTree": "12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5",
+    "trackedClean": true
+  },
+  "productionSourceChanges": [
+    {
+      "path": "packages/stdlib/src/server/harness/authority-world-harness.ts",
+      "beforeBytes": 20668,
+      "afterBytes": 18726,
+      "deltaBytes": -1942,
+      "beforeSha256": "5ae503e512096dd99d2a31fe19b8b11c1e9fd8b0cded0bd75436c1c70e89fc08",
+      "afterSha256": "d7c7ac5bbc97836df1fc59a97c4910a9a24bb975f8cc6f95c1572c74989adc49"
+    },
+    {
+      "path": "packages/stdlib/src/server/harness/world-harness-contract.ts",
+      "beforeBytes": 6327,
+      "afterBytes": 6562,
+      "deltaBytes": 235,
+      "beforeSha256": "7c4681dd568b2a4b72542465abea7e8a7d0ae862400b836e238bcfc68779f214",
+      "afterSha256": "bd9c7ef9db9acbad5d634d12eabab09dcfe39cdc00499e7027ffe20893b91dfc"
+    },
+    {
+      "path": "packages/stdlib/src/server/harness/world-harness-operations.ts",
+      "beforeBytes": 3446,
+      "afterBytes": 6764,
+      "deltaBytes": 3318,
+      "beforeSha256": "812135a161db00045e296acba75a16199da01b2f0c81858aa2f4f1ca89db64f6",
+      "afterSha256": "5e2651670cf24f4ee0f6e0cf7587516e0a25b540568d676aee45faccb86486de"
+    },
+    {
+      "path": "packages/stdlib/src/server/harness/world-harness-validation.ts",
+      "beforeBytes": 6706,
+      "afterBytes": 9008,
+      "deltaBytes": 2302,
+      "beforeSha256": "25398033b8f3169d825cf9480776e2be5bf4196295d70da04293a685f7249a48",
+      "afterSha256": "73cdb07f4911a5267686d4dd69c38517563f108b1cb42bccd218a1c65abe1208"
+    }
+  ]
+}

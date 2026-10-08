@@ -454,6 +454,16 @@ GIT-21 Equipment Core 组合、推送与 V2 BUILD01 是已准出子片的窄交�
 
 ## Delivery Snapshot
 
+V2-ARTIFACT-BUILD-17 从 GIT42 已推送 source `4052dae01d4527bd1747a60358cf59469ab1b3e2` / tree
+`12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5` 的 clean detached acceptance tree 唯一执行 `pnpm build` 与
+`pnpm harness:artifact`，均 PASS。artifactDigest 为
+`da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f`，产物 276 项、磁盘含 receipt 277 项，
+0 symlink/missing/extra/mismatch。相对 BUILD16 的 map 有 10 个实际变化路径，对应四个 stdlib Harness 生产源进入
+bundle；Pack lock 与 MP3 source/public/dist 仍一致。Browser25 仅证明旧 source，新 reference Browser 为 `NOT_RUN`。
+本阶段传统工程量约 `0.1-0.25 PD`，AI 目标 `<=1h`、硬上限 `2h`，120% 容量建议为传统 `0.3 PD`、AI `2.4h`；
+credits、费率、API 等价费用、当前额度与预测占比均为 `unknown`。长期 Harness 合同已由 GIT42 更新 public inspect
+合同；BUILD17 本身不新增 owner、协议或长期教程，因此不再修改长期 docs。
+
 V2-ARTIFACT-BUILD-16 从 GIT40 manifest closure 已推送 source
 `fdb53c07c0da14c7f523473e4f33060a385f23ff` / tree `ecc7940708bca8ea1d01e8df50337fa536d27d18` 的
 clean detached tree 唯一执行 `pnpm build` 与 `pnpm harness:artifact`，均 PASS。产物 276 项、磁盘含 receipt

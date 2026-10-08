@@ -1,5 +1,38 @@
 # V2 Equipment Core Artifact Build 证据
 
+## BUILD17：Restore reference observability
+
+- 已推送 source SHA：`4052dae01d4527bd1747a60358cf59469ab1b3e2`；tree
+  `12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5`。
+- clean detached acceptance tree：`/private/tmp/seedlands-v2-acceptance-4052dae0`。构建前 tracked/index clean、
+  `apps/web/dist` 不存在；离线 frozen 安装下载 0，根、Web 与 Classic 的内部 workspace links 全部指向本树。
+- 唯一 `pnpm build`：runId `v2-artifact-build-17-build`，UTC `2026-09-29T05:19:53.279Z` 至
+  `05:20:46.255Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-17-artifact-verify`，UTC
+  `2026-09-29T05:20:59.035Z` 至 `05:21:16.610Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出 identity 一致：sourceDigest
+`21c84cd108b96deb6187a474bddf9779e027d2095be82a404b27c4815d321671`、lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest
+`da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f`、276 项，builtAt
+`2026-09-29T05:20:40.897Z`。receipt SHA-256 为
+`f00fe6ff759dfa8d5f73bea92d83c25ddd0495b67d2e6cd355ed0201ee2f4043`。276 项 receipt/disk map 逐项一致，
+map SHA-256 均为 `766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde`；dist 为 277
+个普通文件，0 symlink/missing/extra/mismatch。
+
+BUILD17 与 BUILD16 的 map 实测不同，共 10 个路径：旧/新 authority、bootstrap、chunk-persistence、game chunk
+共 8 项，加 `.vite/manifest.json` 与 `index.html`。这是 GIT42 四个 stdlib Harness 生产源变更进入 production bundle
+后的真实差异；四源文件旧/新 bytes 与 SHA-256 及十项产物旧/新 SHA-256 都保存在本阶段 inspection/diff，不能把
+artifact 变化外推为 Browser 通过。Pack lock public/dist SHA-256 均为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`；MP3 source/public/dist 均为
+2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+GIT42 最终 delivery SHA-256 为 `b74599e40309a5a75fe91232ea15f3927e5270dff9b5b7ba4eaf41a11f353929`；本阶段只引用，
+没有改写原件。BUILD17 acceptance tree/dist 保留给下一次 root 唯一 Browser lease。Browser25 只覆盖旧 source；新
+reference 的 old stale/new current/UI continuation 为 `NOT_RUN`。本阶段未运行 Browser26、Cua、devserver、CI 修复、
+deploy 或 merge；artifact PASS 不等于 Browser 或产品 GREEN。
+
 ## BUILD16：Canonical discovery boundary
 
 - 已推送 source SHA：`fdb53c07c0da14c7f523473e4f33060a385f23ff`；tree
