@@ -7,8 +7,9 @@ import { defineBlockActionsModule, definePack, type ModModule } from '@seedlands
 import type { GameplayCallbacks } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
 import { pack } from '../../../../../../../playbooks/classic/src/pack';
 
-type Profile = 'content' | 'inventory-actions' | 'block-rules';
+type Profile = 'content' | 'inventory-actions' | 'block-rules' | 'crops';
 const ROOT_MODULES: Readonly<Record<Profile, readonly string[]>> = Object.freeze({
+  crops: ['seedlands:overworld-crops'],
   content: ['seedlands:overworld-content'],
   'inventory-actions': ['seedlands:inventory-actions-module'],
   'block-rules': ['seedlands:overworld-block-rules'],
@@ -54,7 +55,7 @@ export function classicGameplayDomainOptions(
 ): Pick<GameplayCallbacks, 'composition' | 'moduleActorAuthority' | 'moduleSystemAuthority'> {
   const modules = classicGameplayDomainModules(
     ROOT_MODULES[profile],
-    profile === 'block-rules' ? [defineBlockActionsModule()] : [],
+    profile === 'block-rules' || profile === 'crops' ? [defineBlockActionsModule()] : [],
   );
   const local = definePack({
     id: pack.manifest.id,

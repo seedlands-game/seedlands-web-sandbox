@@ -1,6 +1,7 @@
 import { defineGameplaySnapshotPredecessorsV1, type CompositionCheckpointIdentity } from '@seedlands/stdlib/mod-api';
 import { classicPreDeathV4CompositionIdentity } from './pre-death-v4-composition-identity';
 import { classicPreTillV4CompositionIdentity } from './pre-till-v4-composition-identity';
+import { classicPreCropV4CompositionIdentity } from './pre-crop-v4-composition-identity';
 
 // Exact production capture from c18a890. Keep this independent of current Pack assembly.
 const CAPTURED_KERNEL_MIGRATION_IDENTITY =
@@ -71,6 +72,10 @@ export const classicGameplaySnapshotPredecessors = defineGameplaySnapshotPredece
   {
     gameplayVersions: [4],
     identity: classicPreTillV4CompositionIdentity,
+  },
+  {
+    gameplayVersions: [4],
+    identity: classicPreCropV4CompositionIdentity,
   },
 ]);
 

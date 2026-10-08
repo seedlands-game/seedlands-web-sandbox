@@ -162,6 +162,9 @@ export { defineFluidContainerInteractionModule } from '../gameplay/modules/fluid
 export type { FluidContainerInteractionConfig } from '../gameplay/modules/fluid-container-interaction';
 export { defineSoilTransformInteractionModule } from '../gameplay/modules/soil-transform-interaction';
 export type { SoilTransformInteractionConfig } from '../gameplay/modules/soil-transform-interaction';
+export { defineCropInteractionModule } from '../gameplay/modules/crop-interaction-module';
+export type { CropInteractionConfig } from '../gameplay/modules/crop-interaction-model';
+export type { CropPolicy } from '../gameplay/modules/crop-policy';
 export {
   defineStructureDefinitionV1,
   resolveStructureRootV1,

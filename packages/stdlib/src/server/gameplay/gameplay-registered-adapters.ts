@@ -77,6 +77,7 @@ export function createGameplayRegisteredRuntimes(
     now(): number;
     assertCanChange(): void;
     changed(inventory?: boolean): void;
+    crops(): import('./crop-runtime').CropRuntime;
   }>,
 ) {
   const { callbacks } = options;
@@ -101,6 +102,7 @@ export function createGameplayRegisteredRuntimes(
   const registered = createGameplayRegisteredAdapters({
     entities: options.entities,
     content: options.content,
+    crops: options.crops,
     actorAuthority: callbacks.moduleActorAuthority,
     modules: options.modules,
     simulation: options.simulation,

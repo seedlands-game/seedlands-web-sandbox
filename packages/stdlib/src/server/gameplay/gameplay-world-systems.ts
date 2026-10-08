@@ -12,6 +12,7 @@ import { LifeSkillsRuntime } from './life-skills-runtime';
 import { VehicleRuntime } from './vehicle-runtime';
 import { NavigationItemsRuntime } from './navigation-items-runtime';
 import { CropRuntime } from './crop-runtime';
+import { CROP_INTERACTION_CAPABILITY, type CropInteractionConfig } from './modules/crop-interaction-model';
 import { StructureInteractionRuntime } from './structure-interaction-runtime';
 import { FinalEntitiesRuntime } from './final-entities-runtime';
 import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
@@ -70,7 +71,23 @@ export function createGameplayWorldSystems(
     getLoadedVoxel: options.callbacks.getLoadedVoxel,
     changed: options.changed,
   });
+  const cropPolicy = options.callbacks.composition?.definitionMap.capabilities.some(
+    ({ id }) => id === CROP_INTERACTION_CAPABILITY,
+  )
+    ? options.callbacks.composition.capability<CropInteractionConfig>(CROP_INTERACTION_CAPABILITY)
+    : undefined;
+  if (cropPolicy) {
+    for (const id of [
+      cropPolicy.seedItemId,
+      ...cropPolicy.matureDrops.map((drop) => drop.itemId),
+      ...cropPolicy.immatureDrops.map((drop) => drop.itemId),
+    ])
+      options.content.items.require(id);
+    for (const voxel of [...cropPolicy.soilVoxels, ...cropPolicy.emptyAboveVoxels, ...cropPolicy.waterVoxels])
+      if (!options.content.voxelSemantics.get(voxel)) throw new TypeError('Crop policy requires registered voxels.');
+  }
   const crops = new CropRuntime({
+    policy: cropPolicy,
     seed: options.callbacks.environmentSeed ?? 0,
     entities: options.entities,
     getLoadedVoxel: options.callbacks.getLoadedVoxel,
