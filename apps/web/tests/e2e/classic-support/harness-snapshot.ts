@@ -1,6 +1,7 @@
 import type { Point } from './scenario';
 
 export type ClassicSnapshot = Readonly<{
+  frameMs: number;
   player: Point;
   serverPlayerPosition: Point;
   serverPlayerVelocity: Point;

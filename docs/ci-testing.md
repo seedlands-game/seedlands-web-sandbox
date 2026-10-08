@@ -2,7 +2,7 @@
 
 CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查，不能证明没有缺陷。运行入口以根 `package.json` 为准。
 
-2026-10-08 PR41 修复：CI 固定 Node22.23.3，满足 pnpm11.25 的 Node>=22.13 要求。`format:check` 先校验四个明确冻结的历史证据文件 SHA-256 原字节，再检查其余文件格式；仅这四个路径有 Prettier 例外，完整检出缺失、修改或符号链接替换均失败。稀疏检出只接受 Git 明确标记 skip-worktree 的精确 HEAD blob，不重写历史 manifest 或证据。当前真实浏览器验收状态见 `changes/2026-10-08-pr41-ci-recovery/spec.md`，静态修复不代表产品旅程已通过。
+2026-10-08 PR41 修复：CI 固定 Node22.23.3，满足 pnpm11.25 的 Node>=22.13 要求。`format:check` 先校验五个明确冻结的历史证据文件 SHA-256 原字节，再检查其余文件格式；四个精确路径有 Prettier 例外，另一个 manifest 绑定的 `strict-manifest.mjs` 有精确 ESLint 例外。完整检出缺失、修改或符号链接替换均失败。稀疏检出只接受 Git 明确标记 skip-worktree 的精确 HEAD blob，不重写历史 manifest 或证据。当前真实浏览器验收状态见 `changes/2026-10-08-pr41-ci-recovery/spec.md`，静态修复不代表产品旅程已通过。
 
 ## 2026-09-20 Classic 初版恢复
 
