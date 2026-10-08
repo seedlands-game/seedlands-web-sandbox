@@ -92,6 +92,24 @@ export class LocalPlayerPrediction {
     return { ...this.resetCountsValue };
   }
 
+  /** Preserve input edges between render frames without advancing local physics. */
+  captureInput(request: Omit<LocalPredictionAdvance, 'elapsedSeconds' | 'world'>): InputCommand | null {
+    this.synchronizeMovement(request.snapshot);
+    const command = this.inputStream.sample({
+      physicsTick: request.snapshot.physicsTick,
+      issuedAtMs: request.issuedAtMs,
+      forward: request.forward,
+      right: request.right,
+      keys: request.keys,
+    });
+    return (
+      command && {
+        ...command,
+        ...(request.snapshot.player.movement ? { movementRevision: request.snapshot.player.movement.revision } : {}),
+      }
+    );
+  }
+
   advance(request: LocalPredictionAdvance): Readonly<{ commands: InputCommand[]; body: BodyState }> {
     if (!Number.isFinite(request.elapsedSeconds) || request.elapsedSeconds < 0)
       throw new RangeError('Prediction elapsed seconds must be non-negative and finite.');

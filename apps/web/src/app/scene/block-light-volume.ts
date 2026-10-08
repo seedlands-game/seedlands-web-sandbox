@@ -154,6 +154,9 @@ export type ChunkBlockLightCacheDiagnostics = ChunkBlockLightCacheSnapshot &
       cachedRevision: string | null;
       currentRevision: string;
     }>[];
+    lastRebuildMs: number;
+    totalRebuildMs: number;
+    maxRebuildMs: number;
   }>;
 
 /**
@@ -164,6 +167,9 @@ export class ChunkBlockLightCache {
   private readonly entries = new Map<string, ChunkBlockLightEntry>();
   private readonly dirty = new Set<string>();
   private rebuildCount = 0;
+  private lastRebuildMs = 0;
+  private totalRebuildMs = 0;
+  private maxRebuildMs = 0;
 
   constructor(private readonly reader: BlockLightVoxelReader) {}
 
@@ -222,11 +228,15 @@ export class ChunkBlockLightCache {
       }
     }
     if (!selected) return false;
+    const started = performance.now();
     const snapshot = buildChunkBlockLightVolume(this.reader, selected.cx, selected.cy, selected.cz);
     selected.sink.apply(snapshot.volume);
     selected.snapshot = snapshot;
     this.dirty.delete(selected.key);
     this.rebuildCount += 1;
+    this.lastRebuildMs = performance.now() - started;
+    this.totalRebuildMs += this.lastRebuildMs;
+    this.maxRebuildMs = Math.max(this.maxRebuildMs, this.lastRebuildMs);
     return true;
   }
 
@@ -257,6 +267,9 @@ export class ChunkBlockLightCache {
   get diagnostics(): ChunkBlockLightCacheDiagnostics {
     return {
       ...this.snapshot,
+      lastRebuildMs: this.lastRebuildMs,
+      totalRebuildMs: this.totalRebuildMs,
+      maxRebuildMs: this.maxRebuildMs,
       pendingBricks: [...this.dirty].flatMap((key) => {
         const entry = this.entries.get(key);
         return entry

@@ -70,6 +70,34 @@ const controls = {
 };
 
 describe('生产本地玩家预测运行时', () => {
+  it('即时输入和render预测共享递增序列，未预测的边沿ack不遗留旧运动', () => {
+    const runtime = new LocalPlayerPrediction('world:1', 60);
+    const world = new RevisionWorld();
+    const down = runtime.captureInput({ ...controls, snapshot: snapshot(), issuedAtMs: 0 })!;
+    const rendered = runtime.advance({
+      ...controls,
+      elapsedSeconds: 1 / 60,
+      snapshot: snapshot(),
+      world,
+      issuedAtMs: 16,
+    });
+    const released = { ...controls, keys: { ...controls.keys, forward: false } };
+    const up = runtime.captureInput({ ...released, snapshot: snapshot(6), issuedAtMs: 100 })!;
+    const commands = [down, ...rendered.commands, up];
+    expect(commands.map((command) => command.sequence)).toEqual([0, 1, 2]);
+    expect(commands.map((command) => command.targetPhysicsTick)).toEqual([2, 3, 8]);
+    expect(runtime.pendingFrames.map((frame) => frame.sequence)).toEqual([1]);
+    runtime.applyAuthoritySnapshot(snapshot(8, up.sequence), world);
+    expect(runtime.pendingFrames).toHaveLength(0);
+    const neutral = runtime.advance({
+      ...released,
+      elapsedSeconds: 1 / 60,
+      snapshot: snapshot(8, up.sequence),
+      world,
+      issuedAtMs: 116,
+    });
+    expect(neutral.commands[0]).toMatchObject({ sequence: 3, targetPhysicsTick: 10, state: { moveX: 0, moveZ: 0 } });
+  });
   it('asks for retained prediction chunk revisions beyond the authority contact window', () => {
     const runtime = new LocalPlayerPrediction('world:1', 60);
     const world = new LazyRevisionWorld();
