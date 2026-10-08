@@ -146,6 +146,16 @@ export type ChunkBlockLightCacheSnapshot = Readonly<{
   rebuildCount: number;
 }>;
 
+export type ChunkBlockLightCacheDiagnostics = ChunkBlockLightCacheSnapshot &
+  Readonly<{
+    pendingBricks: readonly Readonly<{
+      key: string;
+      chunk: readonly [number, number, number];
+      cachedRevision: string | null;
+      currentRevision: string;
+    }>[];
+  }>;
+
 /**
  * Owns only reconstructible presentation state.  At most one stale brick is
  * rebuilt per call, selected by squared distance to the presentation camera.
@@ -240,6 +250,29 @@ export class ChunkBlockLightCache {
       pendingBrickCount,
       ready: allocatedBrickCount > 0 && pendingBrickCount === 0,
       rebuildCount: this.rebuildCount,
+    };
+  }
+
+  /** Read-only failure diagnostics; never used to change readiness or schedule work. */
+  get diagnostics(): ChunkBlockLightCacheDiagnostics {
+    return {
+      ...this.snapshot,
+      pendingBricks: [...this.dirty].flatMap((key) => {
+        const entry = this.entries.get(key);
+        return entry
+          ? [
+              {
+                key,
+                chunk: [entry.cx, entry.cy, entry.cz] as const,
+                cachedRevision: entry.snapshot?.revision ?? null,
+                currentRevision: this.reader.blockLightRevision(
+                  blockLightOriginForChunk(entry.cx, entry.cy, entry.cz),
+                  BLOCK_LIGHT_VOLUME_SIZE,
+                ),
+              },
+            ]
+          : [];
+      }),
     };
   }
 

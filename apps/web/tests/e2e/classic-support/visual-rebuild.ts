@@ -77,10 +77,23 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
         { timeout: 30_000 },
       )
       .toBe(true);
-    await waitForSnapshot(
-      page,
-      (s) => s.visualEffects.blockLightReady && s.visualEffects.blockLightSourceRevision === s.worldRevision,
-    );
+    try {
+      await waitForSnapshot(
+        page,
+        (s) => s.visualEffects.blockLightReady && s.visualEffects.blockLightSourceRevision === s.worldRevision,
+      );
+    } catch (error) {
+      await testInfo.attach('block-light-readiness-failure.json', {
+        contentType: 'application/json',
+        body: JSON.stringify(
+          await page.evaluate(() => {
+            const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+            return { snapshot: h.snapshot(), cache: h.blockLightDiagnostics() };
+          }),
+        ),
+      });
+      throw error;
+    }
     await page.evaluate(async () => {
       for (let i = 0; i < 4; i++) await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
     });

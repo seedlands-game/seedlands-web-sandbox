@@ -263,6 +263,10 @@ export class World {
     return this.blockLightCache.snapshot;
   }
 
+  getBlockLightDiagnostics() {
+    return this.blockLightCache.diagnostics;
+  }
+
   sampleBlockLight = (position: readonly [number, number, number]) => this.blockLightCache.sample(position);
 
   waitForInitialVisibleChunk = () => this.repository.waitForFirstVisible();

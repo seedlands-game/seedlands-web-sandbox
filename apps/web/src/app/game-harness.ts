@@ -399,6 +399,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     getFluidCell: (x, y, z) => bindings.world()?.getFluidCell(x, y, z) ?? null,
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,
     getRenderedChunkRevision: (cx, cy, cz) => bindings.world()?.getRenderedChunkRevision(cx, cy, cz) ?? null,
+    blockLightDiagnostics: () => bindings.world()?.getBlockLightDiagnostics() ?? null,
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {
       const environment = bindings.environment();

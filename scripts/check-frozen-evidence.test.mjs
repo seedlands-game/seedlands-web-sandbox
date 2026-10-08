@@ -20,8 +20,8 @@ function fixture(t) {
 }
 
 test('original historical bytes pass in full and sparse checkouts', (t) => {
-  assert.equal(checkFrozenEvidence(fixture(t)), 4);
-  assert.equal(checkFrozenEvidence(repository), 4);
+  assert.equal(checkFrozenEvidence(fixture(t)), 5);
+  assert.equal(checkFrozenEvidence(repository), 5);
 });
 
 test('formatting or modifying any excluded evidence still fails the gate', (t) => {
@@ -44,5 +44,22 @@ test('missing evidence and symlink substitutions fail closed', (t) => {
   const replacement = resolve(root, 'replacement.json');
   writeFileSync(replacement, bytes);
   symlinkSync(replacement, target);
+  assert.throws(() => checkFrozenEvidence(root), /regular file/);
+  rmSync(replacement);
+  assert.throws(() => checkFrozenEvidence(root), /regular file/);
+});
+
+test('a dangling symlink cannot masquerade as an absent sparse file', (t) => {
+  const root = fixture(t);
+  const git = (args) => execFileSync('git', args, { cwd: root, stdio: 'pipe' });
+  git(['init', '-q']);
+  git(['add', '.']);
+  git(['-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'fixture']);
+  const path = Object.keys(frozenEvidence)[0];
+  git(['update-index', '--skip-worktree', '--', path]);
+  const target = resolve(root, path);
+  rmSync(target);
+  assert.equal(checkFrozenEvidence(root), 5);
+  symlinkSync(resolve(root, 'missing-target'), target);
   assert.throws(() => checkFrozenEvidence(root), /regular file/);
 });

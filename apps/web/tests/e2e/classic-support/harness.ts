@@ -59,6 +59,7 @@ export type ChromeTrace = Readonly<{
 }>;
 
 export type HarnessApi = {
+  blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;
   aimedEntityId(): string | null;
@@ -435,6 +436,25 @@ export async function attackWithRealMouse(page: Page, entityId: string): Promise
       )
       .toEqual({ buffered: true, secondStep: true, secondDamage: true });
     await expect.poll(() => queryEntity(page, entityId)).toBeNull();
+  } catch (error) {
+    const diagnostic = await page.evaluate(async (targetId) => {
+      const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+      const current = h.snapshot();
+      const observed = [...((window as Window & { __classicCombatEvidence?: string[] }).__classicCombatEvidence ?? [])];
+      const [player, target] = await Promise.all([
+        h.world.command({ type: 'query-player-state' }),
+        h.world.command({ type: 'query-entity', entityId: targetId }),
+      ]);
+      return {
+        player,
+        target,
+        observed,
+        position: current.player,
+        authority: current.authority,
+        frameMs: current.frameMs,
+      };
+    }, entityId);
+    throw new Error(`Real mouse combat failed: ${JSON.stringify(diagnostic)}`, { cause: error });
   } finally {
     await page.mouse.up();
     await page.evaluate(() =>
