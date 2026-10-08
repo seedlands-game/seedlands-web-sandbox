@@ -37,6 +37,7 @@
     "apps/web/tests/unit/app/player-input-gates.test.ts",
     "apps/web/tests/e2e/classic-support/target-aim.test.ts",
     "apps/web/tests/e2e/classic-support/route-aim-render-independence.test.ts",
+    "apps/web/tests/e2e/classic-support/route-aim-contract.test.ts",
     "apps/web/tests/unit/app/browser-gameplay-fluid-target.test.ts",
     "apps/web/tests/e2e/classic-support/equipment-route-corridor-correction.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-till-authority.test.ts",
@@ -50,6 +51,22 @@
     "apps/web/tests/integration/runtime/server/composition/crop-plant-spine.test.ts",
     "apps/web/tests/unit/worker/unused-geometry-mesh.test.ts",
     "apps/web/tests/unit/worker/geometry-mesh-task.test.ts",
-    "apps/web/tests/integration/runtime/world/wasm-mesh-equivalence.test.ts"
+    "apps/web/tests/integration/runtime/world/wasm-mesh-equivalence.test.ts",
+    "apps/web/tests/e2e/classic-support/canonical-reporter.test.ts",
+    "apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts",
+    "apps/web/tests/e2e/classic-support/door-collision-runner.test.ts",
+    "apps/web/tests/e2e/classic-support/door-exit-face.test.ts",
+    "apps/web/tests/e2e/classic-support/door-readiness.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts",
+    "apps/web/tests/e2e/classic-support/equipment-route-pulse-handoff.test.ts",
+    "apps/web/tests/e2e/classic-support/route-progress.test.ts",
+    "apps/web/tests/e2e/classic-support/scenario.test.ts"
   ]
 }

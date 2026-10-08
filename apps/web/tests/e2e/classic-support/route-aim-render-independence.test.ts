@@ -58,6 +58,20 @@ function mousePage() {
 }
 
 describe('route mouse input observes synchronous yaw without a render dependency', () => {
+  it('a real reverse-route gesture observes alignment before movement within two mouse events', async () => {
+    const driver = mousePage();
+    await lockPointer(driver.page);
+    const result = await walkTo(driver.page, [78.5, -0.5], {
+      refreshAfterCorrection: true,
+      tolerance: 0.06,
+      corridorTolerance: 0.08,
+      pulseMs: 80,
+    });
+    expect(result.player).toEqual([78.5, 32.6, -0.5]);
+    expect(driver.downs()).toBe(1);
+    expect(driver.moves()).toBeLessThanOrEqual(2);
+    expect(driver.elapsed()).toBe(0);
+  });
   it('Browser08 reverse turn retains 18-move bound despite slow renderer', async () => {
     const driver = mousePage();
     await lockPointer(driver.page);

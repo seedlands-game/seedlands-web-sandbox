@@ -12,7 +12,10 @@ const normalizeDegrees = (value: number) => {
   return normalized;
 };
 
-const clampStep = (value: number) => Math.max(-MAX_MOUSE_STEP, Math.min(MAX_MOUSE_STEP, value));
+const clampStep = (value: number, wholeTurn = false) => {
+  const limit = wholeTurn ? 180 / MOUSE_SENSITIVITY_DEGREES : MAX_MOUSE_STEP;
+  return Math.max(-limit, Math.min(limit, value));
+};
 const FACE_INTERIOR_EPSILON = 1e-6;
 
 type VoxelAimObservation = Readonly<{ position: Point; adjacent: Point | null }>;
@@ -60,6 +63,7 @@ export function mouseCorrectionToPoint(
   player: Point,
   viewAngles: readonly [number, number],
   target: Point,
+  options: Readonly<{ wholeTurn?: boolean }> = {},
 ): Readonly<{ dx: number; dy: number }> {
   const x = target[0] - player[0];
   const y = target[1] - player[1];
@@ -67,8 +71,8 @@ export function mouseCorrectionToPoint(
   const targetYaw = (Math.atan2(-x, -z) * 180) / Math.PI;
   const targetPitch = (Math.atan2(y, Math.hypot(x, z)) * 180) / Math.PI;
   return {
-    dx: clampStep(normalizeDegrees(viewAngles[0] - targetYaw) / MOUSE_SENSITIVITY_DEGREES),
-    dy: clampStep((viewAngles[1] - targetPitch) / MOUSE_SENSITIVITY_DEGREES),
+    dx: clampStep(normalizeDegrees(viewAngles[0] - targetYaw) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn),
+    dy: clampStep((viewAngles[1] - targetPitch) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn),
   };
 }
 
@@ -77,11 +81,12 @@ export function horizontalMouseCorrectionToRoute(
   yaw: number,
   target: readonly [number, number],
   direction: 'KeyW' | 'KeyS',
+  options: Readonly<{ wholeTurn?: boolean }> = {},
 ): number {
   const x = target[0] - player[0];
   const z = target[1] - player[2];
   const targetYaw = (Math.atan2(-x, -z) * 180) / Math.PI + (direction === 'KeyS' ? 180 : 0);
-  return clampStep(normalizeDegrees(yaw - targetYaw) / MOUSE_SENSITIVITY_DEGREES);
+  return clampStep(normalizeDegrees(yaw - targetYaw) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn);
 }
 
 export type RouteAimObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
@@ -95,6 +100,7 @@ export async function correctMouseToRoute<T extends RouteAimObservation>(
     observe: () => Promise<T | null>;
     move: (dx: number, dy: number) => Promise<void>;
     routeReached?: (observation: T) => boolean;
+    wholeTurn?: boolean;
   }>,
 ): Promise<RouteAimOutcome<T>> {
   if (!options.target.every(Number.isFinite))
@@ -123,6 +129,7 @@ export async function correctMouseToRoute<T extends RouteAimObservation>(
       current.viewAngles[0],
       options.target,
       options.direction,
+      { wholeTurn: options.wholeTurn },
     );
     if (Math.abs(dx) < 1) return { kind: 'angle-aligned', observation: current };
     lastDx = dx;

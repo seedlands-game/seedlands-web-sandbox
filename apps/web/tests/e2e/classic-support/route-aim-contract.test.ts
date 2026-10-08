@@ -42,10 +42,11 @@ function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
   const target: RoutePoint = [1, 0];
   const initial = routeSnapshot([0, 32.6, 0], -89.74, 1, 1);
   const reached = routeSnapshot([1, 32.6, 0], -89.74, 2, 2);
-  const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false };
+  const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false, pointerLocked: false };
   const page = {
     evaluate: async (callback: (...args: unknown[]) => unknown) => {
       const source = String(callback);
+      if (source.includes('pointerLockElement')) return calls.pointerLocked;
       if (source.includes('snapshot()')) {
         calls.reads += 1;
         return calls.pressed ? reached : initial;
@@ -65,7 +66,9 @@ function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
     locator: (selector: string) => ({
       isVisible: async () => false,
       boundingBox: async () => (selector === '#game' ? { x: 0, y: 0, width: 10_000, height: 540 } : null),
-      click: async () => undefined,
+      click: async () => {
+        calls.pointerLocked = true;
+      },
     }),
     mouse: {
       move: async () => {
