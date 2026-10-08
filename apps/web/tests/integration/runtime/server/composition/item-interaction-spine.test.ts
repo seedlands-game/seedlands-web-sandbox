@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   defineContentModule,
+  defineDeathInventoryPolicyModuleV1,
   defineInventoryModule,
   defineItemInteractionModule,
   definePack,
@@ -157,7 +158,27 @@ it('dispatches a non-Classic selected-item interaction without accepting an oper
 });
 
 it('rejects an unbound item and a stale inventory revision without changing state', async () => {
-  const verified = artifact(clicked);
+  const retain = () => ({
+    inventory: 'retain' as const,
+    cursor: 'retain' as const,
+    crafting: 'retain' as const,
+    armor: 'retain' as const,
+    actor: 'retain' as const,
+  });
+  const verified = artifact(
+    definePack({
+      id: clicked.manifest.id,
+      version: clicked.manifest.version,
+      kind: 'playbook',
+      modules: [
+        ...clicked.modules,
+        defineDeathInventoryPolicyModuleV1({
+          moduleId: 'sample:rejection-test-death-policy',
+          definition: { version: 1, actors: { player: retain(), creature: retain(), npc: retain() } },
+        }),
+      ],
+    }),
+  );
   const session = await HeadlessSession.create({
     seedText: 'non-classic-item-interaction-rejections',
     platform: testCorePlatform,

@@ -8,6 +8,7 @@ import {
 } from '../../../../fixtures/classic/content';
 import { Voxel } from '../../../../../../../packages/stdlib/src/world/voxel';
 import { tillOutcome } from '../../../../../../../packages/stdlib/src/server/gameplay/modules/till-policy';
+import { classicSoilTransformConfig } from '../../../../../../../playbooks/classic/src/item-interactions';
 
 const hoeMatrix = [
   { id: 'wood-hoe', material: 'plank', durability: 60 },
@@ -43,27 +44,47 @@ it('锄对泥土/草出耕地并消耗一点耐久，对其他方块拒绝', () 
   expect(farmland.preferredTool).toBe('shovel');
 
   for (const source of [Voxel.Grass, Voxel.Dirt]) {
-    const result = tillOutcome(classicContent.items, source, {
-      itemId: 'iron-hoe',
-      count: 1,
-      instance: { durability: 250 },
-    });
+    const result = tillOutcome(
+      classicContent.items,
+      source,
+      {
+        itemId: 'iron-hoe',
+        count: 1,
+        instance: { durability: 250 },
+      },
+      classicSoilTransformConfig,
+    );
     expect(result.toVoxel).toBe(Voxel.Farmland);
     expect(result.nextStack).toEqual({ itemId: 'iron-hoe', count: 1, instance: { durability: 249 } });
   }
   // 耐久归零后移除
-  const worn = tillOutcome(classicContent.items, Voxel.Dirt, {
-    itemId: 'wood-hoe',
-    count: 1,
-    instance: { durability: 1 },
-  });
+  const worn = tillOutcome(
+    classicContent.items,
+    Voxel.Dirt,
+    {
+      itemId: 'wood-hoe',
+      count: 1,
+      instance: { durability: 1 },
+    },
+    classicSoilTransformConfig,
+  );
   expect(worn.nextStack).toBeNull();
   // 对石头拒绝
   expect(() =>
-    tillOutcome(classicContent.items, Voxel.Stone, { itemId: 'iron-hoe', count: 1, instance: { durability: 250 } }),
+    tillOutcome(
+      classicContent.items,
+      Voxel.Stone,
+      { itemId: 'iron-hoe', count: 1, instance: { durability: 250 } },
+      classicSoilTransformConfig,
+    ),
   ).toThrow();
   // 非锄工具拒绝
   expect(() =>
-    tillOutcome(classicContent.items, Voxel.Dirt, { itemId: 'iron-pickaxe', count: 1, instance: { durability: 250 } }),
+    tillOutcome(
+      classicContent.items,
+      Voxel.Dirt,
+      { itemId: 'iron-pickaxe', count: 1, instance: { durability: 250 } },
+      classicSoilTransformConfig,
+    ),
   ).toThrow();
 });

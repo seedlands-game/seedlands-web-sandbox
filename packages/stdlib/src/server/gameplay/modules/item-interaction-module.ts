@@ -1,5 +1,6 @@
 import type { FluidCell } from '../../fluid/fluid-cell';
 import type { VoxelSemanticsDefinition } from '../../../world/voxel-semantics';
+import type { ItemCapabilityType } from '../item-registry';
 import type { EntityLifetimeReference } from '../ecs-entity-owner';
 import { playerInteractionOrigin, positionsInRange, voxelAdjacentFacePoint, voxelCenter } from '../gameplay-geometry';
 import { traceVoxelRay } from '../voxel-ray';
@@ -31,9 +32,10 @@ export type ItemInteractionExpectedSelectionV1 = Readonly<{
   creativeCatalogRevision: number;
   selectedSlot: number;
 }>;
+export type ItemInteractionSelector = Readonly<{ itemId: string }> | Readonly<{ capability: ItemCapabilityType }>;
 export type ItemInteractionDefinition = Readonly<{
   id: string;
-  selector: Readonly<{ itemId: string }>;
+  selector: ItemInteractionSelector;
   trigger: ItemInteractionTrigger;
   operationId: string;
   presentationKey: string;
@@ -72,6 +74,8 @@ type ItemInteractionRuntimeOptions = Readonly<{
 
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
 const PRESENTATION_KEY = /^[a-z0-9][a-z0-9._:-]{0,127}$/;
+const CAPABILITY_TYPE = /^[a-z][a-z0-9-]*$/;
+const codeUnitCompare = (left: string, right: string): number => (left < right ? -1 : left > right ? 1 : 0);
 function hasExecutePermission(module: ReturnType<ModDefinitionCatalog['module']>, resource: string): boolean {
   return Boolean(
     module?.permissions.some(
@@ -107,16 +111,22 @@ function snapshotDefinition(raw: ItemInteractionDefinition): ItemInteractionDefi
     throw new TypeError('Item interaction selector is invalid: ' + source.id);
   const selectorDescriptors = Object.getOwnPropertyDescriptors(source.selector);
   const selectorKeys = Reflect.ownKeys(selectorDescriptors);
-  const itemIdDescriptor = selectorDescriptors.itemId;
-  if (
-    selectorKeys.length !== 1 ||
-    selectorKeys[0] !== 'itemId' ||
-    itemIdDescriptor?.enumerable !== true ||
-    !('value' in itemIdDescriptor) ||
-    typeof itemIdDescriptor.value !== 'string' ||
-    !NAMESPACE_ID.test(itemIdDescriptor.value)
-  )
+  if (selectorKeys.length !== 1) throw new TypeError('Item interaction selector is invalid: ' + source.id);
+  const selectorKey = selectorKeys[0];
+  const selectorValue =
+    selectorKey === 'itemId' || selectorKey === 'capability' ? selectorDescriptors[selectorKey] : null;
+  if (selectorValue?.enumerable !== true || !('value' in selectorValue))
     throw new TypeError('Item interaction selector is invalid: ' + source.id);
+  let selector: ItemInteractionSelector;
+  if (selectorKey === 'itemId' && typeof selectorValue.value === 'string' && NAMESPACE_ID.test(selectorValue.value))
+    selector = Object.freeze({ itemId: selectorValue.value });
+  else if (
+    selectorKey === 'capability' &&
+    typeof selectorValue.value === 'string' &&
+    CAPABILITY_TYPE.test(selectorValue.value)
+  )
+    selector = Object.freeze({ capability: selectorValue.value as ItemCapabilityType });
+  else throw new TypeError('Item interaction selector is invalid: ' + source.id);
   if (typeof source.trigger !== 'string' || !['self', 'voxel', 'entity'].includes(source.trigger))
     throw new TypeError('Item interaction trigger is invalid: ' + source.id);
   if (typeof source.operationId !== 'string' || !NAMESPACE_ID.test(source.operationId))
@@ -129,7 +139,7 @@ function snapshotDefinition(raw: ItemInteractionDefinition): ItemInteractionDefi
     throw new TypeError('Item interaction voxel hit policy requires a voxel trigger: ' + source.id);
   return Object.freeze({
     id: source.id,
-    selector: Object.freeze({ itemId: itemIdDescriptor.value }),
+    selector,
     trigger: source.trigger as ItemInteractionTrigger,
     operationId: source.operationId,
     presentationKey: source.presentationKey,
@@ -208,34 +218,33 @@ function createItemInteractionRegistry() {
     string,
     Readonly<{ identity: ModRegistrationIdentity; definition: ItemInteractionDefinition }>
   >();
-  const selectors = new Set<string>();
   let resolved: readonly ResolvedItemInteraction[] | null = null;
   return Object.freeze({
     register(identity: ModRegistrationIdentity, raw: ItemInteractionDefinition) {
       if (resolved) throw new TypeError('Item interaction registry is frozen.');
       const definition = snapshotDefinition(raw);
       if (registered.has(definition.id)) throw new TypeError(`Duplicate item interaction: ${definition.id}`);
-      const selector = `${definition.selector.itemId}:${definition.trigger}`;
-      if (selectors.has(selector)) throw new TypeError(`Item interaction item/trigger conflict: ${selector}`);
-      selectors.add(selector);
       registered.set(definition.id, Object.freeze({ identity: Object.freeze({ ...identity }), definition }));
     },
     freeze(definitions: ModDefinitionCatalog, items: readonly ModItemDefinition[]) {
       if (resolved) throw new TypeError('Item interaction registry is already frozen.');
       const byId = new Map(items.map((item) => [item.id, item]));
       const next: ResolvedItemInteraction[] = [];
+      const selectors = new Set<string>();
       for (const { identity, definition } of registered.values()) {
-        const item = byId.get(definition.selector.itemId);
-        if (!item) throw new TypeError(`Item interaction references unknown item: ${definition.selector.itemId}`);
-        if (
-          definition.voxelHitPolicy === 'fluid-source' &&
-          !item.capabilities?.some(
-            (capability) => capability.type === 'fluid-container' && capability.fluid === 'empty',
-          )
-        )
+        let matches: ModItemDefinition[];
+        if ('itemId' in definition.selector) {
+          const item = byId.get(definition.selector.itemId);
+          matches = item ? [item] : [];
+        } else {
+          const capability = definition.selector.capability;
+          matches = items.filter((item) => item.capabilities?.some(({ type }) => type === capability));
+        }
+        if ('itemId' in definition.selector && matches.length === 0)
+          throw new TypeError(`Item interaction references unknown item: ${definition.selector.itemId}`);
+        if ('capability' in definition.selector && matches.length === 0)
           throw new TypeError(
-            'Item interaction fluid-source policy requires an empty fluid-container item: ' +
-              definition.selector.itemId,
+            `Item interaction capability selector matches no item: ${definition.selector.capability}`,
           );
         const operation = definitions.operation(definition.operationId);
         if (!operation) throw new TypeError(`Item interaction operation is missing: ${definition.operationId}`);
@@ -245,15 +254,29 @@ function createItemInteractionRegistry() {
           throw new TypeError(`Item interaction operation owner has no execute permission: ${definition.operationId}`);
         if (!hasExecutePermission(definitions.module(identity.moduleId), operation.resource))
           throw new TypeError(`Item interaction provider has no execute permission: ${definition.operationId}`);
-        next.push(
-          Object.freeze({
-            definition,
-            moduleId: identity.moduleId,
-            itemId: item.storageId ?? item.id,
-          }),
-        );
+        for (const item of matches) {
+          if (
+            definition.voxelHitPolicy === 'fluid-source' &&
+            !item.capabilities?.some(
+              (capability) => capability.type === 'fluid-container' && capability.fluid === 'empty',
+            )
+          )
+            throw new TypeError(
+              'Item interaction fluid-source policy requires an empty fluid-container item: ' + item.id,
+            );
+          const itemId = item.storageId ?? item.id;
+          const selector = `${itemId}:${definition.trigger}`;
+          if (selectors.has(selector)) throw new TypeError(`Item interaction item/trigger conflict: ${selector}`);
+          selectors.add(selector);
+          next.push(Object.freeze({ definition, moduleId: identity.moduleId, itemId }));
+        }
       }
-      resolved = Object.freeze(next.sort((left, right) => left.definition.id.localeCompare(right.definition.id)));
+      resolved = Object.freeze(
+        next.sort(
+          (left, right) =>
+            codeUnitCompare(left.definition.id, right.definition.id) || codeUnitCompare(left.itemId, right.itemId),
+        ),
+      );
     },
     capability(): ItemInteractionRegistryV1 {
       return Object.freeze({

@@ -160,6 +160,8 @@ export type {
 } from '../gameplay/modules/item-interaction-module';
 export { defineFluidContainerInteractionModule } from '../gameplay/modules/fluid-container-interaction';
 export type { FluidContainerInteractionConfig } from '../gameplay/modules/fluid-container-interaction';
+export { defineSoilTransformInteractionModule } from '../gameplay/modules/soil-transform-interaction';
+export type { SoilTransformInteractionConfig } from '../gameplay/modules/soil-transform-interaction';
 export {
   defineStructureDefinitionV1,
   resolveStructureRootV1,
