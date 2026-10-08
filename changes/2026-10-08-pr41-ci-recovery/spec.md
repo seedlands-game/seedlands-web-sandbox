@@ -1,5 +1,11 @@
 # PR41 当前源码 CI 与可玩性修复
 
+### Browser19 建造前身体清场 checkpoint26
+
+source `259e09ef28758f85efaf5d022288a8e669969561` 的完整 Browser19 为主旅程 FAIL、visual PASS、modular SKIP。C3 首次建造目标 `[52,31,0]` 保持 Air；点击前相机/Authority eye 为 `[51.855609,32.600002,0.499404]`，实际 Controller interactionAttempts 从5到6，不能将失败解释为没有点击。正式 player body 半宽0.32、eye offset1.6，候选格和身体重叠。下一片先以相同坐标和正式碰撞 owner 取得 RED：仅瞄准支撑格仍不提供建造空间。建造前经已有真实键盘路线退至 `[50.5,0.5]`，沿用严格双端 settle、grounded、collision 和45秒期限，再通过实际 ray 与目标卡确认支撑格及上邻面。原建造方块、扣物、网格与后续验收断言不变，不绕过碰撞、不直接 teleport/setView，不增加 timeout。此片是正确输入前置条件，不宣称性能收益。
+
+Visual 单击只读 attachment 证实 pointer lock 与未暂停保持；interactionAttempts 0→1、目标3→0、邻格3不变、worldRevision36→37。Browser18 的单击失败原因仍未证实；一次通过不抹除旧 FAIL。18/19 导出的 compositionIdentity 完全相同，生产 artifact digest 不同，不混用两个产物身份。
+
 ### Browser13 session 反馈接线
 
 `765eef9f` 的Browser13为主旅程FAIL、visual PASS、modular SKIP；C0启动卡原10秒期限失败，未到C3。原生phase显示worker约6.43秒、first-visible约2.90秒，剩余启动步骤使总量越过期限；不能增加timeout或声称持续攻击产品验收通过。

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Page } from '@playwright/test';
-import { aimAtVoxelWithRealMouse } from './aim';
+import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './aim';
+import { playerOccupiesVoxelShape } from '../../../../../packages/stdlib/src/server/gameplay/player-occupancy';
+import { PLAYER_FEET_OFFSET } from '../../../src/app/player/player-view-offsets';
 import { lockPointer } from './mouse-input';
 import { traceVoxelTarget, type VoxelTarget } from '../../../src/client/presentation/voxel-target';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
@@ -42,6 +44,62 @@ const legacyCorrection = (player: Point, observed: Point, target: Point): Readon
 };
 
 describe('Classic real-mouse target correction', () => {
+  it('clears the Browser19 body from the first building cell before aiming its actual upper face', async () => {
+    const target: Point = [52, 31, 0];
+    let player: [number, number, number] = [51.85560989379883, 32.60000228881836, 0.49940407276153564];
+    let view: readonly [number, number] = [-90, -54.48];
+    let mouseX = 480,
+      mouseY = 270,
+      keyDowns = 0;
+    const occupied = () =>
+      playerOccupiesVoxelShape([player[0], player[1] - PLAYER_FEET_OFFSET, player[2]], target, Voxel.Planks);
+    expect(occupied()).toBe(true);
+    const aimed = () => floorTarget(player, view);
+    const page = {
+      locator: () => ({
+        isVisible: async () => false,
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 540 }),
+        click: async () => undefined,
+      }),
+      waitForFunction: async () => undefined,
+      evaluate: async (callback: () => unknown) => {
+        const source = String(callback);
+        if (source.includes('pointerLockElement')) return true;
+        if (source.includes('targetCard')) return { targetCard: aimed()?.position.join(',') ?? null, aimed: aimed() };
+        if (source.includes('data-target')) return aimed()?.position.join(',') ?? null;
+        if (source.includes('snapshot()'))
+          return {
+            player,
+            serverPlayerPosition: player,
+            serverPlayerVelocity: [0, 0, 0],
+            viewAngles: view,
+            onGround: true,
+            colliding: false,
+            authority: { acknowledgedInputSequence: keyDowns },
+          };
+        throw new Error('Unexpected placement observation');
+      },
+      mouse: {
+        move: async (x: number, y: number) => {
+          view = applyCorrection(view, { dx: x - mouseX, dy: y - mouseY });
+          mouseX = x;
+          mouseY = y;
+        },
+      },
+      keyboard: {
+        down: async () => {
+          keyDowns += 1;
+          player = [50.5, 32.6, 0.5];
+        },
+        up: async () => undefined,
+      },
+    } as unknown as Page;
+    await lockPointer(page);
+    await prepareBuildingTargetWithRealMouse(page, target);
+    expect(occupied()).toBe(false);
+    expect(keyDowns).toBeGreaterThan(0);
+    expect(matchesVoxelAim(aimed(), [52, 30, 0], target)).toBe(true);
+  });
   it('a matching target card alone cannot pass a non-responsive whole-turn ray', async () => {
     let moves = 0;
     const page = {

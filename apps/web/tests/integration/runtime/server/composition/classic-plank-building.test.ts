@@ -3,6 +3,52 @@ import { HeadlessSession } from '@seedlands/stdlib/server/headless/headless-sess
 import { createClassicComposition } from '../../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 
+it('Browser19 建造前必须离开玩家身体占据的目标格，正式 Authority 拒绝时不扣木板', async () => {
+  const session = await HeadlessSession.create({
+    seedText: 'browser19-building-clearance',
+    platform: testCorePlatform,
+    createComposition: createClassicComposition,
+  });
+  try {
+    const runtime = session.runtime;
+    expect(
+      runtime.server.editBatch({
+        actorId: 'building-clearance-fixture',
+        edits: [
+          { x: 51, y: 30, z: 0, value: 3 },
+          { x: 52, y: 30, z: 0, value: 3 },
+          { x: 52, y: 31, z: 0, value: 0 },
+        ],
+      }).committed,
+    ).toBe(true);
+    expect((await session.executeLine('/give plank 2')).result.success).toBe(true);
+    runtime.setPlayerPosition([51.855608088313126, 31.00000041036468, 0.4994040795348187]);
+    const before = {
+      inventory: runtime.server.getInventoryPointerView(runtime.playerId),
+      world: runtime.server.worldRevision,
+    };
+    expect((await runtime.performAction({ type: 'place', position: [52, 31, 0] })).result).toMatchObject({
+      success: false,
+      reason: 'player-collision',
+    });
+    expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(before.inventory);
+    expect(runtime.server.worldRevision).toBe(before.world);
+    expect(runtime.server.getVoxel(52, 31, 0)).toBe(0);
+    // Headless fixture placement mirrors the browser route endpoint; this is an Authority boundary test, not real-input evidence.
+    runtime.setPlayerPosition([50.5, 31, 0.5]);
+    expect((await runtime.performAction({ type: 'place', position: [52, 31, 0] })).result).toMatchObject({
+      success: true,
+    });
+    expect(runtime.server.getVoxel(52, 31, 0)).toBe(16);
+    expect(runtime.server.getInventoryPointerView(runtime.playerId).slots[0]).toMatchObject({
+      itemId: 'plank',
+      count: 1,
+    });
+  } finally {
+    session.dispose();
+  }
+});
+
 it('木板由原木合成后可放置，保存重开再挖回时物品守恒', async () => {
   let session = await HeadlessSession.create({
     seedText: 'plank-building',

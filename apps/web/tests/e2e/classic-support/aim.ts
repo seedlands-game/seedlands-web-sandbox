@@ -1,8 +1,20 @@
 import type { Page } from '@playwright/test';
-import { snapshot } from './harness';
+import { snapshot, walkTo } from './harness';
 import { moveMouseBy } from './mouse-input';
 import { matchesVoxelAim, mouseCorrectionToPoint, voxelAimPoint } from './target-aim';
 import type { Point } from './scenario';
+
+/** Prepare the canonical first building gesture through the same real input helpers. */
+export async function prepareBuildingTargetWithRealMouse(page: Page, target: Point): Promise<void> {
+  await walkTo(page, [target[0] - 1.5, target[2] + 0.5], {
+    key: 'KeyS',
+    tolerance: 0.06,
+    corridorTolerance: 0.08,
+    pulseMs: 80,
+    refreshAfterCorrection: true,
+  });
+  await aimAtVoxelWithRealMouse(page, [target[0], target[1] - 1, target[2]], target);
+}
 
 export type RealMouseAimEvidence = Readonly<{
   target: Point;
