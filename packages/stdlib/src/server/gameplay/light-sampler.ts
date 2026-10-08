@@ -11,8 +11,9 @@ export function sampleLight(
   position: LightPosition,
   worldTime: number,
   getVoxel: (position: LightPosition) => number | undefined,
-  semantics?: VoxelSemanticsResolver,
+  semantics: VoxelSemanticsResolver,
 ) {
+  if (!semantics) throw new TypeError('Voxel semantics resolver is required.');
   const [x, y, z] = position;
   let sky = daylightLevel(worldTime);
   for (let above = y + 1; above < 64; above++) {

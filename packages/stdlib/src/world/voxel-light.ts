@@ -1,50 +1,18 @@
-import { isSolid, Voxel } from './voxel';
 import type { VoxelSemanticsResolver } from './voxel-semantics';
 
-/** Classic block light levels, shared by gameplay and the WebGL light volume. */
-export function voxelEmission(voxel: number, semantics?: VoxelSemanticsResolver): number {
-  const composed = semantics?.get(voxel);
-  if (composed) return composed.emission;
-  switch (voxel) {
-    case Voxel.Glowstone:
-    case Voxel.Lava:
-    case Voxel.Fire:
-    case Voxel.JackOLantern:
-      return 15;
-    case Voxel.Lantern:
-    case Voxel.Torch:
-      return 14;
-    case Voxel.LitFurnace:
-      return 13;
-    case Voxel.LitRedstoneOre:
-      return 9;
-    default:
-      return 0;
-  }
+const requireVoxelSemantics = (voxel: number, semantics: VoxelSemanticsResolver | undefined) => {
+  if (!semantics) throw new TypeError('Voxel semantics resolver is required.');
+  const definition = semantics.get(voxel);
+  if (!definition) throw new RangeError(`No voxel semantics are registered for storage ID: ${voxel}`);
+  return definition;
+};
+
+export function voxelEmission(voxel: number, semantics: VoxelSemanticsResolver): number {
+  return requireVoxelSemantics(voxel, semantics).emission;
 }
 
-/** A closed full block stops propagation. Small models let light around their shape. */
-export function voxelLightCost(voxel: number, semantics?: VoxelSemanticsResolver): number {
-  const composed = semantics?.get(voxel);
-  if (composed) return composed.lightCost;
-  if (voxel === Voxel.Water || voxel === Voxel.Leaves || voxel === Voxel.Ice) return 2;
-  if (
-    !isSolid(voxel) ||
-    voxel === Voxel.Glass ||
-    voxel === Voxel.Slab ||
-    voxel === Voxel.WoodStairs ||
-    voxel === Voxel.CobblestoneStairs ||
-    voxel === Voxel.Fence ||
-    voxel === Voxel.Ladder ||
-    voxel === Voxel.Sign ||
-    voxel === Voxel.Cake ||
-    voxel === Voxel.Bed ||
-    voxel === Voxel.Lantern ||
-    voxel === Voxel.Torch ||
-    voxel === Voxel.Spawner
-  )
-    return 1;
-  return 16;
+export function voxelLightCost(voxel: number, semantics: VoxelSemanticsResolver): number {
+  return requireVoxelSemantics(voxel, semantics).lightCost;
 }
 
 export type BlockLightVolume = {
@@ -58,8 +26,9 @@ export function buildBlockLightVolume(
   size: number,
   origin: readonly [number, number, number],
   getVoxel: (x: number, y: number, z: number) => number | undefined,
-  semantics?: VoxelSemanticsResolver,
+  semantics: VoxelSemanticsResolver,
 ): BlockLightVolume {
+  if (!semantics) throw new TypeError('Voxel semantics resolver is required.');
   if (!Number.isInteger(size) || size < 1 || size > 96) throw new RangeError('Invalid light volume size.');
   const count = size ** 3;
   const levels = new Uint8Array(count);

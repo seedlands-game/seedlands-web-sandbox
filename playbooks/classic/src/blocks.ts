@@ -7,7 +7,6 @@ import {
   isSolid,
   isTargetable,
 } from '@seedlands/stdlib/world/voxel';
-import { voxelEmission, voxelLightCost } from '@seedlands/stdlib/world/voxel-light';
 import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
 import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import { woolVoxelColors } from '@seedlands/stdlib/world/wool-colors';
@@ -395,11 +394,49 @@ const classicVoxelName = new Map<number, string>(
 );
 const materialForFace = (storageId: number, axis: number, positive: boolean) =>
   faceMaterialFor(storageId, axis, positive) ?? FaceMaterial.Stone;
+const classicVoxelEmission = (storageId: number) => {
+  switch (storageId) {
+    case Voxel.Glowstone:
+    case Voxel.Lava:
+    case Voxel.Fire:
+    case Voxel.JackOLantern:
+      return 15;
+    case Voxel.Lantern:
+    case Voxel.Torch:
+      return 14;
+    case Voxel.LitFurnace:
+      return 13;
+    case Voxel.LitRedstoneOre:
+      return 9;
+    default:
+      return 0;
+  }
+};
+const classicVoxelLightCost = (storageId: number) => {
+  if (storageId === Voxel.Water || storageId === Voxel.Leaves || storageId === Voxel.Ice) return 2;
+  if (
+    !isSolid(storageId) ||
+    storageId === Voxel.Glass ||
+    storageId === Voxel.Slab ||
+    storageId === Voxel.WoodStairs ||
+    storageId === Voxel.CobblestoneStairs ||
+    storageId === Voxel.Fence ||
+    storageId === Voxel.Ladder ||
+    storageId === Voxel.Sign ||
+    storageId === Voxel.Cake ||
+    storageId === Voxel.Bed ||
+    storageId === Voxel.Lantern ||
+    storageId === Voxel.Torch ||
+    storageId === Voxel.Spawner
+  )
+    return 1;
+  return 16;
+};
 
 /**
  * Compatibility registration for the complete v11 compact palette. The legacy
- * helpers are only used to snapshot unchanged Classic semantics into the Pack;
- * composed consumers use the frozen registry rather than their switches.
+ * values are owned here and snapshot unchanged Classic semantics into the Pack;
+ * composed consumers use the frozen registry rather than Classic switches.
  */
 export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Object.freeze([
   ...Array.from({ length: 89 }, (_, storageId) => {
@@ -420,8 +457,8 @@ export const overworldVoxelSemantics: readonly VoxelSemanticsDefinition[] = Obje
             : storageId === Voxel.Ice
               ? 'ice'
               : 'cube',
-      emission: voxelEmission(storageId),
-      lightCost: voxelLightCost(storageId),
+      emission: classicVoxelEmission(storageId),
+      lightCost: classicVoxelLightCost(storageId),
       faceMaterials: [
         materialForFace(storageId, 0, false),
         materialForFace(storageId, 0, true),

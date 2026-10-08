@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { classicContent } from '../../fixtures/classic/content';
 import {
   BLOCK_LIGHT_MAX_LEVEL,
   BLOCK_LIGHT_VOLUME_SIZE,
@@ -26,6 +27,7 @@ describe('浏览器方块光体积', () => {
       getVoxelIfLoaded: (x: number, y: number, z: number) =>
         y === 0 && z === 0 && (x === -1 || x === 1) ? Voxel.Torch : Voxel.Air,
       blockLightRevision: () => '0,0,0:7',
+      voxelSemantics: classicContent.voxelSemantics,
     };
     const snapshot = buildCameraBlockLightVolume(reader, [0, 0, 0]);
     expect(snapshot.volume.size).toBe(BLOCK_LIGHT_VOLUME_SIZE);
@@ -38,6 +40,7 @@ describe('浏览器方块光体积', () => {
       getVoxelIfLoaded: (x: number, y: number, z: number) =>
         x === -30 && y === 0 && z === 0 ? Voxel.Glowstone : Voxel.Air,
       blockLightRevision: () => '0,0,0:9',
+      voxelSemantics: classicContent.voxelSemantics,
     };
     const snapshot = buildCameraBlockLightVolume(reader, [7.9, 0, 0]);
     expect(snapshot.volume.origin[0]).toBe(-32);
@@ -49,6 +52,7 @@ describe('浏览器方块光体积', () => {
     const reader = {
       getVoxelIfLoaded: () => undefined,
       blockLightRevision: () => revision,
+      voxelSemantics: classicContent.voxelSemantics,
     };
     const snapshot = buildCameraBlockLightVolume(reader, [0, 0, 0]);
     expect(sampleCameraBlockLight(snapshot, [0, 0, 0])).toBe(0);
@@ -63,6 +67,7 @@ describe('浏览器方块光体积', () => {
       {
         getVoxelIfLoaded: (x, y, z) => (x === 31 && y === 0 && z === 0 ? Voxel.Glowstone : undefined),
         blockLightRevision: () => 'resident-neighbor:3',
+        voxelSemantics: classicContent.voxelSemantics,
       },
       1,
       0,
@@ -81,6 +86,7 @@ describe('浏览器方块光体积', () => {
     const cache = new ChunkBlockLightCache({
       getVoxelIfLoaded: () => Voxel.Air,
       blockLightRevision: () => revision,
+      voxelSemantics: classicContent.voxelSemantics,
     });
     cache.register('far', 4, 0, 0, { apply: () => applies.push('far') });
     cache.register('near', 0, 0, 0, { apply: () => applies.push('near') });

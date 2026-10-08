@@ -27,7 +27,7 @@ export const encodeBlockLightLevelForR8 = (level: number) => {
 export type BlockLightVoxelReader = Readonly<{
   getVoxelIfLoaded(x: number, y: number, z: number): number | undefined;
   blockLightRevision(origin: readonly [number, number, number], size: number): string;
-  voxelSemantics?: VoxelSemanticsResolver;
+  voxelSemantics: VoxelSemanticsResolver;
 }>;
 
 export type CameraBlockLightVolume = Readonly<{
