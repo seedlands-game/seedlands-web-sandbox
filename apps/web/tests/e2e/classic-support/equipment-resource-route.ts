@@ -19,6 +19,7 @@ export const EQUIPMENT_ROUTE_MAX_X_ERROR = 0.45;
 
 export type EquipmentRouteSnapshot = Readonly<{
   player: Point;
+  viewAngles?: readonly [number, number];
   serverPlayerPosition: Point;
   onGround: boolean;
   colliding: boolean;
@@ -43,6 +44,21 @@ export type EquipmentRouteDriver = Readonly<{
 
 export const equipmentRouteDirection = (position: Point, target: RoutePoint): RouteDirection =>
   position[0] <= target[0] ? 'KeyW' : 'KeyS';
+
+function corridorCorrectionDirection(snapshot: EquipmentRouteSnapshot, target: RoutePoint): RouteDirection | null {
+  const yaw = snapshot.viewAngles?.[0];
+  const dx = target[0] - snapshot.player[0];
+  const dz = target[1] - snapshot.player[2];
+  if (
+    yaw === undefined ||
+    ![yaw, dx, dz].every(Number.isFinite) ||
+    Math.abs(dx) > EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance ||
+    Math.abs(dz) < EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance
+  )
+    return null;
+  const radians = (yaw * Math.PI) / 180;
+  return -Math.sin(radians) * dx - Math.cos(radians) * dz >= 0 ? 'KeyW' : 'KeyS';
+}
 
 export const equipmentWorkbenchCorridor = (workbenchApproach: RoutePoint): RoutePoint => [workbenchApproach[0], -0.5];
 
@@ -140,7 +156,10 @@ export async function followEquipmentRoute(
   if (!baseline) throw new Error('Classic snapshot is unavailable before the equipment route.');
   let nextDirection: RouteDirection | null = null;
   while (driver.now() < deadline) {
-    const direction: RouteDirection = nextDirection ?? equipmentRouteDirection(baseline.player, target);
+    const direction: RouteDirection =
+      corridorCorrectionDirection(baseline, target) ??
+      nextDirection ??
+      equipmentRouteDirection(baseline.player, target);
     nextDirection = null;
     const remainingBeforeWalk = deadline - driver.now();
     if (remainingBeforeWalk <= 0) break;
