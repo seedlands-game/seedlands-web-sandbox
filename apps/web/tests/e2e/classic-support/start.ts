@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { waitForSnapshot } from './harness';
 import type { ClassicScenario } from './scenario';
+import { collectClassicFailureDiagnostics } from './evidence';
 
 export async function startClassicWorld(
   page: Page,
@@ -29,7 +30,12 @@ export async function startClassicWorld(
   await page.getByRole('button', { name: '进入世界', exact: true }).click();
   const warning = page.getByRole('button', { name: '仍然进入', exact: true });
   if (await warning.isVisible()) await warning.click();
-  await page.locator('#start-card').waitFor({ state: 'hidden' });
+  try {
+    await page.locator('#start-card').waitFor({ state: 'hidden' });
+  } catch (error) {
+    console.info('Classic startup failure diagnostics:', JSON.stringify(await collectClassicFailureDiagnostics(page)));
+    throw error;
+  }
   await waitForSnapshot(page, (value) => value.loadedChunks > 0 && value.workers.authority === 1, 30_000);
   await page.keyboard.press('F3');
 }

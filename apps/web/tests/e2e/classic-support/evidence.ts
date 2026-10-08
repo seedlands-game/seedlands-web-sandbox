@@ -1,5 +1,5 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
-import type { ChromeTrace, ClassicSnapshot } from './harness';
+import { snapshot, type ChromeTrace, type ClassicSnapshot, type ClassicWindow } from './harness';
 import type { ArtifactReadback, CompositionIdentity, PackLockReadback, RuntimeEnvironment } from './identity';
 import type { ClassicLogicObservationEvidence } from './logic';
 import type { ClassicScenario } from './scenario';
@@ -215,4 +215,47 @@ export async function attachClassicFailure(
 export function requireAllClassicStages(stages: Partial<Record<ClassicStage, ClassicStageResult>>): void {
   expect(Object.keys(stages).sort()).toEqual(['C0', 'C1', 'C2', 'C3', 'C4', 'C5']);
   expect(Object.values(stages).every(({ status }) => status === 'PASS')).toBe(true);
+}
+
+export async function attachClassicFailureWithInput(
+  page: Page,
+  testInfo: TestInfo,
+  stages: Partial<Record<ClassicStage, ClassicStageResult>>,
+  benchmarkMode: boolean,
+  restoreEvidence?: Readonly<Record<string, unknown>>,
+): Promise<void> {
+  const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
+  await attachClassicFailure(testInfo, stages, current, benchmarkMode, restoreEvidence);
+  if (page.isClosed()) return;
+  const diagnostics = await collectClassicFailureDiagnostics(page);
+  console.info('Classic failure input/startup diagnostics:', JSON.stringify(diagnostics));
+  await testInfo.attach('input-decision-diagnostics.json', {
+    contentType: 'application/json',
+    body: JSON.stringify(diagnostics),
+  });
+}
+
+export async function collectClassicFailureDiagnostics(page: Page) {
+  return page
+    .evaluate(() => {
+      const harness = (window as unknown as ClassicWindow).__seedlandsHarness;
+      const card = document.querySelector('#start-card');
+      return {
+        observedAtTimeOriginMs: performance.timeOrigin + performance.now(),
+        inputDecisions: harness?.inputDecisionDiagnostics() ?? null,
+        startup: {
+          cardDisplay: card ? getComputedStyle(card).display : null,
+          alerts: Array.from(document.querySelectorAll('#start-card [role="alert"]')).map((node) =>
+            node.textContent?.slice(0, 500),
+          ),
+          buttons: Array.from(document.querySelectorAll<HTMLButtonElement>('#start-card button'))
+            .slice(-8)
+            .map((button) => ({
+              label: button.textContent?.trim().slice(0, 100),
+              disabled: button.disabled,
+            })),
+        },
+      };
+    })
+    .catch(() => null);
 }

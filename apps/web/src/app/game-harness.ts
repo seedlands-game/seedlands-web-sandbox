@@ -23,6 +23,7 @@ import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-ha
 import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
 import type { HarnessApi } from './gameplay/game-harness-contract';
 import { createHarnessObservability } from './gameplay/game-harness-observability';
+import { readInputDecisionDiagnostics } from '../client/authority/input-decision-diagnostics';
 export type { HarnessApi } from './gameplay/game-harness-contract';
 
 type RuntimeHarnessBindings = {
@@ -400,6 +401,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,
     getRenderedChunkRevision: (cx, cy, cz) => bindings.world()?.getRenderedChunkRevision(cx, cy, cz) ?? null,
     blockLightDiagnostics: () => bindings.world()?.getBlockLightDiagnostics() ?? null,
+    inputDecisionDiagnostics: () => readInputDecisionDiagnostics(bindings.authority()),
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {
       const environment = bindings.environment();

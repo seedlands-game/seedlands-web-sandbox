@@ -123,6 +123,18 @@ run37800926606的Classic headless于15:27:36开始无filter的depth1 fetch，15:
 
 本组checkpoint：有效held attack RED在第三次fixture完整后取得，前两次Structure port/target predicate fixture失败保留不计行为RED；GREEN联合5文件50/50、采掘另3文件34/34、单调旧gate补验14/14。完整新headless入口27文件125/125 PASS；Web生产types零错误/警告、完整Classic types（含新held attack）与9个TS/MJS scoped ESLint PASS。路线新fixture类型首轮FAIL已补齐严格字段；CI sparse首轮新evidence未物化FAIL后修正，13/13门禁PASS。根有界审阅输入生命周期、共同deadline、最终路线窗口与pinned sparse action源码，尚无本组未处理可证实finding；不代表完整PR审查或产品可合入。下一步需要光照调度因果验证，再运行新artifact唯一browser。
 
+### Browser10 derived light 调度的判别合同
+
+World.drainCommits原每render只调用一次真实cache.rebuildNearest；在慢帧与新的Authority halo到达时，正确dirty会持续积压。先用真实ChunkBlockLightCache与真实World.drainCommits建立无render推进的RED，不从“pending13”直接认定调度是唯一根因。候选只把derived light队列服务移至有界主线程timer；repository mesh drain与全部可见/postrender预算不变，flood/R8/revision/未知阻光/全部cache ready语义不变。每timer turn最多一次build/apply，复制最近实际camera position，有dirty才继续；以max(16ms,上次完整build/apply耗时×4)让出主线程，禁止零延迟积压循环或同时启动多个timer。dispose先取消timer再销毁sink/cache；已释放key/陈旧replacement沿原生命周期隔离。
+
+定向测试区分调用者与pure helper：只调用一次实际World.drainCommits后、render不推进，真实dirty cache仍须完成；新的halo revision到来须重新计算，未完成不得ready；重复request不产生并发timer，取消后不得写sink，负camera输入拒绝。固定假时钟是调度功能证据，不冒充性能测量。若定向闭包通过，先同一唯一Classic spec按既有selectionArgs执行visual correctness subset（不宣称主旅程或性能GREEN），再新artifact完整验收。可观测耗时只诊断，不从Browser10跨source数据宣称FPS收益；若性能结论需要，另冻结同源A/A及交错A/B窗口。当前candidate尚未运行产品浏览器，原visual FAIL仍未关闭。
+
+Browser10仍有803次prediction authority-resync，但次数不能区分late、capacity或target-out-of-order。下一browser之前仅增加按client生命周期隔离的只读已接收input-decision计数，记录decision与requiresResync，不改sequence/epoch/order/owner拒绝逻辑或包timing；只在失败attachment读出，无每帧扫描、逐包日志或玩家状态写入。用实际client消息router验证重复/旧sequence不计、不同client隔离、读取副本不可修改；计数不当输入延迟测量。新CI e3b8f938检出约1秒，五项静态/构建/headless全部PASS；Chromium主旅程两次start-card原10秒等待FAIL，visual首轮原20秒未ready、重试start-card FAIL。启动失败额外只读DOM alert/按钮disabled/label与card display，输出有界诊断到失败attachment及job log；保持所有启动等待与验收predicate，先取得状态证据再诊断，不任意提高timeout。测试hook的相同失败采集抽到evidence helper以保留500行边界。
+
+### Derived light 当前 halo 身份与 readiness
+
+新增判别反例：真实 cache 已完成一次构建后，reader 的 Authority halo revision 改变，且没有人为调用 invalidate/register。此时旧 volume 不得让 snapshot.ready 继续为 true；下一次 rebuildNearest 必须能发现并重建此变化。先取得该反例 RED，再决定修复。候选仅比较已注册 brick 的 27 个 halo 身份并标记 derived dirty，不读取全体 voxel、不修改 Authority 或 flood/R8 语义。已 dirty 的首次等待序号必须保留，避免重复扫描使公平性失效。此检查是正确性合同，不宣称帧率或整体性能改善。
+
 ## 模型与预算
 
 主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。
