@@ -204,3 +204,11 @@ A=当前whole-task geometry→JS fallback；B=每task完整窗口检测并按实
 现有 artifact.sourceIdentity 先调用完整 readWorkingSnapshot，读取/hash 所有物化文件，然后才选 code/config；新 build 不得全量读取历史证据。只给 readWorkingSnapshot 增加可选路径选择参数，artifact 用原 source predicate 在任何文件读/metadata 前过滤。默认 Harness snapshot 语义不变；sourceSha/sourceDigest/lockDigest 的算法、具体路径集合和源码变更拒绝规则不变。RED 用独立临时 Git fixture 和 fs read guard 拒绝历史文件读取；GREEN 还验证历史内容不影响源码摘要、源码变化仍改变摘要、默认 snapshot 继续完整捕获其输入。CI 纳入这一确定性工程合同，不能借过滤排除真实 code/config。
 
 实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。
+
+### Browser18 完整真实转向与单击诊断（checkpoint 25）
+
+47f5af6/build17 的唯一 canonical attempt 已终止为 2 FAIL / 1 SKIP：C0-C3 和 V1 已执行，V2 在原 900000ms 总时限耗尽；视觉单击目标仍为 voxel3。失败、末尾 Pointer Lock 清理及 trace 保留，不能把阶段耗时行计为 PASS。局部 meshing A/B 不代表整帧；本次末尾 frame interval p50=449ms、p95=1091.4ms，未取得整帧性能准出。23:01UTC 产品真实周剩余91%，初始差7个百分点包含其它任务，停止线仍约60%。
+
+V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 snapshot 约184233ms；嵌套等待不可叠加为 critical path。旧辅助器对每次真实鼠标 delta 限80px，180度需要多达18次事件。冻结新的 correctness 输入合同：路线和精确 voxel helper 可用一次有限的最短完整转向（yaw<=180度、pitch仍由同一观察计算）进入既有 Pointer Lock handler，之后必须重新读取实际 view/target；不能直接 setView、修改状态、重新锁定来伪装命中。旧逐步 correction 保留为测试 control；19-observation/18-move 路线失败上限、180-attempt voxel上限、到达/邻面/grounded/Authority settle、所有操作断言及900000/45000/20000等时限不变。RED 使用现有真实输入适配与几何 ray，反向固定 pose 的成功仍需实际目标观测，但最多两次 gesture；无响应或卡片与ray不一致仍失败。GREEN 后再做新的生产 artifact 真实浏览器；本片不宣称 FPS 或 A/B 性能改善，也不更新 benchmark baseline。
+
+视觉单击的旧 trace 已确认点击前 fresh ray 命中 [0,61,17]、Authority未暂停，无交互反馈；最终暂停 modal 出现在断言失败后的 exitPointerLock 清理，不是点击前根因。下次同一真实 down/up 前后追加只读 target、pointer lock、player-state/action反馈与提交观察，失败时也保存；不代采集、不降低单击断言、不增加 poll时限。具体生产修复待最后确认边界后再决定。

@@ -220,6 +220,7 @@ export async function walkTo(
     if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
     const correction = options.refreshAfterCorrection
       ? await correctMouseToRoute({
+          wholeTurn: true,
           target,
           direction: key,
           observe: async () => {
@@ -234,6 +235,7 @@ export async function walkTo(
           routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
         })
       : await correctMouseToRoute({
+          wholeTurn: true,
           target,
           direction: key,
           observe: () => snapshot(page),

@@ -8,6 +8,28 @@ import { startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { classicBenchmark } from './settings';
 import { lockPointer, snapshot, voxelAt, waitForSnapshot, type ClassicWindow } from './harness';
+import type { HarnessSnapshot } from '../../../src/app/app-contracts';
+
+const observeSingleClick = (page: Page) =>
+  page.evaluate(async () => {
+    const harness = (window as unknown as ClassicWindow).__seedlandsHarness!;
+    const player = await harness.world.command({ type: 'query-player-state' });
+    const current = harness.snapshot() as HarnessSnapshot;
+    return {
+      observedAtMs: performance.now(),
+      pointerLocked: document.pointerLockElement?.id === 'game',
+      target: harness.aimedVoxelTarget(),
+      targetEntity: harness.aimedEntityId(),
+      interactionAttempts: current.interactionAttempts,
+      worldRevision: current.worldRevision,
+      physicsTick: current.authority.physicsTick,
+      authorityPaused: current.authority.paused,
+      ui: current.ui,
+      player,
+      targetVoxel: harness.getVoxelAt?.(0, 61, 17),
+      neighborVoxel: harness.getVoxelAt?.(0, 61, 16),
+    };
+  });
 
 /** Fixed gallery for real production rendering; setup commands are not input acceptance. */
 export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: TestInfo) {
@@ -221,9 +243,18 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   });
   await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(3);
   await aimAtVoxelWithRealMouse(page, [0, 61, 17]);
+  const beforeClick = await observeSingleClick(page);
   await page.mouse.down();
   await page.mouse.up();
-  await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(0);
+  const afterRelease = await observeSingleClick(page);
+  try {
+    await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(0);
+  } finally {
+    await testInfo.attach('creative-one-click-input', {
+      body: JSON.stringify({ runId, beforeClick, afterRelease, afterPoll: await observeSingleClick(page) }),
+      contentType: 'application/json',
+    });
+  }
   const breakTick = (await snapshot(page))!.authority.physicsTick;
   await waitForSnapshot(page, (s) => s.authority.physicsTick >= breakTick + 20);
   expect(await voxelAt(page, [0, 61, 16])).toBe(3);

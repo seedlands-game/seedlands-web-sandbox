@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import type { Page } from '@playwright/test';
+import { aimAtVoxelWithRealMouse } from './aim';
+import { lockPointer } from './mouse-input';
 import { traceVoxelTarget, type VoxelTarget } from '../../../src/client/presentation/voxel-target';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import {
@@ -39,6 +42,73 @@ const legacyCorrection = (player: Point, observed: Point, target: Point): Readon
 };
 
 describe('Classic real-mouse target correction', () => {
+  it('a matching target card alone cannot pass a non-responsive whole-turn ray', async () => {
+    let moves = 0;
+    const page = {
+      locator: () => ({
+        isVisible: async () => false,
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 540 }),
+        click: async () => undefined,
+      }),
+      waitForFunction: async () => undefined,
+      evaluate: async (callback: () => unknown) => {
+        const source = String(callback);
+        if (source.includes('pointerLockElement')) return true;
+        if (source.includes('targetCard')) return { targetCard: '0,0,-3', aimed: null };
+        if (source.includes('snapshot()')) return { player: [0.5, 0.5, 0.5], viewAngles: [180, 0] };
+        throw new Error('Unexpected real-mouse observation');
+      },
+      mouse: {
+        move: async () => {
+          moves += 1;
+        },
+      },
+    } as unknown as Page;
+    await lockPointer(page);
+    await expect(aimAtVoxelWithRealMouse(page, [0, 0, -3])).rejects.toThrow('could not reacquire 0,0,-3');
+    expect(moves).toBe(180);
+  });
+  it('a full reverse gesture still requires the real voxel ray and visible target card', async () => {
+    const player: Point = [0.5, 0.5, 0.5];
+    const target: Point = [0, 0, -3];
+    let view: readonly [number, number] = [180, 0];
+    let mouseX = 480;
+    let mouseY = 270;
+    let moves = 0;
+    const aimed = () =>
+      traceVoxelTarget([...player], directionForView(view), (x, y, z) =>
+        x === target[0] && y === target[1] && z === target[2] ? Voxel.Stone : Voxel.Air,
+      );
+    const page = {
+      locator: () => ({
+        isVisible: async () => false,
+        boundingBox: async () => ({ x: 0, y: 0, width: 960, height: 540 }),
+        click: async () => undefined,
+      }),
+      waitForFunction: async () => undefined,
+      evaluate: async (callback: () => unknown) => {
+        const source = String(callback);
+        if (source.includes('pointerLockElement')) return true;
+        if (source.includes('targetCard')) return { targetCard: aimed()?.position.join(',') ?? null, aimed: aimed() };
+        if (source.includes('snapshot()')) return { player, viewAngles: view };
+        throw new Error('Unexpected real-mouse observation');
+      },
+      mouse: {
+        move: async (x: number, y: number) => {
+          view = applyCorrection(view, { dx: x - mouseX, dy: y - mouseY });
+          mouseX = x;
+          mouseY = y;
+          moves += 1;
+        },
+      },
+    } as unknown as Page;
+    await lockPointer(page);
+    const result = await aimAtVoxelWithRealMouse(page, target);
+    expect(result.firstObserved).toBeNull();
+    expect(result.finalObserved).toBe(target.join(','));
+    expect(matchesVoxelAim(aimed(), target)).toBe(true);
+    expect(moves).toBeLessThanOrEqual(2);
+  });
   it('corrects the hosted C1 yaw residue toward the first resource voxel', () => {
     const correction = mouseCorrectionToVoxel([28.78, 61.6, 1.37], [-80, -16], [34, 60, 0]);
     expect(correction.dx).toBeGreaterThan(0);

@@ -24,6 +24,14 @@ const routeSnapshot = (
   authority: { physicsTick, acknowledgedInputSequence: ack },
 });
 
+// Missing-heading cases exercise the x-based fallback while preserving the
+// recorded observations. Only the test-driver clone omits the fresh heading.
+const withoutHeading = (snapshot: EquipmentRouteSnapshot): EquipmentRouteSnapshot => {
+  const copy = { ...snapshot };
+  delete copy.viewAngles;
+  return copy;
+};
+
 const OUTER_8674 = routeSnapshot(
   [78.55076599121094, 32.599998474121094, -0.49871936440467834],
   20342,
@@ -93,27 +101,33 @@ describe('Classic V2 post-drift route direction', () => {
       initial: OUTER_8674,
       walked: WALK_8880,
       waits: [WAIT_8883, DRIFT_8885],
+      missingHeading: false,
     },
     {
       name: 'second Browser22 outer wait counterfactual fixture',
       initial: DRIFT_8885,
       walked: WALK_9107,
       waits: [WAIT_9110, DRIFT_9112],
+      missingHeading: true,
     },
-  ])('reverses one next movement after $name validates drift', async ({ initial, walked, waits }) => {
+  ])('reverses one next movement after $name validates drift', async ({ initial, walked, waits, missingHeading }) => {
     const sentinel = new Error('post-drift direction sentinel');
     const directions: string[] = [];
+    const snapshot = (value: EquipmentRouteSnapshot) => (missingHeading ? withoutHeading(value) : value);
 
     await expect(
       followEquipmentRoute(TARGET, {
         now: () => 1000,
-        observe: async () => initial,
+        observe: async () => snapshot(initial),
         walk: async (direction) => {
           directions.push(direction);
-          if (directions.length === 1) return walked;
+          if (directions.length === 1) return snapshot(walked);
           throw sentinel;
         },
-        waitForProgress: classifyStream(waits),
+        waitForProgress: async (baseline, direction) => {
+          const result = await classifyStream(waits.map(snapshot))(snapshot(baseline), direction);
+          return { kind: result.kind, snapshot: snapshot(result.snapshot) };
+        },
       }),
     ).rejects.toBe(sentinel);
 
@@ -142,8 +156,40 @@ describe('Classic V2 post-drift route direction', () => {
     expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
   });
 
-  it('reverses from the key actually used after each consecutive validated drift', async () => {
+  it('uses one-shot reverse hints after consecutive validated drift when heading is unavailable', async () => {
     const sentinel = new Error('alternating direction sentinel');
+    const keyWReached = routeSnapshot([78.49, 32.6, 0.52], 20560, 13870, [78.49, 32.6, 0.7], -900);
+    const keyWDrift = routeSnapshot([78.49, 32.6, 0.414], 20561, 13871, [78.49, 32.6, 0.52], -900);
+    const directions: string[] = [];
+    let waits = 0;
+
+    await expect(
+      followEquipmentRoute(TARGET, {
+        now: () => 1000,
+        observe: async () => withoutHeading(OUTER_8674),
+        walk: async (direction) => {
+          directions.push(direction);
+          if (directions.length === 1) return withoutHeading(WALK_8880);
+          if (directions.length === 2) return withoutHeading(keyWReached);
+          throw sentinel;
+        },
+        waitForProgress: async (baseline, direction) => {
+          waits += 1;
+          const result = await (
+            waits === 1
+              ? classifyStream([DRIFT_8885].map(withoutHeading))
+              : classifyStream([keyWDrift].map(withoutHeading))
+          )(withoutHeading(baseline), direction);
+          return { kind: result.kind, snapshot: withoutHeading(result.snapshot) };
+        },
+      }),
+    ).rejects.toBe(sentinel);
+
+    expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
+  });
+
+  it('lets fresh heading override the reverse hint after continuous Browser22 drift', async () => {
+    const sentinel = new Error('fresh heading priority sentinel');
     const keyWReached = routeSnapshot([78.49, 32.6, 0.52], 20560, 13870, [78.49, 32.6, 0.7], -900);
     const keyWDrift = routeSnapshot([78.49, 32.6, 0.414], 20561, 13871, [78.49, 32.6, 0.52], -900);
     const directions: string[] = [];
@@ -162,13 +208,14 @@ describe('Classic V2 post-drift route direction', () => {
         waitForProgress: async (baseline, direction) => {
           waits += 1;
           return waits === 1
-            ? classifyStream([DRIFT_8885])(baseline, direction)
+            ? classifyStream([WAIT_8883, DRIFT_8885])(baseline, direction)
             : classifyStream([keyWDrift])(baseline, direction);
         },
       }),
     ).rejects.toBe(sentinel);
 
-    expect(directions).toEqual(['KeyS', 'KeyW', 'KeyS']);
+    // The latest -900° heading points toward +Z. A stale reverse hint would choose S.
+    expect(directions).toEqual(['KeyS', 'KeyW', 'KeyW']);
   });
 
   it('keeps driver rejection identity and does not enter the wait path', async () => {
