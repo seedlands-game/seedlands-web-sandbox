@@ -58,6 +58,33 @@ describe('浏览器方块光体积', () => {
     expect(cache.snapshot.ready).toBe(false);
   });
 
+  it('近处halo持续变化时，在八次重建后让等待中的远brick先获得重建', () => {
+    let nearRevision = 0;
+    let farRevision = 0;
+    const applied: string[] = [];
+    const cache = new ChunkBlockLightCache({
+      getVoxelIfLoaded: () => Voxel.Air,
+      blockLightRevision: (origin, _size) => (origin[0] < 0 ? `near:${nearRevision}` : `far:${farRevision}`),
+      voxelSemantics: classicContent.voxelSemantics,
+    });
+    cache.register('far', 4, 0, 0, { apply: () => applied.push('far') });
+    cache.register('near', 0, 0, 0, { apply: () => applied.push('near') });
+
+    for (let round = 0; round < 8; round += 1) {
+      expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+      nearRevision += 1;
+      cache.invalidateAround(0, 0, 0);
+      farRevision += 1;
+      cache.invalidateAround(4, 0, 0);
+    }
+    expect(applied).toEqual(Array.from({ length: 8 }, () => 'near'));
+    expect(cache.snapshot).toMatchObject({ pendingBrickCount: 2, ready: false, rebuildCount: 8 });
+
+    expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+    expect(applied.at(-1)).toBe('far');
+    expect(cache.snapshot).toMatchObject({ pendingBrickCount: 1, ready: false, rebuildCount: 9 });
+  });
+
   it('将CPU的0到15光级精确编码为R8 UNORM采样值', () => {
     for (const level of [0, 1, 7, BLOCK_LIGHT_MAX_LEVEL]) {
       const sampledByWebGl = encodeBlockLightLevelForR8(level) / 255;
