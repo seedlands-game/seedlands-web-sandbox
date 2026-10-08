@@ -190,6 +190,54 @@ export type {
   StructureVariantResolutionV1,
 } from '../gameplay/modules/structure-definition-module';
 export {
+  advanceRouteSegmentV1,
+  defineRouteDefinitionV1,
+  resolveRouteSegmentV1,
+} from '../gameplay/modules/route-definition';
+export type {
+  RouteCurveV1,
+  RouteDefinitionInputV1,
+  RouteDefinitionV1,
+  RouteDirectedEdgeV1,
+  RouteEndpointV1,
+  RouteNeighborStateV1,
+  RouteNeighborV1,
+  RoutePlacementTieBreakV1,
+  RouteProgressV1,
+  RouteResolutionV1,
+  RouteSegmentV1,
+  RouteSideV1,
+  RouteVariantDefinitionV1,
+} from '../gameplay/modules/route-definition';
+export { createTransportDefinitionRegistryV1, defineTransportV1 } from '../gameplay/modules/transport-model';
+export type {
+  TransportDefinitionRegistryV1,
+  TransportDefinitionInputV1,
+  TransportDefinitionV1,
+  TransportLocomotionV1,
+  TransportRouteCursorV2,
+  TransportStateV2,
+} from '../gameplay/modules/transport-model';
+export {
+  buildRouteTransportMotionCandidateV1,
+  buildSurfaceTransportMotionCandidateV1,
+} from '../gameplay/modules/transport-motion-model';
+export {
+  commitTransportMotionCandidateV1,
+  deriveMountedSeatConstraintV1,
+} from '../gameplay/modules/transport-motion-state';
+export type {
+  MountedSeatConstraintV1,
+  RouteNextSegmentV1,
+  SurfaceSupportPortV1,
+  TransportCollisionV1,
+  TransportMotionCandidateV1,
+  TransportMotionExpectedV1,
+  TransportMotionPolicyV1,
+  TransportMotionStopReasonV1,
+  TransportSweepPortV1,
+} from '../gameplay/modules/transport-motion-model';
+export {
   assertStructureMultiEditReadsV1,
   buildStructurePlacementCandidateV1,
   buildStructureTransitionCandidateV1,
