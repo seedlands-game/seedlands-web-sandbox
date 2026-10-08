@@ -6,7 +6,10 @@ import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';
 import type { BrowserGameplay } from '../gameplay/browser-gameplay';
 import { PlayerController } from './player-controller';
-import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type {
+  AuthorityActionResult,
+  AuthorityReady,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type Options = Readonly<{
   camera: pc.Entity;
@@ -45,6 +48,18 @@ export function applyAuthorityInputDecision(
   if (decision.requiresResync) controller?.resynchronizeInput();
 }
 
+export function createAuthorityPlayerCallbacks(
+  controller: () => PlayerController | null,
+  gameplay: () => BrowserGameplay | null,
+) {
+  return {
+    onPointerAttackResult: (result: AuthorityActionResult['result']) => gameplay()?.consumeAttackResult(result),
+    onInputDecision: (decision: Readonly<{ requiresResync: boolean }>) =>
+      applyAuthorityInputDecision(controller(), decision),
+    onPlayerDeath: () => controller()?.releaseInput(),
+  };
+}
+
 export function createGamePlayerController(options: Options): PlayerController {
   const gameplay = () => options.getGameplay();
   return new PlayerController({
@@ -65,6 +80,9 @@ export function createGamePlayerController(options: Options): PlayerController {
     onSelectHotbarSlot: options.actions.selectHotbarSlot,
     onAttackTarget: (origin, direction, maxDistance) =>
       gameplay()?.attackTarget(origin, direction, maxDistance) ?? false,
+    onHeldAttackTarget: (origin, direction, maxDistance) =>
+      gameplay()?.heldAttackTarget(origin, direction, maxDistance) ?? false,
+    onStopHeldAttack: () => gameplay()?.stopHeldAttack(),
     canTargetFluidSource: () => gameplay()?.canTargetFluidSource() ?? false,
     isCreativeMode: () => options.authority.gameplay.player.mode?.value === 'creative',
     onAimTarget: (target) => gameplay()?.setAimTarget(target),

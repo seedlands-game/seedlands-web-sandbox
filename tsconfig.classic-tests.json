@@ -29,6 +29,9 @@
     "apps/web/tests/unit/app/player-held-attack.test.ts",
     "apps/web/tests/unit/app/block-light-rebuild-pump.test.ts",
     "apps/web/tests/unit/client/browser-authority-client.test.ts",
-    "apps/web/tests/unit/client/input-decision-diagnostics.test.ts"
+    "apps/web/tests/unit/client/input-decision-diagnostics.test.ts",
+    "apps/web/tests/unit/worker/pointer-attack-input-pump.test.ts",
+    "apps/web/tests/unit/worker/authority-pointer-attack-target.test.ts",
+    "apps/web/tests/unit/client/browser-pointer-attack.test.ts"
   ]
 }

@@ -12,6 +12,7 @@ import {
   type AuthorityWorkerPort,
 } from '../../../src/client/authority/browser-authority-client';
 import type { AuthorityResponse } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import type { BrowserAuthorityResponse } from '../../../src/client/authority/pointer-attack-protocol';
 import { pack as nonClassicPack } from '../../fixtures/packs/builder/builder';
 
 type ActorReference = HarnessEquipmentSnapshot['actor'];
@@ -57,7 +58,7 @@ const stateOf = (session: HeadlessSession) => ({
 });
 
 class FakeAuthorityWorker implements AuthorityWorkerPort {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
+  onmessage: ((event: MessageEvent<BrowserAuthorityResponse>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
   postMessage(message: unknown) {
@@ -65,7 +66,7 @@ class FakeAuthorityWorker implements AuthorityWorkerPort {
   }
   terminate() {}
   emit(message: AuthorityResponse) {
-    this.onmessage?.({ data: message } as MessageEvent<AuthorityResponse>);
+    this.onmessage?.({ data: message } as MessageEvent<BrowserAuthorityResponse>);
   }
 }
 const failures: readonly (readonly [string, InspectionResult])[] = [

@@ -1,12 +1,10 @@
 import type { AuthorityWorkerPort } from '../../../../src/client/authority/browser-authority-client';
-import type {
-  AuthorityReady,
-  AuthorityResponse,
-} from '../../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import type { AuthorityReady } from '../../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
 import { testWorldgenProvider } from './worldgen-provider';
+import type { BrowserAuthorityResponse } from '../../../../src/client/authority/pointer-attack-protocol';
 
 export class FakeAuthorityWorker implements AuthorityWorkerPort {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
+  onmessage: ((event: MessageEvent<BrowserAuthorityResponse>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
   transfers: Transferable[][] = [];
@@ -21,8 +19,8 @@ export class FakeAuthorityWorker implements AuthorityWorkerPort {
     this.terminated = true;
   }
 
-  emit(message: AuthorityResponse) {
-    this.onmessage?.({ data: message } as MessageEvent<AuthorityResponse>);
+  emit(message: BrowserAuthorityResponse) {
+    this.onmessage?.({ data: message } as MessageEvent<BrowserAuthorityResponse>);
   }
 }
 

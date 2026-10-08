@@ -6,7 +6,7 @@ import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
-import { nearestEntityHit } from '../../client/presentation/entity-hit-volume';
+import { BrowserPointerAttackInput } from './pointer-attack-input';
 import type * as pc from 'playcanvas';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { voxelNames } from '@seedlands/stdlib/world/voxel';
@@ -38,6 +38,7 @@ export type BrowserGameplayAuthorityPort = Readonly<{
   gameplay: AuthorityGameplayView;
   voxelGeometry?: VoxelGeometryResolver;
   performAction(action: AuthorityAction): Promise<AuthorityActionResult>;
+  sendPointerAttack?(direction: readonly [number, number, number] | null): void;
 }>;
 
 type Options = {
@@ -62,6 +63,13 @@ type Options = {
 };
 
 export class BrowserGameplay {
+  private readonly pointerAttack = new BrowserPointerAttackInput({
+    authority: () => this.options.authority,
+    execute: (targetId, consume) => {
+      void this.action({ type: 'attack', targetId }, consume);
+    },
+    feedback: (message, tone) => this.feedback(message, tone),
+  });
   private showcasePreparation: Promise<void> | null = null;
   private readonly presenter: GameplayEntityPresenter;
   private readonly viewmodel: FirstPersonViewmodel;
@@ -358,30 +366,23 @@ export class BrowserGameplay {
     direction: readonly [number, number, number],
     maxDistance: number,
   ): boolean {
-    const target = nearestEntityHit(
-      this.options.authority.gameplay.entities.filter((entity) => entity.type === 'creature' || entity.type === 'npc'),
-      origin,
-      direction,
-      maxDistance,
-    );
-    if (!target) return false;
-    void this.action({ type: 'attack', targetId: target.id }, (result) => {
-      if (!result.success) {
-        if (result.reason === 'cooldown' || result.reason === 'attack-cooldown' || result.reason === 'buffer-full')
-          return;
-        if (result.reason === 'combo-window-closed') return this.feedback('等待衔接窗口', 'info');
-        const reason =
-          result.reason === 'out-of-range'
-            ? '目标超出攻击距离'
-            : result.reason === 'blocked'
-              ? '目标被方块遮挡'
-              : result.reason === 'invalid-target'
-                ? '目标已离开或倒下'
-                : '当前无法攻击';
-        this.feedback(reason, 'error');
-      } else if (result.buffered) this.feedback('已衔接下一击', 'info');
-    });
-    return true;
+    return this.pointerAttack.attack(origin, direction, maxDistance);
+  }
+
+  heldAttackTarget(
+    origin: readonly [number, number, number],
+    direction: readonly [number, number, number],
+    maxDistance: number,
+  ): boolean {
+    return this.pointerAttack.held(origin, direction, maxDistance);
+  }
+
+  stopHeldAttack(): void {
+    this.pointerAttack.stop();
+  }
+
+  consumeAttackResult(result: AuthorityActionResult['result']): void {
+    this.pointerAttack.consume(result);
   }
 
   // prettier-ignore

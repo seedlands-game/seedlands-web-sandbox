@@ -1,5 +1,11 @@
 # PR41 当前源码 CI 与可玩性修复
 
+### Browser12 持续指针输入补验与 CI 元数据边界
+
+worker 输入租期在 service 和新包准入时都检查；期限内没有 service 时，排队续期也不得复活已过期手势，必须真实新 mousedown。实际 release、blur、PointerLock 丢失、hidden 和 dispose 经已安装 Controller 输入链取消后，独立推进 Authority 不得新增攻击，已开始 swing 保持原结算。
+
+CI1df 的 Chromium 作业于16:57:42开始 Harness，17:05:07才开始测试，并记录 GitCommitInfo 全 PR diff 超时。已安装 Playwright 1.62.1 的 gitDiff 实现先无filter fetch PR base，再完整diff；这会重新下载 sparse 排除的历史 blob。仅关闭可选 HTML git diff 元数据采集，commit 元数据保留，source SHA/digest/lock/artifact identity 和实际三测试 canonical receipt 原门禁保留；不提高 job/test timeout，不改变重试或验收选择。
+
 状态：实施中 / Agile，用户明确授权持续诊断、最小修复、验证和处理 review，直到完成或预算停止线。
 
 ## 目标与边界
@@ -134,6 +140,18 @@ Browser10仍有803次prediction authority-resync，但次数不能区分late、c
 ### Derived light 当前 halo 身份与 readiness
 
 新增判别反例：真实 cache 已完成一次构建后，reader 的 Authority halo revision 改变，且没有人为调用 invalidate/register。此时旧 volume 不得让 snapshot.ready 继续为 true；下一次 rebuildNearest 必须能发现并重建此变化。先取得该反例 RED，再决定修复。候选仅比较已注册 brick 的 27 个 halo 身份并标记 derived dirty，不读取全体 voxel、不修改 Authority 或 flood/R8 语义。已 dirty 的首次等待序号必须保留，避免重复扫描使公平性失效。此检查是正确性合同，不宣称帧率或整体性能改善。
+
+### Browser12 主线程停顿期间的持续攻击
+
+source1df46ae0/build11的visual-only为1/1 PASS、全缓存ready且worldRevision41/lightRevision41，12GLB呈现、页面/响应/渲染错误为空，截图检查可见封闭房间未照明与glowstone照明差异。完整Browser12终态2 FAIL/1 SKIP：C0-C2完成，C3连击buffer/第二步可见但第二步实际damage2、sequence3/comboStep1，原7点断言FAIL；未到V1/V2/C4/C5。该次失败frameMs961，receipt分类accepted1164/late367；不能由计数证明战斗原因。后续visual启动仅有loading card、无alert/buttons，原10秒FAIL；旧子集通过不覆盖该失败。
+
+下一个判别RED必须同时停止render和主线程timer回调，让完整Classic registered Combat仍按独立Authority时钟推进：真实mousedown持续按住应通过正式攻击入口形成literal第一击5、第二击7且第二个sequence就是第二段，而非两次第一击后剩余2。当前主线程timer只证明render独立，未证明长主线程任务期间可玩。
+
+若RED确认此边界，候选把持续指针意图交给现有Authority worker的串行hostOperation节奏服务；每200ms至多一个正式AuthorityAction.attack，不补积压、不改Combat窗口/伤害、权限、range/LOS、lifetime或位置owner。worker根据最近真实yaw/pitch与当前Authority实体/位置重新选目标；输入epoch/递增sequence、释放、失焦、解锁、隐藏、UI/暂停、模式/世界替换、dispose及有界失活lease必须停止，旧packet不得复活意图。首次mousedown仍立即执行，采掘elapsed沿原路径。该输入状态仅瞬态，不进入存档，不新增Classic硬编码或第二套Combat owner。先验证实际consumer和取消/新鲜性反例，再新artifact原完整browser。
+
+Browser-local pointer envelope携带递增sequence、同次gesture、绝对monotonic采样时间与方向；不扩公开GameplayAction或存档协议。2秒lease过期/生命周期或模式变化会退休gesture，旧renew不得重启，必须新按下。结果按runtimeEpoch拒绝旧世界、 bounded64去重并允许当前窗口内重排commit一次交付；gameplay既有revision gate保留。必要的500行边界仅把既有request/transaction计数与post失败生命周期整体抽到request sender，行为与原client合同不变。
+
+启动失败先追加只读boot阶段/时间诊断，区分scene/material/worker bootstrap与首chunk可见等待；不提高10秒、不改变加载成功或质量口径。新证据后才能选择产品修复，不能仅再跑同源码重试。
 
 ## 模型与预算
 

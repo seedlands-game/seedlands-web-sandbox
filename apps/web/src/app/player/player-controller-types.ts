@@ -26,6 +26,8 @@ export type PlayerControllerOptions = {
     direction: [number, number, number],
     maxDistance: number,
   ) => boolean;
+  onHeldAttackTarget?: PlayerControllerOptions['onAttackTarget'];
+  onStopHeldAttack?: () => void;
   canTargetFluidSource: () => boolean;
   isCreativeMode?: () => boolean;
   onBeginBreak: (position: [number, number, number]) => void | Promise<void>;

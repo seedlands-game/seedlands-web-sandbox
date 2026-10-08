@@ -1,3 +1,4 @@
+import { beginWorldStartMarks } from './world/world-start-marks';
 import * as pc from 'playcanvas';
 import * as sceneBootstrap from './scene/scene-bootstrap';
 import type { GlobalAudio } from './audio/global-audio';
@@ -159,7 +160,8 @@ export class Game {
 
   // prettier-ignore
   private async startSession(seedText: string, restore: RestoredSession | null, qualityLevel: QualityLevel, openMode: WorldOpenMode, actorMode: ActorMode) {
-    await this.saveQueue.flush();
+    const bootPhase = beginWorldStartMarks();
+    await bootPhase('save-flush', () => this.saveQueue.flush());
     this.disposeRuntime();
     const startAbort = new AbortController();
     this.pendingStartAbort = startAbort;
@@ -174,7 +176,7 @@ export class Game {
     this.performanceProfile = sceneBootstrap.selectPerformanceProfile(location.search);
     this.performanceTelemetry = sceneBootstrap.createPerformanceTelemetry(this.performanceProfile);
     this.frameLoop.reset();
-    const scene = await sceneBootstrap.createSceneApplication(this.canvas, this.experimentState.rendererRequest);
+    const scene = await bootPhase('scene', () => sceneBootstrap.createSceneApplication(this.canvas, this.experimentState.rendererRequest));
     if (startGeneration !== this.startGeneration) {
       scene.application.destroy();
       throw new Error('World start was superseded.');
@@ -191,7 +193,7 @@ export class Game {
     this.collisionDebug = new CollisionDebugRuntime(this.app);
     const light = sceneBootstrap.createSun(this.app, lightingBudget);
     this.camera = sceneBootstrap.createCamera(this.app, quality.fogEnd + 18);
-    this.visualResources = await createAppearanceMaterials(this.app, quality);
+    this.visualResources = await bootPhase('materials', () => createAppearanceMaterials(this.app!, quality));
     if (startGeneration !== this.startGeneration) {
       this.visualResources.destroy();
       this.visualResources = null;
@@ -202,7 +204,7 @@ export class Game {
     const sessionConfig = readBrowserSessionConfig(location.search);
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);
-    await this.media.load(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin));
+    await bootPhase('media', () => this.media.load(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin)));
     const clientOptions = {
       onSnapshot: (snapshot: import('@seedlands/stdlib/server/authority/authority-session').AuthoritySnapshot) =>
         this.authoritySync.receive(snapshot),
@@ -214,29 +216,26 @@ export class Game {
         this.world?.consumeServerCommit(commit),
       ...this.media.callbacks,
       onUnknownChunk: (key: string) => runtimeControls.requestAuthorityChunk(this.world, key),
-      // prettier-ignore
-      onInputDecision: (decision: { sequence: number; decision: import('@seedlands/stdlib/runtime/session-protocol').SequenceDecision; requiresResync: boolean }) =>
-        gamePlayer.applyAuthorityInputDecision(this.controller, decision),
+      ...gamePlayer.createAuthorityPlayerCallbacks(() => this.controller, () => this.gameplayClient),
       onWorldRestored: (ready: AuthorityReady) => this.restoreBrowserWorld(ready),
       onFatal: (error: Error) => {
         runtimeControls.reportRuntimeFailure(this.uiSession, ++this.interactionSequence, error);
         this.onRuntimeFailure?.(error);
       },
     };
-    const session = await startBrowserWorkerSession({
+    const session = await bootPhase('worker', () => startBrowserWorkerSession({
       epochSequence: ++this.sessionSequence,
       seedText,
       openMode,
       legacySnapshots: restore?.seed === seedText ? restore.legacySnapshots : [],
-      initialWorldTime: this.environment.worldTime,
+      initialWorldTime: this.environment!.worldTime,
       harnessEnabled,
       generalWorkerCount,
       wasm: this.experimentState.workerSelection,
       frequencies: { physicsHz, gameplayHz: 20, fluidHz: 30 },
       authorityTransportFaults,
       ...clientOptions,
-      onPlayerDeath: () => this.controller?.releaseInput(),
-    });
+    }));
     const { authority, compute: computeRuntime, logic: logicClient, ready } = session;
     if (this.pendingStartAbort === startAbort) this.pendingStartAbort = null;
     if (startGeneration !== this.startGeneration) {
@@ -289,7 +288,7 @@ export class Game {
     this.controller.install();
     authority.requestLogicObservation();
     this.app.on('update', (dt: number) => this.frameLoop.update(Math.min(dt, 0.05)));
-    await initialWorldReady;
+    await bootPhase('first-visible', () => initialWorldReady);
     if (startGeneration !== this.startGeneration) throw new Error('World start was superseded.');
     this.installUiAndHarness();
     runtimeControls.reportSnapshotMigration(this.uiSession, ++this.interactionSequence, ready.snapshotMigrationReports);

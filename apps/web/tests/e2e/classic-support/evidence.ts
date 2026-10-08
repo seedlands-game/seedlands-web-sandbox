@@ -244,6 +244,11 @@ export async function collectClassicFailureDiagnostics(page: Page) {
         observedAtTimeOriginMs: performance.timeOrigin + performance.now(),
         inputDecisions: harness?.inputDecisionDiagnostics() ?? null,
         startup: {
+          phases: performance
+            .getEntriesByType('mark')
+            .filter((mark) => mark.name.startsWith('seedlands:world-start:'))
+            .slice(-12)
+            .map((mark) => ({ name: mark.name, startTime: mark.startTime })),
           cardDisplay: card ? getComputedStyle(card).display : null,
           alerts: Array.from(document.querySelectorAll('#start-card [role="alert"]')).map((node) =>
             node.textContent?.slice(0, 500),
