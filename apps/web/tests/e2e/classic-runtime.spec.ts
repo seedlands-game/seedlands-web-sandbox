@@ -27,7 +27,7 @@ import * as settings from './classic-support/settings';
 import { clearNaturalFixtureEntities } from './classic-support/fixture-entities';
 import { startClassicWorld } from './classic-support/start';
 import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
-import { aimAtVoxelWithRealMouse } from './classic-support/aim';
+import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './classic-support/aim';
 import {
   attachClassicEvidence,
   attachClassicFailureWithInput,
@@ -228,12 +228,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   });
 
   await test.step('C3 真实建造、进食和现有战斗', async () => {
-    const support: Point = [
-      classicScenario.route.buildTarget[0],
-      classicScenario.route.buildTarget[1] - 1,
-      classicScenario.route.buildTarget[2],
-    ];
-    await adjustPitchToTarget(page, support);
+    await prepareBuildingTargetWithRealMouse(page, classicScenario.route.buildTarget);
     await clickCanvasCenter(page, 'right');
     await expect.poll(() => voxelAt(page, classicScenario.route.buildTarget)).toBe(16);
     const afterBuild = await waitForSnapshot(
