@@ -44,6 +44,10 @@ export type WorldAuthorityPort = Readonly<{
     }>,
   ): boolean | Promise<boolean>;
   getVoxel(x: number, y: number, z: number): number;
+  getLoadedVoxelRegion?(
+    origin: readonly [number, number, number],
+    size: number,
+  ): import('../../client/authority/loaded-voxel-region').LoadedVoxelRegion;
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null;
   getChunkRevision(cx: number, cy: number, cz: number): number | null;
   setFluidActiveChunks(keys: readonly string[]): void;

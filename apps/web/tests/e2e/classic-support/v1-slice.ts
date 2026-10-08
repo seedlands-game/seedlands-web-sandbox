@@ -19,6 +19,7 @@ import {
   type ClosedDoorProbePlan,
   type ClosedDoorProbeObservation,
 } from './door-collision-oracle';
+import { collectDoorCollisionObservations } from './door-collision-runner';
 import {
   clickCanvasCenter,
   closeInventory,
@@ -204,24 +205,24 @@ async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promi
     Math.abs(horizontalMouseCorrectionToRoute(before.position, before.viewAngles[0], plan.routeTarget, 'KeyW')),
   ).toBeLessThan(1);
 
-  const observations: DoorAuthorityObservation[] = [];
   const maximumPhysicsTick = before.physicsTick + Math.ceil((before.physicsHz * CLOSED_DOOR_INPUT_BUDGET_MS) / 1_000);
   const deadline = Date.now() + CLOSED_DOOR_INPUT_BUDGET_MS;
-  let assessment = assessClosedDoorProbe(plan, before, observations);
+  let assessment = assessClosedDoorProbe(plan, before, []);
   await page.keyboard.down('KeyW');
   try {
-    while (
-      assessment.status === 'pending' &&
-      Date.now() < deadline &&
-      (observations.at(-1)?.physicsTick ?? before.physicsTick) < maximumPhysicsTick
-    ) {
-      const previousTick = observations.at(-1)?.physicsTick ?? before.physicsTick;
-      await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
-      const current = await doorAuthorityObservation(page);
-      if (current.physicsTick <= previousTick) continue;
-      observations.push(current);
-      assessment = assessClosedDoorProbe(plan, before, observations);
-    }
+    const observations = await collectDoorCollisionObservations({
+      initialPhysicsTick: before.physicsTick,
+      maximumPhysicsTick,
+      deadlineMs: deadline,
+      now: Date.now,
+      observe: () => doorAuthorityObservation(page),
+      yieldControl: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
+      isComplete: (current) => {
+        assessment = assessClosedDoorProbe(plan, before, current);
+        return assessment.status !== 'pending';
+      },
+    });
+    assessment = assessClosedDoorProbe(plan, before, observations);
   } finally {
     await page.keyboard.up('KeyW');
   }

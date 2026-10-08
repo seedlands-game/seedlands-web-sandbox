@@ -80,6 +80,9 @@ export class World {
   ) {
     this.blockLightCache = new ChunkBlockLightCache({
       getVoxelIfLoaded: (x, y, z) => this.getVoxelIfLoaded(x, y, z),
+      ...(authority.getLoadedVoxelRegion
+        ? { getVoxelRegion: (origin, size) => authority.getLoadedVoxelRegion!(origin, size) }
+        : {}),
       blockLightRevision: (origin, size) => this.blockLightRevision(origin, size),
       voxelSemantics: authority.voxelSemantics,
     });

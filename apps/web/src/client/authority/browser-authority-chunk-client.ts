@@ -160,6 +160,10 @@ export class BrowserAuthorityChunkClient {
     return this.baselines.getVoxel(x, y, z);
   }
 
+  getLoadedVoxelRegion(origin: readonly [number, number, number], size: number) {
+    return this.baselines.getLoadedVoxelRegion(origin, size);
+  }
+
   getFluidCell(x: number, y: number, z: number) {
     return this.baselines.getFluidCell(x, y, z);
   }
