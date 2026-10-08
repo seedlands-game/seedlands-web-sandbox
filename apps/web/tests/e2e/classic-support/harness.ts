@@ -207,6 +207,7 @@ export async function walkTo(
     timeout?: number;
     pulseMs?: number;
     refreshAfterCorrection?: boolean;
+    yieldAfterSettledPulse?: (snapshot: ClassicSnapshot) => boolean;
   }> = {},
 ): Promise<ClassicSnapshot> {
   const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
@@ -269,6 +270,7 @@ export async function walkTo(
     );
     if (current.player[1] < segmentStart.player[1] - 2)
       throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);
+    if (options.yieldAfterSettledPulse?.(current)) return current;
   }
   return current;
 }

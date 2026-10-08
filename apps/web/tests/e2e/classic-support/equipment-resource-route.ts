@@ -59,6 +59,20 @@ export const isInsideEquipmentRouteNeighborhood = (position: Point, target: Rout
   Math.abs(position[0] - target[0]) <= EQUIPMENT_ROUTE_MAX_X_ERROR &&
   Math.abs(position[2] - target[1]) < EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance;
 
+// This is progress for the outer direction selector, never an arrival predicate.
+export const shouldYieldEquipmentRoutePulse = (
+  snapshot: EquipmentRouteSnapshot,
+  target: RoutePoint,
+  direction: RouteDirection,
+): boolean =>
+  snapshot.onGround &&
+  !snapshot.colliding &&
+  [snapshot.player, snapshot.serverPlayerPosition].every(
+    (position) =>
+      Math.abs(position[0] - target[0]) <= EQUIPMENT_ROUTE_MAX_X_ERROR &&
+      (direction === 'KeyW' ? position[0] >= target[0] : position[0] <= target[0]),
+  );
+
 export function matchesEquipmentRouteArrival(
   baseline: EquipmentRouteSnapshot,
   current: EquipmentRouteSnapshot,

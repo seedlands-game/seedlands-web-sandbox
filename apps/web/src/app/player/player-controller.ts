@@ -18,6 +18,7 @@ import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 import { createFluidAwareTargetPredicate } from './fluid-source-target';
 import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
 import { samplePlayerWaterImmersion } from './player-water-immersion';
+import { HeldPointerAttackCadence } from './held-pointer-attack';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
@@ -32,9 +33,29 @@ export class PlayerController {
   private spectator = false;
   private miningHeld = false;
   private readonly mining = new PlayerMiningState();
-  // prettier-ignore
-  private attackCooldownSeconds = 0;
   private attackBlocking = false;
+  private readonly heldAttack = new HeldPointerAttackCadence(() => {
+    if (
+      !this.miningHeld ||
+      this.interactionBlocked ||
+      !this.options.getWorld() ||
+      !this.mining.matchesMode(this.options.isCreativeMode) ||
+      document.pointerLockElement !== this.options.canvas
+    ) {
+      this.stopMining();
+      return;
+    }
+    const camera = this.options.camera;
+    camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const position = camera.getPosition();
+    const direction = camera.forward;
+    this.attackBlocking = this.options.onAttackTarget(
+      [position.x, position.y, position.z],
+      [direction.x, direction.y, direction.z],
+      Math.min(3, this.traceTarget()?.distance ?? 3),
+    );
+    if (this.attackBlocking) this.cancelActiveMining();
+  });
   private publishedAimTarget: VoxelTarget | null = null;
   private immersion: WaterImmersionSnapshot = DRY_WATER_IMMERSION;
   private readonly prediction: LocalPlayerPrediction;
@@ -253,8 +274,6 @@ export class PlayerController {
         camera.setPosition(presented.position.x, presented.position.y + PLAYER_FEET_OFFSET, presented.position.z);
       }
     }
-    // 输入重复跟随真实时间；预测用的截断 dt 不能拖慢权威连招窗口。
-    this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - elapsedSeconds);
     const target = this.aimTarget;
     this.publishAimTarget(target);
     if (this.miningHeld) {
@@ -485,27 +504,13 @@ export class PlayerController {
     if (this.miningHeld) this.stopMining();
     this.miningHeld = true;
     this.mining.start(this.options.isCreativeMode?.() ? 'creative' : 'survival');
-    this.attackCooldownSeconds = 0;
+    this.heldAttack.start();
     this.continueMining(this.aimTarget, 0, true);
   }
 
   private continueMining(target: VoxelTarget | null, elapsedSeconds: number, initial = false) {
-    const position = this.options.camera.getPosition();
-    const direction = this.options.camera.forward;
-    if (this.attackCooldownSeconds === 0) {
-      this.attackCooldownSeconds = 0.2;
-      const obstacle = this.traceTarget();
-      this.attackBlocking = this.options.onAttackTarget(
-        [position.x, position.y, position.z],
-        [direction.x, direction.y, direction.z],
-        Math.min(3, obstacle?.distance ?? 3),
-      );
-      if (this.attackBlocking) {
-        this.cancelActiveMining();
-        return;
-      }
-    }
-    if (this.attackBlocking) return;
+    this.heldAttack.attempt();
+    if (!this.miningHeld || this.attackBlocking) return;
     const targetKey = target?.position.join(',') ?? null;
     if (!target || !targetKey) {
       this.cancelActiveMining();
@@ -523,6 +528,7 @@ export class PlayerController {
 
   private stopMining() {
     this.miningHeld = false;
+    this.heldAttack.stop();
     if (this.mining.stop()) this.options.onCancelBreak();
   }
 

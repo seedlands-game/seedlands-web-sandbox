@@ -129,6 +129,8 @@ const collisionGeometry = (collision: boolean) =>
   ]);
 
 it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且界面阻挡立即停止', () => {
+  let now = 0;
+  const monotonicClock = vi.spyOn(performance, 'now').mockImplementation(() => now);
   const canvas = {};
   const documentStub = {
     pointerLockElement: canvas,
@@ -161,17 +163,24 @@ it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且�
   controller.install();
   documentStub.onmousedown?.({ button: 0 });
   expect(attack).toHaveBeenCalledTimes(1);
+  now = 190;
   controller.update(0.05, 0.19);
   expect(attack).toHaveBeenCalledTimes(1);
+  now = 250;
   controller.update(0.05, 0.06);
   expect(attack).toHaveBeenCalledTimes(2);
+  now = 2_250;
   controller.update(0.05, 2);
   expect(attack).toHaveBeenCalledTimes(3);
   blocked = true;
+  now = 2_500;
   controller.update(0.05, 0.25);
   blocked = false;
+  now = 2_750;
   controller.update(0.05, 0.25);
   expect(attack).toHaveBeenCalledTimes(3);
+  controller.dispose(false);
+  monotonicClock.mockRestore();
 });
 
 it('只在Authority明确作废输入队列时重同步预测', () => {
