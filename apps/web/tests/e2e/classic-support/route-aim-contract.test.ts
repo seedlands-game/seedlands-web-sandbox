@@ -38,10 +38,10 @@ const routeSnapshot = (player: Point, yaw: number, tick: number, ack: number): C
     authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
   }) as unknown as ClassicSnapshot;
 
-function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
+function nonResponsiveRoutePage(refreshAfterCorrection: boolean, yaw = -89.74) {
   const target: RoutePoint = [1, 0];
-  const initial = routeSnapshot([0, 32.6, 0], -89.74, 1, 1);
-  const reached = routeSnapshot([1, 32.6, 0], -89.74, 2, 2);
+  const initial = routeSnapshot([0, 32.6, 0], yaw, 1, 1);
+  const reached = routeSnapshot([1, 32.6, 0], yaw, 2, 2);
   const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false, pointerLocked: false };
   const page = {
     evaluate: async (callback: (...args: unknown[]) => unknown) => {
@@ -54,7 +54,12 @@ function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
       return undefined;
     },
     keyboard: {
-      press: async () => undefined,
+      press: async (chord: string, options?: { delay?: number }): Promise<void> => {
+        const keys = chord.split('+');
+        for (const key of keys) await page.keyboard.down(key);
+        await new Promise<void>((resolve) => setTimeout(resolve, options?.delay ?? 0));
+        for (const key of keys.reverse()) await page.keyboard.up(key);
+      },
       down: async () => {
         calls.down += 1;
         calls.pressed = true;
@@ -81,6 +86,28 @@ function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
 }
 
 describe('Classic shared route aim bounded contract', () => {
+  it('releases both held chord keys and preserves the native input failure when cleanup also fails', async () => {
+    const { page, target } = nonResponsiveRoutePage(false, -90);
+    const failure = new Error('Native input interrupted');
+    const held = new Set<string>();
+    const releases: string[] = [];
+    page.keyboard.press = async (chord, options) => {
+      expect(chord).toBe('KeyW+Space');
+      expect(options?.delay).toBe(80);
+      for (const key of chord.split('+')) held.add(key);
+      throw failure;
+    };
+    page.keyboard.up = async (key) => {
+      held.delete(key);
+      releases.push(key);
+      throw new Error('Cleanup response interrupted');
+    };
+
+    await expect(walkTo(page, target, { jump: true, pulseMs: 80 })).rejects.toBe(failure);
+    expect(held.size).toBe(0);
+    expect(releases).toEqual(['KeyW', 'Space']);
+  });
+
   it('does not silently accept the exact Browser20 13-observation prefix', async () => {
     let read = 0;
     const moves: Array<readonly [number, number]> = [];

@@ -1,5 +1,19 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Native keyboard pulse boundary checkpoint59（模型与静态通过，完整浏览器失败）
+
+有效延迟响应RED、near/long3例GREEN、Root70及兼容修正后45例PASS；完整静态第二次EXIT0、identified build EXIT0。原Browser59日志和canonical receipt均FAIL：主10.6分钟FAIL/Visual2.6分钟PASS/Modular SKIP，总13.4分钟，正式C0–C3 PASS，作物共享路线[65.5,-0.5]仍超过原45秒。最后双owner停稳在x65.705/z-0.484，距目标约0.205，未到原0.06；原生80ms参数不能证明实际物理持键时长。连接中断后18:21只读恢复确认原进程18:02正常收尾，未重跑。CI58首轮启动10秒失败、重试900秒失败、Visual PASS、部署SKIP。详见evidence/keyboard-pulse-checkpoint-59-01.md。
+
+接续Group58的实际原完整失败：crop共享路线最后一次距目标不足1格，仍选80ms，却从x66.412跨到x59.975。流式原trace记录keydown method结束后815ms才开始keyup，完整释放间隔约1451ms。已读实际安装Playwright1.62.1：dispatcher在method end后等待tracing after snapshot才返回；当前walkTo等待keyboard.down响应后才启动计时，记录等待因此进入真实按住区间。不能用加大45/20/900秒、放宽0.06/0.08/0.45、关trace/截图、跳阶段或伪造输入解决。
+
+冻结最小合同修复：复用同版本原生keyboard.press(key,{delay:pulseMs})，jump时使用其支持的KeyW/KeyS+Space真实chord；同一次原生动作完成down/delay/up后才等待after snapshot。pulseMs仍由原routePulseDurationMs及Group58上限决定，0ms数字夹具合同保持；若原生动作失败，尝试释放全部涉及键并保留原错误。没有页面JS派发事件、teleport/setView、协议/应用状态写入、包源码补丁或自建调度。原fresh full snapshot、ACK/ground/noncollision/settle、方向交接/越界拒绝与全部原时限不变。
+
+先用实际walkEquipmentRoute和真实stepBody near路线取得有效RED：fake输入事件立即生效，仅让公共keyboard.down/up返回前追加固定1000ms模拟after-call观察等待；fixed snapshot延迟与原模型不改。对照native press在同一次输入内部执行down/delay/up，观察延迟只在释放后发生。GREEN检查原0.06圆内的两个owner、停稳、fresh ACK、实际模拟持键不超过原80ms；旧far模型与现有near-overshoot/ground/方向反例保持。端口替身只模拟已确认的Playwright语义，不冒充真实Authority/PointerLock或FPS。
+
+必要静态、identified build及原唯一完整runner，独立run ID `pr41-classic-browser59-01`；只有新修复后才复验，不重跑已闭合Browser58。实际浏览器核查crop与V2/后续原旅程，当前失败和skip继续原样记录。功能脉冲边界修复不是whole-frame A/A或A/B，也不声称性能收益；最终组合性能仍独立准出。传统0.25PD×120%=0.3PD；AI约40min×120%=48min，17:33附近开始、18:21附近有界checkpoint。服务503造成此前中断，不以盲目重试恢复。
+
+现有一个精确Luna/medium独占新模型helper、near timing test及既有long test抽取；Root独占实际harness、其他端口夹具、spec和集成。禁止额外委派或并发重负载；所有输出新路径。17:38实际UI确认周剩84%，账户自初始98%下降14点不能单独归因PR；约60%停止线不变。CI58推送后正在运行，下一push等其终态，不取消取证。
+
 ## V2 far-corridor real input planning checkpoint58（模型与静态通过，完整浏览器失败）
 
 旧实际调用链45秒长段RED、near control PASS后，候选模型两例PASS；Root原八文件55例通过，新候选边界15例通过。新夹具较严0.005断言、unused声明与类型错误的失败日志均保留，按原0.06合同及正式snapshot接口修正；最终verify:static:ci实际EXIT0、identified build实际EXIT0。原唯一Browser58实际EXIT1：主FAIL/Visual PASS/Modular SKIP，正式C0–C3 PASS；Creative作物共享walkEquipmentRoute到[65.5,-0.5]超过原45秒，未进入V1/V2/C4/C5。新300ms条件在这一失败段所有读回均未成立；仍不能宣布V2修复或可合入。详见evidence/equipment-route-checkpoint-58-01.md。

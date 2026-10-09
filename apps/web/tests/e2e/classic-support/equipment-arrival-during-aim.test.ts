@@ -68,7 +68,12 @@ function routePage(values: readonly ClassicSnapshot[]) {
       return undefined;
     },
     keyboard: {
-      press: async () => undefined,
+      press: async (chord: string, options?: { delay?: number }): Promise<void> => {
+        const keys = chord.split('+');
+        for (const key of keys) await page.keyboard.down(key);
+        await new Promise<void>((resolve) => setTimeout(resolve, options?.delay ?? 0));
+        for (const key of keys.reverse()) await page.keyboard.up(key);
+      },
       down: async () => {
         calls.down += 1;
       },

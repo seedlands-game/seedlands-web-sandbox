@@ -59,6 +59,12 @@ function routePage(
       return options.refreshed;
     },
     keyboard: {
+      press: async (chord: string, options?: { delay?: number }): Promise<void> => {
+        const keys = chord.split('+');
+        for (const key of keys) await page.keyboard.down(key);
+        await new Promise<void>((resolve) => setTimeout(resolve, options?.delay ?? 0));
+        for (const key of keys.reverse()) await page.keyboard.up(key);
+      },
       down: async (key: string) => {
         expect(key).toBe('KeyS');
         calls.down += 1;
