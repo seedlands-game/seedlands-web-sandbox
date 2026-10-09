@@ -3,10 +3,8 @@ import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
   bodyWorldAabb,
-  probeBodyContacts,
   recoverBody,
   selectReachableBodyTarget,
-  separateBodies,
   stepBody,
   type BodyConfig,
   type BodyState,
@@ -33,6 +31,8 @@ import { commitAuthorityPhysicsEntities } from './authority-physics-entity-commi
 import type { AuthoritySessionOptions } from './authority-session-options';
 import { createAuthorityCollisionWorld } from './authority-runtime-geometry';
 import type { VoxelCollisionWorld } from './voxel-collision-world';
+import { separateAuthorityCharacters } from './authority-character-separation';
+import { currentMountedSeats, mountedAuthorityBody } from './authority-mounted-body';
 
 export type * from './authority-session-types';
 
@@ -40,14 +40,10 @@ type BodySnapshot = SessionContract.AuthorityBodySnapshot;
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
 const MAX_RECOVERY_DISTANCE = 8;
-const CHARACTER_SEPARATION_DISTANCE = 0.1;
 const MAX_PICKUP_TARGET_CANDIDATES = 8;
 const MAX_TRACKED_PICKUP_CURSORS = 512;
 const PICKUP_CURSOR_WRAP = 0x80000000;
 const RECOVERY_PRIORITY = { 'external-geometry-change': 0, initialization: 1, 'legacy-restore': 2 } as const;
-
-const isCharacter = (entity: SessionContract.AuthorityEntity): boolean =>
-  entity.type === 'player' || entity.type === 'creature' || entity.type === 'npc';
 
 export class AuthoritySession {
   private readonly clock: ActiveMonotonicClock;
@@ -282,6 +278,7 @@ export class AuthoritySession {
     if (!this.playerBindingCurrent) this.input.clear();
     const input = this.input.consumeForTick(this.state.physicsTick);
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
+    const mounted = currentMountedSeats(this.options.server);
     const pickupTargets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
       left.id.localeCompare(right.id),
     );
@@ -298,6 +295,11 @@ export class AuthoritySession {
       seen.add(entity.id);
       const config = this.options.bodyConfigFor(entity);
       configs.set(entity.id, config);
+      const seat = mounted.get(entity.id);
+      if (seat) {
+        nextBodies.set(entity.id, mountedAuthorityBody(entity, seat));
+        continue;
+      }
       const physicsInput = selectAuthorityPhysicsInput(
         entity,
         this.options.playerId,
@@ -369,24 +371,12 @@ export class AuthoritySession {
       });
     }
 
-    const characters = entities.filter(isCharacter);
-    for (let leftIndex = 0; leftIndex < characters.length; leftIndex += 1)
-      for (let rightIndex = leftIndex + 1; rightIndex < characters.length; rightIndex += 1) {
-        const leftEntity = characters[leftIndex];
-        const rightEntity = characters[rightIndex];
-        const left = nextBodies.get(leftEntity.id)!;
-        const right = nextBodies.get(rightEntity.id)!;
-        const separation = separateBodies({
-          left: left.body,
-          leftConfig: configs.get(left.id)!,
-          right: right.body,
-          rightConfig: configs.get(right.id)!,
-          world: this.collisionWorld,
-          maxDistance: CHARACTER_SEPARATION_DISTANCE,
-        });
-        nextBodies.set(left.id, this.afterSeparation(left, separation.left, configs.get(left.id)!));
-        nextBodies.set(right.id, this.afterSeparation(right, separation.right, configs.get(right.id)!));
-      }
+    separateAuthorityCharacters(
+      entities.filter((entity) => !mounted.has(entity.id)),
+      nextBodies,
+      configs,
+      this.collisionWorld,
+    );
 
     commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies);
     settleAuthorityPickups(
@@ -406,18 +396,14 @@ export class AuthoritySession {
     if (this.options.execution.commitSequence === before) this.options.execution.commit();
   }
 
-  private afterSeparation(snapshot: BodySnapshot, body: BodyState, config: BodyConfig): BodySnapshot {
-    if (snapshot.body === body) return snapshot;
-    const probe = probeBodyContacts({ state: body, config, world: this.collisionWorld });
-    return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
-  }
-
   private processRecoveryQueue(): void {
+    const mounted = currentMountedSeats(this.options.server);
     const requests = [...this.recoveryQueue]
       .sort(([left], [right]) => left.localeCompare(right))
       .slice(0, MAX_AUTHORITY_RECOVERIES_PER_STEP);
     for (const [entityId, request] of requests) {
       this.recoveryQueue.delete(entityId);
+      if (mounted.has(entityId)) continue;
       const entity = this.options.server.getEntity(entityId);
       if (!entity) {
         this.recordRecovery({

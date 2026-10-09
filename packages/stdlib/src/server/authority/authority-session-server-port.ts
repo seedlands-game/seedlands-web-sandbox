@@ -24,6 +24,7 @@ export function createAuthoritySessionServerPort(
       return !entity || entity.type === 'station' ? null : { ...entity, type: entity.type };
     },
     getActorModeState: (id) => server.getActorModeState(id),
+    mountedSeatConstraints: () => server.mountedSeatConstraints(),
     createEntityReference: (id) => server.createEntityReference(id),
     resolveEntityReference: (reference) => server.resolveEntityReference(reference) !== null,
     queryEntities: () =>

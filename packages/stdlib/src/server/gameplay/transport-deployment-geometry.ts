@@ -3,6 +3,7 @@ import type { GameplayCallbacks } from './gameplay-runtime-contracts';
 import type { GameplayContent } from './gameplay-content';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { overlapDepth, translateAabb } from '../../physics/geometry';
+import type { WorldAabb } from '../../physics/types';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
 import { advanceRouteSegmentV1, resolveRouteSegmentV1, type RouteNeighborV1 } from './modules/route-definition';
 import type { TransportDefinitionV1 } from './modules/transport-model';
@@ -87,10 +88,50 @@ function placement(options: Options, definition: TransportDefinitionV1, hit: Pos
 
 function collisionRejection(options: Options, option: TransportDeploymentOptionV1): string | null {
   const definition = options.config.definitions.require(option.definitionId);
-  const bounds = translateAabb(definition.bodyAabb, offset(option.position));
+  return loadedTransportBodyRejection(options, definition.bodyAabb, option.position);
+}
+
+export function loadedTransportBodyRejection(
+  options: Options,
+  localAabb: WorldAabb,
+  position: Position,
+  excludedEntities: readonly string[] = [],
+): string | null {
+  const worldRejection = loadedWorldBodyRejection(options, localAabb, position);
+  if (worldRejection) return worldRejection;
+  const bounds = translateAabb(localAabb, offset(position));
+  for (const entity of options.entities.query()) {
+    if (entity.type === 'station' || excludedEntities.includes(entity.id)) continue;
+    const local =
+      entity.type === 'transport'
+        ? options.config.definitions.require(options.entities.transportComponentSnapshot(entity.id).definitionId)
+            .bodyAabb
+        : bodyConfigFor(bodyKindForEntity(entity)).localAabb;
+    if (overlapDepth(bounds, translateAabb(local, offset(entity.position)))) return 'target-occupied';
+  }
+  return null;
+}
+
+export function loadedWorldBodyRejection(
+  options: Readonly<{
+    callbacks: Pick<GameplayCallbacks, 'getLoadedVoxel' | 'voxelGeometry'>;
+    content: Pick<GameplayContent, 'voxelSemantics'>;
+  }>,
+  localAabb: WorldAabb,
+  position: Position,
+): string | null {
+  const bounds = translateAabb(localAabb, offset(position));
+  if (
+    !position.every(Number.isFinite) ||
+    (['x', 'y', 'z'] as const).some((axis) => bounds.max[axis] <= bounds.min[axis])
+  )
+    return 'transport-body-invalid';
   const from = [bounds.min.x, bounds.min.y, bounds.min.z].map((value) => Math.floor(value + 1e-8));
   const to = [bounds.max.x, bounds.max.y, bounds.max.z].map((value) => Math.floor(value - 1e-8));
+  if (![...from, ...to].every(Number.isSafeInteger) || to.some((value, axis) => value < from[axis]!))
+    return 'transport-body-invalid';
   if (to.reduce((count, value, axis) => count * (value - from[axis]! + 1), 1) > 4096) return 'transport-body-capacity';
+  let occupied = false;
   for (let x = from[0]!; x <= to[0]!; x++)
     for (let y = from[1]!; y <= to[1]!; y++)
       for (let z = from[2]!; z <= to[2]!; z++) {
@@ -113,17 +154,9 @@ function collisionRejection(options: Options, option: TransportDeploymentOptionV
               max: { x: x + box.max[0], y: y + box.max[1], z: z + box.max[2] },
             })
           )
-            return 'target-occupied';
+            occupied = true;
       }
-  for (const entity of options.entities.query()) {
-    const local =
-      entity.type === 'transport'
-        ? options.config.definitions.require(options.entities.transportComponentSnapshot(entity.id).definitionId)
-            .bodyAabb
-        : bodyConfigFor(bodyKindForEntity(entity)).localAabb;
-    if (overlapDepth(bounds, translateAabb(local, offset(entity.position)))) return 'target-occupied';
-  }
-  return null;
+  return occupied ? 'target-occupied' : null;
 }
 
 export function projectTransportDeploymentSite(options: Options, hit: Position): TransportDeploymentSiteV1 {

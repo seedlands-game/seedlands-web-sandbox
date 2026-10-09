@@ -12,6 +12,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'resolveEntityReference',
   'transportState',
   'transportProjections',
+  'mountedSeatConstraints',
   'updateEntity',
   'updateEntityWithoutSnapshot',
   'updateEntitiesWithoutSnapshot',

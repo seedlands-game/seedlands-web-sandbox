@@ -13,6 +13,7 @@ import {
 } from '../gameplay/modules/structure-target-dispatch';
 import type { MediaTargetPortV1 } from '../gameplay/gameplay-media-target-runtime';
 import { dispatchAuthorityCropTarget } from './authority-crop-runtime';
+import { dispatchAuthorityTransportTarget } from './authority-transport-interaction';
 
 export type AuthorityStructureTargetPort = Pick<StructureTargetPortV1, 'resolve' | 'invoke'>;
 export type AuthorityMediaTargetPort = Pick<MediaTargetPortV1, 'resolve' | 'invoke'>;
@@ -113,6 +114,7 @@ export function applyAuthorityPlayerAction(
         };
       };
       const fallback = () =>
+        dispatchAuthorityTransportTarget(server, playerId, action) ??
         dispatchAuthorityCropTarget(server, playerId, action) ??
         dispatchItemInteraction(
           {

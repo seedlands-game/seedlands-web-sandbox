@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Transport registered mount/dismount checkpoint49（上下车与静态骑乘已验证；运输产品未完成）
+
+实际正式caller RED缺state owner，接线后partition类型失败按原合同修为两个component；最终2文件20/20 PASS。实际use/alternate、四项selection、重复/堵seat、world/player占出口、自然unknown frontier、规则veto/forge、receiveInput+flight/walking/jump physics、mounted portable恢复/坏rider active restore零写已验证。风险审查抓到first player-blocked出口仍选中后拒绝，实际RED12/13；出口投影过滤真实players后可选另一个安全出口，GREEN20/20。deploy后World edit原transport:undefined不是setup错误，真实RED保留且physics/recovery已统一definition body selector。根68/68 owner/physics、48/48 dispatch、原geometry8加新增4PASS；完整static原EXIT2仅最后编辑中Classic tuple错误，其余format/paths/lint/生产types/Svelte0/0有效，最终scopedlint/stdlib与Classictypes补验、规则66/CI选择14均PASS。详见evidence/transport-relations-checkpoint-49-01.md。
+
+接续07ed9416，只实现显式非Classic relation module的真实Authority interact entity primary上车、self secondary下车。配置moduleId/operationId，requires正式运输能力；operation只读actor与transport投影，返回关系/空间候选，Host重建并使用同一个prepared EntityStore participant发布transport rider+revision和角色位置/零速度，保持单一transform/lifetime owner。验证四项selection revision、当前目标lifetime、存活/唯一双向关系、当前距离/加载射线、seat和出口的真实body AABB及world/entity占位；unknown/blocked出口拒绝且全部owner/revision不变。只为显式注册module提供Host stateport，不自动扩张Host权限或module可写owner。
+
+Authority从当前ECS状态派生mountedSeatConstraints；本片transport body仍静态，mounted player跳过独立walking/flight/gravity/separation/recovery的position写入，真实receiveInput+physics tick不能偏离canonical seat。恢复沿原完整preflight和transport关系校验，实际mounted portable checkpoint重开仍同实体/lifetime且seat约束生效。先缺正式API/真实caller RED，GREEN覆盖成功/重复/过期lifetime或selection/已乘/阻挡或未知出口/规则veto与候选改写零写、正常physics输入及portable恢复。传统0.8PD×120%=0.96PD；AI约90min×120%=108min，11:32附近开始；最近真实周额度10:10剩86%，10:40更新未返回，60%停止线保持。
+
+不改变Classic pack/旧V4 identity、legacy vehicles、旧voxel0–88/Chunk bytes、浏览器断言/900秒或sealed证据。运输运动、燃料/货箱UI、Classic与Modular真实产品、mounted death结算、非空legacy迁移与浏览器仍后续片，不能由本组静态关系或模型夹具宣布完成。
+
 ## Transport registered deploy checkpoint48（正式 Authority 部署已验证；运输产品未完成）
 
 实际正常 Authority interact 从 WORLD_PERMISSION_DENIED 的2FAIL/1PASS修到7/7 PASS；覆盖 surface/route 部署、库存同次消费、加载几何/占位与选择新鲜度、registered after-rule veto/候选改写零写、静态body推进及便携checkpoint恢复。未知definition用同一persistence写入并实际source.server.restore()拒绝，当前owner与畸形存档均保持。根授权18/18、owner/Kernel/Authority/恢复37/37，完整verify:static:ci实际exit0（冻结5、格式/路径/lint/完整types、Svelte0/0、规则66/CI选择14）；先前半编辑types失败独立保留。Classic pack同构建配置精确HEAD control overlay与candidate entry bytes SHA256同为c1ef197e7fea7248a65488494881cbf84cbda77823d09291edf596183184da18，不替代生产build/真实玩法。详见evidence/transport-deploy-checkpoint-48-01.md。

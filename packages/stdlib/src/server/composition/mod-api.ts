@@ -348,3 +348,5 @@ export type { ForageModuleConfiguration } from '../gameplay/modules/forage-model
 
 export { defineTransportInteractionModule } from '../gameplay/modules/transport-interaction-module';
 export type { TransportInteractionConfig } from '../gameplay/modules/transport-interaction-config';
+export { defineTransportRelationModule } from '../gameplay/modules/transport-relation-module';
+export type { TransportRelationConfig } from '../gameplay/modules/transport-relation-interaction';

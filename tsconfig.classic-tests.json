@@ -90,6 +90,7 @@
     "apps/web/tests/unit/app/classic-native-trace.test.ts",
     "apps/web/tests/unit/app/classic-authority-cpu-profile.test.ts",
     "apps/web/tests/integration/runtime/server/ecs-component-snapshot.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/transport-authority-deployment.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-deployment.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts"
   ]
 }

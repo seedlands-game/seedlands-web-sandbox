@@ -34,6 +34,7 @@ export type AuthorityServerPort = {
   createEntityReference?: (id: string) => EntityLifetimeReference | null;
   resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
   queryEntities: () => AuthorityEntity[];
+  mountedSeatConstraints?: () => readonly import('../gameplay/modules/transport-motion-model').MountedSeatConstraintV1[];
   updateEntity: (
     id: string,
     update: { position: [number, number, number]; physicsVelocity: [number, number, number] },

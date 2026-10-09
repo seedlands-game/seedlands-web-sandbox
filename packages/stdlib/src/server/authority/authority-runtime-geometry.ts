@@ -8,6 +8,7 @@ import type { AuthoritySessionOptions } from './authority-session-options';
 import type { AuthoritySession } from './authority-session';
 import { VoxelCollisionWorld } from './voxel-collision-world';
 import type { GameServer } from '../game-server';
+import { authorityBodyConfig } from './authority-body-config';
 
 export function assertAuthorityRuntimeGeometry(options: AuthorityRuntimeOptions): void {
   const geometry = voxelGeometryForComposition(options.composition);
@@ -38,8 +39,9 @@ export function queueAuthorityRuntimeRecoveries(
 ): void {
   queueBodyRecoveriesAfterCommit(
     commit,
-    server.queryEntities(),
+    server.queryEntities().filter((entity) => entity.type !== 'station'),
     (entityId, maxDistance) => session.requestBodyRecovery(entityId, 'external-geometry-change', maxDistance),
     server.voxelGeometry,
+    (entity) => authorityBodyConfig(server, entity),
   );
 }

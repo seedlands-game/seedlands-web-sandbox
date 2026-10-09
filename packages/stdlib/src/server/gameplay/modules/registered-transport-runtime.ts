@@ -15,6 +15,7 @@ import {
 } from './transport-interaction-config';
 import { transportActorAddress, transportSiteAddress } from './transport-interaction-module';
 import { buildTransportDeploymentCandidate, type TransportDeploymentActorV1 } from './transport-deployment-model';
+import { projectTransportActor } from '../transport-actor-projection';
 
 type Options = Readonly<{
   composition: WorldComposition;
@@ -168,31 +169,7 @@ export class RegisteredTransportRuntime {
   }
 
   private actor(id: string): TransportDeploymentActorV1 {
-    const entity = this.options.entities.get(id);
-    const reference = this.options.entities.createReference(id);
-    if (!reference || entity?.type !== 'player') throw new Error('transport-actor-unavailable');
-    const components = this.options.entities.actorComponentSnapshot(id);
-    const mode = components.mode;
-    const catalog = components.creativeCatalog;
-    if (!mode || !catalog) throw new Error('transport-actor-mode-unavailable');
-    const creative = mode.value === 'creative';
-    const selectedSlot = creative ? catalog.selectedSlot : components.equipment.selectedSlot;
-    const itemId = creative
-      ? (catalog.hotbar[selectedSlot] ?? null)
-      : (components.inventory[selectedSlot]?.itemId ?? null);
-    return Object.freeze({
-      version: 1,
-      reference,
-      position: Object.freeze([...entity.position]) as typeof entity.position,
-      alive: entity.health! > 0 && components.lifecycle === 'alive',
-      mode: mode.value,
-      modeRevision: mode.revision,
-      inventoryRevision: components.inventoryRevision ?? 0,
-      creativeCatalogRevision: catalog.revision,
-      selectedSlot,
-      itemId,
-      count: creative ? Number(itemId !== null) : (components.inventory[selectedSlot]?.count ?? 0),
-    });
+    return projectTransportActor(this.options.entities, id);
   }
 
   private site(position: readonly [number, number, number]) {
