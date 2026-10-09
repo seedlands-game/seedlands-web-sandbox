@@ -262,6 +262,7 @@ export class Game {
       'worker-first',
       () => (this.lifecycle.staleVisibleCommits += 1),
       this.visualResources.waterLayer.id,
+      { resources: this.visualResources.crops, onError: clientOptions.onFatal },
     );
     this.harnessRenderedWorldEpoch = authority.runtimeEpoch;
     this.visualEffects = new AdvancedVisualEffects(

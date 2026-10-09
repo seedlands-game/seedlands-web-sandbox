@@ -71,6 +71,10 @@
     "apps/web/tests/e2e/classic-support/route-progress.test.ts",
     "apps/web/tests/e2e/classic-support/scenario.test.ts",
     "apps/web/tests/unit/client/crop-presentation-loader.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/crop-presentation-authority.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/crop-presentation-authority.test.ts",
+    "apps/web/tests/unit/app/crop-stage-presenter.test.ts",
+    "apps/web/tests/unit/client/crop-stage-geometry.test.ts",
+    "apps/web/tests/unit/app/world-crop-presentation.test.ts",
+    "apps/web/tests/unit/app/playcanvas-crop-stage-adapter.test.ts"
   ]
 }

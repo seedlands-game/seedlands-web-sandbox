@@ -1,5 +1,17 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 作物 Chunk 呈现消费者 checkpoint31（接线与确定性验收完成；浏览器未验收）
+
+承接checkpoint30内容合同，只新增派生渲染消费者。唯一CropRuntime仍拥有种植/阶段/时钟；Web仅消费accepted AuthorityGameplayView.cropStages，按已呈现terrain Chunk、presentationId和stage批处理非碰撞crossed-quads，不创建逐作物Entity、体素、碰撞体、可写crop Map或新提交。缺presentationId的旧投影不绘制；声明的未知ID/非法stage/position失败关闭、清理overlay并报告既有runtime错误UI，不默默显示替代物。渲染与normal soil-target action保持分开的合同。
+
+新增纯CropStagePresenter<Resource>位于app/world；constructor(catalog.crops, adapter)，adapter只有create(batch)/destroy(resource)，batch含chunkKey/cx/cy/cz/presentationId/stage/definition/positions（soil positions，readonly）。update(epoch, projections, residentChunkKeys)仅保留相同内容签名的GPU资源；坐标按floorDiv/CHUNK_SIZE含负坐标与边界。新增client/presentation/crop-stage-geometry纯生成批次positions/normals/uvs/indices，相对Chunk原点，base=soilY+1，两片对角双面cutout平面，尺寸完全来自Pack；每作物8 vertices/12 indices，无写World/Authority接口。
+
+World drainCommits在terrain attach之后协调overlay，Chunk卸载立即销毁相应batch，beginScenario/world-restore清理全部，dispose终止late update。accepted crop删除/成长/恢复在下一正常frame交付；无变化不重建GPU批次。PlayCanvas适配器只创建按chunk/stage批次Entity与Mesh/Material/Texture，关闭碰撞与shadow体，无terrain repository替换；World销毁batch，visualResources销毁材质纹理，异步加载/部分创建失败完整回收。继承旧场景epoch与资源owner，不增加Worker/Kernel状态或素材域名。`world-crop-presentation.ts`窄协调器连接resident keys/错误UI与GPU资源，避免继续扩张World类；作物材质复用现有voxelBlockLightGlsl与terrain的只读光照砖。terrain替换时bind新砖，更新直接观察原GPU纹理；卸载/恢复/退出先撤除引用，不销毁借用砖。夜间光照与透明轮廓需在新artifact实际画面验证，mock仅证明生命周期。
+
+先API RED及旧缺消费者观察：此前Task45实际rg确认cropStages无Web消费者，浏览器可见性预期为在正常种植后应看到stage0、施肥后stage7、收割/移除土壤后消失，restore后如实重现。新增纯测试用实际新owner合同先失败，GREEN覆盖空/旧投影、resident限制、同签名复用、0→7、删除、负坐标/边界、unload/epoch/dispose、未知资产与非法数据/部分创建失败清理、8/12几何与Pack尺寸，不把fake adapter当视觉证据。静态门禁与相关headless回归后仅以新的精确source/artifact、唯一完整Classic入口检验真实输入/作物可见与生命周期；不加debug teleport/setView，不改既有断言/期限/画质，不复用4db dist，不宣称性能提升。
+
+预算02:09UTC产品UI实际周剩余90%，约6天重置；约60%停止线保持。本有界消费者预估传统1–2PD、AI约1–2小时，模型/费用与真实周额度不可换算。当前获授权持续PR修复及正常feature推送；不合并/自动合并/生产部署。V2超时、V3/Modular正式producer、V4完整旅程、194项产品矩阵、组合整帧A/B仍未完成；渲染通过也不自动闭环这些项。
+
 ## 作物 Pack 呈现合同 checkpoint30（内容合同完成；呈现未验收）
 
 本组补齐此前仅有 position/stage 投影的内容合同，未完成浏览器呈现验收。CropPolicy 可选 presentationId 是经原 CropRuntime 冻结的只读内容元数据；无标识的旧配置继续只投影原字段，有标识时每条 cropStages 增加同一个通用 presentationId，不泄漏成长时钟、不改 crop checkpoint 字节或新增状态 owner。Classic 声明 seedlands:wheat-crop，八个阶段资产完全由 Pack 指定；stdlib/Web 不硬编码 Classic 作物或体素。

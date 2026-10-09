@@ -28,6 +28,7 @@ import {
 } from './streaming-admission-retry';
 import type { WorldAuthorityPort } from './world-authority-port';
 import { getRenderedMaterialMeshFromChunks } from './rendered-material-mesh';
+import { WorldCropPresentation, type CropPresentationBindings } from './world-crop-presentation';
 export type { RenderedMaterialMeshSummary } from './rendered-material-mesh';
 export type { WorldAuthorityPort } from './world-authority-port';
 
@@ -67,6 +68,7 @@ export class World {
   private readonly blockLightRebuildPump: BlockLightRebuildPump;
   private lastCenter = '';
   private disposed = false;
+  private readonly crops: WorldCropPresentation | null;
 
   constructor(
     readonly authority: WorldAuthorityPort,
@@ -79,7 +81,15 @@ export class World {
     variant: StreamingVariant,
     onStaleVisibleCommit: () => void = () => undefined,
     waterLayerId?: number,
+    cropPresentation?: CropPresentationBindings,
   ) {
+    this.crops = cropPresentation
+      ? new WorldCropPresentation(
+          cropPresentation,
+          (key) => this.repository.chunks.get(key)?.resource,
+          () => this.repository.chunks.keys(),
+        )
+      : null;
     this.blockLightCache = new ChunkBlockLightCache({
       getVoxelIfLoaded: (x, y, z) => this.getVoxelIfLoaded(x, y, z),
       ...(authority.getLoadedVoxelRegion
@@ -136,6 +146,7 @@ export class World {
       now: () => performance.now(),
       summarize: summarizeMeshParts,
       onVisible: (task, { transitionPending }) => {
+        this.crops?.bindLight(task.chunkKey);
         if (!transitionPending || task.visibilityBarrierRevision === undefined) this.scheduler.completeVisible(task);
         if (!transitionPending)
           this.fluidFeedback.completeVisible(
@@ -316,6 +327,7 @@ export class World {
     this.scenarioId = `${name}-${++this.scenarioSequence}`;
     this.scheduler.beginScenario();
     this.repository.clear();
+    this.crops?.reset();
     this.blockLightCache.clear();
     this.fluidFeedback.reset();
     this.waterTransitions.reset();
@@ -349,6 +361,7 @@ export class World {
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.scheduler.dispose();
     this.repository.dispose();
+    this.crops?.dispose();
     this.blockLightCache.clear();
     this.dirtyChunks.clear();
     this.fluidDirtyChunks.clear();
@@ -485,6 +498,7 @@ export class World {
 
   drainCommits(cameraPosition?: readonly [number, number, number]) {
     this.repository.drain();
+    this.crops?.update(this.scenarioId, this.authority.gameplay.cropStages ?? []);
     if (cameraPosition) this.blockLightRebuildPump.request(cameraPosition);
   }
 

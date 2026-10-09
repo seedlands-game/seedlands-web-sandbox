@@ -5,6 +5,7 @@ import { setAppearanceImages, setPackPresentationCatalog } from './asset-image';
 import { createVoxelMaterials } from '../scene/voxel-materials';
 import type { QualityProfile } from '../scene/quality-profile';
 import { loadBrowserPackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
+import { createPlayCanvasCropPresentation } from '../world/playcanvas-crop-stage-adapter';
 
 export async function loadAppearanceRuntime(app: pc.Application) {
   const [{ state, models }, presentation] = await Promise.all([
@@ -26,11 +27,25 @@ export async function loadAppearanceRuntime(app: pc.Application) {
 
 export async function createAppearanceMaterials(app: pc.Application, quality: QualityProfile) {
   const { assets, presentation } = await loadAppearanceRuntime(app);
-  return createVoxelMaterials(
+  const materials = await createVoxelMaterials(
     app,
     quality,
     assets.filter((asset) => asset.type === 'pixel-texture'),
     assets,
     presentation,
   );
+  try {
+    const crops = await createPlayCanvasCropPresentation(app, presentation);
+    return {
+      ...materials,
+      crops,
+      destroy() {
+        crops.dispose();
+        materials.destroy();
+      },
+    };
+  } catch (error) {
+    materials.destroy();
+    throw error;
+  }
 }
