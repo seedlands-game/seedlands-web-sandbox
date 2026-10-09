@@ -1,3 +1,4 @@
+import type { AuthorityPhysicsFrame, AuthorityPhysicsUpdate } from './authority-physics-frame';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import type { EcsActorArchetype, EcsEntityType } from '../gameplay/ecs-entity-owner';
 import type { BodyState, Contact } from '../../physics';
@@ -35,6 +36,7 @@ export type AuthorityServerPort = {
   resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
   queryEntities: () => AuthorityEntity[];
   mountedSeatConstraints?: () => readonly import('../gameplay/modules/transport-motion-model').MountedSeatConstraintV1[];
+  commitPhysicsFrame?: (frame: AuthorityPhysicsFrame) => readonly AuthorityPhysicsUpdate[] | null;
   updateEntity: (
     id: string,
     update: { position: [number, number, number]; physicsVelocity: [number, number, number] },

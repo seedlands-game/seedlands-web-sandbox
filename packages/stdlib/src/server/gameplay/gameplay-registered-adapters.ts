@@ -18,6 +18,8 @@ import { createRegisteredGameplayMedia } from './gameplay-media-runtime';
 import type { RegisteredMediaPlaybackRuntime } from './modules/registered-media-playback-runtime';
 import { prepareGameplayWorldChange } from './gameplay-structure-commit';
 import type { MediaPlaybackFactV1 } from './modules/media-playback-model';
+import { RegisteredTransportMotionRuntime } from './modules/registered-transport-motion-runtime';
+import { TRANSPORT_MOTION_CAPABILITY } from './modules/transport-motion-module';
 import { RegisteredTransportRuntime } from './modules/registered-transport-runtime';
 import { TRANSPORT_INTERACTION_CAPABILITY } from './modules/transport-interaction-config';
 import { TRANSPORT_RELATION_CAPABILITY } from './modules/transport-relation-interaction';
@@ -137,6 +139,11 @@ export function createGameplayRegisteredRuntimes(
   });
   return Object.freeze({
     ...registered,
+    transportMotion: callbacks.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === TRANSPORT_MOTION_CAPABILITY,
+    )
+      ? new RegisteredTransportMotionRuntime({ ...options, composition: callbacks.composition })
+      : null,
     transportRelations: callbacks.composition?.definitionMap.capabilities.some(
       ({ id }) => id === TRANSPORT_RELATION_CAPABILITY,
     )

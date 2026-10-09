@@ -1,3 +1,4 @@
+import type { AuthorityPhysicsFrame } from './authority/authority-physics-frame';
 import { projectNearbyStations } from './gameplay/station-player-view';
 import type { WorldModuleBinding } from './commands/module-command';
 import type { ModuleInvocationValue } from './composition/contracts';
@@ -135,6 +136,7 @@ export class GameServerGameplayHost {
   createEntityReference = (id: string): EntityLifetimeReference | null => this.gameplay.entities.createReference(id);
   resolveEntityReference = (reference: EntityLifetimeReference): GameplayEntity | null =>
     this.gameplay.entities.resolveReference(reference);
+  commitPhysicsFrame = (frame: AuthorityPhysicsFrame) => this.gameplay.commitPhysicsFrame(frame);
   transportState = (reference: EntityLifetimeReference) => this.gameplay.entities.transportState(reference);
   transportProjections = () => projectTransportStates(this.gameplay.entities);
   mountedSeatConstraints = () =>

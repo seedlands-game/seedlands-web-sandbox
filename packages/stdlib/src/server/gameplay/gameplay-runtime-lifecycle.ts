@@ -1,3 +1,6 @@
+import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
+import type { GameplayModuleRuntime } from './modules/gameplay-module-runtime';
+import type { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
 import type { WorldModuleBinding } from '../commands/module-command';
 import type { EntityStore } from './entity-store';
 import { PlayerState } from './player-state';
@@ -182,4 +185,20 @@ export function bindRegisteredActorRequest<Result>(
   if (!runtime) throw new Error(`Registered ${label} is unavailable.`);
   return (actorId: string, targetId: string, existingActionId?: string) =>
     runtime.request(actorId, targetId, existingActionId, binding);
+}
+
+/** Shared façade assembly, with the existing entity and request owners unchanged. */
+export function createGameplaySpawnFacade(options: Parameters<typeof spawnGameplayEntity>[1]) {
+  return Object.freeze({
+    spawn: (input: EntitySpawn) => spawnGameplayEntity(input, options),
+    autonomous: (input: EntitySpawn, registration: ActorRegistration) =>
+      spawnGameplayAutonomous(input, registration, options),
+  });
+}
+export function createGameplayModuleRequest(modules: GameplayModuleRuntime, combat: RegisteredCombatRuntime | null) {
+  return (...args: Parameters<GameplayModuleRuntime['invoke']>) => {
+    const result = modules.invoke(...args);
+    if (result.ok && args[2].operationId === COMBAT_REQUEST_OPERATION) combat?.drain();
+    return result;
+  };
 }

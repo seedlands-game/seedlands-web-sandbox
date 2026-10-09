@@ -10,6 +10,7 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'getEntity',
   'createEntityReference',
   'resolveEntityReference',
+  'commitPhysicsFrame',
   'transportState',
   'transportProjections',
   'mountedSeatConstraints',

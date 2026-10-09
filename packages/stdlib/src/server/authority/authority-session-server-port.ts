@@ -30,6 +30,7 @@ export function createAuthoritySessionServerPort(
     queryEntities: () =>
       server.queryEntities().flatMap((entity) => (entity.type === 'station' ? [] : [{ ...entity, type: entity.type }])),
     updateEntity: (id, update) => server.updateEntityWithoutSnapshot(id, update),
+    commitPhysicsFrame: (frame) => server.commitPhysicsFrame(frame),
     updateEntities: (updates) => server.updateEntitiesWithoutSnapshot(updates),
     advanceGameplayRules: (seconds) => {
       const result = server.advanceGameplayRules(seconds);

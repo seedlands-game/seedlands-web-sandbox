@@ -125,3 +125,8 @@ export function createAuthorityKernelExecutionPort(
     },
   });
 }
+
+export function assertAuthorityWorldClockRate(rate: number): void {
+  if (!Number.isFinite(rate) || rate < 0 || rate > 24)
+    throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
+}

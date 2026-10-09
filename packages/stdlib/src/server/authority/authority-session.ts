@@ -1,4 +1,5 @@
-import { createMovementInputGuard, projectMovementBodies } from './actor-movement-projection';
+import { projectAuthoritySessionSnapshot } from './authority-session-snapshot';
+import { createMovementInputGuard } from './actor-movement-projection';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
@@ -26,7 +27,7 @@ import {
   acceptBoundPhysicsIntents,
   isAuthorityPlayerBindingCurrent,
 } from './authority-physics-input';
-import type { AuthorityKernelState } from './authority-kernel-state';
+import { assertAuthorityWorldClockRate, type AuthorityKernelState } from './authority-kernel-state';
 import { settleAuthorityPickups } from './authority-pickup-settlement';
 import { assertAdvanceCapacity, MAX_AUTHORITY_RECOVERIES_PER_STEP } from './authority-advance-capacity';
 import { commitAuthorityPhysicsEntities } from './authority-physics-entity-commit';
@@ -34,7 +35,7 @@ import type { AuthoritySessionOptions } from './authority-session-options';
 import { createAuthorityCollisionWorld } from './authority-runtime-geometry';
 import type { VoxelCollisionWorld } from './voxel-collision-world';
 import { separateAuthorityCharacters } from './authority-character-separation';
-import { currentMountedSeats, mountedAuthorityBody } from './authority-mounted-body';
+import { currentMountedSeats, mountedAuthorityBody, heldAuthorityTransportBody } from './authority-mounted-body';
 import { createAuthorityTransportCollisionWorlds } from './authority-transport-collision-world';
 
 export type * from './authority-session-types';
@@ -70,7 +71,7 @@ export class AuthoritySession {
     if (restoredPaused) this.options.execution.assertCanCommit();
     if (!state.scheduler) state.worldClockRate = options.worldHoursPerSecond ?? state.worldClockRate;
     state.paused = false;
-    this.assertWorldClockRate(this.state.worldClockRate);
+    assertAuthorityWorldClockRate(this.state.worldClockRate);
     this.clock = new ActiveMonotonicClock(options.startTimeMs, {
       activeTimeMs: state.activeTimeMs,
       paused: false,
@@ -251,7 +252,7 @@ export class AuthoritySession {
   }
 
   setWorldClockRate(rate: number): number {
-    this.assertWorldClockRate(rate);
+    assertAuthorityWorldClockRate(rate);
     if (rate === this.state.worldClockRate) return rate;
     this.options.execution.assertCanCommit();
     this.state.worldClockRate = rate;
@@ -294,12 +295,19 @@ export class AuthoritySession {
     const worldItemIds = new Set<string>();
     const nextBodies = new Map<string, BodySnapshot>();
     const configs = new Map(entities.map((entity) => [entity.id, this.options.bodyConfigFor(entity)]));
-    const worlds = createAuthorityTransportCollisionWorlds(this.collisionWorld, entities, (entity) =>
-      configs.get(entity.id)!,
+    const worlds = createAuthorityTransportCollisionWorlds(
+      this.collisionWorld,
+      entities,
+      (entity) => configs.get(entity.id)!,
+      [...mounted.values()],
     );
     for (const entity of entities) {
       seen.add(entity.id);
       const config = configs.get(entity.id)!;
+      if (entity.type === 'transport') {
+        nextBodies.set(entity.id, heldAuthorityTransportBody(entity));
+        continue;
+      }
       const seat = mounted.get(entity.id);
       if (seat) {
         nextBodies.set(entity.id, mountedAuthorityBody(entity, seat));
@@ -384,7 +392,16 @@ export class AuthoritySession {
       worlds.all,
     );
 
-    commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies);
+    commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies, {
+      epoch: this.options.epoch,
+      physicsTick: this.state.physicsTick,
+      seconds: dt,
+      playerReference: this.playerBindingCurrent ? this.playerReference : null,
+      playerWish: { x: input.state.moveX, z: input.state.moveZ },
+      acknowledgedSequence: input.acknowledgedSequence,
+      world: this.collisionWorld,
+      bodyConfigs: configs,
+    });
     settleAuthorityPickups(
       {
         server: this.options.server,
@@ -427,6 +444,7 @@ export class AuthoritySession {
         this.collisionWorld,
         this.options.server.queryEntities(),
         this.options.bodyConfigFor,
+        [...mounted.values()],
       ).forEntity(entityId);
       if (!this.overlapsStatic(state, config, world)) {
         this.recordRecovery({
@@ -493,38 +511,20 @@ export class AuthoritySession {
     if (clearAuthorityHorizontalVelocity(this.options.server, this.options.playerId)) this.refreshBodies();
   }
 
-  private assertWorldClockRate(rate: number): void {
-    if (!Number.isFinite(rate) || rate < 0 || rate > 24)
-      throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
-  }
-
   private readonly movementInput = createMovementInputGuard(
     () => this.options.server.getActorModeState?.(this.options.playerId),
     () => this.input.clear(),
   );
   private snapshot(): SessionContract.AuthoritySnapshot {
-    return {
-      kind: 'snapshot',
-      protocolVersion: 1,
-      epoch: this.options.epoch,
-      physicsTick: this.state.physicsTick,
-      commitSequence: this.options.execution.commitSequence,
-      acknowledgedInputSequence: this.input.acknowledgedSequence,
-      inputResyncRequired: this.input.requiresResync,
-      activeTimeMs: this.state.activeTimeMs,
-      integratedPhysicsTimeMs: this.state.integratedPhysicsTimeMs,
-      physicsDebtMs: this.state.physicsDebtMs,
-      ...projectMovementBodies(this.options, this.bodies),
-      chunkRevisions: this.collisionWorld.revisionVector(),
-      worldRevision: this.options.server.worldRevision,
-      worldMutationCount: this.options.server.mutationCount,
-      worldTime: this.options.server.worldTime,
+    return projectAuthoritySessionSnapshot({
+      options: this.options,
+      state: this.state,
+      input: this.input,
+      bodies: this.bodies,
+      collisionWorld: this.collisionWorld,
       paused: this.clock.paused,
-      diagnostics: {
-        recoveryResults: this.recoveryResults.map((result) => ({ ...result })),
-        physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
-        ...(this.options.server.fluidDiagnostics ? { fluid: { ...this.options.server.fluidDiagnostics } } : {}),
-      },
-    };
+      recoveryResults: this.recoveryResults,
+      physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
+    });
   }
 }

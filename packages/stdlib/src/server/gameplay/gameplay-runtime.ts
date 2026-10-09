@@ -1,3 +1,5 @@
+import type { AuthorityPhysicsFrame } from '../authority/authority-physics-frame';
+import { commitGameplayTransportMotionTick } from './gameplay-transport-motion-tick';
 import { isActorEntityType } from './ecs-actor-state';
 import type { WorldModuleBinding } from '../commands/module-command';
 import { createGameplayDomainAdapters } from './gameplay-domain-adapters';
@@ -8,7 +10,6 @@ import type { GameplayCallbacks, GameplayResult } from './gameplay-runtime-contr
 export type * from './gameplay-runtime-contracts';
 import type { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
 import type { RegisteredFeedingRuntime } from './modules/registered-feeding-runtime';
-import { COMBAT_REQUEST_OPERATION } from './modules/combat-model';
 import { NEEDS_COMPONENT } from './modules/needs-model';
 import { createNeedsStatePort, resolveNeedsDeathInventoryMode } from './modules/needs-state-port';
 import { createGameplayModuleSchedule } from './modules/gameplay-module-schedule';
@@ -86,6 +87,9 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
   private readonly compositionGuard;
   private readonly inventoryActions;
   private readonly registeredInventory;
+  private readonly registeredMotion;
+  private readonly spawnFacade;
+  private readonly moduleRequest;
   private readonly modes;
   private readonly vitals;
   private readonly modules: GameplayModuleRuntime;
@@ -177,6 +181,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
         this.touch();
       },
     });
+    this.registeredMotion = registered.transportMotion;
     this.registeredInventory = registered.inventory;
     this.registeredCombat = registered.combat;
     this.registeredBlocks = registered.blocks;
@@ -191,6 +196,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
       changed: () => this.touch(),
     });
     this.modules = new GameplayModuleRuntime({
+      transportMotion: registered.transportMotion?.state,
       transport: registered.transport?.state,
       transportRelations: registered.transportRelations?.state,
       navigation: () => this.navigationItems.state,
@@ -320,6 +326,15 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
         this.environmentQueries.advanceNaturalSpawns(seconds);
       },
     });
+    this.moduleRequest = RuntimeLifecycle.createGameplayModuleRequest(this.modules, this.registeredCombat);
+    this.spawnFacade = RuntimeLifecycle.createGameplaySpawnFacade({
+      entities: this.entities,
+      profiles: this.content.actorProfiles,
+      simulation: this.simulation,
+      players: this.players,
+      playerLimit: this.needsPlayerLimit,
+      changed: () => this.touch(),
+    });
     this.checkpoint = new GameplayRuntimeCheckpoint({
       callbacks,
       compositionGuard: this.compositionGuard,
@@ -358,16 +373,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
   acknowledgeBlockCommit = (value: ModuleInvocationValue) => this.registeredBlocks?.acknowledge(value);
   bindModuleOperations = (authorizer: WorldResourceAuthorizer, source: RegisteredActorOperationBinding) =>
     this.modules.bind(authorizer, source);
-  invokeModuleOperation(
-    authorizer: WorldResourceAuthorizer,
-    source: Omit<RegisteredActorOperationBinding, 'moduleId'>,
-    request: RegisteredOperationRequest,
-  ) {
-    const operationId = request.operationId;
-    const result = this.modules.invoke(authorizer, source, request);
-    if (result.ok && operationId === COMBAT_REQUEST_OPERATION) this.registeredCombat?.drain();
-    return result;
-  }
+  invokeModuleOperation = (...args: Parameters<typeof this.moduleRequest>) => this.moduleRequest(...args);
   invokeActorModuleOperation = (actorId: string, request: RegisteredOperationRequest) =>
     this.modules.invokeActor(this.callbacks.moduleActorAuthority, actorId, request);
   dispose = (): void => {
@@ -382,32 +388,28 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
     return this.callbacks.platform;
   }
 
-  spawn = (input: EntitySpawn): GameplayEntity =>
-    RuntimeLifecycle.spawnGameplayEntity(input, {
-      entities: this.entities,
-      profiles: this.content.actorProfiles,
-      simulation: this.simulation,
-      players: this.players,
-      playerLimit: this.needsPlayerLimit,
-      changed: () => this.touch(),
-    });
+  spawn = (input: EntitySpawn): GameplayEntity => this.spawnFacade.spawn(input);
 
   spawnPlayer = (input: { id?: string; position: Position }): GameplayEntity =>
     this.spawn({ ...input, type: 'player' });
   spawnWorldItem = (position: Position, stack: ItemStack): GameplayEntity =>
     this.spawn({ type: 'world-item', position, stack });
 
-  spawnAutonomous(input: EntitySpawn, registration: ActorRegistration): GameplayEntity {
-    return RuntimeLifecycle.spawnGameplayAutonomous(input, registration, {
-      entities: this.entities,
-      profiles: this.content.actorProfiles,
-      simulation: this.simulation,
-      changed: () => this.touch(),
-    });
-  }
+  spawnAutonomous = (input: EntitySpawn, registration: ActorRegistration): GameplayEntity =>
+    this.spawnFacade.autonomous(input, registration);
 
   character = (request: CharacterControlRequest, actorBinding?: CharacterActorBinding): CharacterControlResult =>
     executeGameplayCharacterRequest(this, request, actorBinding);
+
+  commitPhysicsFrame = (frame: AuthorityPhysicsFrame) =>
+    commitGameplayTransportMotionTick(
+      this.registeredMotion,
+      this.modules,
+      this.callbacks,
+      this.entities,
+      this.kernelState,
+      frame,
+    );
 
   getEntity = (id: string): GameplayEntity | null => this.entities.get(id);
 

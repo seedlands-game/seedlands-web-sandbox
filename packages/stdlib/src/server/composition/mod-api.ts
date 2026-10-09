@@ -231,6 +231,8 @@ export {
   buildRouteTransportMotionCandidateV1,
   buildSurfaceTransportMotionCandidateV1,
 } from '../gameplay/modules/transport-motion-model';
+export { defineTransportMotionModule } from '../gameplay/modules/transport-motion-module';
+export type { TransportMotionConfig, TransportMotionPolicy } from '../gameplay/modules/transport-motion-module';
 export {
   commitTransportMotionCandidateV1,
   deriveMountedSeatConstraintV1,
