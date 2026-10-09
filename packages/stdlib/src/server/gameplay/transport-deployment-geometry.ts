@@ -20,6 +20,7 @@ type Options = Readonly<{
 }>;
 const offset = (position: Position) => ({ x: position[0], y: position[1], z: position[2] });
 const sideOffset = { north: [0, -1], east: [1, 0], south: [0, 1], west: [-1, 0] } as const;
+const oppositeSide = { north: 'south', east: 'west', south: 'north', west: 'east' } as const;
 
 function placement(options: Options, definition: TransportDefinitionV1, hit: Position): TransportDeploymentOptionV1 {
   const voxel = options.callbacks.getLoadedVoxel?.([...hit]);
@@ -47,21 +48,31 @@ function placement(options: Options, definition: TransportDefinitionV1, hit: Pos
         .map((entry) => [`${entry.side}:${entry.elevation}`, entry]),
     ).values(),
   ];
+  let ambiguousNeighbor = false;
   const neighbors: RouteNeighborV1[] = endpoints.map((endpoint) => {
     const delta = sideOffset[endpoint.side];
-    const next = options.callbacks.getLoadedVoxel?.([
-      hit[0] + delta[0],
-      hit[1] + endpoint.elevation,
-      hit[2] + delta[1],
-    ]);
+    const oppositeElevations = new Set(
+      endpoints.filter((entry) => entry.side === oppositeSide[endpoint.side]).map((entry) => entry.elevation),
+    );
+    let connected = 0;
+    let unknown = false;
+    for (const elevation of oppositeElevations) {
+      // Endpoint elevations are local to each cell, so both participate in world-height equality.
+      const cell: Position = [hit[0] + delta[0], hit[1] + endpoint.elevation - elevation, hit[2] + delta[1]];
+      const next = cell.every(Number.isSafeInteger) ? options.callbacks.getLoadedVoxel?.([...cell]) : undefined;
+      if (next === undefined) unknown = true;
+      else if (route.voxels.includes(next)) connected++;
+    }
+    if (connected > 1) ambiguousNeighbor = true;
     return {
       endpoint,
-      state: next === undefined ? 'unknown' : route.voxels.includes(next) ? 'connected' : 'disconnected',
+      state: unknown ? 'unknown' : connected ? 'connected' : 'disconnected',
     };
   });
   const resolutions = endpoints.map((entry) => resolveRouteSegmentV1(route.definition, { entry, neighbors }));
   if (resolutions.some((result) => result.status === 'unknown')) return rejected('chunk-unavailable');
-  if (resolutions.some((result) => result.status === 'ambiguous')) return rejected('transport-route-ambiguous');
+  if (ambiguousNeighbor || resolutions.some((result) => result.status === 'ambiguous'))
+    return rejected('transport-route-ambiguous');
   const segments = resolutions.flatMap((result) => (result.status === 'segment' ? [result.segment] : []));
   if (!segments.length) return rejected('transport-route-disconnected');
   if (new Set(segments.map((segment) => segment.variant)).size !== 1) return rejected('transport-route-ambiguous');

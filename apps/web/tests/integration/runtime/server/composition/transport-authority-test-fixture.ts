@@ -27,7 +27,7 @@ import { MemoryGamePersistence } from '../../../../../../../packages/stdlib/src/
 
 export type Runtime = Awaited<ReturnType<typeof create>>;
 
-const modules = [
+const modules = (routeElevation: 0 | 1) => [
   ...buildingModules(false).filter((module) => module.descriptor.id !== 'sample:building-content'),
   defineContentModule({
     moduleId: 'sample:building-content',
@@ -153,19 +153,19 @@ const modules = [
           family: 'sample:rail',
           variants: [
             {
-              variant: 'sample:straight',
+              variant: routeElevation ? 'sample:slope-east' : 'sample:straight',
               edges: [
                 {
                   entry: { side: 'west', elevation: 0 },
-                  exit: { side: 'east', elevation: 0 },
+                  exit: { side: 'east', elevation: routeElevation },
                   curve: 'line',
-                  slopeDelta: 0,
+                  slopeDelta: routeElevation,
                 },
                 {
-                  entry: { side: 'east', elevation: 0 },
+                  entry: { side: 'east', elevation: routeElevation },
                   exit: { side: 'west', elevation: 0 },
                   curve: 'line',
-                  slopeDelta: 0,
+                  slopeDelta: routeElevation ? -1 : 0,
                 },
               ],
             },
@@ -251,8 +251,12 @@ const requestedPermissions = (registeredModules: readonly ModModule[]): readonly
     ),
   );
 };
-const composition = (ruleMode?: RuleMode, extraModules: readonly ModModule[] = []) => {
-  const registeredModules = [...modules, ...(ruleMode ? [registeredRuleModule(ruleMode)] : []), ...extraModules];
+const composition = (ruleMode?: RuleMode, extraModules: readonly ModModule[] = [], routeElevation: 0 | 1 = 0) => {
+  const registeredModules = [
+    ...modules(routeElevation),
+    ...(ruleMode ? [registeredRuleModule(ruleMode)] : []),
+    ...extraModules,
+  ];
   const candidate = definePack({
     id: 'sample:transport-world',
     version: '1.0.0',
@@ -271,8 +275,9 @@ export const create = async (
   ruleMode?: RuleMode,
   persistence?: MemoryGamePersistence,
   extraModules: readonly ModModule[] = [],
+  routeElevation: 0 | 1 = 0,
 ) => {
-  const world = composition(ruleMode, extraModules);
+  const world = composition(ruleMode, extraModules, routeElevation);
   const moduleActorAuthority = createGameplayActorAuthority(world.resources, { playerAlias: 'transport-player' });
   const runtime = await AuthorityRuntime.create({
     epoch: 'transport-authority-deployment',
