@@ -29,6 +29,8 @@ import {
   type BlockPosition,
 } from './block-action-model';
 import { buildBlockActionCandidate } from './block-actions-module';
+import { cropCellAddress, withCropSupportObservation } from './crop-interaction-model';
+import type { BlockActionsCapabilityV1 } from './block-action-model';
 
 export type BlockRulesModuleOptions = Readonly<{
   moduleId: string;
@@ -153,7 +155,7 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
       ],
     },
     register(api) {
-      api.requireCapability(BLOCK_ACTIONS_CAPABILITY);
+      const blocks = api.requireCapability<BlockActionsCapabilityV1>(BLOCK_ACTIONS_CAPABILITY);
       const contentCapabilities = gameplayContentFromRegistration(api);
       const content = (): BlockActionContent => contentCapabilities;
       api.provideCapability(
@@ -309,7 +311,10 @@ export function defineBlockRulesModule(options: BlockRulesModuleOptions): ModMod
             if (!sameData(effective, expectedInput)) return { reject: `block-${kind}-policy-mismatch` };
             const { actor, voxel } = current(context, state);
             const expected = buildBlockActionCandidate(content(), { kind, actor, voxel, input: effective });
-            if (!sameData(candidate, expected)) return { reject: `block-${kind}-candidate-mismatch` };
+            const expectedWithSupport = blocks.cropSupport
+              ? withCropSupportObservation(expected, state.read(cropCellAddress(voxel.position)))
+              : expected;
+            if (!sameData(candidate, expectedWithSupport)) return { reject: `block-${kind}-candidate-mismatch` };
           },
         });
       };

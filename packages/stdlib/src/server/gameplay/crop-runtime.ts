@@ -96,6 +96,17 @@ export class CropRuntime {
       },
     };
   }
+  /** Uses the registered crop observation, including null, in the host's world transaction. */
+  prepareSupportTransition(position: Position, expected: CropRecord | null, resultingSoilVoxel: number) {
+    if (!this.#policy) throw new Error('crop-policy-unavailable');
+    if (!Number.isSafeInteger(resultingSoilVoxel) || resultingSoilVoxel < 0 || resultingSoilVoxel > 65_535)
+      throw new TypeError('Crop support voxel is invalid.');
+    return this.prepareChange(
+      position,
+      expected,
+      this.#policy.soilVoxels.includes(resultingSoilVoxel) ? expected : null,
+    );
+  }
   plant(playerId: string, position: [number, number, number]) {
     const policy = this.#policy;
     if (!policy) return { success: false as const, reason: 'crop-policy-unavailable' };

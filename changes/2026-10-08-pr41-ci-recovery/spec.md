@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+作物支撑观测改变 Block capability 定义身份；V4 兼容仅增加 Browser20 在精确 source `c3ac4d81996b3693f2f86fa60d045d7ce2a3d31c` 导出的完整前驱身份，保持所有已有捕获不变。先验证此前驱当前被拒绝，再验证单点允许后存档恢复原作物且正式挖掘可清理；篡改任一 Pack integrity/定义字段继续拒绝，不允许通配或以新组合构造旧身份。
+
+### 注册作物支撑状态清理 checkpoint27
+
+只读owner检查发现：普通注册方块破坏/替换和注册soil-transform不观察crop-cell，也不参与CropRuntime清理；支撑变为不支持的voxel后，advance只跳过成长，checkpoint仍保留孤立作物。冻结目标：同一注册观察/授权和prepared transaction内，支撑改变为当前CropPolicy不支持的voxel时删除该位置的唯一crop记录；支持土壤间转换保留记录。不得绕过注册观察直接读取/修改owner，不创建第二map或提交后补清理，不改变普通方块drop或新增未定义的crop-drop；未加载/unknown、stale和准备失败均不能删除作物或部分扣物。没有crop时也观察expected null，以拒绝准备后并发种植造成的孤立状态。
+
+RED先覆盖实际完整Classic Authority注册种植→Survival begin/正常clock finish、Creative立即begin、portable保存/新Authority恢复/清理后二次恢复；原土壤方块drop/工具状态保持原语义。race注入明确区分owner并发测试与正常玩家action，不用reentrant registered action制造非法fixture。实现还须覆盖有实际非Classic policy的支持→不支持soil-transform、支持→支持控制及缺省未装作物模块的普通block操作；注册状态依赖缺失必须明确拒绝，不能弱化观察集或权限门禁。可见crop mesh、上邻格覆盖语义及额外drop不属于本片证明，继续作为后续正式V2工作。
+
 ### Browser19 建造前身体清场 checkpoint26
 
 source `259e09ef28758f85efaf5d022288a8e669969561` 的完整 Browser19 为主旅程 FAIL、visual PASS、modular SKIP。C3 首次建造目标 `[52,31,0]` 保持 Air；点击前相机/Authority eye 为 `[51.855609,32.600002,0.499404]`，实际 Controller interactionAttempts 从5到6，不能将失败解释为没有点击。正式 player body 半宽0.32、eye offset1.6，候选格和身体重叠。下一片先以相同坐标和正式碰撞 owner 取得 RED：仅瞄准支撑格仍不提供建造空间。建造前经已有真实键盘路线退至 `[50.5,0.5]`，沿用严格双端 settle、grounded、collision 和45秒期限，再通过实际 ray 与目标卡确认支撑格及上邻面。原建造方块、扣物、网格与后续验收断言不变，不绕过碰撞、不直接 teleport/setView，不增加 timeout。此片是正确输入前置条件，不宣称性能收益。

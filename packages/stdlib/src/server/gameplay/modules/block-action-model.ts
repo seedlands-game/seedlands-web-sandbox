@@ -136,6 +136,7 @@ export type BlockActionCandidateRequest =
   | Readonly<{ kind: 'finish'; actor: unknown; voxel: unknown; input: unknown }>;
 
 export type BlockActionsCapabilityV1 = Readonly<{
+  cropSupport?: true;
   actorComponentId: typeof BLOCK_ACTOR_COMPONENT;
   voxelComponentId: typeof BLOCK_VOXEL_COMPONENT;
   worldComponentId: typeof BLOCK_WORLD_COMPONENT;
@@ -160,8 +161,9 @@ export const blockWorldAddress = (partition: number) => ({
   target: { kind: 'world' as const },
   partition,
 });
-export const blockActionsCapability = (): BlockActionsCapabilityV1 =>
+export const blockActionsCapability = (crops = false): BlockActionsCapabilityV1 =>
   Object.freeze({
+    ...(crops ? { cropSupport: true as const } : {}),
     actorComponentId: BLOCK_ACTOR_COMPONENT,
     voxelComponentId: BLOCK_VOXEL_COMPONENT,
     worldComponentId: BLOCK_WORLD_COMPONENT,

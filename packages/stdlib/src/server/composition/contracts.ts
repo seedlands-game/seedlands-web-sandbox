@@ -68,6 +68,7 @@ export type ModRegistrationIdentity = Readonly<{
 }>;
 
 export type ModDefinitionCatalog = Readonly<{
+  state(id: string): Readonly<{ id: string; moduleId: string; resource: string }> | null;
   operation(
     id: string,
   ): Readonly<{ id: string; moduleId: string; resource: string; executionKind: 'actor' | 'system' }> | null;

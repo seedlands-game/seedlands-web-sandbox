@@ -1,6 +1,7 @@
 import { GAMEPLAY_CONTENT_CAPABILITIES, gameplayContentFromRegistration } from './content-capabilities';
 import { STATION_RESOURCE } from './station-action-model';
 import { MEDIA_PLAYBACK_CAPABILITY, MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
+import { CROP_CELL_COMPONENT, cropCellAddress, withCropSupportObservation } from './crop-interaction-model';
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
 import { Voxel } from '../../../world/voxel';
 import { createInventoryCandidate } from './inventory-api';
@@ -69,7 +70,9 @@ const targetPosition = (target: unknown) => {
   return validateBlockPosition(value.position, 'Block authorization target');
 };
 
-export function defineBlockActionsModule(options: Readonly<{ stations?: boolean; media?: boolean }> = {}): ModModule {
+export function defineBlockActionsModule(
+  options: Readonly<{ stations?: boolean; media?: boolean; crops?: boolean }> = {},
+): ModModule {
   return Object.freeze({
     descriptor: {
       id: 'seedlands:block-actions-module',
@@ -79,7 +82,13 @@ export function defineBlockActionsModule(options: Readonly<{ stations?: boolean;
         ...(options.media ? [{ id: MEDIA_PLAYBACK_CAPABILITY, version: '1.0.0' }] : []),
         ...GAMEPLAY_CONTENT_CAPABILITIES.map((id) => ({ id, version: '1.0.0' })),
       ],
-      provides: [{ id: BLOCK_ACTIONS_CAPABILITY, version: '1.0.0' }],
+      provides: [
+        {
+          id: BLOCK_ACTIONS_CAPABILITY,
+          version: '1.0.0',
+          ...(options.crops ? { definitionIdentity: 'crop-support-observation-v1' } : {}),
+        },
+      ],
       resources: [
         { id: BLOCK_ACTOR_RESOURCE, operations: ['read', 'execute'] },
         { id: BLOCK_VOXEL_RESOURCE, operations: ['read', 'execute'] },
@@ -102,7 +111,12 @@ export function defineBlockActionsModule(options: Readonly<{ stations?: boolean;
           if (!itemCapability.has(item.id)) throw new TypeError(`Block content item capability is missing ${item.id}.`);
         return resolved;
       };
-      api.provideCapability(BLOCK_ACTIONS_CAPABILITY, blockActionsCapability());
+      api.provideCapability(BLOCK_ACTIONS_CAPABILITY, blockActionsCapability(options.crops));
+      if (options.crops)
+        api.onDefinitionsReady((definitions) => {
+          if (definitions.state(CROP_CELL_COMPONENT)?.resource !== BLOCK_VOXEL_RESOURCE)
+            throw new TypeError('Block crop support requires its registered crop-cell state.');
+        });
       api.registerState({
         id: BLOCK_ACTOR_COMPONENT,
         version: '1.0.0',
@@ -162,7 +176,7 @@ export function defineBlockActionsModule(options: Readonly<{ stations?: boolean;
             });
             if (result.actorId !== boundActorId || !result.position || !samePosition(result.position, position))
               throw new TypeError('Block candidate identity does not match its execution context.');
-            return result;
+            return options.crops ? withCropSupportObservation(result, state.read(cropCellAddress(position))) : result;
           },
         });
       api.registerOperation({

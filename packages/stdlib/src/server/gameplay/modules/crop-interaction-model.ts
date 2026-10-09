@@ -23,6 +23,8 @@ export type CropInteractionConfig = CropPolicy &
     fertilizeOperationId?: string;
   }>;
 export type CropCellProjectionV1 = Readonly<{ version: 1; position: BlockPosition; crop: CropRecord | null }>;
+export const withCropSupportObservation = <Candidate extends object>(candidate: Candidate, cell: unknown) =>
+  Object.freeze({ ...candidate, cropSupport: validateCropCellProjection(cell) });
 export const cropCellAddress = (position: BlockPosition) => ({
   componentId: CROP_CELL_COMPONENT,
   target: { kind: 'voxel' as const, position: [...position] as [number, number, number] },

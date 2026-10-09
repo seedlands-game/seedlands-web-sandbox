@@ -2,6 +2,7 @@ import type { ModModule } from '../../composition/contracts';
 import type { ItemDefinitionRegistry } from '../item-registry';
 import { createInventoryCandidate } from './inventory-api';
 import { GAMEPLAY_CONTENT_CAPABILITIES } from './content-capabilities';
+import { cropCellAddress, withCropSupportObservation } from './crop-interaction-model';
 import {
   BLOCK_ACTIONS_CAPABILITY,
   BLOCK_ACTOR_RESOURCE,
@@ -14,6 +15,7 @@ import {
   type BlockActorProjectionV1,
   type BlockPosition,
   type BlockVoxelProjectionV1,
+  type BlockActionsCapabilityV1,
 } from './block-action-model';
 
 export const FLUID_CONTAINER_INTERACTION_CAPABILITY = 'seedlands:fluid-container-interaction';
@@ -149,7 +151,7 @@ export function defineFluidContainerInteractionModule(config: FluidContainerInte
       ],
     },
     register(api) {
-      api.requireCapability(BLOCK_ACTIONS_CAPABILITY);
+      const blocks = api.requireCapability<BlockActionsCapabilityV1>(BLOCK_ACTIONS_CAPABILITY);
       const items = api.requireCapability<ItemDefinitionRegistry>('seedlands:items');
       api.provideCapability(FLUID_CONTAINER_INTERACTION_CAPABILITY, frozen);
       api.registerOperation({
@@ -169,7 +171,9 @@ export function defineFluidContainerInteractionModule(config: FluidContainerInte
             input,
           );
           if (result.actorId !== context.originalActorId) throw new TypeError('Fluid interaction actor changed.');
-          return result;
+          return blocks.cropSupport
+            ? withCropSupportObservation(result, state.read(cropCellAddress(result.targetPosition)))
+            : result;
         },
       });
     },
