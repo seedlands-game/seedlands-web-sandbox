@@ -9,17 +9,30 @@ function setup(allow = true, floor = true) {
   const composition = assembleOverworldPacks([
     {
       ...pack,
-      integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
+      integrity: {
+        algorithm: 'sha256',
+        manifestDigest: 'a'.repeat(64),
+        entryDigest: 'b'.repeat(64),
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
+      },
     },
   ]);
+  const getVoxel = ([, y]: [number, number, number]) => (floor ? (y === 0 ? 3 : 0) : undefined);
   const gameplay = new GameplayRuntime({
     composition,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
     getWorldTime: () => 0,
-    getVoxel: ([, y]) => (floor ? (y === 0 ? 3 : 0) : undefined),
+    getVoxel,
+    getLoadedCell: (position) => {
+      const voxel = getVoxel(position);
+      return voxel === undefined ? null : { voxel, fluid: 0 };
+    },
     prepareVoxelEdit: () => {
       throw new Error('unexpected edit');
+    },
+    prepareVoxelEdits: () => {
+      throw new Error('unexpected batch edit');
     },
   });
   gameplay.spawnPlayer({ id: 'alice', position: [0.5, 3, 0.5] });

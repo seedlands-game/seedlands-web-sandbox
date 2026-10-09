@@ -1,5 +1,27 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Modular 正常玩家方块入口 checkpoint66（预注册，未验证）
+
+Group65已有正常feature提交da2a2ed6，76项定向/673项完整headless/完整static/build通过。原Browser65实际EXIT1：正式C0–C3 PASS、crop第一条[65.5,-0.5]原45秒FAIL、visual2.5min PASS、Modular SKIP；最后80ms事件生成83–87ms而page callback312–319ms，停稳pose在64.9399/66.3587两侧漂移。该事实不授权改变physics、late policy、range/原.06/.08到达、45/900秒或quality。当前精确CI65五项SUCCESS、Chromium仍运行，不能取消或抢推新head。
+
+Task126只读确认sample:modular-world已有sentinel-glass place:500、hardness.2/drop及通用BlockActions/Rules、Creative UI/正式player place入口。现有90秒smoke仅用Harness.setVoxelAt改变世界，因此当前缺玩家行为证据，未证实生产producer缺陷。先以实际verified Pack/其精确声明权限/loaded sample world，通过既有registered玩家mode/creative-slot命令和Authority.performAction放置/挖掘取最低充分合同；若当前已GREEN如实记录已有行为，不凑RED。occupied/stale/无权/unknown等关键反例必须保持各owner无变化，不用GameServer.edit替代成功动作或直接改entity/inventory owner。
+
+Task127有效诊断区分两个组合：exact Pack 的正常set-mode被OPERATION_UNKNOWN拒绝；仅临时补充标准Mode/Ruleset的组合进一步在place返回Unknown Block rule voxel: 0，尚未到occupied/break断言。原HeadlessSession出生失败保留为setup failure，根因未定位，不作行为RED。Root在实际sample Pack注册标准Mode/Ruleset及自有Air rule0（不可挖、无drop、replaceable），不导入Classic定义；现有product admission已显式允许mode/ruleset，未改grants。测试移除全部补充模块，只装exact Pack并使用声明权限；测试摘要只是可信组合夹具，不是实际字节验证。Root两文件5项PASS/EXIT0，正常place/break及occupied无部分写入已到达；后续生产构建/浏览器仍待验。完整verify:static:ci实际EXIT0，新增证据文档随后单独Prettier检查；不重复全部检查。
+
+Root追加现有Mode/Block回归出现实际38 PASS/7 FAIL：gameplay-registered-mode.test与mode-command-host.test两份旧Classic可信组合夹具把resources写成[]，在实际Pack已有presentation/resources时被完整性门禁拒绝，玩法尚未执行。此缺口与Modular新声明无依赖，最小修复仅按当前pack.manifest.resources补齐测试摘要路径，保留其mock digest边界、所有鉴权/landing/reentry/queue/restore/Authority断言，不修改assembly或production grants；追加两份原行为测试到headless选择，修复后必须实际重跑并单独验证格式/lint/types。根负责集成，此范围扩展不新增agent，原失败完整保留。
+
+补齐资源摘要后第二次实际40 PASS/5 FAIL：同一registered-mode夹具缺少当前Pack注册Media要求的getLoadedCell，仍在构造阶段失败。继续最小补齐该夹具已有floor采样端口：floor=true为相同0层石地/其余Air且fluid0，floor=false保持unknown并返回null，不能把unknown当Air。保留unknown landing及所有原拒绝断言，生产Media门禁不改。
+
+第三次该夹具进一步暴露Structure构造要求prepareVoxelEdits，仍未进入行为；补齐会抛unexpected的batch port，保证Mode测试若意外编辑世界立即失败，不移除Pack模块来规避初始化合同。三份新进入headless选择的测试也追加到tsconfig.classic-tests.include，避免仅运行而未类型检查；需要实际定向类型与lint结果。
+
+把新Modular测试纳入正式类型集合后实际tsc发现旧sample Pack两份faceMaterials被推断为readonly number[]，不满足六面tuple合同；补as const只收紧类型，不改变数值、材质或产物行为。原静态失败保留，修复后重跑受影响类型/格式/lint。
+
+当前delta lint/types/format实际EXIT0；registered-mode原五项最终PASS/EXIT0，mode-command-host三项先前PASS，其余五文件37项有效结果复用，完整七文件初始38/7与后续40/5FAIL均保留，不宣称同次全绿。21:54精确CI65自然终态五项SUCCESS/ChromiumFAIL/部署SKIP；两次主900秒均在V2铁装备背包手势等待耗尽，未到C4，Visual PASS。
+
+然后只扩展既有唯一modular-pack-smoke.ts与classic-runtime.spec.ts的原Modular选择：原固定seed、自有worldgen voxel500/pack lock/Authority/WebGL2/compute/原保存恢复断言保留，正常UI选择自有物品、PointerLock、真实瞄准和鼠标产生放置/挖掘事实，Authority-backed voxel变更与reload持久结果做oracle。成功动作不得Harness写，原cleanup仅清理测试残留，不作成功证据；90秒、low质量、原trace/真实输入不变，不新开runner、通道或专属selector，不扩权限。先验证当前入口并记录不可自动化/尚未实现的观察预期，浏览器失败原样保留。
+
+本片只补最小正常非Classic玩家方块纵向证据，不宣布Modular门/climb/route/transport/media全链、统一lighting、194/完整Classic/组合整帧性能完成。不修改已sealed证据。Root独占spec/package/evidence/modular Browser helper与必要production修复；既有唯一Luna仅独占apps/web/tests/integration/runtime/server/composition/modular-player-block-actions.test.ts和私有task127，不再委派，不跑browser/build/全仓检查。传统0.25PD×120%=0.3PD；AI35min×120%=42min，21:39起22:21有界checkpoint。最后实际UI21:10剩83%、5d5h重置，约60%停止线；实际served元数据未核实，预算不以tokens/credits/时间估算。新run预留pr41-modular-browser66-01，必须使用明确SEEDLANDS_PLAYBOOK=modular-world的新精确HEAD identified artifact；不复用Classic artifact假装Modular。长期docs baseline暂不变，验证后说明是否有真实合同改变。
+
 ## Mining safe-band handoff checkpoint65（有效RED与76项回归通过，浏览器待验）
 
 原Browser64已实际PTY43357 EXIT1，main5.0min在C2采集[38,31,0]中心距离>5拒绝，visual1.0min原lighting/revision predicate FAIL、Modular SKIP；正式C0/C1 PASS。default-off键盘诊断COMPLETE，42可信edges/0 dropped，最后S100 dispatch gap609.5ms/eventStamp123.7ms，区分页面回调与事件生成时刻；不是whole-frame或输入协议根因证明。0-trace metadata显示原mining approach从[39.10158,33.6,.4862]经第一次S100停稳[36.24328,32.6,.49216]，已目标中心distance约2.51原安全band内；仍继续S至[33.54338,32.6,.51054]，>5被原guard拒绝。
