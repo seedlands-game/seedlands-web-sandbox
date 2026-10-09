@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { type EntityStoreComponentSnapshot } from '../../../../../../packages/stdlib/src/server/gameplay/entity-store';
-import { EntityStore } from '../../../fixtures/classic/content';
+import { createActorProfileRegistry } from '../../../../../../packages/stdlib/src/server/gameplay/actor-profile';
+import { classicContent, EntityStore, GameplayRuntime } from '../../../fixtures/classic/content';
 import { ItemIds } from '../../../../../../packages/stdlib/src/server/gameplay/item-registry';
-import { GameplayRuntime } from '../../../fixtures/classic/content';
 import { testCorePlatform } from '../../../../../../packages/stdlib/tests/support/core-platform';
 
 const populatedStore = () => {
@@ -29,6 +29,25 @@ const populatedStore = () => {
   settler.selectSlot(1);
   return store;
 };
+
+const v4CodecContentWithSettler = () => ({
+  ...classicContent,
+  actorProfiles: createActorProfileRegistry(
+    [
+      ...classicContent.actorProfiles.list(),
+      {
+        archetype: 'settler',
+        entityType: 'npc',
+        maxHealth: 20,
+        navigation: { speed: 1.4, perceptionRange: 10 },
+      },
+    ],
+    classicContent.items,
+    classicContent.meleeDefinitions,
+    classicContent.actorProfiles.defaultPlayerMeleeDefinitionId ?? undefined,
+    classicContent.actorProfiles.starterEcology ?? undefined,
+  ),
+});
 
 describe('EntityStore component checkpoint', () => {
   it('roundtrips domain lifetimes, allocator state and all player/NPC facets without raw ECS ids', () => {
@@ -110,6 +129,7 @@ describe('GameplaySnapshot V4 component codec', () => {
       prepareVoxelEdit: () => ({ committed: false }) as never,
       getWorldTime: () => 9,
       platform: testCorePlatform,
+      content: v4CodecContentWithSettler(),
     });
     runtime.spawnPlayer({ id: 'player', position: [1, 8, 1] });
     runtime.spawnAutonomous(
