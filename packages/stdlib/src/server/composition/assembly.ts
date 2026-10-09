@@ -404,6 +404,10 @@ export function assembleWorldPacks(
   const registeredOperations = operationRegistration.finish();
   const registeredLifecycle = lifecycleRegistration.finish(moduleOrder, registeredOperations.operations);
   const definitionCatalog: Contract.ModDefinitionCatalog = Object.freeze({
+    state(id: string) {
+      const state = registeredOperations.states.find((entry) => entry.definition.id === id);
+      return state ? Object.freeze({ id, moduleId: state.moduleId, resource: state.definition.resource }) : null;
+    },
     operation(id: string) {
       const operation = registeredOperations.operations.find((entry) => entry.definition.id === id);
       return operation

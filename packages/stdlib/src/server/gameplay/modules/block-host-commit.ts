@@ -35,12 +35,13 @@ import {
 import { prepareVoxelInteractionCommit, voxelInteractionCells } from './voxel-interaction-commit';
 import type { createBlockStatePort } from './block-state-port';
 import type { createBlockOriginEnvironment } from './block-origin-environment';
-import type { CropRuntime } from '../crop-runtime';
-import { isCropInteractionCandidate } from './crop-interaction-model';
+import type { CropRuntime, CropRecord } from '../crop-runtime';
+import { isCropInteractionCandidate, cropCellAddress, withCropSupportObservation } from './crop-interaction-model';
 import { prepareCropInteractionCommit } from './crop-plant-commit';
 import { MEDIA_PLAYBACK_RESOURCE } from './media-playback-module';
 import {
   BLOCK_BEGIN_OPERATION,
+  BLOCK_ACTIONS_CAPABILITY,
   BLOCK_CANCEL_OPERATION,
   BLOCK_PLACE_OPERATION,
   BLOCK_FINISH_OPERATION,
@@ -55,6 +56,7 @@ import {
   blockWorldAddress,
   validateBlockAdvanceInput,
   type BlockBreakActionV1,
+  type BlockActionsCapabilityV1,
 } from './block-action-model';
 
 type Participant = Readonly<{ validate(): void; apply(): void }>;
@@ -107,6 +109,18 @@ export function prepareRegisteredBlockCommit(
   observed: readonly ObservedModState[],
   execution: RegisteredCommitContext,
 ): PreparedRegisteredCommit {
+  const cropSupport = options.composition.capability<BlockActionsCapabilityV1>(BLOCK_ACTIONS_CAPABILITY).cropSupport;
+  const cropAddresses = (position: readonly [number, number, number]) =>
+    cropSupport ? [cropCellAddress(position)] : [];
+  const prepareSupport = (
+    position: readonly [number, number, number],
+    expectedCrop: CropRecord | null,
+    voxel: number,
+  ) => {
+    if (!cropSupport) return [];
+    if (!options.crops) throw new TypeError('Block crop support requires its crop owner.');
+    return [options.crops().prepareSupportTransition(position, expectedCrop, voxel)];
+  };
   const expected = (addresses: readonly object[]) => {
     if (
       addresses.length !== observed.length ||
@@ -194,9 +208,11 @@ export function prepareRegisteredBlockCommit(
       assertActorResourceExecution(options.composition, execution.authorizer, context, BLOCK_ACTOR_RESOURCE);
     validateActorExecution();
     const candidate = execution.candidateValue;
+    const supportCell = cropSupport ? projections.crop(candidate.targetPosition) : null;
     expected([
       blockActorAddress(id),
       ...voxelInteractionCells(candidate).map((cell) => blockVoxelAddress(cell.position)),
+      ...cropAddresses(candidate.targetPosition),
     ]);
     const currentActor = projections.actor(id);
     const currentHit = projections.voxel(candidate.hit.position);
@@ -231,10 +247,20 @@ export function prepareRegisteredBlockCommit(
         execution.effectiveInput,
       );
     }
-    if (operationId !== execution.operationId || !same(candidate, expectedCandidate) || candidate.actorId !== id)
+    if (
+      operationId !== execution.operationId ||
+      !same(candidate, supportCell ? withCropSupportObservation(expectedCandidate, supportCell) : expectedCandidate) ||
+      candidate.actorId !== id
+    )
       throw new Error(candidate.kind === 'fluid-container' ? 'fluid-interaction-stale' : 'soil-interaction-stale');
     const plan = prepareVoxelInteractionCommit(options, projections, prepareReceipt, candidate, validateActorExecution);
-    return finalize(plan.parts, plan.value, true, plan.inventoryChanged, plan.validateCondition);
+    return finalize(
+      [...plan.parts, ...prepareSupport(candidate.targetPosition, supportCell?.crop ?? null, candidate.toVoxel)],
+      plan.value,
+      true,
+      plan.inventoryChanged,
+      plan.validateCondition,
+    );
   }
   const kind = operations.get(execution.operationId);
   if (!kind || context.kind !== 'actor') throw new TypeError('Unknown Block actor operation.');
@@ -253,15 +279,19 @@ export function prepareRegisteredBlockCommit(
     assertActorResourceExecution(options.composition, execution.authorizer, context, BLOCK_ACTOR_RESOURCE);
   validateActorExecution();
   const target = context.target.kind === 'voxel' ? context.target.position : null;
-  expected([blockActorAddress(id), ...(target ? [blockVoxelAddress(target)] : [])]);
+  expected([blockActorAddress(id), ...(target ? [blockVoxelAddress(target), ...cropAddresses(target)] : [])]);
   const actor = projections.actor(id);
+  const supportCell = target && cropSupport ? projections.crop(target) : null;
   const candidate = buildBlockActionCandidate(
     options.content,
     kind === 'cancel'
       ? { kind, actor, input: execution.effectiveInput }
       : { kind, actor, voxel: projections.voxel(target!), input: execution.effectiveInput },
   );
-  if (!same(candidate, execution.candidateValue) || !same(candidate.position, target))
+  if (
+    !same(supportCell ? withCropSupportObservation(candidate, supportCell) : candidate, execution.candidateValue) ||
+    !same(candidate.position, target)
+  )
     throw new TypeError('Block candidate differs from current state and effective input.');
   let nextBreak = breakState(candidate.breakAction);
   const origin = kind === 'begin' && nextBreak ? origins.capture(execution) : undefined;
@@ -345,6 +375,9 @@ export function prepareRegisteredBlockCommit(
   );
   const cancellation = equippedChanged ? options.simulation().prepareCancellation([id], 'slot-changed') : undefined;
   const receipt = world ? prepareReceipt(world.result) : undefined;
+  const support = candidate.voxelEdit
+    ? prepareSupport(candidate.voxelEdit.position, supportCell?.crop ?? null, candidate.voxelEdit.toVoxel)
+    : [];
   if (dependentRemoval?.removed) {
     if (!world || !options.prepareGameplayChange || !options.prepareFactDelivery)
       throw new TypeError('Media Block removal requires prepared world, gameplay, and fact owners.');
@@ -353,6 +386,7 @@ export function prepareRegisteredBlockCommit(
     const parts: readonly Participant[] = [
       { validate: stationEffects.validate, apply() {} },
       mutation,
+      ...support,
       ...(cancellation ? [cancellation] : []),
       dependentRemoval,
       world,
@@ -384,6 +418,7 @@ export function prepareRegisteredBlockCommit(
   const parts: Participant[] = [
     { validate: stationEffects.validate, apply() {} },
     mutation,
+    ...support,
     ...(cancellation ? [cancellation] : []),
     ...(dependentRemoval ? [dependentRemoval] : []),
     ...(world ? [world] : []),

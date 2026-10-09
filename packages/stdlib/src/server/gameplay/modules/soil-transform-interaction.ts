@@ -3,6 +3,7 @@ import type { ItemDefinitionRegistry } from '../item-registry';
 import { createInventoryCandidate } from './inventory-api';
 import { tillOutcome, type TillPolicy } from './till-policy';
 import { GAMEPLAY_CONTENT_CAPABILITIES } from './content-capabilities';
+import { cropCellAddress, withCropSupportObservation } from './crop-interaction-model';
 import {
   BLOCK_ACTIONS_CAPABILITY,
   BLOCK_ACTOR_RESOURCE,
@@ -15,6 +16,7 @@ import {
   type BlockActorProjectionV1,
   type BlockPosition,
   type BlockVoxelProjectionV1,
+  type BlockActionsCapabilityV1,
 } from './block-action-model';
 
 export const SOIL_TRANSFORM_INTERACTION_CAPABILITY = 'seedlands:soil-transform-interaction';
@@ -156,7 +158,7 @@ export function defineSoilTransformInteractionModule(config: SoilTransformIntera
       ],
     },
     register(api) {
-      api.requireCapability(BLOCK_ACTIONS_CAPABILITY);
+      const blocks = api.requireCapability<BlockActionsCapabilityV1>(BLOCK_ACTIONS_CAPABILITY);
       const items = api.requireCapability<ItemDefinitionRegistry>('seedlands:items');
       api.provideCapability(SOIL_TRANSFORM_INTERACTION_CAPABILITY, frozen);
       api.registerOperation({
@@ -183,7 +185,9 @@ export function defineSoilTransformInteractionModule(config: SoilTransformIntera
             input,
           );
           if (candidate.actorId !== context.originalActorId) throw new TypeError('Soil interaction actor changed.');
-          return candidate;
+          return blocks.cropSupport
+            ? withCropSupportObservation(candidate, state.read(cropCellAddress(candidate.targetPosition)))
+            : candidate;
         },
       });
     },

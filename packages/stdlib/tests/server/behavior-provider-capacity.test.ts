@@ -83,6 +83,7 @@ function createRegistry(callbacks: {
     },
   );
   registry.freeze({
+    state: () => null,
     operation: (id) =>
       id === operation.operationId
         ? { id, moduleId: 'test:counter', resource: 'test.counter', executionKind: 'actor' }

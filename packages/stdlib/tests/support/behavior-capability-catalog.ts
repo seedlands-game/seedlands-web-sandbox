@@ -54,6 +54,7 @@ export function createMaximumBehaviorCatalog(extraBytes = 0): readonly BehaviorC
     );
   }
   registry.freeze({
+    state: () => null,
     operation: () => null,
     module: (id) => (id === PROVIDER_ID ? { packId: 'example:catalog-pack', permissions: [] } : null),
   });

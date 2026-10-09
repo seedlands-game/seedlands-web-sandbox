@@ -118,7 +118,7 @@ export const pack = definePack({
     }),
     defineStationActionsModule(),
     defineForageModule({ sourceVoxel: 5, drop: { itemId: 'berry', count: 1 }, intervalSeconds: 120 }),
-    defineBlockActionsModule({ stations: true, media: true }),
+    defineBlockActionsModule({ stations: true, media: true, crops: true }),
     ...classicItemInteractionModules,
     defineBlockRulesModule({ moduleId: 'seedlands:overworld-block-rules', voxelDefinitions: overworldBlocks }),
     defineModeModule(),

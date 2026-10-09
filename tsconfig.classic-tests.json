@@ -48,6 +48,8 @@
     "apps/web/tests/integration/runtime/server/composition/classic-crop-clock.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-crop-authority.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-crop-harvest-authority.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-crop-support-authority.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/crop-support-spine.test.ts",
     "apps/web/tests/integration/runtime/server/composition/crop-plant-spine.test.ts",
     "apps/web/tests/unit/worker/unused-geometry-mesh.test.ts",
     "apps/web/tests/unit/worker/geometry-mesh-task.test.ts",
