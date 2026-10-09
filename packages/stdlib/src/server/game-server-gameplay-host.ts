@@ -24,7 +24,7 @@ import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
-import { projectTransportStates } from './gameplay/transport-projection';
+import { projectTransportStates, projectMountedSeatConstraints } from './gameplay/transport-projection';
 import type { GameServerOptions } from './game-server-types';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
@@ -132,14 +132,13 @@ export class GameServerGameplayHost {
     const entity = this.gameplay.getEntity(id);
     return entity && this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;
   }
-  createEntityReference(id: string): EntityLifetimeReference | null {
-    return this.gameplay.entities.createReference(id);
-  }
-  resolveEntityReference(reference: EntityLifetimeReference): GameplayEntity | null {
-    return this.gameplay.entities.resolveReference(reference);
-  }
+  createEntityReference = (id: string): EntityLifetimeReference | null => this.gameplay.entities.createReference(id);
+  resolveEntityReference = (reference: EntityLifetimeReference): GameplayEntity | null =>
+    this.gameplay.entities.resolveReference(reference);
   transportState = (reference: EntityLifetimeReference) => this.gameplay.entities.transportState(reference);
   transportProjections = () => projectTransportStates(this.gameplay.entities);
+  mountedSeatConstraints = () =>
+    projectMountedSeatConstraints(this.gameplay.entities, this.gameplay.content.transportDefinitions);
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.gameplay.updateEntity(id, update);
     return this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;

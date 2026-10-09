@@ -192,6 +192,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
     });
     this.modules = new GameplayModuleRuntime({
       transport: registered.transport?.state,
+      transportRelations: registered.transportRelations?.state,
       navigation: () => this.navigationItems.state,
       combat: this.registeredCombat?.state,
       blocks: this.registeredBlocks?.state,

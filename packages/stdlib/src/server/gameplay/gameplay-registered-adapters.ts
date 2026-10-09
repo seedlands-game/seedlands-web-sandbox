@@ -20,6 +20,8 @@ import { prepareGameplayWorldChange } from './gameplay-structure-commit';
 import type { MediaPlaybackFactV1 } from './modules/media-playback-model';
 import { RegisteredTransportRuntime } from './modules/registered-transport-runtime';
 import { TRANSPORT_INTERACTION_CAPABILITY } from './modules/transport-interaction-config';
+import { TRANSPORT_RELATION_CAPABILITY } from './modules/transport-relation-interaction';
+import { RegisteredTransportRelationRuntime } from './modules/registered-transport-relation-runtime';
 
 type Options = Omit<
   ConstructorParameters<typeof RegisteredInventoryRuntime>[0] &
@@ -135,6 +137,16 @@ export function createGameplayRegisteredRuntimes(
   });
   return Object.freeze({
     ...registered,
+    transportRelations: callbacks.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === TRANSPORT_RELATION_CAPABILITY,
+    )
+      ? new RegisteredTransportRelationRuntime({
+          ...options,
+          callbacks,
+          composition: callbacks.composition,
+          revision: () => options.kernelState.gameplayRevision,
+        })
+      : null,
     transport: callbacks.composition?.definitionMap.capabilities.some(
       ({ id }) => id === TRANSPORT_INTERACTION_CAPABILITY,
     )
