@@ -4,6 +4,7 @@ import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
 import { CROP_CELL_COMPONENT } from './crop-interaction-model';
 import { NAVIGATION_COMPONENT } from './navigation-interaction-model';
+import { TRANSPORT_MOTION_COMPONENT } from './transport-motion-module';
 import { TRANSPORT_DEPLOYMENT_COMPONENT } from './transport-interaction-config';
 import { TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT } from './transport-relation-interaction';
 import type { WorldComposition } from '../../composition/contracts';
@@ -66,6 +67,7 @@ export class GameplayModuleRuntime {
       navigation?: () => RegisteredStatePort;
       transport?: RegisteredStatePort;
       transportRelations?: RegisteredStatePort;
+      transportMotion?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -95,6 +97,7 @@ export class GameplayModuleRuntime {
         this.options.transportRelations
       )
         return this.options.transportRelations;
+      if (component === TRANSPORT_MOTION_COMPONENT && this.options.transportMotion) return this.options.transportMotion;
       if (component === TRANSPORT_DEPLOYMENT_COMPONENT && this.options.transport) return this.options.transport;
       if (component === NAVIGATION_COMPONENT && this.options.navigation) return this.options.navigation();
       if (component === 'seedlands:inventory') return this.options.inventory;

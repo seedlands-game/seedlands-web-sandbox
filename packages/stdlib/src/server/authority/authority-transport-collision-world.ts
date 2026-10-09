@@ -1,4 +1,5 @@
 import { bodyWorldAabb, type BodyConfig, type Collider, type PhysicsWorld, type WorldAabb } from '../../physics';
+import type { MountedSeatConstraintV1 } from '../gameplay/modules/transport-motion-model';
 import type { AuthorityEntity } from './authority-session-types';
 
 const intersects = (left: WorldAabb, right: WorldAabb) =>
@@ -14,15 +15,17 @@ export function createAuthorityTransportCollisionWorlds(
   world: PhysicsWorld,
   entities: readonly AuthorityEntity[],
   bodyConfigFor: (entity: AuthorityEntity) => BodyConfig,
+  mountedSeats: readonly MountedSeatConstraintV1[] = [],
 ): Readonly<{ all: PhysicsWorld; forEntity: (id: string) => PhysicsWorld }> {
+  const seats = new Map(mountedSeats.map((seat) => [seat.rider.entityId, seat]));
   const colliders = entities
-    .filter((entity) => entity.type === 'transport')
+    .filter((entity) => entity.type === 'transport' || seats.has(entity.id))
     .map((entity): Collider => {
       const config = bodyConfigFor(entity);
-      const [x, y, z] = entity.position;
+      const [x, y, z] = seats.get(entity.id)?.pose.position ?? entity.position;
       const aabb = bodyWorldAabb({ position: { x, y, z }, velocity: { x: 0, y: 0, z: 0 } }, config);
       return Object.freeze({
-        id: `transport:${entity.id}`,
+        id: `${entity.type === 'transport' ? 'transport' : 'mounted'}:${entity.id}`,
         aabb: Object.freeze({ min: Object.freeze(aabb.min), max: Object.freeze(aabb.max) }),
         layer: config.collisionLayer,
         mask: config.collisionMask,
@@ -39,10 +42,12 @@ export function createAuthorityTransportCollisionWorlds(
           ...(world.sampleFluid ? { sampleFluid: (bounds: WorldAabb) => world.sampleFluid!(bounds) } : {}),
         });
   const all = wrap(colliders);
-  const transportIds = new Set(colliders.map(({ id }) => id));
+
   return Object.freeze({
     all,
     forEntity: (id: string) =>
-      transportIds.has(`transport:${id}`) ? wrap(colliders.filter((body) => body.id !== `transport:${id}`)) : all,
+      colliders.some((body) => body.id === `transport:${id}` || body.id === `mounted:${id}`)
+        ? wrap(colliders.filter((body) => body.id !== `transport:${id}` && body.id !== `mounted:${id}`))
+        : all,
   });
 }

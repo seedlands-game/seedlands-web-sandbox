@@ -1,5 +1,19 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Registered surface transport motion checkpoint54（本地闭合，继续产品闭环）
+
+14:10–15:07有界片完成：stdlib78/78、Authority37/37、最后前沿10/10及完整verify:static:ci EXIT0；实际运动、veto旁路、mounted crossing、stale、伪造与双车相对碰撞RED均保留，详见evidence/registered-motion-checkpoint-54-01.md。Classic Pack精确字节对照相同；本片没有本地build/browser/performance PASS，整体产品仍未完成。
+
+接续2e120b62。下一有界片完成显式非Classic surface transport 的正常 accepted world-space输入→manual registered system→同一physics prepared frontier，不能把world-space moveX/moveZ直接当车辆局部throttle/steering。新增显式motion module/policy，按canonical heading投影前后与转向；现有纯motion builder提供候选，loaded provider/完整vehicle+rider扫掠与当前实体相对运动由Host派生几何端口。载具pose/velocity/component/fuel及rider新seat与所有普通body更新一次mixed series发布，沿原128×192容量、原按实体数的Kernel batch计数；系统操作veto/permission拒绝时普通实体保留原physics fallback，载具保持当前canonical pose，乘员留该pose派生seat并保持对应速度；stale拒绝时不得用先前普通physics结果覆盖已变化owner，本tick保持当前权威实体及seat、下tick重算。14:40实际moving-veto RED证明普通stepBody会按载具已有velocity自行推进（z0.570320→0.581309），因此transport普通分支必须显式保持canonical body，不以maxSpeed=0/acceleration=0误当冻结。无第二position、cargo、relation或motion时钟owner，无自动module grant；新增固定产品Host transport系统许可不得由Pack请求扩大。
+
+14:43 additional bounded collision correction：普通角色的既有碰撞投影需包含current mounted rider身体（座位派生位置），否则车辆底座上方的角色实际扫掠可从x0穿到x6，停住transport不能撤销普通角色已计算的路径。仅派生本步collider，不新增relation/position owner；自体rider仍排除。
+
+module只消费当前transport与派生geometry/motion观察，不复制整次普通body数据给registered操作；Host持有短生命周期本tick frame并在prepare/apply前核对world revision、entity lifetime/component/pose、输入tick/epoch与候选精确重推导。无配置世界保持原路径。surface policy明确acceleration/drag/maxSpeed/steeringRate/fuelPerMeter并有界冻结，只用于当前实例definition/provider。扫掠采用保守旋转包围体与乘员compound volume，未知阻挡并请求已有chunk；角色与载具互相的相对位移必须纳入，不以目标位置overlap冒充连续碰撞。路线运动、真实燃料/货箱交互、旧载具迁移、renderer/UI及完整Classic/Modular随后独立闭环，本片不宣称完成运输产品。
+
+先取得正常目录/部署/use挂载/receiveInput后实际静止RED；GREEN须检查同tick载具与seat移动/速度、货箱/fuel/lifetime保持，当前输入重放/错epoch不额外控制、下车恢复walking、world/entity/unknown支持或扫掠拒绝及registered规则veto/stale不半提交。固定motion模型与owner/physics/部署/关系/死亡回归按实际影响验证；最后当前精确SHA完整浏览器/性能仍不得被单元替代。
+
+14:10附近开始；传统1.2PD×120%=1.44PD，AI约60min×120%=72min，最迟15:22附近有界checkpoint，不盲目超时返工。14:09主对话产品UI确认真实周剩85%（含其他任务），60%停止线保持，无法将工时/credits/token换算真实周占比。一个现有精确Luna/medium独占正常Authority运动fixture文件，禁止再委派；Root独占生产/spec/其他测试与集成，协调同属PR预算。所有新输出独立run ID。
+
 ## Mesh preparation commit race checkpoint53（异步接缝已验证，尚未证明 CI 根因）
 
 两层竞态RED与实际BrowserAuthorityClient路由RED后，12文件60/60及最后MessageEvent夹具6/6 PASS；完整verify:static:ci EXIT0。原main-snapshot反例初版FAIL与两个fixture类型失败保留并修正；worker-first一次刷新及连续提交反例通过，旧/后继trace独立。详见evidence/mesh-preparation-checkpoint-53-01.md；CI52尚未终止，不抢推取消。

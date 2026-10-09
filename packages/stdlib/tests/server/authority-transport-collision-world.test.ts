@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Collider, PhysicsWorld, WorldAabb } from '../../src/physics';
+import { sweepBodyThroughWorld, type Collider, type PhysicsWorld, type WorldAabb } from '../../src/physics';
 import { bodyConfigFor, CollisionLayer } from '../../src/physics/body-registry';
 import { createAuthorityTransportCollisionWorlds } from '../../src/server/authority/authority-transport-collision-world';
 import type { AuthorityEntity } from '../../src/server/authority/authority-session-types';
@@ -61,4 +61,36 @@ describe('current Authority transport collision projection', () => {
     expect(retired.all.querySolids(bounds)).toEqual([unknown]);
     expect(next.forEntity('reused').querySolids(bounds)).toEqual([unknown]);
   });
+});
+
+it('blocks a normal body crossing the derived mounted rider above the carrier body', () => {
+  const rider: AuthorityEntity = { id: 'rider', type: 'player', position: [3, 0.55, 0] };
+  const seat = {
+    rider: { entityId: 'rider', epoch: 1, lifetime: 1 },
+    walkingEnabled: false as const,
+    pose: { position: [3, 0.55, 0] as const, yaw: 0 },
+  };
+  const worlds = createAuthorityTransportCollisionWorlds(
+    { querySolids: () => [] },
+    [entity('cart', 3), rider],
+    (entry) => (entry.type === 'transport' ? config : bodyConfigFor('player')),
+    [seat],
+  );
+  const collider = worlds.all.querySolids(bounds).find(({ id }) => id === 'mounted:rider');
+  const crossing = sweepBodyThroughWorld(
+    { position: { x: 0, y: 1, z: 0 }, velocity: { x: 0, y: 0, z: 0 } },
+    bodyConfigFor('player'),
+    worlds.all,
+    { x: 6, y: 0, z: 0 },
+  );
+  expect(crossing.position.x).toBeLessThan(3);
+  expect(collider).toBeDefined();
+  expect(collider!.aabb.min.y).toBe(0.55);
+  expect(crossing.contacts.some(({ collider }) => collider.id === 'mounted:rider')).toBe(true);
+  expect(
+    worlds
+      .forEntity('rider')
+      .querySolids(bounds)
+      .some(({ id }) => id === 'mounted:rider'),
+  ).toBe(false);
 });

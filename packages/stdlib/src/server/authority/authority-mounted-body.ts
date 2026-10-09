@@ -27,3 +27,8 @@ export function mountedAuthorityBody(entity: AuthorityEntity, seat: MountedSeatC
     contacts: [],
   };
 }
+
+/** Transport velocity belongs to the registered motion policy, never passive character integration. */
+export function heldAuthorityTransportBody(entity: AuthorityEntity): AuthorityBodySnapshot {
+  return { id: entity.id, type: entity.type, body: bodyStateForAuthorityEntity(entity), grounded: false, contacts: [] };
+}
