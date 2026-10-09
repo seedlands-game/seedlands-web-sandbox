@@ -14,6 +14,7 @@ import type { World } from '../world/world-runtime';
 import type { FluidFeedbackTarget } from './fluid-feedback-tracker';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
+import type { HarnessRouteSnapshot } from './game-harness-route-observation';
 
 type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 
@@ -23,6 +24,7 @@ export type HarnessApi = {
   blockLightDiagnostics: () => import('../scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   world: WorldHarnessPort;
   snapshot: () => HarnessSnapshot;
+  routeSnapshot: () => HarnessRouteSnapshot | null;
   lifecycleSnapshot: () => LifecycleSnapshot;
   restartWorld: (seed: string) => Promise<void>;
   moveTo: (x: number, z: number) => Promise<void>;
