@@ -3,6 +3,7 @@ import type { WorldChange } from '@seedlands/stdlib/world/storage';
 import type { SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { MeshTaskIdentity } from '../client/compute/mesh-task-snapshot';
 import type { PerformanceTelemetry } from '../client/presentation/performance-telemetry';
+import type { FrameCpuSnapshot } from '../client/presentation/frame-cpu-observer';
 import type { RenderPipelineSnapshot } from './scene/voxel-render-pipeline';
 import type { ExperimentalClientOptions } from '../client/experimental-client-options';
 import type { UiMetrics } from './ui/ui-contracts';
@@ -182,6 +183,7 @@ export type HarnessSnapshot = {
   };
   serverWorldTime: number;
   performance: PerformanceSummary;
+  frameCpu: FrameCpuSnapshot;
   compute: ComputePoolDiagnostics;
   fluidFeedback: FluidFeedbackSummary;
   waterTransitions: WaterMeshTransitionSnapshot;

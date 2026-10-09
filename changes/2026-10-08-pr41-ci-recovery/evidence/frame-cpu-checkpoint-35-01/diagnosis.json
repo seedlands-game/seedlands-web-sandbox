@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "939e0165317518ea50aef755ccc8e86930a4b499",
+  "runId": "pr41-cloud-browser-25",
+  "whole": {
+    "failed": 1,
+    "passed": 1,
+    "skipped": 1
+  },
+  "failure": [
+    "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Test timeout of 900000ms exceeded"
+  ],
+  "passedBeforeFailure": ["C0", "C1", "C2", "C3", "creative-crops", "V1"],
+  "pending": ["V2-completion", "C4", "C5", "crop-save-restore", "modular", "combined-frame-AB"],
+  "lastPlayer": [78.53150177001953, 32.599998474121094, -0.5549989938735962],
+  "lastServerPlayer": [78.53150351514442, 32.6, -0.554999],
+  "onGround": true,
+  "colliding": false,
+  "authorityPausedAfterFailure": true,
+  "frameInterval": {
+    "count": 1200,
+    "p50Ms": 484,
+    "p95Ms": 1148.8999999985099,
+    "p99Ms": 1637.6000000014901,
+    "maxMs": 2309.5,
+    "longFrameCount": 1199,
+    "lastLongFrameMs": 479
+  },
+  "tracePath": "/workspace/pr41-recovery-20261008-root-01/browser-25-results/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+  "interpretation": "整场900秒耗尽于铁资源准备前的回工作台路线；不能据结束后paused或局部wait栈证明永久停滞；帧间隔不能分解CPU/GPU。"
+}

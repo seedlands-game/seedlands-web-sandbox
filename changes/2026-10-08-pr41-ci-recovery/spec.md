@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 公开帧事件诊断 checkpoint35（确定性与静态完成；浏览器待运行）
+
+Browser25精确939e0165/build24 whole结果1 FAIL、1 visual PASS、1 Modular条件SKIP。C0-C3、新负Z双田创造种植/成熟/收割/库存保持及原V1均PASS；V2完成木镐、石镐，在铁资源准备前回工作台走廊时达到900秒整场期限。最后player[78.5315,32.6,-0.555]、ground=true/colliding=false，未证明永久路线停滞。保留原始trace与failure，不提高900/45/20秒或弱化玩家/ACK断言。
+
+默认PlayCanvas2.21.4不写有效updateTime/cullTime/renderStart；不可直接暴露初始化计时作为测量。本组只添加公开事件配对只读CPU wall观察：frameupdate→framerender包括同步update/input polling；prerender→postrender仅中心render与driver调用，不含resize/frameStart/frameEnd，不是GPU/cull时长。容量128，同帧完整有限非负pair才入样；重复start、缺事件、clock倒退丢弃，换app/reset detach并清空，snapshot冻结独立复制。不得改变renderer/线程/质量/时钟/玩法/性能阈值。
+
+先取得有界emitter时序、missing/invalid/reset隔离及冻结复制RED，再GREEN；选择器纳入现有Classic headless，必要format/lint/types后新build25/browser26唯一完整入口读取诊断。最新03:55真实UI90%，账户另有独立博客任务、不能精确归因PR41，60%停止；传统0.15PD×120%=0.18PD、AI约20min×120%=24min，不换算周额度。确定性77文件526/526、完整verify:static:ci通过（冻结5/5、Svelte0错误/警告、规则66、选择器14）；最初Game行数与新JSON格式失败保留，必要修正后复验。完整产品与组合A/B未闭环，长期docs仅更新实际owner地图。
+
 ## 作物视线隔离修正 checkpoint34（静态验收完成；浏览器复验待运行）
 
 Browser24（489c1941 / build23）完整结果 1 FAIL、1 原visual PASS、1 Modular条件SKIP。新双端/ACK路线完成两块田真实创造种植0/施肥7、第一田收割与恢复Survival库存保持，实际批次8/12；尚未运行保存恢复。随后原V1水支撑[68,30,2]从approach[66,2.5]连续12次实际命中新增Farmland[67,31,2]；作物田块挡住既有视线，不能删除原V1断言或跳过。

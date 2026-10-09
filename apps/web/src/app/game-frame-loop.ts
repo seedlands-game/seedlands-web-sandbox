@@ -14,6 +14,7 @@ import type { WorldEnvironment } from './scene/world-environment';
 import type { UiWorldSession } from './ui/ui-bridge';
 import type { World } from './world/world-runtime';
 import type { DebugRuntimeInput } from './ui/debug-diagnostics';
+import { FrameCpuObserver } from '../client/presentation/frame-cpu-observer';
 
 type GameFrameBindings = Readonly<{
   app: () => pc.Application | null;
@@ -41,6 +42,7 @@ type GameFrameBindings = Readonly<{
 }>;
 
 export class GameFrameLoop {
+  private readonly cpuFrames = new FrameCpuObserver(() => performance.now());
   private lastFpsSample = performance.now();
   private frames = 0;
   private fps = 0;
@@ -50,7 +52,12 @@ export class GameFrameLoop {
 
   constructor(private readonly bindings: GameFrameBindings) {}
 
+  get cpuFrameSnapshot() {
+    return this.cpuFrames.snapshot();
+  }
+
   reset(): void {
+    this.cpuFrames.reset();
     const now = performance.now();
     this.lastFpsSample = now;
     this.lastFrameTimestamp = now;
@@ -61,6 +68,8 @@ export class GameFrameLoop {
   }
 
   update(dt: number): void {
+    const app = this.bindings.app();
+    if (app) this.cpuFrames.attach(app);
     const world = this.bindings.world();
     const camera = this.bindings.camera();
     if (!world || !camera) return;

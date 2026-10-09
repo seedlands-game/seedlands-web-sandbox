@@ -24,6 +24,7 @@ import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
 import type { HarnessApi } from './gameplay/game-harness-contract';
 import { createHarnessObservability } from './gameplay/game-harness-observability';
 import { readInputDecisionDiagnostics } from '../client/authority/input-decision-diagnostics';
+import type { GameFrameLoop } from './game-frame-loop';
 export type { HarnessApi } from './gameplay/game-harness-contract';
 
 type RuntimeHarnessBindings = {
@@ -35,7 +36,7 @@ type RuntimeHarnessBindings = {
   camera: () => pc.Entity | null;
   environment: () => WorldEnvironment | null;
   gameplay: () => BrowserGameplay | null;
-  frameMs: () => number;
+  frame: Readonly<Pick<GameFrameLoop, 'frameMs' | 'cpuFrameSnapshot'>>;
   qualityLevel: () => QualityLevel;
   authority: () => BrowserAuthorityClient | null;
   compute: () => BrowserComputeRuntime | null;
@@ -81,6 +82,7 @@ type SnapshotContext = {
   environment: WorldEnvironment | null;
   controller: PlayerController | null;
   frameMs: number;
+  frameCpu: HarnessSnapshot['frameCpu'];
   qualityLevel: QualityLevel;
   authority: BrowserAuthorityClient | null;
   compute: BrowserComputeRuntime | null;
@@ -268,6 +270,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     },
     serverWorldTime: context.world?.worldTime ?? 0,
     performance: context.world?.performanceSummary ?? unavailablePerformance(),
+    frameCpu: context.frameCpu,
     compute: computeWorkers ?? unavailableCompute(),
     fluidFeedback: context.world?.fluidFeedbackSummary ?? {
       count: 0,
@@ -363,7 +366,8 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         world: bindings.world(),
         environment: bindings.environment(),
         controller: bindings.controller(),
-        frameMs: bindings.frameMs(),
+        frameMs: bindings.frame.frameMs,
+        frameCpu: bindings.frame.cpuFrameSnapshot,
         qualityLevel: bindings.qualityLevel(),
         authority: bindings.authority(),
         compute: bindings.compute(),
