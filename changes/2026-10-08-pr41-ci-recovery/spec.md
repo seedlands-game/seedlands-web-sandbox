@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 作物路线消费者修正 checkpoint33（确定性验收完成；浏览器复验待运行）
+
+Browser23（7a675c50 / build22）完整 correctness 结果 1 FAIL、1 visual PASS、1 modular 条件 SKIP，未达到 V1/V2/C4/C5。第一田 [67,31,2] 经真实创造 UI/鼠标完成 stage0→7→harvest，实际 GPU 8 vertices/12 indices、清理为空，夜间截图可见幼苗/成熟/移除；此仅局部消费者证据，不是 whole 或 Survival PASS。第二田瞄准 [69,30,2] 连续12 null。失败双端 x≈65.329、z≈0.4998、y≈32.6、速度0、onGround true；新crop helper固定KeyS，而原reachedRouteTarget对S使用xDelta≤0，因此向更大x的第二站提前返回，没有真实走到approach。
+
+修正仅在crop-journey复用既有walkEquipmentRoute的fresh-heading方向选择、双端邻域/arrival、ground/collision、推进tick/ACK与drift重试；删除新crop固定KeyS调用，初次和restore同一路线合同。不修改标准walkTo、route-progress、Authority物理或瞄准12次/超时/画质。既有回归覆盖被复用流程，必要静态检查后用新build23/browser24唯一完整入口验证；不因首次局部PASS跳过第二田或保存恢复。原Browser23 receipt/trace和六个crop附件独立保存，source/artifact不复用。
+
+预算最新02:41真实产品UI90%，60%停止线不变；本小消费者修正约传统0.1PD×120%=0.12PD、AI约10min×120%=12min，不换算周额度。完整V2/V3/V4/Modular/194与组合整帧A/B仍未完成，无合并/生产发布。
+
 ## 作物真实输入与观测 checkpoint32（接线与确定性验收完成；浏览器未验收）
 
 为checkpoint31补实际产品证据，仅扩展唯一完整Classic旅程及只读BrowserProductHarness，不另造runner或developer玩法写入。cropStageSnapshot()返回runtimeEpoch/gameplayRevision、accepted Authority cropStages的冻结独立复制，以及当前adapter live GPU batch的只读摘要：Chunk/呈现ID/阶段/soil positions、Mesh.getPositions实际vertexCount、primitive实际indexCount、材质绑定的light参数是否存在、local enable/mesh visibility标志。参数存在和enable不是实际照明/可见性结论，须结合真实截图。ready/authority实例/gameplay引用/runtime/rendered-world epoch不一致时返回null；无新权威crop Map、写API、wire版本或route-slim重试。
