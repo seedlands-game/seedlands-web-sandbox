@@ -2,6 +2,8 @@
 
 ## 独立输入事件路线观测候选 checkpoint29
 
+终态：候选29未采用。源码 `4db1a0bdd86e8a8e2422b829d422fc560896bd78` 的 Browser22/window `pr41-cloud-browser-22` 为 FAIL / NOT_RECORDED，主旅程 FAIL，visual/modular SKIP。20次观测为4warmup+完整16次A/A，所有实际输入事件计数0，固定owner/profile身份唯一、同任务精确投影通过；A/A左右median为53.69309150000481/62.12084249999316ms，偏差15.696155249297933%超过15%否决线。未采A/B，不能以接近门槛或部分样本宣称收益。生产API、路线切换、工程probe、测量接线及相关测试/selector全部撤回至cd5源码；保留原始附件、trace、窗口回执与候选checkpoint，不追加同条件重采。当前read-boundary候选停止，继续正式玩法消费者与主旅程其他瓶颈。
+
 新证据：Browser21/window28在14次精确同任务投影中，仅input ack由743推进至755；位置/视角/速度/ground/collision/world/runtime/generator不变，测量区间无Playwright键鼠调用。Controller每次prediction advance仍发送生成命令，ack应视为可推进的流水线确认时钟。本轮28已FAIL并撤回，不复用部分样本作A/A或收益。
 
 候选29仍只检验相同的只读路线投影边界，不改生产输入、物理、世界、预测、渲染、quality、pulse、到达、期限、存档或正式玩法断言。新的测量身份以工程层短生命周期DOM输入事件观察器冻结：keydown/up、pointerdown/up/move、mousemove、wheel、blur/focus、pointerlockchange的总事件序号须不变。观察器仅在当前页面测量窗口安装，拒绝已有实例，finally移除全部listener与自有probe；不得消费/阻止事件或写任何玩法owner。固定三轴双端位置/速度、视角、ground/collision、world revision/runtime/generator、quality/render backend/请求实验配置/worker counts；同任务完整与精简字段包括tick/ack仍须精确相等。physicsTick/ack在样本之间只允许非递减，safe integer/owner-ready规则不变；其倒退或实际输入事件变化均否决，不允许把真实新输入或epoch替换当自然时钟。

@@ -69,7 +69,6 @@
     "apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts",
     "apps/web/tests/e2e/classic-support/equipment-route-pulse-handoff.test.ts",
     "apps/web/tests/e2e/classic-support/route-progress.test.ts",
-    "apps/web/tests/e2e/classic-support/scenario.test.ts",
-    "apps/web/tests/unit/app/game-harness-route-snapshot.test.ts"
+    "apps/web/tests/e2e/classic-support/scenario.test.ts"
   ]
 }
