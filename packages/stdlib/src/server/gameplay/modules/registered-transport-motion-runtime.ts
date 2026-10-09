@@ -19,6 +19,7 @@ import {
 } from './transport-motion-module';
 import { deriveMountedSeatConstraintV1 } from './transport-motion-state';
 import { projectSurfaceMotion } from '../transport-motion-geometry';
+import { projectRouteMotion } from '../transport-route-motion-geometry';
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 type Options = Readonly<{
@@ -243,7 +244,7 @@ export class RegisteredTransportMotionRuntime {
       return [
         {
           state,
-          candidate: projectSurfaceMotion({
+          candidate: (definition.locomotion.provider === 'route' ? projectRouteMotion : projectSurfaceMotion)({
             state,
             policy,
             policies: this.config.policies,
@@ -261,21 +262,27 @@ export class RegisteredTransportMotionRuntime {
     const tentative = buildTransportMotionPublication(this.transport, { version: 1, frameId: this.frameId, entries });
     const corrections = new Map(this.corrections(tentative, frame).map((entry) => [entry.id, entry]));
     const relativeFrame = { ...frame, updates: frame.updates.map((entry) => corrections.get(entry.id) ?? entry) };
+    const motionPaths = new Map(entries.map(({ state, candidate }) => [state.reference.entityId, candidate]));
     return {
       version: 1,
       frameId: this.frameId,
       entries: entries.map((entry) => {
         if (entry.candidate.traveledDistance === 0) return entry;
-        const candidate = projectSurfaceMotion({
+        const definition = this.transport.definitions.require(entry.state.definitionId);
+        const options = {
           state: entry.state,
           policy: this.config.policies.find((policy) => policy.definitionId === entry.state.definitionId)!,
           policies: this.config.policies,
-          definition: this.transport.definitions.require(entry.state.definitionId),
+          definition,
           frame: relativeFrame,
           config: this.transport,
           entities: this.options.entities,
           callbacks: this.options.callbacks,
-        });
+          motionPaths,
+        };
+        const candidate = (definition.locomotion.provider === 'route' ? projectRouteMotion : projectSurfaceMotion)(
+          options,
+        );
         return candidate.stopReason ? { ...entry, candidate } : entry;
       }),
     };

@@ -6,7 +6,10 @@ import type { GameplayCallbacks } from './gameplay-runtime-contracts';
 import type { FrozenTransportInteractionConfig } from './modules/transport-interaction-config';
 import type { TransportDefinitionV1, TransportStateV2 } from './modules/transport-model';
 import type { TransportMotionPolicy } from './modules/transport-motion-module';
-import { buildSurfaceTransportMotionCandidateV1 } from './modules/transport-motion-model';
+import {
+  buildSurfaceTransportMotionCandidateV1,
+  type TransportMotionCandidateV1,
+} from './modules/transport-motion-model';
 import { transportControlFromWorldWish } from './transport-motion-control';
 import { transportBodyConfig } from './transport-body-config';
 
@@ -22,7 +25,7 @@ const bounded = (bounds: WorldAabb) => {
 };
 
 /** Includes rotation and the rider's body; it is a conservative collision volume, not a rendered shape. */
-function compoundBody(
+export function compoundBody(
   definition: TransportDefinitionV1,
   state: TransportStateV2,
   frame: AuthorityPhysicsFrame,
@@ -52,6 +55,23 @@ function compoundBody(
   return { ...config, localAabb: bounds };
 }
 
+/** Bounds another carrier's arbitrary path around its endpoint chord for this frame only. */
+export function compoundMotionPathBody(
+  definition: TransportDefinitionV1,
+  state: TransportStateV2,
+  frame: AuthorityPhysicsFrame,
+  distance: number,
+): BodyConfig {
+  const body = compoundBody(definition, state, frame, true, distance);
+  return {
+    ...body,
+    localAabb: {
+      min: { ...body.localAabb.min, y: body.localAabb.min.y - distance },
+      max: { ...body.localAabb.max, y: body.localAabb.max.y + distance },
+    },
+  };
+}
+
 export function projectSurfaceMotion(
   options: Readonly<{
     state: TransportStateV2;
@@ -62,6 +82,7 @@ export function projectSurfaceMotion(
     frame: AuthorityPhysicsFrame;
     entities: EntityStore;
     callbacks: Pick<GameplayCallbacks, 'getLoadedVoxel'>;
+    motionPaths?: ReadonlyMap<string, TransportMotionCandidateV1>;
   }>,
 ) {
   const { state, definition, policy, policies, config, frame, entities, callbacks } = options;
@@ -97,6 +118,7 @@ export function projectSurfaceMotion(
       let body = frame.bodyConfigs.get(entity.id);
       if (body && entity.type === 'transport') {
         const other = entities.transportState(entities.createReference(entity.id)!)!;
+        const otherDefinition = config.definitions.require(other.definitionId);
         const otherPolicy = policies.find((entry) => entry.definitionId === other.definitionId);
         const otherDriven =
           other.rider &&
@@ -104,14 +126,21 @@ export function projectSurfaceMotion(
           other.rider.entityId === frame.playerReference.entityId &&
           other.rider.lifetime === frame.playerReference.lifetime &&
           other.rider.epoch === frame.playerReference.epoch;
-        if (
+        if (otherDefinition.locomotion.provider === 'route') {
+          body = compoundMotionPathBody(
+            otherDefinition,
+            other,
+            frame,
+            options.motionPaths?.get(entity.id)?.traveledDistance ?? 0,
+          );
+        } else if (
           otherPolicy &&
           otherDriven &&
           otherPolicy.steeringRate !== 0 &&
           transportControlFromWorldWish(other.pose.yaw, frame.playerWish).steering !== 0
         ) {
           body = compoundBody(
-            config.definitions.require(other.definitionId),
+            otherDefinition,
             other,
             frame,
             true,

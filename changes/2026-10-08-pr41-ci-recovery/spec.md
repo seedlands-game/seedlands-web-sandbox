@@ -1,5 +1,21 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 正式路线运输运动 checkpoint69（预注册）
+
+2026-10-09 22:48UTC，head52f41c10的CI68自然执行，不取消。注册motion当前明确拒绝route，runtime仅projectSurfaceMotion；纯route模型通过不能证明正式玩法。先以实际非Classic注册组合、部署、mount和accepted world-space输入取得RED，再沿同一manual system/prepared ECS frontier接入route adapter。局部端点原点高度复用67合同，所有当前/邻格用frame.world.querySolids记录包括non-solid轨道的chunk revision；未知/断开/多个邻格失败关闭，保持64transition上限。沿当前directed cursor前进，负输入仅减速到零，不静默倒车或改cursor方向。
+
+碰撞包括实际yaw及rider body；quarter arc须有保守弧线/转动包络，不能以单一chord当完整路线。真实Authority覆盖平轨跨格、坡道、mount seat同tick、loaded墙、before-rule veto及route revision陈旧；pure adapter补反向/四角/unknown/ambiguous与观察集，不冒充真实Browser运输UI。surface行为、权限、cargo/fuel/lifetime和单一事务owner保持；静态/相关测试通过后再完整必要检查。本片不增加Classic默认轨道或运输UI，不宣称完整V3/非空旧存档迁移/照明/194/性能准出。
+
+根独占route adapter/runtime/module/test/spec；无新agent。传统0.75PD×120%=0.9PD、AI60min×120%=72min，首个有界checkpoint23:18、最晚次日00:00前重新估计；实际模型/credits/API无法核实，不换算周额度。22:09真实UI剩83%/5d4h，约60%停止线。CI66已terminal ChromiumFAIL、部署SKIP；其trace引用下载进云环境HTTPS代理403，已报告具体oaiusercontent域名等待许可，不绕过或扩权限。长期docs暂不更新：复用已冻结route provider与事务合同。
+
+23:09UTC主对话产品UI实测周剩82%/5d3h，停止线仍约60%。Task130最终实际RED-03不是浮点夹具失败：两条真实first-pass候选均clear、端点不交，字面同步弧线AABB相交而relative chord无contact，旧第二pass漏判。Root在同帧第二pass传递first-pass候选Map，以另一carrier实际traveledDistance保守扩张全yaw/rider水平及上下包络，覆盖多曲线/坡段；Map不跨帧、不新增owner。最终定向29项PASS，完整类型EXIT0；近距离并行路径可能提前停车，不宣称精确time-of-impact/性能收益。完整stdlib第一轮1193PASS/1FAIL：既有CLI用例15.97秒超过原15秒；保持原门槛，隔离串行复核及完整headless仍运行。
+
+23:15有界风险复核发现新增route provider使既有surface adapter面对另一route carrier时仍只有弦/原body，可能漏掉曲线或rider包络。现有唯一Luna Task131只扩展同一专属stdlib测试文件与private日志，以真实surface候选对route弧线建立独立mixed-provider RED；先验证实际first-pass、literal同步AABB与chord控制，不因模型推测直接改源码。现有source冻结到当前headless结束；若反例成立，再复用同帧候选长度包络覆盖surface→route，不扩大产品内容或性能声明。原CLI文件在无并发types的隔离串行复核7/7PASS，67.81秒；原整轮1193PASS/1FAIL不改写成PASS。
+
+CI68精确52f41c10已自然terminal：build/architecture/deterministic/headless/static SUCCESS，Chromium FAIL，部署SKIP。首次V2铁资源路线耗尽原900秒；重试V1新木门跨Chunk mesh原5秒检查得到[-1,0]而预期[0,0]，visual PASS，Modular SKIP。不能与旧V2 inventory失败混为相同原因。Group68原始trace/results及完整HTML分别成功上传139049592/150359464 bytes，均低于536870912下载工具cap；尚未传入环境检查ZIP树/trace。前述具体域名许可仍pending，无绕过。
+
+23:30最终本地checkpoint69：冻结候选完整stdlib166文件1195项PASS/EXIT0、完整headless111文件695项PASS/EXIT0；混合修复相关四文件37项PASS、生产workspace全部types及测试/tools/classic三集合通过，format/lint/paths通过。完整type命令最初在测试session epoch类型处FAIL，精确行修正后相关集合全部通过；未把旧失败改成PASS。测试max-lines实际FAIL后原样分为route与mixed两文件，无门禁豁免。最终有界复核补核实际Authority held transport first-pass入口；没有其他可证实P0/P1，但保守包络可能提前停车。实现/协调/返工/审阅/本地验证22:48–23:30约42分钟，在原72分钟保守量内；新head远端CI及真正产品验收待结果。详见evidence/registered-route-motion-checkpoint-69-01.md，长期docs保持既有合同。
+
 ## Modular 正常玩家方块入口 checkpoint66（预注册及实际局部验收）
 
 Group65已有正常feature提交da2a2ed6，76项定向/673项完整headless/完整static/build通过。原Browser65实际EXIT1：正式C0–C3 PASS、crop第一条[65.5,-0.5]原45秒FAIL、visual2.5min PASS、Modular SKIP；最后80ms事件生成83–87ms而page callback312–319ms，停稳pose在64.9399/66.3587两侧漂移。该事实不授权改变physics、late policy、range/原.06/.08到达、45/900秒或quality。当前精确CI65五项SUCCESS、Chromium仍运行，不能取消或抢推新head。
