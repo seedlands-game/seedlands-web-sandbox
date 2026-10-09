@@ -8,7 +8,9 @@ import {
   stepBody,
   type BodyConfig,
   type BodyState,
+  type PhysicsWorld,
 } from '../../physics';
+import { colliderMatches } from '../../physics/geometry';
 import { WORLD_ITEM_INTERACTION } from '../../physics/body-registry';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
 import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
@@ -33,6 +35,7 @@ import { createAuthorityCollisionWorld } from './authority-runtime-geometry';
 import type { VoxelCollisionWorld } from './voxel-collision-world';
 import { separateAuthorityCharacters } from './authority-character-separation';
 import { currentMountedSeats, mountedAuthorityBody } from './authority-mounted-body';
+import { createAuthorityTransportCollisionWorlds } from './authority-transport-collision-world';
 
 export type * from './authority-session-types';
 
@@ -290,16 +293,19 @@ export class AuthoritySession {
     const seen = new Set<string>();
     const worldItemIds = new Set<string>();
     const nextBodies = new Map<string, BodySnapshot>();
-    const configs = new Map<string, BodyConfig>();
+    const configs = new Map(entities.map((entity) => [entity.id, this.options.bodyConfigFor(entity)]));
+    const worlds = createAuthorityTransportCollisionWorlds(this.collisionWorld, entities, (entity) =>
+      configs.get(entity.id)!,
+    );
     for (const entity of entities) {
       seen.add(entity.id);
-      const config = this.options.bodyConfigFor(entity);
-      configs.set(entity.id, config);
+      const config = configs.get(entity.id)!;
       const seat = mounted.get(entity.id);
       if (seat) {
         nextBodies.set(entity.id, mountedAuthorityBody(entity, seat));
         continue;
       }
+      const world = worlds.forEntity(entity.id);
       const physicsInput = selectAuthorityPhysicsInput(
         entity,
         this.options.playerId,
@@ -328,7 +334,7 @@ export class AuthoritySession {
           ? selectReachableBodyTarget({
               state: initialState,
               config,
-              world: this.collisionWorld,
+              world,
               targets: physicsTargets,
               maxDistance: WORLD_ITEM_INTERACTION.attractionRadius,
               maxCandidates: MAX_PICKUP_TARGET_CANDIDATES,
@@ -358,7 +364,7 @@ export class AuthoritySession {
               },
             }
           : authorizedPhysicsInput,
-        world: this.collisionWorld,
+        world,
         dt,
       });
       nextBodies.set(entity.id, {
@@ -375,7 +381,7 @@ export class AuthoritySession {
       entities.filter((entity) => !mounted.has(entity.id)),
       nextBodies,
       configs,
-      this.collisionWorld,
+      worlds.all,
     );
 
     commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies);
@@ -417,7 +423,12 @@ export class AuthoritySession {
       }
       const state = bodyStateForAuthorityEntity(entity);
       const config = this.options.bodyConfigFor(entity);
-      if (!this.overlapsStatic(state, config)) {
+      const world = createAuthorityTransportCollisionWorlds(
+        this.collisionWorld,
+        this.options.server.queryEntities(),
+        this.options.bodyConfigFor,
+      ).forEntity(entityId);
+      if (!this.overlapsStatic(state, config, world)) {
         this.recordRecovery({
           entityId,
           reason: request.reason,
@@ -427,7 +438,7 @@ export class AuthoritySession {
         });
         continue;
       }
-      const result = recoverBody({ state, config, world: this.collisionWorld, maxDistance: request.maxDistance });
+      const result = recoverBody({ state, config, world, maxDistance: request.maxDistance });
       if (result.recovered)
         this.options.server.updateEntity(entityId, {
           position: [result.state.position.x, result.state.position.y, result.state.position.z],
@@ -443,12 +454,14 @@ export class AuthoritySession {
     }
   }
 
-  private overlapsStatic(state: BodyState, config: BodyConfig): boolean {
+  private overlapsStatic(state: BodyState, config: BodyConfig, world: PhysicsWorld): boolean {
     const bounds = bodyWorldAabb(state, config);
-    return this.collisionWorld
+    return world
       .querySolids(bounds)
       .some(
         (collider) =>
+          !collider.sensor &&
+          colliderMatches(config, collider) &&
           Math.min(bounds.max.x, collider.aabb.max.x) - Math.max(bounds.min.x, collider.aabb.min.x) > 1e-6 &&
           Math.min(bounds.max.y, collider.aabb.max.y) - Math.max(bounds.min.y, collider.aabb.min.y) > 1e-6 &&
           Math.min(bounds.max.z, collider.aabb.max.z) - Math.max(bounds.min.z, collider.aabb.min.z) > 1e-6,

@@ -6,6 +6,7 @@ import type { TransportRelationSite } from './modules/transport-relation-interac
 import { deriveMountedSeatConstraintV1 } from './modules/transport-motion-state';
 import { bodyConfigFor } from '../../physics/body-registry';
 import { loadedTransportBodyRejection, loadedWorldBodyRejection } from './transport-deployment-geometry';
+import { transportBodyConfig } from './transport-body-config';
 
 type Options = Readonly<{
   config: FrozenTransportInteractionConfig;
@@ -25,10 +26,11 @@ export function projectTransportRelationSite(options: Options, entityId: string)
   const rejection = (position: readonly [number, number, number], seat = false) =>
     loadedTransportBodyRejection(options, local, position, seat ? exclusion : [entityId]);
   const [x, y, z] = state.pose.position;
-  const xMin = definition.bodyAabb.min.x - local.max.x - 0.05;
-  const xMax = definition.bodyAabb.max.x - local.min.x + 0.05;
-  const zMin = definition.bodyAabb.min.z - local.max.z - 0.05;
-  const zMax = definition.bodyAabb.max.z - local.min.z + 0.05;
+  const body = transportBodyConfig(definition, state.pose.yaw).localAabb;
+  const xMin = body.min.x - local.max.x - 0.05;
+  const xMax = body.max.x - local.min.x + 0.05;
+  const zMin = body.min.z - local.max.z - 0.05;
+  const zMax = body.max.z - local.min.z + 0.05;
   const positions: readonly (readonly [number, number, number])[] = [
     [x + xMin, y, z],
     [x + xMax, y, z],

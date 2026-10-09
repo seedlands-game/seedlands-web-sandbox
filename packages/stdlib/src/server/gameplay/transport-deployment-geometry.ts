@@ -5,6 +5,7 @@ import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { overlapDepth, translateAabb } from '../../physics/geometry';
 import type { WorldAabb } from '../../physics/types';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
+import { transportBodyConfig } from './transport-body-config';
 import { advanceRouteSegmentV1, resolveRouteSegmentV1, type RouteNeighborV1 } from './modules/route-definition';
 import type { TransportDefinitionV1 } from './modules/transport-model';
 import type { FrozenTransportInteractionConfig } from './modules/transport-interaction-config';
@@ -88,7 +89,7 @@ function placement(options: Options, definition: TransportDefinitionV1, hit: Pos
 
 function collisionRejection(options: Options, option: TransportDeploymentOptionV1): string | null {
   const definition = options.config.definitions.require(option.definitionId);
-  return loadedTransportBodyRejection(options, definition.bodyAabb, option.position);
+  return loadedTransportBodyRejection(options, transportBodyConfig(definition, option.yaw).localAabb, option.position);
 }
 
 export function loadedTransportBodyRejection(
@@ -102,11 +103,10 @@ export function loadedTransportBodyRejection(
   const bounds = translateAabb(localAabb, offset(position));
   for (const entity of options.entities.query()) {
     if (entity.type === 'station' || excludedEntities.includes(entity.id)) continue;
-    const local =
-      entity.type === 'transport'
-        ? options.config.definitions.require(options.entities.transportComponentSnapshot(entity.id).definitionId)
-            .bodyAabb
-        : bodyConfigFor(bodyKindForEntity(entity)).localAabb;
+    const transport = entity.type === 'transport' ? options.entities.transportComponentSnapshot(entity.id) : null;
+    const local = transport
+      ? transportBodyConfig(options.config.definitions.require(transport.definitionId), transport.yaw).localAabb
+      : bodyConfigFor(bodyKindForEntity(entity)).localAabb;
     if (overlapDepth(bounds, translateAabb(local, offset(entity.position)))) return 'target-occupied';
   }
   return null;
