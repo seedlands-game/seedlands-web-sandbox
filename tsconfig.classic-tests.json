@@ -100,6 +100,9 @@
     "apps/web/tests/unit/app/mesh-task-scheduler.test.ts",
     "apps/web/tests/unit/app/mesh-supersession-order.test.ts",
     "apps/web/tests/integration/runtime/server/composition/transport-authority-motion.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/transport-authority-motion-frontier.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-motion-frontier.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/modular-player-block-actions.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/gameplay-registered-mode.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/mode-command-host.test.ts"
   ]
 }

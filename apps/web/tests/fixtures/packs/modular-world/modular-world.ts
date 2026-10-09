@@ -3,6 +3,8 @@ import {
   defineBlockRulesModule,
   defineContentModule,
   definePack,
+  defineModeModule,
+  defineRulesetModule,
   defineStandardWorldgenModule,
   type StandardWorldgenProvider,
 } from '@seedlands/stdlib/mod-api';
@@ -78,7 +80,7 @@ export const modularWorldContentCandidates = Object.freeze({
     meshKind: 'cube' as const,
     emission: 0,
     lightCost: 1,
-    faceMaterials: Object.freeze([21, 21, 21, 21, 21, 21]),
+    faceMaterials: Object.freeze([21, 21, 21, 21, 21, 21] as const),
     materialCategories: Object.freeze([[21, 'cutout'] as const]),
   }),
   item: Object.freeze({
@@ -98,7 +100,14 @@ export const modularWorldContentCandidates = Object.freeze({
     meshKind: 'glass' as const,
     emission: 15,
     lightCost: 1,
-    faceMaterials: Object.freeze([21, 21, 21, 21, 21, 21]),
+    faceMaterials: Object.freeze([21, 21, 21, 21, 21, 21] as const),
+  }),
+  airBlockRule: Object.freeze({
+    voxel: 0,
+    hardnessSeconds: null,
+    preferredTool: null,
+    drop: null,
+    replaceable: true,
   }),
   blockRule: Object.freeze({
     voxel: MODULAR_WORLD_SENTINEL_VOXEL,
@@ -137,10 +146,12 @@ export const pack = definePack({
       meleeDefinitions: [],
       actorProfiles: [modularWorldContentCandidates.actorProfile],
     }),
+    defineRulesetModule({ id: 'sample:modular-world-rules', version: '1.0.0' }),
+    defineModeModule(),
     defineBlockActionsModule(),
     defineBlockRulesModule({
       moduleId: 'sample:modular-world-block-rules',
-      voxelDefinitions: [modularWorldContentCandidates.blockRule],
+      voxelDefinitions: [modularWorldContentCandidates.airBlockRule, modularWorldContentCandidates.blockRule],
     }),
   ],
 });
