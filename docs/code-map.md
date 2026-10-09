@@ -264,3 +264,5 @@ PR41 持续指针输入经 `app/player/held-pointer-aim.ts` 捕获真实鼠标�
 PR41 真实 mousemove 在 `PlayerController` 同步更新相机射线与目标回调；`BrowserGameplay.setAimTarget` 经既有 `UiWorldSession.publishTarget` 即时发布目标卡，`app/gameplay/voxel-target-ui.ts` 复用原 target 投影。held 方向捕获与 mining cancellation 复用同一门控；瞄准助手读取正式射线和可见卡，不再固定等双 RAF。V2 route 的 corridor correction 只在 X 已达原容差、Z 仍未达走廊且实际 yaw 有效时选较近的前进/后退方向；原双投影 arrival、freshness、碰撞和总 deadline 仍由既有 helper 判定。
 
 作物真实输入复用唯一 Classic 浏览器旅程的 `classic-support/crop-journey.ts`；`game-harness-observability.ts` 的作物快照复制 Authority 投影和实际 PlayCanvas 批次，双重核对运行时 epoch 与 gameplay 引用，不提供写入或第二份作物 owner。
+
+公开帧事件 CPU wall 诊断由 `client/presentation/frame-cpu-observer.ts` 配对并保存最多128个只读样本；`app/game-frame-loop.ts` 管理 app/reset 生命周期，`game-harness.ts` 输出 detached `frameCpu`。该区间不代表 GPU/cull 时间或整帧 A/B。

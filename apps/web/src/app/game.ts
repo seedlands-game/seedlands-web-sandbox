@@ -411,7 +411,7 @@ export class Game {
         camera: () => this.camera,
         environment: () => this.environment,
         gameplay: () => this.gameplayClient,
-        frameMs: () => this.frameLoop.frameMs,
+        frame: this.frameLoop,
         qualityLevel: () => this.qualityLevel,
         authority: () => this.authority,
         collisionDebug: () => this.collisionDebug,
