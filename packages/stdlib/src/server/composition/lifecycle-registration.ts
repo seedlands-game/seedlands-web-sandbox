@@ -22,6 +22,11 @@ const normalizeSystem = (definition: ModSystemDefinition): ModSystemDefinition =
   const before = denseDependencies(definition.before, 'before');
   const after = denseDependencies(definition.after, 'after');
   if (before.some((id) => after.includes(id))) throw new TypeError(`Conflicting system dependency: ${definition.id}`);
+  if (cadence === 'manual') {
+    if (definition.intervalSeconds !== undefined || before.length || after.length)
+      throw new TypeError(`Manual system cannot define an interval or schedule dependencies: ${definition.id}`);
+    return Object.freeze({ ...definition, cadence, before, after });
+  }
   if (cadence === 'every-advance') {
     if (definition.intervalSeconds !== undefined)
       throw new TypeError(`Every-advance system cannot define an interval: ${definition.id}`);
@@ -80,8 +85,11 @@ export function createLifecycleRegistration() {
       for (const [id, { moduleId, definition }] of systems) {
         assertOwner(moduleId, definition.operationId);
         dependencies.set(id, new Set(definition.after));
-        for (const dependency of [...(definition.before ?? []), ...(definition.after ?? [])])
+        for (const dependency of [...(definition.before ?? []), ...(definition.after ?? [])]) {
           if (!systems.has(dependency)) throw new TypeError(`Unknown system dependency: ${dependency}`);
+          if (systems.get(dependency)!.definition.cadence === 'manual')
+            throw new TypeError(`Scheduled system cannot depend on a manual system: ${dependency}`);
+        }
       }
       for (const [id, { definition }] of systems)
         for (const next of definition.before ?? []) dependencies.get(next)!.add(id);

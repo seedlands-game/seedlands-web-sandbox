@@ -116,7 +116,7 @@ export function createGameplayModuleSchedule(
             systems: composition.registrations.systems.map(({ definition }) => ({
               id: definition.id,
               remainder:
-                definition.cadence === 'every-advance'
+                definition.cadence === 'every-advance' || definition.cadence === 'manual'
                   ? 0
                   : (Math.round(time * 1e9) % Math.round(definition.intervalSeconds * 1e9)) / 1e9,
             })),

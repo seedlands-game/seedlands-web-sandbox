@@ -245,10 +245,17 @@ const validateDefinitionMap = (raw: unknown): void => {
     );
     id(definition.id, 'System id');
     id(definition.operationId, 'System operation id');
-    if (definition.cadence !== 'interval' && definition.cadence !== 'every-advance')
+    if (definition.cadence !== 'interval' && definition.cadence !== 'every-advance' && definition.cadence !== 'manual')
       throw new TypeError('System cadence is invalid.');
     validateDependencyIds(definition.before, 'System before dependencies');
     validateDependencyIds(definition.after, 'System after dependencies');
+    if (
+      definition.cadence === 'manual' &&
+      (definition.intervalSeconds !== undefined ||
+        (definition.before as readonly string[]).length ||
+        (definition.after as readonly string[]).length)
+    )
+      throw new TypeError('Manual system cannot define an interval or schedule dependencies.');
     if (
       definition.intervalSeconds !== undefined &&
       (typeof definition.intervalSeconds !== 'number' || !Number.isFinite(definition.intervalSeconds))
