@@ -1,0 +1,54 @@
+{
+  "crop-creative-0-stage-0": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 74466,
+    "cropStages": [
+      {
+        "position": [67, 31, 2],
+        "stage": 0,
+        "presentationId": "seedlands:wheat-crop"
+      }
+    ],
+    "renderedBatches": [
+      {
+        "chunkKey": "2,0,0",
+        "presentationId": "seedlands:wheat-crop",
+        "stage": 0,
+        "positions": [[67, 31, 2]],
+        "vertexCount": 8,
+        "indexCount": 12,
+        "enabled": true,
+        "lightingBound": true
+      }
+    ]
+  },
+  "crop-creative-0-stage-7": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 76823,
+    "cropStages": [
+      {
+        "position": [67, 31, 2],
+        "stage": 7,
+        "presentationId": "seedlands:wheat-crop"
+      }
+    ],
+    "renderedBatches": [
+      {
+        "chunkKey": "2,0,0",
+        "presentationId": "seedlands:wheat-crop",
+        "stage": 7,
+        "positions": [[67, 31, 2]],
+        "vertexCount": 8,
+        "indexCount": 12,
+        "enabled": true,
+        "lightingBound": true
+      }
+    ]
+  },
+  "crop-creative-harvested": {
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "gameplayRevision": 79222,
+    "cropStages": [],
+    "renderedBatches": []
+  }
+}

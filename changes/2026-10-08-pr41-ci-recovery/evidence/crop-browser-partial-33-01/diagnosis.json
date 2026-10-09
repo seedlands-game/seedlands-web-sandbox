@@ -1,0 +1,26 @@
+{
+  "sourceSha": "7a675c507cafcd3eb8a7722eb6168e2333b321f4",
+  "sourceDigest": "5b04d0c4260caba8588ab7559e91d7ed0c4b2c0c307e756cb7d5bd5f6ae26f3e",
+  "artifactDigest": "d5b1a1bb49e8bca85f8984dce22fb8f574cedc7785dadfdfa847507d06ef5219",
+  "browserRunId": "pr41-cloud-browser-23",
+  "wholeStatus": "FAIL",
+  "visualStatus": "PASS",
+  "modularStatus": "SKIP",
+  "failure": [
+    "Error: Real mouse input could not reacquire 69,30,2; last targets=[null,null,null,null,null,null,null,null,null,null,null,null]."
+  ],
+  "current": {
+    "player": [65.32945251464844, 32.60000228881836, 0.49979084730148315],
+    "serverPlayerPosition": [65.3294534693683, 32.600001, 0.49979083449915307],
+    "serverPlayerVelocity": [0, 0, 0],
+    "viewAngles": [-115.61000000000001, -19.12],
+    "onGround": true,
+    "colliding": false,
+    "worldRevision": 16
+  },
+  "imagesSha256": {
+    "crop-creative-0-stage-0.png": "98770203875dc4e6d5d852fb19b244250bdb8c8f3798a7fbc57ed57c57966f1b",
+    "crop-creative-0-stage-7.png": "69b19b79e40a0fe0ddf664a4794f42728ecbca366bb9cea6612e25c8a5d31180",
+    "crop-creative-harvested.png": "3499a3bf19569a6923fe9321059e4998f434c8366f63f31071c25cf28bdb879a"
+  }
+}
