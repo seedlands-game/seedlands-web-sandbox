@@ -39,6 +39,8 @@ describe('FrameCpuObserver', () => {
       events.emit('prerender');
       now += 12;
       events.emit('postrender');
+      now += 18;
+      events.emit('frameend');
     }
 
     const sample = observer.snapshot();
@@ -46,6 +48,16 @@ describe('FrameCpuObserver', () => {
     expect(sample.samples.map(({ updateWallMs, renderWallMs }) => [updateWallMs, renderWallMs])).toEqual([
       [5, 12],
       [5, 12],
+    ]);
+    expect(
+      sample.samples.map(({ renderEnvelopeWallMs, renderTailWallMs, tickWallMs }) => [
+        renderEnvelopeWallMs,
+        renderTailWallMs,
+        tickWallMs,
+      ]),
+    ).toEqual([
+      [35, 18, 40],
+      [35, 18, 40],
     ]);
     expect(sample.samples[1]!.frameSequence).toBeGreaterThan(sample.samples[0]!.frameSequence);
     expect(Object.isFrozen(sample)).toBe(true);
@@ -70,6 +82,8 @@ describe('FrameCpuObserver', () => {
     events.emit('prerender');
     now = 20;
     events.emit('postrender');
+    now = 25;
+    events.emit('frameend');
     expect(observer.snapshot().sampleCount).toBe(0);
 
     now = 30;
@@ -84,6 +98,8 @@ describe('FrameCpuObserver', () => {
     events.emit('prerender');
     now = 62;
     events.emit('postrender');
+    now = 70;
+    events.emit('frameend');
     expect(observer.snapshot().samples).toHaveLength(1);
     expect(observer.snapshot().samples[0]).toMatchObject({ updateWallMs: 5, renderWallMs: 12 });
   });
@@ -101,6 +117,8 @@ describe('FrameCpuObserver', () => {
     events.emit('prerender');
     now = 20;
     events.emit('postrender');
+    now = 25;
+    events.emit('frameend');
 
     now = 30;
     events.emit('frameupdate');
@@ -110,6 +128,8 @@ describe('FrameCpuObserver', () => {
     events.emit('prerender');
     now = 39;
     events.emit('postrender');
+    now = 45;
+    events.emit('frameend');
     expect(observer.snapshot().sampleCount).toBe(0);
   });
 
@@ -131,6 +151,8 @@ describe('FrameCpuObserver', () => {
     first.emit('prerender');
     now = 8;
     first.emit('postrender');
+    now = 10;
+    first.emit('frameend');
     expect(observer.snapshot().sampleCount).toBe(1);
 
     observer.attach(second);
@@ -150,5 +172,79 @@ describe('FrameCpuObserver', () => {
     expect(observer.snapshot().sampleCount).toBe(0);
     observer.attach(second);
     expect(second.listenerCount()).toBeGreaterThan(0);
+  });
+
+  it('records only complete frames and measures intervals through frameend', () => {
+    const events = new EventSource();
+    let now = 10;
+    const observer = new FrameCpuObserver(() => now);
+    observer.attach(events);
+
+    events.emit('frameupdate');
+    now = 15;
+    events.emit('framerender');
+    now = 20;
+    events.emit('prerender');
+    now = 32;
+    events.emit('postrender');
+    expect(observer.snapshot().sampleCount).toBe(0);
+    now = 50;
+    events.emit('frameend');
+    expect(observer.snapshot().samples[0]).toMatchObject({
+      updateWallMs: 5,
+      renderWallMs: 12,
+      renderEnvelopeWallMs: 35,
+      renderTailWallMs: 18,
+      tickWallMs: 40,
+      interTickGapWallMs: null,
+    });
+
+    now = 60;
+    events.emit('frameupdate');
+    now = 65;
+    events.emit('framerender');
+    now = 70;
+    events.emit('prerender');
+    now = 72;
+    events.emit('postrender');
+    now = 100;
+    events.emit('frameend');
+    expect(observer.snapshot().samples[1]).toMatchObject({
+      renderEnvelopeWallMs: 35,
+      renderTailWallMs: 28,
+      tickWallMs: 40,
+      interTickGapWallMs: 10,
+    });
+  });
+
+  it('does not pair missing render or backward frameend events into samples', () => {
+    const events = new EventSource();
+    let now = 0;
+    const observer = new FrameCpuObserver(() => now);
+    observer.attach(events);
+
+    events.emit('frameupdate');
+    now = 2;
+    events.emit('framerender');
+    now = 3;
+    events.emit('prerender');
+    now = 5;
+    events.emit('postrender');
+    events.emit('frameupdate');
+    now = 8;
+    events.emit('frameend');
+    expect(observer.snapshot().sampleCount).toBe(0);
+
+    now = 10;
+    events.emit('frameupdate');
+    now = 11;
+    events.emit('framerender');
+    now = 12;
+    events.emit('prerender');
+    now = 13;
+    events.emit('postrender');
+    now = 12;
+    events.emit('frameend');
+    expect(observer.snapshot().sampleCount).toBe(0);
   });
 });
