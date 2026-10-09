@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 精确 Authority Worker 采样 checkpoint44（仅诊断；未选优化）
+
+Browser33精确b17dc509/build32原完整3测试闭合：main FAIL、visual PASS、Modular条件SKIP，17.4min。C0–C3、作物与导航、V1完成；V2在铁资源准备的walkTo→waitForSnapshot触及原900秒，C4/C5未到达。末态双端位置约80.865,32.6,-0.461，落地/无碰撞，不认定永久卡住；128帧中位tick25.05ms/gap446.2ms/同步receive39.6ms，仅描述该窗口。
+
+原生20.171419372秒采集COMPLETE、无dataLoss、126610事件、33862305bytes，UTC08:22:44.089–08:23:04.260；全部原始闭合trace/元数据/失败字节/派生保留Root browser-33独立路径。GPU SwapBuffers29次inclusive wall19158.374ms、原生tdur70633us；CrGpuMain RunTask CPU383.521ms，不能把等待说成着色器CPU或GPU执行时间。DedicatedWorker169480 TimerFire(timerId1)1460次，inclusive wall12352.965ms、tdur8728654us；该线程整体RunTask CPU9639.469ms，不能相加。源码Authority唯一8ms周期与此相符只是推断，尚未直接确认该trace线程owner。V2闭合Playwright调用中snapshot1467次约118996.569ms，PointerLock/关包click各24次约35656.342/34289.279ms；调用可能重叠，不据此采纳旧slimSnapshot或压缩旅程。
+
+下一步只在原唯一main hook启用SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE=1，默认关闭、与主线程CPU/native trace互斥、benchmark拒绝。固定延迟360秒、20秒10ms V8 sampler；原runner从同次artifact receipt精确唯一assets/authority-worker-*.js及其hash派生选择器，CDP Target.getTargets只接受当前page同origin、完全匹配该pathname的唯一worker，记录实际target URL/id/context、source/run/asset/hash/UTC/elapsed。不依线程编号或timer频率猜owner，不暂停worker、改变线程/频率/品质/输入/协议或原900/45/20秒。
+
+使用已安装Playwright官方CDP类型明确支持的Target.attachToTarget(flatten=false)、sendMessageToTarget/receivedMessageFromTarget嵌套会话及Profiler接口；不patch SDK私有connection。协议失败、目标缺失/歧义、目标退出、超时、attach/start/stop/detach错误保留为诊断FAIL，未开始timer提前取消；pending请求有界且清理，子会话与browser session均detach。所有附件diagnosticOnly=true/eligible=false，不作为整帧性能。实际missing模块RED保留，三诊断fixture26/26、scoped lint及完整verify:static:ci PASS；fresh build和原完整browser采集仍未运行。传统0.2PD×120%=0.24PD；AI约40min×120%=48min。08:55实际周剩仍87%、约60%停止；当前不可合入，未完成全194/真实Modular/组合整帧A/A/A/B。
+
 ## 有界 Chromium 原生 trace checkpoint43（仅诊断；未选优化）
 
 Browser32 精确1b6ba70d/build31原完整3测试为main FAIL、visual PASS、Modular条件SKIP（17.2min）。C0–C3、Creative作物及导航、中性目标下地图map-1/81pixel/revision2与作物保持、V1完成；V2在followEquipmentRoute→mineResources→prepareCraftedIronArmor的keyboard.up触及原900秒，C5未到达。实际地图截图与失败字节/闭合trace保留Root独立browser-32路径，不把步骤耗时作为通过依据。

@@ -3,6 +3,7 @@ import { requireHeadlessClassic } from './settings';
 import { attachClassicFailureWithInput, type ClassicStage, type ClassicStageResult } from './evidence';
 import { startClassicCpuProfile, stopClassicCpuProfile } from './cpu-profile';
 import { startClassicNativeTrace, stopClassicNativeTrace } from './native-trace';
+import { startClassicAuthorityCpuProfile, stopClassicAuthorityCpuProfile } from './authority-cpu-profile';
 
 type DiagnosticState = Readonly<{
   stages: Partial<Record<ClassicStage, ClassicStageResult>>;
@@ -22,12 +23,14 @@ export function installClassicDiagnosticHooks(test: typeof classicTest, state: (
     requireHeadlessClassic(headless, launchOptions);
   });
   test.beforeEach(async ({ page }, info) => {
+    await startClassicAuthorityCpuProfile(page, info, state().benchmark);
     await startClassicNativeTrace(page, info, state().benchmark);
     await startClassicCpuProfile(page, info, state().benchmark);
   });
   test.afterEach(async ({ page }, info) => {
     const errors: unknown[] = [];
     for (const operation of [
+      () => stopClassicAuthorityCpuProfile(page, info),
       () => stopClassicNativeTrace(page, info),
       () => stopClassicCpuProfile(page, info),
       () => finishOriginalEvidence(page, info, state()),

@@ -87,6 +87,7 @@
     "packages/stdlib/tests/server/navigation-policy.test.ts",
     "apps/web/tests/integration/runtime/server/composition/navigation-authority.test.ts",
     "apps/web/tests/integration/runtime/server/composition/navigation-target-priority.test.ts",
-    "apps/web/tests/unit/app/classic-native-trace.test.ts"
+    "apps/web/tests/unit/app/classic-native-trace.test.ts",
+    "apps/web/tests/unit/app/classic-authority-cpu-profile.test.ts"
   ]
 }
