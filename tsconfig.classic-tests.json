@@ -79,6 +79,7 @@
     "apps/web/tests/unit/app/crop-harness-observation.test.ts",
     "apps/web/tests/unit/client/frame-cpu-observer.test.ts",
     "apps/web/tests/unit/client/authority-receive-wall-observer.test.ts",
-    "apps/web/tests/unit/client/browser-authority-receive-observation.test.ts"
+    "apps/web/tests/unit/client/browser-authority-receive-observation.test.ts",
+    "apps/web/tests/unit/app/classic-cpu-profile.test.ts"
   ]
 }

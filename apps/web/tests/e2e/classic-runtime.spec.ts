@@ -30,12 +30,12 @@ import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironme
 import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './classic-support/aim';
 import {
   attachClassicEvidence,
-  attachClassicFailureWithInput,
   observeBrowserRuntime,
   requireAllClassicStages,
   type ClassicStage as Stage,
   type ClassicStageResult as StageResult,
 } from './classic-support/evidence';
+import { installClassicDiagnosticHooks } from './classic-support/diagnostic-hooks';
 import { classicPersistedPositions, classicScenario, type Point } from './classic-support/scenario';
 import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
 import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
@@ -59,16 +59,12 @@ const benchmarkMode = settings.classicBenchmark.enabled;
 let evidenceWritten = false;
 let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
 
-test.beforeAll(async ({ headless, launchOptions }) => {
-  settings.requireHeadlessClassic(headless, launchOptions);
-});
-
-test.afterEach(async ({ page }, testInfo) => {
-  if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
-  if (modularPackSmokeEnabled) return;
-  if (evidenceWritten || testInfo.title.startsWith('Classic 视觉')) return;
-  await attachClassicFailureWithInput(page, testInfo, stageResults, benchmarkMode, restoreEvidence);
-});
+installClassicDiagnosticHooks(test, () => ({
+  stages: stageResults,
+  benchmark: benchmarkMode,
+  restore: restoreEvidence,
+  skip: evidenceWritten || modularPackSmokeEnabled,
+}));
 
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');

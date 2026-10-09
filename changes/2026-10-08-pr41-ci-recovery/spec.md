@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 主线程 sampling 诊断 checkpoint39（确定性与静态完成；真实采样待运行）
+
+Browser29精确6b459cbf/build28 whole1 FAIL、visual1 PASS、Modular条件1 SKIP，V1与新作物完成并进入V2，stone-pickaxe的placeOneEach→committedPointer在900秒失败。最后camera[78.47565,32.6,0.45011]、Authority[78.47565,32.6,0.45011]。同128帧gap中位439.45ms、同步receive38.7ms/17次，配对比例中位9.037%、sum(wall)/sum(gap)9.676%；仅同步receive占用，不能证明整体消息处理或GPU因果。原始trace/results/失败字节保留私有Root browser-29-results、browser-29-failure-39-01.json。
+
+只在现有唯一Classic spec的主旅程启用可选Chromium Profiler sampling：SEEDLANDS_CLASSIC_CPU_PROFILE=1，默认关闭，采样间隔固定10000微秒。原生产artifact、输入/断言、trace、renderer、质量、线程、20/45/900秒不变；benchmark启用时拒绝采样，所有profile标diagnosticOnly/eligible=false。启动前固定runId/sourceSha，正常及失败均stop→attach原始profile→detach，启动/停止失败仍清理并保留失败，不吞掉错误。profile只覆盖当前主线程isolate，timeDeltas为相邻样本微秒间隔，不能将采样归属视为精确函数wall、Worker或GPU执行测量。先用fake原CDP port验证benchmark拒绝、命令顺序、start/stop/attach异常清理与元数据原样保留；真实采样仅由新artifact的原完整runner取得。
+
+主spec已500有效行，只将原beforeAll/afterEach与新增诊断beforeEach按同一生命周期抽到classic-support/diagnostic-hooks.ts；原headless检查、exitPointerLock、visual/modular跳过失败采集及stage/restore引用保持，不新增runner或改选项。必要types/lint与新hook测试后构建/运行；未定位主要热点前不增加生产优化。旧slimSnapshot仍拒绝。只读Task72纠正旧Task66：Authority interact已支持self，无需新增action/协议；未来导航注册producer/accepted-view/UI仍未实现。
+
+checkpoint38派生JSON的serverPosition:null是字段名查找缺失，不能表示Authority无位置；原失败真实字段serverPlayerPosition已核实，本组新的diagnosis记录真实字段并保留旧派生与原始字节。最新05:40实际周UI仍剩89%，60%停止；传统0.12PD×120%=0.144PD、AI含18min浏览器约35min×120%=42min，未知额度分母不换算比例。根必要静态cpu-profile-static-39-02.log PASS（冻结5/5、全格式/路径、scoped lint、完整Classic types、CI选择14），联合4文件18/18 PASS；spy类型与cause失败保留。完整V2/V3/V4/194/恢复和组合整帧AB仍未完成，无合并/生产部署。
+
 ## 相邻帧空档 receive wall 诊断 checkpoint38（确定性与静态完成；浏览器待运行）
 
 Browser28精确5f3f679/build27 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。V1已结束并进入V2，石镐制作返回工作台在900秒上限失败；末尾Pointer Lock错误发生于超时退出附近，不认定为首因。最后128样本同步tick中位21.05ms、renderEnvelope3.2ms、interTickGap434.95ms；不同窗口不能相减，GPU/Worker/trace因果仍未知。原始结果保留在私有Root browser-28-results，失败原字节browser-28-failure-38-01.json。
