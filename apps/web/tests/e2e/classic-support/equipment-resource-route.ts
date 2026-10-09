@@ -61,10 +61,8 @@ export function equipmentRoutePulseMs(
     !snapshot.onGround ||
     snapshot.colliding ||
     !routeInputSettled({ ...snapshot, serverPlayerVelocity: velocity }) ||
-    ![snapshot.player, snapshot.serverPlayerPosition].every(
-      (position) =>
-        Math.abs(position[2] - target[1]) < EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance &&
-        (direction === 'KeyW' ? target[0] - position[0] > 3 : position[0] - target[0] > 3),
+    ![snapshot.player, snapshot.serverPlayerPosition].every((position) =>
+      direction === 'KeyW' ? target[0] - position[0] > 3 : position[0] - target[0] > 3,
     ) ||
     Math.abs(horizontalMouseCorrectionToRoute(snapshot.player, yaw, target, direction, { wholeTurn: true })) >= 1
   )
