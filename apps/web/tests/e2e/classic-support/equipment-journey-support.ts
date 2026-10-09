@@ -9,11 +9,9 @@ import {
   mineVoxel,
   playerState,
   snapshot,
-  routeSnapshot,
-  walkRouteTo,
-  waitForRouteSnapshot,
   voxelAt,
   waitForSnapshot,
+  walkTo,
 } from './harness';
 import { itemCount } from './journey';
 import { classicScenario, type V2EquipmentResource } from './scenario';
@@ -196,9 +194,9 @@ async function switchToSurvival(page: Page): Promise<void> {
 export async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
   return followEquipmentRoute(target, {
     now: Date.now,
-    observe: () => routeSnapshot(page),
+    observe: () => snapshot(page),
     walk: (key, timeout) =>
-      walkRouteTo(page, target, {
+      walkTo(page, target, {
         key,
         timeout,
         ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
@@ -206,7 +204,7 @@ export async function walkEquipmentRoute(page: Page, target: readonly [number, n
       }),
     waitForProgress: async (baseline, key, timeout) => {
       let kind: 'arrival' | 'drift' | null = null;
-      const current = await waitForRouteSnapshot(
+      const current = await waitForSnapshot(
         page,
         (snapshot) => {
           const result = classifyEquipmentRouteWait(baseline, snapshot, target, key);

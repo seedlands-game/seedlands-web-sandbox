@@ -2,6 +2,8 @@
 
 ## 路线只读观测候选 checkpoint28
 
+终态：候选未采用。源码 `8255157424f8f7f776b8c4224092744e9392385b` 的 Browser21/window `pr41-cloud-browser-21` 为 FAIL / NOT_RECORDED，主旅程 FAIL、visual/modular SKIP。仅取得4次warmup和10次A/A观测，未达到A/A资格，未进行平衡A/B。14次同任务投影全部精确相等；第14次input ack从743推进至755，其余位置/视角/速度/ground/collision/world/runtime/generator不变，trace测量区间无Playwright键鼠调用。客户端预测循环仍持续发送命令，ack是流水线时钟，不等同物理输入状态。本轮固定ack合同不能满足真实流水线；不放宽本轮否决线、不追认部分样本。生产API、路线切换、测量接线及相关候选测试/selector撤回到父提交cd5；原候选checkpoint与失败原始记录保留。后续若需要新实验，须先登记独立输入事件观测与tick/ack单调新鲜度合同，而非简单移除校验或盲目重试。
+
 Browser20 的2142次V2快照，CDP编码值中位90335 bytes、合计193283849 bytes；trajectory中位约51KB，其次是waterTransitions/compute/authority诊断。此后验体积不是延迟因果证据。注册单一候选：增加只读routeSnapshot，直接从与完整snapshot相同的Controller/已接受Authority owner复制player/server三轴位置、三轴速度、viewAngles、onGround/colliding、physicsTick/input ack。缺少/未就绪/非有限owner数据返回不可用，不沿用完整诊断snapshot的默认假坐标。完整snapshot及所有版本、呈现、光照、存档、失败诊断保留。
 
 先取得有效RED：当前完整投影含无关诊断且在owner缺失时提供默认坐标，不满足新路线投影合同；再验证新投影精确等价、独立只读副本、无写入，以及原双端到达/velocity/tick/ack/grounded/collision条件不变。仅设备路线与真实移动内部观测可切换；其余消费者继续完整snapshot。所有原Pointer Lock/真实键鼠、pulse、到达/邻面判断和900000/45000/20000期限保持。失败时仍取完整owner诊断。
