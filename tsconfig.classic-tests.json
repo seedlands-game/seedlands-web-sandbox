@@ -104,6 +104,7 @@
     "apps/web/tests/integration/runtime/server/composition/modular-player-block-actions.test.ts",
     "apps/web/tests/integration/runtime/server/composition/gameplay-registered-mode.test.ts",
     "apps/web/tests/integration/runtime/server/composition/mode-command-host.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/modular-world-playbook.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/modular-world-playbook.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-route-motion.test.ts"
   ]
 }

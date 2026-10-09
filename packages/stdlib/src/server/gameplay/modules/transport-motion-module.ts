@@ -105,9 +105,7 @@ export function defineTransportMotionModule(input: TransportMotionConfig): ModMo
     },
     register(api) {
       const transport = api.requireCapability<FrozenTransportInteractionConfig>(TRANSPORT_INTERACTION_CAPABILITY);
-      for (const policy of config.policies)
-        if (transport.definitions.require(policy.definitionId).locomotion.provider !== 'surface')
-          throw new TypeError('This motion module requires a surface definition.');
+      for (const policy of config.policies) transport.definitions.require(policy.definitionId);
       api.provideCapability(TRANSPORT_MOTION_CAPABILITY, config);
       api.registerState({
         id: TRANSPORT_MOTION_COMPONENT,

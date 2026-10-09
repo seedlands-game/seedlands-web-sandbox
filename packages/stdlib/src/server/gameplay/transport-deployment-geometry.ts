@@ -6,7 +6,8 @@ import { overlapDepth, translateAabb } from '../../physics/geometry';
 import type { WorldAabb } from '../../physics/types';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
 import { transportBodyConfig } from './transport-body-config';
-import { advanceRouteSegmentV1, resolveRouteSegmentV1, type RouteNeighborV1 } from './modules/route-definition';
+import { advanceRouteSegmentV1, resolveRouteSegmentV1 } from './modules/route-definition';
+import { projectLoadedRouteNeighbors, routeEndpoints } from './transport-route-neighbors';
 import type { TransportDefinitionV1 } from './modules/transport-model';
 import type { FrozenTransportInteractionConfig } from './modules/transport-interaction-config';
 import type { TransportDeploymentOptionV1, TransportDeploymentSiteV1 } from './modules/transport-deployment-model';
@@ -19,8 +20,6 @@ type Options = Readonly<{
   callbacks: GameplayCallbacks;
 }>;
 const offset = (position: Position) => ({ x: position[0], y: position[1], z: position[2] });
-const sideOffset = { north: [0, -1], east: [1, 0], south: [0, 1], west: [-1, 0] } as const;
-const oppositeSide = { north: 'south', east: 'west', south: 'north', west: 'east' } as const;
 
 function placement(options: Options, definition: TransportDefinitionV1, hit: Position): TransportDeploymentOptionV1 {
   const voxel = options.callbacks.getLoadedVoxel?.([...hit]);
@@ -41,34 +40,10 @@ function placement(options: Options, definition: TransportDefinitionV1, hit: Pos
   }
   const route = options.config.routes.find((entry) => entry.definition.family === definition.locomotion.providerId)!;
   if (!route.voxels.includes(voxel)) return rejected('transport-route-invalid');
-  const endpoints = [
-    ...new Map(
-      route.definition.variants
-        .flatMap((variant) => variant.edges.flatMap((edge) => [edge.entry, edge.exit]))
-        .map((entry) => [`${entry.side}:${entry.elevation}`, entry]),
-    ).values(),
-  ];
-  let ambiguousNeighbor = false;
-  const neighbors: RouteNeighborV1[] = endpoints.map((endpoint) => {
-    const delta = sideOffset[endpoint.side];
-    const oppositeElevations = new Set(
-      endpoints.filter((entry) => entry.side === oppositeSide[endpoint.side]).map((entry) => entry.elevation),
-    );
-    let connected = 0;
-    let unknown = false;
-    for (const elevation of oppositeElevations) {
-      // Endpoint elevations are local to each cell, so both participate in world-height equality.
-      const cell: Position = [hit[0] + delta[0], hit[1] + endpoint.elevation - elevation, hit[2] + delta[1]];
-      const next = cell.every(Number.isSafeInteger) ? options.callbacks.getLoadedVoxel?.([...cell]) : undefined;
-      if (next === undefined) unknown = true;
-      else if (route.voxels.includes(next)) connected++;
-    }
-    if (connected > 1) ambiguousNeighbor = true;
-    return {
-      endpoint,
-      state: unknown ? 'unknown' : connected ? 'connected' : 'disconnected',
-    };
-  });
+  const endpoints = routeEndpoints(route);
+  const { neighbors, ambiguous: ambiguousNeighbor } = projectLoadedRouteNeighbors(route, hit, (cell) =>
+    options.callbacks.getLoadedVoxel?.([...cell]),
+  );
   const resolutions = endpoints.map((entry) => resolveRouteSegmentV1(route.definition, { entry, neighbors }));
   if (resolutions.some((result) => result.status === 'unknown')) return rejected('chunk-unavailable');
   if (ambiguousNeighbor || resolutions.some((result) => result.status === 'ambiguous'))
