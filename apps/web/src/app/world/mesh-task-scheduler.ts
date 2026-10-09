@@ -22,6 +22,7 @@ type PendingMeshRequest = {
   priority: MeshRequestPriority;
   enqueuedAtDispatch: number;
   visibilityBarrierRevision?: number;
+  refreshedPreparation?: true;
 };
 
 export type MeshRequestOptions = { forceRemesh?: boolean; priority?: MeshRequestPriority };
@@ -303,9 +304,20 @@ export class MeshTaskScheduler {
         this.preparingRequests.delete(key);
         const preparedReplacement = this.replacements.get(key);
         if (preparedReplacement) {
-          this.replacements.delete(key);
-          this.options.telemetry.completeTrace(request.traceId, 'superseded-during-prepare', 'main');
-          request = preparedReplacement;
+          // Worker-first inputs belong to the completed preparation lease. Refresh once,
+          // then retain further replacements for result settlement so commits cannot starve dispatch.
+          if (this.variant === 'worker-first' && !request.refreshedPreparation) {
+            this.replacements.delete(key);
+            this.options.telemetry.completeTrace(request.traceId, 'superseded-during-prepare', 'main');
+            this.options.source.releasePrepared?.(request.cx, request.cy, request.cz);
+            this.queued.set(key, { ...preparedReplacement, refreshedPreparation: true });
+            continue;
+          }
+          if (this.variant === 'main-snapshot') {
+            this.replacements.delete(key);
+            this.options.telemetry.completeTrace(request.traceId, 'superseded-during-prepare', 'main');
+            request = preparedReplacement;
+          }
         }
         try {
           if (this.variant === 'main-snapshot') this.postMainSnapshot(request);

@@ -480,11 +480,12 @@ export class World {
     );
     presentationKeys.forEach((key) => {
       const pending = this.scheduler.latestTask(key);
-      if (pending) {
+      if (pending || this.scheduler.requestedKeys.has(key)) {
         hasPresentationWork = true;
         const revision = revisions.get(key);
         if (fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
-        this.scheduler.request(pending.cx, pending.cy, pending.cz, {
+        const [cx, cy, cz] = pending ? [pending.cx, pending.cy, pending.cz] : key.split(',').map(Number);
+        this.scheduler.request(cx!, cy!, cz!, {
           forceRemesh: true,
           priority: fluidPriority ? 'interactive-fluid' : 'interactive',
         });

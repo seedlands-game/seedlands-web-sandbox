@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Mesh preparation commit race checkpoint53（异步接缝已验证，尚未证明 CI 根因）
+
+两层竞态RED与实际BrowserAuthorityClient路由RED后，12文件60/60及最后MessageEvent夹具6/6 PASS；完整verify:static:ci EXIT0。原main-snapshot反例初版FAIL与两个fixture类型失败保留并修正；worker-first一次刷新及连续提交反例通过，旧/后继trace独立。详见evidence/mesh-preparation-checkpoint-53-01.md；CI52尚未终止，不抢推取消。
+
+接续8dceef28；CI51原浏览器失败含新门下半Chunk无门材质mesh（axes[-1,0]）和另一attempt路线跌出支撑。只读源码发现结构提交仅查询latestTask或已有repository record，漏掉已请求但queued/preparing/failed的Chunk；异步prepare期间强制后继还会沿用旧准备租约。先用真实MeshTaskScheduler的worker-first路径与World.consumeServerCommit重现：prepare持有revision1，结构提交到revision2，旧租约释放，必须重新准备并派发/接受revision2，不能丢失请求或发布revision1。fluid同样保持现有revision可见屏障和interactive-fluid优先级；完全未请求、未呈现的offscreen Chunk不被新增入队。
+
+13:48原有main-snapshot连续流体修订反例揭示无界重新准备会饿死Worker，初版候选31项中1FAIL，保留失败。实际main-snapshot在派发时读取实时owner，保持原合并/一次准备合同；worker-first每次派发前至多重新准备一次，期间新提交保留后继至结果结算，旧结果不得被普通呈现接纳。新增119次提交压力夹具覆盖两次prepare后仍派发、旧结果零发布、最终revision121接纳；不删原反例、不降低断言。
+
+本片仅修当前请求的新鲜度及提交路由，不增加重试次数/超时、不改assert/输入/质量/World owner、不将unit异步租约夹具声称真实Authority或浏览器根因。先RED，最小生产修复后GREEN及既有调度/流体/提交回归、完整静态；新增夹具纳入现有Classic headless选择器。原浏览器仍须同一精确生产artifact完整复验，CI52正在运行，不打断它。传统0.25PD×120%=0.3PD；AI约30min×120%=36min，13:46附近开始，最新13:10真实周剩85%（含其他任务），60%停止线不变。长期docs仅在实际职责改变时更新；全部输出独立run ID。
+
 ## Parked transport collision checkpoint52（正式静态碰撞消费者已验证）
 
 正常目录/deploy/Survival/input实际穿透RED后，consumer1/1 GREEN，完整transport snapshot保持。Root Authority四文件24/24、stdlib八文件36/36与完整verify:static:ci EXIT0；canonical yaw检查取得部署占位/出口两个有效几何RED并统一修复。Classic Pack control/candidate字节相同3bb6fb96，无browser/性能PASS声明。详见evidence/transport-collision-checkpoint-52-01.md。13:10真实周剩85%、60%停止线保持，正式registered motion与完整产品仍未完成。

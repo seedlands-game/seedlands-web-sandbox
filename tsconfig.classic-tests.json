@@ -94,6 +94,10 @@
     "apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts",
     "apps/web/tests/integration/runtime/server/composition/transport-authority-death.test.ts",
     "apps/web/tests/integration/runtime/server/composition/pre-manual-v4-checkpoint.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/transport-authority-collision.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-collision.test.ts",
+    "apps/web/tests/unit/app/world-commit-during-mesh-preparation.test.ts",
+    "apps/web/tests/unit/app/world-fluid-commit.test.ts",
+    "apps/web/tests/unit/app/mesh-task-scheduler.test.ts",
+    "apps/web/tests/unit/app/mesh-supersession-order.test.ts"
   ]
 }
