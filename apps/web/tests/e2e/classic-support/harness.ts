@@ -256,14 +256,12 @@ export async function walkTo(
     const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
     const pulseMs = routePulseDurationMs(current.player, target, maximumPulseMs);
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
-    await page.keyboard.down(key);
-    if (options.jump) await page.keyboard.down('Space');
     try {
-      // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
-      await new Promise<void>((resolve) => setTimeout(resolve, pulseMs));
-    } finally {
-      await page.keyboard.up(key);
-      if (options.jump) await page.keyboard.up('Space');
+      // Native press releases input before tracing snapshots delay the API response.
+      await page.keyboard.press(options.jump ? `${key}+Space` : key, { delay: pulseMs });
+    } catch (error) {
+      await Promise.allSettled([page.keyboard.up(key), ...(options.jump ? [page.keyboard.up('Space')] : [])]);
+      throw error;
     }
     current = await waitForSnapshot(
       page,
