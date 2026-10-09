@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 门撤退双端路线 checkpoint37（确定性与静态完成；浏览器待运行）
+
+Browser27精确32422f99/build26 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3和作物通过，V1关闭门探测后retreat readiness20秒FAIL，未进入V2；不声明V1通过。实际geometry93是x[0.8125,1]薄门，plan contact70.4925、approach69.4925。松开探测W后首snapshot camera69.49097、Authority70.49250；旧walkTo固定KeyS在camera已越过approach时直接返回，trace之后无任何S，camera追上70.4925后纯wait不可能使双方到门体素外。这是有效实际RED，不是瞄准或900秒失败。
+
+只将V1关闭门后的retreat调用复用已有walkEquipmentRoute的双端邻域/arrival、推进tick/ACK与drift重试，保留原碰撞探测、ground/collision、门内外体素/几何/mesh、20/45/900秒及全部V1/V2断言。其他walkTo/物理/渲染器/时钟不改；不创建新runner。既有对应路线及door readiness回归为必要确定性检查，随后新build27/browser28唯一完整入口验证。
+
+Browser27最后128样本tick中位21.25ms、renderEnvelope4.95ms、renderTail0ms、interTickGap675.7ms；同步循环外间隔占大头但不推定GPU/Worker/trace因果，保留原样本与trace。本组不是性能改善声明。最新04:38真实UI89%、含博客等同期用量，60%停止；传统0.05PD×120%=0.06PD、AI约10min×120%=12min，非周额度换算。本组Classic全类型/scoped lint及6文件51/51路线/门回归PASS；生产/其他既有静态沿用有效结果，无生产源码修改。完整V2/V3/V4/194及组合整帧AB未闭环，无合并/生产部署。
+
 ## 完整tick边界诊断 checkpoint36（确定性与静态完成；浏览器待运行）
 
 Browser26精确669ca56b/build25 whole 1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3/新作物/原V1通过，V2在stone-pickaxe的回工作台路线耗尽900秒，不能视作永久路线死锁。最后128个CPU样本update中位19.5ms、中心render1.8ms；原frame窗口1200帧中位459.1ms。窗口不同且相关计时不能相加推导因果，旧center render明确遗漏canvas/device边界。

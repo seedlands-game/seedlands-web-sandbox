@@ -32,6 +32,7 @@ import {
 } from './harness';
 import { classicScenario, type Point } from './scenario';
 import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
+import { walkEquipmentRoute } from './equipment-journey-support';
 
 type DoorPair = readonly [number, number];
 
@@ -269,12 +270,7 @@ export async function completeV1SliceBeforeSave(page: Page): Promise<V1SliceStat
   await switchToSurvival(page);
   const closedDoorPlan = await expectClosedDoorBlocks(page, placed);
 
-  const retreatBaseline = await walkTo(page, closedDoorPlan.approach, {
-    key: 'KeyS',
-    tolerance: 0.06,
-    corridorTolerance: 0.08,
-    pulseMs: 80,
-  });
+  const retreatBaseline = await walkEquipmentRoute(page, closedDoorPlan.approach);
   const retreated = await waitForSnapshot(page, (current) =>
     matchesDoorRouteReadinessSnapshot(closedDoorPlan, door.upper, 'entry', retreatBaseline, current),
   );
