@@ -1,5 +1,19 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Parked transport collision checkpoint52（正式静态碰撞消费者已验证）
+
+正常目录/deploy/Survival/input实际穿透RED后，consumer1/1 GREEN，完整transport snapshot保持。Root Authority四文件24/24、stdlib八文件36/36与完整verify:static:ci EXIT0；canonical yaw检查取得部署占位/出口两个有效几何RED并统一修复。Classic Pack control/candidate字节相同3bb6fb96，无browser/性能PASS声明。详见evidence/transport-collision-checkpoint-52-01.md。13:10真实周剩85%、60%停止线保持，正式registered motion与完整产品仍未完成。
+
+接续4a477ad8，实际运输 motion 接缝检查发现普通角色的 `stepBody` 与角色分离只查询体素，停放运输虽有显式 definition body 和 canonical pose，却不在这些碰撞候选中。先修这一正式消费者缺口，作为后续运输连续运动的必要基础：从当前 world-local ECS 投影 transport body colliders，复用既有 swept AABB 求解；普通 walking/flight/world-item、角色分离与已存在的 geometry recovery 使用同一当前载具体积，transport 自身不撞自身，mounted rider 仍从 seat 派生。已退役/已 restore 的实体不得被长期缓存；未配置或无 transport 的世界返回原 PhysicsWorld，体素 unknown blocker/流体/active chunks 保持。
+
+当前载具体积以 definition AABB 和 canonical yaw 旋转后包围盒表达，静态 yaw0 与旧 definition body 保持；只由当前实例 definitions 解析，不猜 archetype、不添加第二 position/relation owner。连续运动尚未接线，旋转包围盒是保守体积，不声称精确旋转多边形碰撞。本组不增加 motion policy/操作、Host grants、输入字段、浏览器断言/时限、画质或 legacy vehicle 迁移。
+
+13:27非对称实际ECS geometry fixture取得2 FAIL/1 PASS：当前physics body selector已读canonical yaw，但部署占位与出口投影仍用未旋转definition体积，导致允许占用旋转载具、两个safe出口实际重叠。修复范围包含这两个同体积消费者及route deployment候选yaw，统一使用同一body helper。layer/mask保持原值；world-item经过相同PhysicsWorld端口，但原Item mask不与Character层相撞，本组不改变此策略。fixture首次inventory=null违反原空容量数组合同，不计行为RED；改为[]后的两个几何断言FAIL为有效RED。
+
+先实际 Authority 正常 deploy、accepted receiveInput 与 physics tick RED 穿过停放实体；GREEN 检查角色持续移动在载具体积前停止且 canonical transport/关联/payload 保持，mount 后不会自撞或偏离 seat，移除/恢复后没有旧 collider；已有 voxel unknown/角色/拾取/关系回归按影响验证。非对称 definition yaw 对照覆盖实际 body selector 与保守 AABB；不把直接 owner seed 当正式部署证明。只读候选和同一现有 physics batch 保持，最终 payload/revision/source 新鲜度仍由 owner 校验。
+
+传统0.3PD×120%=0.36PD；AI约35min×120%=42min，13:14附近开始。13:10产品UI真实周剩85%（含其他任务），60%停止线不变。新输出独立run ID；完成本片后继续正式registered motion与两向连续实体碰撞、Classic/Modular产品和原浏览器验收，不把静态障碍物修复当运输产品完成。
+
 ## Manual system cadence checkpoint51（通用 cadence 与精确 V4 兼容已验证）
 
 真实assembly RED后新增夹具6/6、原lifecycle8/8与Classic checkpoint两文件12/12 PASS；最后只改fixture immutable构造后的新文件3/3补验。生产/测试类型、scopedlint与完整verify:static:ci实际EXIT0。Classic entry不变假设FAIL后，从精确前驱Host与正式loader校验的真实Pack导出完整V4；候选恢复先RED零写、唯一完整前驱迁移后GREEN，默认definitionMap保持且foreign digest/definition拒绝。证据及未通过浏览器边界见evidence/manual-cadence-checkpoint-51-01.md。本组未实现运输运动，继续正式产品和原浏览器验收。
