@@ -8,7 +8,11 @@ import {
 } from '@seedlands/stdlib/host';
 import { AuthorityRuntime } from '../../../../../../../packages/stdlib/src/server/authority/authority-runtime';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
-import { pack, MODULAR_WORLD_SENTINEL_VOXEL } from '../../../../fixtures/packs/modular-world/modular-world';
+import {
+  pack,
+  MODULAR_WORLD_SENTINEL_VOXEL,
+  MODULAR_WORLD_FLOOR_Y,
+} from '../../../../fixtures/packs/modular-world/modular-world';
 
 // Composition fixture only; the browser verifies the built Pack and its real digests.
 const artifact: VerifiedPackArtifact = {
@@ -38,14 +42,14 @@ const create = async () => {
     platform: testCorePlatform,
     initialWorldTime: 8,
     startTimeMs: 0,
-    initialPlayerBodyPosition: [0.5, 65, 0.5],
+    initialPlayerBodyPosition: [0.5, MODULAR_WORLD_FLOOR_Y + 1, 0.5],
   });
   return Object.assign(runtime, { commandBinding: moduleActorAuthority.forActor(runtime.playerId, 'player')! });
 };
 
 it('uses the registered modular block producer for Creative placement and mining without partial writes', async () => {
   const runtime = await create();
-  const position: [number, number, number] = [1, 65, 0];
+  const position: [number, number, number] = [1, MODULAR_WORLD_FLOOR_Y + 1, 0];
   const playerId = runtime.playerId;
   const server = runtime.server;
   const source = {
@@ -54,7 +58,7 @@ it('uses the registered modular block producer for Creative placement and mining
     sourceType: 'test-player',
     capabilities: ['mutation'] as const,
   };
-  expect(server.getVoxel(0, 64, 0)).toBe(MODULAR_WORLD_SENTINEL_VOXEL);
+  expect(server.getVoxel(0, MODULAR_WORLD_FLOOR_Y, 0)).toBe(MODULAR_WORLD_SENTINEL_VOXEL);
   // The ordinary UI settles its cursor before switching modes, even when empty.
   const pointer = server.getInventoryPointerView(playerId);
   const closed = await runtime.performAction({

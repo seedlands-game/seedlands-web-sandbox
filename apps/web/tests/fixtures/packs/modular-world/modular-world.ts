@@ -13,6 +13,7 @@ import {
 import { CHUNK_SIZE, voxelIndex } from '@seedlands/stdlib/world/voxel';
 
 export const MODULAR_WORLD_SENTINEL_VOXEL = 500;
+export const MODULAR_WORLD_FLOOR_Y = 32;
 export const MODULAR_WORLD_SENTINEL_POSITION = [10_000, 100, 10_000] as const;
 export const MODULAR_WORLD_PRESENTATION = 'apps/web/tests/fixtures/packs/modular-world/presentation.json';
 export const MODULAR_WORLD_TEXTURE = 'apps/web/tests/fixtures/packs/modular-world/sentinel-glass.svg';
@@ -22,18 +23,18 @@ const contains = (coordinate: number, target: number): boolean =>
 
 export const modularWorldgenIdentity = Object.freeze({
   id: 'sample:modular-worldgen',
-  implementationVersion: '1.0.0',
-  configurationIdentity: 'sample:modular-world-v1',
+  implementationVersion: '1.1.0',
+  configurationIdentity: 'sample:modular-world-v2',
   supportedGeneratorVersions: Object.freeze([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]),
-  artifactIdentity: 'sample:modular-world@1.0.0',
+  artifactIdentity: 'sample:modular-world@1.1.0',
 });
 
 export const modularWorldgenProvider: StandardWorldgenProvider = Object.freeze({
   identity: modularWorldgenIdentity,
   generate({ generatorVersion, coordinate, epoch, revision }) {
     const voxels = new Uint16Array(CHUNK_SIZE ** 3);
-    if (contains(coordinate.y, 64)) {
-      const localY = 64 - coordinate.y * CHUNK_SIZE;
+    if (contains(coordinate.y, MODULAR_WORLD_FLOOR_Y)) {
+      const localY = MODULAR_WORLD_FLOOR_Y - coordinate.y * CHUNK_SIZE;
       for (let z = 0; z < CHUNK_SIZE; z += 1)
         for (let x = 0; x < CHUNK_SIZE; x += 1) voxels[voxelIndex(x, localY, z)] = MODULAR_WORLD_SENTINEL_VOXEL;
     }
@@ -63,7 +64,7 @@ export const modularWorldgenProvider: StandardWorldgenProvider = Object.freeze({
       z === MODULAR_WORLD_SENTINEL_POSITION[2]
     )
       return MODULAR_WORLD_SENTINEL_VOXEL;
-    return y === 64 ? MODULAR_WORLD_SENTINEL_VOXEL : 0;
+    return y === MODULAR_WORLD_FLOOR_Y ? MODULAR_WORLD_SENTINEL_VOXEL : 0;
   },
 });
 
@@ -131,7 +132,7 @@ export const modularWorldContentCandidates = Object.freeze({
 
 export const pack = definePack({
   id: 'sample:modular-world',
-  version: '1.0.0',
+  version: '1.1.0',
   kind: 'playbook',
   entry: 'modular-world.mjs',
   resources: [MODULAR_WORLD_PRESENTATION, MODULAR_WORLD_TEXTURE],
