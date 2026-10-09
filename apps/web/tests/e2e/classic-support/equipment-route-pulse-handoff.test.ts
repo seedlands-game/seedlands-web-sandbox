@@ -147,6 +147,19 @@ function routePage() {
       const source = String(callback);
       if (source.includes('pointerLockElement')) return pointerLocked;
       if (source.includes('requestAnimationFrame')) animationFrameWaits += 1;
+      if (source.includes('routeSnapshot()'))
+        return structuredClone({
+          player: current.player,
+          serverPlayerPosition: current.serverPlayerPosition,
+          serverPlayerVelocity: current.serverPlayerVelocity,
+          viewAngles: [yaw, current.viewAngles[1]] as const,
+          onGround: current.onGround,
+          colliding: current.colliding,
+          authority: {
+            physicsTick: current.authority.physicsTick,
+            acknowledgedInputSequence: current.authority.acknowledgedInputSequence,
+          },
+        });
       if (!source.includes('snapshot()')) throw new Error('Unexpected evaluate callback in equipment route fake.');
       return structuredClone({ ...current, viewAngles: [yaw, current.viewAngles[1]] as const });
     },

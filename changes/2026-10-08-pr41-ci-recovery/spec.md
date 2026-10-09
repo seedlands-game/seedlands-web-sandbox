@@ -1,5 +1,17 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 路线只读观测候选 checkpoint28
+
+Browser20 的2142次V2快照，CDP编码值中位90335 bytes、合计193283849 bytes；trajectory中位约51KB，其次是waterTransitions/compute/authority诊断。此后验体积不是延迟因果证据。注册单一候选：增加只读routeSnapshot，直接从与完整snapshot相同的Controller/已接受Authority owner复制player/server三轴位置、三轴速度、viewAngles、onGround/colliding、physicsTick/input ack。缺少/未就绪/非有限owner数据返回不可用，不沿用完整诊断snapshot的默认假坐标。完整snapshot及所有版本、呈现、光照、存档、失败诊断保留。
+
+先取得有效RED：当前完整投影含无关诊断且在owner缺失时提供默认坐标，不满足新路线投影合同；再验证新投影精确等价、独立只读副本、无写入，以及原双端到达/velocity/tick/ack/grounded/collision条件不变。仅设备路线与真实移动内部观测可切换；其余消费者继续完整snapshot。所有原Pointer Lock/真实键鼠、pulse、到达/邻面判断和900000/45000/20000期限保持。失败时仍取完整owner诊断。
+
+保留理由涉及观测成本，必须受控A/A+A/B：只在唯一canonical spec的同一次当前artifact/同浏览器/同固定Classic低质量场景/同窗口运行；A=完整snapshot过CDP后在Node投影相同字段，B=同owner在浏览器投影后过CDP。除投影边界外不改变渲染、Worker、输入或世界状态。每次测量前同一同步页面任务内比较完整投影和B字段精确相等；owner不可用、字段差异、输入状态变化、world/runtime身份变化均否决。记录原始样本、顺序、source/artifact/profile与观测值；payload大小标清逻辑JSON/实际CDP编码，不推断网络bytes。
+
+先有界warmup，再A/A交错8对，median偏差须<=15%；通过才做平衡ABBA/BAAB至少8对，B端到端观测elapsed median改善须>=20%，所有原玩法断言保持。无确定收益或超过否决线，撤除候选及路线切换，保留失败证据，不改benchmark baseline、不追加盲目重试。候选通过也只证明读出边界成本；完整当前SHA玩法、必需CI和既有frame优化的组合端到端A/B仍独立待验。实施前无RED/GREEN/A/A/A-B结论。
+
+测量执行细化：使用既有 `SEEDLANDS_CLASSIC_BENCHMARK=1` 的完整无选择参数入口，额外开关 `SEEDLANDS_ROUTE_OBSERVATION_AB=1` 只在C0正式初态就绪后采样，不另开浏览器线路。4次有界warmup、16次A/A与16次平衡A/B；每个页面同步任务的owner等价证明计入两臂相同开销。固定站立、零速度、输入ack/三轴位置/视角/碰撞/世界revision/runtime/generator身份，physicsTick自然推进不作身份变化。结果独立attachment保存，只有整段canonical及独占窗口均PASS才有资格采用；失败的部分测量不得另写成功声明或绕过现有receipt。字节数只标逻辑UTF-8 JSON，实际CDP编码仅由保留的原始trace另行取证。
+
 作物支撑观测改变 Block capability 定义身份；V4 兼容仅增加 Browser20 在精确 source `c3ac4d81996b3693f2f86fa60d045d7ce2a3d31c` 导出的完整前驱身份，保持所有已有捕获不变。先验证此前驱当前被拒绝，再验证单点允许后存档恢复原作物且正式挖掘可清理；篡改任一 Pack integrity/定义字段继续拒绝，不允许通配或以新组合构造旧身份。
 
 ### 注册作物支撑状态清理 checkpoint27

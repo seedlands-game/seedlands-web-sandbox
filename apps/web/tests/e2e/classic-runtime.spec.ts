@@ -1,4 +1,5 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
+import { measureRouteObservation } from './classic-support/route-observation-measurement';
 import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDropOrPickup } from './classic-support/drops';
@@ -106,6 +107,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       (!benchmarkMode || value.performance.scenarioId === telemetryRunId),
     30_000,
   );
+  const routeIdentity = { artifact, packLock, composition, environment };
+  const routeObservation = await measureRouteObservation(page, testInfo, routeIdentity);
   const crossingFloor = [
     [31, 30, 0],
     [32, 30, 0],
@@ -490,6 +493,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     assets: [...new Set(assets)],
     workers: [...new Set(workers)],
     baseline,
+    routeObservationMeasurement: routeObservation,
     final,
     trace: routeTrace,
     pageErrors,

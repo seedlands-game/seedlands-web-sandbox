@@ -248,6 +248,8 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 
 
 ## Classic 初版续作（2026-09-21）
 
+PR41 的 [route-walk.ts](../apps/web/tests/e2e/classic-support/route-walk.ts) 承接既有真实键鼠移动循环与原 settle/到达门槛；`harness.ts` 注入完整或路线只读观测，不新增动作 owner。客户端 [game-harness-route-observation.ts](../apps/web/src/app/gameplay/game-harness-route-observation.ts) 只复制 Controller/已接受 Authority 的导航字段，不替代完整诊断快照。
+
 - apps/web/src/app/ui/personal-crafting.svelte 展示 Authority 投影的随身 2×2 网格、结果和共享配方手册；inventory-crafting.svelte 持有库存、随身合成格与工位共用的游标手势。Classic 的 2×2/3×3 均消费 stations.ts 中的同一网格配方目录。
 - packages/stdlib/src/server/gameplay/inventory-layout.ts 持有每世界玩家布局校验与旧24/8存档准入；Classic 选择36/9，ECS、模式和UI消费同一实际布局。
 - scripts/harness/artifact.mjs 绑定生产源码/锁文件/产物摘要，classic.mjs 执行唯一 apps/web/tests/e2e/classic-runtime.spec.ts；classic-support/canonical-reporter.ts 在公开 Playwright onTestEnd 边界生成唯一终态 receipt，scripts/harness/classic-receipt.mjs 负责纯合并与 runner 校验；classic-support/crafting.ts 包含真实配方和第9快捷槽输入步骤。
