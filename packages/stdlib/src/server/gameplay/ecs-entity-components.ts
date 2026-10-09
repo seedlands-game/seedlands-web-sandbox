@@ -26,6 +26,7 @@ export const createEntityComponents = () => ({
   station: {},
   fallingBlock: {},
   painting: {},
+  transport: {},
 });
 export type EntityComponents = ReturnType<typeof createEntityComponents>;
 
@@ -37,6 +38,7 @@ export function ecsEntityType(world: World, components: EntityComponents, eid: E
   if (hasComponent(world, eid, components.station)) return 'station';
   if (hasComponent(world, eid, components.fallingBlock)) return 'falling-block';
   if (hasComponent(world, eid, components.painting)) return 'painting';
+  if (hasComponent(world, eid, components.transport)) return 'transport';
   throw new Error('Entity type component is missing.');
 }
 
@@ -47,6 +49,7 @@ export function ecsEntityTypeComponent(components: EntityComponents, type: EcsEn
   if (type === 'npc') return components.npc;
   if (type === 'station') return components.station;
   if (type === 'falling-block') return components.fallingBlock;
+  if (type === 'transport') return components.transport;
   return components.painting;
 }
 
@@ -54,6 +57,16 @@ const readPosition = (
   component: EntityComponents['transform'] | EntityComponents['velocity'],
   eid: EntityId,
 ): EcsPosition => [component.x[eid]!, component.y[eid]!, component.z[eid]!];
+
+export function writeEcsPosition(
+  component: EntityComponents['transform'] | EntityComponents['velocity'],
+  eid: EntityId,
+  position: EcsPosition,
+): void {
+  component.x[eid] = position[0];
+  component.y[eid] = position[1];
+  component.z[eid] = position[2];
+}
 
 export function projectEcsEntity(world: World, components: EntityComponents, eid: EntityId): EcsOwnedEntity {
   const type = ecsEntityType(world, components, eid);

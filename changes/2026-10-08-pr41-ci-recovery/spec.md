@@ -1,5 +1,29 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Transport lifetime ECS owner checkpoint46（有界实施；尚未验收）
+
+实际owner缺type/API RED后，新增货箱单槽overflow反例抓到normalizeStack并不限制待分槽count，补实体分配前stack-limit预检。最终owner+既有ECS/model3文件17/17 PASS；Web四文件24/24有效回归，加修正局部NPC profile的V4 codec文件5/5，合计29/29。完整静态首轮在Authority port旧enum处失败，原format/paths/lint/sealed5有效；修正canonical enum派生后余项完整types、Svelte0/0、规则/CI选择实际exit0。500行门禁未放宽，拆类型与纯校验职责；必要V4 regression追加既有headless/type路径。详见evidence/transport-owner-checkpoint-46-01.md；正式生产消费者、legacy迁移与浏览器验收未完成。
+
+先落实单一transform owner：新增transport entity/type和bitECS component，由显式world-local TransportDefinitionRegistry与同一items registry校验。component只存definition/yaw/routeCursor/rider stable lifetime/fuel/cargo/revision，不重复position/velocity，也不存跨restore失效的epoch；完整TransportStateV2从当前ECS transform、velocity和当前epoch/reference投影。snapshot沿用EntityStore V2增加optional transports child，旧缺省为空；restore在candidate ECS完整创建、定义/容量/货物/唯一rider及实际actor lifetime验证全部通过后一次替换，失败保留原owner、epoch、序列、issued IDs和状态。不同world registry不混用，缺配置、缺/重复/额外child、错误生命周期、退役引用和空间/库存非法输入fail closed。
+
+先做真实EntityStore缺type/API的RED，再所有权/移动投影/生命周期、未知定义/容量、存档原子失败、rider唯一性、旧snapshot兼容的GREEN；不把纯模型fixture当Authority产品验收。此组只建立必要owner接缝，后续正式prepared deploy、Pack/Host权限、Authority caller/view/physics/container与V4 legacy非空vehicles迁移仍需独立落实。旧Map没有ECS lifetime，不能猜reference、丢弃或假称已迁移；本组保持其原保存字节与行为。旧voxel0–88及Chunk bytes不动。固定工具检查相关types/lint/现有ECS与snapshot回归，暂不跑重复浏览器或性能实验。传统0.6PD×120%=0.72PD；AI约75min×120%=90min，09:40实际周剩87%、60%停止线保持。
+
+## Logic terrain 派生缓存候选 checkpoint45（预注册后 A/A 失败；已撤回）
+
+唯一组件实验于10:05:37.758–10:05:38.427 UTC完成；reservation与子进程实际exit1，status=A_A_NOISE_FAIL。四对A/A噪声分别6.229527529626598%、15.174364395031265%、32.23019034291813%、1.933799408579085%；最大32.23019034291813%超过原15%门槛，A/B NOT_RUN。完整50输入两轮deep equal通过，容量峰值2023 cells；这些正确性结果不能覆盖性能否决。未追加样本、重测或改变门槛；生产3文件、脚本/类型选择与code-map均恢复当前HEAD，新增夹具移出工作树。原候选9文件、patch、manifest、RED/GREEN、静态原失败及修复余项、raw/reservation全部保留Root独立路径。详细闭合见evidence/logic-terrain-checkpoint-45-01.md；不宣称组件收益或采用。
+
+精确5d91421远端run37910217197终态：Architecture、Static、Deterministic modules、Classic headless、Production build五项SUCCESS，Chromium FAIL、Cloudflare SKIP。headless87文件575/575；Chromium首次在铁资源路线walkTo目标78.5,-0.5超时，retry1在V1门交互原5秒断言期望[2,2]实得[2,0]失败。远端与本地Browser34失败分别保留，不能以任何构建或旧Browser25宣布可合入；PR仍OPEN/DRAFT、mergeable=true、merged=false。
+
+计时细节在首个样本前固定：50个synthetic pose输入，五个相邻x位置各重复10次，使用同一实际GameServer canonical Chunk；不冒充浏览器原始世界负载。每个arm/sample各warmup200次再计时200次，A/A按A1/A2、A2/A1交错，噪声为abs(A1-A2)/min(A1,A2)×100；p95为nearest-rank。Chunk边长实际32，32768-cell预算沿用原协议；早期夹具错误profile/Chunk Y和readonly resolver赋值失败均保留，不改生产常量或阈值。
+
+Browser34精确5d91421/build33原三测试终态main FAIL、visual PASS、Modular条件SKIP，17.6min；C0–C3、作物/导航、V1完成，V2石块[90,31,2]采矿1.0/1.2秒时触及原900秒，C5未到达。精确Authority URL/asset/hash的嵌套CDP采样实际COMPLETE、无错误，UTC09:23:23.838–09:23:43.880、1701样本。采样delta20.27291秒与Node capture20.042772417秒不同，不混用。按函数身份合并后createTerrainWindow self1.922548秒、buildLogicObservation inclusive2.660231秒；prepared mutation JSON比较self0.979733秒。嵌套指标不可相加，诊断不等于性能准出。
+
+候选只改变重复terrain occupancy构造；A为现有逐格peekLoadedVoxel，B为Authority实例内派生缓存。canonical Chunk实例提供opaque identity与revision的只读stamp，无voxel/Chunk可写对象泄漏；相同identity/revision/bounds/固定semantics才能命中，输出occupancy每次独立复制。改块、换Chunk（含同revision）、卸载、bounds改变、跨Authority实例均失效；不缓存null，保留逐格revision一致预检，缓存总cells<=MAX_LOGIC_TERRAIN_CELLS，剪除不再参与窗口。其他逻辑状态、输入频率、物理/玩法、Worker传输、renderer、画质、trace、900/45/20秒与断言保持。
+
+先实际RED：未实现cache导出或缺少有效复用失败；GREEN负例覆盖修改、换实例、卸载/重新加载、bounds、输出buffer被修改/transfer、容量、不同owner及不一致stamp。复用现有buildLogicObservation默认A合同，新增实际GameServer/Authority builder消费者对照。实验只使用同一bundle和固定loaded Chunk/语义/actors/bounds序列，记录source/worktree、lock、bundle、corpus hash与Node身份，独占reservation运行，不与测试/构建并发。组件主指标为同等输出的完整窗口构造/复制墙钟中位数；每sample200次、warmup200次，A/A四对交错后A/B八对AB/BA平衡。A/A最大配对相对差>15%即停止、不得追加无新证据重试；B中位收益>=10%且超过A/A最大噪声、p95不回退>5%、输出逐字节相同、派生容量不超上限才组件通过。所有失败/raw保留，未达标恢复A并删除生产候选。组件通过仍不宣称FPS/whole收益；当前已接受栈为control的原完整浏览器及组合整帧A/A/A/B未完成前不得宣称采用或可合入，最多一次有界消融。
+
+传统0.25PD×120%=0.3PD；AI约45min×120%=54min。09:40产品UI周剩仍87%，约5天17小时重置，含其他任务；60%停止线不变，费用/credits分母未知不换算。运输Task90只读计划保留Agent独立路径，不是实施或产品证据。
+
 ## 精确 Authority Worker 采样 checkpoint44（仅诊断；未选优化）
 
 Browser33精确b17dc509/build32原完整3测试闭合：main FAIL、visual PASS、Modular条件SKIP，17.4min。C0–C3、作物与导航、V1完成；V2在铁资源准备的walkTo→waitForSnapshot触及原900秒，C4/C5未到达。末态双端位置约80.865,32.6,-0.461，落地/无碰撞，不认定永久卡住；128帧中位tick25.05ms/gap446.2ms/同步receive39.6ms，仅描述该窗口。

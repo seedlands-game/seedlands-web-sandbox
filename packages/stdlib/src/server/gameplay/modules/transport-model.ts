@@ -1,5 +1,5 @@
 import type { WorldAabb } from '../../../physics/types';
-import type { EntityLifetimeReference } from '../ecs-entity-owner';
+import type { EntityLifetimeReference, EntityLifetimeSnapshot } from '../ecs-entity-owner';
 import { isItemId, type ItemStack } from '../item-registry';
 
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
@@ -54,6 +54,19 @@ export type TransportCheckpointV2 = Readonly<{
   version: 2;
   sequence: number;
   transports: readonly TransportStateV2[];
+}>;
+
+/** Canonical component fields; transform, velocity and volatile epoch belong to the ECS owner. */
+export type TransportComponentV1 = Readonly<{
+  version: 1;
+  entityId: string;
+  revision: number;
+  definitionId: string;
+  yaw: number;
+  routeCursor: TransportRouteCursorV2 | null;
+  rider: EntityLifetimeSnapshot | null;
+  fuel: number | null;
+  inventory: readonly (Readonly<ItemStack> | null)[];
 }>;
 
 export type LegacyTransportStateV1 = Readonly<{
@@ -312,6 +325,57 @@ const fuel = (raw: unknown, definition: TransportDefinitionV1): number | null =>
     throw new TypeError('Transport fuel is invalid.');
   return raw;
 };
+
+export function validateTransportComponentV1(
+  raw: unknown,
+  definitions: TransportDefinitionRegistryV1,
+): TransportComponentV1 {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new TypeError('Transport component is invalid.');
+  const value = raw as Record<string, unknown>;
+  exactKeys(
+    value,
+    ['version', 'entityId', 'revision', 'definitionId', 'yaw', 'routeCursor', 'rider', 'fuel', 'inventory'],
+    'Transport component',
+  );
+  if (
+    value.version !== 1 ||
+    typeof value.entityId !== 'string' ||
+    !value.entityId.trim() ||
+    !Number.isSafeInteger(value.revision) ||
+    (value.revision as number) < 0 ||
+    typeof value.definitionId !== 'string' ||
+    !Number.isFinite(value.yaw)
+  )
+    throw new TypeError('Transport component identity or revision is invalid.');
+  const definition = definitions.require(value.definitionId);
+  let rider: EntityLifetimeSnapshot | null = null;
+  if (value.rider !== null) {
+    if (!value.rider || typeof value.rider !== 'object' || Array.isArray(value.rider))
+      throw new TypeError('Transport component rider is invalid.');
+    const source = value.rider as Record<string, unknown>;
+    exactKeys(source, ['entityId', 'lifetime'], 'Transport component rider');
+    if (
+      typeof source.entityId !== 'string' ||
+      !source.entityId.trim() ||
+      source.entityId === value.entityId ||
+      !Number.isSafeInteger(source.lifetime) ||
+      (source.lifetime as number) <= 0
+    )
+      throw new TypeError('Transport component rider is invalid.');
+    rider = Object.freeze({ entityId: source.entityId, lifetime: source.lifetime as number });
+  }
+  return Object.freeze({
+    version: 1,
+    entityId: value.entityId,
+    revision: value.revision as number,
+    definitionId: definition.id,
+    yaw: value.yaw as number,
+    routeCursor: routeCursor(value.routeCursor, definition),
+    rider,
+    fuel: fuel(value.fuel, definition),
+    inventory: inventory(value.inventory, definition),
+  });
+}
 
 const stateV2 = (raw: unknown, definitions: TransportDefinitionRegistryV1): TransportStateV2 => {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new TypeError('Transport state is invalid.');
