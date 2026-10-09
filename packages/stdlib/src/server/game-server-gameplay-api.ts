@@ -10,6 +10,8 @@ export const GAME_SERVER_GAMEPLAY_API = [
   'getEntity',
   'createEntityReference',
   'resolveEntityReference',
+  'transportState',
+  'transportProjections',
   'updateEntity',
   'updateEntityWithoutSnapshot',
   'updateEntitiesWithoutSnapshot',

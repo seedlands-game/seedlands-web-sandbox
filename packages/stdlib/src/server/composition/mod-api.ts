@@ -345,3 +345,6 @@ export { defineStationActionsModule } from '../gameplay/modules/station-actions-
 
 export { defineForageModule } from '../gameplay/modules/forage-module';
 export type { ForageModuleConfiguration } from '../gameplay/modules/forage-model';
+
+export { defineTransportInteractionModule } from '../gameplay/modules/transport-interaction-module';
+export type { TransportInteractionConfig } from '../gameplay/modules/transport-interaction-config';

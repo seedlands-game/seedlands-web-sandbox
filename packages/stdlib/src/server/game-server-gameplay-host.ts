@@ -24,6 +24,7 @@ import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
+import { projectTransportStates } from './gameplay/transport-projection';
 import type { GameServerOptions } from './game-server-types';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
@@ -137,6 +138,8 @@ export class GameServerGameplayHost {
   resolveEntityReference(reference: EntityLifetimeReference): GameplayEntity | null {
     return this.gameplay.entities.resolveReference(reference);
   }
+  transportState = (reference: EntityLifetimeReference) => this.gameplay.entities.transportState(reference);
+  transportProjections = () => projectTransportStates(this.gameplay.entities);
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.gameplay.updateEntity(id, update);
     return this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;

@@ -143,6 +143,7 @@ export class GameplayRuntimeCheckpoint {
       playerLayout: this.options.entities.playerLayout,
       meleeDefinitions: this.options.content.meleeDefinitions,
       actorProfiles: this.options.content.actorProfiles,
+      transportDefinitions: this.options.content.transportDefinitions,
       entities: this.options.entities,
       registeredNeeds: !!this.options.schedule,
       registeredFeeding: !!callbacks.composition,

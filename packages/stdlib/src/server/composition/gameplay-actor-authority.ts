@@ -4,6 +4,7 @@ import type { WorldModuleBinding } from '../commands/module-command';
 import { WorldResourceAuthorizer, type WorldResourceRegistration } from '../harness/world-authorization';
 import { MEDIA_PLAYBACK_RESOURCE } from '../gameplay/modules/media-playback-module';
 import { NAVIGATION_RESOURCE } from '../gameplay/modules/navigation-interaction-model';
+import { TRANSPORT_RESOURCE } from '../gameplay/modules/transport-interaction-config';
 
 const PLAYER_SUBJECT = 'seedlands:local-player';
 const AUTONOMY_SUBJECT = 'seedlands:autonomy';
@@ -24,6 +25,7 @@ export function createGameplayActorAuthority(
     throw new TypeError('Script policy cannot claim a reserved gameplay subject.');
   const mediaRegistered = resources.some(({ id }) => id === MEDIA_PLAYBACK_RESOURCE);
   const navigationRegistered = resources.some(({ id }) => id === NAVIGATION_RESOURCE);
+  const transportRegistered = resources.some(({ id }) => id === TRANSPORT_RESOURCE);
   const forActor = (actorId: string, kind: EntityType): WorldModuleBinding | undefined => {
     if (kind !== 'player' && kind !== 'npc' && kind !== 'creature') return undefined;
     if (!actorId || actorId.trim() !== actorId || actorId.length > 256)
@@ -40,6 +42,24 @@ export function createGameplayActorAuthority(
           },
         ],
         rules: [
+          ...(transportRegistered && kind === 'player'
+            ? [
+                {
+                  effect: 'allow' as const,
+                  principal: { ids: [principalId] },
+                  resources: [TRANSPORT_RESOURCE],
+                  operations: ['read', 'execute'] as const,
+                  scope: 'any' as const,
+                },
+                {
+                  effect: 'allow' as const,
+                  principal: { ids: [principalId] },
+                  resources: [TRANSPORT_RESOURCE],
+                  operations: ['write'] as const,
+                  scope: 'self' as const,
+                },
+              ]
+            : []),
           ...(navigationRegistered && kind === 'player'
             ? [
                 {

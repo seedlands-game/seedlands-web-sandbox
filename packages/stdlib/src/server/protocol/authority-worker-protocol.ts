@@ -122,6 +122,8 @@ export type AuthorityGameplayView = Readonly<{
   media?: readonly import('../gameplay/modules/media-playback-model').MediaPlaybackProjectionV1[];
   cropStages?: readonly AuthorityCropStageProjection[];
   navigation?: import('../gameplay/navigation-items-runtime').NavigationHeldProjectionV1 | null;
+  transports?: readonly import('../gameplay/modules/transport-model').TransportStateV2[];
+  transportDefinitions?: readonly import('../gameplay/modules/transport-model').TransportDefinitionV1[];
   metrics: AuthorityGameplayMetrics;
 }>;
 

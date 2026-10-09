@@ -18,6 +18,8 @@ import { createRegisteredGameplayMedia } from './gameplay-media-runtime';
 import type { RegisteredMediaPlaybackRuntime } from './modules/registered-media-playback-runtime';
 import { prepareGameplayWorldChange } from './gameplay-structure-commit';
 import type { MediaPlaybackFactV1 } from './modules/media-playback-model';
+import { RegisteredTransportRuntime } from './modules/registered-transport-runtime';
+import { TRANSPORT_INTERACTION_CAPABILITY } from './modules/transport-interaction-config';
 
 type Options = Omit<
   ConstructorParameters<typeof RegisteredInventoryRuntime>[0] &
@@ -133,6 +135,16 @@ export function createGameplayRegisteredRuntimes(
   });
   return Object.freeze({
     ...registered,
+    transport: callbacks.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === TRANSPORT_INTERACTION_CAPABILITY,
+    )
+      ? new RegisteredTransportRuntime({
+          ...options,
+          callbacks,
+          composition: callbacks.composition,
+          revision: () => options.kernelState.gameplayRevision,
+        })
+      : null,
     structureTargets: structure?.targets ?? null,
     mediaTargets: media?.targets ?? null,
   });

@@ -33,7 +33,14 @@ const asKernelValue = (value: unknown): KernelValue => value as KernelValue;
 const storeFor = (port: KernelStorageAllocationPort, content: GameplayContent, layout?: PlayerInventoryLayout) =>
   port.shared(
     SHARED_ENTITY_STORE,
-    () => new EntityStore(content.items, content.stations?.codec, layout, content.actorProfiles),
+    () =>
+      new EntityStore(
+        content.items,
+        content.stations?.codec,
+        layout,
+        content.actorProfiles,
+        content.transportDefinitions,
+      ),
   );
 
 const entityProjectionStorage = (
@@ -125,6 +132,15 @@ export function createGameplayKernelRuntime(
           (store: EntityStore, entity: GameplayEntity) =>
             entity.type === 'station' ? store.stationSnapshot(entity.id) : null,
         ],
+        ...(content.transportDefinitions
+          ? [
+              [
+                'seedlands:transport-state',
+                (store: EntityStore, entity: GameplayEntity) =>
+                  entity.type === 'transport' ? store.transportComponentSnapshot(entity.id) : null,
+              ],
+            ]
+          : []),
       ].map(([id, project]) =>
         defineComponent({
           id: id as string,
@@ -147,7 +163,13 @@ export function createGameplayKernelRuntime(
             version: 2,
             encode: (store: EntityStore) => asKernelValue(store.exportComponentSnapshot()),
             decode: (value) => {
-              const store = new EntityStore(content.items, content.stations?.codec, layout, content.actorProfiles);
+              const store = new EntityStore(
+                content.items,
+                content.stations?.codec,
+                layout,
+                content.actorProfiles,
+                content.transportDefinitions,
+              );
               store.restoreComponentSnapshot(value);
               return store;
             },

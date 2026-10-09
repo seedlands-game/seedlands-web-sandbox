@@ -29,6 +29,7 @@ import {
   type VoxelSemanticsDefinition,
   type VoxelSemanticsRegistry,
 } from '../../world/voxel-semantics';
+import type { TransportDefinitionRegistryV1 } from './modules/transport-model';
 
 export type GameplayContent = Readonly<{
   items: ItemDefinitionRegistry;
@@ -39,6 +40,7 @@ export type GameplayContent = Readonly<{
   actorProfiles: ActorProfileRegistry;
   voxelGameplay: VoxelGameplayRegistry;
   voxelSemantics: VoxelSemanticsRegistry;
+  transportDefinitions?: TransportDefinitionRegistryV1;
 }>;
 
 export type GameplayContentInput = Readonly<{
@@ -150,5 +152,6 @@ export function resolveGameplayContent(
     voxelGameplay: resolved.voxelGameplay,
     voxelSemantics: resolved.voxelSemantics,
     ...(resolved.stations ? { stations: resolved.stations } : {}),
+    ...(resolved.transportDefinitions ? { transportDefinitions: resolved.transportDefinitions } : {}),
   });
 }

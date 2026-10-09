@@ -1,5 +1,16 @@
 import type { KernelStateOwner } from '@seedlands/kernel/execution';
-import type { EntityStore, EntityUpdate } from './entity-store';
+import type { EntityStore, EntityUpdate, GameplayEntity } from './entity-store';
+
+export function updateGameplayEntity(
+  entities: EntityStore,
+  id: string,
+  update: EntityUpdate,
+  changed: () => void,
+): GameplayEntity {
+  const entity = entities.update(id, update);
+  changed();
+  return entity;
+}
 
 export function commitGameplayDynamicBatch(
   entities: EntityStore,

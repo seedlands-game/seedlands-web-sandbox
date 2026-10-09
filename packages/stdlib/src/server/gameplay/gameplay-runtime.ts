@@ -50,7 +50,7 @@ import {
   createAuthorityKernelExecutionPort,
   type AuthorityKernelExecutionPort,
 } from '../authority/authority-kernel-state';
-import { commitGameplayDynamicBatch } from './gameplay-dynamic-batch';
+import { commitGameplayDynamicBatch, updateGameplayEntity } from './gameplay-dynamic-batch';
 import { createGameplayHotbarSelection } from './gameplay-inventory-selection';
 import { GameplayEnvironmentFacade } from './gameplay-environment-facade';
 import { collectRuntimeStatistics } from './gameplay-runtime-statistics';
@@ -191,6 +191,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
       changed: () => this.touch(),
     });
     this.modules = new GameplayModuleRuntime({
+      transport: registered.transport?.state,
       navigation: () => this.navigationItems.state,
       combat: this.registeredCombat?.state,
       blocks: this.registeredBlocks?.state,
@@ -409,11 +410,8 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
 
   getEntity = (id: string): GameplayEntity | null => this.entities.get(id);
 
-  updateEntity(id: string, update: EntityUpdate): GameplayEntity {
-    const entity = this.entities.update(id, update);
-    this.touch(false);
-    return entity;
-  }
+  updateEntity = (id: string, update: EntityUpdate): GameplayEntity =>
+    updateGameplayEntity(this.entities, id, update, () => this.touch(false));
 
   updateEntityWithoutSnapshot = (id: string, update: EntityUpdate): void =>
     void (this.entities.updateWithoutSnapshot(id, update), this.touch(false));
