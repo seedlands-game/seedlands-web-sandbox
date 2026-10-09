@@ -47,7 +47,6 @@ import {
   type StationComponentV1,
   type StationStateCodec,
 } from './ecs-station-state';
-import { clearComponentSlot } from './ecs-component-storage';
 import { defaultSpeciesState } from './species-state';
 import { EcsTransportStateOwner, type TransportSpawnState, type TransportStateCodec } from './ecs-transport-state';
 import type { TransportComponentV1, TransportStateV2 } from './modules/transport-model';
@@ -57,6 +56,8 @@ import {
   ecsEntityTypeComponent,
   projectEcsEntity,
   writeEcsPosition,
+  writePreparedSpatial,
+  clearEcsEntityColumns,
   type EntityComponents,
 } from './ecs-entity-components';
 export { LEGACY_ACTOR_ARCHETYPES, isActorArchetype, type EcsActorArchetype } from './actor-archetype';
@@ -159,6 +160,8 @@ export class EcsEntityOwner {
   /** Installs a station that the EntityStore prepared and freshness-checked. */
   createPreparedStation = (entity: EcsOwnedEntity, prepared: PreparedStationComponentSnapshot): EcsOwnedEntity =>
     this.installEntity(entity, undefined, prepared);
+  createPreparedTransport = (entity: EcsOwnedEntity, state: TransportComponentV1): EcsOwnedEntity =>
+    this.installEntity(entity, undefined, undefined, state);
 
   private createWithLifetime(
     entity: EcsOwnedEntity,
@@ -370,12 +373,7 @@ export class EcsEntityOwner {
     spatial: PreparedActorSpatialReplacement = {},
   ): void {
     const eid = this.require(id);
-    if (spatial.position) writeEcsPosition(this.components.transform, eid, spatial.position);
-    if (spatial.physicsVelocity) {
-      if (!hasComponent(this.world, eid, this.components.velocity))
-        addComponent(this.world, eid, this.components.velocity);
-      writeEcsPosition(this.components.velocity, eid, spatial.physicsVelocity);
-    }
+    writePreparedSpatial(this.world, this.components, eid, spatial);
     this.components.health.current[eid] = health;
     installPreparedActorComponentSnapshot(this.actors, eid, prepared, true);
   }
@@ -408,6 +406,18 @@ export class EcsEntityOwner {
     const eid = this.require(id);
     if (this.project(eid).type !== 'station') throw new TypeError(`Entity does not have a station component: ${id}`);
     return this.stations.prepare('station', id, snapshot);
+  }
+
+  prepareTransportComponentSnapshot = (id: string, raw: unknown): TransportComponentV1 =>
+    this.transports.prepareReplacement(id, raw);
+  installPreparedTransportReplacement(
+    id: string,
+    state: TransportComponentV1,
+    spatial: PreparedActorSpatialReplacement = {},
+  ): void {
+    const eid = this.require(id);
+    writePreparedSpatial(this.world, this.components, eid, spatial);
+    this.transports.replace(eid, state);
   }
 
   installPreparedStationReplacement(id: string, prepared: PreparedStationComponentSnapshot): void {
@@ -539,25 +549,7 @@ export class EcsEntityOwner {
     clearActorComponents(this.actors, eid);
     this.stations.clear(eid);
     this.transports.clear(eid);
-    clearComponentSlot(eid, [
-      this.components.identity.id,
-      this.components.identity.lifetime,
-      this.components.identity.order,
-      this.components.lifecycle.active,
-      this.components.transform.x,
-      this.components.transform.y,
-      this.components.transform.z,
-      this.components.velocity.x,
-      this.components.velocity.y,
-      this.components.velocity.z,
-      this.components.health.current,
-      this.components.health.maximum,
-      this.components.itemStack.itemId,
-      this.components.itemStack.count,
-      this.components.itemStack.durability,
-      this.components.actorMetadata.archetype,
-      this.components.actorMetadata.persistent,
-    ]);
+    clearEcsEntityColumns(eid, this.components);
   }
 
   private assertAvailable = (): void => {

@@ -1,5 +1,11 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Transport prepared entity publication checkpoint47（有界基础已验证；产品接入未完成）
+
+在已提交5912eab1的ECS owner上增加host-only prepared transportSpawns与transport component replacements；玩家库存消费与运输创建共享同一EntityStore participant、allocator reservation与commit frontier。prepare/validate不写真实component、inventory、issued IDs、sequence或lifetime；apply前再次核对owner/epoch/allocator、目标transform/immutable component、所有rider生命周期和唯一性。更新definition不得在同一lifetime改换，component revision恰好+1；位置/速度只写canonical transform。metadata与cargo在prepare时冻结复制，未知definition/溢出货物/错revision/重放/owner已替换/重复ID/冲突target/退役引用/坏array一律零写。裸reference不带worldId；不同world数值相同的reference不能仅凭这些字段判源，后续Authority envelope/Host绑定仍须保证实例隔离，不声称本组解决此边界。默认world item/station/actor参与者及192×128 series原额度与顺序保持，不吞掉新类型或放宽500行门禁。
+
+先做实际missing API/ignored spawn RED；真实EntityStore验证库存+spawn同次publication、invalid候选零写、取消/prepare期间状态变化与重复apply拒绝、混合world-item/station/transport allocator、多segment单一frontier及rider恢复关系。已有owner/shadow状态不作第二份canonical位置owner；future actor death/despawn不得使已接受运输rider引用悬空，候选预检必须检查该关系。此组仍不是Pack/Authority正式部署或浏览器产品PASS，legacy车辆迁移/骑乘physics/container与真实输入仍未完成。传统0.55PD×120%=0.66PD；AI约70min×120%=84min。10:10真实周剩86%、约60%停止线；不跑重复性能候选或扩大限额。
+
 ## Transport lifetime ECS owner checkpoint46（有界实施；尚未验收）
 
 实际owner缺type/API RED后，新增货箱单槽overflow反例抓到normalizeStack并不限制待分槽count，补实体分配前stack-limit预检。最终owner+既有ECS/model3文件17/17 PASS；Web四文件24/24有效回归，加修正局部NPC profile的V4 codec文件5/5，合计29/29。完整静态首轮在Authority port旧enum处失败，原format/paths/lint/sealed5有效；修正canonical enum派生后余项完整types、Svelte0/0、规则/CI选择实际exit0。500行门禁未放宽，拆类型与纯校验职责；必要V4 regression追加既有headless/type路径。详见evidence/transport-owner-checkpoint-46-01.md；正式生产消费者、legacy迁移与浏览器验收未完成。
