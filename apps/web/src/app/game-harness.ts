@@ -23,6 +23,8 @@ import type { WorldHarnessPort } from '@seedlands/stdlib/server/harness/world-ha
 import { nearestEntityHit } from '../client/presentation/entity-hit-volume';
 import type { HarnessApi } from './gameplay/game-harness-contract';
 import { createHarnessObservability } from './gameplay/game-harness-observability';
+import { createHarnessRouteSnapshot } from './gameplay/game-harness-route-observation';
+export { createHarnessRouteSnapshot } from './gameplay/game-harness-route-observation';
 import { readInputDecisionDiagnostics } from '../client/authority/input-decision-diagnostics';
 export type { HarnessApi } from './gameplay/game-harness-contract';
 
@@ -357,6 +359,8 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
       audio: bindings.audio,
     }),
     world: bindings.developerWorld(),
+    routeSnapshot: () =>
+      createHarnessRouteSnapshot({ controller: bindings.controller(), authority: bindings.authority() }),
     snapshot: () =>
       createHarnessSnapshot({
         world: bindings.world(),
