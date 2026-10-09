@@ -7,6 +7,7 @@ export async function completeBeforeSave(page: Page, info: TestInfo) {
     crops.completeCropJourneyBeforeSave(page, info));
   const nav = await test.step('Creative 导航选择、右键注册更新与实际 HUD', () =>
     navigation.completeNavigationBeforeSave(page, info));
+  await crops.expectCropForSave(page, crop);
   return { crop, navigation: nav };
 }
 export async function expectForSave(page: Page, state: Awaited<ReturnType<typeof completeBeforeSave>>) {

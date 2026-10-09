@@ -85,6 +85,7 @@
     "apps/web/tests/integration/runtime/server/composition/navigation-prepared-commit.test.ts",
     "apps/web/tests/unit/app/held-item-interaction.test.ts",
     "packages/stdlib/tests/server/navigation-policy.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/navigation-authority.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/navigation-authority.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/navigation-target-priority.test.ts"
   ]
 }

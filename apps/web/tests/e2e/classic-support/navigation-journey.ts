@@ -1,6 +1,7 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import type { NavigationItemsCheckpoint } from '@seedlands/stdlib/server/gameplay/navigation-items-runtime';
 import { clickCanvasCenter, closeInventory, playerState, type ClassicWindow } from './harness';
+import { aimAtVoxelWithRealMouse } from './aim';
 
 export async function navigationCheckpoint(page: Page): Promise<NavigationItemsCheckpoint> {
   return page.evaluate(async () => {
@@ -58,6 +59,8 @@ export async function completeNavigationBeforeSave(page: Page, info: TestInfo) {
   expect(Number.isFinite(phase) && phase >= 0 && phase < 1).toBe(true);
   await select(page, 'map');
   await expect(page.locator('#navigation-item-hud')).toContainText('尚未探索');
+  // A mature crop consumes target-first use; explore against the neighboring neutral floor.
+  await aimAtVoxelWithRealMouse(page, [68, 30, 0], [68, 31, 0]);
   await clickCanvasCenter(page, 'right');
   await expect(page.locator('#navigation-item-hud svg')).toBeVisible();
   const first = await navigationCheckpoint(page);
