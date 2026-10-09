@@ -1,12 +1,24 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Mining safe-band handoff checkpoint65（有效RED与76项回归通过，浏览器待验）
+
+原Browser64已实际PTY43357 EXIT1，main5.0min在C2采集[38,31,0]中心距离>5拒绝，visual1.0min原lighting/revision predicate FAIL、Modular SKIP；正式C0/C1 PASS。default-off键盘诊断COMPLETE，42可信edges/0 dropped，最后S100 dispatch gap609.5ms/eventStamp123.7ms，区分页面回调与事件生成时刻；不是whole-frame或输入协议根因证明。0-trace metadata显示原mining approach从[39.10158,33.6,.4862]经第一次S100停稳[36.24328,32.6,.49216]，已目标中心distance约2.51原安全band内；仍继续S至[33.54338,32.6,.51054]，>5被原guard拒绝。
+
+本片正确性合同只在mineVoxel已有walkTo调用复用yieldAfterSettledPulse：原完整观察已经ACK推进、ground/noncollision、Authority velocity0与presentation追上，且player/serverPlayerPosition到同target中心均在原[2.5,4.5]安全band时可交接，随后原fresh snapshot、>5 guard、PointerLock、正常aim和采掘全部保留。approach target、tol.45、100ms输入、15秒route/8秒action/原整体900与其他时限不变；通用walkTo单向crossing语义及其它consumer不变。不改速度、物理、late-input拒绝、quality或renderer；不把少调用当性能收益。
+
+先用真实callback的readonly observation model重放以上三份实际Browser64观察，正常mouse correction/keyboardPress与fresh ACK/tick边界保留；传入aim stub只记录正常交接并抛marker，避免假挖掘/写owner。旧source须secondS后out-of-range FAIL，新sourcefirstS后原safe snapshot进入aim；若模型不能证明该消费边界则不凑RED。反例保留server unsafe不能早交接、fresh snapshot漂移仍>5拒绝、PointerLock失败传播及原aim marker传播；15秒route配置与原20秒settled观察等待均不改，不宣称整段mineVoxel墙钟必然不超过15秒。unit观察模型不是实际Authority或浏览器PASS。
+
+Root独占harness.ts/spec/package/evidence及验收；既有唯一Luna只独占apps/web/tests/e2e/classic-support/mining-approach-handoff.test.ts和private task125，不再委派、不跑browser/build/fullstatic。传统0.2PD×120%=0.24PD、AI35min×120%=42min，21:00起约21:42有界checkpoint；实际服务元数据未核实，按用户Sol/high/default及Luna/medium请求。20:26真实UI剩83%，约60%停止线保持，未知计量不换算token/credits。新run独立pr41-classic-browser65-01；CI64自然终态前不抢推取消，编辑前remote e71/base fba21:00核对不变。剩余完整产品/lighting/transport/Modular/combined性能未准出。
+
+有效旧行为RED为Task125 red-02；red-01遗漏PointerLock mouse baseline，属无效夹具尝试并保留。候选四项GREEN，Root加入global cleanup并按原trace更正起点末位后，九文件76/76回归实际EXIT0。完整verify:static:ci实际EXIT0；更新后的完整headless106文件673项PASS/EXIT0。新identified build与Browser65待验。CI64已自然终态：五项SUCCESS、两次主C4返回900秒FAIL、Visual PASS、部署SKIP。详见evidence/mining-handoff-checkpoint-65-01.md。
+
 ## 瞄准同轮观测 checkpoint63（候选撤回，无生产或测试改动）
 
 Root和现有Luna复核后确认：旧aim.ts已经在同一次evaluate读取HUD target与正式ray；另外的snapshot用于未命中后的correction，较晚姿态未被证明错误。仅要求“一次evaluate”或使用第一帧view不是可验收产品不变量。Task123新fixture由其作者撤回，未运行无效RED、未修改aim.ts；减少调用若作为优化理由仍须按既有A/A/A/B门禁，不能贴正确性标签绕过。保持原代码。私有task123结论仅分析，不计PASS。
 
 ## 真实键盘事件时序 checkpoint64（只读诊断待验）
 
-Task124缺诊断helper RED实际EXIT1（0 tests/module missing，仅缺入口）；四项GREEN实际EXIT0。Root诊断/CPU/native/canonical五文件35/35 PASS，完整verify:static:ci原PTY9004实际EXIT0。20:38短暂transport断开后原会话保留，无重跑。详见evidence/keyboard-timing-checkpoint-64-01.md；identified build和Browser64仍待验。
+Task124缺诊断helper RED实际EXIT1（0 tests/module missing，仅缺入口）；四项GREEN实际EXIT0。Root诊断/CPU/native/canonical五文件35/35 PASS，完整verify:static:ci原PTY9004实际EXIT0。20:38短暂transport断开后原会话保留，无重跑。详见evidence/keyboard-timing-checkpoint-64-01.md；后续identified build实际EXIT0，Browser64实际EXIT1、正式C0/C1 PASS而C2与视觉FAIL，完整终态见evidence/browser64-final-checkpoint-01.md。
 
 接续56294bff Browser62本地原主900秒FAIL/visual PASS及远端CI62五项SUCCESS/Chromium FAIL/部署SKIP。远端两次主旅程最终失败均C4返回路线耗尽原900秒，V2步骤耗时8.3/8.5min；不从耗时行宣布V2完成。本地第二块crop最后截图仅442.4ms，前四张成功，不是截图自身长阻塞。API delay80/300与前后pose无法证明实际keydown/up间隔。原Browser61的20秒C3 native仅两组keyboard事件，间隔5.791/235.523ms，无key code且不覆盖crop，不当路线因果证据。
 
