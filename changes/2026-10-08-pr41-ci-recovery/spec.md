@@ -1,5 +1,19 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## V2 far-corridor real input planning checkpoint58（模型与静态通过，完整浏览器失败）
+
+旧实际调用链45秒长段RED、near control PASS后，候选模型两例PASS；Root原八文件55例通过，新候选边界15例通过。新夹具较严0.005断言、unused声明与类型错误的失败日志均保留，按原0.06合同及正式snapshot接口修正；最终verify:static:ci实际EXIT0、identified build实际EXIT0。原唯一Browser58实际EXIT1：主FAIL/Visual PASS/Modular SKIP，正式C0–C3 PASS；Creative作物共享walkEquipmentRoute到[65.5,-0.5]超过原45秒，未进入V1/V2/C4/C5。新300ms条件在这一失败段所有读回均未成立；仍不能宣布V2修复或可合入。详见evidence/equipment-route-checkpoint-58-01.md。
+
+16:49之后服务端503阻断，17:25单次原环境恢复成功，HEAD/七个修改/原始结果完整且无活跃测试进程；没有重复Browser58或环境setup。原17:08 checkpoint受服务中断影响，恢复后先完成证据交接，不把阻断墙钟或tokens换算成实际周额度。16:05真实84%为历史读数，16:48刷新请求待答；60%停止线保持。CI57现已完整终态：五项SUCCESS，Chromium两次V2原45秒失败、Visual PASS，部署SKIP；正常下一push不会取消该证据。
+
+接续cea9a948与Browser56实际原45秒失败：回工作台的长段从约x98.5沿z=-0.5持续西行，末尾x82.845、ground且无collision、velocity0、ACK持续推进。原80ms精细脉冲被用于整个约20格远段，每次都按原门禁等待release/Authority停稳与呈现追上；不能据此认定世界永久阻挡或修改45/20/900秒、到达0.06/走廊0.08/目标邻域0.45、fresh ACK/ground/collision/settle。
+
+冻结有界输入规划候选：仅当当前full snapshot中的玩家与Authority都处在目标同一窄走廊、ground/noncollision、velocity全0且两者位置已追上，距目标沿程超过3格且当前航向对计划KeyW/KeyS满足原correctMouseToRoute小于1px误差时，可用既有普通walkTo最大300ms真实键盘脉冲；近目标、偏走廊、moving、presentation未追上、航向未对齐、missing或非法观察继续原80ms。每个真实输入后保留原fresh观测与所有到达/资源距离断言；没有setView、teleport、途中补给、采集捷径或世界状态写入。routePulseDurationMs仍依实际剩余距离进一步缩短，退出/方向切换/overshoot原流程保持。
+
+先在现有实际walkEquipmentRoute调用链取得旧80ms长段失败RED：fake Page仅模拟协议/DOM/输入端口与固定虚拟观察延迟，位移/加速/制动用真实stepBody/BodyConfig/PhysicsWorld，不手造到达位置，不冒充真实Pointer Lock/Authority/browser或性能证据。GREEN还保留所有near-overshoot、drift、ground、new ACK与pulses原反例；Root验证候选阈值/freshness/非法输入分支。必要静态后新identified artifact、原唯一完整Classic runner，run ID `pr41-classic-browser58-01`。只证明真实输入能在原验收合同内到达，不宣称FPS/机器时延或whole-frame A/B收益；若后续保留理由变为性能改善，另注册独占A/A及交错A/B。
+
+16:08附近开始，传统0.3PD×120%=0.36PD；AI约50min×120%=60min，17:08附近有界checkpoint。现有精确Luna/medium仅独占新equipment-long-route-pulse.test.ts fixture，禁止再委派；Root独占helper/spec/其他测试与集成。16:05产品UI真实周剩84%（账户其他任务共同下降），约60%停止线不变；不估算PR专属周比例。CI57正在运行，下一正常push前等其终态，不取消取证。
+
 ## CI browser job resource budget checkpoint57（本地闭合，继续V2修复）
 
 15:52附近开始，实际25分钟RED后45分钟GREEN，现有工程选择器15/15；初版正则ESLint空格失败保留并等价修正，最终完整verify:static:ci实际EXIT0。仅job资源上限与失败后只读附件改变，各测试时限/断言、retry/flaky策略、生产artifact和部署边界保持。Browser55/56原始FAIL不被改写，PR仍不可合入。详见evidence/ci-browser-budget-checkpoint-57-01.md；随后正常feature提交推送及精确新SHA CI。传统/AI预算与15:45真实UI请求保持，不购买或扩大每周额度。

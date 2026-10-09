@@ -208,7 +208,7 @@ export async function walkTo(
     tolerance?: number;
     corridorTolerance?: number;
     timeout?: number;
-    pulseMs?: number;
+    pulseMs?: number | ((snapshot: ClassicSnapshot) => number);
     refreshAfterCorrection?: boolean;
     yieldAfterSettledPulse?: (snapshot: ClassicSnapshot) => boolean;
   }> = {},
@@ -253,7 +253,8 @@ export async function walkTo(
       if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
     }
     const segmentStart = current;
-    const pulseMs = routePulseDurationMs(current.player, target, options.pulseMs ?? 300);
+    const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
+    const pulseMs = routePulseDurationMs(current.player, target, maximumPulseMs);
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
     await page.keyboard.down(key);
     if (options.jump) await page.keyboard.down('Space');

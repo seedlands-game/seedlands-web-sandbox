@@ -17,6 +17,7 @@ import { itemCount } from './journey';
 import { classicScenario, type V2EquipmentResource } from './scenario';
 import {
   equipmentResourcePickup,
+  equipmentRoutePulseMs,
   classifyEquipmentRouteWait,
   followEquipmentRoute,
   equipmentWorkbenchCorridor,
@@ -200,6 +201,7 @@ export async function walkEquipmentRoute(page: Page, target: readonly [number, n
         key,
         timeout,
         ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
+        pulseMs: (current) => equipmentRoutePulseMs(current, target, key),
         yieldAfterSettledPulse: (current) => shouldYieldEquipmentRoutePulse(current, target, key),
       }),
     waitForProgress: async (baseline, key, timeout) => {
