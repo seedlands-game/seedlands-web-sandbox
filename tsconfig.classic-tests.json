@@ -92,6 +92,7 @@
     "apps/web/tests/integration/runtime/server/ecs-component-snapshot.test.ts",
     "apps/web/tests/integration/runtime/server/composition/transport-authority-deployment.test.ts",
     "apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/transport-authority-death.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/transport-authority-death.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/pre-manual-v4-checkpoint.test.ts"
   ]
 }

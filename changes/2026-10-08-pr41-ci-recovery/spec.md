@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Manual system cadence checkpoint51（通用 cadence 与精确 V4 兼容已验证）
+
+真实assembly RED后新增夹具6/6、原lifecycle8/8与Classic checkpoint两文件12/12 PASS；最后只改fixture immutable构造后的新文件3/3补验。生产/测试类型、scopedlint与完整verify:static:ci实际EXIT0。Classic entry不变假设FAIL后，从精确前驱Host与正式loader校验的真实Pack导出完整V4；候选恢复先RED零写、唯一完整前驱迁移后GREEN，默认definitionMap保持且foreign digest/definition拒绝。证据及未通过浏览器边界见evidence/manual-cadence-checkpoint-51-01.md。本组未实现运输运动，继续正式产品和原浏览器验收。
+
+接续ecb7213f，正式运输运动接缝审查确认 `bindSystem` 必须绑定已注册system，而现有interval/every-advance都由gameplay schedule推进；不能用假长interval或lifecycle start冒充physics tick，也不能让两个时钟重复推进运输。先增加显式通用 `cadence: 'manual'`：Host可按已有system principal/resource审批调用其唯一注册operation，lifecycle advance/preview不调它，schedule snapshot仍记录该system且remainder严格0。manual无interval和时间排序依赖；scheduled/manual间before/after依赖拒绝，避免承诺不存在的时序。旧interval/every-advance定义、顺序与快照保持；Classic entry identity是否不变由精确字节核验决定。
+
+本片只改cadence合同、注册/身份校验、调度及legacy schedule投影，不实现运输运动、不扩Host resource grants，不修改input协议、browser/性能或sealed证据。先实际assembly RED拒绝manual；GREEN验证真实registered system binding/invoke、无自动调用/预算消耗、显式权限拒绝、manual snapshot恢复/非零remainder原状态不变、坏interval/dependency/serialized identity拒绝及原调度回归。运输控制仍需后续把当前已接受world-space moveX/moveZ与原body batch在同一prepared frontier发布，不能将moveX/moveZ误作车辆局部输入或独立前后提交。传统0.15PD×120%=0.18PD，AI约30min×120%=36min，12:38附近开始；11:40真实周剩86%，12:07新读数仍待主对话，60%停止线保持。
+
+12:42精确前驱Classic entry字节核验FAIL：control c1ef197e…与candidate 8b732487…不同，实际diff仅嵌入pack的checkpoint identity validator加入manual合同。原默认entry不变假设撤回；兼容处理扩展预注册为从精确前驱actual runtime导出的完整V4 identity，新增唯一确切前驱，不广泛匹配digest、版本或重解释字段。取得旧档真实来源和实际恢复/foreign identity拒绝后才可提交；若36分钟边界内无法完成，保留可恢复证据并继续有界诊断，不把字节失败改写为PASS。
+
 ## Mounted death settlement checkpoint50（正式死亡结算已验证；运输产品未完成）
 
 实际Authority正常部署/use骑乘后，显式death policy的direct Vitals致死RED在prepare期被悬空rider校验拒绝；不是缺policy。共享death series现从当前owner精确id+lifetime派生解除关系replacement，与actor死亡/退役和四容器掉落同一allocator/frontier提交，原128×192上限保持。风险反例抓到手造alive replacement仍被当death候选接受，补health0/lifecycle dead门禁后拒绝零写。新Authority3/3与stdlib5/5 PASS，含注册Combat、非零运输velocity/payload/lifetime保持、存活rider、四容器drops、重放/新鲜度/容量拒绝、mounted死亡保存恢复/复活以及无policy fail-closed。根原death63/63、transport owner14/14、Classic死亡/复活/特殊伤害25/25 PASS。类型与格式完成状态见evidence/transport-death-checkpoint-50-01.md；本组无browser/性能验收声明。

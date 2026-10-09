@@ -74,6 +74,7 @@ ECS 用于把能力从固定 player/npc 类型分支解放出来，不为了模�
 - 状态 schema、默认值、单一 owner、只读投影、codec/迁移、删除/恢复行为。
 - 资源、操作、参数/结果 schema、授权目标提取与真实执行器。
 - 系统阶段、频率、逻辑时钟、读写依赖、初始化/执行顺序与稳定平局规则。
+- 显式 `manual` system 由已批准的 Host principal 调用注册 operation，不参与逻辑时钟的自动执行或调用预算；快照保留它且 remainder 必须为0，不声明 interval 或定时系统间的 before/after 依赖。定义和 permission 请求不会新增 Host grants。
 - 生命周期、资源释放、错误/冲突诊断，以及行为验收。
 
 不要求纯资源包声明模拟 tick；不允许模拟系统自行创建权威 setInterval。自定义组件不会仅因注册就自动被物理、库存或 AI 理解，必须由消费该合同的系统赋予语义。Action 的工具描述也不能自动授予调用权限。

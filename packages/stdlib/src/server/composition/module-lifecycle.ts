@@ -70,7 +70,7 @@ const canonicalSnapshotUnits = (value: unknown, label: string): number => {
 };
 
 const intervalUnits = (definition: ModSystemDefinition): number => {
-  if (definition.cadence === 'every-advance') return 0;
+  if (definition.cadence === 'every-advance' || definition.cadence === 'manual') return 0;
   return secondsToUnits(definition.intervalSeconds, `system interval ${definition.id}`, false);
 };
 
@@ -140,10 +140,7 @@ export function createModuleLifecycle(
       seen.add(saved.id);
       const remainderUnits = canonicalSnapshotUnits(saved.remainder, `remainder ${definition.id}`);
       const interval = intervals.get(definition.id)!;
-      if (
-        (definition.cadence === 'every-advance' && remainderUnits !== 0) ||
-        (definition.cadence !== 'every-advance' && remainderUnits >= interval)
-      )
+      if ((interval === 0 && remainderUnits !== 0) || (interval !== 0 && remainderUnits >= interval))
         throw new TypeError(`Module schedule entry is invalid: ${definition.id}`);
       return { id: definition.id, remainderUnits };
     });
@@ -198,6 +195,7 @@ export function createModuleLifecycle(
         throw new RangeError('Module lifecycle advance call count is invalid.');
       let count = 0;
       for (const { definition } of systems) {
+        if (definition.cadence === 'manual') continue;
         if (definition.cadence === 'every-advance') count += advanceCalls;
         else count += Math.floor((remainders.get(definition.id)! + elapsedUnits) / intervals.get(definition.id)!);
       }
@@ -215,6 +213,10 @@ export function createModuleLifecycle(
       const events: DueEvent[] = [];
       for (let order = 0; order < systems.length; order++) {
         const { moduleId, definition } = systems[order];
+        if (definition.cadence === 'manual') {
+          nextRemainders.set(definition.id, 0);
+          continue;
+        }
         if (definition.cadence === 'every-advance') {
           count += 1;
           events.push({
@@ -274,7 +276,7 @@ export function createModuleLifecycle(
         time: timeUnits / TIME_SCALE,
         systems: systems.map(({ definition }) => ({
           id: definition.id,
-          remainder: definition.cadence === 'every-advance' ? 0 : remainders.get(definition.id)! / TIME_SCALE,
+          remainder: intervals.get(definition.id) === 0 ? 0 : remainders.get(definition.id)! / TIME_SCALE,
         })),
       };
     },
