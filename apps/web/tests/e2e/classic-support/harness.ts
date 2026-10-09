@@ -1,9 +1,13 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import type { HarnessRouteSnapshot } from '../../../src/app/gameplay/game-harness-route-observation';
-import { walkWithObservations, type WalkOptions } from './route-walk';
+import { reachedRouteTarget, routeInputSettled, routePulseDurationMs } from './route-progress';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
-import { correctMouseUntilEntityAimed, mouseCorrectionToVoxel, voxelInteractionDistance } from './target-aim';
+import {
+  correctMouseToRoute,
+  correctMouseUntilEntityAimed,
+  mouseCorrectionToVoxel,
+  voxelInteractionDistance,
+} from './target-aim';
 import { queryEntity } from './combat-entity';
 import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
@@ -59,7 +63,6 @@ export type HarnessApi = {
     import('../../../src/client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   snapshot(): ClassicSnapshot;
-  routeSnapshot(): HarnessRouteSnapshot | null;
   presentedEntityPosition(entityId: string): Point | null;
   aimedEntityId(): string | null;
   aimedVoxelTarget(): Readonly<{ position: Point; adjacent: Point | null }> | null;
@@ -100,35 +103,6 @@ export type ClassicWindow = Window & {
 
 export const snapshot = (page: Page) =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.snapshot() ?? null);
-
-export const routeSnapshot = (page: Page) =>
-  page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.routeSnapshot() ?? null);
-
-export async function waitForRouteSnapshot(
-  page: Page,
-  predicate: (value: HarnessRouteSnapshot) => boolean,
-  timeout = 20_000,
-): Promise<HarnessRouteSnapshot> {
-  let matched: HarnessRouteSnapshot | null = null;
-  try {
-    await expect
-      .poll(
-        async () => {
-          const current = await routeSnapshot(page);
-          if (!current || !predicate(current)) return false;
-          matched = structuredClone(current);
-          return true;
-        },
-        { timeout, intervals: [16, 32, 64, 100] },
-      )
-      .toBe(true);
-  } catch (error) {
-    // Preserve the full owner read in the Playwright failure trace without replacing the original error.
-    await snapshot(page).catch(() => null);
-    throw error;
-  }
-  return matched!;
-}
 
 export const voxelAt = (page: Page, target: Point) =>
   page.evaluate(
@@ -224,23 +198,86 @@ export async function prepareInitialState(
   }, scenario);
 }
 
-export const walkTo = (page: Page, target: RoutePoint, options: WalkOptions<ClassicSnapshot> = {}) =>
-  walkWithObservations<ClassicSnapshot>(
-    page,
-    target,
-    options,
-    () => snapshot(page),
-    (predicate, timeout) => waitForSnapshot(page, predicate, timeout),
-  );
-
-export const walkRouteTo = (page: Page, target: RoutePoint, options: WalkOptions<HarnessRouteSnapshot> = {}) =>
-  walkWithObservations(
-    page,
-    target,
-    options,
-    () => routeSnapshot(page),
-    (predicate, timeout) => waitForRouteSnapshot(page, predicate, timeout),
-  );
+export async function walkTo(
+  page: Page,
+  target: RoutePoint,
+  options: Readonly<{
+    key?: 'KeyW' | 'KeyS';
+    jump?: boolean;
+    tolerance?: number;
+    corridorTolerance?: number;
+    timeout?: number;
+    pulseMs?: number;
+    refreshAfterCorrection?: boolean;
+    yieldAfterSettledPulse?: (snapshot: ClassicSnapshot) => boolean;
+  }> = {},
+): Promise<ClassicSnapshot> {
+  const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
+  const deadline = Date.now() + (options.timeout ?? 45_000);
+  let current = await snapshot(page);
+  if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
+  while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+    if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+    const correction = options.refreshAfterCorrection
+      ? await correctMouseToRoute({
+          wholeTurn: true,
+          target,
+          direction: key,
+          observe: async () => {
+            const observed = await snapshot(page);
+            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+            return observed;
+          },
+          move: async (dx, dy) => {
+            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+            await moveMouseBy(page, dx, dy, { waitForRender: false });
+          },
+          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
+        })
+      : await correctMouseToRoute({
+          wholeTurn: true,
+          target,
+          direction: key,
+          observe: () => snapshot(page),
+          move: (dx, dy) => moveMouseBy(page, dx, dy, { waitForRender: false }),
+          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
+        });
+    if (!options.refreshAfterCorrection && correction.kind === 'route-reached') return correction.observation;
+    if (options.refreshAfterCorrection) {
+      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+      if (correction.kind === 'route-reached') return correction.observation;
+      if ((current = await snapshot(page)) === null)
+        throw new Error('Classic snapshot is unavailable after route correction.');
+      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+      if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
+    }
+    const segmentStart = current;
+    const pulseMs = routePulseDurationMs(current.player, target, options.pulseMs ?? 300);
+    const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
+    await page.keyboard.down(key);
+    if (options.jump) await page.keyboard.down('Space');
+    try {
+      // This timer bounds the duration of a real input pulse. Readiness is verified below from Authority state.
+      await new Promise<void>((resolve) => setTimeout(resolve, pulseMs));
+    } finally {
+      await page.keyboard.up(key);
+      if (options.jump) await page.keyboard.up('Space');
+    }
+    current = await waitForSnapshot(
+      page,
+      (value) =>
+        value.authority.acknowledgedInputSequence > sequenceBeforeInput &&
+        value.onGround &&
+        !value.colliding &&
+        routeInputSettled(value),
+      20_000,
+    );
+    if (current.player[1] < segmentStart.player[1] - 2)
+      throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);
+    if (options.yieldAfterSettledPulse?.(current)) return current;
+  }
+  return current;
+}
 
 export async function adjustPitchToTarget(page: Page, target: Point): Promise<void> {
   const history: Array<string | null> = [];
