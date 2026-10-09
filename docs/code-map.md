@@ -270,3 +270,5 @@ PR41 真实 mousemove 在 `PlayerController` 同步更新相机射线与目标�
 Authority消息同步wall观察由 `client/authority/authority-receive-wall-observer.ts` 按epoch/generation维护有界累计，原 `browser-authority-client.ts` 的Worker入口持有实例；帧观察器仅输出相邻有效帧空档的累计差。未覆盖structured clone、排队、异步后续、Worker CPU或GPU。
 
 唯一Classic spec的启动/失败/诊断hook归 `tests/e2e/classic-support/diagnostic-hooks.ts`；可选主线程采样归同目录 `cpu-profile.ts`，默认关闭、禁止benchmark、原始profile只标诊断不可计入性能准出。
+
+导航策略与注册 self producer 归 `packages/stdlib/src/server/gameplay/modules/navigation-{policy,interaction-model,interaction-module,state-port}.ts`；原 `navigation-items-runtime.ts` 仍唯一拥有地图、序列和V1 checkpoint，prepared port 不另建状态。Classic内容配置归 `playbooks/classic/src/navigation-policy.ts`，旧V4身份只取实际 Browser30 export。Authority 接受的持有视图经 UI projector 到 `app/ui/navigation-item-hud.svelte`；实际右键与原食品消费归 `app/gameplay/held-item-interaction.ts`。`server/protocol/authority-gameplay-projections.ts` 只容纳派生 crop 类型，原protocol公开类型入口保持 re-export。唯一Classic runner内，`classic-support/portable-item-journeys.ts` 顺序编排原作物及新导航输入/保存恢复；`navigation-journey.ts` 不作为独立浏览器入口。

@@ -6,10 +6,10 @@ import { Voxel } from '@seedlands/stdlib/world/voxel';
 
 let worldTime = 6;
 const loaded = ([x, y, z]: [number, number, number]) =>
-  Math.abs(x) <= 8 && y === 4 && Math.abs(z) <= 8 ? ((x + z) % 2 ? Voxel.Grass : Voxel.Stone) : undefined;
+  Math.abs(x) <= 8 && y === 3 && Math.abs(z) <= 8 ? ((x + z) % 2 ? Voxel.Grass : Voxel.Stone) : undefined;
 const createWorld = () => {
   const world = new GameplayRuntime({
-    ...classicGameplayDomainOptions(),
+    ...classicGameplayDomainOptions('navigation'),
     platform: testCorePlatform,
     environmentSeed: 7,
     getWorldTime: () => worldTime,

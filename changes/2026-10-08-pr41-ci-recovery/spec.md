@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 正式导航 producer / consumer checkpoint41（实施中；未验收）
+
+整体复验实际结果：Classic headless 84文件552例PASS；stdlib 153文件1101例PASS、Headless CLI同一宿主navigation resource未许可导致7例FAIL；静态format/冻结5/5/paths/lint/产品types与Svelte0/0通过，Classic夹具读取可空inventory slot导致后续types失败。下一步仅补工程脚本Overworld的明确navigation读/写/执行许可（不采用Pack自请求权限、不改其他Playbook许可），显式排除null slot，再复验受影响CLI/Authority夹具、types与未运行规则/选择器；复用有效结果。
+
+复用既有 Authority interact self，无新增动作/协议 target。新增可组合 navigation-items policy，Classic storage item ID 与 voxel→颜色配置移至 Playbook；windowRadius0..4、色值0..15保留既有 V1 child 保存接受边界，不虚构128×128需求。Classic 从 player body feet 下方一个 voxel 采样已加载表面；未知 cell 不填色、不加载、不调用 MacroMap。已有地图 center、scale、像素与map-ID序列保持；缩放索引解释不变。
+
+导航模块声明自己的 actor resource/state/operation，纯 operation 读 observation、写 candidate；唯一 NavigationItemsRuntime 提供 prepared port，验证 actor/selection/loaded samples/map/revision/lifetime 与授权，拒绝伪造候选、额外写、旧 revision、取消/after-rule veto 和跨生命周期重放后才替换状态。指南针出生点、时钟世界时间与当前选中地图只经 Authority accepted gameplay view 进入 HUD；地图更新从真实右键 self consumer 进入正式 owner，客户端不存第二份地图。实际旧 composition 身份取自 Browser30 已结束原完整 trace 的 world.checkpoint export；新前驱仅精确V4 allowlist，缺省 navigation child 恢复空 owner，畸形 child 在原预检拒绝。
+
+验证先覆盖 policy 与实际 registered owner/Authority caller 的定向 RED/GREEN、失败前后 snapshot/inventory不变和旧V4恢复，再必要静态/构建与原唯一完整 browser。UI成功、恢复、整帧性能及194完成只以实际结果为准；本组不修改原期限/输入断言/renderer/trace，不宣称当前可合入。传统约0.8PD×120%=0.96PD；AI含浏览器约90min×120%=108min；未知额度分母不换算，06:09实际周剩89%、60%停止。Luna仅独占policy/fixture，根集成。
+
 ## 主线程采样结果 checkpoint40（whole 已失败；未选生产优化）
 
 Browser30 精确63f8d24c/build29，原完整runner main FAIL、visual PASS、Modular条件SKIP。C0–C3、Creative作物与V1完成；石镐制作/关闭工作台已发生，随后进入铁资源路线，原900秒终结。真实75033样本覆盖900.139563秒并含生产应用，但idle/program约56%/20%无法直接定位主要空档；同步receive、UI比较和光照样本不足以建立GPU/trace因果。只固化原始profile的有界派生与真实旧V4 composition投影，不声称性能GREEN，不恢复已否决slimSnapshot，不改输入/断言/期限/质量/trace。证据在evidence/cpu-profile-result-40-01，原始大文件保留私有Root。06:09实际周剩89%；当前仍不可合入，持续正式producer/consumer与完整玩法验收。

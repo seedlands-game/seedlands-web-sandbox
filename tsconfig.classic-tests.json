@@ -80,6 +80,11 @@
     "apps/web/tests/unit/client/frame-cpu-observer.test.ts",
     "apps/web/tests/unit/client/authority-receive-wall-observer.test.ts",
     "apps/web/tests/unit/client/browser-authority-receive-observation.test.ts",
-    "apps/web/tests/unit/app/classic-cpu-profile.test.ts"
+    "apps/web/tests/unit/app/classic-cpu-profile.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-navigation-registered.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/navigation-prepared-commit.test.ts",
+    "apps/web/tests/unit/app/held-item-interaction.test.ts",
+    "packages/stdlib/tests/server/navigation-policy.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/navigation-authority.test.ts"
   ]
 }

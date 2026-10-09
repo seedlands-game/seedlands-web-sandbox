@@ -11,6 +11,8 @@ import { createGameplaySpeciesFacade } from './gameplay-species-facade';
 import { LifeSkillsRuntime } from './life-skills-runtime';
 import { VehicleRuntime } from './vehicle-runtime';
 import { NavigationItemsRuntime } from './navigation-items-runtime';
+import { NAVIGATION_ITEMS_CAPABILITY } from './modules/navigation-policy';
+import type { NavigationInteractionConfig } from './modules/navigation-interaction-model';
 import { CropRuntime } from './crop-runtime';
 import { CROP_INTERACTION_CAPABILITY, type CropInteractionConfig } from './modules/crop-interaction-model';
 import { StructureInteractionRuntime } from './structure-interaction-runtime';
@@ -70,6 +72,13 @@ export function createGameplayWorldSystems(
     getWorldTime: options.callbacks.getWorldTime,
     getLoadedVoxel: options.callbacks.getLoadedVoxel,
     changed: options.changed,
+    assertCanChange: options.assertCanChange,
+    composition: options.callbacks.composition,
+    config: options.callbacks.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === NAVIGATION_ITEMS_CAPABILITY,
+    )
+      ? options.callbacks.composition.capability<NavigationInteractionConfig>(NAVIGATION_ITEMS_CAPABILITY)
+      : undefined,
   });
   const cropPolicy = options.callbacks.composition?.definitionMap.capabilities.some(
     ({ id }) => id === CROP_INTERACTION_CAPABILITY,

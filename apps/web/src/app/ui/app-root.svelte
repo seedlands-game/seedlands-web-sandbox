@@ -16,6 +16,7 @@
   import PlayerActionPresentation from './player-action-presentation.svelte';
   import TargetCard from './target-card.svelte';
   import SurvivalHud from './survival-hud.svelte';
+  import NavigationItemHud from './navigation-item-hud.svelte';
   import CombatStatus from './combat-status.svelte';
   import PresentedEntities from './presented-entities.svelte';
   import MeleeShowcaseGuide from './melee-showcase-guide.svelte';
@@ -159,6 +160,7 @@
         {shell.gameplay.progress.statistics['items-crafted'] ?? 0}
       </div>
     {/if}
+    <NavigationItemHud navigation={hud.navigation} />
     <div id="survival-deck">
       <div id="held-item-name">
         {hud.hotbar[hud.selectedHotbarSlot]?.itemId ? hud.hotbar[hud.selectedHotbarSlot].name : ''}
