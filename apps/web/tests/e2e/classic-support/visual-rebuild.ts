@@ -8,6 +8,7 @@ import { startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { classicBenchmark } from './settings';
 import { lockPointer, snapshot, voxelAt, waitForSnapshot, type ClassicWindow } from './harness';
+import { clickSingleBlockWithRealMouse } from './single-block-click';
 import type { HarnessSnapshot } from '../../../src/app/app-contracts';
 
 const observeSingleClick = (page: Page) =>
@@ -244,8 +245,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(3);
   await aimAtVoxelWithRealMouse(page, [0, 61, 17]);
   const beforeClick = await observeSingleClick(page);
-  await page.mouse.down();
-  await page.mouse.up();
+  await clickSingleBlockWithRealMouse(page);
   const afterRelease = await observeSingleClick(page);
   try {
     await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(0);

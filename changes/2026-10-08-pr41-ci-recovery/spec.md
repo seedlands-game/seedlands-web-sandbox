@@ -1,5 +1,29 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Native single-click boundary checkpoint62（RED/GREEN与静态通过，原浏览器待验）
+
+19:36–19:38有效单击RED实际EXIT1，修复后六文件42/42 PASS，完整verify:static:ci实际EXIT0。失败清理保持原错误并释放held。精确8ea CI60自然终态：五项SUCCESS、Chromium两次V2铁装备路线耗尽900秒FAIL、Visual PASS、部署SKIP；不取消它。详见evidence/single-block-click-checkpoint-62-01.md。19:41真实UI周剩83%，5天7小时后重置，账户总下降不能独占归因PR。新精确SHA浏览器与产品准出尚未完成。
+
+Browser61已实际EXIT1，主9.9min在crop[65.5,-0.5]原45秒超时、Visual3.3min在one-click原断言失败、Modular SKIP。visual原始附件beforeClick前/后两块均3，afterRelease两块均0、worldRevision36→38。0-trace记录mouseDown142.235ms，server method end后180.308ms才开始mouseUp；没有测试故意等待，但两个独立调用期间保留了held状态。生产PlayerMiningState的原250/200ms连续held节奏保持，不把真实长按当单击。原native20秒只覆盖主旅程，不能冒充visual事件时间或整帧性能证据。
+
+本片只将visual的一次点击producer抽取为有界helper，先保持原down/up控制流取得有效延迟响应RED，再复用既有clickCanvasCenter的原生page.mouse.click。原生click在同一server动作内完成释放，再等待after-call trace响应；无direct DOM event、状态写入、PointerLock/输入门禁旁路，也不改变真实按住攻击的mining/combat路径。保留beforeClick/afterRelease/afterPoll附件、first block Air和neighbor保持3、后续20 physics ticks、原900/240/90秒、质量和全旅程。
+
+源码进一步核对：Worker PointerAttackInputPump只负责entity attack，本次block破坏由PlayerMiningState的creative cadence处理（首个250ms held之后开始重复，之后200ms）。RED/GREEN使用真实PlayerMiningState与固定322ms输入API响应延迟；初始mousedown进入一次正常shouldBegin/recordBegin，原分开down/up期间一帧322ms允许第二次请求，候选原生click在响应等待前release使第二块保持。夹具保留controller的held guard、stop/cancel语义，验证正式consumer节奏、release之后不复活，既有mouse positions/PointerLock helper保持；它不是Authority/真实浏览器或性能证据。新文件路径先discovery，Root独占source/test/spec/package；现有唯一Luna只读native报告已结束，无新增委派。定向pointer/input与类型/static验证后，用新identified artifact和独立pr41-classic-browser62-01原唯一完整runner验证；CI60自然终态前不抢推取消。
+
+传统0.2PD×120%=0.24PD，AI约30min×120%=36min，从19:34附近开始、20:10附近checkpoint；最新确认18:37周剩84%，19:12已向主对话请求新UI读数，未将任何tokens/credits折算周百分比。60%停止线保持。本片不改renderer，不作GPU/host豁免或性能收益声明。
+
+## Browser frame-gap diagnosis checkpoint61（诊断闭合，原浏览器失败）
+
+原唯一Browser61实际PTY EXIT1（19:22已收到，之后重连未丢失）：C0–C3 PASS、crop原45秒FAIL、visual单击后两块均Air FAIL、Modular SKIP。360秒后的20秒native trace COMPLETE、无丢失，仅覆盖C3；实际page线程72次ReadPixels的中位238.969ms、最大387.694ms，首个233ms等待嵌在LayerTreeHost::DoUpdateLayers。该线程区间union包含等待，不能冒充CPU busy或whole-frame A/A/A/B，不能归因全部路线/visual。组61仅诊断无生产更改；详见evidence/frame-gap-diagnosis-checkpoint-61-01.md。19:30单次只读恢复保留全部证据，无重复setup/browser。
+
+接续8ea883a1与Browser60实际双失败。Root流式读取已结束的0-trace.trace取得37份视觉snapshot：day-gallery已ready，随后传送至[-6,62.7,-9.2]，原20秒内loaded从19升至28、light rebuild从70升至92，最后14砖pending。不能把单点附件解释成调度饥饿；现有8次重建年龄优先和独立续泵保持。主旅程失败前最后128帧update+render中位9.2ms，inter-tick gap中位197.7ms；只说明有明显帧外等待，不能据此认定GPU、trace或宿主根因。现有Luna只读提取两次未取得有效字段，Root独立正确解码；无伪造PASS、无额外并行任务。
+
+本片仅复用已有SEEDLANDS_CLASSIC_NATIVE_TRACE=1诊断合同：从原完整主旅程开始后360秒抓取20秒toplevel/gpu/cc/viz/devtools.timeline原始事件，16MiB trace buffer、64MiB stream上限、10秒完成界限，数据丢失或清理失败照原合同FAIL；保留原Playwright trace、真实键鼠、900/240/90秒、单次本地完整runner、C0–C5/V1/V2与Modular验收。无生产行为、测试断言或质量变更；benchmark不开profiler，诊断eligible=false，不作性能A/A或A/B。
+
+新证据目标是分别观察原输入等待/快照/驻留过程中主线程、compositor/GPU服务和任务间隔；若20秒未覆盖失败路径，明确时间窗口限制，不用线程存在或SwapBuffers事件代替因果证明。identified build仅为当前提交SHA身份重新标识；保留旧dist/results/report到独立未占用路径，原完整runner使用pr41-classic-browser61-01。无新安装/权限/网络扩张、无sealed重写、无旁路浏览器验收。当前CI60自然运行，不为诊断取消或抢推。
+
+传统0.25PD×120%=0.3PD，AI约40min×120%=48min，从19:06附近开始、19:54附近有界checkpoint；18:37真实UI周剩84%，约60%停止线保持。无实际周额度接口，继续依赖主对话读数；诊断不足则记录缺口并选择有新证据的下一片，不盲目同源重复。
+
 ## Far diagonal route planning checkpoint60（模型、静态和完整headless通过，浏览器双失败）
 
 原Browser60实际EXIT1，主6.5分钟FAIL/Visual1.1分钟FAIL/Modular SKIP，正式C0–C2 PASS。C3浆果格子hover原10秒失败，未到crop新规划；Visual原20秒光照谓词失败，worldRevision9、cache pending14。不能把未执行斜向路线计为产品PASS。完整headless103文件663例EXIT0，identified build EXIT0；全静态候选EXIT0后，漏补的target-aim端口定向格式/lint/classic-test类型EXIT0。精确904 CI59已终态失败（headless1/658、Chromium首轮启动10秒/重试900秒，Visual PASS、部署SKIP）。详见evidence/diagonal-route-checkpoint-60-01.md。
