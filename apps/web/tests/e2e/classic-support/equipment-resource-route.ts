@@ -1,5 +1,5 @@
-import { reachedRouteTarget, type RouteDirection } from './route-progress';
-import { voxelInteractionDistance } from './target-aim';
+import { reachedRouteTarget, routeInputSettled, type RouteDirection } from './route-progress';
+import { horizontalMouseCorrectionToRoute, voxelInteractionDistance } from './target-aim';
 import type { Point, RoutePoint } from './scenario';
 
 export const EQUIPMENT_RESOURCE_ROUTE_OPTIONS = Object.freeze({
@@ -21,6 +21,7 @@ export type EquipmentRouteSnapshot = Readonly<{
   player: Point;
   viewAngles?: readonly [number, number];
   serverPlayerPosition: Point;
+  serverPlayerVelocity?: Point;
   onGround: boolean;
   colliding: boolean;
   authority: Readonly<{ physicsTick: number; acknowledgedInputSequence: number }>;
@@ -44,6 +45,32 @@ export type EquipmentRouteDriver = Readonly<{
 
 export const equipmentRouteDirection = (position: Point, target: RoutePoint): RouteDirection =>
   position[0] <= target[0] ? 'KeyW' : 'KeyS';
+
+export function equipmentRoutePulseMs(
+  snapshot: EquipmentRouteSnapshot,
+  target: RoutePoint,
+  direction: RouteDirection,
+): number {
+  const fallback = EQUIPMENT_RESOURCE_ROUTE_OPTIONS.pulseMs;
+  const velocity = snapshot.serverPlayerVelocity;
+  const yaw = snapshot.viewAngles?.[0];
+  if (
+    !velocity ||
+    yaw === undefined ||
+    ![...target, ...snapshot.player, ...snapshot.serverPlayerPosition, ...velocity, yaw].every(Number.isFinite) ||
+    !snapshot.onGround ||
+    snapshot.colliding ||
+    !routeInputSettled({ ...snapshot, serverPlayerVelocity: velocity }) ||
+    ![snapshot.player, snapshot.serverPlayerPosition].every(
+      (position) =>
+        Math.abs(position[2] - target[1]) < EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance &&
+        (direction === 'KeyW' ? target[0] - position[0] > 3 : position[0] - target[0] > 3),
+    ) ||
+    Math.abs(horizontalMouseCorrectionToRoute(snapshot.player, yaw, target, direction, { wholeTurn: true })) >= 1
+  )
+    return fallback;
+  return 300;
+}
 
 function corridorCorrectionDirection(snapshot: EquipmentRouteSnapshot, target: RoutePoint): RouteDirection | null {
   const yaw = snapshot.viewAngles?.[0];
