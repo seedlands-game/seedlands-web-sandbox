@@ -2,6 +2,7 @@ import type { test as classicTest, Page, TestInfo } from '@playwright/test';
 import { requireHeadlessClassic } from './settings';
 import { attachClassicFailureWithInput, type ClassicStage, type ClassicStageResult } from './evidence';
 import { startClassicCpuProfile, stopClassicCpuProfile } from './cpu-profile';
+import { startClassicNativeTrace, stopClassicNativeTrace } from './native-trace';
 
 type DiagnosticState = Readonly<{
   stages: Partial<Record<ClassicStage, ClassicStageResult>>;
@@ -20,12 +21,23 @@ export function installClassicDiagnosticHooks(test: typeof classicTest, state: (
   test.beforeAll(async ({ headless, launchOptions }) => {
     requireHeadlessClassic(headless, launchOptions);
   });
-  test.beforeEach(({ page }, info) => startClassicCpuProfile(page, info, state().benchmark));
+  test.beforeEach(async ({ page }, info) => {
+    await startClassicNativeTrace(page, info, state().benchmark);
+    await startClassicCpuProfile(page, info, state().benchmark);
+  });
   test.afterEach(async ({ page }, info) => {
-    try {
-      await stopClassicCpuProfile(page, info);
-    } finally {
-      await finishOriginalEvidence(page, info, state());
+    const errors: unknown[] = [];
+    for (const operation of [
+      () => stopClassicNativeTrace(page, info),
+      () => stopClassicCpuProfile(page, info),
+      () => finishOriginalEvidence(page, info, state()),
+    ]) {
+      try {
+        await operation();
+      } catch (error) {
+        errors.push(error);
+      }
     }
+    if (errors.length) throw new AggregateError(errors, 'Classic diagnostic/evidence hooks failed.');
   });
 }
