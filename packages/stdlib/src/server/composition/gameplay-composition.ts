@@ -9,6 +9,10 @@ import { BLOCK_RULES_CAPABILITY } from '../gameplay/modules/block-action-model';
 import type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 import { createVoxelGameplayRegistry } from '../gameplay/voxel-gameplay';
 import {
+  TRANSPORT_INTERACTION_CAPABILITY,
+  type FrozenTransportInteractionConfig,
+} from '../gameplay/modules/transport-interaction-config';
+import {
   defineGameplaySnapshotPredecessorsV1,
   GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
   type GameplaySnapshotMigration,
@@ -26,6 +30,13 @@ export const gameplayContentForComposition = (composition: WorldComposition): Ga
   const content = Object.freeze({
     ...base,
     voxelGameplay: createVoxelGameplayRegistry(blockRules?.definitions),
+    ...(composition.definitionMap.capabilities.some(({ id }) => id === TRANSPORT_INTERACTION_CAPABILITY)
+      ? {
+          transportDefinitions: composition.capability<FrozenTransportInteractionConfig>(
+            TRANSPORT_INTERACTION_CAPABILITY,
+          ).definitions,
+        }
+      : {}),
   });
   contentByComposition.set(composition, content);
   return content;

@@ -1,5 +1,6 @@
 import type { PlayerInventoryLayout } from './inventory-layout';
 import type { StationStateCodec } from './ecs-station-state';
+import type { TransportDefinitionRegistryV1 } from './modules/transport-model';
 import { validateBlockBreakAction } from './modules/block-action-model';
 import type { CombatOriginRuntimeOptions } from './combat-origin';
 import type { ModuleScheduleSnapshot } from '../composition/lifecycle-contracts';
@@ -148,6 +149,7 @@ type GameplaySnapshotValidationOptions = {
   clone: CoreClone;
   items?: ItemDefinitionRegistry;
   stationCodec?: StationStateCodec;
+  transportDefinitions?: TransportDefinitionRegistryV1;
   playerLayout?: PlayerInventoryLayout;
   meleeDefinitions?: readonly MeleeDefinition[];
   actorProfiles?: ActorProfileRegistry;
@@ -337,6 +339,7 @@ export function validateGameplaySnapshot(
     options.stationCodec,
     sourceVersion === 4 ? options.playerLayout : undefined,
     options.actorProfiles,
+    options.transportDefinitions,
   );
   const players = new Map<string, PlayerState>();
   const legacyCombatLockouts = new Map<string, number>();

@@ -27,6 +27,12 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     armorPoints: server.getPlayerArmorPoints(playerId),
     media: server.mediaProjections(),
     navigation: server.navigationItems.held(playerId),
+    ...(server.gameplayContent.transportDefinitions
+      ? {
+          transports: server.transportProjections(),
+          transportDefinitions: server.gameplayContent.transportDefinitions.list(),
+        }
+      : {}),
     cropStages: Object.freeze(
       server.crops.list().map(({ position, stage }) =>
         Object.freeze({

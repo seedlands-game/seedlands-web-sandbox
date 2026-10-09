@@ -1,0 +1,17 @@
+# checkpoint48：非 Classic Pack 的正式运输部署入口
+
+基于 `72462e84721af0e430ba862de423059829cad17b`。新增显式 `defineTransportInteractionModule` 的 definition registry、route/surface provider 和存储物品绑定；定义 identity 固定配置的 JSON 数据。组合根只在能力显式存在时给 GameplayContent / EntityStore / Kernel 传运输 definitions，同时注册只读 ECS component projection。默认未配置世界不新增 child 或 transport component。原旧车辆 facade 未转换、未清空。Classic pack 源定义未改变；确定性 esbuild control 用精确 HEAD 的已改源码 overlay，对比当前候选的 Classic pack entry bytes，actual exit0、两端 SHA256 完全相同，日志 `transport-classic-pack-identity-48-01.json`。此项是字节身份检查，不是生产 build 或产品通过。
+
+真实 Authority interact 沿原 item interaction registry 调注册 Actor operation。模块只读投影并返回候选；Host 重新解析候选、检查 primary target/自身 Actor 与库存资源执行授权、观察 receipts、当前模式/选中物/库存、加载几何和实体占位。所有可写效果用同一个 prepared EntityStore participant；同一次扣一份物品并创建 transport，元数据、pose 与当前 lifetime 出现在 accepted view。未知/断连/歧义路线、未知表面或身体空间、占位、错选中物、陈旧选择、规则 veto 或改写候选拒绝且零写。身体空间扫描最多4096格，配置边界为±8；不将 unknown 视为空气。
+
+Task96 初始 missing export 0 tests、重复内容 capability provider、错误 cleanup API/未清理 setup commits 等 fixture 失败均保留，不算运行时 RED。校正后正常 Authority caller 实际 RED 为2FAIL/1PASS；pass-through spy 捕获 `WORLD_PERMISSION_DENIED`。新增注册资源的玩家策略为 transport read/execute any、write self；NPC/creature 与未注册世界不获新 grant，模块请求不自动变成 Host 批准，Host inventory execute 与 module provenance 仍重检。实际几何 fixture 改为连通三格非 solid route，固体 surface 用顶面 offset1；直线段现行模型的 feet y=cellY，不造半格偏移。
+
+Task96最终3/3 GREEN；Task97增加正常 Authority action after-rule veto 与 forged-candidate，精确错误为 `RULE_REJECTED / transport-test-veto` 与 `OPERATION_FAILED / transport-candidate-stale`，最终5/5 GREEN。推进100ms Authority session 确认运输身体可被选择且 canonical pose 保持；这只证明静态已部署 body，并不证明动态骑乘/碰撞产品。根授权回归3文件18/18、owner/Kernel/Authority/恢复回归6文件37/37 PASS。独立日志位于 cloud 私有 root/fixtures run 目录。临时 lint500超限保留，注册组装/投影/单实体动态更新按职责整理，未改500门槛。
+
+Task98 正常 portable Authority checkpoint 持久化后新 Authority 恢复7/7；Task99 将负例改为同一 MemoryGamePersistence、同一 source Authority：正常部署并保存后写入未知 definition 的畸形child，调用真实 source.server.restore()。restore拒绝，当前 entity/component/inventory/revisions/transport、Authority snapshot 和持久化的畸形存档均逐项不变，最终7/7 PASS，`task99-focused-01.log`。原 Task98 新实例启动拒绝不能单独证明原 owner 原子性，故不采用其作为该负例证据。
+
+完整 `verify:static:ci` actual exit0，日志 `transport-deploy-static-48-01.log`：冻结证据5/5、全库格式/路径/lint、全产品与工具/Classic类型、Svelte0 errors/0 warnings、规则66/66、CI选择14/14均PASS。早期 `transport-deploy-all-types-48-01.log` actual exit2，因fixture写入过程中 duplicate key；不重写该失败。Task99最后编辑完成早于最终types但晚于lint阶段；root最终fixture scoped lint抓到503行超过原500门槛，actual exit1，日志保留。Task100提取共享portable类型守卫并消除重复校验，最后scoped ESLint PASS与focused7/7 PASS（task100-lint-01.log / task100-focused-01.log），断言/门槛保持；最终Classic类型与git diff --check另行核验。本组没有本地新 production build、browser或performance运行。
+
+本片仍未实现 Classic 运输声明与玩家 mount/dismount/运动/fuel/cargo UI、非空旧 V4 vehicles 转换、客户端运输呈现与真实浏览器输入。CI新测试已追加既有 headless 与 Classic 类型选择。11:24远端仍72462e84、base fba4486e；47组run37920581998五项SUCCESS、Chromium RUNNING，不声称最终CI通过。PR OPEN/DRAFT、mergeable=true、无review threads/reviews。最近真实周额度10:10 UTC剩86%，10:40更新请求未返回；不把本组用量换算为额度百分比。feature预览授权沿用，不合并/不触发main生产。
+
+最终补正Task101：Task100 boolean helper 未缩窄 entityStore V2，root Classic types actual exit2；改为显式 type predicate，不能靠 cast 掩盖。predicate增行后的临时lint失败同样保留；复用原子 state helper加入完整Authority snapshot比较，最后scoped ESLint `task101-lint-04.log` PASS、Classic types `task101-types-02.log` TSC_EXIT=0、focused `task101-focused-01.log` 7/7 PASS。最终生产代码与其完整static有效，最终fixture的format/lint/types/行为分别补验，不把早期失败改写为通过。

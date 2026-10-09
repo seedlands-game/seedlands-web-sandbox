@@ -1,6 +1,7 @@
 import { projectAuthorityGameplayView } from './authority-gameplay-view';
 import { bindModuleCommandPort, type WorldModuleBinding } from '../commands/module-command';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
+import { transportBodyConfig } from '../gameplay/transport-body-config';
 import { TransactionDeduplicator, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type {
   AuthorityAction,
@@ -104,7 +105,14 @@ export class AuthorityRuntime {
       epoch: options.epoch,
       playerId,
       server: serverPort,
-      bodyConfigFor: (entity) => bodyConfigFor(bodyKindForEntity(entity)),
+      bodyConfigFor: (entity) => {
+        if (entity.type !== 'transport') return bodyConfigFor(bodyKindForEntity(entity));
+        const reference = server.createEntityReference(entity.id);
+        const state = reference && server.transportState(reference);
+        const definition = state && server.gameplayContent.transportDefinitions?.require(state.definitionId);
+        if (!definition) throw new Error('Authority transport body requires its current configured definition.');
+        return transportBodyConfig(definition);
+      },
       voxelSource: { getLoadedVoxel: (x, y, z) => server.peekLoadedVoxel(x, y, z) },
       voxelSemantics: server.voxelSemantics,
       voxelGeometry: server.voxelGeometry,

@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Transport registered deploy checkpoint48（正式 Authority 部署已验证；运输产品未完成）
+
+实际正常 Authority interact 从 WORLD_PERMISSION_DENIED 的2FAIL/1PASS修到7/7 PASS；覆盖 surface/route 部署、库存同次消费、加载几何/占位与选择新鲜度、registered after-rule veto/候选改写零写、静态body推进及便携checkpoint恢复。未知definition用同一persistence写入并实际source.server.restore()拒绝，当前owner与畸形存档均保持。根授权18/18、owner/Kernel/Authority/恢复37/37，完整verify:static:ci实际exit0（冻结5、格式/路径/lint/完整types、Svelte0/0、规则66/CI选择14）；先前半编辑types失败独立保留。Classic pack同构建配置精确HEAD control overlay与candidate entry bytes SHA256同为c1ef197e7fea7248a65488494881cbf84cbda77823d09291edf596183184da18，不替代生产build/真实玩法。详见evidence/transport-deploy-checkpoint-48-01.md。
+
+接续72462e84，将显式Pack运输定义与部署绑定接入world-local EntityStore及正式注册Actor operation；新增defineTransportInteractionModule配置moduleId/operationId/definitions/deployments/routes/surfaces。deployment绑定存储itemId和definitionId；route provider由RouteDefinitionV1和注册voxel集合表达，surface provider由namespace id、voxel集合与surfaceOffset表达。显式配置改变definition identity，不改默认未配置世界、旧Classic pack identity或legacy vehicles。本片先用非Classic Pack的真实Authority performAction(interact)做RED/GREEN，不把直接runtime facade调用算产品通过。
+
+正式部署使用现有item-interaction registry和Actor授权；operation返回只读候选，由单一host state port重建并校验，然后库存消费和transport创建同一次prepared EntityStore发布。校验存活角色、四项selection revision、真实当前选中物、射线/距离、已加载route/surface、definition/body AABB静态及实体占位、候选/规则改写与owner新鲜度；失败inventory/entity/issued/sequence/gameplay/world保持。prepare/apply都检查当前加载几何；不将unknown视为空气，不给模块可写world/owner或新增隐式Host权限。deployment后Authority body使用显式definition AABB；运输位置仍由同一canonical transform持有，本片部署实体为受约束静态body，不承诺运动/骑乘已实现。元数据与lifetime进入accepted gameplay view。缺定义世界不创建transport child；Kernel候选restore显式使用同一运输定义，坏child原owner零写。
+
+RED覆盖自定义surface pod与route cart的实际Authority入口；GREEN验证一次扣物品、accepted entity/reference/component、重复占位/未知surface/错物品/selection stale拒绝，规则veto/forge与prepare后变化零写。World-local非Classic ID证明模块无Classic常量。限定此片不动原浏览器断言/时限、旧voxel0–88/Chunk bytes、sealed evidence、Classic identity迁移和legacy facade；随后必须继续mounted physics、Classic producers/consumers、存档及真实浏览器验收。传统1.2PD×120%=1.44PD；AI约110min×120%=132min，11时附近开始。真实周额度最新仍10:10剩86%，更新请求未返回；60%停止线不变。
+
 ## Transport prepared entity publication checkpoint47（有界基础已验证；产品接入未完成）
 
 在已提交5912eab1的ECS owner上增加host-only prepared transportSpawns与transport component replacements；玩家库存消费与运输创建共享同一EntityStore participant、allocator reservation与commit frontier。prepare/validate不写真实component、inventory、issued IDs、sequence或lifetime；apply前再次核对owner/epoch/allocator、目标transform/immutable component、所有rider生命周期和唯一性。更新definition不得在同一lifetime改换，component revision恰好+1；位置/速度只写canonical transform。metadata与cargo在prepare时冻结复制，未知definition/溢出货物/错revision/重放/owner已替换/重复ID/冲突target/退役引用/坏array一律零写。裸reference不带worldId；不同world数值相同的reference不能仅凭这些字段判源，后续Authority envelope/Host绑定仍须保证实例隔离，不声称本组解决此边界。默认world item/station/actor参与者及192×128 series原额度与顺序保持，不吞掉新类型或放宽500行门禁。
