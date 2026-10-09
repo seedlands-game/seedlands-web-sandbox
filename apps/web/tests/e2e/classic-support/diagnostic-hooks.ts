@@ -4,6 +4,7 @@ import { attachClassicFailureWithInput, type ClassicStage, type ClassicStageResu
 import { startClassicCpuProfile, stopClassicCpuProfile } from './cpu-profile';
 import { startClassicNativeTrace, stopClassicNativeTrace } from './native-trace';
 import { startClassicAuthorityCpuProfile, stopClassicAuthorityCpuProfile } from './authority-cpu-profile';
+import { startClassicKeyboardTiming, stopClassicKeyboardTiming } from './keyboard-timing';
 
 type DiagnosticState = Readonly<{
   stages: Partial<Record<ClassicStage, ClassicStageResult>>;
@@ -23,6 +24,7 @@ export function installClassicDiagnosticHooks(test: typeof classicTest, state: (
     requireHeadlessClassic(headless, launchOptions);
   });
   test.beforeEach(async ({ page }, info) => {
+    await startClassicKeyboardTiming(page, info, state().benchmark);
     await startClassicAuthorityCpuProfile(page, info, state().benchmark);
     await startClassicNativeTrace(page, info, state().benchmark);
     await startClassicCpuProfile(page, info, state().benchmark);
@@ -30,6 +32,7 @@ export function installClassicDiagnosticHooks(test: typeof classicTest, state: (
   test.afterEach(async ({ page }, info) => {
     const errors: unknown[] = [];
     for (const operation of [
+      () => stopClassicKeyboardTiming(page, info),
       () => stopClassicAuthorityCpuProfile(page, info),
       () => stopClassicNativeTrace(page, info),
       () => stopClassicCpuProfile(page, info),
