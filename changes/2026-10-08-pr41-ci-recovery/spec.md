@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 完整tick边界诊断 checkpoint36（确定性与静态完成；浏览器待运行）
+
+Browser26精确669ca56b/build25 whole 1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3/新作物/原V1通过，V2在stone-pickaxe的回工作台路线耗尽900秒，不能视作永久路线死锁。最后128个CPU样本update中位19.5ms、中心render1.8ms；原frame窗口1200帧中位459.1ms。窗口不同且相关计时不能相加推导因果，旧center render明确遗漏canvas/device边界。
+
+只扩观察至同帧frameend：framerender→frameend renderEnvelopeWallMs包括完整render调用，postrender→frameend renderTailWallMs包括device收尾，frameupdate→frameend tickWallMs；previous frameend→new frameupdate interTickGapWallMs首帧/断链null。仅五事件完整有限有序pair在frameend入样，缺phase/重复start/倒退不串frame；仍capacity128、冻结复制/reset/destroy清理。所有是CPU/driver墙钟或事件间等待，不是GPU/cull时间，仍不更改renderer、trace、质量、时钟、线程、玩法、路线断言或900/45/20秒。
+
+适配原observer合同测试并以新增envelope/gap/缺frameend行为取得RED→GREEN，必要types/lint后新build26/browser27唯一完整入口；保存Browser26原始trace/failure/128样本，不直接重跑相同源码。最新实际03:55UI90%，账户另博客任务不能精确归因，60%停止；传统0.08PD×120%=0.096PD、AI约10min×120%=12min，非周额度换算。新观察6/6及联合PerformanceTelemetry共2文件12/12 GREEN、生产与Classic types/scoped lint/格式PASS；沿用本组未改变的checkpoint35完整静态与77文件526项结果。完整V2/V3/V4/194及组合整帧AB仍未完成，无合并/生产部署。
+
 ## 公开帧事件诊断 checkpoint35（确定性与静态完成；浏览器待运行）
 
 Browser25精确939e0165/build24 whole结果1 FAIL、1 visual PASS、1 Modular条件SKIP。C0-C3、新负Z双田创造种植/成熟/收割/库存保持及原V1均PASS；V2完成木镐、石镐，在铁资源准备前回工作台走廊时达到900秒整场期限。最后player[78.5315,32.6,-0.555]、ground=true/colliding=false，未证明永久路线停滞。保留原始trace与failure，不提高900/45/20秒或弱化玩家/ACK断言。

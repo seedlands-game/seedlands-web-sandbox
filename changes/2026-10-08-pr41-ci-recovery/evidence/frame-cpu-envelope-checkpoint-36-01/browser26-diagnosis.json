@@ -1,0 +1,666 @@
+{
+  "sourceSha": "669ca56b261609ab425e47bb9d3246defb0b46be",
+  "runId": "pr41-cloud-browser-26",
+  "whole": {
+    "failed": 1,
+    "passed": 1,
+    "skipped": 1
+  },
+  "failure": ["Error: Test timeout of 900000ms exceeded"],
+  "player": [88.90231323242188, 32.599998474121094, -0.4532327651977539],
+  "frameInterval1200": {
+    "count": 1200,
+    "p50Ms": 459.1000000014901,
+    "p95Ms": 1337.2999999970198,
+    "p99Ms": 2028.1000000014901,
+    "maxMs": 3569.9000000059605,
+    "longFrameCount": 1195,
+    "lastLongFrameMs": 451.59999999403954
+  },
+  "cpuLast128": {
+    "sampleCount": 128,
+    "samples": [
+      {
+        "frameSequence": 1747,
+        "updateWallMs": 35.399999998509884,
+        "renderWallMs": 7.600000001490116
+      },
+      {
+        "frameSequence": 1748,
+        "updateWallMs": 39.80000000447035,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1749,
+        "updateWallMs": 18.899999998509884,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1750,
+        "updateWallMs": 602.7999999970198,
+        "renderWallMs": 2.6999999955296516
+      },
+      {
+        "frameSequence": 1751,
+        "updateWallMs": 21.299999997019768,
+        "renderWallMs": 2.3000000044703484
+      },
+      {
+        "frameSequence": 1752,
+        "updateWallMs": 15,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1753,
+        "updateWallMs": 15.5,
+        "renderWallMs": 4.100000001490116
+      },
+      {
+        "frameSequence": 1754,
+        "updateWallMs": 9.299999997019768,
+        "renderWallMs": 1.8000000044703484
+      },
+      {
+        "frameSequence": 1755,
+        "updateWallMs": 15.700000002980232,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1756,
+        "updateWallMs": 32.80000000447035,
+        "renderWallMs": 2.0999999940395355
+      },
+      {
+        "frameSequence": 1757,
+        "updateWallMs": 70.19999999552965,
+        "renderWallMs": 2.899999998509884
+      },
+      {
+        "frameSequence": 1758,
+        "updateWallMs": 20.100000001490116,
+        "renderWallMs": 1.9000000059604645
+      },
+      {
+        "frameSequence": 1759,
+        "updateWallMs": 40.099999994039536,
+        "renderWallMs": 3.899999998509884
+      },
+      {
+        "frameSequence": 1760,
+        "updateWallMs": 10.200000002980232,
+        "renderWallMs": 1.7999999970197678
+      },
+      {
+        "frameSequence": 1761,
+        "updateWallMs": 134.29999999701977,
+        "renderWallMs": 2.600000001490116
+      },
+      {
+        "frameSequence": 1762,
+        "updateWallMs": 270.3999999985099,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1763,
+        "updateWallMs": 23.600000001490116,
+        "renderWallMs": 1.6999999955296516
+      },
+      {
+        "frameSequence": 1764,
+        "updateWallMs": 8.200000002980232,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1765,
+        "updateWallMs": 13.600000001490116,
+        "renderWallMs": 1.2999999970197678
+      },
+      {
+        "frameSequence": 1766,
+        "updateWallMs": 14.5,
+        "renderWallMs": 1.9000000059604645
+      },
+      {
+        "frameSequence": 1767,
+        "updateWallMs": 20.899999998509884,
+        "renderWallMs": 10.100000001490116
+      },
+      {
+        "frameSequence": 1768,
+        "updateWallMs": 25.299999997019768,
+        "renderWallMs": 3.0999999940395355
+      },
+      {
+        "frameSequence": 1769,
+        "updateWallMs": 23.80000000447035,
+        "renderWallMs": 3.5999999940395355
+      },
+      {
+        "frameSequence": 1770,
+        "updateWallMs": 9.700000002980232,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1771,
+        "updateWallMs": 25.30000000447035,
+        "renderWallMs": 4.5
+      },
+      {
+        "frameSequence": 1772,
+        "updateWallMs": 15.399999998509884,
+        "renderWallMs": 2.100000001490116
+      },
+      {
+        "frameSequence": 1773,
+        "updateWallMs": 11.200000002980232,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1774,
+        "updateWallMs": 53.5,
+        "renderWallMs": 14
+      },
+      {
+        "frameSequence": 1775,
+        "updateWallMs": 10,
+        "renderWallMs": 1.2000000029802322
+      },
+      {
+        "frameSequence": 1776,
+        "updateWallMs": 108.39999999850988,
+        "renderWallMs": 10.400000005960464
+      },
+      {
+        "frameSequence": 1777,
+        "updateWallMs": 25.69999999552965,
+        "renderWallMs": 4.399999998509884
+      },
+      {
+        "frameSequence": 1778,
+        "updateWallMs": 15.5,
+        "renderWallMs": 4.299999997019768
+      },
+      {
+        "frameSequence": 1779,
+        "updateWallMs": 9.599999994039536,
+        "renderWallMs": 4.100000001490116
+      },
+      {
+        "frameSequence": 1780,
+        "updateWallMs": 13.700000002980232,
+        "renderWallMs": 2.1999999955296516
+      },
+      {
+        "frameSequence": 1781,
+        "updateWallMs": 10.100000001490116,
+        "renderWallMs": 3.4000000059604645
+      },
+      {
+        "frameSequence": 1782,
+        "updateWallMs": 142.39999999850988,
+        "renderWallMs": 12.799999997019768
+      },
+      {
+        "frameSequence": 1783,
+        "updateWallMs": 12.5,
+        "renderWallMs": 1.2999999970197678
+      },
+      {
+        "frameSequence": 1784,
+        "updateWallMs": 141.80000000447035,
+        "renderWallMs": 1.8999999985098839
+      },
+      {
+        "frameSequence": 1785,
+        "updateWallMs": 10.400000005960464,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1786,
+        "updateWallMs": 8.600000001490116,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1787,
+        "updateWallMs": 14,
+        "renderWallMs": 1.7000000029802322
+      },
+      {
+        "frameSequence": 1788,
+        "updateWallMs": 10.899999998509884,
+        "renderWallMs": 3.3000000044703484
+      },
+      {
+        "frameSequence": 1789,
+        "updateWallMs": 22,
+        "renderWallMs": 4.399999998509884
+      },
+      {
+        "frameSequence": 1790,
+        "updateWallMs": 36.5,
+        "renderWallMs": 5.399999998509884
+      },
+      {
+        "frameSequence": 1791,
+        "updateWallMs": 12.100000001490116,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1792,
+        "updateWallMs": 103.60000000149012,
+        "renderWallMs": 1.8999999985098839
+      },
+      {
+        "frameSequence": 1793,
+        "updateWallMs": 12.700000002980232,
+        "renderWallMs": 1.3000000044703484
+      },
+      {
+        "frameSequence": 1794,
+        "updateWallMs": 50.100000001490116,
+        "renderWallMs": 3.2999999970197678
+      },
+      {
+        "frameSequence": 1795,
+        "updateWallMs": 17.30000000447035,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1796,
+        "updateWallMs": 97.39999999850988,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1797,
+        "updateWallMs": 99.89999999850988,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1798,
+        "updateWallMs": 13.299999997019768,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1799,
+        "updateWallMs": 72,
+        "renderWallMs": 1
+      },
+      {
+        "frameSequence": 1800,
+        "updateWallMs": 17.299999997019768,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1801,
+        "updateWallMs": 25,
+        "renderWallMs": 2.899999998509884
+      },
+      {
+        "frameSequence": 1802,
+        "updateWallMs": 15.699999995529652,
+        "renderWallMs": 2.5999999940395355
+      },
+      {
+        "frameSequence": 1803,
+        "updateWallMs": 11.699999995529652,
+        "renderWallMs": 1.3000000044703484
+      },
+      {
+        "frameSequence": 1804,
+        "updateWallMs": 161.60000000149012,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1805,
+        "updateWallMs": 71.5,
+        "renderWallMs": 1.3000000044703484
+      },
+      {
+        "frameSequence": 1806,
+        "updateWallMs": 42.70000000298023,
+        "renderWallMs": 3.7000000029802322
+      },
+      {
+        "frameSequence": 1807,
+        "updateWallMs": 18,
+        "renderWallMs": 4.200000002980232
+      },
+      {
+        "frameSequence": 1808,
+        "updateWallMs": 98.19999999552965,
+        "renderWallMs": 6.399999998509884
+      },
+      {
+        "frameSequence": 1809,
+        "updateWallMs": 16,
+        "renderWallMs": 1.2999999970197678
+      },
+      {
+        "frameSequence": 1810,
+        "updateWallMs": 23.700000002980232,
+        "renderWallMs": 2.2000000029802322
+      },
+      {
+        "frameSequence": 1811,
+        "updateWallMs": 22.80000000447035,
+        "renderWallMs": 1.3000000044703484
+      },
+      {
+        "frameSequence": 1812,
+        "updateWallMs": 28.600000001490116,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1813,
+        "updateWallMs": 22.100000001490116,
+        "renderWallMs": 1.7000000029802322
+      },
+      {
+        "frameSequence": 1814,
+        "updateWallMs": 24.399999998509884,
+        "renderWallMs": 1.1999999955296516
+      },
+      {
+        "frameSequence": 1815,
+        "updateWallMs": 14.199999995529652,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1816,
+        "updateWallMs": 16.299999997019768,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1817,
+        "updateWallMs": 11.900000005960464,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1818,
+        "updateWallMs": 25.200000002980232,
+        "renderWallMs": 1.1999999955296516
+      },
+      {
+        "frameSequence": 1819,
+        "updateWallMs": 10.399999998509884,
+        "renderWallMs": 11.800000004470348
+      },
+      {
+        "frameSequence": 1820,
+        "updateWallMs": 8,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1821,
+        "updateWallMs": 15,
+        "renderWallMs": 3.6999999955296516
+      },
+      {
+        "frameSequence": 1822,
+        "updateWallMs": 19.200000002980232,
+        "renderWallMs": 12.899999998509884
+      },
+      {
+        "frameSequence": 1823,
+        "updateWallMs": 173.39999999850988,
+        "renderWallMs": 5.700000002980232
+      },
+      {
+        "frameSequence": 1824,
+        "updateWallMs": 27,
+        "renderWallMs": 7.600000001490116
+      },
+      {
+        "frameSequence": 1825,
+        "updateWallMs": 18.899999998509884,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1826,
+        "updateWallMs": 20.399999998509884,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1827,
+        "updateWallMs": 9.5,
+        "renderWallMs": 2
+      },
+      {
+        "frameSequence": 1828,
+        "updateWallMs": 14.299999997019768,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1829,
+        "updateWallMs": 26.599999994039536,
+        "renderWallMs": 3.2000000029802322
+      },
+      {
+        "frameSequence": 1830,
+        "updateWallMs": 18.600000001490116,
+        "renderWallMs": 2.1999999955296516
+      },
+      {
+        "frameSequence": 1831,
+        "updateWallMs": 32.19999999552965,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1832,
+        "updateWallMs": 100.89999999850988,
+        "renderWallMs": 17.099999994039536
+      },
+      {
+        "frameSequence": 1833,
+        "updateWallMs": 21,
+        "renderWallMs": 4.799999997019768
+      },
+      {
+        "frameSequence": 1834,
+        "updateWallMs": 35.80000000447035,
+        "renderWallMs": 1.7999999970197678
+      },
+      {
+        "frameSequence": 1835,
+        "updateWallMs": 17.299999997019768,
+        "renderWallMs": 2.5
+      },
+      {
+        "frameSequence": 1836,
+        "updateWallMs": 27.900000005960464,
+        "renderWallMs": 6.300000004470348
+      },
+      {
+        "frameSequence": 1837,
+        "updateWallMs": 33.600000001490116,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1838,
+        "updateWallMs": 17,
+        "renderWallMs": 2.3000000044703484
+      },
+      {
+        "frameSequence": 1839,
+        "updateWallMs": 41.70000000298023,
+        "renderWallMs": 2.2999999970197678
+      },
+      {
+        "frameSequence": 1840,
+        "updateWallMs": 22.100000001490116,
+        "renderWallMs": 1.8000000044703484
+      },
+      {
+        "frameSequence": 1841,
+        "updateWallMs": 12.700000002980232,
+        "renderWallMs": 1.1999999955296516
+      },
+      {
+        "frameSequence": 1842,
+        "updateWallMs": 105.5,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1843,
+        "updateWallMs": 76.69999999552965,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1844,
+        "updateWallMs": 13.299999997019768,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1845,
+        "updateWallMs": 12.5,
+        "renderWallMs": 1.3000000044703484
+      },
+      {
+        "frameSequence": 1846,
+        "updateWallMs": 10.700000002980232,
+        "renderWallMs": 1.4000000059604645
+      },
+      {
+        "frameSequence": 1847,
+        "updateWallMs": 9.299999997019768,
+        "renderWallMs": 1.8999999985098839
+      },
+      {
+        "frameSequence": 1848,
+        "updateWallMs": 17.69999999552965,
+        "renderWallMs": 1.6000000014901161
+      },
+      {
+        "frameSequence": 1849,
+        "updateWallMs": 64.10000000149012,
+        "renderWallMs": 2.399999998509884
+      },
+      {
+        "frameSequence": 1850,
+        "updateWallMs": 46.5,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1851,
+        "updateWallMs": 24,
+        "renderWallMs": 2.100000001490116
+      },
+      {
+        "frameSequence": 1852,
+        "updateWallMs": 3.4000000059604645,
+        "renderWallMs": 1.0999999940395355
+      },
+      {
+        "frameSequence": 1853,
+        "updateWallMs": 15.300000004470348,
+        "renderWallMs": 1.2999999970197678
+      },
+      {
+        "frameSequence": 1854,
+        "updateWallMs": 19.599999994039536,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1855,
+        "updateWallMs": 11.600000001490116,
+        "renderWallMs": 2.8000000044703484
+      },
+      {
+        "frameSequence": 1856,
+        "updateWallMs": 15.800000004470348,
+        "renderWallMs": 1.7000000029802322
+      },
+      {
+        "frameSequence": 1857,
+        "updateWallMs": 30.700000002980232,
+        "renderWallMs": 1.5
+      },
+      {
+        "frameSequence": 1858,
+        "updateWallMs": 22.899999998509884,
+        "renderWallMs": 5.899999998509884
+      },
+      {
+        "frameSequence": 1859,
+        "updateWallMs": 28.399999998509884,
+        "renderWallMs": 6.600000001490116
+      },
+      {
+        "frameSequence": 1860,
+        "updateWallMs": 13.399999998509884,
+        "renderWallMs": 1.8999999985098839
+      },
+      {
+        "frameSequence": 1861,
+        "updateWallMs": 20.299999997019768,
+        "renderWallMs": 3.5
+      },
+      {
+        "frameSequence": 1862,
+        "updateWallMs": 16.399999998509884,
+        "renderWallMs": 9.700000002980232
+      },
+      {
+        "frameSequence": 1863,
+        "updateWallMs": 16.600000001490116,
+        "renderWallMs": 1.7000000029802322
+      },
+      {
+        "frameSequence": 1864,
+        "updateWallMs": 24.5,
+        "renderWallMs": 1.3999999985098839
+      },
+      {
+        "frameSequence": 1865,
+        "updateWallMs": 19.399999998509884,
+        "renderWallMs": 1.8000000044703484
+      },
+      {
+        "frameSequence": 1866,
+        "updateWallMs": 15.200000002980232,
+        "renderWallMs": 4.399999998509884
+      },
+      {
+        "frameSequence": 1867,
+        "updateWallMs": 44.899999998509884,
+        "renderWallMs": 4
+      },
+      {
+        "frameSequence": 1868,
+        "updateWallMs": 149.20000000298023,
+        "renderWallMs": 6.100000001490116
+      },
+      {
+        "frameSequence": 1869,
+        "updateWallMs": 23.5,
+        "renderWallMs": 1.8999999985098839
+      },
+      {
+        "frameSequence": 1870,
+        "updateWallMs": 16.69999999552965,
+        "renderWallMs": 1.1000000014901161
+      },
+      {
+        "frameSequence": 1871,
+        "updateWallMs": 10.399999998509884,
+        "renderWallMs": 1.2000000029802322
+      },
+      {
+        "frameSequence": 1872,
+        "updateWallMs": 17.299999997019768,
+        "renderWallMs": 1.7000000029802322
+      },
+      {
+        "frameSequence": 1873,
+        "updateWallMs": 9.399999998509884,
+        "renderWallMs": 1.2999999970197678
+      },
+      {
+        "frameSequence": 1874,
+        "updateWallMs": 18.599999994039536,
+        "renderWallMs": 4.9000000059604645
+      }
+    ]
+  },
+  "scope": "公开事件中心CPU wall非GPU；两个窗口不可直接相减或推定因果。完整tick/device边界尚未测量。"
+}
