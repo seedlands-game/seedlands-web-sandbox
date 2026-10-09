@@ -1,7 +1,14 @@
-import { hasComponent, type EntityId, type World } from 'bitecs';
+import { clearComponentSlot } from './ecs-component-storage';
+import { addComponent, hasComponent, type EntityId, type World } from 'bitecs';
 import type { ItemStack } from './item-registry';
 import { cloneItemStack } from './item-instance';
-import type { EcsActorArchetype, EcsEntityType, EcsOwnedEntity, EcsPosition } from './ecs-entity-owner';
+import type {
+  EcsActorArchetype,
+  EcsEntityType,
+  EcsOwnedEntity,
+  EcsPosition,
+  PreparedActorSpatialReplacement,
+} from './ecs-entity-owner';
 
 type SlotArray<Value> = Array<Value | undefined>;
 export const createEntityComponents = () => ({
@@ -68,6 +75,19 @@ export function writeEcsPosition(
   component.z[eid] = position[2];
 }
 
+export function writePreparedSpatial(
+  world: World,
+  components: EntityComponents,
+  eid: EntityId,
+  spatial: PreparedActorSpatialReplacement,
+): void {
+  if (spatial.position) writeEcsPosition(components.transform, eid, spatial.position);
+  if (spatial.physicsVelocity) {
+    if (!hasComponent(world, eid, components.velocity)) addComponent(world, eid, components.velocity);
+    writeEcsPosition(components.velocity, eid, spatial.physicsVelocity);
+  }
+}
+
 export function projectEcsEntity(world: World, components: EntityComponents, eid: EntityId): EcsOwnedEntity {
   const type = ecsEntityType(world, components, eid);
   const entity: EcsOwnedEntity = {
@@ -100,4 +120,26 @@ export function projectEcsEntity(world: World, components: EntityComponents, eid
     ...(entity.physicsVelocity ? { physicsVelocity: [...entity.physicsVelocity] } : {}),
     ...(entity.stack ? { stack: cloneItemStack(entity.stack) } : {}),
   };
+}
+
+export function clearEcsEntityColumns(eid: EntityId, components: EntityComponents): void {
+  clearComponentSlot(eid, [
+    components.identity.id,
+    components.identity.lifetime,
+    components.identity.order,
+    components.lifecycle.active,
+    components.transform.x,
+    components.transform.y,
+    components.transform.z,
+    components.velocity.x,
+    components.velocity.y,
+    components.velocity.z,
+    components.health.current,
+    components.health.maximum,
+    components.itemStack.itemId,
+    components.itemStack.count,
+    components.itemStack.durability,
+    components.actorMetadata.archetype,
+    components.actorMetadata.persistent,
+  ]);
 }

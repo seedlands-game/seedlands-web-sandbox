@@ -1,77 +1,24 @@
+import { validatePreparedTransportRelations } from './prepared-transport-relations';
+import type { TransportComponentV1 } from './modules/transport-model';
+import { reservePreparedSpawnId } from './prepared-spawn-identity';
+import type {
+  PreparedActorReplacement,
+  PreparedWorldItemSpawn,
+  PreparedStationReplacement,
+  PreparedStationSpawn,
+  PreparedEntityMutationInput,
+  PreparedEntityMutationResult,
+  PreparedEntityMutation,
+  PreparedEntityMutationHost,
+} from './prepared-entity-mutation-types';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
 import { isActorEntityType } from './ecs-actor-state';
-import type { EcsEntityOwner, EcsPosition, EntityLifetimeReference } from './ecs-entity-owner';
-import type { StationComponentV1, StationKind } from './ecs-station-state';
-import type { EntitySpawn, EntityStore, GameplayEntity } from './entity-store';
-import type { ItemStack } from './item-registry';
+import type { EcsPosition, EntityLifetimeReference } from './ecs-entity-owner';
+import type { StationComponentV1 } from './ecs-station-state';
+import type { EntityStore, GameplayEntity } from './entity-store';
 import { ARMOR_SLOTS } from './modules/armor-policy';
 
-export type PreparedActorReplacement = Readonly<{
-  reference: EntityLifetimeReference;
-  health: number;
-  components: ActorComponentSnapshot;
-  position?: readonly [number, number, number];
-  physicsVelocity?: readonly [number, number, number];
-}>;
-
-export type PreparedWorldItemSpawn = Readonly<{
-  id?: string;
-  position: readonly [number, number, number];
-  physicsVelocity?: readonly [number, number, number];
-  stack: ItemStack;
-}>;
-
-export type PreparedStationReplacement = Readonly<{
-  reference: EntityLifetimeReference;
-  snapshot: StationComponentV1;
-}>;
-
-export type PreparedStationSpawn = Readonly<{
-  id?: string;
-  position: readonly [number, number, number];
-  kind: StationKind;
-}>;
-
-export type PreparedEntityMutationInput = Readonly<{
-  dynamics?: readonly Readonly<{
-    reference: EntityLifetimeReference;
-    position?: readonly [number, number, number];
-    physicsVelocity?: readonly [number, number, number];
-  }>[];
-  actors?: readonly PreparedActorReplacement[];
-  stations?: readonly PreparedStationReplacement[];
-  worldItems?: readonly Readonly<{ reference: EntityLifetimeReference; count: number }>[];
-  spawns?: readonly PreparedWorldItemSpawn[];
-  stationSpawns?: readonly PreparedStationSpawn[];
-  despawns?: readonly EntityLifetimeReference[];
-}>;
-
-export type PreparedEntityMutationResult = Readonly<{
-  actorIds: readonly string[];
-  stationIds: readonly string[];
-  despawnedIds: readonly string[];
-  spawned: readonly GameplayEntity[];
-}>;
-
-export type PreparedEntityMutation = Readonly<{
-  spawnIds: readonly string[];
-  validate(): void;
-  apply(): PreparedEntityMutationResult;
-}>;
-
-export type PreparedEntityMutationHost = Readonly<{
-  owner: EcsEntityOwner;
-  sequence: number;
-  isCurrent(owner: EcsEntityOwner, sequence: number): boolean;
-  prepareWorldItem(input: EntitySpawn, id: string): GameplayEntity;
-  prepareStation(
-    input: Readonly<{ position: readonly [number, number, number]; kind: StationKind }>,
-    id: string,
-  ): Readonly<{ entity: GameplayEntity; station: StationComponentV1 }>;
-  removeFromBucket(entity: GameplayEntity): void;
-  addToBucket(entity: GameplayEntity): void;
-  commitSequence(sequence: number): void;
-}>;
+export type * from './prepared-entity-mutation-types';
 
 const sameSnapshot = (left: unknown, right: unknown) => JSON.stringify(left) === JSON.stringify(right);
 const armorInteractionSnapshot = (components: ActorComponentSnapshot) =>
@@ -103,17 +50,21 @@ function prepareMutation(
   const actorInputs = input.actors ?? [];
   const dynamicInputs = input.dynamics ?? [];
   const stationInputs = input.stations ?? [];
+  const transportInputs = input.transports === undefined ? [] : input.transports;
   const worldItemInputs = input.worldItems ?? [];
   const spawnInputs = input.spawns ?? [];
   const stationSpawnInputs = input.stationSpawns ?? [];
+  const transportSpawnInputs = input.transportSpawns === undefined ? [] : input.transportSpawns;
   const despawnInputs = input.despawns ?? [];
   for (const entries of [
     dynamicInputs,
     actorInputs,
     stationInputs,
+    transportInputs,
     worldItemInputs,
     spawnInputs,
     stationSpawnInputs,
+    transportSpawnInputs,
     despawnInputs,
   ])
     if (!Array.isArray(entries)) throw new TypeError('Prepared entity mutation entries must be arrays.');
@@ -121,9 +72,11 @@ function prepareMutation(
     dynamicInputs.length +
     actorInputs.length +
     stationInputs.length +
+    transportInputs.length +
     worldItemInputs.length +
     spawnInputs.length +
     stationSpawnInputs.length +
+    transportSpawnInputs.length +
     despawnInputs.length;
   if (!Number.isSafeInteger(entryCount) || entryCount < 1 || entryCount > maxEntries)
     throw new RangeError(`Prepared entity mutation must contain between 1 and ${maxEntries} entries.`);
@@ -131,9 +84,11 @@ function prepareMutation(
     dynamicInputs,
     actorInputs,
     stationInputs,
+    transportInputs,
     worldItemInputs,
     spawnInputs,
     stationSpawnInputs,
+    transportSpawnInputs,
     despawnInputs,
   ])
     assertDense(entries);
@@ -151,6 +106,7 @@ function prepareMutation(
       entity: GameplayEntity;
       actor: ActorComponentSnapshot | null;
       station: StationComponentV1 | null;
+      transport: TransportComponentV1 | null;
     }>
   >();
 
@@ -173,7 +129,8 @@ function prepareMutation(
     const savedReference = Object.freeze({ ...reference });
     const actor = isActorEntityType(entity.type) ? capturedOwner.actorComponentSnapshot(entity.id) : null;
     const station = entity.type === 'station' ? capturedOwner.stationSnapshot(entity.id) : null;
-    touched.set(entity.id, Object.freeze({ reference: savedReference, entity, actor, station }));
+    const transport = entity.type === 'transport' ? capturedOwner.transportComponentSnapshot(entity.id) : null;
+    touched.set(entity.id, Object.freeze({ reference: savedReference, entity, actor, station, transport }));
     return entity;
   };
 
@@ -231,6 +188,20 @@ function prepareMutation(
     });
   });
 
+  const transports = transportInputs.map((candidate) => {
+    const entity = capture(candidate.reference, 'transport');
+    if (entity.type !== 'transport') throw new TypeError('Prepared transport replacement requires a transport entity.');
+    if (Object.keys(candidate).some((key) => !['reference', 'snapshot', 'position', 'physicsVelocity'].includes(key)))
+      throw new TypeError('Prepared transport replacement fields are invalid.');
+    return Object.freeze({
+      id: entity.id,
+      entity,
+      snapshot: capturedOwner.prepareTransportComponentSnapshot(entity.id, candidate.snapshot),
+      position: copyPosition(candidate.position, 'position'),
+      physicsVelocity: copyPosition(candidate.physicsVelocity, 'physics velocity'),
+    });
+  });
+
   const worldItems = worldItemInputs.map((candidate) => {
     const entity = capture(candidate.reference, 'world-item');
     if (entity.type !== 'world-item' || !entity.stack || !Number.isSafeInteger(candidate.count) || candidate.count <= 0)
@@ -248,7 +219,7 @@ function prepareMutation(
   });
 
   const explicitSpawnIds = new Set<string>();
-  for (const spawn of [...spawnInputs, ...stationSpawnInputs]) {
+  for (const spawn of [...spawnInputs, ...stationSpawnInputs, ...transportSpawnInputs]) {
     if (spawn.id === undefined) continue;
     if (typeof spawn.id !== 'string' || !spawn.id.trim()) throw new TypeError('Entity id must not be empty.');
     if (explicitSpawnIds.has(spawn.id) || touchedIds.has(spawn.id))
@@ -256,22 +227,15 @@ function prepareMutation(
     explicitSpawnIds.add(spawn.id);
   }
   const blockedSpawnIds = new Set([...explicitSpawnIds, ...touchedIds]);
-  let candidateSequence = capturedSequence;
+  const spawnIdentity = {
+    owner: capturedOwner,
+    state: { sequence: capturedSequence },
+    touchedIds,
+    explicitIds: explicitSpawnIds,
+    blockedIds: blockedSpawnIds,
+  };
   const spawns = spawnInputs.map((spawn) => {
-    let id = spawn.id;
-    if (id === undefined) {
-      do {
-        candidateSequence += 1;
-        if (!Number.isSafeInteger(candidateSequence)) throw new RangeError('Entity sequence is exhausted.');
-        id = `world-item-${candidateSequence}`;
-      } while (capturedOwner.isIssued(id) || blockedSpawnIds.has(id));
-    }
-    if (!id.trim()) throw new TypeError('Entity id must not be empty.');
-    if (capturedOwner.get(id)) throw new Error(`Entity already exists: ${id}`);
-    if (capturedOwner.isIssued(id)) throw new Error(`Entity id was already issued or retired: ${id}`);
-    if (touchedIds.has(id) || (spawn.id === undefined && explicitSpawnIds.has(id)))
-      throw new TypeError(`Prepared entity mutation contains a duplicate or conflicting id: ${id}`);
-    blockedSpawnIds.add(id);
+    const id = reservePreparedSpawnId(spawn.id, 'world-item', spawnIdentity);
     const entity = host.prepareWorldItem({ ...spawn, type: 'world-item', kind: 'world-item' }, id);
     return Object.freeze(entity);
   });
@@ -286,20 +250,7 @@ function prepareMutation(
       .map((station) => station.position.join(',')),
   );
   const stationSpawns = stationSpawnInputs.map((spawn) => {
-    let id = spawn.id;
-    if (id === undefined) {
-      do {
-        candidateSequence += 1;
-        if (!Number.isSafeInteger(candidateSequence)) throw new RangeError('Entity sequence is exhausted.');
-        id = `station-${candidateSequence}`;
-      } while (capturedOwner.isIssued(id) || blockedSpawnIds.has(id));
-    }
-    if (!id.trim()) throw new TypeError('Entity id must not be empty.');
-    if (capturedOwner.get(id)) throw new Error(`Entity already exists: ${id}`);
-    if (capturedOwner.isIssued(id)) throw new Error(`Entity id was already issued or retired: ${id}`);
-    if (touchedIds.has(id) || (spawn.id === undefined && explicitSpawnIds.has(id)))
-      throw new TypeError(`Prepared entity mutation contains a duplicate or conflicting id: ${id}`);
-    blockedSpawnIds.add(id);
+    const id = reservePreparedSpawnId(spawn.id, 'station', spawnIdentity);
     const position = copyPosition(spawn.position, 'station position')!;
     if (!position.every(Number.isSafeInteger))
       throw new TypeError('Prepared station position must contain safe integers.');
@@ -309,7 +260,26 @@ function prepareMutation(
     const prepared = host.prepareStation({ position, kind: spawn.kind }, id);
     return Object.freeze(prepared);
   });
-  const allSpawns = [...spawns.map((entity) => Object.freeze({ entity, station: null })), ...stationSpawns];
+  const transportSpawns = transportSpawnInputs.map((spawn) => {
+    if (Object.keys(spawn).some((key) => !['id', 'position', 'physicsVelocity', 'transport'].includes(key)))
+      throw new TypeError('Prepared transport spawn fields are invalid.');
+    const id = reservePreparedSpawnId(spawn.id, 'transport', spawnIdentity);
+    return Object.freeze(host.prepareTransport(spawn, id));
+  });
+  const allSpawns = [
+    ...spawns.map((entity) => Object.freeze({ entity, station: null, transport: null })),
+    ...stationSpawns.map((spawn) => Object.freeze({ ...spawn, transport: null })),
+    ...transportSpawns.map((spawn) => Object.freeze({ ...spawn, station: null })),
+  ];
+  const validateTransportFrontier = () =>
+    validatePreparedTransportRelations({
+      owner: capturedOwner,
+      replacements: transports,
+      spawns: transportSpawns,
+      actors,
+      despawns,
+    });
+  validateTransportFrontier();
   capturedOwner.validateCreateCapacity(allSpawns.length);
 
   const spawnIds = Object.freeze(allSpawns.map((spawn) => spawn.entity.id));
@@ -332,7 +302,10 @@ function prepareMutation(
         throw new Error(`Prepared entity mutation actor component state has changed: ${saved.reference.entityId}`);
       if (saved.station && !sameSnapshot(capturedOwner.stationSnapshot(saved.reference.entityId), saved.station))
         throw new Error(`Prepared entity mutation station component state has changed: ${saved.reference.entityId}`);
+      if (saved.transport && capturedOwner.transportComponentSnapshot(saved.reference.entityId) !== saved.transport)
+        throw new Error(`Prepared entity mutation transport component state has changed: ${saved.reference.entityId}`);
     }
+    validateTransportFrontier();
     for (const id of spawnIds)
       if (capturedOwner.get(id) || capturedOwner.isIssued(id))
         throw new Error(`Prepared entity mutation spawn id is stale: ${id}`);
@@ -370,6 +343,14 @@ function prepareMutation(
         });
         if (actor.position) host.addToBucket(capturedOwner.get(actor.id)!);
       }
+      for (const transport of transports) {
+        if (transport.position) host.removeFromBucket(transport.entity);
+        capturedOwner.installPreparedTransportReplacement(transport.id, transport.snapshot, {
+          ...(transport.position ? { position: transport.position } : {}),
+          ...(transport.physicsVelocity ? { physicsVelocity: transport.physicsVelocity } : {}),
+        });
+        if (transport.position) host.addToBucket(capturedOwner.get(transport.id)!);
+      }
       for (const station of stations) capturedOwner.installPreparedStationReplacement(station.id, station.snapshot);
       for (const item of worldItems) capturedOwner.setStackCount(item.id, item.count);
       for (const despawn of despawns) {
@@ -379,11 +360,13 @@ function prepareMutation(
       const spawned = allSpawns.map((spawn) => {
         const created = spawn.station
           ? capturedOwner.createPreparedStation(spawn.entity, spawn.station)
-          : capturedOwner.createPreparedWorldItem(spawn.entity);
+          : spawn.transport
+            ? capturedOwner.createPreparedTransport(spawn.entity, spawn.transport)
+            : capturedOwner.createPreparedWorldItem(spawn.entity);
         host.addToBucket(created);
         return created;
       });
-      host.commitSequence(candidateSequence);
+      host.commitSequence(spawnIdentity.state.sequence);
       return Object.freeze({
         actorIds: Object.freeze(actors.map((actor) => actor.id)),
         stationIds: Object.freeze(stations.map((station) => station.id)),
@@ -425,6 +408,8 @@ export function prepareEntityMutationSeriesParticipant(
   const dynamics: NonNullable<PreparedEntityMutationInput['dynamics']>[number][] = [],
     actors: PreparedActorReplacement[] = [],
     stations: PreparedStationReplacement[] = [],
+    transports: import('./prepared-entity-mutation-types').PreparedTransportReplacement[] = [],
+    transportSpawns: import('./prepared-entity-mutation-types').PreparedTransportSpawn[] = [],
     worldItems: Readonly<{ reference: EntityLifetimeReference; count: number }>[] = [],
     spawns: PreparedWorldItemSpawn[] = [],
     stationSpawns: PreparedStationSpawn[] = [],
@@ -434,17 +419,21 @@ export function prepareEntityMutationSeriesParticipant(
     const actorEntries = segment.actors ?? [],
       dynamicEntries = segment.dynamics ?? [],
       stationEntries = segment.stations ?? [],
+      transportEntries = segment.transports === undefined ? [] : segment.transports,
       worldItemEntries = segment.worldItems ?? [],
       spawnEntries = segment.spawns ?? [],
       stationSpawnEntries = segment.stationSpawns ?? [],
+      transportSpawnEntries = segment.transportSpawns === undefined ? [] : segment.transportSpawns,
       despawnEntries = segment.despawns ?? [];
     for (const entries of [
       dynamicEntries,
       actorEntries,
       stationEntries,
+      transportEntries,
       worldItemEntries,
       spawnEntries,
       stationSpawnEntries,
+      transportSpawnEntries,
       despawnEntries,
     ])
       if (!Array.isArray(entries)) throw new TypeError('Entity mutation segment arrays are invalid.');
@@ -452,30 +441,40 @@ export function prepareEntityMutationSeriesParticipant(
       dynamicEntries.length +
       actorEntries.length +
       stationEntries.length +
+      transportEntries.length +
       worldItemEntries.length +
       spawnEntries.length +
       stationSpawnEntries.length +
+      transportSpawnEntries.length +
       despawnEntries.length;
     if (count < 1 || count > 128) throw new RangeError('Entity mutation segment must contain 1..128 entries.');
     for (const entries of [
       dynamicEntries,
       actorEntries,
       stationEntries,
+      transportEntries,
       worldItemEntries,
       spawnEntries,
       stationSpawnEntries,
+      transportSpawnEntries,
       despawnEntries,
     ])
       assertDense(entries);
     dynamics.push(...dynamicEntries);
     actors.push(...actorEntries);
     stations.push(...stationEntries);
+    transports.push(...transportEntries);
+    transportSpawns.push(...transportSpawnEntries);
     worldItems.push(...worldItemEntries);
     spawns.push(...spawnEntries);
     stationSpawns.push(...stationSpawnEntries);
     despawns.push(...despawnEntries);
   }
-  return prepareMutation(host, { dynamics, actors, stations, worldItems, spawns, stationSpawns, despawns }, 192 * 128);
+  return prepareMutation(
+    host,
+    { dynamics, actors, stations, transports, worldItems, spawns, stationSpawns, transportSpawns, despawns },
+    192 * 128,
+  );
 }
 
 /** All segments share one allocator reservation and one commit frontier. */

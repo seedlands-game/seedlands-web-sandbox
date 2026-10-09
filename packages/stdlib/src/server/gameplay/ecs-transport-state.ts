@@ -46,9 +46,21 @@ export class EcsTransportStateOwner {
       this.bindings.epoch,
     );
   }
-  prepareRestored(entityId: string, state: TransportComponentV1): TransportComponentV1 {
+  prepareRestored(entityId: string, state: unknown): TransportComponentV1 {
     if (!this.codec) throw new TypeError('Transport restore requires a configured codec.');
     return this.codec.decode(state, entityId);
+  }
+  prepareReplacement(entityId: string, raw: unknown): TransportComponentV1 {
+    const current = this.snapshot(entityId);
+    const candidate = this.prepareRestored(entityId, raw);
+    if (current.revision >= Number.MAX_SAFE_INTEGER || candidate.revision !== current.revision + 1)
+      throw new TypeError('Prepared transport revision must advance exactly once.');
+    if (candidate.definitionId !== current.definitionId)
+      throw new TypeError('A transport definition cannot change within one entity lifetime.');
+    return candidate;
+  }
+  replace(eid: EntityId, state: TransportComponentV1): void {
+    this.component.value[eid] = state;
   }
   initialize(eid: EntityId, state: TransportComponentV1): void {
     addComponent(this.world, eid, this.component);

@@ -1,3 +1,4 @@
+import { projectEntityComponentSnapshot } from './entity-component-projection';
 import { prepareEntitySpawn, entityTypeForSpawn, assertPosition } from './entity-spawn-validation';
 import { freezePlayerInventoryLayout, type PlayerInventoryLayout } from './inventory-layout';
 import {
@@ -230,26 +231,7 @@ export class EntityStore {
   }
 
   exportComponentSnapshot(): EntityStoreComponentSnapshotV2 {
-    const entities = this.owner.queryAll();
-    return {
-      version: 2,
-      sequence: this.sequence,
-      lifetimeHighWater: this.owner.lifetimeHighWater,
-      issuedIds: [...this.owner.issuedIds()].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)),
-      entities,
-      identities: this.owner.identitySnapshots(),
-      actors: entities
-        .filter((entity) => isActorEntityType(entity.type))
-        .map((entity) => this.owner.actorComponentSnapshot(entity.id)),
-      stations: this.owner.queryStations().map((entity) => this.owner.stationSnapshot(entity.id)),
-      ...(this.transportCodec
-        ? {
-            transports: entities
-              .filter((entity) => entity.type === 'transport')
-              .map((entity) => this.owner.transportComponentSnapshot(entity.id)),
-          }
-        : {}),
-    };
+    return projectEntityComponentSnapshot(this.owner, this.sequence, this.transportCodec !== undefined);
   }
 
   /** Reads one actor's complete ECS component state without exporting or scanning the world. */
@@ -302,6 +284,10 @@ export class EntityStore {
       ) => {
         const entity = this.prepareEntity({ ...input, type: 'station', station: { kind: input.kind } }, id, 'station');
         return Object.freeze({ entity, station: this.stationCodec!.create(id, input.kind) });
+      },
+      prepareTransport: (input: import('./prepared-entity-mutation').PreparedTransportSpawn, id: string) => {
+        const entity = this.prepareEntity({ ...input, type: 'transport' }, id, 'transport');
+        return Object.freeze({ entity, transport: this.transportCodec!.create(id, input.transport) });
       },
       removeFromBucket: (entity: GameplayEntity) => removeEntityFromBucket(entity, this.buckets),
       addToBucket: (entity: GameplayEntity) => addEntityToBucket(entity, this.buckets),
