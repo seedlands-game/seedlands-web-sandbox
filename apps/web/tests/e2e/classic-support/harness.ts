@@ -318,6 +318,11 @@ export async function mineVoxel(
       tolerance: 0.45,
       timeout: 15_000,
       pulseMs: 100,
+      yieldAfterSettledPulse: (value) =>
+        [value.player, value.serverPlayerPosition].every((position) => {
+          const distance = voxelInteractionDistance(position, target);
+          return distance >= 2.5 && distance <= 4.5;
+        }),
     });
     current = await snapshot(page);
     if (!current || voxelInteractionDistance(current.player, target) > 5)
