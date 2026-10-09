@@ -1,6 +1,6 @@
 # PR41 当前源码 CI 与可玩性修复
 
-## Modular 正常玩家方块入口 checkpoint66（预注册，未验证）
+## Modular 正常玩家方块入口 checkpoint66（预注册及实际局部验收）
 
 Group65已有正常feature提交da2a2ed6，76项定向/673项完整headless/完整static/build通过。原Browser65实际EXIT1：正式C0–C3 PASS、crop第一条[65.5,-0.5]原45秒FAIL、visual2.5min PASS、Modular SKIP；最后80ms事件生成83–87ms而page callback312–319ms，停稳pose在64.9399/66.3587两侧漂移。该事实不授权改变physics、late policy、range/原.06/.08到达、45/900秒或quality。当前精确CI65五项SUCCESS、Chromium仍运行，不能取消或抢推新head。
 
@@ -39,6 +39,26 @@ Root追加现有Mode/Block回归出现实际38 PASS/7 FAIL：gameplay-registered
 Root独占harness.ts/spec/package/evidence及验收；既有唯一Luna只独占apps/web/tests/e2e/classic-support/mining-approach-handoff.test.ts和private task125，不再委派、不跑browser/build/fullstatic。传统0.2PD×120%=0.24PD、AI35min×120%=42min，21:00起约21:42有界checkpoint；实际服务元数据未核实，按用户Sol/high/default及Luna/medium请求。20:26真实UI剩83%，约60%停止线保持，未知计量不换算token/credits。新run独立pr41-classic-browser65-01；CI64自然终态前不抢推取消，编辑前remote e71/base fba21:00核对不变。剩余完整产品/lighting/transport/Modular/combined性能未准出。
 
 有效旧行为RED为Task125 red-02；red-01遗漏PointerLock mouse baseline，属无效夹具尝试并保留。候选四项GREEN，Root加入global cleanup并按原trace更正起点末位后，九文件76/76回归实际EXIT0。完整verify:static:ci实际EXIT0；更新后的完整headless106文件673项PASS/EXIT0。新identified build与Browser65待验。CI64已自然终态：五项SUCCESS、两次主C4返回900秒FAIL、Visual PASS、部署SKIP。详见evidence/mining-handoff-checkpoint-65-01.md。
+
+## 路线部署邻格入口高度 checkpoint67（预注册及局部GREEN）
+
+2026-10-09 22:24UTC，当前 head894e8152，CI66 Chromium仍执行，其余五项SUCCESS；该CI自然终态前不推送新head。本片仅修正式部署投影的相邻端口世界高度，不宣称注册route motion、真实运输UI、旧非空存档迁移或完整V3通过。
+
+旧读取为`sourceCellY + exit.elevation`；正确邻格原点还须扣除配置中反向入口的局部高度。先在真实projectTransportDeploymentSite上用四方向双向坡、字面量相邻cell/中点坐标取得RED；错高、缺少反向端口、候选未知与多高度连接分别拒绝。候选枚举同family的反向入口高度，所有可能cell精确读取；任一未知优先chunk-unavailable，多个已知连接拒绝transport-route-ambiguous，不添加配置字段/权限，不改World/Inventory/ECS owner。保持平轨部署、body碰撞和保存回归。纯投影测试不冒充Authority部署或Browser验收。
+
+根独占该geometry/stdlib test/spec/evidence；无需新agent。传统0.2PD×120%=0.24PD，AI30min×120%=36min，约23:00有界checkpoint。最新真实周额度由主对话刷新为22:09UTC剩83%，5天4小时重置；约60%停止线，未知credits/API及实际模型元数据不换算额度，不重复安装或运行同条件Browser。长期docs不变：此为既有端点合同修复。
+
+67结果：旧13项12FAIL/1PASS，候选四文件34PASS；实际Authority旧坡道部署1FAIL/原7PASS、候选成功。冻结后六文件35PASS、完整stdlib164文件1165PASS、完整static EXIT0。首轮full检查与旧源码反证时间重叠虽EXIT0仍不作冻结证据，已保留并按冻结候选重跑。详见evidence/route-height-checkpoint-67-01.md；不声明Browser/完整运输准出。
+
+## CI完整证据分包 checkpoint68（预注册及工程GREEN，实际CI待验）
+
+2026-10-09 22:31UTC，CI65 artifact11647256747实际570695923 bytes，下载连接器返回InvalidInputException，单包上限536870912 bytes；不是权限审批拒绝。原job日志可读，但两个V2失败trace无法取得。不重复相同下载，不读取凭据、不扩网络或更换连接器绕过限制。
+
+候选只把原Chromium上传中的playwright-report独立成同run/attempt命名的report artifact；原classic artifact继续完整保存harness/results及test-results。三个原目录均保留、不裁剪trace/video/HTML/附件、不改运行选择、断言、900/240/90秒、重试、flaky拒绝、生产产物下载或部署条件，upload action精确pin及7天retention不变。原class结果与trace上传仍if-no-files-found:error；独立report缺目录仅warn，匹配原聚合上传允许任一目录缺失的语义，不能因成功时没有failure trace制造新失败。分包后的实际尺寸与可下载性待下一CI取得，不能预称已解决所有大包。
+
+68结果：旧布局工程1FAIL/1PASS，候选完整16CI合同PASS、完整static EXIT0；三目录完整保留与部署边界已源码复核，新实际artifact仍待下一CI。详见evidence/ci-evidence-split-checkpoint-68-01.md。66最终实际Modular正常方块PASS与686项headless记录补入evidence/modular-final-checkpoint-66-04.md，完整Classic与其他准出仍保留。
+
+先给既有CI工程测试增加三个目录全保留、唯一归属、trace与HTML分离、同失败保留条件及同pin/retention合同，旧单包须RED；修改后GREEN。根独占workflow/该脚本/spec/docs/evidence，无agent；传统0.1PD×120%=0.12PD，AI15min×120%=18min。与67共用83%实际读数及约60%停止线，当前CI66自然终态前不推新head。长期docs只更新可执行CI证据布局，不写性能收益或产品PASS。
 
 ## 瞄准同轮观测 checkpoint63（候选撤回，无生产或测试改动）
 
