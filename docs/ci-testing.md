@@ -74,6 +74,8 @@ build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` �
 
 浏览器重试一次只用于取得 trace，`failOnFlakyTests` 使重试通过仍然失败。超时是资源上限，不是性能阈值。FPS、CPU/GPU/RSS 或“更快”结论必须进入独占性能窗口，以 A/A 和交错 A/B 取证；hosted runner 时长只能用于诊断。
 
+Chromium job 的资源上限为45分钟：原Classic主旅程900秒与视觉场景240秒各至多两次，runner上限38分钟，另留setup、失败附件、上传与清理裕量。Modular 90秒场景与Classic旅程互斥。`scripts/ci-browser-time-budget.test.mjs` 核对实际workflow/config/spec的既有时限、唯一runner、一次诊断重试和flaky拒绝，并防止job资源预算再次短于完整runner加5分钟报告裕量；不修改动作/poll或产品验收条件。
+
 ## 延期设计：失败与证据保留
 
 - scope、static、build、Chromium 各自保留精确失败；下游不得在上游失败时以 skipped 冒充成功。

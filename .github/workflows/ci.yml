@@ -192,7 +192,9 @@ jobs:
     needs: build
     if: ${{ always() }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    # Original main + visual tests with one diagnostic retry require up to 38min.
+    # Keep a bounded setup/reporting margin without changing test acceptance.
+    timeout-minutes: 45
     steps:
       - name: Require successful production build
         env:
