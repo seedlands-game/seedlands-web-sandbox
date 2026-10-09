@@ -102,10 +102,11 @@ export type AuthorityStationAction = Readonly<{
     | Readonly<{ kind: 'transfer'; from: 'actor' | 'station'; actorSlot: number; stationSlot: number; count?: number }>
   );
 
-/** Derived from the crop child owner; soil position, without simulation timing or policy. */
+/** Derived from the crop owner and frozen Pack metadata; no simulation timing or writable state. */
 export type AuthorityCropStageProjection = Readonly<{
   position: readonly [number, number, number];
   stage: number;
+  presentationId?: string;
 }>;
 
 export type AuthorityGameplayView = Readonly<{

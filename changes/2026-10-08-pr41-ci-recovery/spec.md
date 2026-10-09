@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 作物 Pack 呈现合同 checkpoint30（内容合同完成；呈现未验收）
+
+本组补齐此前仅有 position/stage 投影的内容合同，未完成浏览器呈现验收。CropPolicy 可选 presentationId 是经原 CropRuntime 冻结的只读内容元数据；无标识的旧配置继续只投影原字段，有标识时每条 cropStages 增加同一个通用 presentationId，不泄漏成长时钟、不改 crop checkpoint 字节或新增状态 owner。Classic 声明 seedlands:wheat-crop，八个阶段资产完全由 Pack 指定；stdlib/Web 不硬编码 Classic 作物或体素。
+
+Pack presentation schemaVersion1 新增可选 crops 数组。每项 id 唯一，stages 必须恰好8项，每项只含 texture、height、width；texture 必须是相对路径并进入 manifest resources、资源锁、SHA256 校验与同源读取，height/width 为有限正数且不超过2。缺 crops 的旧Pack保持有效；声明错误、未锁定资源、重复作物、阶段数不合法均失败且释放已创建URL。不得用既有地形 faceMaterial 槽位伪装作物或改体素/碰撞语义。Classic 提供8张本仓库原创16×16 SVG透明纹理，后续按Chunk crossed-quads消费者另组实现。
+
+先有效RED：旧loader拒绝合法crops扩展，旧Authority投影不含配置标识。GREEN覆盖旧格式兼容、完整8阶段加载/锁校验/销毁、缺失资源与错误尺寸/重复id/阶段数量拒绝、标识冻结与非法id、Authority旧/新配置及成长/恢复仍保持独立投影。不以这些确定性测试宣称实际可见或正式玩法PASS。Pack/模块定义变化仅新增 Browser22 在4db1a0b实际捕获、与cd5同玩法定义的精确 V4 predecessor；不猜摘要或使用wildcard。保持旧 captured identities 及sealed evidence不变。
+
+预算沿用本PR：01:41UTC真实产品UI周剩余90%，包括其他账户任务；约60%停止线。当前子片预估传统1PD、AI约1–2小时，实际模型会话与credits/API/周额度换算不可核实，不另做探测或估算比例。授权为当前PR持续修复、正常feature提交推送，无合并/生产发布。验证以 focused RED/GREEN、生产静态检查、相关headless回归为准；渲染、真实输入、完整V2/V3/V4/194项与组合整帧A/B仍未完成。
+
 ## 独立输入事件路线观测候选 checkpoint29
 
 终态：候选29未采用。源码 `4db1a0bdd86e8a8e2422b829d422fc560896bd78` 的 Browser22/window `pr41-cloud-browser-22` 为 FAIL / NOT_RECORDED，主旅程 FAIL，visual/modular SKIP。20次观测为4warmup+完整16次A/A，所有实际输入事件计数0，固定owner/profile身份唯一、同任务精确投影通过；A/A左右median为53.69309150000481/62.12084249999316ms，偏差15.696155249297933%超过15%否决线。未采A/B，不能以接近门槛或部分样本宣称收益。生产API、路线切换、工程probe、测量接线及相关测试/selector全部撤回至cd5源码；保留原始附件、trace、窗口回执与候选checkpoint，不追加同条件重采。当前read-boundary候选停止，继续正式玩法消费者与主旅程其他瓶颈。

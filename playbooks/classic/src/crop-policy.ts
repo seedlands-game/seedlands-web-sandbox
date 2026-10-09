@@ -2,6 +2,7 @@ import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { CropInteractionConfig } from '@seedlands/stdlib/mod-api';
 
 export const classicCropConfig: CropInteractionConfig = Object.freeze({
+  presentationId: 'seedlands:wheat-crop',
   moduleId: 'seedlands:overworld-crops',
   plantOperationId: 'seedlands:plant-crop',
   harvestOperationId: 'seedlands:harvest-crop',
