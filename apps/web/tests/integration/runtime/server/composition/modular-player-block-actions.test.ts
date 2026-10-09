@@ -55,6 +55,15 @@ it('uses the registered modular block producer for Creative placement and mining
     capabilities: ['mutation'] as const,
   };
   expect(server.getVoxel(0, 64, 0)).toBe(MODULAR_WORLD_SENTINEL_VOXEL);
+  // The ordinary UI settles its cursor before switching modes, even when empty.
+  const pointer = server.getInventoryPointerView(playerId);
+  const closed = await runtime.performAction({
+    type: 'inventory-pointer',
+    actor: pointer.actor,
+    expectedInventoryRevision: pointer.revision,
+    command: { kind: 'close' },
+  });
+  expect(closed.result, JSON.stringify(closed.result)).toMatchObject({ success: true });
   const mode = await runtime.executeCommand(source, { type: 'set-mode', mode: 'creative' }, runtime.commandBinding);
   expect(mode, JSON.stringify(mode)).toMatchObject({ success: true, data: { mode: 'creative' } });
   expect(

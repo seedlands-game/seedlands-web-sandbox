@@ -1,0 +1,11 @@
+# Modular 正常 UI 前置结算 checkpoint66-02
+
+冻结已提交 8ecc7b006da24b17e16e7fb468daa58484d88edb，父 da2a2ed6c6df162efc1c4ccd8a5a0e456d1c9c42；本组未推送。identified Modular build实际EXIT0，sourceDigest2c9d064a5ff2e6feef365bbbc7bd1154f55da0faafcdc5c6467070ce15c2f808，artifactDigest452aacce2d7e81ce76e32ac3fa7cfcd33bf8ad183f5d092af7f2c5f03f1297c2，builtAt2026-10-09T21:57:31.143Z、288files、lock44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169。
+
+原唯一run pr41-modular-browser66-01实际EXIT1/回执FAIL。Modular13.1秒FAIL，Classic主/visual因明确Modular Pack选择SKIP。固定Pack身份、自有voxel初态、正常步行、背包打开已到达；点击切换创造后仍生存背包，原5秒创造目录visible断言FAIL。没有执行挖掘、放置或save/reload，不可将Authority单测或build当正常UI通过。原log/trace/error-context/receipt完整保留，后续产物必须move至独立路径，不重跑同source。
+
+实际UI inventory-crafting.mode()在切模式前经BrowserInventoryPointer发送正常close，携带当前actor/revision。8ecc的sample Pack未注册Inventory/InventoryActions；新增exact Pack Authority close断言取得有效RED inventory-rejected（modular-ui-close-red-66-01.log EXIT1）。Root在实际Pack显式注册标准两模块，不跳过close/换Harness命令、不修改existing product admission。既有alternativePermissions已批准inventory/inventory-item声明。更新后两文件5项PASS/EXIT0（modular-ui-close-green-66-01.log），正式close→Mode→自有放置/occupied原子拒绝/挖掘全部到达。定向lint、完整classic-tests类型和格式实际EXIT0（modular-ui-close-static-66-01.log）。
+
+既有Luna只读审阅报告冻结8ecc、覆盖十文件；最初误述测试补模块已按Git tree纠正为只装实际Pack。Browser后新证据被列为8ecc的P1正常UI缺口，当前两模块修复直接处理该producer声明，不用审阅无finding覆盖真实FAIL。新精确HEAD、identified Modular build与独立pr41-modular-browser66-02仍待验；whole Classic/lighting/transport/其他Modular/组合性能未准出。
+
+CI65原artifact11647256747约570695923bytes（544MiB）超过GitHub连接器536870912bytes（512MiB）下载上限，下载工具返回InvalidInputException，未获trace ZIP。原job日志已取得，实际两次V2背包手势900秒FAIL/visualPASS；仅定位消费等待，不推断其唯一根因。不改变上传/trace/超时以缩小或绕过失败。
