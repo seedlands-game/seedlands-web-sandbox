@@ -78,6 +78,8 @@ Chromium job 的资源上限为45分钟：原Classic主旅程900秒与视觉场�
 
 ## 延期设计：失败与证据保留
 
+当前唯一Chromium入口的完整证据分为同run/attempt的两份artifact：`classic-<run>-<attempt>`保存`harness/results/`与`test-results/`，`classic-report-<run>-<attempt>`保存完整`playwright-report/`。两者均在原always条件下保留7天，未裁剪任何trace、video、HTML或附件。CI65原聚合包570695923bytes超过连接器单包536870912bytes下载上限，因此拆分HTML与原始trace；新布局的实际尺寸和可下载性仍需后续CI验证，不能只凭分包代码宣称成功。原结果/trace包无文件继续报错，独立HTML缺目录告警，保持原聚合上传允许某目录未生成的行为。
+
 - scope、static、build、Chromium 各自保留精确失败；下游不得在上游失败时以 skipped 冒充成功。
 - Harness 结果写入 `harness/results/<runId>/result.json`，记录 stage、plan、steps、artifact 与 Classic receipt；失败步骤同样保留。
 - CI 上传计划、生产 `dist` 和浏览器/Harness 报告。计划与产物均绑定 `headSha`，浏览器只消费 build job 上传的字节。
