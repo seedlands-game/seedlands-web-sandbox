@@ -240,9 +240,46 @@ export async function collectClassicFailureDiagnostics(page: Page) {
     .evaluate(() => {
       const harness = (window as unknown as ClassicWindow).__seedlandsHarness;
       const card = document.querySelector('#start-card');
+      let presentation;
+      try {
+        const current = harness?.snapshot();
+        const target = harness?.aimedVoxelTarget();
+        const positions = [current?.player, target?.position].filter((position) => position !== undefined);
+        const chunks = new Map<string, readonly [number, number, number]>();
+        for (const position of positions) {
+          const [cx, cy, cz] = position.map((value) => Math.floor(value / 32));
+          for (const [dx, dy, dz] of [
+            [0, 0, 0],
+            [-1, 0, 0],
+            [1, 0, 0],
+            [0, -1, 0],
+            [0, 1, 0],
+            [0, 0, -1],
+            [0, 0, 1],
+          ]) {
+            const chunk = [cx! + dx!, cy! + dy!, cz! + dz!] as const;
+            chunks.set(chunk.join(','), chunk);
+          }
+        }
+        presentation = {
+          diagnosticOnly: true,
+          eligible: false,
+          chunks: [...chunks].map(([key, chunk]) => ({
+            key,
+            authorityRevision: harness?.getChunkRevision?.(...chunk) ?? null,
+            renderedRevision: harness?.getRenderedChunkRevision?.(...chunk) ?? null,
+          })),
+          traceEvents: [...(harness?.exportPerformanceTrace().traceEvents ?? [])]
+            .sort((left, right) => left.ts - right.ts)
+            .slice(-256),
+        };
+      } catch (error) {
+        presentation = { error: error instanceof Error ? error.message : String(error) };
+      }
       return {
         observedAtTimeOriginMs: performance.timeOrigin + performance.now(),
         inputDecisions: harness?.inputDecisionDiagnostics() ?? null,
+        presentation,
         startup: {
           phases: performance
             .getEntriesByType('mark')

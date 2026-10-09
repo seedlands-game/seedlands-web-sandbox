@@ -1,5 +1,31 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## CI browser job resource budget checkpoint57（本地闭合，继续V2修复）
+
+15:52附近开始，实际25分钟RED后45分钟GREEN，现有工程选择器15/15；初版正则ESLint空格失败保留并等价修正，最终完整verify:static:ci实际EXIT0。仅job资源上限与失败后只读附件改变，各测试时限/断言、retry/flaky策略、生产artifact和部署边界保持。Browser55/56原始FAIL不被改写，PR仍不可合入。详见evidence/ci-browser-budget-checkpoint-57-01.md；随后正常feature提交推送及精确新SHA CI。传统/AI预算与15:45真实UI请求保持，不购买或扩大每周额度。
+
+实际CI54 run37949472227/job113884710636的首轮主旅程15.3分钟FAIL，原一次诊断重试于15:34:55被job取消；五项其他CI SUCCESS、部署SKIP。首轮V2耗时行不能计完整PASS，取消使原runner最终错误/报告不完整。源码明确主旅程900秒、visual240秒、CI retries1且failOnFlakyTests=true；Classic配置下Modular互斥跳过。原job25分钟小于主旅程与视觉两次的38分钟最大预算，尚未计setup/upload/cleanup。
+
+冻结最小工程修复：仅将Chromium job资源上限25→45分钟，覆盖38分钟runner加7分钟setup/附件/上传裕量；原900/240/90秒及动作/poll、一次retry与flaky拒绝不变，生产build仍只一次且Chromium只校验/消费既有artifact。正常失败仍失败，取消/skip仍不合入。先确定性读取实际workflow/config/spec，断言job预算至少覆盖既有完整runner及5分钟裕量，取得25分钟RED，再45分钟GREEN；同一检查保留唯一runner/原重试和flaky拒绝。新工程合同纳入现有test:ci-selection，不增Playwright旁路线、不将job时长当性能阈值。
+
+先等Browser56实际终态以保持artifact/source冻结；然后必要静态/工程合同、自然hook、核对最新远端后正常feature commit/push。workflow的部署trigger/权限/目标不变，只有此前授权的PR preview，禁止main/生产/merge。传统0.12PD×120%=0.144PD；AI25min×120%=30min，从实际开始时计有界checkpoint。14:09真实周剩85%，15:45再次请求实际UI；约60%停止，未知费用/工时不得折成周占比。
+
+## Failure presentation readback checkpoint56（原完整运行失败，诊断交付）
+
+完整静态与build实际EXIT0；原唯一runner实际EXIT1，1 FAIL/1 visual PASS/1 Modular SKIP、总14.9分钟。主旅程12.4分钟在V2铁资源准备的原45秒移动时限失败，`Real input route timed out before 78.5,-0.5`，未耗尽900秒。最后canonical/player停稳于x82.845/z-0.509、grounded且无collision，距目标4.345格。V1已返回并进入V2，但Browser55相同production bytes的门mesh失败仍保留为不稳定证据，不能由这次关闭。新failure只读revision/末256trace成功附加；仍无完整V2/C4/C5/恢复/全194、Modular产品或组合性能准出。详见evidence/browser-checkpoint-56-01.md。15:45真实周额度刷新仍待主对话。
+
+接续3f784078与Browser55真实失败。只在原失败附件增加只读presentation readback：玩家/当前瞄准所在Chunk及六个面邻居的Authority与实际rendered revision，以及现有有界PerformanceTelemetry导出的末256事件。只在失败后读取，不加每帧扫描、不改变玩法/worker/mesh owner、不影响原断言poll、时限、retry、renderer或quality。观察用于区分目标提交丢失、authority accept拒绝、上传排队与postrender等待；不把全局队列空当门已可见，不将诊断当性能A/A/A/B或产品GREEN。
+
+先必要格式/类型/静态核验，再新identified artifact与原唯一完整Classic runner，run ID `pr41-classic-browser56-01`，不追加旁路线。传统0.15PD×120%=0.18PD；AI30min×120%=36min，15:35附近开始、16:11附近checkpoint。14:09真实周剩85%，15:09请求仍待当前UI；60%停止线保持。CI54仍在运行，不抢推取消。
+
+## Current artifact / original browser revalidation checkpoint55（完整运行失败，证据保留）
+
+新build实际EXIT0，唯一原runner实际EXIT1：主旅程8.3分钟在V1木门closed mesh原5000ms期望[0,0]实际[-1,-1]；visual PASS、Modular SKIP，总9.9分钟。正式阶段附件确认C0–C3 PASS；农业/V1耗时行不是完整PASS。体素93/94和geometry正确，失败时compute269/269、running0/queued0/failed0，但generationQueue2/meshingQueue1/uploadQueue1，rendered18。当前不能证明mesh丢失或新门可见；无完整V2/C4/C5/194/恢复或性能准出。artifact/source与原始trace身份及剩余风险见evidence/browser-checkpoint-55-01.md；结果原目录移动保留，未改历史sealed证据。
+
+source3f784078。15:10附近开始，重新构建一个identified production artifact并用原唯一Classic旅程、原900秒、原C0–C5/V1–V4/视觉断言及默认本地retry策略检验；不新增partial/side Playwright路线，不把前驱CI步骤完成当当前PASS。新run ID `pr41-classic-browser55-01`；原dist44/test-results按原目录移动到Root独立retained路径保留，不复制或删除sealed证据。新结果/trace按新run ID记录，完整本地trace用于定位CI53 C4/总时限问题；此前artifact域名403未获新授权，不绕过网络边界。此轮正确性验证不加CPU/native profiler、不作为AA/AB或性能收益证据，无CPU亲和性/质量变更。浏览器开始到结束不改apps/packages/scripts等源身份，只有独立证据/spec可写。
+
+传统0.3PD×120%=0.36PD；AI30min×120%=36min，15:46附近必须checkpoint。Group54已提交正常push，CI54待结果；PR仍Draft/未合并/未生产部署。14:09真实周剩85%，15:09已请求当前真实UI，60%停止线保持。
+
 ## Registered surface transport motion checkpoint54（本地闭合，继续产品闭环）
 
 14:10–15:07有界片完成：stdlib78/78、Authority37/37、最后前沿10/10及完整verify:static:ci EXIT0；实际运动、veto旁路、mounted crossing、stale、伪造与双车相对碰撞RED均保留，详见evidence/registered-motion-checkpoint-54-01.md。Classic Pack精确字节对照相同；本片没有本地build/browser/performance PASS，整体产品仍未完成。
