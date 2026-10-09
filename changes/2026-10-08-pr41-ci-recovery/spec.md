@@ -1,5 +1,9 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 主线程采样结果 checkpoint40（whole 已失败；未选生产优化）
+
+Browser30 精确63f8d24c/build29，原完整runner main FAIL、visual PASS、Modular条件SKIP。C0–C3、Creative作物与V1完成；石镐制作/关闭工作台已发生，随后进入铁资源路线，原900秒终结。真实75033样本覆盖900.139563秒并含生产应用，但idle/program约56%/20%无法直接定位主要空档；同步receive、UI比较和光照样本不足以建立GPU/trace因果。只固化原始profile的有界派生与真实旧V4 composition投影，不声称性能GREEN，不恢复已否决slimSnapshot，不改输入/断言/期限/质量/trace。证据在evidence/cpu-profile-result-40-01，原始大文件保留私有Root。06:09实际周剩89%；当前仍不可合入，持续正式producer/consumer与完整玩法验收。
+
 ## 主线程 sampling 诊断 checkpoint39（确定性与静态完成；真实采样待运行）
 
 Browser29精确6b459cbf/build28 whole1 FAIL、visual1 PASS、Modular条件1 SKIP，V1与新作物完成并进入V2，stone-pickaxe的placeOneEach→committedPointer在900秒失败。最后camera[78.47565,32.6,0.45011]、Authority[78.47565,32.6,0.45011]。同128帧gap中位439.45ms、同步receive38.7ms/17次，配对比例中位9.037%、sum(wall)/sum(gap)9.676%；仅同步receive占用，不能证明整体消息处理或GPU因果。原始trace/results/失败字节保留私有Root browser-29-results、browser-29-failure-39-01.json。
