@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 有界 Chromium 原生 trace checkpoint43（仅诊断；未选优化）
+
+Browser32 精确1b6ba70d/build31原完整3测试为main FAIL、visual PASS、Modular条件SKIP（17.2min）。C0–C3、Creative作物及导航、中性目标下地图map-1/81pixel/revision2与作物保持、V1完成；V2在followEquipmentRoute→mineResources→prepareCraftedIronArmor的keyboard.up触及原900秒，C5未到达。实际地图截图与失败字节/闭合trace保留Root独立browser-32路径，不把步骤耗时作为通过依据。
+
+同失败128帧CPU样本中位tick22.5ms、interTick gap402.35ms、同步receive29.55ms；同窗之外1200帧p50为442.4ms，不能相减或宣称GPU归因。V2阶段独立10.010824402秒原生CPU观测显示gpu-process五工作线程合计26.58CPU秒、renderer主线程2.45秒、单DedicatedWorker5.23秒；宿主四核CPU预算保持。现有V8主线程sample和同步receive不能覆盖这些native/Worker占用，不改变线程数、CPU亲和/额度、renderer、品质或trace/输入断言来消除失败。
+
+下一诊断只在原唯一Classic main hook启用SEEDLANDS_CLASSIC_NATIVE_TRACE=1，默认关闭，与CPU sampler互斥、benchmark模式拒绝。使用Playwright Chromium browser CDP Tracing官方类型已声明的getCategories/start/end/IO stream：先发现并记录实际categories，固定Node延迟360000ms开始、采集20000ms，实际UTC/elapsed/source/run/类别/数据丢失状态如实保留。选择toplevel/gpu/cc/viz/devtools.timeline及存在的gpu.service/debug类别；缺核心类别拒绝，不用截图类别。原生buffer16MiB、返回JSON stream64MiB上限、chunk64KiB、完成等待10秒，所有路径关闭stream与session。早期main失败取消未开始的timer；start/end/read/detach失败保留并使诊断失败，不以吞错制造通过。所有附件diagnosticOnly=true/eligible=false；raw trace区分原生任务和跨线程调度，不把重叠task相加当整帧GPU时间或FPS收益。
+
+先做实际可执行session/timer/stream生命周期负例与GREEN，纳入原headless/type/selector路径；复用有效生产/static结果，只跑新增相关检查，然后新精确SHA build/原完整browser采集一次新证据。传统约0.2PD×120%=0.24PD；AI约40min×120%=48min。07:39真实周剩88%，含博客等共用账户用量，约60%停止。未完成全产品、C5、真实Modular与整帧A/A/A/B，当前不可合入。
+
 ## 导航正常输入与 target-first 共存 checkpoint42（诊断后有界修复）
 
 Browser31 精确6e1a1f26/build30原完整3测试为main FAIL、visual PASS、Modular条件SKIP（8.1min）。C0–C3和Creative作物完成；已正常选中指南针/时钟/地图并显示accepted HUD，但地图第一次右键后的原5秒SVG断言FAIL，尚未运行V1/V2/C5。原始trace/results/失败字节保留独立browser-31路径。不可由step耗时宣称导航PASS。
