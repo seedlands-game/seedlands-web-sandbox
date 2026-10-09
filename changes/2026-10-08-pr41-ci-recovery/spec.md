@@ -1,6 +1,24 @@
 # PR41 当前源码 CI 与可玩性修复
 
-## Native single-click boundary checkpoint62（RED/GREEN与静态通过，原浏览器待验）
+## 瞄准同轮观测 checkpoint63（候选撤回，无生产或测试改动）
+
+Root和现有Luna复核后确认：旧aim.ts已经在同一次evaluate读取HUD target与正式ray；另外的snapshot用于未命中后的correction，较晚姿态未被证明错误。仅要求“一次evaluate”或使用第一帧view不是可验收产品不变量。Task123新fixture由其作者撤回，未运行无效RED、未修改aim.ts；减少调用若作为优化理由仍须按既有A/A/A/B门禁，不能贴正确性标签绕过。保持原代码。私有task123结论仅分析，不计PASS。
+
+## 真实键盘事件时序 checkpoint64（只读诊断待验）
+
+Task124缺诊断helper RED实际EXIT1（0 tests/module missing，仅缺入口）；四项GREEN实际EXIT0。Root诊断/CPU/native/canonical五文件35/35 PASS，完整verify:static:ci原PTY9004实际EXIT0。20:38短暂transport断开后原会话保留，无重跑。详见evidence/keyboard-timing-checkpoint-64-01.md；identified build和Browser64仍待验。
+
+接续56294bff Browser62本地原主900秒FAIL/visual PASS及远端CI62五项SUCCESS/Chromium FAIL/部署SKIP。远端两次主旅程最终失败均C4返回路线耗尽原900秒，V2步骤耗时8.3/8.5min；不从耗时行宣布V2完成。本地第二块crop最后截图仅442.4ms，前四张成功，不是截图自身长阻塞。API delay80/300与前后pose无法证明实际keydown/up间隔。原Browser61的20秒C3 native仅两组keyboard事件，间隔5.791/235.523ms，无key code且不覆盖crop，不当路线因果证据。
+
+新增默认关闭的SEEDLANDS_CLASSIC_KEYBOARD_TIMING=1诊断，仅原唯一Classic生产旅程、原production artifact与真实keyboard输入；benchmark禁止开启。既有beforeEach里addInitScript在新document安装passive capture keydown/up listener，只记录KeyW/A/S/D/Space的code/type/event.timeStamp/performance.now/repeat/isTrusted/PointerLock/visibility及document timeOrigin。listener不调用Harness、发输入、preventDefault或改状态；固定1024条有界ring记录total/dropped，stop只读取回后移除监听并删除私有diagnostic property。新document重新建立时钟及记录，明确只覆盖当前document而非跨navigation补造历史。
+
+启用前验证runId/sourceSHA，重复start不重复安装；关闭时不触碰page。正常afterEach在原PointerLock清理之前记录附件，保留原完整trace/CPU/native诊断及原900/240/90/45/20秒、所有质量、步骤、snapshot和断言。页面已关闭明确PAGE_CLOSED、尚未navigation没有state则NOT_STARTED，不伪造事件；其他安装/采集失败按原diagnostic hooks聚合报FAIL。附件schemaVersion1、diagnosticOnly=true/eligible=false，关联runId/sourceSHA，不进入正式owner、存档或产品UI。读回只作本次真实持键长度/累计路线排查，不是whole-frame性能样本。
+
+先以新helper不存在取得可执行功能RED；再测试真实init callback的passive参数、键过滤、固定容量/丢弃计数、完整字段、cleanup/重复/关闭/identity/benchmark拒绝。unit手动callback不冒充浏览器trusted输入；原唯一完整runner新run pr41-classic-browser64-01开启这一个诊断。原Browser62不重跑。新identified build、scoped及必要完整静态验证后正常feature提交推送；CI62已经自然终态，无取消。新输出独立路径，不改sealed证据。
+
+Root独占helper/hooks、package selector/spec和集成；现有唯一Luna仅独占apps/web/tests/unit/app/classic-keyboard-timing.test.ts及private task124证据，不再委派、不跑browser/build/fullstatic。传统0.25PD×120%=0.3PD，AI约40min×120%=48min，20:31起有界checkpoint约21:19；服务型号未核实，按用户Sol/high/default与Luna/medium请求。主对话真实产品UI额度20:26剩83%、5天6小时后重置，本工具不可查询UI，约60%停止线保持，无token/credit百分比换算。此片不改输入排程或renderer，不宣称性能改善，真实事件证据仍待采集。
+
+## Native single-click boundary checkpoint62（visual通过，主旅程失败）
 
 19:36–19:38有效单击RED实际EXIT1，修复后六文件42/42 PASS，完整verify:static:ci实际EXIT0。失败清理保持原错误并释放held。精确8ea CI60自然终态：五项SUCCESS、Chromium两次V2铁装备路线耗尽900秒FAIL、Visual PASS、部署SKIP；不取消它。详见evidence/single-block-click-checkpoint-62-01.md。19:41真实UI周剩83%，5天7小时后重置，账户总下降不能独占归因PR。新精确SHA浏览器与产品准出尚未完成。
 
