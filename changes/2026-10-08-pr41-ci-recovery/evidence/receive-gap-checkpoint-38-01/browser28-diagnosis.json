@@ -1,0 +1,1165 @@
+{
+  "sourceSha": "5f3f679c39c2944b07d8eee1793645add86e4ce1",
+  "status": "FAIL",
+  "errors": ["\u001b[31mTest timeout of 900000ms exceeded.\u001b[39m"],
+  "player": [90.50044250488281, 32.599998474121094, -0.521058201789856],
+  "serverPosition": null,
+  "frameCpu": {
+    "sampleCount": 128,
+    "samples": [
+      {
+        "frameSequence": 1826,
+        "updateWallMs": 41.899999998509884,
+        "renderWallMs": 7.100000001490116,
+        "renderEnvelopeWallMs": 8.799999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 50.69999999552965,
+        "interTickGapWallMs": 382.6000000014901
+      },
+      {
+        "frameSequence": 1827,
+        "updateWallMs": 11.199999995529652,
+        "renderWallMs": 2,
+        "renderEnvelopeWallMs": 2,
+        "renderTailWallMs": 0,
+        "tickWallMs": 13.199999995529652,
+        "interTickGapWallMs": 441.20000000298023
+      },
+      {
+        "frameSequence": 1828,
+        "updateWallMs": 21.299999997019768,
+        "renderWallMs": 5,
+        "renderEnvelopeWallMs": 6.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 27.799999997019768,
+        "interTickGapWallMs": 751.2000000029802
+      },
+      {
+        "frameSequence": 1829,
+        "updateWallMs": 21.100000001490116,
+        "renderWallMs": 3.899999998509884,
+        "renderEnvelopeWallMs": 7.899999998509884,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 29,
+        "interTickGapWallMs": 578.7000000029802
+      },
+      {
+        "frameSequence": 1830,
+        "updateWallMs": 18.600000001490116,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 3.100000001490116,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 21.700000002980232,
+        "interTickGapWallMs": 652.5
+      },
+      {
+        "frameSequence": 1831,
+        "updateWallMs": 23.299999997019768,
+        "renderWallMs": 5.300000004470348,
+        "renderEnvelopeWallMs": 6.700000002980232,
+        "renderTailWallMs": 0,
+        "tickWallMs": 30,
+        "interTickGapWallMs": 393.3999999985099
+      },
+      {
+        "frameSequence": 1832,
+        "updateWallMs": 28.899999998509884,
+        "renderWallMs": 6.200000002980232,
+        "renderEnvelopeWallMs": 6.300000004470348,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 35.20000000298023,
+        "interTickGapWallMs": 348.3999999985099
+      },
+      {
+        "frameSequence": 1833,
+        "updateWallMs": 19,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 6.799999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 25.799999997019768,
+        "interTickGapWallMs": 363.29999999701977
+      },
+      {
+        "frameSequence": 1834,
+        "updateWallMs": 20.799999997019768,
+        "renderWallMs": 1.3000000044703484,
+        "renderEnvelopeWallMs": 1.4000000059604645,
+        "renderTailWallMs": 0,
+        "tickWallMs": 22.200000002980232,
+        "interTickGapWallMs": 398.70000000298023
+      },
+      {
+        "frameSequence": 1835,
+        "updateWallMs": 16.5,
+        "renderWallMs": 1.2000000029802322,
+        "renderEnvelopeWallMs": 6.799999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 23.299999997019768,
+        "interTickGapWallMs": 400
+      },
+      {
+        "frameSequence": 1836,
+        "updateWallMs": 40.19999999552965,
+        "renderWallMs": 1.7000000029802322,
+        "renderEnvelopeWallMs": 1.7000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 41.899999998509884,
+        "interTickGapWallMs": 397.6000000014901
+      },
+      {
+        "frameSequence": 1837,
+        "updateWallMs": 19.600000001490116,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 3.6999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 23.299999997019768,
+        "interTickGapWallMs": 402.6000000014901
+      },
+      {
+        "frameSequence": 1838,
+        "updateWallMs": 41.20000000298023,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 1.2999999970197678,
+        "renderTailWallMs": 0,
+        "tickWallMs": 42.5,
+        "interTickGapWallMs": 339.6000000014901
+      },
+      {
+        "frameSequence": 1839,
+        "updateWallMs": 35.399999998509884,
+        "renderWallMs": 1.4000000059604645,
+        "renderEnvelopeWallMs": 2.9000000059604645,
+        "renderTailWallMs": 0,
+        "tickWallMs": 38.30000000447035,
+        "interTickGapWallMs": 347.8999999985099
+      },
+      {
+        "frameSequence": 1840,
+        "updateWallMs": 11.600000001490116,
+        "renderWallMs": 5.399999998509884,
+        "renderEnvelopeWallMs": 5.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17,
+        "interTickGapWallMs": 396.59999999403954
+      },
+      {
+        "frameSequence": 1841,
+        "updateWallMs": 18.399999998509884,
+        "renderWallMs": 1.3000000044703484,
+        "renderEnvelopeWallMs": 1.3000000044703484,
+        "renderTailWallMs": 0,
+        "tickWallMs": 19.700000002980232,
+        "interTickGapWallMs": 424.6000000014901
+      },
+      {
+        "frameSequence": 1842,
+        "updateWallMs": 26,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 2.4000000059604645,
+        "renderTailWallMs": 0,
+        "tickWallMs": 28.400000005960464,
+        "interTickGapWallMs": 469.19999999552965
+      },
+      {
+        "frameSequence": 1843,
+        "updateWallMs": 11.600000001490116,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 1.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 12.800000004470348,
+        "interTickGapWallMs": 770.5999999940395
+      },
+      {
+        "frameSequence": 1844,
+        "updateWallMs": 3.7000000029802322,
+        "renderWallMs": 5.399999998509884,
+        "renderEnvelopeWallMs": 5.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.100000001490116,
+        "interTickGapWallMs": 76.69999999552965
+      },
+      {
+        "frameSequence": 1845,
+        "updateWallMs": 10.699999995529652,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 7.300000004470348,
+        "renderTailWallMs": 0,
+        "tickWallMs": 18,
+        "interTickGapWallMs": 484.20000000298023
+      },
+      {
+        "frameSequence": 1846,
+        "updateWallMs": 8.5,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 0.8999999985098839,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.399999998509884,
+        "interTickGapWallMs": 442.79999999701977
+      },
+      {
+        "frameSequence": 1847,
+        "updateWallMs": 10.5,
+        "renderWallMs": 5.200000002980232,
+        "renderEnvelopeWallMs": 5.200000002980232,
+        "renderTailWallMs": 0,
+        "tickWallMs": 15.700000002980232,
+        "interTickGapWallMs": 365.70000000298023
+      },
+      {
+        "frameSequence": 1848,
+        "updateWallMs": 10.399999998509884,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1.1000000014901161,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11.5,
+        "interTickGapWallMs": 409.29999999701977
+      },
+      {
+        "frameSequence": 1849,
+        "updateWallMs": 47.5,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 3.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 50.600000001490116,
+        "interTickGapWallMs": 395.29999999701977
+      },
+      {
+        "frameSequence": 1850,
+        "updateWallMs": 35.899999998509884,
+        "renderWallMs": 1.2000000029802322,
+        "renderEnvelopeWallMs": 1.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 37.100000001490116,
+        "interTickGapWallMs": 342.20000000298023
+      },
+      {
+        "frameSequence": 1851,
+        "updateWallMs": 32.70000000298023,
+        "renderWallMs": 3.600000001490116,
+        "renderEnvelopeWallMs": 3.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 36.30000000447035,
+        "interTickGapWallMs": 371.69999999552965
+      },
+      {
+        "frameSequence": 1852,
+        "updateWallMs": 11.599999994039536,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 3.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 14.699999995529652,
+        "interTickGapWallMs": 414
+      },
+      {
+        "frameSequence": 1853,
+        "updateWallMs": 17.099999994039536,
+        "renderWallMs": 5.5,
+        "renderEnvelopeWallMs": 7.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 24.19999999552965,
+        "interTickGapWallMs": 297.80000000447035
+      },
+      {
+        "frameSequence": 1854,
+        "updateWallMs": 24.399999998509884,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 1.2000000029802322,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 25.600000001490116,
+        "interTickGapWallMs": 540.5
+      },
+      {
+        "frameSequence": 1855,
+        "updateWallMs": 3.899999998509884,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 5.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.299999997019768,
+        "interTickGapWallMs": 205.10000000149012
+      },
+      {
+        "frameSequence": 1856,
+        "updateWallMs": 14,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 1.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 15.5,
+        "interTickGapWallMs": 462.8999999985099
+      },
+      {
+        "frameSequence": 1857,
+        "updateWallMs": 13.100000001490116,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 5.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 18.200000002980232,
+        "interTickGapWallMs": 407
+      },
+      {
+        "frameSequence": 1858,
+        "updateWallMs": 17.100000001490116,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 6.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 23.200000002980232,
+        "interTickGapWallMs": 389.8999999985099
+      },
+      {
+        "frameSequence": 1859,
+        "updateWallMs": 15.899999998509884,
+        "renderWallMs": 3.899999998509884,
+        "renderEnvelopeWallMs": 4.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.799999997019768,
+        "interTickGapWallMs": 380.6000000014901
+      },
+      {
+        "frameSequence": 1860,
+        "updateWallMs": 16.100000001490116,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 0.8999999985098839,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17,
+        "interTickGapWallMs": 389.29999999701977
+      },
+      {
+        "frameSequence": 1861,
+        "updateWallMs": 21.700000002980232,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 1.1999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 22.899999998509884,
+        "interTickGapWallMs": 381.6000000014901
+      },
+      {
+        "frameSequence": 1862,
+        "updateWallMs": 38.5,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 4.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 43.100000001490116,
+        "interTickGapWallMs": 394.5
+      },
+      {
+        "frameSequence": 1863,
+        "updateWallMs": 25.100000001490116,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 1.3999999985098839,
+        "renderTailWallMs": 0,
+        "tickWallMs": 26.5,
+        "interTickGapWallMs": 412.5
+      },
+      {
+        "frameSequence": 1864,
+        "updateWallMs": 29.30000000447035,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 1.1999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 30.5,
+        "interTickGapWallMs": 380.8999999985099
+      },
+      {
+        "frameSequence": 1865,
+        "updateWallMs": 21,
+        "renderWallMs": 1.6000000014901161,
+        "renderEnvelopeWallMs": 3.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 24.200000002980232,
+        "interTickGapWallMs": 411.1000000014901
+      },
+      {
+        "frameSequence": 1866,
+        "updateWallMs": 10.899999998509884,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 3,
+        "renderTailWallMs": 0,
+        "tickWallMs": 13.899999998509884,
+        "interTickGapWallMs": 419.3999999985099
+      },
+      {
+        "frameSequence": 1867,
+        "updateWallMs": 23.899999998509884,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 1.6000000014901161,
+        "renderTailWallMs": 0,
+        "tickWallMs": 25.5,
+        "interTickGapWallMs": 405.70000000298023
+      },
+      {
+        "frameSequence": 1868,
+        "updateWallMs": 22.099999994039536,
+        "renderWallMs": 24.700000002980232,
+        "renderEnvelopeWallMs": 28.400000005960464,
+        "renderTailWallMs": 0,
+        "tickWallMs": 50.5,
+        "interTickGapWallMs": 383.1000000014901
+      },
+      {
+        "frameSequence": 1869,
+        "updateWallMs": 18,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 3.1999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 21.19999999552965,
+        "interTickGapWallMs": 1122.8999999985099
+      },
+      {
+        "frameSequence": 1870,
+        "updateWallMs": 5.200000002980232,
+        "renderWallMs": 6,
+        "renderEnvelopeWallMs": 6.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11.300000004470348,
+        "interTickGapWallMs": 154.10000000149012
+      },
+      {
+        "frameSequence": 1871,
+        "updateWallMs": 16.299999997019768,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 4.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.69999999552965,
+        "interTickGapWallMs": 108
+      },
+      {
+        "frameSequence": 1872,
+        "updateWallMs": 25.299999997019768,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 1.2999999970197678,
+        "renderTailWallMs": 0,
+        "tickWallMs": 26.599999994039536,
+        "interTickGapWallMs": 776.8000000044703
+      },
+      {
+        "frameSequence": 1873,
+        "updateWallMs": 15.5,
+        "renderWallMs": 5.800000004470348,
+        "renderEnvelopeWallMs": 7.800000004470348,
+        "renderTailWallMs": 0,
+        "tickWallMs": 23.30000000447035,
+        "interTickGapWallMs": 593
+      },
+      {
+        "frameSequence": 1874,
+        "updateWallMs": 34,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 6.699999995529652,
+        "renderTailWallMs": 0.19999999552965164,
+        "tickWallMs": 40.69999999552965,
+        "interTickGapWallMs": 872
+      },
+      {
+        "frameSequence": 1875,
+        "updateWallMs": 17.600000001490116,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 4.800000004470348,
+        "renderTailWallMs": 3.3000000044703484,
+        "tickWallMs": 22.400000005960464,
+        "interTickGapWallMs": 378.5
+      },
+      {
+        "frameSequence": 1876,
+        "updateWallMs": 6.5,
+        "renderWallMs": 1.8000000044703484,
+        "renderEnvelopeWallMs": 3.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.700000002980232,
+        "interTickGapWallMs": 56.69999999552965
+      },
+      {
+        "frameSequence": 1877,
+        "updateWallMs": 11.799999997019768,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 1.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 13,
+        "interTickGapWallMs": 392.5
+      },
+      {
+        "frameSequence": 1878,
+        "updateWallMs": 22.799999997019768,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 3,
+        "renderTailWallMs": 0,
+        "tickWallMs": 25.799999997019768,
+        "interTickGapWallMs": 389.6000000014901
+      },
+      {
+        "frameSequence": 1879,
+        "updateWallMs": 58,
+        "renderWallMs": 20.19999999552965,
+        "renderEnvelopeWallMs": 22,
+        "renderTailWallMs": 0,
+        "tickWallMs": 80,
+        "interTickGapWallMs": 382.79999999701977
+      },
+      {
+        "frameSequence": 1880,
+        "updateWallMs": 9.799999997019768,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 2.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 12,
+        "interTickGapWallMs": 1037.7000000029802
+      },
+      {
+        "frameSequence": 1881,
+        "updateWallMs": 4.200000002980232,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 1.1000000014901161,
+        "renderTailWallMs": 0,
+        "tickWallMs": 5.300000004470348,
+        "interTickGapWallMs": 66.39999999850988
+      },
+      {
+        "frameSequence": 1882,
+        "updateWallMs": 2.8000000044703484,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 1.8999999985098839,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 4.700000002980232,
+        "interTickGapWallMs": 100.19999999552965
+      },
+      {
+        "frameSequence": 1883,
+        "updateWallMs": 8.600000001490116,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.600000001490116,
+        "interTickGapWallMs": 726.6999999955297
+      },
+      {
+        "frameSequence": 1884,
+        "updateWallMs": 3.7000000029802322,
+        "renderWallMs": 0.8000000044703484,
+        "renderEnvelopeWallMs": 2.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 6.100000001490116,
+        "interTickGapWallMs": 96.10000000149012
+      },
+      {
+        "frameSequence": 1885,
+        "updateWallMs": 9.800000004470348,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1.0999999940395355,
+        "renderTailWallMs": 0,
+        "tickWallMs": 10.899999998509884,
+        "interTickGapWallMs": 416.79999999701977
+      },
+      {
+        "frameSequence": 1886,
+        "updateWallMs": 14.899999998509884,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 3.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 18.799999997019768,
+        "interTickGapWallMs": 422.70000000298023
+      },
+      {
+        "frameSequence": 1887,
+        "updateWallMs": 12.100000001490116,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 1.1000000014901161,
+        "renderTailWallMs": 0,
+        "tickWallMs": 13.200000002980232,
+        "interTickGapWallMs": 662.2000000029802
+      },
+      {
+        "frameSequence": 1888,
+        "updateWallMs": 9.100000001490116,
+        "renderWallMs": 15.899999998509884,
+        "renderEnvelopeWallMs": 29.299999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 38.399999998509884,
+        "interTickGapWallMs": 77.89999999850988
+      },
+      {
+        "frameSequence": 1889,
+        "updateWallMs": 11.200000002980232,
+        "renderWallMs": 1.3000000044703484,
+        "renderEnvelopeWallMs": 2.7000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 13.900000005960464,
+        "interTickGapWallMs": 427.29999999701977
+      },
+      {
+        "frameSequence": 1890,
+        "updateWallMs": 31.399999998509884,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 2.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 34.29999999701977,
+        "interTickGapWallMs": 452.79999999701977
+      },
+      {
+        "frameSequence": 1891,
+        "updateWallMs": 16.400000005960464,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17.400000005960464,
+        "interTickGapWallMs": 337
+      },
+      {
+        "frameSequence": 1892,
+        "updateWallMs": 26.799999997019768,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 27.799999997019768,
+        "interTickGapWallMs": 349.79999999701977
+      },
+      {
+        "frameSequence": 1893,
+        "updateWallMs": 7.699999995529652,
+        "renderWallMs": 1.2000000029802322,
+        "renderEnvelopeWallMs": 3.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 10.899999998509884,
+        "interTickGapWallMs": 421.40000000596046
+      },
+      {
+        "frameSequence": 1894,
+        "updateWallMs": 7.5,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 8.5,
+        "interTickGapWallMs": 419.3999999985099
+      },
+      {
+        "frameSequence": 1895,
+        "updateWallMs": 8.100000001490116,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9.100000001490116,
+        "interTickGapWallMs": 454.8999999985099
+      },
+      {
+        "frameSequence": 1896,
+        "updateWallMs": 9,
+        "renderWallMs": 2.2999999970197678,
+        "renderEnvelopeWallMs": 3.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 12.399999998509884,
+        "interTickGapWallMs": 435
+      },
+      {
+        "frameSequence": 1897,
+        "updateWallMs": 8.799999997019768,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 2.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11,
+        "interTickGapWallMs": 448.20000000298023
+      },
+      {
+        "frameSequence": 1898,
+        "updateWallMs": 10.5,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 1.2999999970197678,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11.799999997019768,
+        "interTickGapWallMs": 434.8999999985099
+      },
+      {
+        "frameSequence": 1899,
+        "updateWallMs": 13.5,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 14.5,
+        "interTickGapWallMs": 439.90000000596046
+      },
+      {
+        "frameSequence": 1900,
+        "updateWallMs": 8.700000002980232,
+        "renderWallMs": 1.6999999955296516,
+        "renderEnvelopeWallMs": 1.6999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 10.399999998509884,
+        "interTickGapWallMs": 461.19999999552965
+      },
+      {
+        "frameSequence": 1901,
+        "updateWallMs": 10,
+        "renderWallMs": 1.7000000029802322,
+        "renderEnvelopeWallMs": 2.8000000044703484,
+        "renderTailWallMs": 0,
+        "tickWallMs": 12.800000004470348,
+        "interTickGapWallMs": 449.5
+      },
+      {
+        "frameSequence": 1902,
+        "updateWallMs": 8,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1,
+        "renderTailWallMs": 0,
+        "tickWallMs": 9,
+        "interTickGapWallMs": 428.29999999701977
+      },
+      {
+        "frameSequence": 1903,
+        "updateWallMs": 9.899999998509884,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 1.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11.399999998509884,
+        "interTickGapWallMs": 552.2000000029802
+      },
+      {
+        "frameSequence": 1904,
+        "updateWallMs": 10,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1.0999999940395355,
+        "renderTailWallMs": 0,
+        "tickWallMs": 11.099999994039536,
+        "interTickGapWallMs": 447.20000000298023
+      },
+      {
+        "frameSequence": 1905,
+        "updateWallMs": 26.299999997019768,
+        "renderWallMs": 5.200000002980232,
+        "renderEnvelopeWallMs": 6.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 32.899999998509884,
+        "interTickGapWallMs": 1674.8000000044703
+      },
+      {
+        "frameSequence": 1906,
+        "updateWallMs": 3.5,
+        "renderWallMs": 2.8000000044703484,
+        "renderEnvelopeWallMs": 4.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 8,
+        "interTickGapWallMs": 65.70000000298023
+      },
+      {
+        "frameSequence": 1907,
+        "updateWallMs": 15.5,
+        "renderWallMs": 3.899999998509884,
+        "renderEnvelopeWallMs": 5.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.899999998509884,
+        "interTickGapWallMs": 604.1999999955297
+      },
+      {
+        "frameSequence": 1908,
+        "updateWallMs": 25.099999994039536,
+        "renderWallMs": 6.299999997019768,
+        "renderEnvelopeWallMs": 33.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 58.599999994039536,
+        "interTickGapWallMs": 1955.9000000059605
+      },
+      {
+        "frameSequence": 1909,
+        "updateWallMs": 6,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 1.3999999985098839,
+        "renderTailWallMs": 0,
+        "tickWallMs": 7.399999998509884,
+        "interTickGapWallMs": 125.40000000596046
+      },
+      {
+        "frameSequence": 1910,
+        "updateWallMs": 13.399999998509884,
+        "renderWallMs": 2.100000001490116,
+        "renderEnvelopeWallMs": 4.300000004470348,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17.700000002980232,
+        "interTickGapWallMs": 536.7999999970198
+      },
+      {
+        "frameSequence": 1911,
+        "updateWallMs": 25.399999998509884,
+        "renderWallMs": 1.2000000029802322,
+        "renderEnvelopeWallMs": 2.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 27.899999998509884,
+        "interTickGapWallMs": 405.5
+      },
+      {
+        "frameSequence": 1912,
+        "updateWallMs": 22.700000002980232,
+        "renderWallMs": 40.20000000298023,
+        "renderEnvelopeWallMs": 41.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 64.20000000298023,
+        "interTickGapWallMs": 1261
+      },
+      {
+        "frameSequence": 1913,
+        "updateWallMs": 32.79999999701977,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 2.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 35.29999999701977,
+        "interTickGapWallMs": 866.2999999970198
+      },
+      {
+        "frameSequence": 1914,
+        "updateWallMs": 55.399999998509884,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 5.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 61,
+        "interTickGapWallMs": 1955.1000000014901
+      },
+      {
+        "frameSequence": 1915,
+        "updateWallMs": 4.799999997019768,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 1.8999999985098839,
+        "renderTailWallMs": 0,
+        "tickWallMs": 6.699999995529652,
+        "interTickGapWallMs": 82.70000000298023
+      },
+      {
+        "frameSequence": 1916,
+        "updateWallMs": 7.199999995529652,
+        "renderWallMs": 3.100000001490116,
+        "renderEnvelopeWallMs": 3.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 10.299999997019768,
+        "interTickGapWallMs": 336.30000000447035
+      },
+      {
+        "frameSequence": 1917,
+        "updateWallMs": 13.199999995529652,
+        "renderWallMs": 1.0999999940395355,
+        "renderEnvelopeWallMs": 2.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 15.699999995529652,
+        "interTickGapWallMs": 452.70000000298023
+      },
+      {
+        "frameSequence": 1918,
+        "updateWallMs": 16.899999998509884,
+        "renderWallMs": 3.2999999970197678,
+        "renderEnvelopeWallMs": 3.2999999970197678,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.19999999552965,
+        "interTickGapWallMs": 722.8000000044703
+      },
+      {
+        "frameSequence": 1919,
+        "updateWallMs": 33.80000000447035,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 2.399999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 36.20000000298023,
+        "interTickGapWallMs": 818.6000000014901
+      },
+      {
+        "frameSequence": 1920,
+        "updateWallMs": 9.800000004470348,
+        "renderWallMs": 2.600000001490116,
+        "renderEnvelopeWallMs": 4.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 14.300000004470348,
+        "interTickGapWallMs": 1192.6999999955297
+      },
+      {
+        "frameSequence": 1921,
+        "updateWallMs": 5.5,
+        "renderWallMs": 1.0999999940395355,
+        "renderEnvelopeWallMs": 1.0999999940395355,
+        "renderTailWallMs": 0,
+        "tickWallMs": 6.5999999940395355,
+        "interTickGapWallMs": 95.10000000149012
+      },
+      {
+        "frameSequence": 1922,
+        "updateWallMs": 19.200000002980232,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 3.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 22.30000000447035,
+        "interTickGapWallMs": 677.5
+      },
+      {
+        "frameSequence": 1923,
+        "updateWallMs": 43.69999999552965,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 1.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 45.19999999552965,
+        "interTickGapWallMs": 1130.1000000014901
+      },
+      {
+        "frameSequence": 1924,
+        "updateWallMs": 8.5,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 1.1000000014901161,
+        "renderTailWallMs": 0.10000000149011612,
+        "tickWallMs": 9.600000001490116,
+        "interTickGapWallMs": 275.5
+      },
+      {
+        "frameSequence": 1925,
+        "updateWallMs": 21.5,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 4.300000004470348,
+        "renderTailWallMs": 1.2000000029802322,
+        "tickWallMs": 25.80000000447035,
+        "interTickGapWallMs": 491.3999999985099
+      },
+      {
+        "frameSequence": 1926,
+        "updateWallMs": 59.20000000298023,
+        "renderWallMs": 1.1000000014901161,
+        "renderEnvelopeWallMs": 7.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 66.80000000447035,
+        "interTickGapWallMs": 834.6999999955297
+      },
+      {
+        "frameSequence": 1927,
+        "updateWallMs": 2.7999999970197678,
+        "renderWallMs": 0.8999999985098839,
+        "renderEnvelopeWallMs": 1.7000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 4.5,
+        "interTickGapWallMs": 38.79999999701977
+      },
+      {
+        "frameSequence": 1928,
+        "updateWallMs": 13.5,
+        "renderWallMs": 1.1999999955296516,
+        "renderEnvelopeWallMs": 2.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 16,
+        "interTickGapWallMs": 477.29999999701977
+      },
+      {
+        "frameSequence": 1929,
+        "updateWallMs": 17.400000005960464,
+        "renderWallMs": 4.600000001490116,
+        "renderEnvelopeWallMs": 6.299999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 23.700000002980232,
+        "interTickGapWallMs": 662
+      },
+      {
+        "frameSequence": 1930,
+        "updateWallMs": 115.69999999552965,
+        "renderWallMs": 1.5,
+        "renderEnvelopeWallMs": 3.3000000044703484,
+        "renderTailWallMs": 0,
+        "tickWallMs": 119,
+        "interTickGapWallMs": 1691.1000000014901
+      },
+      {
+        "frameSequence": 1931,
+        "updateWallMs": 41.29999999701977,
+        "renderWallMs": 5.800000004470348,
+        "renderEnvelopeWallMs": 7.300000004470348,
+        "renderTailWallMs": 0,
+        "tickWallMs": 48.600000001490116,
+        "interTickGapWallMs": 1282
+      },
+      {
+        "frameSequence": 1932,
+        "updateWallMs": 21.5,
+        "renderWallMs": 2.7000000029802322,
+        "renderEnvelopeWallMs": 6.199999995529652,
+        "renderTailWallMs": 0.29999999701976776,
+        "tickWallMs": 27.69999999552965,
+        "interTickGapWallMs": 1242.8999999985099
+      },
+      {
+        "frameSequence": 1933,
+        "updateWallMs": 74.10000000149012,
+        "renderWallMs": 3.8000000044703484,
+        "renderEnvelopeWallMs": 5.799999997019768,
+        "renderTailWallMs": 0.19999999552965164,
+        "tickWallMs": 79.89999999850988,
+        "interTickGapWallMs": 1408.6000000014901
+      },
+      {
+        "frameSequence": 1934,
+        "updateWallMs": 48.29999999701977,
+        "renderWallMs": 3.399999998509884,
+        "renderEnvelopeWallMs": 7.799999997019768,
+        "renderTailWallMs": 0,
+        "tickWallMs": 56.099999994039536,
+        "interTickGapWallMs": 958.4000000059605
+      },
+      {
+        "frameSequence": 1935,
+        "updateWallMs": 66,
+        "renderWallMs": 8,
+        "renderEnvelopeWallMs": 20.200000002980232,
+        "renderTailWallMs": 0,
+        "tickWallMs": 86.20000000298023,
+        "interTickGapWallMs": 952.5
+      },
+      {
+        "frameSequence": 1936,
+        "updateWallMs": 26.600000001490116,
+        "renderWallMs": 1.0999999940395355,
+        "renderEnvelopeWallMs": 2.2999999970197678,
+        "renderTailWallMs": 0,
+        "tickWallMs": 28.899999998509884,
+        "interTickGapWallMs": 1092.8999999985099
+      },
+      {
+        "frameSequence": 1937,
+        "updateWallMs": 10.399999998509884,
+        "renderWallMs": 1.2999999970197678,
+        "renderEnvelopeWallMs": 4,
+        "renderTailWallMs": 0,
+        "tickWallMs": 14.399999998509884,
+        "interTickGapWallMs": 461.1000000014901
+      },
+      {
+        "frameSequence": 1938,
+        "updateWallMs": 19.099999994039536,
+        "renderWallMs": 12.100000001490116,
+        "renderEnvelopeWallMs": 14.400000005960464,
+        "renderTailWallMs": 0,
+        "tickWallMs": 33.5,
+        "interTickGapWallMs": 930.4000000059605
+      },
+      {
+        "frameSequence": 1939,
+        "updateWallMs": 15.5,
+        "renderWallMs": 2.1999999955296516,
+        "renderEnvelopeWallMs": 6.600000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 22.100000001490116,
+        "interTickGapWallMs": 464.59999999403954
+      },
+      {
+        "frameSequence": 1940,
+        "updateWallMs": 15.299999997019768,
+        "renderWallMs": 1.2000000029802322,
+        "renderEnvelopeWallMs": 5.300000004470348,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.600000001490116,
+        "interTickGapWallMs": 479.20000000298023
+      },
+      {
+        "frameSequence": 1941,
+        "updateWallMs": 75,
+        "renderWallMs": 27.899999998509884,
+        "renderEnvelopeWallMs": 27.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 102.89999999850988,
+        "interTickGapWallMs": 1087.1999999955297
+      },
+      {
+        "frameSequence": 1942,
+        "updateWallMs": 45.29999999701977,
+        "renderWallMs": 5.699999995529652,
+        "renderEnvelopeWallMs": 7.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 52.79999999701977,
+        "interTickGapWallMs": 968.7000000029802
+      },
+      {
+        "frameSequence": 1943,
+        "updateWallMs": 9.699999995529652,
+        "renderWallMs": 1.4000000059604645,
+        "renderEnvelopeWallMs": 8.900000005960464,
+        "renderTailWallMs": 0,
+        "tickWallMs": 18.600000001490116,
+        "interTickGapWallMs": 840.8000000044703
+      },
+      {
+        "frameSequence": 1944,
+        "updateWallMs": 17.899999998509884,
+        "renderWallMs": 2.1999999955296516,
+        "renderEnvelopeWallMs": 7.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 25.799999997019768,
+        "interTickGapWallMs": 1036.8999999985099
+      },
+      {
+        "frameSequence": 1945,
+        "updateWallMs": 12,
+        "renderWallMs": 2.2000000029802322,
+        "renderEnvelopeWallMs": 5.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17.899999998509884,
+        "interTickGapWallMs": 997.8000000044703
+      },
+      {
+        "frameSequence": 1946,
+        "updateWallMs": 12.699999995529652,
+        "renderWallMs": 1.3999999985098839,
+        "renderEnvelopeWallMs": 4.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17.19999999552965,
+        "interTickGapWallMs": 1720
+      },
+      {
+        "frameSequence": 1947,
+        "updateWallMs": 4.100000001490116,
+        "renderWallMs": 1,
+        "renderEnvelopeWallMs": 2.899999998509884,
+        "renderTailWallMs": 0,
+        "tickWallMs": 7,
+        "interTickGapWallMs": 89.80000000447035
+      },
+      {
+        "frameSequence": 1948,
+        "updateWallMs": 16.5,
+        "renderWallMs": 1.0999999940395355,
+        "renderEnvelopeWallMs": 3.6999999955296516,
+        "renderTailWallMs": 0,
+        "tickWallMs": 20.19999999552965,
+        "interTickGapWallMs": 974
+      },
+      {
+        "frameSequence": 1949,
+        "updateWallMs": 26.399999998509884,
+        "renderWallMs": 1.7000000029802322,
+        "renderEnvelopeWallMs": 4.700000002980232,
+        "renderTailWallMs": 0,
+        "tickWallMs": 31.100000001490116,
+        "interTickGapWallMs": 801.3000000044703
+      },
+      {
+        "frameSequence": 1950,
+        "updateWallMs": 21.100000001490116,
+        "renderWallMs": 1.7000000029802322,
+        "renderEnvelopeWallMs": 3.2000000029802322,
+        "renderTailWallMs": 0,
+        "tickWallMs": 24.30000000447035,
+        "interTickGapWallMs": 796.5999999940395
+      },
+      {
+        "frameSequence": 1951,
+        "updateWallMs": 33.399999998509884,
+        "renderWallMs": 4.5,
+        "renderEnvelopeWallMs": 6.100000001490116,
+        "renderTailWallMs": 0,
+        "tickWallMs": 39.5,
+        "interTickGapWallMs": 411.6000000014901
+      },
+      {
+        "frameSequence": 1952,
+        "updateWallMs": 13.700000002980232,
+        "renderWallMs": 1.8999999985098839,
+        "renderEnvelopeWallMs": 3.5,
+        "renderTailWallMs": 0,
+        "tickWallMs": 17.200000002980232,
+        "interTickGapWallMs": 395.09999999403954
+      },
+      {
+        "frameSequence": 1953,
+        "updateWallMs": 0.7000000029802322,
+        "renderWallMs": 1.5999999940395355,
+        "renderEnvelopeWallMs": 1.5999999940395355,
+        "renderTailWallMs": 0,
+        "tickWallMs": 2.2999999970197678,
+        "interTickGapWallMs": 1012.5
+      }
+    ]
+  },
+  "scope": "Browser28 failure window; synchronous frame intervals are not GPU or causal performance proof."
+}

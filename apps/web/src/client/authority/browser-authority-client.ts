@@ -14,6 +14,7 @@ import type { WorldHarnessPort, WorldHarnessResult } from '@seedlands/stdlib/ser
 // prettier-ignore
 import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
+import { AuthorityReceiveWallObserver as ReceiveWallObserver } from './authority-receive-wall-observer';
 import { BrowserInputSchedulingClock } from './input-scheduling-tick';
 import { deliverInputDecision } from './input-decision-diagnostics';
 import { BrowserAuthorityRequestSender } from './browser-authority-request-sender';
@@ -70,6 +71,7 @@ export class BrowserAuthorityClient {
   private runtimeEpochValue: string;
   private readonly directLogic: BrowserAuthorityDirectLogic;
   private readonly media: BrowserMediaFrontier;
+  private readonly receiveWall: ReceiveWallObserver;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
@@ -77,6 +79,7 @@ export class BrowserAuthorityClient {
     private readonly options: AuthorityClientOptions = {},
   ) {
     this.runtimeEpochValue = epoch;
+    this.receiveWall = new ReceiveWallObserver(options.observationNow, () => !this.disposed && this.runtimeEpoch);
     this.media = new BrowserMediaFrontier(epoch, options.onMediaProjection, options.onMediaFacts);
     this.directLogic = new BrowserAuthorityDirectLogic(worker, epoch);
     this.estimatedInputTransitMs = authorityInputTransitBudgetMs(options.transportFaults ?? { harnessEnabled: false });
@@ -110,7 +113,7 @@ export class BrowserAuthorityClient {
       (cx, cy, cz) => this.ensureChunkNeighborhood(cx, cy, cz),
       (cx, cy, cz) => this.chunks.refreshCollisionBaseline(cx, cy, cz),
     );
-    worker.onmessage = (event) => this.receive(event.data);
+    worker.onmessage = (event) => this.receiveWall.measure(() => this.receive(event.data));
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
 
@@ -160,6 +163,9 @@ export class BrowserAuthorityClient {
   get snapshot(): AuthoritySnapshot | null { return this.snapshotValue; }
   // prettier-ignore
   get runtimeEpoch(): string { return this.runtimeEpochValue; }
+  get receiveWallSnapshot() {
+    return this.receiveWall.snapshot();
+  }
 
   get gameplay(): AuthorityGameplayView {
     if (!this.gameplayValue) throw new Error('Authority gameplay view is not ready.');

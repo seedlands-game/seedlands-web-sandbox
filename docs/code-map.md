@@ -266,3 +266,5 @@ PR41 真实 mousemove 在 `PlayerController` 同步更新相机射线与目标�
 作物真实输入复用唯一 Classic 浏览器旅程的 `classic-support/crop-journey.ts`；`game-harness-observability.ts` 的作物快照复制 Authority 投影和实际 PlayCanvas 批次，双重核对运行时 epoch 与 gameplay 引用，不提供写入或第二份作物 owner。
 
 公开帧事件 CPU wall 诊断由 `client/presentation/frame-cpu-observer.ts` 配对并保存最多128个只读样本；`app/game-frame-loop.ts` 管理 app/reset 生命周期，`game-harness.ts` 输出 detached `frameCpu`。该区间不代表 GPU/cull 时间或整帧 A/B。
+
+Authority消息同步wall观察由 `client/authority/authority-receive-wall-observer.ts` 按epoch/generation维护有界累计，原 `browser-authority-client.ts` 的Worker入口持有实例；帧观察器仅输出相邻有效帧空档的累计差。未覆盖structured clone、排队、异步后续、Worker CPU或GPU。
