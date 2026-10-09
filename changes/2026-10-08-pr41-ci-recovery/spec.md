@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 导航正常输入与 target-first 共存 checkpoint42（诊断后有界修复）
+
+Browser31 精确6e1a1f26/build30原完整3测试为main FAIL、visual PASS、Modular条件SKIP（8.1min）。C0–C3和Creative作物完成；已正常选中指南针/时钟/地图并显示accepted HUD，但地图第一次右键后的原5秒SVG断言FAIL，尚未运行V1/V2/C5。原始trace/results/失败字节保留独立browser-31路径。不可由step耗时宣称导航PASS。
+
+现有输入优先voxel target，其次held self；实际crop dispatcher对非种子/非肥料所持物品执行目标收割。新增导航旅程沿用了成熟作物的瞄准方向；先用真实Authority与前端secondary helper组合取得该触发的定向反例，区分目标收割与self地图更新。若反例确认，只用既有真实Pointer Lock鼠标瞄准邻近中性Stone地面再右键，保留target-first生产行为、原map owner/HUD/map-ID/inventory断言和期限；导航后立即复核待保存作物仍stage7，不把真实目标交互改成无条件self，也不以admin更新地图。修复后定向测试/必要静态与原完整browser重新验收。传统0.15PD×120%=0.18PD；AI约25min×120%=30min，周额度读数待主对话更新、60%停止。
+
+Browser31只读原生CPU观测：固定10秒GPU process五个Thread工作线程合计约25.12CPU秒、renderer主线程1.97CPU秒，宿主cpu.max为400000/100000（四核总预算）。第一份角色字段只是未核实的browser默认值，后独立显式--type扫描确认为gpu-process/renderer并保留原件。此为诊断而非GPU执行计时或因果/收益证据，不修改环境资源、安全策略、render质量/输入/trace，不选优化候选。
+
 ## 正式导航 producer / consumer checkpoint41（实施中；未验收）
 
 整体复验实际结果：Classic headless 84文件552例PASS；stdlib 153文件1101例PASS、Headless CLI同一宿主navigation resource未许可导致7例FAIL；静态format/冻结5/5/paths/lint/产品types与Svelte0/0通过，Classic夹具读取可空inventory slot导致后续types失败。下一步仅补工程脚本Overworld的明确navigation读/写/执行许可（不采用Pack自请求权限、不改其他Playbook许可），显式排除null slot，再复验受影响CLI/Authority夹具、types与未运行规则/选择器；复用有效结果。
