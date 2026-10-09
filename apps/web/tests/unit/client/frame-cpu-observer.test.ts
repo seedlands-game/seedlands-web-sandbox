@@ -247,4 +247,111 @@ describe('FrameCpuObserver', () => {
     events.emit('frameend');
     expect(observer.snapshot().sampleCount).toBe(0);
   });
+
+  it('attaches receive deltas only across a same-generation gap and reports valid zero work', () => {
+    const events = new EventSource();
+    let now = 0;
+    let receive = { runtimeEpoch: 'epoch-a', generation: 1, count: 0, totalWallMs: 0 };
+    const observer = new FrameCpuObserver(
+      () => now,
+      128,
+      () => receive,
+    );
+    observer.attach(events);
+    const frame = (start: number) => {
+      now = start;
+      events.emit('frameupdate');
+      now = start + 2;
+      events.emit('framerender');
+      now = start + 3;
+      events.emit('prerender');
+      now = start + 5;
+      events.emit('postrender');
+      now = start + 10;
+      events.emit('frameend');
+    };
+
+    frame(10);
+    expect(observer.snapshot().samples[0]).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+    receive = { ...receive, count: 2, totalWallMs: 5 };
+    frame(30);
+    expect(observer.snapshot().samples[1]).toMatchObject({ receiveGapWallMs: 5, receiveGapCount: 2 });
+    frame(50);
+    expect(observer.snapshot().samples[2]).toMatchObject({ receiveGapWallMs: 0, receiveGapCount: 0 });
+  });
+
+  it('rejects receive deltas across epoch, generation, invalid totals, excess gap, or missing phases', () => {
+    const events = new EventSource();
+    let now = 0;
+    let receive: { runtimeEpoch: string; generation: number; count: number; totalWallMs: number } | null = {
+      runtimeEpoch: 'epoch-a',
+      generation: 1,
+      count: 4,
+      totalWallMs: 12,
+    };
+    const observer = new FrameCpuObserver(
+      () => now,
+      128,
+      () => receive,
+    );
+    observer.attach(events);
+    const frame = (start: number) => {
+      now = start;
+      events.emit('frameupdate');
+      now = start + 2;
+      events.emit('framerender');
+      now = start + 3;
+      events.emit('prerender');
+      now = start + 5;
+      events.emit('postrender');
+      now = start + 10;
+      events.emit('frameend');
+    };
+
+    frame(10);
+    receive = { runtimeEpoch: 'epoch-b', generation: 2, count: 1, totalWallMs: 2 };
+    frame(30);
+    expect(observer.snapshot().samples[1]).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+
+    receive = { ...receive, count: 2, totalWallMs: 4 };
+    frame(50);
+    expect(observer.snapshot().samples[2]).toMatchObject({ receiveGapWallMs: 2, receiveGapCount: 1 });
+
+    receive = { ...receive, generation: 3, count: 0, totalWallMs: 0 };
+    frame(70);
+    expect(observer.snapshot().samples[3]).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+
+    receive = { ...receive, count: 1, totalWallMs: 20 };
+    frame(82); // 2ms idle gap cannot contain 20ms of receive callbacks.
+    expect(observer.snapshot().samples[4]).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+
+    receive = null;
+    frame(102);
+    expect(observer.snapshot().samples[5]).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+
+    receive = { runtimeEpoch: 'epoch-b', generation: 4, count: 0, totalWallMs: 0 };
+    now = 122;
+    events.emit('frameupdate');
+    now = 124;
+    events.emit('framerender');
+    now = 125;
+    events.emit('prerender');
+    now = 127;
+    events.emit('postrender');
+    now = 132;
+    events.emit('frameupdate'); // Repeated start discards the unclosed frame's receive baseline.
+    now = 134;
+    events.emit('framerender');
+    now = 135;
+    events.emit('prerender');
+    now = 137;
+    events.emit('postrender');
+    now = 142;
+    events.emit('frameend');
+    expect(observer.snapshot().samples.at(-1)).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+
+    receive = { ...receive, count: -1, totalWallMs: Number.NaN };
+    frame(162);
+    expect(observer.snapshot().samples.at(-1)).toMatchObject({ receiveGapWallMs: null, receiveGapCount: null });
+  });
 });

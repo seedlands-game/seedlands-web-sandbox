@@ -42,7 +42,11 @@ type GameFrameBindings = Readonly<{
 }>;
 
 export class GameFrameLoop {
-  private readonly cpuFrames = new FrameCpuObserver(() => performance.now());
+  private readonly cpuFrames = new FrameCpuObserver(
+    () => performance.now(),
+    128,
+    () => this.bindings.authority()?.receiveWallSnapshot ?? null,
+  );
   private lastFpsSample = performance.now();
   private frames = 0;
   private fps = 0;

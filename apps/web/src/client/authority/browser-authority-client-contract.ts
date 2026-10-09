@@ -55,6 +55,7 @@ export type AuthorityWorkerPort = {
 };
 
 export type AuthorityClientOptions = Readonly<{
+  observationNow?: () => number;
   onSnapshot?: (snapshot: AuthoritySnapshot) => void;
   onGameplay?: (view: AuthorityGameplayView) => void;
   onMediaProjection?: (projection: readonly MediaPlaybackProjectionV1[]) => void;

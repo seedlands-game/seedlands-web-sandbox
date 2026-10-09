@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 相邻帧空档 receive wall 诊断 checkpoint38（确定性与静态完成；浏览器待运行）
+
+Browser28精确5f3f679/build27 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。V1已结束并进入V2，石镐制作返回工作台在900秒上限失败；末尾Pointer Lock错误发生于超时退出附近，不认定为首因。最后128样本同步tick中位21.05ms、renderEnvelope3.2ms、interTickGap434.95ms；不同窗口不能相减，GPU/Worker/trace因果仍未知。原始结果保留在私有Root browser-28-results，失败原字节browser-28-failure-38-01.json。
+
+只在原BrowserAuthorityClient worker.onmessage外层测同步receive全调用（含早退及回调），finally计数并原样传播异常。实例注入单调now；有界累计runtimeEpoch/generation/count/totalWallMs，不按消息无限缓存。epoch切换、dispose或非法/倒退时钟使累计身份断链，重入仅计外层，副本冻结；读取不暴露写入口。frameend记累计baseline，下一frameupdate只对相同epoch/generation且有限非递减的累计差输出receiveGapWallMs/receiveGapCount，wall差不得超过该gap；首帧/缺phase/换app/reset/不可用/非法累计皆null，有效无receive才为0。不得跨断帧或epoch串样。
+
+同步入口不包括structured clone进JS前、排队、异步后续、Worker CPU、GPU及其他task。只回答已完成同步receive的空档占用，不宣称因果或FPS收益。保持原owner、协议、selection、线程、renderer、trace、质量、45/20/900秒及唯一完整Classic runner；不用旧slimSnapshot候选。RED覆盖实际client调用者、异常不吞、重入/clock失效/epoch/dispose，frame字段正确差值及断链反例；GREEN后必要lint/types/观察和client回归，新artifact唯一browser读取证据。
+
+05:10真实UI剩余89%、约5天21小时重置，60%停止；传统0.15PD×120%=0.18PD、AI约25min×120%=30min，未知credits/API分母不换算周比例。根receive-gap-static-38-01.log完整静态PASS，冻结5/5、Svelte0错误/警告、规则66与CI选择14；联合4文件26/26 PASS，原fixture/行数失败保留。长期docs仅记录实际观察owner。完整V2/V3/V4/194、恢复及组合整帧AB仍未完成；不合并、不部署生产。
+
 ## 门撤退双端路线 checkpoint37（确定性与静态完成；浏览器待运行）
 
 Browser27精确32422f99/build26 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3和作物通过，V1关闭门探测后retreat readiness20秒FAIL，未进入V2；不声明V1通过。实际geometry93是x[0.8125,1]薄门，plan contact70.4925、approach69.4925。松开探测W后首snapshot camera69.49097、Authority70.49250；旧walkTo固定KeyS在camera已越过approach时直接返回，trace之后无任何S，camera追上70.4925后纯wait不可能使双方到门体素外。这是有效实际RED，不是瞄准或900秒失败。
