@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Mounted death settlement checkpoint50（正式死亡结算已验证；运输产品未完成）
+
+实际Authority正常部署/use骑乘后，显式death policy的direct Vitals致死RED在prepare期被悬空rider校验拒绝；不是缺policy。共享death series现从当前owner精确id+lifetime派生解除关系replacement，与actor死亡/退役和四容器掉落同一allocator/frontier提交，原128×192上限保持。风险反例抓到手造alive replacement仍被当death候选接受，补health0/lifecycle dead门禁后拒绝零写。新Authority3/3与stdlib5/5 PASS，含注册Combat、非零运输velocity/payload/lifetime保持、存活rider、四容器drops、重放/新鲜度/容量拒绝、mounted死亡保存恢复/复活以及无policy fail-closed。根原death63/63、transport owner14/14、Classic死亡/复活/特殊伤害25/25 PASS。类型与格式完成状态见evidence/transport-death-checkpoint-50-01.md；本组无browser/性能验收声明。
+
+接续7ff66457，实际骑乘后致死的Vitals/registered Combat/Needs现有共同death inventory settlement必须在同一prepared series清除transport rider并推进该component revision，不能先解除关系或让dead/despawned rider悬空。从同一个当前EntityStore transport component选取精确actor id+lifetime关系，保留transport pose/velocity/fuel/cargo/lifetime，只生成transports replacement；与death actor/四容器drops/despawn/其他survivors沿原单allocator/frontier和128×192上限共同预检、apply，容量/源新鲜度失败原owner全部不变，未骑乘世界原顺序/数量保持。除正式death producer之外的一般死actor/despawn仍要求显式关系settlement，不在底层EntityStore偷偷自动修复或丢弃rider。
+
+先真实mounted player致死producer RED（缺death policy failure不算该RED）；正式非Classic policy的direct Vitals与注册Combat/Needs caller GREEN证明dead/retired关系清除、物品只掉一次、幸存者仍挂在原transport、cargo/fuel/pose/ref保持、重复/prepare后变化/capacity失败零写。mounted死亡checkpoint恢复/respawn证明关系不会重现，实际无policy仍按原fail-closed行为。传统0.45PD×120%=0.54PD；AI约55min×120%=66min，12:08附近开始。无Classic identity/legacy迁移、运输运动/UI或browser/performance修改；完成后继续正式产品与真实验收，不能由death模型夹具代替玩家玩法。11:40产品周剩86%、60%停止线保持。
+
 ## Transport registered mount/dismount checkpoint49（上下车与静态骑乘已验证；运输产品未完成）
 
 实际正式caller RED缺state owner，接线后partition类型失败按原合同修为两个component；最终2文件20/20 PASS。实际use/alternate、四项selection、重复/堵seat、world/player占出口、自然unknown frontier、规则veto/forge、receiveInput+flight/walking/jump physics、mounted portable恢复/坏rider active restore零写已验证。风险审查抓到first player-blocked出口仍选中后拒绝，实际RED12/13；出口投影过滤真实players后可选另一个安全出口，GREEN20/20。deploy后World edit原transport:undefined不是setup错误，真实RED保留且physics/recovery已统一definition body selector。根68/68 owner/physics、48/48 dispatch、原geometry8加新增4PASS；完整static原EXIT2仅最后编辑中Classic tuple错误，其余format/paths/lint/生产types/Svelte0/0有效，最终scopedlint/stdlib与Classictypes补验、规则66/CI选择14均PASS。详见evidence/transport-relations-checkpoint-49-01.md。
