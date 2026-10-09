@@ -58,3 +58,7 @@ Classic art direction is documented in [Classic visual style](docs/classic-visua
 ## User-provided Classic audio
 
 - `playbooks/classic/assets/audio/to-far-shores.mp3` was provided by the user for this Classic Mod resource import. Its license status is **unknown**. This repository does not claim that the recording is original, open source, or covered by Apache-2.0 or the CC BY 4.0 grants above. Do not redistribute it without separately confirming the necessary rights.
+
+## Classic crop stages
+
+`playbooks/classic/assets/crops/wheat-stage-*.svg` are eight original repository-authored 16×16 pixel textures, offered under Apache-2.0. Their transparent stems, leaves and mature grain heads use no third-party artwork. The Classic Pack declares their world dimensions and resource locks; the SVG files are the editable source.

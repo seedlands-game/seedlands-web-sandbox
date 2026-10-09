@@ -45,7 +45,18 @@ export const pack = definePack({
   version: '1.0.0',
   kind: 'playbook',
   entry: 'overworld.mjs',
-  resources: ['playbooks/classic/presentation.json', 'playbooks/classic/assets/audio/to-far-shores.mp3'],
+  resources: [
+    'playbooks/classic/presentation.json',
+    'playbooks/classic/assets/audio/to-far-shores.mp3',
+    'playbooks/classic/assets/crops/wheat-stage-0.svg',
+    'playbooks/classic/assets/crops/wheat-stage-1.svg',
+    'playbooks/classic/assets/crops/wheat-stage-2.svg',
+    'playbooks/classic/assets/crops/wheat-stage-3.svg',
+    'playbooks/classic/assets/crops/wheat-stage-4.svg',
+    'playbooks/classic/assets/crops/wheat-stage-5.svg',
+    'playbooks/classic/assets/crops/wheat-stage-6.svg',
+    'playbooks/classic/assets/crops/wheat-stage-7.svg',
+  ],
   presentation: { path: 'playbooks/classic/presentation.json' },
   modules: [
     defineStandardWorldgenModule({

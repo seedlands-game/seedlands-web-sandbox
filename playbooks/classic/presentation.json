@@ -28,5 +28,52 @@
       "texture": "builtin:seedlands:texture/terrain/torch",
       "renderMode": "opaque"
     }
+  ],
+  "crops": [
+    {
+      "id": "seedlands:wheat-crop",
+      "stages": [
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-0.svg",
+          "height": 0.23,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-1.svg",
+          "height": 0.33,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-2.svg",
+          "height": 0.43,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-3.svg",
+          "height": 0.53,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-4.svg",
+          "height": 0.63,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-5.svg",
+          "height": 0.73,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-6.svg",
+          "height": 0.83,
+          "width": 0.85
+        },
+        {
+          "texture": "playbooks/classic/assets/crops/wheat-stage-7.svg",
+          "height": 0.93,
+          "width": 0.85
+        }
+      ]
+    }
   ]
 }

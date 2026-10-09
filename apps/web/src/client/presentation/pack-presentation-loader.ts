@@ -1,6 +1,8 @@
 export type PackPresentationVoxel = Readonly<{ id: string; texture: string; material: string }>;
 export type PackPresentationItem = Readonly<{ id: string; model: string; icon: string; material?: string }>;
 export type PackPresentationActor = Readonly<{ id: string; model: string; texture: string }>;
+export type PackPresentationCropStage = Readonly<{ texture: string; height: number; width: number }>;
+export type PackPresentationCrop = Readonly<{ id: string; stages: readonly PackPresentationCropStage[] }>;
 export type PackPresentationMaterial = Readonly<{
   id: string;
   faceMaterial: number;
@@ -12,6 +14,7 @@ export type PackPresentationCatalog = Readonly<{
   items: Readonly<Record<string, PackPresentationItem>>;
   actors: Readonly<Record<string, PackPresentationActor>>;
   materials: Readonly<Record<string, PackPresentationMaterial>>;
+  crops?: Readonly<Record<string, PackPresentationCrop>>;
   assetUrls: Readonly<Record<string, string>>;
   dispose(): void;
 }>;
@@ -145,7 +148,12 @@ function catalogEntry<T extends Record<string, unknown>>(
 function parsePresentation(value: unknown): PackPresentationCatalog {
   if (
     !object(value) ||
-    !exactKeys(value, ['schemaVersion', 'voxels', 'items', 'actors', 'materials']) ||
+    !exactKeys(
+      value,
+      value.crops === undefined
+        ? ['schemaVersion', 'voxels', 'items', 'actors', 'materials']
+        : ['schemaVersion', 'voxels', 'items', 'actors', 'materials', 'crops'],
+    ) ||
     value.schemaVersion !== 1
   )
     throw new TypeError('Pack presentation schema is invalid.');
@@ -153,6 +161,40 @@ function parsePresentation(value: unknown): PackPresentationCatalog {
   const items: Record<string, PackPresentationItem> = {};
   const actors: Record<string, PackPresentationActor> = {};
   const materials: Record<string, PackPresentationMaterial> = {};
+  const crops: Record<string, PackPresentationCrop> = {};
+  if (value.crops !== undefined) {
+    if (!Array.isArray(value.crops) || value.crops.length > MAX_ENTRIES)
+      throw new TypeError('Pack presentation crops are invalid.');
+    for (const crop of value.crops) {
+      if (
+        !object(crop) ||
+        !exactKeys(crop, ['id', 'stages']) ||
+        !id(crop.id) ||
+        Object.hasOwn(crops, crop.id) ||
+        !Array.isArray(crop.stages) ||
+        crop.stages.length !== 8
+      )
+        throw new TypeError('Pack presentation crop stages are invalid.');
+      const stages = crop.stages.map((stage: unknown) => {
+        if (
+          !object(stage) ||
+          !exactKeys(stage, ['texture', 'height', 'width']) ||
+          !path(stage.texture) ||
+          typeof stage.height !== 'number' ||
+          !Number.isFinite(stage.height) ||
+          stage.height <= 0 ||
+          stage.height > 2 ||
+          typeof stage.width !== 'number' ||
+          !Number.isFinite(stage.width) ||
+          stage.width <= 0 ||
+          stage.width > 2
+        )
+          throw new TypeError('Pack presentation crop stage is invalid.');
+        return Object.freeze({ texture: stage.texture, height: stage.height, width: stage.width });
+      });
+      crops[crop.id] = Object.freeze({ id: crop.id, stages: Object.freeze(stages) });
+    }
+  }
   catalogEntry(value.voxels, ['id', 'texture', 'material'], voxels, 'voxels');
   if (!Array.isArray(value.items) || value.items.length > MAX_ENTRIES)
     throw new TypeError('Pack presentation items is invalid.');
@@ -199,13 +241,14 @@ function parsePresentation(value: unknown): PackPresentationCatalog {
   for (const entry of Object.values(items))
     if (entry.material !== undefined && !materials[entry.material])
       throw new TypeError('Pack presentation material binding is unresolved.');
-  for (const reference of referencedAssets({ voxels, items, actors, materials, assetUrls: {}, dispose() {} }))
+  for (const reference of referencedAssets({ voxels, items, actors, materials, crops, assetUrls: {}, dispose() {} }))
     if (!assetReference(reference)) throw new TypeError(`Pack presentation asset reference is invalid: ${reference}`);
   return Object.freeze({
     voxels: Object.freeze(voxels),
     items: Object.freeze(items),
     actors: Object.freeze(actors),
     materials: Object.freeze(materials),
+    crops: Object.freeze(crops),
     assetUrls: Object.freeze({}),
     dispose() {},
   });
@@ -218,6 +261,7 @@ const referencedAssets = (catalog: PackPresentationCatalog) =>
       ...Object.values(catalog.items).flatMap((entry) => [entry.model, entry.icon]),
       ...Object.values(catalog.actors).flatMap((entry) => [entry.model, entry.texture]),
       ...Object.values(catalog.materials).map((entry) => entry.texture),
+      ...Object.values(catalog.crops ?? {}).flatMap((crop) => crop.stages.map((stage) => stage.texture)),
     ].filter((reference) => !reference.startsWith('builtin:')),
   );
 
@@ -237,6 +281,7 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
     items: {},
     actors: {},
     materials: {},
+    crops: {},
     assetUrls: {},
     dispose() {},
   };
@@ -284,9 +329,9 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
         createdAssetUrls.push(objectUrl);
         (merged.assetUrls as Record<string, string>)[reference] = objectUrl;
       }
-      for (const category of ['voxels', 'items', 'actors', 'materials'] as const) {
-        for (const [key, entry] of Object.entries(parsed[category])) {
-          if (Object.hasOwn(merged[category], key))
+      for (const category of ['voxels', 'items', 'actors', 'materials', 'crops'] as const) {
+        for (const [key, entry] of Object.entries(parsed[category] ?? {})) {
+          if (Object.hasOwn(merged[category]!, key))
             throw new TypeError(`Duplicate Pack presentation ${category}: ${key}`);
           (merged[category] as Record<string, unknown>)[key] = entry;
         }
@@ -303,6 +348,7 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
     items: Object.freeze(merged.items),
     actors: Object.freeze(merged.actors),
     materials: Object.freeze(merged.materials),
+    crops: Object.freeze(merged.crops!),
     assetUrls,
     dispose() {
       if (disposed) return;

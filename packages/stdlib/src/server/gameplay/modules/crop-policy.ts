@@ -1,4 +1,5 @@
 export type CropPolicy = Readonly<{
+  presentationId?: string;
   soilVoxels: readonly number[];
   emptyAboveVoxels: readonly number[];
   waterVoxels: readonly number[];
@@ -37,12 +38,21 @@ export function freezeCropPolicy(policy: CropPolicy): CropPolicy {
     );
   };
   const fertilizer = policy.fertilizer;
+  const presentationId = policy.presentationId;
+  if (
+    presentationId !== undefined &&
+    (typeof presentationId !== 'string' ||
+      presentationId.length > 128 ||
+      !/^[a-z0-9][a-z0-9._-]*(?::[a-z0-9][a-z0-9._/-]*)?$/.test(presentationId))
+  )
+    throw new TypeError('Crop presentation identity is invalid.');
   if (
     fertilizer &&
     (!Number.isSafeInteger(fertilizer.growthStages) || fertilizer.growthStages < 1 || fertilizer.growthStages > 7)
   )
     throw new TypeError('Crop fertilizer growth policy is invalid.');
   return Object.freeze({
+    ...(presentationId !== undefined ? { presentationId } : {}),
     soilVoxels: voxels(policy.soilVoxels),
     emptyAboveVoxels: voxels(policy.emptyAboveVoxels),
     waterVoxels: voxels(policy.waterVoxels),

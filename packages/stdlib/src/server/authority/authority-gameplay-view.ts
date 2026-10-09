@@ -26,7 +26,15 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     difficulty: server.gameplayDifficulty,
     armorPoints: server.getPlayerArmorPoints(playerId),
     media: server.mediaProjections(),
-    cropStages: Object.freeze(server.crops.list().map(({ position, stage }) => Object.freeze({ position, stage }))),
+    cropStages: Object.freeze(
+      server.crops.list().map(({ position, stage }) =>
+        Object.freeze({
+          position,
+          stage,
+          ...(server.crops.presentationId === undefined ? {} : { presentationId: server.crops.presentationId }),
+        }),
+      ),
+    ),
     metrics: server.gameplayMetrics(),
   };
 }

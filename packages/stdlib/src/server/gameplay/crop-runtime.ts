@@ -62,6 +62,10 @@ export class CropRuntime {
     const crop = this.#crops.get(key(position));
     return crop ? copy(crop) : null;
   }
+  /** Pack content metadata; it is not crop state and never enters the checkpoint. */
+  get presentationId(): string | undefined {
+    return this.#policy?.presentationId;
+  }
   /** A participant for the registered host; it never edits inventory or publishes a second gameplay revision. */
   preparePlant(position: Position, expected: CropRecord | null, next: CropRecord) {
     if (expected !== null || next.stage !== 0 || next.subSeconds !== 0) throw new Error('crop-interaction-stale');

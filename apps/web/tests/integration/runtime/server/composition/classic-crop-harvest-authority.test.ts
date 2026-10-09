@@ -89,7 +89,7 @@ it('uses the registered Classic bone-derived white dye as fertilizer through the
   expect(response.result).toMatchObject({ success: true, handled: true });
   expect(runtime.server.crops.at(hit)).toMatchObject({ stage: 7, subSeconds: 0 });
   expect(total(runtime, 'white-dye')).toBe(0);
-  expect(runtime.view().cropStages).toEqual([{ position: hit, stage: 7 }]);
+  expect(runtime.view().cropStages).toEqual([{ position: hit, stage: 7, presentationId: 'seedlands:wheat-crop' }]);
 });
 
 const capture = (runtime: Runtime) => ({
@@ -177,7 +177,7 @@ it('restores a fertilized crop through portable persistence then harvests throug
   const restored = await create(testCorePlatform, persistence);
   await expect(restored.server.prepareCanonicalChunkForMutation(0, 1, 0)).resolves.toBe(true);
   expect(restored.server.peekLoadedVoxel(...hit)?.voxel).toBe(Voxel.Farmland);
-  expect(restored.view().cropStages).toEqual([{ position: hit, stage: 7 }]);
+  expect(restored.view().cropStages).toEqual([{ position: hit, stage: 7, presentationId: 'seedlands:wheat-crop' }]);
   expect((await restored.performAction(action(restored))).result).toMatchObject({ success: true });
   expect(total(restored, 'wheat')).toBe(1);
   expect(restored.view().cropStages).toEqual([]);

@@ -131,7 +131,7 @@ it('projects registered crop stages from the sole owner across Authority growth 
   giveSeeds(runtime);
   expect((await runtime.performAction(plant(runtime))).result).toMatchObject({ success: true });
   const planted = runtime.view();
-  expect(planted).toHaveProperty('cropStages', [{ position: hit, stage: 0 }]);
+  expect(planted).toHaveProperty('cropStages', [{ position: hit, stage: 0, presentationId: 'seedlands:wheat-crop' }]);
   const epoch = runtime.snapshot().epoch;
   const worker = new FakeAuthorityWorker();
   const client = new BrowserAuthorityClient(worker, epoch);
@@ -144,13 +144,17 @@ it('projects registered crop stages from the sole owner across Authority growth 
   });
   worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch, ready: structuredClone(runtime.ready()) });
   await starting;
-  expect(client.gameplay.cropStages).toEqual([{ position: hit, stage: 0 }]);
+  expect(client.gameplay.cropStages).toEqual([{ position: hit, stage: 0, presentationId: 'seedlands:wheat-crop' }]);
   runtime.advanceSession(10_000);
   const grown = runtime.view();
   expect(grown.cropStages?.[0]?.stage).toBeGreaterThan(0);
-  expect(grown.cropStages).toEqual(runtime.server.crops.list().map(({ position, stage }) => ({ position, stage })));
+  expect(grown.cropStages).toEqual(
+    runtime.server.crops
+      .list()
+      .map(({ position, stage }) => ({ position, stage, presentationId: 'seedlands:wheat-crop' })),
+  );
   expect(grown.cropStages?.[0]).not.toHaveProperty('subSeconds');
-  expect(planted.cropStages).toEqual([{ position: hit, stage: 0 }]);
+  expect(planted.cropStages).toEqual([{ position: hit, stage: 0, presentationId: 'seedlands:wheat-crop' }]);
   expect(grown.cropStages?.[0]?.position).not.toBe(runtime.server.crops.list()[0]?.position);
   new AuthorityTickPublisher().publish(runtime, runtime.snapshot(), 10_000, epoch, epoch, (message) =>
     worker.emit(structuredClone(message)),
@@ -176,6 +180,7 @@ it('plants in Creative while preserving the Survival inventory', async () => {
   expect(response.result, JSON.stringify(response.result)).toMatchObject({ success: true, handled: true });
   expect(runtime.server.getInventoryPointerView(runtime.playerId)).toEqual(inventoryBefore);
   expect(runtime.server.crops.checkpoint().crops).toMatchObject([{ position: hit, stage: 0 }]);
+  expect(runtime.server.crops.checkpoint().crops[0]).not.toHaveProperty('presentationId');
 });
 
 it.each(['inventory', 'slot', 'mode', 'creative-catalog'] as const)(

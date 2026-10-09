@@ -69,6 +69,8 @@
     "apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts",
     "apps/web/tests/e2e/classic-support/equipment-route-pulse-handoff.test.ts",
     "apps/web/tests/e2e/classic-support/route-progress.test.ts",
-    "apps/web/tests/e2e/classic-support/scenario.test.ts"
+    "apps/web/tests/e2e/classic-support/scenario.test.ts",
+    "apps/web/tests/unit/client/crop-presentation-loader.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/crop-presentation-authority.test.ts"
   ]
 }
