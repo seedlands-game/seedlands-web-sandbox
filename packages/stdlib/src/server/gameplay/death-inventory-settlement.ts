@@ -8,11 +8,12 @@ import { copyBreakAction } from './player-break-action-codec';
 import { ARMOR_SLOTS, type ArmorSlot } from './modules/armor-policy';
 import { emptyInventoryCursor, type InventoryCursorV1 } from './modules/inventory-pointer-contract';
 import { cloneCharacterComponentState } from '../simulation/character-runtime-validation';
+import { deathEntityMutationSegments } from './death-entity-mutation-segments';
+import { transportDeathReplacements } from './transport-death-settlement';
 import {
   prepareEntityMutationSeries,
   type PreparedActorReplacement,
   type PreparedEntityMutation,
-  type PreparedEntityMutationInput,
   type PreparedWorldItemSpawn,
 } from './prepared-entity-mutation';
 
@@ -357,6 +358,11 @@ function validateCandidate(entities: EntityStore, candidate: DeathInventorySettl
   sourceIsFresh(entities, candidate.source);
   if (Boolean(candidate.actorReplacement) === Boolean(candidate.despawnReference))
     throw new TypeError('Death inventory settlement actor replacement and despawn are invalid.');
+  if (
+    candidate.actorReplacement &&
+    (candidate.actorReplacement.health !== 0 || candidate.actorReplacement.components.lifecycle !== 'dead')
+  )
+    throw new TypeError('Death inventory settlement actor replacement must be dead.');
   const targetReference = candidate.actorReplacement?.reference ?? candidate.despawnReference!;
   if (!sameSnapshot(targetReference, reference))
     throw new TypeError('Death inventory settlement target does not match its source.');
@@ -415,36 +421,6 @@ function validateAdditionalActorReplacement(
 const worldItemSpawn = (drop: DeathInventoryIntrinsicDropV1 | DeathInventoryDropIntentV1): PreparedWorldItemSpawn =>
   Object.freeze({ position: frozenPosition(drop.position), stack: frozenStack(drop.stack) as ItemStack });
 
-function mutationSegments(
-  actors: readonly PreparedActorReplacement[],
-  despawns: readonly EntityLifetimeReference[],
-  spawns: readonly PreparedWorldItemSpawn[],
-): PreparedEntityMutationInput[] {
-  const segments: PreparedEntityMutationInput[] = [];
-  let actorOffset = 0;
-  let despawnOffset = 0;
-  let spawnOffset = 0;
-  while (actorOffset < actors.length || despawnOffset < despawns.length || spawnOffset < spawns.length) {
-    let remaining = 128;
-    const nextActors = actors.slice(actorOffset, actorOffset + remaining);
-    actorOffset += nextActors.length;
-    remaining -= nextActors.length;
-    const nextDespawns = despawns.slice(despawnOffset, despawnOffset + remaining);
-    despawnOffset += nextDespawns.length;
-    remaining -= nextDespawns.length;
-    const nextSpawns = spawns.slice(spawnOffset, spawnOffset + remaining);
-    spawnOffset += nextSpawns.length;
-    segments.push(
-      Object.freeze({
-        ...(nextActors.length ? { actors: Object.freeze(nextActors) } : {}),
-        ...(nextDespawns.length ? { despawns: Object.freeze(nextDespawns) } : {}),
-        ...(nextSpawns.length ? { spawns: Object.freeze(nextSpawns) } : {}),
-      }),
-    );
-  }
-  return segments;
-}
-
 /** Prepares every death mutation through one allocator and freshness frontier. */
 export function prepareDeathInventorySettlementSeriesV1(
   entities: EntityStore,
@@ -492,7 +468,11 @@ export function prepareDeathInventorySettlementSeriesV1(
     ...candidates.flatMap((candidate) => candidate.dropIntents.map(worldItemSpawn)),
     ...intrinsicDrops.map(worldItemSpawn),
   ];
-  return prepareEntityMutationSeries(entities, mutationSegments(actors, despawns, spawns));
+  const transports = transportDeathReplacements(
+    entities,
+    candidates.map((candidate) => candidate.source.actorReference),
+  );
+  return prepareEntityMutationSeries(entities, deathEntityMutationSegments(actors, despawns, spawns, transports));
 }
 
 /** Single-candidate compatibility delegates to the same series frontier. */
