@@ -79,6 +79,7 @@ export type HarnessApi = {
   getVoxelGeometry(voxel: number): VoxelGeometryDefinitionV1 | null;
   getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId): RenderedMaterialMeshSummary | null; // prettier-ignore
   mediaSnapshot(): HarnessMediaSnapshot;
+  cropStageSnapshot(): import('../../../src/app/gameplay/game-harness-contract').HarnessCropStageSnapshot | null;
   equipmentSnapshot(): HarnessEquipmentSnapshot | null;
   flushSave(): Promise<void>;
   beginPerformanceScenario(name: string): string;

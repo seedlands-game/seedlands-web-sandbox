@@ -5,7 +5,19 @@ import { buildCropStageGeometry } from '../../client/presentation/crop-stage-geo
 import { voxelBlockLightGlsl } from '../shaders/voxel-block-light-chunk';
 import type { CropStageAdapter, CropStageBatch } from './crop-stage-presenter';
 
+export type CropRenderBatchSnapshot = Readonly<{
+  chunkKey: string;
+  presentationId: string;
+  stage: number;
+  positions: readonly (readonly [number, number, number])[];
+  vertexCount: number;
+  indexCount: number;
+  enabled: boolean;
+  lightingBound: boolean;
+}>;
+
 export type CropRenderResource = Readonly<{
+  batch: Readonly<Pick<CropStageBatch, 'presentationId' | 'stage' | 'positions'>>;
   chunkKey: string;
   entity: pc.Entity;
   mesh: pc.Mesh;
@@ -20,6 +32,7 @@ export type PlayCanvasCropPresentation = CropStageAdapter<CropRenderResource> &
   Readonly<{
     definitions: NonNullable<PackPresentationCatalog['crops']>;
     bindChunkLight(key: string, lighting: ChunkLighting | undefined): void;
+    snapshot(): readonly CropRenderBatchSnapshot[];
     dispose(): void;
   }>;
 
@@ -118,7 +131,14 @@ export async function createPlayCanvasCropPresentation(
         instance.castShadow = false;
         entity.addComponent('render', { meshInstances: [instance], castShadows: false });
         app.root.addChild(entity);
-        const resource = { chunkKey: batch.chunkKey, entity, mesh, instance };
+        const metadata = Object.freeze({
+          presentationId: batch.presentationId,
+          stage: batch.stage,
+          positions: Object.freeze(
+            batch.positions.map((position) => Object.freeze([...position]) as readonly [number, number, number]),
+          ),
+        });
+        const resource = { batch: metadata, chunkKey: batch.chunkKey, entity, mesh, instance };
         const group = live.get(batch.chunkKey) ?? new Set<CropRenderResource>();
         group.add(resource);
         live.set(batch.chunkKey, group);
@@ -131,6 +151,27 @@ export async function createPlayCanvasCropPresentation(
       }
     },
     destroy,
+    snapshot: () =>
+      Object.freeze(
+        [...live.values()].flatMap((group) =>
+          [...group].map((resource) => {
+            const parameter = resource.instance.getParameter('texture_blockLight') as { data?: unknown } | undefined;
+            return Object.freeze({
+              chunkKey: resource.chunkKey,
+              ...resource.batch,
+              positions: Object.freeze(
+                resource.batch.positions.map(
+                  (position) => Object.freeze([...position]) as readonly [number, number, number],
+                ),
+              ),
+              vertexCount: resource.mesh.getPositions([]),
+              indexCount: resource.mesh.primitive[0]?.count ?? 0,
+              enabled: resource.entity.enabled && resource.instance.visible,
+              lightingBound: parameter?.data != null,
+            });
+          }),
+        ),
+      ),
     bindChunkLight(key, lighting) {
       const group = live.get(key);
       if (!group?.size) return;

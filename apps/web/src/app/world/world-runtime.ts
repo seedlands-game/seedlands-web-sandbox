@@ -60,6 +60,10 @@ export class World {
   private latestCommitMutationCount = 0;
   private latestCommitMeshChunkCount = 0;
   private scenarioSequence = 0;
+  get cropPresentationSnapshot() {
+    return this.crops?.snapshot ?? Object.freeze([]);
+  }
+
   private scenarioId = 'default';
   private readonly fluidFeedback = new FluidFeedbackTracker();
   private readonly waterTransitions = new WaterMeshTransitionTracker();

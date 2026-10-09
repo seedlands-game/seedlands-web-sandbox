@@ -34,6 +34,10 @@ export class WorldCropPresentation {
     });
   }
 
+  get snapshot() {
+    return this.failed || this.disposed ? Object.freeze([]) : this.bindings.resources.snapshot();
+  }
+
   update(epoch: string, crops: readonly AuthorityCropStageProjection[]) {
     if (this.failed || this.disposed) return;
     try {
