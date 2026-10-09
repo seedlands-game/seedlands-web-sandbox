@@ -1,5 +1,6 @@
 import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { BrowserInventoryPointer } from './browser-inventory-pointer';
+import { useGameplayHeldItem } from './held-item-interaction';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
@@ -239,6 +240,7 @@ export class BrowserGameplay {
     const projection = projectGameplayUi(
       {
         revision: view.gameplayRevision,
+        navigation: view.navigation,
         inventoryView: view.inventory,
         player: {
           combat: player.combat,
@@ -435,13 +437,16 @@ export class BrowserGameplay {
     }); }
 
   useHeldItem(): boolean {
-    const player = this.options.authority.gameplay.player;
-    if (player.mode?.value === 'creative') return false;
-    const stack = player.inventory[player.selectedSlot];
-    if (!stack || !this.itemDefinition(stack.itemId)?.capabilities.some((capability) => capability.type === 'consume'))
-      return false;
-    this.useInventoryItem(player.selectedSlot);
-    return true;
+    return useGameplayHeldItem({
+      gameplay: this.options.authority.gameplay,
+      perform: (action) => this.options.authority.performAction(action),
+      refresh: () => this.refresh(),
+      succeeded: this.options.queueSave,
+      failed: (reason) => this.feedback(`无法使用导航物品 · ${reason}`, 'error'),
+      isEdible: (id) =>
+        this.itemDefinition(id)?.capabilities.some((capability) => capability.type === 'consume') ?? false,
+      consume: (slot) => this.useInventoryItem(slot),
+    });
   }
 
   get blocksInput(): boolean {

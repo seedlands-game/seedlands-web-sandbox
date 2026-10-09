@@ -46,6 +46,21 @@ const snapshot = () => ({
 });
 
 describe('gameplay retained UI projection', () => {
+  it('publishes the accepted navigation view and clears it when the held item changes', () => {
+    const navigation = {
+      itemId: 'custom-map',
+      slot: 2,
+      kind: 'map' as const,
+      revision: 1,
+      map: { id: 'map-1', playerId: 'player', center: [4, 0] as const, scale: 0, pixels: [{ x: 0, z: 0, color: 6 }] },
+    };
+    const first = projectGameplayUi({ ...snapshot(), navigation });
+    expect(first.hud.navigation).toEqual(navigation);
+    expect(projectGameplayUi({ ...snapshot(), navigation: structuredClone(navigation) }, first).hud).toBe(first.hud);
+    const changed = projectGameplayUi({ ...snapshot(), navigation: null }, first);
+    expect(changed.hud.navigation).toBeNull();
+    expect(changed.shell).toBe(first.shell);
+  });
   it('partitions canonical state into HUD, interaction and shell snapshots', () => {
     const projected = projectGameplayUi(snapshot());
 

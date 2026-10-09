@@ -3,6 +3,7 @@ import { STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT } from './station-a
 import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model';
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
 import { CROP_CELL_COMPONENT } from './crop-interaction-model';
+import { NAVIGATION_COMPONENT } from './navigation-interaction-model';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import { createRegisteredOperationRuntime } from '../../composition/registered-operations';
@@ -60,6 +61,7 @@ export class GameplayModuleRuntime {
       stations?: RegisteredStatePort;
       structures?: RegisteredStatePort;
       media?: RegisteredStatePort;
+      navigation?: () => RegisteredStatePort;
     }>,
   ) {}
 
@@ -84,6 +86,7 @@ export class GameplayModuleRuntime {
     const { composition } = this.options;
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
+      if (component === NAVIGATION_COMPONENT && this.options.navigation) return this.options.navigation();
       if (component === 'seedlands:inventory') return this.options.inventory;
       if (
         (component === INVENTORY_ACTOR_COMPONENT || component === INVENTORY_ITEM_COMPONENT) &&

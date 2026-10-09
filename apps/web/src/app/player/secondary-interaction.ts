@@ -7,23 +7,26 @@ import type {
 export type SecondaryInteractionResult = 'target' | 'held-item' | 'place' | 'out-of-range' | 'blocked';
 export type TargetInteractionResult = 'handled' | 'fallback';
 
+export function itemInteractionSelection(gameplay: Pick<AuthorityGameplayView, 'inventory' | 'player'>) {
+  const player = gameplay.player;
+  return {
+    inventoryRevision: gameplay.inventory.revision,
+    modeRevision: player.mode?.revision ?? 0,
+    creativeCatalogRevision: player.creativeCatalog?.revision ?? 0,
+    selectedSlot: player.mode?.value === 'creative' ? (player.creativeCatalog?.selectedSlot ?? 0) : player.selectedSlot,
+  };
+}
+
 export function createVoxelInteractionAction(
   gameplay: Pick<AuthorityGameplayView, 'inventory' | 'player'>,
   target: Readonly<{ position: [number, number, number]; adjacent: [number, number, number] }>,
   intent: 'use' | 'alternate',
 ): Extract<AuthorityAction, { type: 'interact' }> {
-  const player = gameplay.player;
   return {
     type: 'interact',
     intent,
     target: { kind: 'voxel', hit: [...target.position], adjacent: [...target.adjacent] },
-    expectedSelection: {
-      inventoryRevision: gameplay.inventory.revision,
-      modeRevision: player.mode?.revision ?? 0,
-      creativeCatalogRevision: player.creativeCatalog?.revision ?? 0,
-      selectedSlot:
-        player.mode?.value === 'creative' ? (player.creativeCatalog?.selectedSlot ?? 0) : player.selectedSlot,
-    },
+    expectedSelection: itemInteractionSelection(gameplay),
   };
 }
 

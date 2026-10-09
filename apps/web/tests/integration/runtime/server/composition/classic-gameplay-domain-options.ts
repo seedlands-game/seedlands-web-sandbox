@@ -7,8 +7,9 @@ import { defineBlockActionsModule, definePack, type ModModule } from '@seedlands
 import type { GameplayCallbacks } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
 import { pack } from '../../../../../../../playbooks/classic/src/pack';
 
-type Profile = 'content' | 'inventory-actions' | 'block-rules' | 'crops';
+type Profile = 'content' | 'inventory-actions' | 'block-rules' | 'crops' | 'navigation';
 const ROOT_MODULES: Readonly<Record<Profile, readonly string[]>> = Object.freeze({
+  navigation: ['seedlands:overworld-navigation'],
   crops: ['seedlands:overworld-crops'],
   content: ['seedlands:overworld-content'],
   'inventory-actions': ['seedlands:inventory-actions-module'],

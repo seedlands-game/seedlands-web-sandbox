@@ -1,6 +1,7 @@
 import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
 import type {
   AuthorityInventoryView,
+  AuthorityGameplayView,
   AuthorityStationView,
 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { ARMOR_SLOTS, stationRecipeFitsGrid, type ArmorSlot, type StationRecipe } from '@seedlands/stdlib/mod-api';
@@ -27,6 +28,7 @@ export type EquipmentItemPresentation = Readonly<Omit<GameplayItemPresentation, 
 export type GameplayEquipmentPresentation = Readonly<Record<ArmorSlot, EquipmentItemPresentation>>;
 
 export type GameplayUiSource = Readonly<{
+  navigation?: AuthorityGameplayView['navigation'];
   station?: AuthorityStationView | null;
   stationRecipes?: readonly StationRecipe[];
   revision: number;
@@ -65,6 +67,7 @@ export type GameplayUiSource = Readonly<{
 
 export type GameplayUiProjection = Readonly<{
   hud: Readonly<{
+    navigation?: AuthorityGameplayView['navigation'];
     combat: CombatUiProjection;
     health: Readonly<{ value: number; max: 20 }>;
     hunger: Readonly<{ value: number; max: 20 }>;
@@ -252,6 +255,7 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
       flightEnabled,
       selectedHotbarSlot,
       hotbar,
+      navigation: source.navigation ?? null,
     },
     previous?.hud,
   );

@@ -1,4 +1,8 @@
 export { definePack } from './assembly';
+export { defineNavigationInteractionModule } from '../gameplay/modules/navigation-interaction-module';
+export { freezeNavigationPolicy, NAVIGATION_ITEMS_CAPABILITY } from '../gameplay/modules/navigation-policy';
+export type { NavigationItemsPolicyV1 } from '../gameplay/modules/navigation-policy';
+export type { NavigationInteractionConfig } from '../gameplay/modules/navigation-interaction-model';
 export type {
   BehaviorArguments,
   BehaviorCapability,

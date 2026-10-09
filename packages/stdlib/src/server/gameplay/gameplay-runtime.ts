@@ -191,6 +191,7 @@ export class GameplayRuntime extends GameplayRuntimeMetadata {
       changed: () => this.touch(),
     });
     this.modules = new GameplayModuleRuntime({
+      navigation: () => this.navigationItems.state,
       combat: this.registeredCombat?.state,
       blocks: this.registeredBlocks?.state,
       feeding: this.registeredFeeding?.state,

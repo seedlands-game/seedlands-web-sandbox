@@ -1,4 +1,6 @@
 import type { AuthoritySnapshotMessage } from './authority-snapshot-message';
+import type { AuthorityCropStageProjection } from './authority-gameplay-projections';
+export type { AuthorityCropStageProjection } from './authority-gameplay-projections';
 import type { EntityLifetimeReference, GameplayEntity } from '../gameplay/entity-store';
 import type { StationComponentV1 } from '../gameplay/ecs-station-state';
 import type { StationRecipe } from '../gameplay/modules/station-candidates';
@@ -102,13 +104,6 @@ export type AuthorityStationAction = Readonly<{
     | Readonly<{ kind: 'transfer'; from: 'actor' | 'station'; actorSlot: number; stationSlot: number; count?: number }>
   );
 
-/** Derived from the crop owner and frozen Pack metadata; no simulation timing or writable state. */
-export type AuthorityCropStageProjection = Readonly<{
-  position: readonly [number, number, number];
-  stage: number;
-  presentationId?: string;
-}>;
-
 export type AuthorityGameplayView = Readonly<{
   nearbyStations?: readonly AuthorityStationView[];
   stationRecipes?: readonly StationRecipe[];
@@ -126,6 +121,7 @@ export type AuthorityGameplayView = Readonly<{
   armorPoints?: number;
   media?: readonly import('../gameplay/modules/media-playback-model').MediaPlaybackProjectionV1[];
   cropStages?: readonly AuthorityCropStageProjection[];
+  navigation?: import('../gameplay/navigation-items-runtime').NavigationHeldProjectionV1 | null;
   metrics: AuthorityGameplayMetrics;
 }>;
 

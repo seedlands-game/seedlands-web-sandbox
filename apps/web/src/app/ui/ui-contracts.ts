@@ -67,6 +67,7 @@ export type ShellState = Readonly<{
 }>;
 
 export type HudState = Readonly<{
+  navigation?: import('@seedlands/stdlib/server/protocol/authority-worker-protocol').AuthorityGameplayView['navigation'];
   combat?: CombatUiProjection;
   visible: boolean;
   worldClock: string;

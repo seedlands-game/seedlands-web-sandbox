@@ -1,5 +1,12 @@
-import { Voxel } from '../../world/voxel';
 import type { EntityStore } from './entity-store';
+import type { RegisteredStatePort } from '../composition/operation-contracts';
+import type { WorldComposition } from '../composition/contracts';
+import {
+  buildNavigationCandidate,
+  type NavigationInteractionConfig,
+  type NavigationObservationV1,
+} from './modules/navigation-interaction-model';
+import { createNavigationStatePort } from './modules/navigation-state-port';
 
 export type MapPixel = Readonly<{ x: number; z: number; color: number }>;
 export type NavigationMap = Readonly<{
@@ -15,7 +22,17 @@ type Context = Readonly<{
   getWorldTime(): number;
   getLoadedVoxel?(position: [number, number, number]): number | undefined;
   changed(): void;
+  assertCanChange(): void;
+  composition?: WorldComposition;
+  config?: NavigationInteractionConfig;
 }>;
+
+export type NavigationHeldProjectionV1 = Readonly<{ itemId: string; slot: number }> &
+  (
+    | Readonly<{ kind: 'map'; revision: number; map: NavigationMap | null }>
+    | Readonly<{ kind: 'compass'; target: readonly [number, number, number]; turns: number }>
+    | Readonly<{ kind: 'clock'; worldTime: number; phase: number }>
+  );
 
 const copyMap = (map: NavigationMap): NavigationMap =>
   Object.freeze({
@@ -83,24 +100,108 @@ export function navigationCheckpointFromSnapshot(source: unknown, entities: Enti
   return checkpoint;
 }
 
-const mapColor = (voxel: number) => {
-  if (voxel === Voxel.Water) return 1;
-  if (voxel === Voxel.Grass || voxel === Voxel.Leaves || voxel === Voxel.Cactus) return 2;
-  if (voxel === Voxel.Sand || voxel === Voxel.Sandstone) return 3;
-  if (voxel === Voxel.Wood || voxel === Voxel.Planks) return 4;
-  if (voxel === Voxel.Lava || voxel === Voxel.Fire || voxel === Voxel.Tnt) return 5;
-  return voxel === Voxel.Air ? 0 : 6;
-};
 const turns = (value: number) => ((value % 1) + 1) % 1;
 
 export class NavigationItemsRuntime {
   #sequence = 0;
+  #revision = 0;
+  #lifetime = {};
   readonly #maps = new Map<string, NavigationMap>();
+  readonly state: RegisteredStatePort;
   constructor(
     private readonly context: Context,
     checkpoint?: NavigationItemsCheckpoint,
   ) {
     this.restore(checkpoint);
+    this.state = createNavigationStatePort({
+      config: context.config,
+      composition: context.composition,
+      revision: () => this.#revision,
+      lifetime: () => this.#lifetime,
+      actorLifetime: (id) => context.entities.createReference(id),
+      project: (id) => this.projectUse(id),
+      assertCanChange: context.assertCanChange,
+      accept: (candidate) => {
+        this.#maps.set(candidate.actorId, candidate.map);
+        this.#sequence = candidate.sequence;
+        this.#revision++;
+        context.changed();
+      },
+    });
+  }
+
+  private selectedItem(playerId: string): Readonly<{ itemId: string | null; slot: number }> {
+    const actor = this.context.entities.actorStateAccess(playerId);
+    const components = this.context.entities.actorComponentSnapshot(playerId);
+    const creative = components.mode?.value === 'creative';
+    const slot = creative ? (components.creativeCatalog?.selectedSlot ?? actor.selectedSlot) : actor.selectedSlot;
+    return {
+      slot,
+      itemId: creative
+        ? (components.creativeCatalog?.hotbar[slot] ?? null)
+        : (actor.inventory.slot(slot)?.itemId ?? null),
+    };
+  }
+
+  held(playerId: string): NavigationHeldProjectionV1 | null {
+    const policy = this.context.config?.policy;
+    if (
+      !policy ||
+      this.context.entities.get(playerId)?.type !== 'player' ||
+      this.context.entities.actorStateAccess(playerId).lifecycle !== 'alive'
+    )
+      return null;
+    const selected = this.selectedItem(playerId);
+    if (selected.itemId === policy.mapItemId)
+      return Object.freeze({
+        ...selected,
+        itemId: policy.mapItemId,
+        kind: 'map',
+        revision: this.#revision,
+        map: this.#maps.has(playerId) ? copyMap(this.#maps.get(playerId)!) : null,
+      });
+    if (selected.itemId === policy.compassItemId)
+      return Object.freeze({ ...selected, itemId: policy.compassItemId, kind: 'compass', ...this.compass(playerId) });
+    if (selected.itemId === policy.clockItemId)
+      return Object.freeze({ ...selected, itemId: policy.clockItemId, kind: 'clock', ...this.clock() });
+    return null;
+  }
+
+  private projectUse(playerId: string, scale?: number): NavigationObservationV1 {
+    const policy = this.context.config?.policy,
+      entity = this.context.entities.get(playerId);
+    if (!policy || entity?.type !== 'player') throw new Error('Navigation requires its configured player owner.');
+    const existing = this.#maps.get(playerId);
+    const center = existing?.center ?? ([Math.floor(entity.position[0]), Math.floor(entity.position[2])] as const);
+    const mapScale = scale ?? existing?.scale ?? 0;
+    if (!Number.isSafeInteger(mapScale) || mapScale < 0 || mapScale > 4)
+      throw new TypeError('Navigation scale is invalid.');
+    const pixels: MapPixel[] = [],
+      palette = new Map(policy.palette.map(({ voxel, color }) => [voxel, color]));
+    for (let z = -policy.windowRadius; z <= policy.windowRadius; z++)
+      for (let x = -policy.windowRadius; x <= policy.windowRadius; x++) {
+        const voxel = this.context.getLoadedVoxel?.([
+          center[0] + x * (1 << mapScale),
+          Math.floor(entity.position[1]) + policy.sampleYOffset,
+          center[1] + z * (1 << mapScale),
+        ]);
+        if (voxel !== undefined)
+          pixels.push(Object.freeze({ x, z, color: palette.get(voxel) ?? policy.fallbackColor }));
+      }
+    return Object.freeze({
+      version: 1,
+      kind: 'observation',
+      actorId: playerId,
+      alive: this.context.entities.actorStateAccess(playerId).lifecycle === 'alive',
+      selectedItemId: this.selectedItem(playerId).itemId,
+      sequence: this.#sequence,
+      center: Object.freeze([...center] as [number, number]),
+      scale: mapScale,
+      map: existing
+        ? copyMap({ ...existing, scale: mapScale, pixels: existing.scale === mapScale ? existing.pixels : [] })
+        : null,
+      pixels: Object.freeze(pixels),
+    });
   }
   compass(playerId: string) {
     const entity = this.context.entities.get(playerId);
@@ -122,33 +223,20 @@ export class NavigationItemsRuntime {
     const entity = this.context.entities.get(playerId);
     if (entity?.type !== 'player' || !Number.isSafeInteger(scale) || scale < 0 || scale > 4)
       return { success: false as const, reason: 'invalid-map-request' };
-    const actor = this.context.entities.actorStateAccess(playerId);
-    if (actor.inventory.slot(actor.selectedSlot)?.itemId !== 'map')
+    const policy = this.context.config?.policy;
+    if (!policy || this.selectedItem(playerId).itemId !== policy.mapItemId)
       return { success: false as const, reason: 'requires-map' };
-    const existing = [...this.#maps.values()].find((map) => map.playerId === playerId);
-    const center = existing?.center ?? ([Math.floor(entity.position[0]), Math.floor(entity.position[2])] as const);
-    const pixels = new Map(
-      (existing?.scale === scale ? existing.pixels : []).map((pixel) => [`${pixel.x},${pixel.z}`, pixel]),
-    );
-    const stride = 1 << scale;
-    const y = Math.floor(entity.position[1]);
-    for (let z = -4; z <= 4; z++)
-      for (let x = -4; x <= 4; x++) {
-        const worldX = center[0] + x * stride;
-        const worldZ = center[1] + z * stride;
-        const voxel = this.context.getLoadedVoxel?.([worldX, y, worldZ]);
-        if (voxel !== undefined) pixels.set(`${x},${z}`, Object.freeze({ x, z, color: mapColor(voxel) }));
-      }
-    const map = copyMap({
-      id: existing?.id ?? 'map-' + ++this.#sequence,
-      playerId,
-      center,
-      scale,
-      pixels: [...pixels.values()].sort((a, b) => a.z - b.z || a.x - b.x),
+    this.context.assertCanChange();
+    const candidate = buildNavigationCandidate(this.projectUse(playerId, scale), policy, {
+      version: 1,
+      trigger: 'self',
+      target: { kind: 'self' },
     });
-    this.#maps.set(playerId, map);
+    this.#maps.set(playerId, candidate.map);
+    this.#sequence = candidate.sequence;
+    this.#revision++;
     this.context.changed();
-    return { success: true as const, map };
+    return { success: true as const, map: candidate.map };
   }
   list(): readonly NavigationMap[] {
     return Object.freeze([...this.#maps.values()].sort((a, b) => a.id.localeCompare(b.id)).map(copyMap));
@@ -162,6 +250,8 @@ export class NavigationItemsRuntime {
       if (this.context.entities.get(map.playerId)?.type !== 'player')
         throw new TypeError('Navigation map player is invalid.');
     this.#sequence = checkpoint.sequence;
+    this.#revision = 0;
+    this.#lifetime = {};
     this.#maps.clear();
     for (const map of checkpoint.maps) this.#maps.set(map.playerId, copyMap(map));
   }

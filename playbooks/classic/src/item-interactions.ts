@@ -3,10 +3,12 @@ import {
   defineItemInteractionModule,
   defineSoilTransformInteractionModule,
   defineCropInteractionModule,
+  defineNavigationInteractionModule,
   type SoilTransformInteractionConfig,
 } from '@seedlands/stdlib/mod-api';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicCropConfig } from './crop-policy';
+import { classicNavigationConfig } from './navigation-policy';
 
 export const classicFluidContainerOperationId = 'seedlands:fluid-container-interact';
 export const classicSoilTransformConfig: SoilTransformInteractionConfig = Object.freeze({
@@ -19,6 +21,7 @@ export const classicSoilTransformConfig: SoilTransformInteractionConfig = Object
 });
 
 export const classicItemInteractionModules = [
+  defineNavigationInteractionModule(classicNavigationConfig),
   defineCropInteractionModule(classicCropConfig),
   defineSoilTransformInteractionModule(classicSoilTransformConfig),
   defineFluidContainerInteractionModule({
@@ -34,8 +37,18 @@ export const classicItemInteractionModules = [
   }),
   defineItemInteractionModule({
     moduleId: 'seedlands:overworld-item-interactions',
-    permissions: [{ resource: 'seedlands.block-voxel', operations: ['execute'] }],
+    permissions: [
+      { resource: 'seedlands.block-voxel', operations: ['execute'] },
+      { resource: 'seedlands.navigation-item', operations: ['execute'] },
+    ],
     definitions: [
+      {
+        id: 'seedlands:map-self-interaction',
+        selector: { itemId: 'seedlands:map' },
+        trigger: 'self',
+        operationId: classicNavigationConfig.operationId,
+        presentationKey: 'seedlands:explore-map',
+      },
       {
         id: 'seedlands:seed-crop-interaction',
         selector: { itemId: 'seedlands:wheat-seeds' },
