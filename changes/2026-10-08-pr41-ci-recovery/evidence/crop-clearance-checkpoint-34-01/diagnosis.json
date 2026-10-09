@@ -1,0 +1,28 @@
+{
+  "sourceSha": "489c194101e2696bd16a71f653f6c32cabb9b895",
+  "sourceDigest": "89e9298d7c752daf7cd20402d88c089d115c0a95b4aba179cfff311b29785e5c",
+  "artifactDigest": "d5b1a1bb49e8bca85f8984dce22fb8f574cedc7785dadfdfa847507d06ef5219",
+  "browserRunId": "pr41-cloud-browser-24",
+  "wholeStatus": "FAIL",
+  "visualStatus": "PASS",
+  "modularStatus": "SKIP",
+  "errors": [
+    "Error: Real mouse input could not reacquire 68,30,2; last targets=[\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\",\"67,31,2\"]."
+  ],
+  "current": {
+    "player": [65.78186798095703, 32.60000228881836, 2.799851179122925],
+    "serverPlayerPosition": [65.7818659396873, 32.600001, 2.7998511496010705],
+    "serverPlayerVelocity": [0, 0, 0],
+    "viewAngles": [-83.63, -30.299999999999997],
+    "onGround": true,
+    "colliding": false,
+    "worldRevision": 18
+  },
+  "imagesSha256": {
+    "crop-creative-0-stage-0.png": "099f302b1a0bc31dd0305a14b0d8cb4b99ca53aa7762ee8ea2674c66e8d6aced",
+    "crop-creative-0-stage-7.png": "7e75e5d15c653fec238e78441109b4ba538cbbcc4594811e697eee80dd827e8b",
+    "crop-creative-harvested.png": "12e7273e3f5b837ddab82c3d0f8cec3acd49a026910f329b818dd0f1f620ddb6",
+    "crop-creative-1-stage-0.png": "d337a0cc4e9be31180855f17369f066c5943dd352e09e9b286e346cc36b02b96",
+    "crop-creative-1-stage-7.png": "5dedbe6a479e392278d6fd0a1950409f1344a6397f55a7c6861659e0c3d65620"
+  }
+}

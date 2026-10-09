@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 作物视线隔离修正 checkpoint34（静态验收完成；浏览器复验待运行）
+
+Browser24（489c1941 / build23）完整结果 1 FAIL、1 原visual PASS、1 Modular条件SKIP。新双端/ACK路线完成两块田真实创造种植0/施肥7、第一田收割与恢复Survival库存保持，实际批次8/12；尚未运行保存恢复。随后原V1水支撑[68,30,2]从approach[66,2.5]连续12次实际命中新增Farmland[67,31,2]；作物田块挡住既有视线，不能删除原V1断言或跳过。
+
+只将新增plots改为[67,31,-2]/[69,31,-2]、approach改为[x-1.5,z+1.5]，全部仍在原Stone/Air范围内。原V1水[68,31,2]、door[70,31/32,0]、jukebox[76,31,2]及对应approaches保持；新田块z[-2,-1]与这些视线/站位不共享目标列，V2沿z=-0.5中心线与农田边缘距0.5。静态坐标不等于真实body sweep/LOS PASS。继续复用原walkEquipmentRoute与正常UI/鼠标，原C0-C5、V1/V2、aim12次、45/900秒、visual/modular和画质不变。
+
+保留Browser24原receipt、failure、五个crop观察及截图；旧task55/57静态审查遗漏已由readonly61纠正，不重写旧失败。必要format/lint/types后新build24/browser25唯一完整入口检验，未改变生产源码或新建runner。预算03:09真实UI90%，约5天23小时重置、60%停止线；本修正传统约0.1PD×120%=0.12PD、AI约10min×120%=12min，非周额度换算。完整V2/V3/V4/Modular/194与组合整帧A/B尚未闭环。
+
 ## 作物路线消费者修正 checkpoint33（确定性验收完成；浏览器复验待运行）
 
 Browser23（7a675c50 / build22）完整 correctness 结果 1 FAIL、1 visual PASS、1 modular 条件 SKIP，未达到 V1/V2/C4/C5。第一田 [67,31,2] 经真实创造 UI/鼠标完成 stage0→7→harvest，实际 GPU 8 vertices/12 indices、清理为空，夜间截图可见幼苗/成熟/移除；此仅局部消费者证据，不是 whole 或 Survival PASS。第二田瞄准 [69,30,2] 连续12 null。失败双端 x≈65.329、z≈0.4998、y≈32.6、速度0、onGround true；新crop helper固定KeyS，而原reachedRouteTarget对S使用xDelta≤0，因此向更大x的第二站提前返回，没有真实走到approach。

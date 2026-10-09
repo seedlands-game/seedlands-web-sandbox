@@ -6,8 +6,8 @@ import type { Point } from './scenario';
 import { walkEquipmentRoute } from './equipment-journey-support';
 
 const plots = [
-  [67, 31, 2],
-  [69, 31, 2],
+  [67, 31, -2],
+  [69, 31, -2],
 ] as const;
 const presentationId = 'seedlands:wheat-crop';
 const names = {
@@ -88,7 +88,7 @@ export async function completeCropJourneyBeforeSave(page: Page, info: TestInfo):
     await selectCreative(page, 'dirt-block');
     expect(await voxelAt(page, position)).toBe(0);
     expect(await voxelAt(page, [position[0], position[1] - 1, position[2]])).toBe(3);
-    await walkEquipmentRoute(page, [position[0] - 1.5, position[2] - 1.5]);
+    await walkEquipmentRoute(page, [position[0] - 1.5, position[2] + 1.5]);
     await aimAtVoxelWithRealMouse(page, [position[0], position[1] - 1, position[2]], position);
     await clickCanvasCenter(page, 'right');
     await expect.poll(() => voxelAt(page, position)).toBe(2);
@@ -121,7 +121,7 @@ export async function verifyCropAfterRestore(
   state: CropJourneyState,
   before: HarnessCropStageSnapshot,
 ) {
-  await walkEquipmentRoute(page, [state.position[0] - 1.5, state.position[2] - 1.5]);
+  await walkEquipmentRoute(page, [state.position[0] - 1.5, state.position[2] + 1.5]);
   const restored = await expectCrop(page, state.position, 7);
   expect(restored.runtimeEpoch).not.toBe(before.runtimeEpoch);
   expect(restored.cropStages).toEqual(before.cropStages);
