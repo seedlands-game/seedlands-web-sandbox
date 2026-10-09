@@ -1,0 +1,14 @@
+{
+  "sourceSha": "4db1a0bdd86e8a8e2422b829d422fc560896bd78",
+  "status": "FAIL",
+  "error": "Route observation A/A exceeds the registered 15% noise veto.",
+  "aaLeft": 53.69309150000481,
+  "aaRight": 62.12084249999316,
+  "aaBiasPercent": 15.696155249297933,
+  "startedAt": "2026-10-09T01:30:25.004Z",
+  "completedAt": "2026-10-09T01:30:26.275Z",
+  "samples": 20,
+  "inputEventCounts": [0],
+  "fixedOwnerCount": 1,
+  "rawAttachmentSha256": "4e387e37339b4d174d307c968e3e119e877ec67ded87ee6e413c4828e2d024cd"
+}
