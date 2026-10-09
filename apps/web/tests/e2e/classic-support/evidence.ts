@@ -35,6 +35,7 @@ type EvidenceData = Readonly<{
   assets: readonly string[];
   workers: readonly string[];
   baseline: ClassicSnapshot;
+  routeObservationMeasurement?: Readonly<Record<string, unknown>>;
   final: ClassicSnapshot;
   trace: ChromeTrace;
   pageErrors: readonly string[];
@@ -143,6 +144,7 @@ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceDa
         sourceDigest: data.artifact.identity?.sourceDigest,
         lockDigest: data.artifact.identity?.lockDigest,
         artifactDigest: data.artifact.identity?.artifactDigest,
+        routeObservation: data.routeObservationMeasurement,
         environment: data.environment,
         boundary: {
           preparation: 'Deterministic fixture setup completed before the C0 baseline.',

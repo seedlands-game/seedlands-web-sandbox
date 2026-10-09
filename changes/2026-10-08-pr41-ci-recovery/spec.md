@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 独立输入事件路线观测候选 checkpoint29
+
+新证据：Browser21/window28在14次精确同任务投影中，仅input ack由743推进至755；位置/视角/速度/ground/collision/world/runtime/generator不变，测量区间无Playwright键鼠调用。Controller每次prediction advance仍发送生成命令，ack应视为可推进的流水线确认时钟。本轮28已FAIL并撤回，不复用部分样本作A/A或收益。
+
+候选29仍只检验相同的只读路线投影边界，不改生产输入、物理、世界、预测、渲染、quality、pulse、到达、期限、存档或正式玩法断言。新的测量身份以工程层短生命周期DOM输入事件观察器冻结：keydown/up、pointerdown/up/move、mousemove、wheel、blur/focus、pointerlockchange的总事件序号须不变。观察器仅在当前页面测量窗口安装，拒绝已有实例，finally移除全部listener与自有probe；不得消费/阻止事件或写任何玩法owner。固定三轴双端位置/速度、视角、ground/collision、world revision/runtime/generator、quality/render backend/请求实验配置/worker counts；同任务完整与精简字段包括tick/ack仍须精确相等。physicsTick/ack在样本之间只允许非递减，safe integer/owner-ready规则不变；其倒退或实际输入事件变化均否决，不允许把真实新输入或epoch替换当自然时钟。
+
+先用旧固定ack实现取得有效RED：真实协议允许保持中性/无DOM事件时tick/ack单调前进，旧实现仍拒绝；输入事件变化但姿态暂未改变时旧实现无法拒绝。GREEN覆盖事件监听安装/全量清理、成功与失败清理、owner同任务不等、pose/world/profile改变、tick/ack倒退、非法计时、输入事件变化、无输入时钟前进，保留之前导航双端与真实键鼠handoff断言。确定性时钟fixture不作性能证据。
+
+性能维度、完整唯一canonical入口、独占窗口、4warmup/8对A/A/8对ABBA-BAAB、15%噪声否决与20%改善门槛保持28注册值；原始样本新增实际probe事件序号、tick/ack及固定身份，在失败时也保留。新source/artifact/window独立，全部原Canonical断言继续，whole FAIL不能通过资格。非收益/否决后再次撤除候选，不通过更换阈值、选择器、baseline或重复同条件采样改绿。最新预算01:09 UTC产品UI剩余91%，仍共用PR预算，约60%停止；本轮无当前A/A或性能结论。
+
 ## 路线只读观测候选 checkpoint28
 
 终态：候选未采用。源码 `8255157424f8f7f776b8c4224092744e9392385b` 的 Browser21/window `pr41-cloud-browser-21` 为 FAIL / NOT_RECORDED，主旅程 FAIL、visual/modular SKIP。仅取得4次warmup和10次A/A观测，未达到A/A资格，未进行平衡A/B。14次同任务投影全部精确相等；第14次input ack从743推进至755，其余位置/视角/速度/ground/collision/world/runtime/generator不变，trace测量区间无Playwright键鼠调用。客户端预测循环仍持续发送命令，ack是流水线时钟，不等同物理输入状态。本轮固定ack合同不能满足真实流水线；不放宽本轮否决线、不追认部分样本。生产API、路线切换、测量接线及相关候选测试/selector撤回到父提交cd5；原候选checkpoint与失败原始记录保留。后续若需要新实验，须先登记独立输入事件观测与tick/ack单调新鲜度合同，而非简单移除校验或盲目重试。
