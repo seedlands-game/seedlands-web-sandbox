@@ -1,0 +1,792 @@
+{
+  "sourceSha": "6b459cbf84b1cc42d1d646aa82c3c5f5fff3fc5a",
+  "runId": "pr41-cloud-browser-29",
+  "status": "FAIL",
+  "errors": ["Error: Test timeout of 900000ms exceeded"],
+  "player": [78.47564697265625, 32.599998474121094, 0.4501066505908966],
+  "serverPlayerPosition": [78.4756451536607, 32.6, 0.45010664868872113],
+  "sampleCount": 128,
+  "tickMedianMs": 23.300000000745058,
+  "gapMedianMs": 439.45000000298023,
+  "receiveMedianMs": 38.70000000298023,
+  "receiveCountMedian": 17.0,
+  "pairedReceiveFractionMedian": 0.0903710428873181,
+  "pairedReceiveFractionWeighted": 0.09675868105117295,
+  "pairs": [
+    {
+      "frameSequence": 1913,
+      "interTickGapWallMs": 450.69999999552965,
+      "receiveGapWallMs": 24.899999976158142,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 1914,
+      "interTickGapWallMs": 553.7999999970198,
+      "receiveGapWallMs": 63.79999999701977,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1915,
+      "interTickGapWallMs": 546.8000000044703,
+      "receiveGapWallMs": 62.20000001788139,
+      "receiveGapCount": 22
+    },
+    {
+      "frameSequence": 1916,
+      "interTickGapWallMs": 1410.8000000044703,
+      "receiveGapWallMs": 165.7000000178814,
+      "receiveGapCount": 56
+    },
+    {
+      "frameSequence": 1917,
+      "interTickGapWallMs": 119,
+      "receiveGapWallMs": 13.800000011920929,
+      "receiveGapCount": 8
+    },
+    {
+      "frameSequence": 1918,
+      "interTickGapWallMs": 87.80000000447035,
+      "receiveGapWallMs": 12.100000008940697,
+      "receiveGapCount": 6
+    },
+    {
+      "frameSequence": 1919,
+      "interTickGapWallMs": 366.79999999701977,
+      "receiveGapWallMs": 44.5,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1920,
+      "interTickGapWallMs": 508.59999999403954,
+      "receiveGapWallMs": 24.200000002980232,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1921,
+      "interTickGapWallMs": 427.6000000014901,
+      "receiveGapWallMs": 29.100000001490116,
+      "receiveGapCount": 11
+    },
+    {
+      "frameSequence": 1922,
+      "interTickGapWallMs": 441.3999999985099,
+      "receiveGapWallMs": 36.100000001490116,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1923,
+      "interTickGapWallMs": 632.5,
+      "receiveGapWallMs": 72.99999999254942,
+      "receiveGapCount": 26
+    },
+    {
+      "frameSequence": 1924,
+      "interTickGapWallMs": 770.7000000029802,
+      "receiveGapWallMs": 69.29999998956919,
+      "receiveGapCount": 29
+    },
+    {
+      "frameSequence": 1925,
+      "interTickGapWallMs": 602.6000000014901,
+      "receiveGapWallMs": 135.50000001490116,
+      "receiveGapCount": 34
+    },
+    {
+      "frameSequence": 1926,
+      "interTickGapWallMs": 607.2999999970198,
+      "receiveGapWallMs": 88.7000000178814,
+      "receiveGapCount": 35
+    },
+    {
+      "frameSequence": 1927,
+      "interTickGapWallMs": 466,
+      "receiveGapWallMs": 34.1000000089407,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 1928,
+      "interTickGapWallMs": 450.30000000447035,
+      "receiveGapWallMs": 33.49999998509884,
+      "receiveGapCount": 24
+    },
+    {
+      "frameSequence": 1929,
+      "interTickGapWallMs": 388.40000000596046,
+      "receiveGapWallMs": 43.299999974668026,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 1930,
+      "interTickGapWallMs": 399.1000000014901,
+      "receiveGapWallMs": 87.29999999701977,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1931,
+      "interTickGapWallMs": 408.30000000447035,
+      "receiveGapWallMs": 34.899999998509884,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1932,
+      "interTickGapWallMs": 474.5,
+      "receiveGapWallMs": 26.00000001490116,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1933,
+      "interTickGapWallMs": 408,
+      "receiveGapWallMs": 55.1000000089407,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 1934,
+      "interTickGapWallMs": 653.8999999985099,
+      "receiveGapWallMs": 42.099999986588955,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1935,
+      "interTickGapWallMs": 160.30000000447035,
+      "receiveGapWallMs": 8.400000013411045,
+      "receiveGapCount": 9
+    },
+    {
+      "frameSequence": 1936,
+      "interTickGapWallMs": 387.20000000298023,
+      "receiveGapWallMs": 54.29999999701977,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1937,
+      "interTickGapWallMs": 412.59999999403954,
+      "receiveGapWallMs": 38.19999999552965,
+      "receiveGapCount": 10
+    },
+    {
+      "frameSequence": 1938,
+      "interTickGapWallMs": 418.40000000596046,
+      "receiveGapWallMs": 52.100000001490116,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1939,
+      "interTickGapWallMs": 445.3999999985099,
+      "receiveGapWallMs": 25.099999986588955,
+      "receiveGapCount": 13
+    },
+    {
+      "frameSequence": 1940,
+      "interTickGapWallMs": 820.3999999985099,
+      "receiveGapWallMs": 55.49999997764826,
+      "receiveGapCount": 26
+    },
+    {
+      "frameSequence": 1941,
+      "interTickGapWallMs": 64.40000000596046,
+      "receiveGapWallMs": 18.49999999254942,
+      "receiveGapCount": 5
+    },
+    {
+      "frameSequence": 1942,
+      "interTickGapWallMs": 394.59999999403954,
+      "receiveGapWallMs": 47.99999998509884,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1943,
+      "interTickGapWallMs": 489.3999999985099,
+      "receiveGapWallMs": 38.69999999552965,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1944,
+      "interTickGapWallMs": 484.19999999552965,
+      "receiveGapWallMs": 43.900000005960464,
+      "receiveGapCount": 18
+    },
+    {
+      "frameSequence": 1945,
+      "interTickGapWallMs": 350.29999999701977,
+      "receiveGapWallMs": 23.99999998509884,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1946,
+      "interTickGapWallMs": 606.4000000059605,
+      "receiveGapWallMs": 37.900000005960464,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 1947,
+      "interTickGapWallMs": 388.29999999701977,
+      "receiveGapWallMs": 22.799999997019768,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1948,
+      "interTickGapWallMs": 224.5,
+      "receiveGapWallMs": 26.400000005960464,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 1949,
+      "interTickGapWallMs": 412.1000000014901,
+      "receiveGapWallMs": 32.100000001490116,
+      "receiveGapCount": 13
+    },
+    {
+      "frameSequence": 1950,
+      "interTickGapWallMs": 736.6000000014901,
+      "receiveGapWallMs": 44.899999998509884,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1951,
+      "interTickGapWallMs": 97.19999999552965,
+      "receiveGapWallMs": 9.099999994039536,
+      "receiveGapCount": 8
+    },
+    {
+      "frameSequence": 1952,
+      "interTickGapWallMs": 348.70000000298023,
+      "receiveGapWallMs": 18.69999999552965,
+      "receiveGapCount": 8
+    },
+    {
+      "frameSequence": 1953,
+      "interTickGapWallMs": 423.5,
+      "receiveGapWallMs": 26.700000002980232,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 1954,
+      "interTickGapWallMs": 407.1000000014901,
+      "receiveGapWallMs": 47.89999996870756,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 1955,
+      "interTickGapWallMs": 422.69999999552965,
+      "receiveGapWallMs": 38.89999998360872,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1956,
+      "interTickGapWallMs": 462.1000000014901,
+      "receiveGapWallMs": 31.30000001192093,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 1957,
+      "interTickGapWallMs": 441.20000000298023,
+      "receiveGapWallMs": 65.10000000149012,
+      "receiveGapCount": 25
+    },
+    {
+      "frameSequence": 1958,
+      "interTickGapWallMs": 473.6000000014901,
+      "receiveGapWallMs": 38.20000001043081,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1959,
+      "interTickGapWallMs": 575.2999999970198,
+      "receiveGapWallMs": 62.19999998807907,
+      "receiveGapCount": 25
+    },
+    {
+      "frameSequence": 1960,
+      "interTickGapWallMs": 438.70000000298023,
+      "receiveGapWallMs": 35.79999999701977,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 1961,
+      "interTickGapWallMs": 545.6999999955297,
+      "receiveGapWallMs": 84.5,
+      "receiveGapCount": 26
+    },
+    {
+      "frameSequence": 1962,
+      "interTickGapWallMs": 463.1000000014901,
+      "receiveGapWallMs": 64.80000000447035,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 1963,
+      "interTickGapWallMs": 470.20000000298023,
+      "receiveGapWallMs": 63.900000005960464,
+      "receiveGapCount": 22
+    },
+    {
+      "frameSequence": 1964,
+      "interTickGapWallMs": 335,
+      "receiveGapWallMs": 20.600000001490116,
+      "receiveGapCount": 11
+    },
+    {
+      "frameSequence": 1965,
+      "interTickGapWallMs": 437.90000000596046,
+      "receiveGapWallMs": 57.99999999254942,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 1966,
+      "interTickGapWallMs": 413.59999999403954,
+      "receiveGapWallMs": 50.89999997615814,
+      "receiveGapCount": 24
+    },
+    {
+      "frameSequence": 1967,
+      "interTickGapWallMs": 489.40000000596046,
+      "receiveGapWallMs": 60.600000001490116,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 1968,
+      "interTickGapWallMs": 512.2999999970198,
+      "receiveGapWallMs": 81.79999999701977,
+      "receiveGapCount": 26
+    },
+    {
+      "frameSequence": 1969,
+      "interTickGapWallMs": 437.3999999985099,
+      "receiveGapWallMs": 45.79999998956919,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1970,
+      "interTickGapWallMs": 418.6000000014901,
+      "receiveGapWallMs": 48.1000000089407,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 1971,
+      "interTickGapWallMs": 526.2999999970198,
+      "receiveGapWallMs": 51.50000000745058,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 1972,
+      "interTickGapWallMs": 440.20000000298023,
+      "receiveGapWallMs": 33.1000000089407,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1973,
+      "interTickGapWallMs": 453.1000000014901,
+      "receiveGapWallMs": 36.400000020861626,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 1974,
+      "interTickGapWallMs": 405.3999999985099,
+      "receiveGapWallMs": 38.70000001043081,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1975,
+      "interTickGapWallMs": 422.3999999985099,
+      "receiveGapWallMs": 12.300000004470348,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 1976,
+      "interTickGapWallMs": 442.20000000298023,
+      "receiveGapWallMs": 27,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 1977,
+      "interTickGapWallMs": 443.6000000014901,
+      "receiveGapWallMs": 42.20000000298023,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 1978,
+      "interTickGapWallMs": 1118.2000000029802,
+      "receiveGapWallMs": 66.90000000596046,
+      "receiveGapCount": 41
+    },
+    {
+      "frameSequence": 1979,
+      "interTickGapWallMs": 138.60000000149012,
+      "receiveGapWallMs": 24.600000001490116,
+      "receiveGapCount": 6
+    },
+    {
+      "frameSequence": 1980,
+      "interTickGapWallMs": 146.70000000298023,
+      "receiveGapWallMs": 21.899999998509884,
+      "receiveGapCount": 7
+    },
+    {
+      "frameSequence": 1981,
+      "interTickGapWallMs": 252.60000000149012,
+      "receiveGapWallMs": 12.500000014901161,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1982,
+      "interTickGapWallMs": 456.30000000447035,
+      "receiveGapWallMs": 22.299999997019768,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 1983,
+      "interTickGapWallMs": 917.8999999985099,
+      "receiveGapWallMs": 134.3000000193715,
+      "receiveGapCount": 31
+    },
+    {
+      "frameSequence": 1984,
+      "interTickGapWallMs": 97.80000000447035,
+      "receiveGapWallMs": 7.4000000059604645,
+      "receiveGapCount": 8
+    },
+    {
+      "frameSequence": 1985,
+      "interTickGapWallMs": 561.8999999985099,
+      "receiveGapWallMs": 47.29999999701977,
+      "receiveGapCount": 25
+    },
+    {
+      "frameSequence": 1986,
+      "interTickGapWallMs": 389.6000000014901,
+      "receiveGapWallMs": 26.99999999254942,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 1987,
+      "interTickGapWallMs": 533,
+      "receiveGapWallMs": 66.90000002086163,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 1988,
+      "interTickGapWallMs": 450.6000000014901,
+      "receiveGapWallMs": 43.400000005960464,
+      "receiveGapCount": 24
+    },
+    {
+      "frameSequence": 1989,
+      "interTickGapWallMs": 455.59999999403954,
+      "receiveGapWallMs": 36.20000000298023,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1990,
+      "interTickGapWallMs": 409.19999999552965,
+      "receiveGapWallMs": 33.29999998956919,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 1991,
+      "interTickGapWallMs": 427.09999999403954,
+      "receiveGapWallMs": 39.99999999254942,
+      "receiveGapCount": 25
+    },
+    {
+      "frameSequence": 1992,
+      "interTickGapWallMs": 496.80000000447035,
+      "receiveGapWallMs": 59.19999999552965,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 1993,
+      "interTickGapWallMs": 483.6000000014901,
+      "receiveGapWallMs": 55.899999998509884,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1994,
+      "interTickGapWallMs": 575,
+      "receiveGapWallMs": 73.30000001192093,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 1995,
+      "interTickGapWallMs": 713.9000000059605,
+      "receiveGapWallMs": 73.90000000596046,
+      "receiveGapCount": 24
+    },
+    {
+      "frameSequence": 1996,
+      "interTickGapWallMs": 852.3999999985099,
+      "receiveGapWallMs": 68.49999997019768,
+      "receiveGapCount": 41
+    },
+    {
+      "frameSequence": 1997,
+      "interTickGapWallMs": 44.30000000447035,
+      "receiveGapWallMs": 1.0999999940395355,
+      "receiveGapCount": 5
+    },
+    {
+      "frameSequence": 1998,
+      "interTickGapWallMs": 818.7999999970198,
+      "receiveGapWallMs": 55.10000001639128,
+      "receiveGapCount": 32
+    },
+    {
+      "frameSequence": 1999,
+      "interTickGapWallMs": 97.70000000298023,
+      "receiveGapWallMs": 6.500000014901161,
+      "receiveGapCount": 7
+    },
+    {
+      "frameSequence": 2000,
+      "interTickGapWallMs": 459.40000000596046,
+      "receiveGapWallMs": 30.399999998509884,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 2001,
+      "interTickGapWallMs": 411.3999999985099,
+      "receiveGapWallMs": 34.3999999910593,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 2002,
+      "interTickGapWallMs": 457.30000000447035,
+      "receiveGapWallMs": 41.099999986588955,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 2003,
+      "interTickGapWallMs": 441.5,
+      "receiveGapWallMs": 28.899999976158142,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 2004,
+      "interTickGapWallMs": 436.40000000596046,
+      "receiveGapWallMs": 26.200000025331974,
+      "receiveGapCount": 18
+    },
+    {
+      "frameSequence": 2005,
+      "interTickGapWallMs": 393.5,
+      "receiveGapWallMs": 24.30000000447035,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 2006,
+      "interTickGapWallMs": 417.3999999985099,
+      "receiveGapWallMs": 37.8999999910593,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 2007,
+      "interTickGapWallMs": 362.70000000298023,
+      "receiveGapWallMs": 24.5,
+      "receiveGapCount": 17
+    },
+    {
+      "frameSequence": 2008,
+      "interTickGapWallMs": 405.79999999701977,
+      "receiveGapWallMs": 33.79999998956919,
+      "receiveGapCount": 20
+    },
+    {
+      "frameSequence": 2009,
+      "interTickGapWallMs": 890.5999999940395,
+      "receiveGapWallMs": 46.99999998509884,
+      "receiveGapCount": 25
+    },
+    {
+      "frameSequence": 2010,
+      "interTickGapWallMs": 58.100000001490116,
+      "receiveGapWallMs": 5.399999998509884,
+      "receiveGapCount": 8
+    },
+    {
+      "frameSequence": 2011,
+      "interTickGapWallMs": 415.6000000014901,
+      "receiveGapWallMs": 13.399999998509884,
+      "receiveGapCount": 10
+    },
+    {
+      "frameSequence": 2012,
+      "interTickGapWallMs": 401.8999999985099,
+      "receiveGapWallMs": 16.299999997019768,
+      "receiveGapCount": 18
+    },
+    {
+      "frameSequence": 2013,
+      "interTickGapWallMs": 529.1000000014901,
+      "receiveGapWallMs": 56.10000003874302,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 2014,
+      "interTickGapWallMs": 395.1000000014901,
+      "receiveGapWallMs": 62.099999971687794,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 2015,
+      "interTickGapWallMs": 415.20000000298023,
+      "receiveGapWallMs": 37.400000005960464,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 2016,
+      "interTickGapWallMs": 382,
+      "receiveGapWallMs": 53.29999999701977,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 2017,
+      "interTickGapWallMs": 442.79999999701977,
+      "receiveGapWallMs": 25.599999986588955,
+      "receiveGapCount": 13
+    },
+    {
+      "frameSequence": 2018,
+      "interTickGapWallMs": 490.1000000014901,
+      "receiveGapWallMs": 66.49999999254942,
+      "receiveGapCount": 19
+    },
+    {
+      "frameSequence": 2019,
+      "interTickGapWallMs": 420.80000000447035,
+      "receiveGapWallMs": 26.599999979138374,
+      "receiveGapCount": 21
+    },
+    {
+      "frameSequence": 2020,
+      "interTickGapWallMs": 444,
+      "receiveGapWallMs": 52.20000001043081,
+      "receiveGapCount": 15
+    },
+    {
+      "frameSequence": 2021,
+      "interTickGapWallMs": 507.69999999552965,
+      "receiveGapWallMs": 38.79999999701977,
+      "receiveGapCount": 13
+    },
+    {
+      "frameSequence": 2022,
+      "interTickGapWallMs": 418.3999999985099,
+      "receiveGapWallMs": 69.60000000149012,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 2023,
+      "interTickGapWallMs": 419.79999999701977,
+      "receiveGapWallMs": 38.49999997019768,
+      "receiveGapCount": 22
+    },
+    {
+      "frameSequence": 2024,
+      "interTickGapWallMs": 706.3999999985099,
+      "receiveGapWallMs": 57.599999986588955,
+      "receiveGapCount": 30
+    },
+    {
+      "frameSequence": 2025,
+      "interTickGapWallMs": 55.600000001490116,
+      "receiveGapWallMs": 9.300000004470348,
+      "receiveGapCount": 6
+    },
+    {
+      "frameSequence": 2026,
+      "interTickGapWallMs": 399.5,
+      "receiveGapWallMs": 24.69999998062849,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 2027,
+      "interTickGapWallMs": 412.8999999985099,
+      "receiveGapWallMs": 21.600000008940697,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 2028,
+      "interTickGapWallMs": 459.8999999985099,
+      "receiveGapWallMs": 57.29999999701977,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 2029,
+      "interTickGapWallMs": 542.6000000014901,
+      "receiveGapWallMs": 77.30000001192093,
+      "receiveGapCount": 24
+    },
+    {
+      "frameSequence": 2030,
+      "interTickGapWallMs": 225.70000000298023,
+      "receiveGapWallMs": 22.799999997019768,
+      "receiveGapCount": 11
+    },
+    {
+      "frameSequence": 2031,
+      "interTickGapWallMs": 408.8999999985099,
+      "receiveGapWallMs": 24.69999998807907,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 2032,
+      "interTickGapWallMs": 396.6000000014901,
+      "receiveGapWallMs": 27.099999994039536,
+      "receiveGapCount": 11
+    },
+    {
+      "frameSequence": 2033,
+      "interTickGapWallMs": 377.1000000014901,
+      "receiveGapWallMs": 28.19999999552965,
+      "receiveGapCount": 13
+    },
+    {
+      "frameSequence": 2034,
+      "interTickGapWallMs": 379.6000000014901,
+      "receiveGapWallMs": 20.799999997019768,
+      "receiveGapCount": 16
+    },
+    {
+      "frameSequence": 2035,
+      "interTickGapWallMs": 486.5,
+      "receiveGapWallMs": 60.30000000447035,
+      "receiveGapCount": 12
+    },
+    {
+      "frameSequence": 2036,
+      "interTickGapWallMs": 443.5,
+      "receiveGapWallMs": 91.10000001639128,
+      "receiveGapCount": 22
+    },
+    {
+      "frameSequence": 2037,
+      "interTickGapWallMs": 361.20000000298023,
+      "receiveGapWallMs": 87.3999999910593,
+      "receiveGapCount": 10
+    },
+    {
+      "frameSequence": 2038,
+      "interTickGapWallMs": 575.7000000029802,
+      "receiveGapWallMs": 57.69999998807907,
+      "receiveGapCount": 14
+    },
+    {
+      "frameSequence": 2039,
+      "interTickGapWallMs": 559.7000000029802,
+      "receiveGapWallMs": 46.69999999552965,
+      "receiveGapCount": 23
+    },
+    {
+      "frameSequence": 2040,
+      "interTickGapWallMs": 447.69999999552965,
+      "receiveGapWallMs": 47.099999979138374,
+      "receiveGapCount": 21
+    }
+  ],
+  "scope": "Synchronous receive occupancy only; not all message costs, GPU time or causal performance proof.",
+  "browser28FieldLookupCorrection": {
+    "sourceSha": "5f3f679c39c2944b07d8eee1793645add86e4ce1",
+    "field": "current.serverPlayerPosition",
+    "value": [90.50044315988983, 32.6, -0.521058224710438],
+    "priorDerivedServerPositionNull": "Absent key lookup, not an Authority observation."
+  }
+}
