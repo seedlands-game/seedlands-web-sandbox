@@ -273,4 +273,6 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 
 同hook的 `native-trace.ts` 只拥有可选Chromium browser CDP跨进程诊断：固定延迟/20秒采集、有界buffer与stream、timer/listener/session清理。默认关闭，与CPU sampler互斥且禁止benchmark；原始trace及元数据仅diagnosticOnly/eligible=false，不改变产品输入、renderer或质量。
 
+同hook的 `authority-cpu-profile.ts` 只采集同次artifact指定的唯一Authority worker；`target-session.ts` 使用公开嵌套CDP消息管理有限请求及退出/清理。`scripts/harness/classic.mjs` 从已验证receipt派生精确worker asset/hash，diagnostic不使用SDK私有transport、不暂停worker，也不作为性能准出。
+
 导航策略与注册 self producer 归 `packages/stdlib/src/server/gameplay/modules/navigation-{policy,interaction-model,interaction-module,state-port}.ts`；原 `navigation-items-runtime.ts` 仍唯一拥有地图、序列和V1 checkpoint，prepared port 不另建状态。Classic内容配置归 `playbooks/classic/src/navigation-policy.ts`，旧V4身份只取实际 Browser30 export。Authority 接受的持有视图经 UI projector 到 `app/ui/navigation-item-hud.svelte`；实际右键与原食品消费归 `app/gameplay/held-item-interaction.ts`。`server/protocol/authority-gameplay-projections.ts` 只容纳派生 crop 类型，原protocol公开类型入口保持 re-export。唯一Classic runner内，`classic-support/portable-item-journeys.ts` 顺序编排原作物及新导航输入/保存恢复；`navigation-journey.ts` 不作为独立浏览器入口。

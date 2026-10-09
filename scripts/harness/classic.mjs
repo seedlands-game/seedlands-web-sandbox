@@ -7,6 +7,17 @@ import { readClassicReceipt, validateClassicRunReceipt } from './classic-receipt
 import { performanceWindowContext, writeMeasurementDeclaration } from './performance-window-proof.mjs';
 
 const artifact = verifyArtifact();
+const authorityProfilerEnv = {};
+if (process.env.SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE === '1') {
+  const assets = Object.entries(artifact.files).filter(([path]) =>
+    /^assets\/authority-worker-[A-Za-z0-9_-]+\.js$/.test(path),
+  );
+  if (assets.length !== 1)
+    throw new Error('Authority profiling requires one exact worker asset in the verified artifact.');
+  const [asset, sha256] = assets[0];
+  authorityProfilerEnv.SEEDLANDS_AUTHORITY_CPU_PROFILE_ASSET = asset;
+  authorityProfilerEnv.SEEDLANDS_AUTHORITY_CPU_PROFILE_ASSET_SHA256 = sha256;
+}
 const runId = process.env.SEEDLANDS_HARNESS_RUN_ID ?? randomUUID();
 const resultPath = resolve(root, 'harness/results', runId, 'classic.json');
 const selectionArgs = process.argv.slice(2);
@@ -18,6 +29,7 @@ const result = spawnSync('pnpm', ['exec', 'playwright', 'test', '--config', 'pla
   stdio: 'inherit',
   env: {
     ...process.env,
+    ...authorityProfilerEnv,
     SEEDLANDS_HARNESS_RUN_ID: runId,
     SEEDLANDS_SOURCE_SHA: artifact.sourceSha,
     SEEDLANDS_CLASSIC_RESULT: resultPath,
