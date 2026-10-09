@@ -243,8 +243,17 @@ jobs:
           path: |
             harness/results/
             test-results/
-            playwright-report/
           if-no-files-found: error
+          retention-days: 7
+      - name: Preserve complete Classic HTML report separately
+        if: ${{ always() && steps.classic.outcome != 'skipped' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          # Keep every report byte without combining its embedded traces with the raw trace artifact.
+          name: classic-report-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+          if-no-files-found: warn
           retention-days: 7
 
   cloudflare-pages:

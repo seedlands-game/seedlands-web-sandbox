@@ -34,3 +34,37 @@ test('Chromium job covers the original complete journey and diagnostic retry', (
     `Chromium job ${minutes}min cannot cover ${runnerMinutes}min of existing tests plus 5min reporting margin.`,
   );
 });
+
+test('Chromium keeps every evidence tree while separating the HTML report from raw failure traces', () => {
+  const job = workflow.match(/\n {2}chromium:\n([\s\S]*?)(?=\n {2}[a-z][\w-]*:|$)/)?.[1];
+  assert.ok(job, 'The unique Chromium job must exist.');
+  const uploads = job.split(/\n {6}- name:/).filter((step) => step.includes('uses: actions/upload-artifact@'));
+  const owners = new Map();
+  const names = new Set();
+  for (const step of uploads) {
+    assert.match(step, /if: \$\{\{ always\(\) && steps\.classic\.outcome != 'skipped' \}\}/);
+    assert.match(step, /uses: actions\/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/);
+    assert.match(step, /retention-days: 7/);
+    const name = step.match(/\n {10}name: (.+)/)?.[1];
+    assert.ok(name?.includes('${{ github.run_id }}-${{ github.run_attempt }}'));
+    assert.ok(!names.has(name), 'Evidence artifacts must have distinct run-bound names.');
+    names.add(name);
+    const paths = step
+      .match(/\n {10}path: \|\n((?: {12}[^\n]+\n)+)/)?.[1]
+      .trim()
+      .split('\n')
+      .map((path) => path.trim());
+    assert.ok(paths?.length, 'Evidence upload must declare its complete source trees.');
+    for (const path of paths) {
+      assert.ok(!owners.has(path), `Duplicate evidence tree ${path}`);
+      owners.set(path, name);
+    }
+    if (paths.includes('harness/results/')) assert.match(step, /if-no-files-found: error/);
+  }
+  assert.deepEqual([...owners.keys()].sort(), ['harness/results/', 'playwright-report/', 'test-results/']);
+  assert.notEqual(
+    owners.get('playwright-report/'),
+    owners.get('test-results/'),
+    'Combined HTML and raw traces exceeded the observed single-artifact download limit.',
+  );
+});
