@@ -12,6 +12,7 @@ import {
   type ClassicWindow,
 } from './harness';
 import { aimAtVoxelWithRealMouse } from './aim';
+import { MODULAR_WORLD_FLOOR_Y } from '../../fixtures/packs/modular-world/modular-world';
 
 export const modularPackSmokeEnabled = process.env.SEEDLANDS_PACK_SMOKE === 'modular-world';
 
@@ -35,12 +36,12 @@ export async function verifyModularPackSmoke({ page }: { page: Page }, testInfo:
   ]);
   expect(artifact.ok).toBe(true);
   expect(packLock.lock?.packs).toContainEqual(
-    expect.objectContaining({ id: 'sample:modular-world', version: '1.0.0' }),
+    expect.objectContaining({ id: 'sample:modular-world', version: '1.1.0' }),
   );
   expect(composition).toMatchObject({ playbookId: 'sample:modular-world' });
   expect(state).toMatchObject({ runtime: 'authority-worker', generatorVersion: 11, onGround: true });
   expect(state.compute.failedTasks).toBe(0);
-  await expect.poll(() => voxelAt(page, [0, 64, 0])).toBe(500);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y, 0])).toBe(500);
   // Move off the floor tile before mining it; the sample world has one floor layer.
   await lockPointer(page);
   const approach = await walkTo(page, [2.5, 0.5], { pulseMs: 80, timeout: 15_000 });
@@ -59,14 +60,18 @@ export async function verifyModularPackSmoke({ page }: { page: Page }, testInfo:
   );
   const beforeActions = await snapshot(page);
   if (!beforeActions) throw new Error('Modular snapshot is unavailable before player block actions.');
-  const miningAim = await aimAtVoxelWithRealMouse(page, [0, 64, 0]);
+  const miningAim = await aimAtVoxelWithRealMouse(page, [0, MODULAR_WORLD_FLOOR_Y, 0]);
   await clickCanvasCenter(page, 'left');
-  await expect.poll(() => voxelAt(page, [0, 64, 0])).toBe(0);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y, 0])).toBe(0);
   const mined = await waitForSnapshot(page, (value) => value.worldRevision > beforeActions.worldRevision);
-  await expect.poll(() => voxelAt(page, [0, 65, 1])).toBe(0);
-  const placementAim = await aimAtVoxelWithRealMouse(page, [0, 64, 1], [0, 65, 1]);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y + 1, 1])).toBe(0);
+  const placementAim = await aimAtVoxelWithRealMouse(
+    page,
+    [0, MODULAR_WORLD_FLOOR_Y, 1],
+    [0, MODULAR_WORLD_FLOOR_Y + 1, 1],
+  );
   await clickCanvasCenter(page, 'right');
-  await expect.poll(() => voxelAt(page, [0, 65, 1])).toBe(500);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y + 1, 1])).toBe(500);
   const placed = await waitForSnapshot(page, (value) => value.worldRevision > mined.worldRevision);
   await page.evaluate(async () => {
     await (window as unknown as ClassicWindow).__seedlandsHarness!.flushSave();
@@ -76,8 +81,8 @@ export async function verifyModularPackSmoke({ page }: { page: Page }, testInfo:
   await page.getByRole('button', { name: '进入世界', exact: true }).click();
   await page.locator('#start-card').waitFor({ state: 'hidden' });
   await waitForSnapshot(page, (value) => value.loadedChunks > 0 && value.renderedChunks > 0, 30_000);
-  await expect.poll(() => voxelAt(page, [0, 64, 0])).toBe(0);
-  await expect.poll(() => voxelAt(page, [0, 65, 1])).toBe(500);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y, 0])).toBe(0);
+  await expect.poll(() => voxelAt(page, [0, MODULAR_WORLD_FLOOR_Y + 1, 1])).toBe(500);
   expect(runtime.pageErrors).toEqual([]);
   expect(runtime.failedResponses).toEqual([]);
   await testInfo.attach('modular-pack-smoke.json', {
@@ -95,10 +100,10 @@ export async function verifyModularPackSmoke({ page }: { page: Page }, testInfo:
       worldRevisions: [beforeActions.worldRevision, mined.worldRevision, placed.worldRevision],
     }),
   });
-  await page.evaluate(async () => {
+  await page.evaluate(async (floorY) => {
     const harness = (window as unknown as ClassicWindow).__seedlandsHarness!;
-    await harness.setVoxelAt(0, 64, 0, 500);
-    await harness.setVoxelAt(0, 65, 1, 0);
+    await harness.setVoxelAt(0, floorY, 0, 500);
+    await harness.setVoxelAt(0, floorY + 1, 1, 0);
     await harness.flushSave();
-  });
+  }, MODULAR_WORLD_FLOOR_Y);
 }

@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { BROWSER_MAX_BUILD_Y, BROWSER_MIN_BUILD_Y } from '../../../../../src/app/world/browser-world-limits';
 import { assembleWorldPacks, type VerifiedPackArtifact } from '@seedlands/stdlib/host';
 import { WORLDGEN_PROVIDER_CAPABILITY } from '@seedlands/stdlib/mod-api';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
@@ -11,6 +12,7 @@ import { runWorldComputeTask } from '../../../../../../../packages/stdlib/src/se
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 import {
   MODULAR_WORLD_SENTINEL_POSITION,
+  MODULAR_WORLD_FLOOR_Y,
   MODULAR_WORLD_SENTINEL_VOXEL,
   modularWorldContentCandidates,
   modularWorldgenIdentity,
@@ -103,9 +105,12 @@ it('第二 Playbook 可通过通用 Worker 计算合同寻找出生点并生成 
   );
   expect(bootstrap).toMatchObject({
     kind: 'safe-spawn-result',
-    playerBodyPosition: [0.5, 65, 0.5],
+    playerBodyPosition: [0.5, MODULAR_WORLD_FLOOR_Y + 1, 0.5],
   });
   if (bootstrap.kind !== 'safe-spawn-result') throw new Error('Modular bootstrap failed.');
+  // A playable sample needs a legal floor and one legal cell for player placement.
+  expect(bootstrap.playerBodyPosition[1] - 1).toBeGreaterThan(BROWSER_MIN_BUILD_Y);
+  expect(bootstrap.playerBodyPosition[1]).toBeLessThanOrEqual(BROWSER_MAX_BUILD_Y);
   expect(bootstrap.starterChunks.length).toBeGreaterThan(0);
   const canonical = await runWorldComputeTask(
     {
@@ -113,16 +118,16 @@ it('第二 Playbook 可通过通用 Worker 计算合同寻找出生点并生成 
       seed: 917,
       generatorVersion: 11,
       provider: modularWorldgenIdentity,
-      key: '0,2,0',
+      key: '0,1,0',
       cx: 0,
-      cy: 2,
+      cy: 1,
       cz: 0,
     },
     () => false,
     () => Promise.resolve(),
     kernels,
   );
-  expect(canonical).toMatchObject({ kind: 'canonical-result', key: '0,2,0' });
+  expect(canonical).toMatchObject({ kind: 'canonical-result', key: '0,1,0' });
   if (canonical.kind !== 'canonical-result') throw new Error('Modular canonical generation failed.');
   expect(new Uint16Array(canonical.voxels)[0]).toBe(MODULAR_WORLD_SENTINEL_VOXEL);
 });
