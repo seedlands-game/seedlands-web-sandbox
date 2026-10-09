@@ -3,6 +3,7 @@ import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 import type { AuthorityCropStageProjection } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
 import type { PackPresentationCrop } from '../../../src/client/presentation/pack-presentation-loader';
 import type {
+  CropRenderBatchSnapshot,
   CropRenderResource,
   PlayCanvasCropPresentation,
 } from '../../../src/app/world/playcanvas-crop-stage-adapter';
@@ -22,6 +23,7 @@ const projection = (position: readonly [number, number, number] = [1, 2, 3]): Au
 
 function fixture() {
   const resources: CropRenderResource[] = [];
+  const snapshots = new Map<CropRenderResource, CropRenderBatchSnapshot>();
   const lightTexture = (id: string) => ({ id, destroy: vi.fn() });
   const lights = new Map<string, NonNullable<Parameters<PlayCanvasCropPresentation['bindChunkLight']>[1]>>();
   const firstLight = {
@@ -43,9 +45,20 @@ function fixture() {
       instance: { setParameter: vi.fn() },
     } as unknown as CropRenderResource;
     resources.push(resource);
+    snapshots.set(resource, {
+      chunkKey: batch.chunkKey,
+      presentationId: batch.presentationId,
+      stage: batch.stage,
+      positions: batch.positions,
+      vertexCount: batch.positions.length * 8,
+      indexCount: batch.positions.length * 12,
+      enabled: true,
+      lightingBound: true,
+    });
     return resource;
   });
   const destroy = vi.fn((resource: CropRenderResource) => {
+    snapshots.delete(resource);
     resource.entity.destroy();
     resource.mesh.destroy();
   });
@@ -59,6 +72,7 @@ function fixture() {
     create,
     destroy,
     bindChunkLight,
+    snapshot: vi.fn(() => Object.freeze([...snapshots.values()])),
     dispose: adapterDispose,
   };
   const world = new WorldCropPresentation(
@@ -85,6 +99,18 @@ describe('World crop presentation resource coordination', () => {
     const test = fixture();
     test.world.update('epoch-a', [projection()]);
     expect(test.create).toHaveBeenCalledTimes(1);
+    expect(test.world.snapshot).toEqual([
+      {
+        chunkKey: key,
+        presentationId: 'sample:crop',
+        stage: 0,
+        positions: [[1, 2, 3]],
+        vertexCount: 8,
+        indexCount: 12,
+        enabled: true,
+        lightingBound: true,
+      },
+    ]);
     expect(test.bindChunkLight).toHaveBeenCalledWith(key, test.firstLight);
 
     test.lights.set(key, test.secondLight);
@@ -99,6 +125,7 @@ describe('World crop presentation resource coordination', () => {
 
     test.world.update('epoch-a', []);
     expect(test.destroy).toHaveBeenCalledTimes(1);
+    expect(test.world.snapshot).toEqual([]);
     expect(test.adapterDispose).not.toHaveBeenCalled();
   });
 
@@ -112,6 +139,7 @@ describe('World crop presentation resource coordination', () => {
     test.world.update('epoch-a', [projection()]);
 
     expect(test.onError).toHaveBeenCalledTimes(1);
+    expect(test.world.snapshot).toEqual([]);
     expect(test.create).toHaveBeenCalledTimes(1);
     expect(test.destroy).toHaveBeenCalledTimes(1);
     expect(test.resources[0]!.entity.destroy).toHaveBeenCalledTimes(1);
@@ -130,12 +158,14 @@ describe('World crop presentation resource coordination', () => {
     expect(test.destroy).toHaveBeenCalledTimes(1);
     test.world.dispose();
     expect(test.destroy).toHaveBeenCalledTimes(2);
+    expect(test.world.snapshot).toEqual([]);
   });
 
   it('terminates late update, bind, and reset work after dispose without disposing shared presentation assets', () => {
     const test = fixture();
     test.world.update('epoch-a', [projection()]);
     test.world.dispose();
+    expect(test.world.snapshot).toEqual([]);
     expect(test.destroy).toHaveBeenCalledTimes(1);
     expect(test.adapterDispose).not.toHaveBeenCalled();
 

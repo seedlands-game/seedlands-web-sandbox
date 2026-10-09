@@ -10,7 +10,8 @@ import {
 import type { GameMediaControllerSnapshot } from '../audio/game-media-controller';
 import type { HarnessEquipmentSnapshot, HarnessMediaSnapshot, RenderedMaterialMeshSummary } from '../app-contracts';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
-import type { HarnessApi } from './game-harness-contract';
+import type { CropRenderBatchSnapshot } from '../world/playcanvas-crop-stage-adapter';
+import type { HarnessCropStageSnapshot, HarnessApi } from './game-harness-contract';
 import type { RenderedMaterialMeshSummary as WorldRenderedMaterialMeshSummary } from '../world/world-runtime';
 import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
 import type { AuthorityInventoryView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
@@ -28,13 +29,14 @@ export type HarnessObservabilityBindings = Readonly<{
     material: FaceMaterialId,
   ) => WorldRenderedMaterialMeshSummary | null;
   renderedWorldEpoch: () => string | null;
+  renderedCropBatches: () => readonly CropRenderBatchSnapshot[] | null;
   media: () => GameMediaControllerSnapshot;
   audio: () => HarnessMediaSnapshot['audio'];
 }>;
 
 type HarnessObservabilityApi = Pick<
   HarnessApi,
-  'getVoxelGeometry' | 'getRenderedMaterialMesh' | 'mediaSnapshot' | 'equipmentSnapshot'
+  'getVoxelGeometry' | 'getRenderedMaterialMesh' | 'mediaSnapshot' | 'equipmentSnapshot' | 'cropStageSnapshot'
 >;
 
 const cloneFrozenStack = (stack: AuthorityInventoryView['slots'][number]): AuthorityInventoryView['slots'][number] =>
@@ -143,6 +145,46 @@ export function createHarnessObservability(bindings: HarnessObservabilityBinding
       )
         return null;
       return cloneRenderedMaterialMesh(summary, worldEpoch);
+    },
+    cropStageSnapshot: (): HarnessCropStageSnapshot | null => {
+      const authority = bindings.authority();
+      if (!authority?.isReady) return null;
+      const runtimeEpoch = authority.runtimeEpoch;
+      if (!runtimeEpoch || bindings.renderedWorldEpoch() !== runtimeEpoch) return null;
+      const gameplay = authority.gameplay;
+      const batches = bindings.renderedCropBatches();
+      if (!batches) return null;
+      const snapshot = Object.freeze({
+        runtimeEpoch,
+        gameplayRevision: gameplay.gameplayRevision,
+        cropStages: Object.freeze(
+          (gameplay.cropStages ?? []).map((crop) =>
+            Object.freeze({
+              ...crop,
+              position: Object.freeze([...crop.position]) as readonly [number, number, number],
+            }),
+          ),
+        ),
+        renderedBatches: Object.freeze(
+          batches.map((batch) =>
+            Object.freeze({
+              ...batch,
+              positions: Object.freeze(
+                batch.positions.map((position) => Object.freeze([...position]) as readonly [number, number, number]),
+              ),
+            }),
+          ),
+        ),
+      });
+      if (
+        bindings.authority() !== authority ||
+        !authority.isReady ||
+        authority.runtimeEpoch !== runtimeEpoch ||
+        authority.gameplay !== gameplay ||
+        bindings.renderedWorldEpoch() !== runtimeEpoch
+      )
+        return null;
+      return snapshot;
     },
     mediaSnapshot: () => cloneHarnessMediaSnapshot(bindings.media(), bindings.audio()),
     equipmentSnapshot: (): HarnessEquipmentSnapshot | null => {

@@ -41,6 +41,7 @@ import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/rest
 import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
 import * as v1 from './classic-support/v1-slice';
 import * as equipment from './classic-support/equipment-journey';
+import * as crops from './classic-support/crop-journey';
 import {
   equipFromInventory,
   inventorySignature,
@@ -295,6 +296,9 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     stageSamples.C3 = (await snapshot(page))!;
   });
 
+  const cropJourney = await test.step('Creative 正常放置、锄地、种植、施肥、收割与实际作物批次', () =>
+    crops.completeCropJourneyBeforeSave(page, testInfo));
+
   let v1SliceState!: v1.V1SliceState;
   await test.step('V1 水桶、跨 Chunk 木门与唱片机均通过正式玩家输入', async () => {
     await v1.expectV1AudioSettings(page);
@@ -373,6 +377,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   await test.step('C5 正式保存返回、同上下文继续并再次交互', async () => {
     const persistedPositions = classicPersistedPositions;
     const stateBeforeSave = await playerState(page);
+    const cropBeforeSave = await crops.expectCropForSave(page, cropJourney);
     const equipmentBeforeSave = await equipment.expectEquipmentReadyForSave(page, equipmentJourney);
     const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
     const checkpointBefore = await checkpointVoxels(page, persistedPositions);
@@ -382,6 +387,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       checkpoint: checkpointBefore,
       derived: derivedBefore,
       v2EquipmentPreSave: equipmentBeforeSave,
+      cropBeforeSave,
     });
     expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
     expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
@@ -399,6 +405,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     );
     const developerEpochAfter = await equipment.developerWorldEpoch(page);
     expect(developerEpochAfter).not.toBe(developerEpochBefore);
+    const restoredCrop = await crops.verifyCropAfterRestore(page, testInfo, cropJourney, cropBeforeSave);
+    restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { restoredCrop });
     await v1.verifyV1SliceAfterRestore(page, v1SliceState);
     const restoredEquipment = await equipment.verifyEquipmentJourneyAfterRestore(page, equipmentBeforeSave, (value) => {
       const { referenceStatus, ...v2Equipment } = value;

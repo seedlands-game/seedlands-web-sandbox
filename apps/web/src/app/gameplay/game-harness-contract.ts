@@ -15,6 +15,16 @@ import type { FluidFeedbackTarget } from './fluid-feedback-tracker';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 
+import type { AuthorityCropStageProjection } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { CropRenderBatchSnapshot } from '../world/playcanvas-crop-stage-adapter';
+
+export type HarnessCropStageSnapshot = Readonly<{
+  runtimeEpoch: string;
+  gameplayRevision: number;
+  cropStages: readonly AuthorityCropStageProjection[];
+  renderedBatches: readonly CropRenderBatchSnapshot[];
+}>;
+
 type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 
 export type HarnessApi = {
@@ -59,6 +69,7 @@ export type HarnessApi = {
     material: FaceMaterialId,
   ) => RenderedMaterialMeshSummary | null;
   mediaSnapshot: () => HarnessMediaSnapshot;
+  cropStageSnapshot: () => HarnessCropStageSnapshot | null;
   equipmentSnapshot: () => HarnessEquipmentSnapshot | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;

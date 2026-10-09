@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 作物真实输入与观测 checkpoint32（接线与确定性验收完成；浏览器未验收）
+
+为checkpoint31补实际产品证据，仅扩展唯一完整Classic旅程及只读BrowserProductHarness，不另造runner或developer玩法写入。cropStageSnapshot()返回runtimeEpoch/gameplayRevision、accepted Authority cropStages的冻结独立复制，以及当前adapter live GPU batch的只读摘要：Chunk/呈现ID/阶段/soil positions、Mesh.getPositions实际vertexCount、primitive实际indexCount、材质绑定的light参数是否存在、local enable/mesh visibility标志。参数存在和enable不是实际照明/可见性结论，须结合真实截图。ready/authority实例/gameplay引用/runtime/rendered-world epoch不一致时返回null；无新权威crop Map、写API、wire版本或route-slim重试。
+
+先API/新观测契约RED，GREEN证明getter就绪/新鲜度拒绝、复制冻结不修改既有view或GPUmetadata、实际mesh计数而非从authority猜数、destroy/epoch后的空资源与灯光绑定观测。正式新字段纳入原selector/types；旧fixture只补必需接口，不放宽原owner/epoch断言。
+
+真实路线复用既有已铺平/已加载Stone走廊。不得猜自然土壤/水/高草坐标；可通过正常mode UI/创造目录选择dirt-block并按既有placement helper用真实右键放土，再木锄→小麦种子→white-dye完成锄地/0→7。此为创造模式农业消费者验证，不冒充完整Survival材料/骨粉/水化自然成长链。收割/施肥实际已由authority-player-action的正常interact fallback→dispatchAuthorityCropTarget进入registered prepared host，不能因item selector里无独立项而重复新入口。明确的新plots只能使用原floor/air覆盖、避开原build/workbench/V1/V2targets与bodyClearance的支持格；用同样瞄准/双端到达/ACK/碰撞/20s/900s合同，运行后才能登记坐标通过。保留第二株进入原C5 portable save/继续，并校验新epoch的accepted crop及实际mesh；不跳过V2或把部分步骤改记whole PASS。原每个阶段、原visual与modular条件、画质/线程/PointerLock合同保持。
+
+planned captures含stage0/mature/harvest空/restore截图与只读观测附件，失败亦保存原始receipt/trace；新的精确source/artifact build22/browser23，不能使用4db dist。本组未运行browser或性能；完整V2/V3/Modular/V4/194和组合整帧A/B仍待闭环。预算02:41真实UI90%、约6天重置，60%停止；子片保守传统1PD×120%=1.2PD、AI约1h×120%=1.2h，实际费用/模型元数据与周额度分母不可换算，不额外探测或购买。现有PR持续修复授权不变，无合并/生产发布。
+
 ## 作物 Chunk 呈现消费者 checkpoint31（接线与确定性验收完成；浏览器未验收）
 
 承接checkpoint30内容合同，只新增派生渲染消费者。唯一CropRuntime仍拥有种植/阶段/时钟；Web仅消费accepted AuthorityGameplayView.cropStages，按已呈现terrain Chunk、presentationId和stage批处理非碰撞crossed-quads，不创建逐作物Entity、体素、碰撞体、可写crop Map或新提交。缺presentationId的旧投影不绘制；声明的未知ID/非法stage/position失败关闭、清理overlay并报告既有runtime错误UI，不默默显示替代物。渲染与normal soil-target action保持分开的合同。

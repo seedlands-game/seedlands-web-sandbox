@@ -353,6 +353,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
       authority: bindings.authority,
       renderedMaterialMesh: bindings.renderedMaterialMesh,
       renderedWorldEpoch: bindings.renderedWorldEpoch,
+      renderedCropBatches: () => bindings.world()?.cropPresentationSnapshot ?? null,
       media: bindings.media,
       audio: bindings.audio,
     }),

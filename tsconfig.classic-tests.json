@@ -75,6 +75,7 @@
     "apps/web/tests/unit/app/crop-stage-presenter.test.ts",
     "apps/web/tests/unit/client/crop-stage-geometry.test.ts",
     "apps/web/tests/unit/app/world-crop-presentation.test.ts",
-    "apps/web/tests/unit/app/playcanvas-crop-stage-adapter.test.ts"
+    "apps/web/tests/unit/app/playcanvas-crop-stage-adapter.test.ts",
+    "apps/web/tests/unit/app/crop-harness-observation.test.ts"
   ]
 }

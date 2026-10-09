@@ -159,6 +159,7 @@ const bindings = () => {
     world: () => null,
     renderedMaterialMesh: vi.fn(() => renderedSummary),
     renderedWorldEpoch: () => renderedWorldEpoch,
+    renderedCropBatches: () => [],
     media: () => ({ worldEpoch: 'world:2', projections: [projection], lastForwardedBatch: batch }),
     audio: () => ({
       epoch: 'world:2',

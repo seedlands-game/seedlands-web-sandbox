@@ -21,17 +21,21 @@ const state = vi.hoisted(() => ({
     normals?: Float32Array;
     uvs?: Float32Array;
     indices?: Uint32Array;
+    primitive: Array<{ count: number }>;
     destroy: ReturnType<typeof vi.fn>;
   }>,
   instances: [] as Array<{
     parameters: Map<string, unknown>;
     castShadow: boolean;
+    visible: boolean;
     setParameter: ReturnType<typeof vi.fn>;
+    getParameter: ReturnType<typeof vi.fn>;
   }>,
   entities: [] as Array<{
     name: string;
     render: unknown;
     children: unknown[];
+    enabled: boolean;
     destroy: ReturnType<typeof vi.fn>;
     addComponent: ReturnType<typeof vi.fn>;
   }>,
@@ -77,6 +81,7 @@ vi.mock('playcanvas', () => {
     normals?: Float32Array;
     uvs?: Float32Array;
     indices?: Uint32Array;
+    primitive: Array<{ count: number }> = [];
     destroy = vi.fn();
     constructor(_device: unknown) {
       state.meshes.push(this as never);
@@ -92,13 +97,23 @@ vi.mock('playcanvas', () => {
     }
     setIndices(value: Uint32Array) {
       this.indices = value;
+      this.primitive = [{ count: value.length }];
+    }
+    getPositions(target: Float32Array[]) {
+      if (this.positions) target.push(this.positions);
+      return this.positions?.length ? this.positions.length / 3 : 0;
     }
     update() {}
   }
   class MeshInstance {
     parameters = new Map<string, unknown>();
     castShadow = true;
+    visible = true;
     setParameter = vi.fn((name: string, value: unknown) => this.parameters.set(name, value));
+    getParameter = vi.fn((name: string) => {
+      const data = this.parameters.get(name);
+      return data === undefined ? undefined : { data };
+    });
     constructor(
       readonly mesh: Mesh,
       readonly material: StandardMaterial,
@@ -110,6 +125,7 @@ vi.mock('playcanvas', () => {
   class Entity {
     render: unknown = null;
     children: unknown[] = [];
+    enabled = true;
     destroy = vi.fn();
     addComponent = vi.fn((kind: string, options: Record<string, unknown>) => {
       if (kind === 'render') this.render = options;
@@ -220,6 +236,23 @@ describe('PlayCanvas crop stage adapter', () => {
     expect(resource.instance.setParameter).toHaveBeenCalledWith('texture_blockLight', brick);
     expect(resource.instance.setParameter).toHaveBeenCalledWith('uBlockLightOrigin', origin);
     expect(resource.instance.setParameter).toHaveBeenCalledWith('uBlockLightSize', 34);
+    expect(adapter.snapshot()).toEqual([
+      {
+        chunkKey: '0:0:0',
+        presentationId: definition.id,
+        stage: 3,
+        positions: [
+          [1, 2, 3],
+          [4, 2, 5],
+        ],
+        vertexCount: 16,
+        indexCount: 24,
+        enabled: true,
+        lightingBound: true,
+      },
+    ]);
+    expect(Object.isFrozen(adapter.snapshot())).toBe(true);
+    expect(Object.isFrozen(adapter.snapshot()[0]!.positions[0])).toBe(true);
     const replacementBrick = { destroy: vi.fn() } as unknown as import('playcanvas').Texture;
     adapter.bindChunkLight('0:0:0', {
       blockLightTexture: replacementBrick,
@@ -229,6 +262,7 @@ describe('PlayCanvas crop stage adapter', () => {
     expect(resource.instance.setParameter).toHaveBeenCalledWith('texture_blockLight', replacementBrick);
     adapter.destroy(resource);
     adapter.destroy(resource);
+    expect(adapter.snapshot()).toEqual([]);
     expect(resource.entity.destroy).toHaveBeenCalledOnce();
     expect(resource.mesh.destroy).toHaveBeenCalledOnce();
     expect(brick.destroy).not.toHaveBeenCalled();
@@ -236,6 +270,7 @@ describe('PlayCanvas crop stage adapter', () => {
 
     adapter.dispose();
     adapter.dispose();
+    expect(adapter.snapshot()).toEqual([]);
     expect(state.materials.every((material) => material.destroy.mock.calls.length === 1)).toBe(true);
     expect(state.textures.every((texture) => texture.destroy.mock.calls.length === 1)).toBe(true);
     expect(brick.destroy).not.toHaveBeenCalled();
