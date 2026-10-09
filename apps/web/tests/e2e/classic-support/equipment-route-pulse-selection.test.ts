@@ -13,7 +13,28 @@ const settled: EquipmentRouteSnapshot = {
 };
 
 describe('bounded equipment route pulse planning', () => {
-  it('uses an existing 300ms ordinary walking pulse only for the aligned settled far corridor', () => {
+  it.each(['KeyW', 'KeyS'] as const)('uses the ordinary far pulse while %s approaches diagonally', (direction) => {
+    const player = [direction === 'KeyW' ? 58.5 : 98.5, 32.6, 0.5] as const;
+    const sign = direction === 'KeyW' ? -1 : 1;
+    const yaw = (Math.atan2(sign * (target[0] - player[0]), sign * (target[1] - player[2])) * 180) / Math.PI;
+    expect(
+      equipmentRoutePulseMs(
+        { ...settled, player, serverPlayerPosition: player, viewAngles: [yaw, 0] },
+        target,
+        direction,
+      ),
+    ).toBe(300);
+  });
+
+  it('keeps a diagonally aligned near approach on the original short pulse', () => {
+    const player = [80.5, 32.6, 0.5] as const;
+    const yaw = (Math.atan2(target[0] - player[0], target[1] - player[2]) * 180) / Math.PI;
+    expect(
+      equipmentRoutePulseMs({ ...settled, player, serverPlayerPosition: player, viewAngles: [yaw, 0] }, target, 'KeyS'),
+    ).toBe(80);
+  });
+
+  it('uses an existing 300ms ordinary walking pulse only for an aligned settled far route', () => {
     expect(equipmentRoutePulseMs(settled, target, 'KeyS')).toBe(300);
     expect(
       equipmentRoutePulseMs(

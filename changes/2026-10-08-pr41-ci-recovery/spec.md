@@ -1,5 +1,21 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Far diagonal route planning checkpoint60（模型、静态和完整headless通过，浏览器双失败）
+
+原Browser60实际EXIT1，主6.5分钟FAIL/Visual1.1分钟FAIL/Modular SKIP，正式C0–C2 PASS。C3浆果格子hover原10秒失败，未到crop新规划；Visual原20秒光照谓词失败，worldRevision9、cache pending14。不能把未执行斜向路线计为产品PASS。完整headless103文件663例EXIT0，identified build EXIT0；全静态候选EXIT0后，漏补的target-aim端口定向格式/lint/classic-test类型EXIT0。精确904 CI59已终态失败（headless1/658、Chromium首轮启动10秒/重试900秒，Visual PASS、部署SKIP）。详见evidence/diagonal-route-checkpoint-60-01.md。
+
+旧选择器的斜向实际45秒RED与正/反两个直接选择器RED有效；候选后Root九文件53/53 PASS、完整verify:static:ci实际EXIT0。18:35读到精确904 CI59 headless为1 FAIL/658 PASS：target-aim.test经prepareBuildingTargetWithRealMouse间接调用walkTo的旧fake keyboard漏补press。本片补齐相同原生端口语义，保留原body-clear/actual-face瞄准断言，先定向格式/lint/classic-test类型，再运行原完整headless集合；不是production fallback。实际证据依赖当前运行结果。
+
+接续904a78f4与原Browser59实际失败。最后距目标约0.205但超过原45秒；一路从z约0.5斜向接近z=-0.5，各pulse前双owner停稳且对齐目标，仍全部选择80ms，因为Group58额外要求当前位置已在目标z的0.08终点走廊内。对于斜向远段，该条件通常直到x距目标不足3格才成立，300ms远段因此不可用。这是输入规划候选，不以本次未重现6.4格越界宣称真实持键或全部稳定。
+
+冻结候选仅移除远段选择器的固定目标z走廊前置条件：双owner沿原方向的x剩余均大于3、ground/noncollision、当前Authority停稳且呈现追上、有限完整观测、真实视角已对齐完整目标向量小于原1px时，仍用原300ms普通walking上限。任何near、方向不符、滞后、移动、未知/非法观测、未对齐仍原80ms；routePulseDurationMs继续裁剪。0.08终点走廊、0.06双owner到达、0.45交接邻域与45/20/900秒、原native keyboard与全部fresh/ACK/settle门禁保持，不以取消终点断言替换规划。
+
+先用既有stepBody模型、原250ms每次snapshot等待与真实walkEquipmentRoute取得斜向长段RED；禁止为制造失败调延迟、直接赋目标、放宽最终断言。模型输入start[98.5,32.6,0.5]→原target[78.5,-0.5]，固有mouse correction与ground floor；同时直接选择器反例确认合法对齐远段的缺口。GREEN要求双owner各自原0.06内、完整释放、ground/noncollision、velocity0、fresh tick/ACK，旧near/overshoot/方向/滞后反例保持。模型不作为真实Authority或性能证据。
+
+现有唯一agent按Luna/medium请求参数独占一个新diagonal路线测试文件，实际会话型号未获服务元数据核实；Root独占选择器、既有边界测试、package selector、spec和集成。必要静态、identified build与原唯一完整runner，独立run ID pr41-classic-browser60-01；实际浏览器检验crop/V1/V2及后续原旅程。无关封存输出不重建，没有额外模型、包安装、侧Playwright路线或新网络权限。当前CI59待终态，不取消抢推；各失败保留，下一push只在终态后执行。
+
+传统0.3PD×120%=0.36PD；AI约45min×120%=54min，从18:29附近开始、19:23附近有界checkpoint。18:37实际UI周剩84%为最新读数，5天8小时后重置；账户总下降不单独归因PR，约60%停止线保持。不是whole-frame A/A/A/B，不声称性能收益。
+
 ## Native keyboard pulse boundary checkpoint59（模型与静态通过，完整浏览器失败）
 
 有效延迟响应RED、near/long3例GREEN、Root70及兼容修正后45例PASS；完整静态第二次EXIT0、identified build EXIT0。原Browser59日志和canonical receipt均FAIL：主10.6分钟FAIL/Visual2.6分钟PASS/Modular SKIP，总13.4分钟，正式C0–C3 PASS，作物共享路线[65.5,-0.5]仍超过原45秒。最后双owner停稳在x65.705/z-0.484，距目标约0.205，未到原0.06；原生80ms参数不能证明实际物理持键时长。连接中断后18:21只读恢复确认原进程18:02正常收尾，未重跑。CI58首轮启动10秒失败、重试900秒失败、Visual PASS、部署SKIP。详见evidence/keyboard-pulse-checkpoint-59-01.md。
