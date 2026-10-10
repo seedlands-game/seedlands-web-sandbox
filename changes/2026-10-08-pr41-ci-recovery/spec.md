@@ -1286,3 +1286,11 @@ CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，�
 21:06UTC150否决检查点：local23e58b5d正常commit，尚未push；identified build/verify PASS（sourceDigestb0c5d8f2/artifact06d64718/289files/built21:01:15.378Z）。原visual一次FAIL101476ms；旧前段素材/连续帧/单击步骤完成，新图标260case覆盖130项、32像素全相同，16像素105项RGBA不同。cold-stored-sky未到达，不能宣布完整visual通过。原raw/图像/hash保留，main151 NOT_STARTED，候选不准出。
 
 152有界新问题是150对照环境：actualDOM Image与新建reference Image的相同URL A/A是否仍相同。只为现有helper每个case增加同source fresh Image对照及equal-context candidate/control指标，原differentChannels断言、元素budget、所有旧输入/240秒/断言保持；不先假定path绘制或DOM上下文谁有问题，不修改生产候选。新test-only commit/newidentified build后原visual一次run152，实际A/A决定原对照能否归因；失败/负样本原样保留，未确证前不推23、不启main。传统.05PD×120%=.06PD，AI8min×120%=9.6min，21:15UTC检查点；仅Root两TS/spec/evidence私有，无新模型/权限/网络，真实停止要求优先。21:20总修复检查点保持。
+
+21:15UTC152结果：local9c99d904、新identified build/verify通过，生产字节与150一致。原visual一次FAIL71170ms；130图标260case，same-context candidate/control仍105项16px不同，32px全部相同。source A/A只有paper@16为72channels不同，其余259case为0，不能据此消除104项A/A为0的真实候选差异。149按颜色聚合path生产候选拒绝，未推送；main151仍未启动。另CI422远端f01自然FAIL：五非Browser SUCCESS/main C4首次global900、retry208.5,.5原45sec路线超时，visual1.3min/native29.5secPASS/previewSKIP，C5未完成；不同运行进度不是性能A/B。
+
+### 保留rect原语和绘制顺序的行内合并153（21:16UTC预注册）
+
+149 path逻辑像素等价但缩小栅格不等价，撤销该生产分支。新唯一候选轴只把同一行、相邻同RGB的不透明单位rect合并成一条height=1的rect；保留原rect原语、逐行绘制顺序、透明间隔、RGB/边界/viewBox/crispEdges/cache/override，禁止跨行或跨不同颜色合并。仍DOM-free，不引入PNG编译器或canvas平台依赖。
+
+固定149同130图标A/A原37564elements/4315978bytes，新的硬预算为实际行内色段数（按行首、透明到不透明、RGB变化独立计数），逐格展开rect验证全像素。当前未采用path实现先取得新representation contract RED，C后GREEN并打印counter；将元素预算更新为新候选的行段合同，不改变原任何玩法/视觉断言。原260case 16/32逐RGBA零差异与source A/A保持，任何非0拒绝。Root独占原asset-image/既有两个helper与unit/spec/evidence，没有新agent/权限；必要unit/types/lint后commit/newidentified build，原visual一次154，严格通过才启动原main151。失败必须产生新证据后才进入下一候选，21:25UTC检查点；长期docs/CI质量与原资源时限不改。

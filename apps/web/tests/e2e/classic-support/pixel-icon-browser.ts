@@ -21,7 +21,18 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         .join('');
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" shape-rendering="crispEdges">${rectangles}</svg>`;
       const colorCount = new Set(pixels.filter((color) => color !== 0).map((color) => palette[color]!.join(','))).size;
-      return [[binding.itemId, { url: `data:image/svg+xml,${encodeURIComponent(svg)}`, colorCount }]];
+      const shapeBound = pixels.reduce(
+        (count, color, index) =>
+          count +
+          Number(
+            color !== 0 &&
+              (index % width === 0 ||
+                pixels[index - 1] === 0 ||
+                palette[color]!.join(',') !== palette[pixels[index - 1]!]!.join(',')),
+          ),
+        0,
+      );
+      return [[binding.itemId, { url: `data:image/svg+xml,${encodeURIComponent(svg)}`, colorCount, shapeBound }]];
     }),
   );
   const result = await page.evaluate(async (references) => {
@@ -36,6 +47,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       controlSha256: string;
       elements: number;
       colorCount: number;
+      shapeBound: number;
     }> = [];
     const skipped: Array<{ itemId: string; reason: string }> = [];
     const errors: string[] = [];
@@ -71,8 +83,8 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         await freshActual.decode();
         const svg = decodeURIComponent(image.src.slice('data:image/svg+xml,'.length));
         const elements = [...svg.matchAll(/<(?:rect|path)\b/g)].length;
-        if (elements !== reference.colorCount)
-          errors.push(`${itemId}: ${elements} elements, expected ${reference.colorCount}`);
+        if (elements !== reference.shapeBound)
+          errors.push(`${itemId}: ${elements} elements, expected ${reference.shapeBound}`);
         for (const size of [16, 32]) {
           canvas.width = canvas.height = size;
           context.imageSmoothingEnabled = false;
@@ -101,6 +113,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             equalContextDifferentChannels,
             elements,
             colorCount: reference.colorCount,
+            shapeBound: reference.shapeBound,
             actualSha256: await hash(after),
             freshActualSha256: await hash(fresh),
             controlSha256: await hash(before),
