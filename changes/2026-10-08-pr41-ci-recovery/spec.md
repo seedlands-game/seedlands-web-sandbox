@@ -1318,3 +1318,11 @@ Root独占既有helper/spec/新证据，无agent/新权限。21:42UTC检查点�
 实际旧A/A source一致且尺寸一致，原控制是每case第一个draw；fresh/DOM/等价资源后续draw相互一致（paper首次例外）。唯一新轴记录同一个control对象在原序列后重复draw与第一次RGBA的差异，以及同DOM对象重复draw与原actual差异。原所有比较与零断言保持，新增同对象重复也要求0，不允许用后一次替换前一次或自动warmup而掩盖基线失效。仅paper/redstone16保留原控制/actual/repeat三张完整RGBA数组用于确定性分析，无其他生产/质量/输入/timeout变更。
 
 Root独占原helper/spec/evidence，无agent/权限，Classic types/lint/hooks后新身份build/verify，原visual一次160；只定位measurement不稳定，不采用任何生产候选/main151。21:47UTC检查点。新证据仍不支持修复时停止该图标优化诊断单元并保留旧生产owner，避免继续无结论尝试。
+
+21:40UTC160终态：原visual一次FAIL78906ms，105个16px同control对象first/repeat不同，paper同DOMrepeat也不同，32px全同。原RGBA表明红石首次46种/重复3种，paper首次27种/重复3种；不能解释为生产候选像素缺陷。现在有新事实支持读回上下文不稳定诊断，非无证据重复。
+
+### 明确频繁读回Canvas2D用途161（21:40UTC预注册）
+
+唯一轴getContext('2d',{willReadFrequently:true})，增加getContextAttributes实际配置回执。旧生产/图像尺寸与style/16&32/first/每条draw顺序、imageSmoothing=false和原different/sourceAA/equivalent/同对象repeat全零断言保持，不warmup、不丢掉first、不改变GPU/WebGL质量。160实际同对象重复是此诊断RED；新test-only commit/build/verify后原visual一次162，检验全部first/repeat稳定性。此API配置不单独证明浏览器backend或GPU性能，只有RGBA/A/A实际结果才准出测量；若仍失败停止此图标优化单元并保持旧生产。
+
+Root独占helper/spec/evidence，无agent/权限/域名扩张；Classic types/lint/hooks适度验证，原主旅程151仍未启动，21:47UTC检查点不变。
