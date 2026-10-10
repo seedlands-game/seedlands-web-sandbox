@@ -1,7 +1,7 @@
 import type { CDPSession, Page, TestInfo } from '@playwright/test';
 
 const delayMs = 360_000;
-const durationMs = 20_000;
+const durationMs = 5_000;
 const completionTimeoutMs = 10_000;
 const maxBytes = 64 * 1024 * 1024;
 const coreCategories = ['toplevel', 'gpu', 'cc', 'viz', 'devtools.timeline'];

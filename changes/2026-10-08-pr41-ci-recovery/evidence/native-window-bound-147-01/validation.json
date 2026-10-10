@@ -1,0 +1,44 @@
+{
+  "candidateParentSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+  "change": "Only opt-in native diagnostic capture window 20000 to 5000ms",
+  "productionGameplayChange": false,
+  "red": {
+    "files": 1,
+    "failed": 1,
+    "passed": 10,
+    "trigger": "Tracing.end absent at 5000ms in old implementation"
+  },
+  "green": {
+    "files": 5,
+    "passed": 35,
+    "failed": 0
+  },
+  "classicTypes": "PASS",
+  "targetedEslint": "PASS",
+  "browser": "NOT_RUN_AT_DELIVERY",
+  "failClosedDataLoss": "UNCHANGED",
+  "limits": "Not product acceptance or performance gain; final identified browser capture pending.",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-window-red-147-01.log",
+      "bytes": 1435,
+      "sha256": "a4f8f427f69cc347730427fecdb16f624ef8264b591c21a46a01e5dba10e3a49"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-window-green-147-01.log",
+      "bytes": 341,
+      "sha256": "57a62001edbc80101db5b176695e8102c347cc933e5e4919af63651866e0cb43"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-window-types-147-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-window-lint-147-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "longTermDocsBaseline": "unchanged; existing opt-in diagnostic only"
+}
