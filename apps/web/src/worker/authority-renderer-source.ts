@@ -2,7 +2,7 @@ import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
 import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
 import type { AuthorityWorldHarness } from '@seedlands/stdlib/server/harness/authority-world-harness';
-import type { AuthorityCollisionBaselineResult } from '@seedlands/stdlib/server/game-server-types';
+import type { SkySourceResult } from '../client/authority/browser-authority-sky-chunk';
 import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { BrowserChunkPersistence } from '../client/persistence/browser-chunk-persistence';
 import { observeAuthorityColumnSource } from './authority-column-source';
@@ -27,7 +27,7 @@ export async function observeAuthoritySkySource(
   key: string,
   revision: number,
   requestedEpoch: string | undefined,
-): Promise<AuthorityCollisionBaselineResult> {
+): Promise<SkySourceResult> {
   const coordinates = key.split(',').map(Number);
   if (
     coordinates.length !== 3 ||
@@ -41,24 +41,31 @@ export async function observeAuthoritySkySource(
   const submitted = owner(),
     worldId = submitted.persistence.worldId;
   const persistenceFence = submitted.persistence.sourceReadFence();
-  const sameOwner = () => {
+  const sameIdentity = () => {
     const current = owner();
     return (
       current.epoch === requestedEpoch &&
       current.epoch === submitted.epoch &&
       current.runtime === submitted.runtime &&
       current.persistence === submitted.persistence &&
-      current.persistence.worldId === worldId &&
-      persistenceFence !== null &&
-      current.persistence.sourceReadFence() === persistenceFence
+      current.persistence.worldId === worldId
     );
   };
-  const unavailable = (): AuthorityCollisionBaselineResult => ({ status: 'unavailable', key });
+  const sameOwner = () => sameIdentity() && owner().persistence.sourceReadFence() === persistenceFence;
+  const unavailable = (reason?: 'superseded'): SkySourceResult => ({
+    status: 'unavailable',
+    key,
+    ...(reason ? { reason } : {}),
+  });
   let worldRevision = -1;
-  let pending!: Promise<{ ok: true; value: AuthorityCollisionBaselineResult } | { ok: false; cause: unknown }>;
+  let pending!: Promise<{ ok: true; value: SkySourceResult } | { ok: false; cause: unknown }>;
   await harness.hostOperation(() => {
-    if (!sameOwner()) throw new Error('WORLD_EPOCH_STALE: Sky source request belongs to a stale runtime.');
+    if (!sameIdentity()) throw new Error('WORLD_EPOCH_STALE: Sky source request belongs to a stale runtime.');
     worldRevision = submitted.runtime.server.worldRevision;
+    if (persistenceFence === null || !sameOwner()) {
+      pending = Promise.resolve({ ok: true, value: unavailable(persistenceFence === null ? undefined : 'superseded') });
+      return;
+    }
     const resident = submitted.runtime.readCollisionBaseline(key, 0);
     if (resident.status === 'available') {
       pending = Promise.resolve({ ok: true, value: resident.chunkRevision === revision ? resident : unavailable() });
@@ -66,7 +73,7 @@ export async function observeAuthoritySkySource(
     }
     pending = submitted.persistence
       .readStoredSkySnapshot(cx, cy, cz, revision)
-      .then((snapshot): AuthorityCollisionBaselineResult => {
+      .then((snapshot): SkySourceResult => {
         if (
           !snapshot ||
           snapshot.key !== key ||
@@ -99,7 +106,7 @@ export async function observeAuthoritySkySource(
   });
   const result = await pending;
   return harness.hostOperation(() => {
-    if (!sameOwner() || submitted.runtime.server.worldRevision !== worldRevision) return unavailable();
+    if (!sameOwner() || submitted.runtime.server.worldRevision !== worldRevision) return unavailable('superseded');
     if (!result.ok) throw result.cause;
     return result.value;
   });

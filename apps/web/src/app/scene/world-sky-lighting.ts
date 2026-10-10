@@ -1,6 +1,7 @@
 import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 import type { PendingMeshTask } from '../app-contracts';
 import type { WorldAuthorityPort } from '../world/world-authority-port';
+import { SkySourceSupersededError } from '../../client/authority/browser-authority-sky-chunk';
 import { readSkyColumnProofByTask } from './sky-column-source';
 import { prepareSkyColumnReader } from './sky-column-reader';
 import {
@@ -190,7 +191,11 @@ export class WorldSkyLighting {
         return;
       }
       entry.stamp = stamp;
-      if (source.status !== 'complete' || source.worldRevision !== this.authority.worldRevision) return;
+      if (source.status !== 'complete') {
+        if (source.reason === 'superseded') entry.dirty = true;
+        return;
+      }
+      if (source.worldRevision !== this.authority.worldRevision) return;
       const isCurrent = () => !this.disposed && this.entries.get(entry.key) === entry && stamp === this.stamp(entry);
       const reader = await prepareSkyColumnReader(
         source,
@@ -230,10 +235,10 @@ export class WorldSkyLighting {
         entry.stamp = '';
         entry.dirty = true;
       }
-    } catch {
+    } catch (cause) {
       if (!this.disposed && this.entries.get(entry.key) === entry) {
         entry.stamp = stamp === this.stamp(entry) ? stamp : '';
-        if (!entry.stamp) entry.dirty = true;
+        if (!entry.stamp || cause instanceof SkySourceSupersededError) entry.dirty = true;
         entry.sink.failDark();
       }
     } finally {

@@ -1080,3 +1080,13 @@ Root独占新visual-stored-sky helper/原visual窄调用及spec/evidence；复�
 14:52UTC121结果：999dadf7/source d2cfc704/artifact42a2687f identified build PASS，原visual整体FAIL2.9m，前段66不同GPU/全部原画廊输入步骤完成；新冷恢复原start-card10000ms失败，cold源/ready断言NOT_RUN。实际startup save-flush→first-visible11339.7ms，失败后cardDisplay none，原超时仍FAIL，未确认单一原因、不提高任何等待。原HTML/trace/JSON/receipt保留，Root查看night-source-removed热场景PNG；不冒充冷像素或全矩阵。随后同产物原native56.4s/runner59.4sPASS，NON_MAIN，真实输入/存档/PointerLock原断言保留。生产stdlib与root test types额外PASS，11949/12050及此前Web/Svelte/Classic/lint有效输出复用。cold-stored-sky-121-01新证据与哈希绑定，原ledger117未关闭。
 
 122仅唯一现有Luna6分钟内完成CI414 retry creative click只读诊断：普通type=button→Authority mode command/UI refresh/save，无确认导航调用或receipt；实际scheduled navigation owner仍未知。新v2-click-navigation-122-01保留边界，没有noWaitAfter/增时限或猜改，也不拿累计input归因C4。14:25实际UI周75%，约60%全PR停止线保持。当前两组源码有有效行为验证，但PR整体仍不可合入；计划正常feature push绑定下一次完整远端CI，前驱414已自然终态，生产workflow只main且既有PR preview授权不扩展。
+
+### 已确认失效的Sky源恢复125（15:09UTC预注册）
+
+冻结308d2cc5，CI415五项非Browser SUCCESS、Chromium原主旅程仍运行，不push取消。124冷启动只读检查未确认初始化顺序错误，11339.7ms不是原因或性能结论；本片不将独立Sky保存竞态归因启动超时/C4。待复现假设：列目录unknown/superseded，或非驻留payload在save fence改变后被拒绝，但runtime/worldRevision/client revision均未变，WorldSky将dirty清除后不会再次排队，当前合法列可能一直暗。
+
+先以实际WorldSky与原requestBrowserSkyChunk解码器取得旧行为RED：一次明确superseded后同owner完整目录/独占roof复制恢复，32ms原调度应发布合法遮挡；持续缺失、损坏、budget-exhausted保持暗且静止。若RED成立，Sky专用响应仅新增superseded原因（碰撞baseline合同不扩张），Client在当前epoch且准确key时传递有类型的暂时失效，WorldSky在原16ms/至多一个pending内重新排队。旧epoch/key、释放和dispose不得复活旧consumer；未知普通错误不轮询、不把unknown变亮、不增存储/目录/高度/复制/缓存预算。Worker最终frontier必须区分保存或owner新鲜度失效与真正缺失记录，复用119真实Host队列外IO和buffer所有权反例。
+
+Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据，不新增委派、浏览器full重跑或权限。范围测试、生产Web/Classic类型、lint/格式及正常hooks，原冷Browser仍FAIL/cold proof NOT_RUN，之后有实际新证据才重评。传统.15PD×120%=.18PD；AI16min×120%=19.2min，15:29UTC检查点。真实14:25产品UI剩75%，最新读数待主对话，约60%全PR停止线；credits/费率/API分母未知不换算。源码层GREEN不关闭原ledger117、不宣布可合入。
+
+15:15UTC125范围检查点：旧实际WorldSky及真实Sky解码RED2FAIL/20PASS；修复相关5files62PASS，最终坐标端口夹具类型修正后WorldSky27PASS、生产Web/Svelte0error0warning及tsc/tools、Classic types、范围lint/格式/diff PASS。第一次Classic类型FAIL保留，新增数据与缺失/损坏不轮询、save前后Host frontier、原epoch/key/释放/单pending保护均覆盖。sky-superseded-125-01独立证据绑定基线308d与原日志摘要；长期codemap更新局部失败传递合同。最新远端仍308d/main fba、Draft mergeable true，CI415自然运行，本片尚未push、build或真实冷Browser，不扩大任何门槛或宣布全PR可合入。实际额度仍14:25周75%，刷新待主对话，原约60%停止线保持。

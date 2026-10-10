@@ -5,6 +5,21 @@ import { BrowserAuthorityClient } from '../../../src/client/authority/browser-au
 import { FakeAuthorityWorker } from './fixtures/browser-authority';
 
 describe('Browser Authority column inspection', () => {
+  it.each(['epoch', 'key', 'reason'] as const)(
+    'does not retry an unowned or permanent Sky failure: %s',
+    async (failure) => {
+      let epoch = 'world:1';
+      const request = async () => {
+        if (failure === 'epoch') epoch = 'world:2';
+        return {
+          status: 'unavailable',
+          key: failure === 'key' ? '0,4,0' : '0,3,0',
+          reason: failure === 'reason' ? 'invalid-data' : 'superseded',
+        };
+      };
+      await expect(requestBrowserSkyChunk(request, () => epoch, 0, 3, 0, 7)).resolves.toBeNull();
+    },
+  );
   it.each(['key', 'revision', 'shape'] as const)('rejects a Sky baseline with wrong %s', async (failure) => {
     const payload = {
       status: 'available',

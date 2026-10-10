@@ -2,6 +2,17 @@ import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 import type { AuthorityCollisionBaselinePayload } from './authority-collision-baseline-client';
 
 export type SkySourceChunk = Readonly<{ canonical: Uint16Array; revision: number }>;
+export type SkySourceResult =
+  | Extract<AuthorityCollisionBaselinePayload, { status: 'available' }>
+  | Readonly<{ status: 'unavailable'; key: string; reason?: 'superseded' }>;
+
+/** A confirmed source fence change permits another proof; missing data does not. */
+export class SkySourceSupersededError extends Error {
+  constructor() {
+    super('Sky source was superseded before its copy could be consumed.');
+    this.name = 'SkySourceSupersededError';
+  }
+}
 
 /** Exclusive transferred copy for one proof, without adding a collision/mesh cache entry. */
 export async function requestBrowserSkyChunk(
@@ -20,12 +31,11 @@ export async function requestBrowserSkyChunk(
     kind: 'request-sky-source',
     key,
     minimumRevision: revision,
-  })) as AuthorityCollisionBaselinePayload;
+  })) as SkySourceResult;
+  if (epoch() !== submittedEpoch || !payload || payload.key !== key) return null;
+  if (payload.status === 'unavailable' && payload.reason === 'superseded') throw new SkySourceSupersededError();
   if (
-    epoch() !== submittedEpoch ||
-    !payload ||
     payload.status !== 'available' ||
-    payload.key !== key ||
     payload.chunkRevision !== revision ||
     !(payload.canonical instanceof ArrayBuffer) ||
     payload.canonical.byteLength !== CHUNK_SIZE ** 3 * 2 ||
