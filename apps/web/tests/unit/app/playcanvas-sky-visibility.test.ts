@@ -16,12 +16,15 @@ describe('actual PlayCanvas R8 CPU resource (Null device, not GPU pixel evidence
     const material = new pc.StandardMaterial();
     const instance = new pc.MeshInstance(mesh, material, new pc.Entity());
     const water = new pc.MeshInstance(mesh, material, new pc.Entity());
+    const borrowed = new pc.MeshInstance(mesh, material, new pc.Entity());
     const resource = {
       skyTexture: texture,
       skyOrigin: new Float32Array(3),
       instances: [instance],
       waterTransition: { instance: water },
+      lightingListeners: new Set<() => void>(),
     } as unknown as PlayCanvasChunkResource;
+    resource.lightingListeners!.add(() => bindChunkSky(borrowed, resource));
     bindChunkSky(instance, resource);
     expect(texture.format).toBe(pc.PIXELFORMAT_R8);
     expect(texture.volume).toBe(true);
@@ -37,12 +40,14 @@ describe('actual PlayCanvas R8 CPU resource (Null device, not GPU pixel evidence
     expect(water.getParameter('texture_skyVisibility')).toMatchObject({ data: texture });
     expect(instance.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 1 });
     expect(water.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 1 });
+    expect(borrowed.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 1 });
     expect(texture.height).toBe(33);
     expect((texture.lock() as Uint8Array).every((value) => value === 255)).toBe(true);
     texture.unlock();
     invalidateChunkSky(resource);
     expect(instance.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 0 });
     expect(water.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 0 });
+    expect(borrowed.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 0 });
     expect((texture.lock() as Uint8Array).every((value) => value === 0)).toBe(true);
     texture.unlock();
     const destroyed = vi.spyOn(texture, 'destroy');
@@ -50,6 +55,7 @@ describe('actual PlayCanvas R8 CPU resource (Null device, not GPU pixel evidence
     expect(destroyed).toHaveBeenCalledTimes(1);
     instance.destroy();
     water.destroy();
+    borrowed.destroy();
     material.destroy();
     device.destroy();
   });

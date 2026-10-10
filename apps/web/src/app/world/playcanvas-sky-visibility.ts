@@ -35,6 +35,7 @@ export const invalidateChunkSky = (resource: PlayCanvasChunkResource): void => {
   resource.skyReady = false;
   for (const instance of resource.instances) bindChunkSky(instance, resource);
   if (resource.waterTransition) bindChunkSky(resource.waterTransition.instance, resource);
+  for (const notify of resource.lightingListeners ?? []) notify();
 };
 
 export const applyChunkSky = (resource: PlayCanvasChunkResource, volume: SkyVisibilityVolume): void => {
@@ -55,4 +56,5 @@ export const applyChunkSky = (resource: PlayCanvasChunkResource, volume: SkyVisi
   resource.skyReady = true;
   for (const instance of resource.instances) bindChunkSky(instance, resource);
   if (resource.waterTransition) bindChunkSky(resource.waterTransition.instance, resource);
+  for (const notify of resource.lightingListeners ?? []) notify();
 };

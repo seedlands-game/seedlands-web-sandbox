@@ -53,7 +53,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
     contentType: 'application/json',
     body: JSON.stringify({ diagnosticOnly: true, pixels: receivedPixels }),
   });
-  expect(receivedPixels).toHaveLength(22);
+  expect(receivedPixels).toHaveLength(33);
   for (const pixel of receivedPixels ?? []) {
     const expected =
       pixel.name === 'combined'

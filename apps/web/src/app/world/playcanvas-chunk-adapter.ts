@@ -43,6 +43,7 @@ export type PlayCanvasChunkResource = RenderedMaterialMeshResource & {
   blockLightSize?: number;
   blockLightReady?: boolean;
   blockLightRelease?: (() => void) | null;
+  lightingListeners?: Set<() => void>;
 };
 
 export type ChunkBlockLightResourceHooks = Readonly<{
@@ -87,6 +88,7 @@ export const applyChunkBlockLightVolume = (resource: PlayCanvasChunkResource, vo
     instance.setParameter('uBlockLightReady', 1);
   }
   if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
+  for (const notify of resource.lightingListeners ?? []) notify();
 };
 
 export const invalidateChunkBlockLightVolume = (resource: PlayCanvasChunkResource) => {
@@ -97,6 +99,7 @@ export const invalidateChunkBlockLightVolume = (resource: PlayCanvasChunkResourc
   resource.blockLightReady = false;
   for (const instance of resource.instances ?? []) bindBlockLight(instance, resource);
   if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
+  for (const notify of resource.lightingListeners ?? []) notify();
 };
 
 const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) => {
@@ -158,6 +161,7 @@ export const createPlayCanvasChunkAdapter = (
       renderedMaterialMeshes: new Map(),
       blockLightOrigin: new Float32Array(origin),
       blockLightSize: BLOCK_LIGHT_VOLUME_SIZE,
+      lightingListeners: new Set(),
     };
     return resource;
   },

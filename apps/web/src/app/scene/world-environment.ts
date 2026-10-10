@@ -102,6 +102,7 @@ export class WorldEnvironment {
   private apply() {
     const frame = sampleLightingFrame(this.materials?.lightingProfile, this.presentedWorldTime);
     const state = frame.environment;
+    this.materials?.updateAuxiliaryLightingFrame?.(frame.skyRadiance, frame.blockLightTint);
     for (const material of this.materials?.categoryMaterials.values() ?? []) {
       material.setParameter('uSkyRadiance', new Float32Array(frame.skyRadiance));
       material.setParameter('uBlockLightTint', new Float32Array(frame.blockLightTint));

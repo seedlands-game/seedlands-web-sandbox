@@ -69,6 +69,8 @@ function fixture() {
   const onError = vi.fn();
   const presentation: PlayCanvasCropPresentation = {
     definitions,
+    lightingMaterials: [],
+    setLightingFrame: vi.fn(),
     create,
     destroy,
     bindChunkLight,

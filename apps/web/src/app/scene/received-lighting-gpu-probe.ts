@@ -11,7 +11,7 @@ import { createChunkSkyTexture, applyChunkSky, invalidateChunkSky } from '../wor
 import { SKY_VISIBILITY_VOLUME_BYTES } from './sky-visibility-volume';
 
 export type ReceivedLightingGpuPixel = Readonly<{
-  category: 'opaque' | 'transparent';
+  category: 'opaque' | 'transparent' | 'crop';
   name: string;
   rgba: readonly number[];
 }>;
@@ -71,11 +71,14 @@ export function receivedLightingGpuProbe(
     levels: [Array.from({ length: MATERIAL_LAYER_COUNT }, () => white)] as unknown as HTMLCanvasElement[],
   });
   const pixels: ReceivedLightingGpuPixel[] = [];
+  const cropAlbedo = new pc.Texture(device, { width: 1, height: 1, mipmaps: false });
+  cropAlbedo.setSource(white);
   app.scene.layers.pushOpaque(layer);
   app.root.addChild(camera);
   try {
-    for (const category of ['opaque', 'transparent'] as const) {
-      const source = materials.categoryMaterials.get(category);
+    for (const category of ['opaque', 'transparent', 'crop'] as const) {
+      const source =
+        category === 'crop' ? materials.cropLightingMaterials?.[0] : materials.categoryMaterials.get(category);
       if (!source) throw new Error(`Missing production ${category} material.`);
       const material = source.clone();
       for (const [name, parameter] of Object.entries(source.parameters)) {
@@ -99,6 +102,10 @@ export function receivedLightingGpuProbe(
       material.blendType = pc.BLEND_NONE;
       material.cull = pc.CULLFACE_NONE;
       material.useFog = false;
+      if (category === 'crop') {
+        material.diffuseMap = cropAlbedo;
+        material.opacityMap = cropAlbedo;
+      }
       material.setParameter('texture_voxelArray', albedo);
       material.setParameter('uSkyRadiance', new Float32Array([0.25, 0.25, 0.25]));
       material.setParameter('uBlockLightTint', new Float32Array([0.25, 0.25, 0.25]));
@@ -198,6 +205,7 @@ export function receivedLightingGpuProbe(
     target.destroy();
     color.destroy();
     albedo.destroy();
+    cropAlbedo.destroy();
     app.scene.exposure = previousExposure;
   }
 }
