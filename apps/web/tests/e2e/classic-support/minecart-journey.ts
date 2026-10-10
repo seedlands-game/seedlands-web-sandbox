@@ -12,15 +12,32 @@ export function registerClassicMinecartJourney(test: typeof import('@playwright/
   test('Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档', async ({ page }, testInfo) => {
     test.skip(modularPackSmokeEnabled, 'Ordinary minecart belongs to the Classic production Pack.');
     test.setTimeout(120_000);
+    if (process.env.SEEDLANDS_CLASSIC_NATIVE_LOW_CORE_DIAGNOSTIC === '1') {
+      if (process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1')
+        throw new Error('Advertised-core fault injection is correctness diagnostic only.');
+      await page.addInitScript(() => {
+        const original = navigator.hardwareConcurrency;
+        Object.defineProperty(navigator, 'hardwareConcurrency', { configurable: true, get: () => 4 });
+        (window as unknown as { __seedlandsCoreDiagnostic: unknown }).__seedlandsCoreDiagnostic = {
+          diagnosticOnly: true,
+          eligible: false,
+          originalAdvertisedCores: original,
+          injectedAdvertisedCores: 4,
+        };
+      });
+    }
     try {
       await verifyClassicMinecartJourney(page, testInfo);
     } catch (error) {
+      const diagnostics = await collectClassicFailureDiagnostics(page);
+      const minecart = await readMinecartInputDiagnostics(page);
+      console.info(
+        'Classic native minecart startup diagnostic:',
+        JSON.stringify({ diagnosticOnly: true, eligible: false, startup: diagnostics?.startup ?? null, minecart }),
+      );
       await testInfo.attach('classic-minecart-native-failure.json', {
         contentType: 'application/json',
-        body: JSON.stringify({
-          ...(await collectClassicFailureDiagnostics(page)),
-          minecart: await readMinecartInputDiagnostics(page),
-        }),
+        body: JSON.stringify({ ...diagnostics, minecart }),
       });
       throw error;
     }
@@ -30,9 +47,12 @@ export function registerClassicMinecartJourney(test: typeof import('@playwright/
 async function readMinecartInputDiagnostics(page: Page) {
   return page.evaluate(() => {
     const h = (window as unknown as ClassicWindow).__seedlandsHarness;
-    if (!h) return { available: false, hud: document.body.innerText.slice(0, 2000) };
+    const coreDiagnostic =
+      (window as unknown as { __seedlandsCoreDiagnostic?: unknown }).__seedlandsCoreDiagnostic ?? null;
+    if (!h) return { available: false, coreDiagnostic, hud: document.body.innerText.slice(0, 2000) };
     const s = h.snapshot();
     return {
+      coreDiagnostic,
       aimed: h.aimedVoxelTarget(),
       rail: h.getVoxelAt?.(2, 31, 0),
       fluid: h.getFluidCell?.(2, 31, 0),
@@ -256,6 +276,9 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       currentReferenceInspection,
       currentWorldIdentity,
       restoredPresentation,
+      advertisedCoreDiagnostic: await page.evaluate(
+        () => (window as unknown as { __seedlandsCoreDiagnostic?: unknown }).__seedlandsCoreDiagnostic ?? null,
+      ),
     }),
   });
   await testInfo.attach('classic-minecart-restored.png', { contentType: 'image/png', body: await page.screenshot() });
