@@ -175,13 +175,13 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     .toEqual({ ...dismounted.reference, epoch: dismounted.reference.epoch + 1 });
   const restoredSnapshot = (await transportSnapshot(page))!;
   const restored = restoredSnapshot.transports[0]!;
-  expect(restoredSnapshot.runtimeEpoch).not.toBe(dismountedSnapshot.runtimeEpoch);
-  const [staleReferenceInspection, currentReferenceInspection] = await page.evaluate(
+  const [staleReferenceInspection, currentReferenceInspection, currentWorldIdentity] = await page.evaluate(
     async ({ stale, current }) => {
       const world = (window as unknown as ClassicWindow).__seedlandsHarness!.world;
       return Promise.all([
         world.inspect({ kind: 'entity-reference', reference: stale }),
         world.inspect({ kind: 'entity-reference', reference: current }),
+        world.identity(),
       ]);
     },
     { stale: dismounted.reference, current: restored.reference },
@@ -193,6 +193,11 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   expect(currentReferenceInspection).toMatchObject({
     ok: true,
     data: { kind: 'entity-reference', reference: restored.reference, status: 'current' },
+  });
+  expect(currentWorldIdentity).toMatchObject({
+    ok: true,
+    data: { epoch: restoredSnapshot.runtimeEpoch },
+    frontier: { epoch: restoredSnapshot.runtimeEpoch },
   });
   expect(restored.pose.position).toEqual(dismounted.pose.position);
   expect(restored.rider).toBeNull();
@@ -211,6 +216,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       restored,
       staleReferenceInspection,
       currentReferenceInspection,
+      currentWorldIdentity,
     }),
   });
   await testInfo.attach('classic-minecart-restored.png', { contentType: 'image/png', body: await page.screenshot() });
