@@ -72,6 +72,32 @@ const segment = (definition: RouteDefinitionV1, entry: RouteEndpointV1, connecte
 };
 
 describe('RouteDefinitionV1', () => {
+  it('applies a cell placement choice to every entry, including an otherwise unique edge', () => {
+    const definition = defineRouteDefinitionV1({
+      version: 1,
+      family: 'sample:placement-choice',
+      variants: [
+        variant('north-south', endpoint('south'), endpoint('north'), 'line'),
+        variant('north-east', endpoint('north'), endpoint('east'), 'quarter'),
+      ],
+      placementTieBreaks: [
+        { connected: [endpoint('north'), endpoint('east'), endpoint('south')], variant: 'sample:north-east' },
+      ],
+    });
+    const connected = [endpoint('north'), endpoint('east'), endpoint('south')];
+    expect(segment(definition, endpoint('north'), connected).variant).toBe('sample:north-east');
+    expect(segment(definition, endpoint('east'), connected).variant).toBe('sample:north-east');
+    expect(
+      resolveRouteSegmentV1(definition, { entry: endpoint('south'), neighbors: neighbors(definition, connected) }),
+    ).toEqual({ status: 'disconnected' });
+    expect(
+      resolveRouteSegmentV1(definition, {
+        entry: endpoint('north'),
+        neighbors: neighbors(definition, connected, [endpoint('east')]),
+      }).status,
+    ).toBe('unknown');
+  });
+
   it('freezes generic family, variants, directed edges and placement tie-breaks without Classic identities', () => {
     const definition = route();
     expect(definition.family).toBe('sample:guideway');

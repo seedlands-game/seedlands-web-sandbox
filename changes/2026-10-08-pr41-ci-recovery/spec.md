@@ -1128,3 +1128,23 @@ Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据�
 待检问题是当前统一Sky/模型和新释放边界的生产栈中，V2等待期间同一Authority Worker的采样工作分布；历史旧源主线程idle/program和原生SwapBuffers等待无法回答当前Worker的函数归属。当前原CI416路线全部返回但整场900sec仍失败，计时不提供因果。新诊断仅回答本次精确Worker/source/阶段的热点，不宣称GPU因果、收益、A/A或A/B、可合入；即使main PASS也仍标带sampler的diagnosticOnly/eligible=false，标准最终验收另需无sampler。采样未开始就失败或没有V2采样则如实未覆盖，不补跑盼绿。
 
 Root独占spec/新私有run/回执，源码与生产产物在构建到runner结束冻结；不委派、不增加CPU/网络/线程权限。本轮AI20min×120%=24min，17:13UTC检查点，传统.1PD×120%=.12PD；不将该估计换算实际额度。最新产品UI16:03周74%、约60停止线；正常feature push包含129/130/132/本注册，先复核远端与现有workflow生产仅main/原PR preview，无合并、automerge或生产部署。长期docs baseline未修改，现有证据边界不变。
+
+### 曲线与坡道配置及已部署矿车兼容135（16:58UTC预注册）
+
+当前356ec528/CI417五非Browser SUCCESS、Chromium自然运行，不取消/抢推。133本地identified build PASS（sourceDigest ec436a3058f6d7f1ae87bd4aacb17b6bda78fdecfcac46fa80f067a2264e662a/artifact6df19efb/289files，builtAt16:48:38.530Z）；原main1.2m在prepareInitialState Authority request165原30000ms失败，采样metadata NOT_STARTED/createdAt16:49:16.824Z，未触达V2、不补跑。原trace7140959bytes/SHA c54e8c5b02ce427388962e1036019d4334bde56ec32f05c304cdf5fbbd6ac7e4和raw完整保留。133标题16:49UTC是手工标签；真实预注册commit356ec528为16:47:14UTC、真实执行/构建时间以上述记录为准，修正标签精度、不改旧记录。tick已由tickQueued有界，本地早期失败不证明无界tick队列；正式生产原因未知。
+
+Luna134只读核实stdlib支持quarter/双向坡但Classic只两直轨；新增routes会改变transport definitionIdentity，当前pre-transport V4不含非空运输状态，不能代替当前straight-only旧存档保护。已从原成功Browser128 native JSON正式composition export取得精确5690生产身份（entryDigest1e053907236afca3792b7b6d0c0ed7548becac6c28a99ac8ce24193d80e2a347），与当前356ec528 verified artifact entry和全部dist bytes一致；不再跑另一次native来重复采集。以此实际身份新增独立capture与窄predecessor，只允许gameplay V4精确旧identity，不改写已有历史。
+
+可验证行为：Classic保留两直线variant，并声明四个quarter角和四个ascending方向的双向edge；不增加三/四向自动tie-break，歧义/unknown继续fail-closed。先通过正式resolveRouteSegmentV1取得配置缺失RED，再GREEN；正式Authority已有真实部署/骑乘/推进测试回归不变，新非空旧straight carrier/state/remainder/库存/lifetime恢复需以实际旧production composition作源，未知digest/definition tampering仍拒绝。Root负责真实capture、predecessor/迁移及保存反例、原CI/types登记和集成；唯一现有Luna/medium只写transport.ts及新的apps/web/tests/integration/runtime/server/composition/classic-rail-route-definition.test.ts，路径互斥、不得再委派。
+
+本片仅配置/旧当前V4兼容；轨道实际neighbor-aware mesh、真实放置/曲线与坡道玩家旅程、其余两轨两车/boat/fuel/container/更早非空legacy仍开放，不以配置GREEN宣布运输完成。原唯一Browser/20/45/90/900sec、selection既有项、质量/输入/全部旧断言保持；只登记新增测试，不弱化门槛。必要范围测试/Classic与Pack生产类型/lint/format/hooks；生产变更后新的identified build和原native验收另按证据选择，最终精确CI417不可替代135。传统.35PD×120%=.42PD，AI25min×120%=30min，17:28UTC检查点；最新16:55产品UI周74%/4d10h，约60停止线保持，不算token占比，不新增权限，不修改长期架构baseline。
+
+17:05UTC135集成新证据与有界范围修订：Luna旧route配置消费者RED13FAIL/13PASS→26PASS；Root旧当前identity/nonempty保存RED2FAIL/1PASS→3PASS。原Authority矿车5例中1例部署真实回归（新增坡后同Rail voxel被同时投影低/高端，不能为通过改旧fixture/断言）。泛型resolveRouteSegmentV1仅在多candidate时应用placementTieBreak；同一邻居集合不同entry会因此输出不同variant，正式deployment拒绝。这是待用正式Owner反例验证的合同缺口，不靠配置数量宣称可用。Root增加窄RED：已声明cell placement rule选quarter时，另一个唯一straight entry不得把该cell改形；旧原世界直轨部署断言保持。
+
+允许Root在原route-definition resolver及其既有单测修正显式已声明shape对所有entry一致生效，原unknown/disconnected/无rule歧义仍关闭；Classic只对准确两个物理方向的端点组合声明平/角/坡placement rule，不给三/四方向junction选默认路。新Classic正式邻居投影+Authority真实部署配置反例验证这一层，不修改邻居的loaded/unknown、碰撞或输入语义。该范围是在原曲线配置不能通过既有正式部署后产生的新证据修订；若不能保留旧生产断言则不交付此候选。135仍按17:28检查点、实际74%@16:55/60停止线；真正mesh、曲线/坡道行驶和原非空legacy等仍未准出，禁止将配置/模型冒充产品。
+
+17:08UTC135第二个真实存档回归：显式placement choice单entry漏洞在stdlib旧消费者RED1FAIL/14PASS成立，修正后3files57PASS；不改unknown，已声明cell shape对所有entry一致，原Classic部署恢复为成功。但新增合法10variant+准确两方向placement配置的transport definitionIdentity全文超过现有checkpoint string4096上限，原矿车save/restore失败，不能抬旧输入预算或删曲线。Root补范围：只对原全文超过4096的transport配置使用带显式format discriminator、全部字段无损的route endpoint/edge tuple身份编码；4096以内原字节保持，最终仍拒绝超过4096，早在装配失败而非产生不可恢复存档。实际配置须canonical比较/字段变化导致身份变化、旧小配置identity原字节与新大配置snapshot往返反例，原上限及断言保持。该编码只属控制平面的定义身份，不改runtime config/渲染/数据平面，不宣称性能收益。若完整语义无法保持则撤候选，不绕过快照门禁。
+
+17:22UTC135检查点（运行时间以原日志为准）：原Classic headless152files/1072PASS、stdlib172files/1274PASS，定向Web5files56PASS、stdlib6files94PASS，四组types/lint/17 CI selection/format/diff PASS。原选择150文件完整保留，仅加入两新测试；不存在的pre-transport-v4-checkpoint路径未运行、不计第六文件，旧identity恢复本来位于原minecart Authority文件。原部署歧义与4096 identity回归日志完整保留。窄current straight-only V4 predecessor保留实际mounted/moving carrier状态和schedule；不声称世界编辑/真实曲线mesh或旧legacy完成。新README/validation为route-shapes-save-135-01。
+
+135冻结后验证预注册：仅从新的pnpm build identified production产物运行原唯一classic-runtime.spec.ts中的普通矿车native用例（原120000ms、原真实右键/键盘/Shift右键/存档恢复断言），新runId pr41-route-shapes-native-135-01；保持所有sampler/benchmark/trace旁路关闭。旧356产物及133失败保留，不以旧Browser128冒充当前。无输入补偿/超时或断言变化，原失败不盲重跑；独立校验artifact/source/lock/Pack identity。共享generic resolver/identity/存档Root改动仅作一轮有界Luna只读风险review，既有Luna自己配置不由其自审。CI417自然终态前不push。该验证只验证原直轨native流程及当前save/restore，不替代shape产品journey；预算仍16:55实际74%/约60停止线，17:28报告冻结/构建/浏览器/审阅各状态。

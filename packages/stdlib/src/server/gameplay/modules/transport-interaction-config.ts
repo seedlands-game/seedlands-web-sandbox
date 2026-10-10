@@ -82,5 +82,39 @@ export function freezeTransportInteractionConfig(input: TransportInteractionConf
   });
 }
 
-export const transportDefinitionIdentity = (config: FrozenTransportInteractionConfig): string =>
-  JSON.stringify({ ...config, definitions: config.definitions.list() });
+export function transportDefinitionIdentity(config: FrozenTransportInteractionConfig): string {
+  // Matches the existing checkpoint identity string budget; do not widen admission.
+  const checkpointBudget = 4_096;
+  const value = { ...config, definitions: config.definitions.list() };
+  const original = JSON.stringify(value);
+  if (original.length <= checkpointBudget) return original;
+  const compact = JSON.stringify({
+    ...value,
+    format: 'seedlands:transport-definition-tuples:1',
+    routes: value.routes.map(({ definition, voxels }) => ({
+      voxels,
+      definition: {
+        version: definition.version,
+        family: definition.family,
+        variants: definition.variants.map(({ variant, edges }) => [
+          variant,
+          edges.map(({ entry, exit, curve, slopeDelta }) => [
+            entry.side,
+            entry.elevation,
+            exit.side,
+            exit.elevation,
+            curve,
+            slopeDelta,
+          ]),
+        ]),
+        placementTieBreaks: definition.placementTieBreaks.map(({ variant, connected }) => [
+          variant,
+          connected.map(({ side, elevation }) => [side, elevation]),
+        ]),
+      },
+    })),
+  });
+  if (compact.length > checkpointBudget)
+    throw new RangeError('Transport definition identity exceeds checkpoint budget.');
+  return compact;
+}

@@ -251,18 +251,19 @@ export function resolveRouteSegmentV1(
       ),
     });
   if (states.get(endpointKey(entry)) !== 'connected') return Object.freeze({ status: 'disconnected' });
-  const candidates = outgoing.filter(({ edge }) => states.get(endpointKey(edge.exit)) === 'connected');
+  const connected = input.neighbors
+    .filter((neighbor) => neighbor.state === 'connected')
+    .map(({ endpoint }) => endpoint);
+  const placement = definition.placementTieBreaks.find(
+    (rule) => endpointSetKey(rule.connected) === endpointSetKey(connected),
+  );
+  // A declared placement chooses one cell shape for every possible incoming edge.
+  const candidates = outgoing.filter(
+    ({ variant, edge }) =>
+      states.get(endpointKey(edge.exit)) === 'connected' && (!placement || variant === placement.variant),
+  );
   if (!candidates.length) return Object.freeze({ status: 'disconnected' });
-  let selected = candidates.length === 1 ? candidates[0] : undefined;
-  if (!selected) {
-    const connected = input.neighbors
-      .filter((neighbor) => neighbor.state === 'connected')
-      .map((neighbor) => neighbor.endpoint);
-    const tieBreak = definition.placementTieBreaks.find(
-      (rule) => endpointSetKey(rule.connected) === endpointSetKey(connected),
-    );
-    if (tieBreak) selected = candidates.find((candidate) => candidate.variant === tieBreak.variant);
-  }
+  const selected = candidates.length === 1 ? candidates[0] : undefined;
   if (!selected)
     return Object.freeze({
       status: 'ambiguous',
