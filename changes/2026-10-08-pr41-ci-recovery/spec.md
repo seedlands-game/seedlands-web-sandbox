@@ -784,3 +784,5 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 03:32UTC静态检查指出测试本地HarnessResult为unknown data/error分支无frontier。af301afa已本地提交但未构建/未推送，类型尚FAIL；立即按真实判别联合补成功分支与string守卫，不用any绕过。仅是类型/测试诊断修正，生产文件不改；下一提交及artifact在类型通过后执行。
 
 03:37UTC补判别联合/string守卫后的Classic类型检查80-03 exit0；80-02日志无错误但上次工具会话退出状态不可恢复，未将其单独声称PASS。只为取得丢失的退出证据执行同一静态检查，非浏览器重试。下一步提交并构建精确SHA，按03:38检查点继续有界6分钟×120%=7.2分钟至03:45；传统0.05PD×120%=0.06PD，周额度仍以03:09实际81%为最新、停止线约60%。
+
+03:40UTC checkpoint80：5eee6e15/14285c69原生普通矿车45.0s PASS，runner48.9s，canonical NON_MAIN；真实部署/骑乘/W行驶x2.5→9/停稳/下车/保存重开与旧stale新current、位置和rider断言均PASS。完整HTML内嵌raw JSON及两张PNG已核验，PASS不保留trace；恢复截图不能证明模型可见，未宣称视觉运动/照明/性能。全stdlib与Headless原超时保留，PR仍不可合入。远端main/feature未变，reviews/threads空、Draft/无冲突；当前授权范围内正常推feature并等待最终SHA CI，生产main工作流不触发。后续主旅程失败诊断有界AI15分钟×120%=18分钟，传统0.1PD×120%=0.12PD，约03:59 checkpoint；03:09实际81%为最新周额度。
