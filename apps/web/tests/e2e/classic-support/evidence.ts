@@ -273,7 +273,18 @@ export async function collectClassicFailureDiagnostics(page: Page) {
                 onGround: current.onGround,
                 colliding: current.colliding,
                 worldRevision: current.worldRevision,
-                authority: current.authority,
+                authority: {
+                  physicsTick: current.authority.physicsTick,
+                  acknowledgedInputSequence: current.authority.acknowledgedInputSequence,
+                  commitSequence: current.authority.commitSequence,
+                  residency: current.authority.residency
+                    ? {
+                        evictionCount: current.authority.residency.evictionCount,
+                        residentCount: current.authority.residency.residentCount,
+                        dirtyCount: current.authority.residency.dirtyCount,
+                      }
+                    : null,
+                },
               }
             : null,
           chunks: [...chunks].map(([key, chunk]) => ({

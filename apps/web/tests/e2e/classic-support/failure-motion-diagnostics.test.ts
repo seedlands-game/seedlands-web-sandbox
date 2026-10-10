@@ -53,6 +53,28 @@ describe('失败控制台同次运动观察', () => {
     });
   });
 
+  it('运行时Authority额外字段不进入窄控制台合同，完整原snapshot保持', async () => {
+    const authority = {
+      physicsTick: 731,
+      acknowledgedInputSequence: 92,
+      commitSequence: 144,
+      residency: { evictionCount: 1, residentCount: 27, dirtyCount: 2, internalSamples: [9, 8] },
+      physicsCost: { samples: [11, 22, 33] },
+    };
+    const snapshot = vi.fn(() => ({ player: [0, 32, 0], authority }));
+    installWindow(snapshot);
+    const result = await collectClassicFailureDiagnostics(page);
+    expect((result?.presentation as { motion?: { authority?: unknown } }).motion?.authority).toEqual({
+      physicsTick: 731,
+      acknowledgedInputSequence: 92,
+      commitSequence: 144,
+      residency: { evictionCount: 1, residentCount: 27, dirtyCount: 2 },
+    });
+    expect(snapshot).toHaveBeenCalledTimes(1);
+    expect(authority.physicsCost.samples).toEqual([11, 22, 33]);
+    expect(authority.residency.internalSamples).toEqual([9, 8]);
+  });
+
   it('尚未启动时保持null观察及原启动诊断', async () => {
     installWindow(undefined);
     const result = await collectClassicFailureDiagnostics(page);
