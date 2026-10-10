@@ -263,8 +263,10 @@ export class ChunkBlockLightCache {
       floorDiv(position[1], BLOCK_LIGHT_CHUNK_CORE_SIZE),
       floorDiv(position[2], BLOCK_LIGHT_CHUNK_CORE_SIZE),
     );
-    const snapshot = this.entries.get(key)?.snapshot;
-    return snapshot ? sampleBlockLight(snapshot.volume, position[0], position[1], position[2]) : 0;
+    const entry = this.entries.get(key);
+    if (!entry?.snapshot || chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz))
+      return 0;
+    return sampleBlockLight(entry.snapshot.volume, position[0], position[1], position[2]);
   }
 
   get snapshot(): ChunkBlockLightCacheSnapshot {

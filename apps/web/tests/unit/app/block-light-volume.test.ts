@@ -16,6 +16,33 @@ import {
 } from '../../../src/app/scene/block-light-volume';
 
 describe('浏览器方块光体积', () => {
+  it.each(['edited', 'before-notification', 'unloaded'] as const)(
+    '正式缓存在%s的Authority halo重建前不能给消费者旧光值',
+    (cause) => {
+      let revision = 'resident:1';
+      let torch = true;
+      let loaded = true;
+      const cache = new ChunkBlockLightCache({
+        getVoxelIfLoaded: (x, y, z) =>
+          !loaded ? undefined : torch && x === 1 && y === 0 && z === 0 ? Voxel.Torch : Voxel.Air,
+        blockLightRevision: () => revision,
+        voxelSemantics: classicContent.voxelSemantics,
+      });
+      cache.register('0,0,0', 0, 0, 0, { apply: () => {} });
+      expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+      expect(cache.sample([0, 0, 0])).toBe(13);
+      expect(cache.sample([0, 0, 0])).toBe(13);
+      torch = false;
+      if (cause === 'unloaded') loaded = false;
+      revision = cause === 'unloaded' ? 'unloaded:2' : 'resident:2';
+      if (cause === 'edited') cache.invalidateAround(0, 0, 0);
+      expect(cache.snapshot.ready).toBe(false);
+      expect(cache.sample([0, 0, 0])).toBe(0);
+      expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+      expect(cache.sample([0, 0, 0])).toBe(0);
+    },
+  );
+
   it('生产brick消费一次有界region，输出与逐cell正式reader完全一致且unknown仍阻光', () => {
     const canonical = new Uint16Array(32 ** 3);
     canonical[0] = Voxel.Lantern;
