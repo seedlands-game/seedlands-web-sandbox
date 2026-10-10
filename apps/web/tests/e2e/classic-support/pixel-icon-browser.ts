@@ -55,7 +55,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
     const skipped: Array<{ itemId: string; reason: string }> = [];
     const errors: string[] = [];
     const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
     if (!context) throw new Error('Pixel icon raster needs Canvas2D.');
     const hash = async (bytes: Uint8ClampedArray) =>
       Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array(bytes).buffer)), (value) =>
@@ -198,7 +198,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         errors.push(`${itemId}: ${String(error)}`);
       }
     }
-    return { rows, skipped, errors };
+    return { rows, skipped, errors, canvasAttributes: context.getContextAttributes() };
   }, controls);
   await info.attach('pixel-icon-browser-equivalence.json', {
     contentType: 'application/json',
