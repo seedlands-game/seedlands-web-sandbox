@@ -1,7 +1,7 @@
 import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 import type { PendingMeshTask } from '../app-contracts';
 import type { WorldAuthorityPort } from '../world/world-authority-port';
-import { readSkyColumnProof } from './sky-column-source';
+import { readSkyColumnProofByTask } from './sky-column-source';
 import {
   SkyVisibilityCache,
   buildSkyVisibilityVolume,
@@ -34,7 +34,10 @@ export class WorldSkyLighting {
   private revisionFloor = 0;
   private observedEpoch: string | undefined;
 
-  constructor(private readonly authority: SkyAuthority) {
+  constructor(
+    private readonly authority: SkyAuthority,
+    private readonly proofScheduling: Readonly<{ yieldTask?: () => Promise<void> }> = {},
+  ) {
     this.observedEpoch = authority.runtimeEpoch;
   }
 
@@ -178,8 +181,18 @@ export class WorldSkyLighting {
       }
       entry.stamp = stamp;
       if (source.status !== 'complete' || source.worldRevision !== this.authority.worldRevision) return;
-      const proof = readSkyColumnProof(source, entry.chunk, this.authority);
-      if (!proof || stamp !== this.stamp(entry)) return;
+      const proof = await readSkyColumnProofByTask(source, entry.chunk, this.authority, {
+        yieldTask: this.proofScheduling.yieldTask,
+        isCurrent: () => !this.disposed && this.entries.get(entry.key) === entry && stamp === this.stamp(entry),
+      });
+      if (this.disposed || this.entries.get(entry.key) !== entry) return;
+      if (stamp !== this.stamp(entry)) {
+        entry.stamp = '';
+        entry.dirty = true;
+        entry.sink.failDark();
+        return;
+      }
+      if (!proof) return;
       entry.release?.();
       entry.release = this.cache.register(
         entry.key,
