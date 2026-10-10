@@ -151,13 +151,6 @@ export class AdvancedVisualEffects {
       budget.postProcessing && camera.camera
         ? new StylizedPostProcessing(camera.camera, app.graphicsDevice, budget.colorGradeStrength)
         : null;
-    if (camera.camera)
-      camera.camera.toneMapping =
-        budget.colorGradeStrength >= 0.3
-          ? pc.TONEMAP_ACES
-          : budget.postProcessing
-            ? pc.TONEMAP_NEUTRAL
-            : pc.TONEMAP_LINEAR;
   }
 
   update(dt: number, _shadowCasters: readonly LocalShadowCaster[] = []) {
