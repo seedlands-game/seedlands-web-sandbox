@@ -32,12 +32,22 @@ export type ChunkPersistenceLoadDiagnostics = Readonly<{
 
 export type ChunkPersistencePreparedStatus = 'found' | 'missing' | 'unknown';
 
+/** Point-in-time durable directory observation; consumers must fence their world and subsequent writes. */
+export type ChunkColumnDirectory =
+  | Readonly<{
+      status: 'complete';
+      revision: number;
+      entries: readonly Readonly<ChunkCoord & { key: string; revision: number }>[];
+    }>
+  | Readonly<{ status: 'unknown'; reason: 'source-unavailable' | 'invalid-data' | 'budget-exhausted' | 'superseded' }>;
+
 export type ChunkPersistenceMeasurementStatus = 'measured' | 'not-collected' | 'unsupported';
 
 export type ChunkPersistenceMeasurementField =
   'queueWaitMs' | 'databaseMs' | 'transactionReadMs' | 'decodeMs' | 'totalWorkerMs' | 'roundTripMs';
 
 export interface ChunkPersistence {
+  inspectColumnDirectory?(cx: number, cz: number): Promise<ChunkColumnDirectory>;
   loadSnapshot(key: string): ChunkSnapshot | null;
   saveSnapshots(snapshots: readonly ChunkSnapshot[]): void | Promise<void>;
   ensureSnapshot?(cx: number, cy: number, cz: number): Promise<void>;

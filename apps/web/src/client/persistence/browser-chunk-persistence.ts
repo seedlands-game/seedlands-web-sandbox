@@ -1,5 +1,6 @@
 import type {
   ChunkPersistence,
+  ChunkColumnDirectory,
   ChunkPersistenceLoadDiagnostics,
   ChunkSnapshot,
 } from '@seedlands/stdlib/server/persistence/chunk-persistence';
@@ -42,16 +43,12 @@ import type {
 import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
 import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import { requestWorldDirectory, type StoredWorldSummary } from './browser-world-directory';
+import { inspectBrowserColumnDirectory } from './browser-column-directory';
+import { cloneBrowserChunkSnapshot } from './browser-persistence-load';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
 export type { BrowserWorldSave, SerializedChunkSnapshot } from './browser-world-save';
 export type { BrowserPersistenceMetrics, ChunkPersistenceCorpusSummary } from './browser-persistence-metrics';
-
-const cloneSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
-  ...snapshot,
-  voxels: snapshot.voxels.slice(),
-  ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
-});
 
 export class BrowserChunkPersistence implements ChunkPersistence {
   seedText: string;
@@ -68,6 +65,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     type: 'module',
   });
   private requestSequence = 0;
+  private directoryFence = Symbol();
   private disposed = false;
   private corpusSummaryValue: ChunkPersistenceCorpusSummary | null = null;
   private metricsValue: BrowserPersistenceMetrics = createBrowserPersistenceMetrics();
@@ -220,10 +218,25 @@ export class BrowserChunkPersistence implements ChunkPersistence {
 
   private request(message: Record<string, unknown>, transfers: Transferable[] = []): Promise<unknown> {
     if (this.disposed) return Promise.reject(new Error('Chunk persistence was disposed.'));
+    if (
+      message.kind === 'save' ||
+      message.kind === 'save-frozen' ||
+      message.kind === 'replace-frozen' ||
+      message.kind === 'seed-corpus'
+    )
+      this.directoryFence = Symbol();
     const requestId = ++this.requestSequence;
     return new Promise((resolve, reject) => {
       this.pending.set(requestId, { resolve, reject });
       this.worker.postMessage({ ...message, requestId }, transfers);
+    });
+  }
+
+  async inspectColumnDirectory(cx: number, cz: number): Promise<ChunkColumnDirectory> {
+    return inspectBrowserColumnDirectory(cx, cz, {
+      source: () => JSON.stringify([this.worldId, this.seedText, this.generatorVersion, this.worldgenProvider]),
+      fence: () => (this.disposed ? null : this.directoryFence),
+      request: () => this.request({ kind: 'column-directory', cx, cz }),
     });
   }
 
@@ -236,7 +249,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     if (hasResult) this.loadRegistry.consumeExact(key);
     else if (this.loadRegistry.consumeInvalidatedExact(key))
       throw new Error(`Persistence load result was superseded by a save for ${key}.`);
-    return snapshot ? cloneSnapshot(snapshot) : null;
+    return snapshot ? cloneBrowserChunkSnapshot(snapshot) : null;
   }
 
   preparedSnapshotStatus(key: string) {

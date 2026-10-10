@@ -118,6 +118,9 @@
     "apps/web/tests/unit/client/browser-logic-client.test.ts",
     "apps/web/tests/unit/client/collision-debug-projection.test.ts",
     "apps/web/tests/unit/app/collision-debug-renderer.test.ts",
-    "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts"
+    "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts",
+    "apps/web/tests/unit/worker/persistence-chunk-directory-revision.test.ts",
+    "apps/web/tests/unit/worker/persistence-column-directory.test.ts",
+    "apps/web/tests/unit/client/browser-column-directory.test.ts"
   ]
 }

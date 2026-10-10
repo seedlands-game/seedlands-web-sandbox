@@ -10,6 +10,7 @@ import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './
 import { loadPersistenceBatch } from './persistence-load-many';
 import { persistChunkSnapshots } from './persistence-save';
 import { seedPersistenceCorpus } from './persistence-seed-corpus';
+import { inspectPersistenceColumnDirectory } from './persistence-column-directory';
 import { browserCorePlatform } from '../platform/core-platform';
 import type {
   PersistenceInitTask as InitTask,
@@ -121,6 +122,7 @@ const initialize = async (task: InitTask) => {
       generatorVersion: config.generatorVersion,
       provider: provider.identity,
       player: null,
+      chunkDirectoryRevision: 0,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
   await done;
@@ -365,6 +367,10 @@ const handle = async (
   if (task.kind === 'delete-world') return deleteWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
+  if (task.kind === 'column-directory') {
+    if (!config) throw new Error('Persistence worker is not initialized.');
+    return inspectPersistenceColumnDirectory(await database(), config, task.cx, task.cz);
+  }
   if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);
   if (task.kind === 'save') return save(task, active!);
   if (task.kind === 'save-frozen' || task.kind === 'replace-frozen') return saveFrozen(task, active!);

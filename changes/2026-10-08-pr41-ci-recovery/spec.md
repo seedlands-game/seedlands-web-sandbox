@@ -956,3 +956,11 @@ Browser公开可选端口经原worker队列发送，结果校验坐标、身份�
 07:59UTC，CI409 headless在dde3上795PASS/1FAIL：equipment-mining-aim.test.ts要求直接await mineVoxel文本，资源消费者已包装而workbench仍原直接调用。原CI日志作为RED，不改生产操作、full aim注入、调用数量、不得额外pre-aim或timeout。复用98准确语法树await/返回原操作Promise检查至新测试helper，仅资源消费者认可原awaited诊断回调；workbench保持直接await精确完整瞄准调用。原负例/顺序检查继续适用，定向旧测试先重现RED再GREEN，types/lint及现有邻近矿物/route回归。Root独占两个测试及测试helper/spec/证据，AI5min×120%=6min，08:05检查点；传统0.05PD×120%=0.06PD。费用未知，实际周额度仍07:10的79%，不推算；CI409浏览器继续自然运行，不提前推送。
 
 08:01UTC checkpoint100：本地原挖掘RED26PASS/1FAIL；共享准确await/Promise源码契约后4files58PASS，范围ESLint及根test types PASS，生产行为完全未改。headless整批没有本地重复，远端CI409仍待Chromium自然终态；下一精确CI必须验证该修复。先提交有界测试改动，99列目录源码仍独立本地进行，不夹带未验收生产代码。
+
+### 新owner保护的CI收集闭包 checkpoint101（预注册）
+
+08:08UTC，新96/99 Web单元测试尚不在原显式Classic headless脚本/类型名单，根tsconfig.test只收Kernel/stdlib；不把该根检查当新Web夹具类型通过。私人跨目录tsconfig首次缺node/vite类型路径FAIL保留，不做重装。仅给既有test:classic:headless和tsconfig.classic-tests登记三项目录写/读及Browser新单元，另登记98诊断合同测试（E2E已由目录纳入类型）；先CI收集断言RED再GREEN。原Classic其他全部测试、唯一Browser/900秒/重试/artifact不改，增加保护不能缩减收集。CI选择静态检查、Classic精确类型及必要定向回归，原CI409继续自然终态不取消。Root独占package.json、tsconfig.classic-tests.json及ci-browser-time-budget.test.mjs/spec/证据；AI5min×120%=6min、08:14检查点，传统0.05PD×120%=0.06PD。真实07:10周79%，08:10更新；費用未知不换算。
+
+08:12UTC checkpoint99/101：真实保存记录与主键查询RED4FAIL/15PASS，GREEN2files29PASS；最终6files75PASS。首个手写fixture GREEN不覆盖真实producer，旧错误签名/provider及507/504行lint/编译失败全部保留。真实Classic收集暴露新Web夹具类型盲区，按ES2022与原FrozenSnapshot身份补齐后第三轮types PASS，75回归及范围lint PASS；收集RED1/2→GREEN3，原全部旅程/timeout/断言保留。99约19min、101约4min，最后CI选择/冻结校验及提交后记录；08:10实际产品UI查询已发送而未回复，不假设额度。新query只是point-in-time目录，Matched IDB get仍克隆stored record，Memory/Switchable、旧客户端/跨tab新鲜度、Authority dirty/resident与Sky/GPU未闭合；不宣称性能、实际Browser query或PR可合入。
+
+08:15UTC最终CI选择17PASS、格式/路径/冻结5份PASS，99/101共同提交以保持新端口和保护收集一致；101墙钟约7min略超过预估6min，失败和类型盲区产生了新证据，没有全量盲重测或扩用户预算。唯一既有Luna/medium Task144只读此次冻结query commit（从main fba取规则）做一次有界风险审阅，独占私有task144-column-*报告路径；禁止仓库写/测试/Browser/build/远端/网络/.env/再委派，只关注cursor完整性、point-in-time/异步fence、身份与误报完整。AI5min×120%=6min、08:21UTC回报，传统0.05PD×120%=0.06PD，模型服务元数据仍未核实；整个PR共享预算且08:10真实额度回复未到。不是完整PR批准，不追加重复多阶段review。
