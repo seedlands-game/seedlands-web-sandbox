@@ -91,7 +91,7 @@ export class RoutePulseDiagnostics {
   report(status: 'returned' | 'threw'): void {
     const elapsedMs = Date.now() - this.startedAt;
     console.info(
-      'Classic C4 route pulse diagnostic:',
+      this.label.startsWith('V2-') ? 'Classic V2 route pulse diagnostic:' : 'Classic C4 route pulse diagnostic:',
       JSON.stringify({
         diagnosticOnly: true,
         eligible: false,
@@ -110,7 +110,7 @@ export class RoutePulseDiagnostics {
   }
 }
 
-async function withRoutePulseDiagnostics<T>(
+export async function withRoutePulseDiagnostics<T>(
   label: string,
   target: RoutePoint,
   timeoutMs: number,

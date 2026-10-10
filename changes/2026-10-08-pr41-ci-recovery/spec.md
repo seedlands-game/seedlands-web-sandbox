@@ -930,3 +930,13 @@ Root独占persistence写入源码/protocol、相关新owner事务测试、packag
 ### CI408自然终态 checkpoint97
 
 07:22UTC已读精确407/run38031941067原job日志：五非Browser SUCCESS、Chromium FAILURE/preview SKIP；原900000ms主旅程first/retry均15.3m在V2资源链失败，C4 NOT_RUN/pulse诊断0。首次walk settle栈、retry drop/pickup栈均由整体时限中断，不能把8.4m/8.6m失败step结束记为V2成功或臆测局部永久不满足。视觉1.6m PASS、native42.5s PASS；细节与原始/派生身份见ci408-terminal-97-01.md。新V2诊断另预注册，不盲目重跑旧full、不放宽时限/断言/质量，当前仍不可合入。真实07:10剩79%/约60%停止线保持。
+
+### V2既有资源操作与route pulse诊断 checkpoint98（预注册）
+
+07:33UTC，冻结04d98c5c。CI408两次均在V2总时限结束、C4未触达，现有日志没有逐资源操作或每pulse耗时。唯一新轴是Node只读诊断：复用原walkTo已读snapshot/键盘release/settle predicate，加到原followEquipmentRoute驱动；原80/300选择、45000 route/20000 settle/900000总时限、鼠标、snapshot次数和所有断言保持。每route最多512 pulse，截断明确unknown；V2标签与C4分别输出，既有C4语义不变。每资源原有place/mine操作前后只记Date.now/status，缺成功不写通过，不额外query/帧/输入，不缩短资源矩阵、不关trace/降低quality。
+
+正式BENCHMARK=1时全诊断旁路，不加入计时样本。Node合同测试验证回调只执行一次、原返回/错误保留、benchmark无observer/log/Date.now采样；这些不是实际浏览器因果或性能证据。原CI408 FAIL与没有该字段是观察基线，不伪造新的runtime RED。范围types/lint/格式与既有route/scenario/原CI时限回归；合96只做一次最终identified build，原native包括真实目录字段正例，然后正常推feature触发原完整CI。新的原900旅程仅为取得此前没有的V2诊断，不重复无新增证据的旧full；C4仍需要真正触达后才有事实。
+
+Root独占route-pulse-diagnostics.ts、equipment-journey-support.ts、新operation诊断及其Node合同测试/spec/新证据；Luna143只读冻结96并写私有报告，不改这些路径。AI15min×120%=18min、07:51UTC checkpoint；传统0.15PD×120%=0.18PD。真实07:10剩79%/4天19小时，约60%线；费用/credits/API未知不换算。96浏览器及全主旅程暂NOT_RUN，不提前宣称统一lighting/194/运输或可合入。
+
+07:44UTC范围细化：原scenario源码契约在包装后仍搜索直接await调用，55PASS/1FAIL保留。改用TypeScript语法树验证外层await、准确phase/target、返回原调用的无参数箭头回调，原操作顺序/新鲜tick/ground门禁不改；新增漏await、错操作/标签、丢弃Promise、注释伪调用反例。首次复核误用不存在的equipment-route-progress路径，只执行4files33PASS；apps/web/tsconfig.test.json不存在导致类型命令FAIL，随后使用实际route-progress/equipment-resource-route及根tsconfig.test.json核验，不把不存在项写PASS。
