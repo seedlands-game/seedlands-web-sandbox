@@ -798,3 +798,51 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 传统0.2PD×120%=0.24PD，AI20分钟×120%=24分钟，04:28检查点。credits/费率/API等价及周分母不可读，不换算；周额度最新03:09实际81%，03:38刷新待答、原60%停止线。Root独占三生产文件、相关真实等值测试与本spec/新独立输出；Luna Task139已结束无新实现委派。候选空间每列至多49个anchor、1024列每chunk，惰性只在above-ground树分支使用；实际数量与bytes待测，现阶段不保留未测优化结论。
 
 04:23UTC checkpoint82：最终源码范围lint/格式、完整类型及最终stdlib范围类型、路径lint、五冻结证据字节检查PASS；全stdlib167files1211tests PASS，完整Headless128files795tests PASS。A/A相对差0.494%，原15%线保持；第一轮AB89.750%与静态简化后的最终字节AB91.114%改善均保存原始样本/绑定字节，20chunk全摘要一致。两轮control median发生变化，不能拼样本或外推产品收益。内部列缓存最多49anchor、1024列/chunk，原65536B输出/传输不变；对象/闭包实际字节NOT_COLLECTED。新evidence/tree-column-micro-candidate-82-01明确仅warmNode分项候选；生产startup/矿车reload/组合Browser及whole-frame门禁仍待完成。下一步仅本地冻结candidate source供identified artifact验证，未采用/未推送/不可合入，原CI80终态ChromiumFAIL保留。长期docs不变：无新owner、协议或持久化语义。周额度最新03:09实际81%，04:18请求更新待答，约60%停止线保持；仍按04:28 checkpoint。
+
+04:26UTC checkpoint82完成有界分项：source2b17241b/artifactefd549f3本地生产native矿车38.2s PASS/runner42.8s，NON_MAIN；保存page.reload原10000ms和全真实输入/pose/rider/reference断言不变。此前local45s与当前38.2s不作受控产品收益。候选未推送/未正式采用，完整Classic及组合/整帧门禁待完成；新增evidence/tree-column-native-followup-82-02补实际产物、JSON摘要和闭包总空间说明，旧原始证据不改。
+
+### 当前候选完整Classic产品验收 checkpoint83（预注册）
+
+04:27UTC，固定2b17241b source及efd549f3 artifact，无新实现轴。只执行唯一canonical classic-runtime.spec.ts全选择、原900000/10000/5000等时限、真实click/key/mouse/PointerLock/WebGL2与全部原断言；本地没有CI retry，不为连接或状态反复启动。新run ID pr41-tree-column-full-browser83-01；保留所有错误/trace/终态与C0阶段观察。门模型5秒FAIL与V2仍未关闭，full功能PASS也不替代组合/whole-frame受控A/A与A/B。一次完整功能运行后按实际新证据决定下一片，没证据不盲目重跑。
+
+传统0.15PD×120%=0.18PD；AI20分钟×120%=24分钟，04:51UTC检查点。额度最新03:09实际81%、04:18请求待答，约60%停止线；本环境不能读取实际UI，费用/credits/API等价与预测百分比未知，不换算、不扩预算。Root仅验收/只读诊断及新证据/spec路径，无其他agent实施、无源文件变更、无部署/合并。
+
+04:33UTC主对话实际产品UI回报：周剩余80%，4日22小时后重置；初始98%的账户总降18个百分点含其他任务，不能归因本PR。约60%停止线不变。checkpoint83继续原完整canonical单次验收，无新源码或阈值变更；阶段C0–C3/作物导航已完成，V1步骤结束、整次仍未终态。当前候选未经组合产品/whole-frame性能准入，未推送。
+
+04:49UTC checkpoint83终态：2b17241b/efd549f3唯一canonical全选择17.3min FAIL，main15.3min、visual1.3min PASS、native25.8s PASS、default modularSKIP。C0–C3/作物导航/V1完成，V2 wood-pickaxe阶段的第二stone88仅breakAction0.6/1.2即被原总限截断，C4/C5及装备/死亡恢复NOT_RUN。完整trace/库存/frontier与API诊断记录evidence/tree-column-full-failure-83-01；不抬时限/豁免/换绿。出生阶段仅diagnostic，micro候选仍未采用/未推送；当前整帧p50=469.2ms/p95=1206.5ms不达准出，当前JS tick与巨大帧间隙差未归因，下一片必须先补主要延迟证据，不能盲目重复whole Browser。周额度最新04:33实际80%，约60%线；本片在04:51前终止采样并报告。
+
+### 帧间隙与观察成本只读定位 checkpoint84（预注册）
+
+04:50UTC固定source2b17241b与刚结束83失败trace/receipt；Root只读当前源码、单个本地trace/原始采样统计，不改生产/测试/口径，不启动新Browser或性能采样。先确定trace中各类记录bytes、snapshot字段成本边界、自动存档与Authority接收是否有具体匹配的时间证据；CPU tick与帧间隙差不能直接定为GPU或trace根因。若无法归因，记录缺口并停止该假设，下一实验另注册同身份AA/AB，不靠同源重试。新增私有输出独占browser83-readonly-gap-84-*，不重写sealed evidence。初步入口frameCpu/update loop、harness snapshot以及已有performance observer。
+
+传统0.1PD×120%=0.12PD，AI15分钟×120%=18分钟，05:08UTC检查点；真实UI04:33周剩余80%（4日22小时重置），原约60%停止线；费率/credits/API等价/占比未知，不换算。无新agent或网络权限；常规静态元数据保存不等于性能候选正式采用，PR不可合入。后续范围实变先另注册，不为了预算检查读取用户电脑或启动额外模型。
+
+04:56UTC checkpoint84只读结束：Playwright1.62.1源码collectionTime为DOM浏览器采集wall；8706条合计21.416s、中位1.5ms，最大24.45MB记录22.5ms，不足以解释持续405ms帧间隙。停止主要内联SVG假设，不从bytes推出延迟收益；序列化/调度/异步GPU/Svelte微任务仍缺归因。private browser83-readonly-gap-84-*保留记录统计和源码结论。没有源码、测试口径或新的Browser运行。
+
+### 精确候选主线程CPU诊断 checkpoint85（预注册）
+
+04:56UTC，仍固定2b17241b/efd549f3及原唯一Classic spec，使用现有diagnostic-hooks与SEEDLANDS_CLASSIC_CPU_PROFILE=1。唯一改变轴为10ms CDP Profiler诊断；Authority CPU/native trace/benchmark flags保持关闭。只选原main完整C0–C5+扩展的同一旅程（不删其内部步骤/断言），新run pr41-main-cpu-diagnostic-browser85-01，保留原900000ms、全部输入/质量/WebGL2和失败；不是为了换绿同源重试，是补当前唯一未测JS/GC/program/idle分布证据。profiler结果diagnosticOnly/eligible=false，不能充当AA/AB或最终性能/产品验收；默认afterEach停止并detach，保持所有负结果和原83失败。
+
+Root只运行/读取诊断与metadata，不改源文件，不新建浏览器入口/域名/权限，无其他agent。原产物仍匹配HEAD与源bytes，先verify现有artifact、不重建。AI22分钟×120%=26.4分钟，05:23UTC检查点；传统0.15PD×120%=0.18PD。周额度04:33实际80%/4日22小时重置，约60%停止线；费用/credits/API等价及占比无法核实，不换算、不扩预算。一次诊断后用实际新证据注册最小修复/实验或记录阻塞，不盲目再次full retry。
+
+04:57UTC诊断85-01在Browser测试开始前FAIL（No tests found）：root误给grep加^，Playwright匹配完整标题含文件前缀。原失败/空HTML/receipt保留，不是产品RED或CPU证据。修正无源码/口径变化；确定性--list已确认唯一匹配原main1test1file。新run pr41-main-cpu-diagnostic-browser85-02、新HTML/output/log路径继续同一原05:23有界上限，选中测试内部步骤与断言全部不变。
+
+05:18UTC checkpoint85结束：原main900000ms FAIL，C0–C3 PASS记录，C4/C5未通过。诊断profile唯一payload1539334bytes/71608samples身份PASS；idle51.0%、program24.3%、GC1.9%、Authority receive包含约9.9%（重叠不可相加），不能从idle推GPU因果。私有raw与两次解码失败保留，公共main-cpu-diagnosis-85-01记录准确身份/界限。无源码修改、未推送、不采纳82候选；本片在05:23上限前结束。最新实际UI04:33剩80%，05:17刷新待答，约60%停止线。
+
+### 观察取帧成本单变量诊断 checkpoint86（预注册）
+
+05:19UTC，固定source2b17241b/artifactefd549f3/lock44db46fb、Chromium151/SwiftShader/viewport960×540、原Classic场景与quality low。只在私有诊断脚本复用现有startClassicWorld/prepareInitialState和原生PointerLock；不是新产品验收入口。初态准备后使用现有world clock pause冻结权威场景，静止视角、空按键、worldRevision/geometry/pose固定，观察真实生产renderer。此静止暂停场景不代表主旅程的持续Authority消息/移动/组合性能。
+
+唯一轴为Playwright context tracing的screenshots（A=true，B=false），两组snapshots=true/sources=true，其他输入/产物不变。轻量只读rAF计时探针两组一致，每段30s、先5s稳定；原始rAF deltas/起止snapshot完整保留，trace stop/zip写入在计时之外，不开CPU/nativeProfiler，不删旧证据。先A/A两对（4段）检查中位帧时差≤15%，失败则停止、不做AB/不提高噪声线。通过后平衡2AB+2BA（8段）；primary=各段median帧时的组median，预注册可解释观察成本线≥20%下降，p95不回归>10%；严格要求起止pose/view/worldRevision/triangles/drawCalls/resident-loaded-rendered/chunk queues一致且ready/原WebGL2成立。任一负结果保留、无明确收益保留现状；不能由此采用截图关闭、放宽原900000/断言、删掉正式trace或宣称PR可合入。
+
+机器独占窗口持锁，Root仅私有脚本/本spec/新evidence，无生产、正式Playwright配置、CI或测试选择修改，无其他agent。传统0.15PD×120%=0.18PD，AI12分钟×120%=14.4分钟，05:34UTC检查点；credits/API/费率/真实周分母未知不换算。最新实际额度04:33剩80%，刷新待答，约60%停止线保持。一次AA→条件AB后按证据决定下一片，不盲目full retry。
+
+05:24UTC checkpoint86终态：暂停静止场景真实A/A四段median416.7/300/283.4/283.3ms，原15%线被18.2017%超过，FAIL，AB NOT_RUN。全部场景固定字段PASS，window FAIL/measurement RECORDED；真实UUID0edf2443-aa60-4e48-b827-e704a43bd293已绑定，不伪装初始未生效命名env。四trace/raw/log及失败保留，公共observer-aa-failure-86-01记准确界限。明显顺序下降支持控制未稳定假设，不能挑后两段宣布AA通过、不能推GPU原因或更改验收。早于05:34原片上限停止。
+
+### 观察控制完整路径预热 checkpoint86-02（新预注册）
+
+05:25UTC，唯一新证据是86-01稳定身份下417→300→283ms的显著顺序下降，此前仅5s取帧稳定期不足。新实验先以A相同screenshots=true/snapshots=true/sources=true真实取帧连续90s预热，保存warm trace；再执行与86-01完全相同4段30s AA、同原15%线，失败立即停止。仅改变预热程序，不改生产/质量/窗口长/指标/限值；不合并旧样本，不用重置或旧两段换绿。AA通过后仍仅原2AB+2BA，收益≥20%、p95回归≤10%，场景身份严格一致。
+
+仍只私有暂停静止renderer诊断，不是正式产品或组合准入；不删正式trace/截图，不改CI或断言。固定同source2b17241b/artifactefd549f3/lock、Chromium151/SwiftShader、独占lock，不与其他测试/构建并行。实际新run pr41-observer-warm-aa-ab-86-02（使用正确SEEDLANDS_RESERVATION_RUN）。Root只一脚本与证据/spec，其他agent无工作。AI14min×120%=16.8min，05:42UTC检查点，传统0.15PD×120%=0.18PD；最新04:33真实80%，05:17刷新待答，约60%停止线，费用/credits/API/占比未知不换算。此有界控制修正若AA仍失败则关闭观察成本候选，不进行第三次控制重试。
+
+05:35UTC checkpoint86-02自然终态：原90s warm、四AA和2AB+2BA全完成、12段场景身份PASS。AA11.051%≤原15%，AB median A345.85/B370.775ms，改善-7.207%不达≥20%，p95 A924.9/B908.3ms。结论NO_PREDECLARED_BENEFIT；window PASS/measurement RECORDED不表示收益或产品通过。关闭截图观察轴候选，正式trace/CI/时限/质量不改，不做第三次控制试验；86-01原AAFAIL、全部raw/trace保留。公共observer-no-benefit-86-02绑定身份/限制。05:29主对话实际产品UI剩80%/4天21小时重置，60%停止线保持；用户要求等待自然终态不重复运行已遵守，本轮05:34:24完成（早于05:42上限）。后续先整理可恢复证据/精确分支状态，不盲目full重试。

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "native ordinary minecart NON_MAIN; not whole Classic or performance acceptance",
+  "sourceSha": "2b17241b64dfba61147444d9187881cddc32e942",
+  "sourceDigest": "bdd1937fd81a604670a72bd0b421e65f6ec1f0148fa318db35aa8bf35848f3a6",
+  "artifactDigest": "efd549f30cc12570084c5742f33bbe9de2b3e522582dafe114a68600ffd5a580",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "runId": "pr41-tree-column-native-browser82-01",
+  "selection": {
+    "mode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "modularSmokeMatches": 0,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-ecbb537107fc1cdb398c",
+        "file": "apps/web/tests/e2e/classic-support/minecart-journey.ts",
+        "test": "Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档",
+        "project": "chromium"
+      }
+    ]
+  },
+  "helperSeconds": 38.2,
+  "runnerSeconds": 42.8,
+  "rawAttachments": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native82-html-extracted-02/classic-minecart-before-deploy.json",
+      "bytes": 517,
+      "sha256": "44602fddf8f01ba1c337599a456c69f8082681339c51b3c9743db7ef642aa7d7"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native82-html-extracted-02/classic-minecart-after-deploy.json",
+      "bytes": 517,
+      "sha256": "3d2ad4a806dc53f71ec04de2b1aa0eb862c810a28f124dc5e7647b294936a7cc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native82-html-extracted-02/classic-minecart-native-input.json",
+      "bytes": 85501,
+      "sha256": "e989f98d7e4d1e54135590bcc34324ce40ae0748886e634ae78acfbed50a24c8"
+    }
+  ],
+  "wholeClassic": "NOT_RUN for candidate",
+  "wholeFrameAndCombinedAB": "NOT_RUN",
+  "remoteCI80Chromium": "FAIL remains; candidate not pushed",
+  "weeklyQuota": {
+    "remainingPercent": 81,
+    "observedAt": "2026-10-10 03:09 UTC",
+    "refreshRequested": "04:18 UTC pending",
+    "stopLinePercent": 60
+  }
+}

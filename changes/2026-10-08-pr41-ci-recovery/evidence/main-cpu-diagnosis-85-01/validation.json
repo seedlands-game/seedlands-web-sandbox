@@ -1,0 +1,677 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "eligible": false,
+  "runId": "pr41-main-cpu-diagnostic-browser85-02",
+  "sourceSha": "2b17241b64dfba61147444d9187881cddc32e942",
+  "rawBytes": 1539334,
+  "rawSha256": "822f254fb49507f459f1f317fa42dfa10cae27d15385ed1346dad378808d19e5",
+  "samplingIntervalUs": 10000,
+  "sampleCount": 71608,
+  "weightedSpanMs": 899598.035,
+  "scope": "sample-weighted diagnostic wall distribution; inclusive rows overlap; NOT performance AA/AB or GPU attribution",
+  "self": [
+    {
+      "nodeId": 6,
+      "weightedMs": 458705.073,
+      "callFrame": {
+        "functionName": "(idle)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 2,
+      "weightedMs": 218305.491,
+      "callFrame": {
+        "functionName": "(program)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 277,
+      "weightedMs": 26395.077,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 30810
+      }
+    },
+    {
+      "nodeId": 19,
+      "weightedMs": 16802.596,
+      "callFrame": {
+        "functionName": "(garbage collector)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 574,
+      "weightedMs": 13392.788,
+      "callFrame": {
+        "functionName": "lu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 38335
+      }
+    },
+    {
+      "nodeId": 634,
+      "weightedMs": 8222.143,
+      "callFrame": {
+        "functionName": "hy",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 61701
+      }
+    },
+    {
+      "nodeId": 387,
+      "weightedMs": 5558.356,
+      "callFrame": {
+        "functionName": "finalize",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 412,
+        "columnNumber": 1749
+      }
+    },
+    {
+      "nodeId": 357,
+      "weightedMs": 3342.393,
+      "callFrame": {
+        "functionName": "updateCanvasSize",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 11663,
+        "columnNumber": 12430
+      }
+    },
+    {
+      "nodeId": 510,
+      "weightedMs": 3277.515,
+      "callFrame": {
+        "functionName": "_m",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 166326
+      }
+    },
+    {
+      "nodeId": 513,
+      "weightedMs": 2810.549,
+      "callFrame": {
+        "functionName": "Rm",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 165908
+      }
+    },
+    {
+      "nodeId": 511,
+      "weightedMs": 2680.458,
+      "callFrame": {
+        "functionName": "Cm",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 164134
+      }
+    },
+    {
+      "nodeId": 545,
+      "weightedMs": 2269.556,
+      "callFrame": {
+        "functionName": "Im",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 165071
+      }
+    },
+    {
+      "nodeId": 455,
+      "weightedMs": 2266.689,
+      "callFrame": {
+        "functionName": "ai",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 38597
+      }
+    },
+    {
+      "nodeId": 660,
+      "weightedMs": 1941.516,
+      "callFrame": {
+        "functionName": "lu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 38335
+      }
+    },
+    {
+      "nodeId": 1104,
+      "weightedMs": 1848.657,
+      "callFrame": {
+        "functionName": "bs",
+        "scriptId": "13",
+        "url": "http://127.0.0.1:4273/assets/glb-model-resource-BTfBzE6i.js",
+        "lineNumber": 0,
+        "columnNumber": 151993
+      }
+    },
+    {
+      "nodeId": 1458,
+      "weightedMs": 1650.191,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 14263
+      }
+    },
+    {
+      "nodeId": 1285,
+      "weightedMs": 1591.185,
+      "callFrame": {
+        "functionName": "ni",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 1,
+        "columnNumber": 37205
+      }
+    },
+    {
+      "nodeId": 1248,
+      "weightedMs": 1429.185,
+      "callFrame": {
+        "functionName": "innerSerialize",
+        "scriptId": "18",
+        "url": "",
+        "lineNumber": 185,
+        "columnNumber": 23
+      }
+    },
+    {
+      "nodeId": 1327,
+      "weightedMs": 1424.145,
+      "callFrame": {
+        "functionName": "ni",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 1,
+        "columnNumber": 37205
+      }
+    },
+    {
+      "nodeId": 1439,
+      "weightedMs": 1395.801,
+      "callFrame": {
+        "functionName": "readableChunk",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 21705
+      }
+    },
+    {
+      "nodeId": 644,
+      "weightedMs": 1311.906,
+      "callFrame": {
+        "functionName": "J",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 49,
+        "columnNumber": 50
+      }
+    },
+    {
+      "nodeId": 991,
+      "weightedMs": 1303.296,
+      "callFrame": {
+        "functionName": "ni",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 1,
+        "columnNumber": 37205
+      }
+    },
+    {
+      "nodeId": 1031,
+      "weightedMs": 1299.542,
+      "callFrame": {
+        "functionName": "visitNode",
+        "scriptId": "5",
+        "url": "",
+        "lineNumber": 273,
+        "columnNumber": 24
+      }
+    },
+    {
+      "nodeId": 3510,
+      "weightedMs": 1285.17,
+      "callFrame": {
+        "functionName": "bytes",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 40784
+      }
+    },
+    {
+      "nodeId": 1118,
+      "weightedMs": 1242.917,
+      "callFrame": {
+        "functionName": "cu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 38408
+      }
+    },
+    {
+      "nodeId": 420,
+      "weightedMs": 1237.395,
+      "callFrame": {
+        "functionName": "hy",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 61701
+      }
+    },
+    {
+      "nodeId": 1271,
+      "weightedMs": 1234.297,
+      "callFrame": {
+        "functionName": "isTypedArray",
+        "scriptId": "18",
+        "url": "",
+        "lineNumber": 64,
+        "columnNumber": 21
+      }
+    },
+    {
+      "nodeId": 1257,
+      "weightedMs": 1221.238,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 41912
+      }
+    },
+    {
+      "nodeId": 1103,
+      "weightedMs": 1189.112,
+      "callFrame": {
+        "functionName": "Ml",
+        "scriptId": "13",
+        "url": "http://127.0.0.1:4273/assets/glb-model-resource-BTfBzE6i.js",
+        "lineNumber": 0,
+        "columnNumber": 153504
+      }
+    },
+    {
+      "nodeId": 424,
+      "weightedMs": 1161.534,
+      "callFrame": {
+        "functionName": "mu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 39830
+      }
+    }
+  ],
+  "inclusive": [
+    {
+      "nodeId": 1,
+      "weightedMs": 899598.035,
+      "callFrame": {
+        "functionName": "(root)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 6,
+      "weightedMs": 458705.073,
+      "callFrame": {
+        "functionName": "(idle)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 2,
+      "weightedMs": 218305.491,
+      "callFrame": {
+        "functionName": "(program)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 272,
+      "weightedMs": 89003.611,
+      "callFrame": {
+        "functionName": "Ap.i.onmessage",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 13702
+      }
+    },
+    {
+      "nodeId": 274,
+      "weightedMs": 88780.793,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 13773
+      }
+    },
+    {
+      "nodeId": 273,
+      "weightedMs": 88780.793,
+      "callFrame": {
+        "functionName": "l",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 13475
+      }
+    },
+    {
+      "nodeId": 275,
+      "weightedMs": 88709.729,
+      "callFrame": {
+        "functionName": "Oi.e.onmessage",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 30782
+      }
+    },
+    {
+      "nodeId": 276,
+      "weightedMs": 88704.953,
+      "callFrame": {
+        "functionName": "measure",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 8024
+      }
+    },
+    {
+      "nodeId": 277,
+      "weightedMs": 87522.44,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 30810
+      }
+    },
+    {
+      "nodeId": 278,
+      "weightedMs": 61127.363,
+      "callFrame": {
+        "functionName": "receive",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 36545
+      }
+    },
+    {
+      "nodeId": 408,
+      "weightedMs": 58996.405,
+      "callFrame": {
+        "functionName": "acceptSnapshot",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 40352
+      }
+    },
+    {
+      "nodeId": 414,
+      "weightedMs": 50245.421,
+      "callFrame": {
+        "functionName": "updateGameplay",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 29,
+        "columnNumber": 39877
+      }
+    },
+    {
+      "nodeId": 421,
+      "weightedMs": 49760.966,
+      "callFrame": {
+        "functionName": "onGameplay",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 52,
+        "columnNumber": 44787
+      }
+    },
+    {
+      "nodeId": 422,
+      "weightedMs": 49752.978,
+      "callFrame": {
+        "functionName": "onGameplay",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 51302
+      }
+    },
+    {
+      "nodeId": 423,
+      "weightedMs": 49699.319,
+      "callFrame": {
+        "functionName": "refresh",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 50010
+      }
+    },
+    {
+      "nodeId": 267,
+      "weightedMs": 48476.761,
+      "callFrame": {
+        "functionName": "tick",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 11663,
+        "columnNumber": 3180
+      }
+    },
+    {
+      "nodeId": 268,
+      "weightedMs": 32243.296,
+      "callFrame": {
+        "functionName": "update",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 11663,
+        "columnNumber": 10522
+      }
+    },
+    {
+      "nodeId": 332,
+      "weightedMs": 32117.683,
+      "callFrame": {
+        "functionName": "fire",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 0,
+        "columnNumber": 6232
+      }
+    },
+    {
+      "nodeId": 333,
+      "weightedMs": 31618.609,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 53605
+      }
+    },
+    {
+      "nodeId": 334,
+      "weightedMs": 31562.19,
+      "callFrame": {
+        "functionName": "update",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 52,
+        "columnNumber": 12077
+      }
+    },
+    {
+      "nodeId": 424,
+      "weightedMs": 26415.305,
+      "callFrame": {
+        "functionName": "mu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 15,
+        "columnNumber": 39830
+      }
+    },
+    {
+      "nodeId": 519,
+      "weightedMs": 19052.47,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "23",
+        "url": "",
+        "lineNumber": 0,
+        "columnNumber": 1
+      }
+    },
+    {
+      "nodeId": 520,
+      "weightedMs": 18891.278,
+      "callFrame": {
+        "functionName": "evaluate",
+        "scriptId": "18",
+        "url": "",
+        "lineNumber": 304,
+        "columnNumber": 10
+      }
+    },
+    {
+      "nodeId": 19,
+      "weightedMs": 16802.596,
+      "callFrame": {
+        "functionName": "(garbage collector)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 349,
+      "weightedMs": 16184.156,
+      "callFrame": {
+        "functionName": "publish",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 51,
+        "columnNumber": 272
+      }
+    },
+    {
+      "nodeId": 350,
+      "weightedMs": 15994.721,
+      "callFrame": {
+        "functionName": "sampleDebug",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 55,
+        "columnNumber": 65778
+      }
+    },
+    {
+      "nodeId": 356,
+      "weightedMs": 15879.485,
+      "callFrame": {
+        "functionName": "render",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-BZne4xrP.js",
+        "lineNumber": 11663,
+        "columnNumber": 11083
+      }
+    },
+    {
+      "nodeId": 351,
+      "weightedMs": 15499.543,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 51,
+        "columnNumber": 583
+      }
+    },
+    {
+      "nodeId": 352,
+      "weightedMs": 15489.441,
+      "callFrame": {
+        "functionName": "withSpan",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 1,
+        "columnNumber": 39523
+      }
+    },
+    {
+      "nodeId": 353,
+      "weightedMs": 15464.817,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-DqNlgQIl.js",
+        "lineNumber": 51,
+        "columnNumber": 631
+      }
+    }
+  ]
+}
