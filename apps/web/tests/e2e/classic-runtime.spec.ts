@@ -1,5 +1,6 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
 import { registerClassicMinecartJourney } from './classic-support/minecart-journey';
+import { walkC4Route } from './classic-support/route-pulse-diagnostics';
 import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDropOrPickup } from './classic-support/drops';
@@ -322,7 +323,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
       ),
     );
     expect(returnChunkNamesBeforeTraverse.size).toBeGreaterThan(0);
-    await walkTo(page, classicScenario.route.farTurnaround, { jump: true, timeout: 90_000 });
+    await walkC4Route(page, classicScenario.route.farTurnaround);
     const far = await waitForSnapshot(
       page,
       (value) => value.streamCenter[0] - beforeTraverse.streamCenter[0] >= 4 && value.renderedChunks > 0,
@@ -331,7 +332,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     expect(far.authority.residency).not.toBeNull();
     expect(far.loadedChunks).toBeLessThanOrEqual(beforeTraverse.loadedChunks + 8);
     expect(far.renderedChunks).toBeLessThanOrEqual(beforeTraverse.renderedChunks + 8);
-    await walkTo(page, classicScenario.route.returnPoint, { key: 'KeyS', jump: true, timeout: 90_000 });
+    await walkC4Route(page, classicScenario.route.returnPoint, 'KeyS');
     const returned = await waitForSnapshot(
       page,
       (value) => value.streamCenter[0] === returnChunkX && value.renderedChunks > 0,

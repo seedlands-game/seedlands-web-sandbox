@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
 import { reachedRouteTarget, routeInputSettled, routePulseDurationMs } from './route-progress';
+import type { RoutePulseDiagnostics } from './route-pulse-diagnostics';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
   correctMouseToRoute,
@@ -213,6 +214,7 @@ export async function walkTo(
     pulseMs?: number | ((snapshot: ClassicSnapshot) => number);
     refreshAfterCorrection?: boolean;
     yieldAfterSettledPulse?: (snapshot: ClassicSnapshot) => boolean;
+    diagnostics?: RoutePulseDiagnostics;
   }> = {},
 ): Promise<ClassicSnapshot> {
   const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
@@ -221,6 +223,7 @@ export async function walkTo(
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
   while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
     if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
+    options.diagnostics?.begin(current);
     const correction = options.refreshAfterCorrection
       ? await correctMouseToRoute({
           wholeTurn: true,
@@ -258,20 +261,27 @@ export async function walkTo(
     const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
     const pulseMs = routePulseDurationMs(current.player, target, maximumPulseMs);
     const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
+    options.diagnostics?.beforeInput(current, pulseMs, options.jump ? `${key}+Space` : key);
     try {
       // Native press releases input before tracing snapshots delay the API response.
       await page.keyboard.press(options.jump ? `${key}+Space` : key, { delay: pulseMs });
+      options.diagnostics?.inputFinished('returned');
     } catch (error) {
+      options.diagnostics?.inputFinished('threw');
       await Promise.allSettled([page.keyboard.up(key), ...(options.jump ? [page.keyboard.up('Space')] : [])]);
       throw error;
     }
     current = await waitForSnapshot(
       page,
-      (value) =>
-        value.authority.acknowledgedInputSequence > sequenceBeforeInput &&
-        value.onGround &&
-        !value.colliding &&
-        routeInputSettled(value),
+      (value) => {
+        const settled =
+          value.authority.acknowledgedInputSequence > sequenceBeforeInput &&
+          value.onGround &&
+          !value.colliding &&
+          routeInputSettled(value);
+        options.diagnostics?.observe(value, settled);
+        return settled;
+      },
       20_000,
     );
     if (current.player[1] < segmentStart.player[1] - 2)
