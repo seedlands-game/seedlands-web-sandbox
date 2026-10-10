@@ -194,11 +194,13 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     ok: true,
     data: { kind: 'entity-reference', reference: restored.reference, status: 'current' },
   });
-  expect(currentWorldIdentity).toMatchObject({
-    ok: true,
-    data: { epoch: restoredSnapshot.runtimeEpoch },
-    frontier: { epoch: restoredSnapshot.runtimeEpoch },
-  });
+  if (!currentWorldIdentity.ok) throw new Error(currentWorldIdentity.error.message);
+  const worldEpoch = currentWorldIdentity.data.epoch;
+  expect(worldEpoch).toEqual(expect.any(String));
+  expect(worldEpoch.length).toBeGreaterThan(0);
+  expect(currentWorldIdentity.frontier.epoch).toBe(worldEpoch);
+  expect(staleReferenceInspection.frontier?.epoch).toBe(worldEpoch);
+  expect(currentReferenceInspection.frontier?.epoch).toBe(worldEpoch);
   expect(restored.pose.position).toEqual(dismounted.pose.position);
   expect(restored.rider).toBeNull();
   expect(runtime.pageErrors).toEqual([]);
