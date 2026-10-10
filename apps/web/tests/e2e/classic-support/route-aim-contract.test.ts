@@ -4,8 +4,106 @@ import { walkTo, type ClassicSnapshot } from './harness';
 import { lockPointer } from './mouse-input';
 import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
 import type { Point, RoutePoint } from './scenario';
+import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
+import { assessClosedDoorProbe, createClosedDoorProbePlan } from './door-collision-oracle';
 
 const SENSITIVITY = 0.13;
+
+it('settles the closed-door approach before probe input even when the initial body is at contact', async () => {
+  const config = bodyConfigFor('player');
+  const plan = createClosedDoorProbePlan({
+    door: [70, 31, 0],
+    collision: { min: [0.8125, 0, 0], max: [1, 1, 1] },
+    playerPosition: [67, 32.6, 0.5],
+    playerHalfWidth: 0.32,
+  });
+  const world: PhysicsWorld = {
+    querySolids: () => [
+      { id: 'floor', aabb: { min: { x: 60, y: 30, z: -2 }, max: { x: 80, y: 31, z: 2 } } },
+      { id: 'door', aabb: { min: { x: 70.8125, y: 31, z: 0 }, max: { x: 71, y: 33, z: 1 } } },
+    ],
+  };
+  let body: BodyState = {
+    position: { x: plan.contact, y: 31, z: 0.5 },
+    velocity: { x: 0, y: 0, z: 0 },
+  };
+  let yaw = -90,
+    tick = 1,
+    ack = 1,
+    presses = 0,
+    pointerLocked = false;
+  let mouseX = 5000;
+  const observe = (): ClassicSnapshot => ({
+    ...routeSnapshot([body.position.x, body.position.y + 1.6, body.position.z], yaw, tick, ack),
+    serverPlayerVelocity: [body.velocity.x, body.velocity.y, body.velocity.z],
+  });
+  const page = {
+    evaluate: async (callback: (...args: unknown[]) => unknown) =>
+      String(callback).includes('pointerLockElement') ? pointerLocked : observe(),
+    keyboard: {
+      press: async (key: string, options?: { delay?: number }) => {
+        expect(key).toBe('KeyW');
+        expect(options?.delay).toBeLessThanOrEqual(80);
+        presses++;
+        const heldTicks = Math.ceil((options!.delay! * 60) / 1000);
+        for (let i = 0; i < 180; i++) {
+          const radians = (yaw * Math.PI) / 180;
+          const stepped = stepBody({
+            state: body,
+            config,
+            world,
+            dt: 1 / 60,
+            input: {
+              wish: i < heldTicks ? { x: -Math.sin(radians), z: -Math.cos(radians) } : { x: 0, z: 0 },
+              jumpPressed: false,
+              verticalIntent: 0,
+            },
+          });
+          body = stepped.state;
+          tick++;
+          if (i >= heldTicks && Math.abs(body.velocity.x) < 1e-6 && Math.abs(body.velocity.z) < 1e-6) break;
+        }
+        ack++;
+      },
+      up: async () => undefined,
+    },
+    locator: () => ({
+      isVisible: async () => false,
+      boundingBox: async () => ({ x: 0, y: 0, width: 10_000, height: 540 }),
+      click: async () => {
+        pointerLocked = true;
+      },
+    }),
+    mouse: {
+      move: async (x: number) => {
+        yaw -= (x - mouseX) * SENSITIVITY;
+        mouseX = x;
+      },
+    },
+    waitForFunction: async () => undefined,
+  } as unknown as Page;
+  await lockPointer(page);
+  const crossed = await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80 });
+  expect(crossed.player[0]).toBeCloseTo(plan.contact, 6);
+  expect(presses).toBe(0);
+  const options = { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80, arrival: 'point' as const };
+  const reached = await walkTo(page, plan.approach, options);
+  expect(presses).toBeGreaterThan(0);
+  expect(Math.hypot(reached.player[0] - plan.approach[0], reached.player[2] - plan.approach[1])).toBeLessThan(0.06);
+  expect(
+    assessClosedDoorProbe(
+      plan,
+      {
+        position: reached.serverPlayerPosition,
+        acknowledgedInputSequence: reached.authority.acknowledgedInputSequence,
+        physicsTick: reached.authority.physicsTick,
+        onGround: reached.onGround,
+        colliding: reached.colliding,
+      },
+      [],
+    ),
+  ).toEqual({ status: 'pending', reason: 'no-observations' });
+});
 
 type RouteObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
 

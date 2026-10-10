@@ -2,6 +2,17 @@ import { bodyConfigFor } from '@seedlands/stdlib/physics';
 
 export type RouteDirection = 'KeyW' | 'KeyS';
 
+export function routeTargetPredicate(
+  target: readonly [number, number],
+  direction: RouteDirection,
+  tolerance: number,
+  corridorTolerance: number,
+  arrival: 'crossing' | 'point' = 'crossing',
+) {
+  return (value: Readonly<{ player: readonly [number, number, number] }>) =>
+    reachedRouteTarget(value.player, target, direction, tolerance, corridorTolerance, arrival);
+}
+
 export function routePulseDurationMs(
   position: readonly [number, number, number],
   target: readonly [number, number],
@@ -38,10 +49,12 @@ export function reachedRouteTarget(
   direction: RouteDirection,
   tolerance: number,
   corridorTolerance: number,
+  arrival: 'crossing' | 'point' = 'crossing',
 ): boolean {
   const xDelta = position[0] - target[0];
   const zDelta = position[2] - target[1];
   if (Math.hypot(xDelta, zDelta) < tolerance) return true;
+  if (arrival === 'point') return false;
   if (Math.abs(zDelta) >= corridorTolerance) return false;
   return direction === 'KeyW' ? xDelta >= 0 : xDelta <= 0;
 }

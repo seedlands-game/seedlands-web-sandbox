@@ -189,7 +189,7 @@ async function expectClosedDoorBlocks(page: Page, expectedDoor: DoorPair): Promi
     playerPosition: initial.position,
     playerHalfWidth,
   });
-  await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80 });
+  await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80, arrival: 'point' });
   await correctMouseToRoute({
     target: plan.routeTarget,
     direction: 'KeyW',

@@ -1062,3 +1062,11 @@ Root独占World/cache/sampler、三个实际消费者接线与测试、GPUprobe/
 14:19UTC新CI414精确7831自然终态五非BrowserSUCCESS/ChromiumFAIL/previewSKIP，visual1.6m与native34.9sPASS；main首次V1闭门开始not-before-door，retry V2目录铁块button已click action done但等待scheduled navigation触及原10000ms，两轮C4未运行。完整新日志单独保存，sha256 6392aec1df75f8e974f84494fdfff4301968a07dc5f45956fd78b4829b251747。唯一现有Luna做120有界只读首次闭门诊断至14:25，独占private pr41-door-diagnosis-120-luna-01/diagnosis.md，不改仓库/测试/build/browser/网络、不再委派、不处理未确定retry原因；Root独占119剩余类型/证明/证据。没有确认前不弱化before-door/oracle或10秒click/90/900门槛，当前仍不可合入。
 
 14:32UTC119源码检查点：相关5files49PASS（真实持久屋顶进入客户端列proof/无碰撞驻留、队列外IO时输入服务、保存/恢复/版本/借用buffer反例），生产Web/Svelte0error0warning+tsc/tools、最终Classic types、范围500有效行lint、CI选择3合同与diff检查PASS。最后集成proof的provider字面量过窄类型FAIL已修为独立结构声明，原失败保留。新stored-sky-source-119-01记录源码层范围；冷存档Browser/identified build/提交推送尚未执行，不能声称完整矩阵或PR可合入。实际14:25产品UI周75%/4天12小时，60停止线不变。
+
+### 闭门探测精确approach120（14:33UTC预注册）
+
+CI414第一次main在真实probe键盘之前被原oracle正确拒绝；日志X与east闭门contact条件重建一致，原初位置/plan未记录，不能宣称门ID已确认。共享walkTo crossing半平面会把超过approach的墙接触位置当到达，导致缺少1米前置距离。Root仅为此调用增加显式point到达模式，默认crossing与原正向/反向消费者保持；实际walkTo/aim/native输入循环使用同一point谓词，不改80ms/.06/.08/45s/20s或原blocked oracle与1250ms输入窗口。先以真实stepBody墙接触+实际walkTo取得旧代码行为RED，再点定位/默认crossing/正反门几何回归；新mode仅此door setup使用，最终原main/全部玩法是否通过另记，不修未确认的retry导航猜测。
+
+独占harness、route-progress、现有route-aim-contract测试与v1-slice及spec/evidence，复用已结束Luna只读结果，不新增委派。AI20min×120%=24min，14:57UTC检查点；传统.2PD×120%=.24PD。14:25实际产品UI周75%，60停止线，credits/API/比例未知不估算。119源码已保存，冷存档验收需随后与新身份绑定；不盲跑原900秒，不提高原门槛。
+
+14:39UTC120范围检查点：真实stepBody+闭门+实际walkTo旧入口RED1FAIL/19PASS，point模式相关5files50PASS，最终Classic types与范围lint PASS；原harness501行FAIL已通过把同一arrival谓词归属既有route-progress处理，没有提高500上限。默认crossing保持（新测试同一墙边case直接验证无输入默认越线，再point实际退回），门前1米/.06/.08/80ms及原oracle/时限不变。新door-point-120-01证据保留条件几何推断边界；原main/远端CI尚未验证，retry scheduled navigation及C4原因仍未确认。实际14:25周75%，60停止线保持。

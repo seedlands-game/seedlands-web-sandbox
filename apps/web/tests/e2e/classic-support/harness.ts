@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import { reachedRouteTarget, routeInputSettled, routePulseDurationMs } from './route-progress';
+import { routeTargetPredicate, routeInputSettled, routePulseDurationMs } from './route-progress';
 import type { RoutePulseDiagnostics } from './route-pulse-diagnostics';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
@@ -209,6 +209,7 @@ export async function walkTo(
     jump?: boolean;
     tolerance?: number;
     corridorTolerance?: number;
+    arrival?: 'crossing' | 'point';
     timeout?: number;
     pulseMs?: number | ((snapshot: ClassicSnapshot) => number);
     refreshAfterCorrection?: boolean;
@@ -217,10 +218,11 @@ export async function walkTo(
   }> = {},
 ): Promise<ClassicSnapshot> {
   const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
+  const reached = routeTargetPredicate(target, key, tolerance, corridorTolerance, options.arrival);
   const deadline = Date.now() + (options.timeout ?? 45_000);
   let current = await snapshot(page);
   if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
-  while (!reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) {
+  while (!reached(current)) {
     if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
     options.diagnostics?.begin(current);
     const correction = options.refreshAfterCorrection
@@ -237,7 +239,7 @@ export async function walkTo(
             if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
             await moveMouseBy(page, dx, dy, { waitForRender: false });
           },
-          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
+          routeReached: reached,
         })
       : await correctMouseToRoute({
           wholeTurn: true,
@@ -245,7 +247,7 @@ export async function walkTo(
           direction: key,
           observe: () => snapshot(page),
           move: (dx, dy) => moveMouseBy(page, dx, dy, { waitForRender: false }),
-          routeReached: (observed) => reachedRouteTarget(observed.player, target, key, tolerance, corridorTolerance),
+          routeReached: reached,
         });
     if (!options.refreshAfterCorrection && correction.kind === 'route-reached') return correction.observation;
     if (options.refreshAfterCorrection) {
@@ -254,7 +256,7 @@ export async function walkTo(
       if ((current = await snapshot(page)) === null)
         throw new Error('Classic snapshot is unavailable after route correction.');
       if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-      if (reachedRouteTarget(current.player, target, key, tolerance, corridorTolerance)) return current;
+      if (reached(current)) return current;
     }
     const segmentStart = current;
     const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
