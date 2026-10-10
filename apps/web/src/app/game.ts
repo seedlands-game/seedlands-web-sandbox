@@ -200,7 +200,7 @@ export class Game {
       throw new Error('World start was superseded.');
     }
     this.camera.camera!.layers = [...this.camera.camera!.layers, this.visualResources.waterLayer.id];
-    this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water);
+    this.environment = new WorldEnvironment(this.app, light, quality, this.visualResources.water, this.visualResources, this.camera);
     const sessionConfig = readBrowserSessionConfig(location.search);
     const { harnessEnabled, generalWorkerCount, physicsHz, authorityTransportFaults } = sessionConfig;
     this.performanceProfile = applySessionWorkerBudget(this.performanceProfile, generalWorkerCount);

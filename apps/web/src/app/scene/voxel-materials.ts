@@ -15,6 +15,8 @@ import type { QualityProfile } from './quality-profile';
 import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';
 import { voxelEmissionRedDominance, voxelEmissionThreshold } from './voxel-emission-profile';
+import { voxelReceivedLightGlsl } from '../shaders/voxel-received-light-chunk';
+import type { PackLightingProfile } from '../../client/presentation/pack-lighting-profile';
 import {
   voxelArrayDiffuseGlsl,
   voxelArrayDiffuseWgsl,
@@ -22,6 +24,7 @@ import {
   voxelArrayOpacityGlsl,
   voxelArrayOpacityWgsl,
   voxelWaterReflectionEmissionGlsl,
+  voxelWaterReflectionCombineGlsl,
 } from '../shaders/voxel-array-chunks';
 
 const mix = (a: number, b: number, amount: number) => a + (b - a) * amount;
@@ -48,6 +51,7 @@ export type VoxelMaterials = {
   resolve: (part: MeshPart) => pc.StandardMaterial;
   water: readonly pc.StandardMaterial[];
   waterLayer: pc.Layer;
+  lightingProfile?: PackLightingProfile;
   destroy: () => void;
 };
 
@@ -100,12 +104,18 @@ export async function createVoxelMaterials(
       1 - (parameters?.roughness ?? (definition.renderMode === 'transparent' ? 0.18 : 0.92)),
       parameters?.metalness ?? 0,
     );
-    const linearEmission = new pc.Color(...(parameters?.emissive ?? ([1, 0.48, 0.1] as const))).linear();
+    const profileEmission =
+      packMaterial && material?.source !== 'user'
+        ? presentation?.lighting?.surfaceSelfEmission[packMaterial.id]
+        : undefined;
+    const linearEmission = profileEmission
+      ? new pc.Color(...profileEmission.color)
+      : new pc.Color(...(parameters?.emissive ?? ([1, 0.48, 0.1] as const))).linear();
     emission.push(
       linearEmission.r,
       linearEmission.g,
       linearEmission.b,
-      parameters?.emissiveIntensity ?? definition.emissiveIntensity,
+      profileEmission?.intensity ?? parameters?.emissiveIntensity ?? definition.emissiveIntensity,
     );
     emissionThreshold.push(voxelEmissionThreshold(definition.faceMaterial));
     emissionRedDominance.push(voxelEmissionRedDominance(definition.faceMaterial));
@@ -148,6 +158,14 @@ export async function createVoxelMaterials(
     levels: [new Uint8Array(1)],
   });
   const waterLayer = new pc.Layer({ name: 'Voxel Water' });
+  const receivedLightFeature = new pc.Texture(app.graphicsDevice, {
+    name: 'voxel-received-light-feature',
+    width: 1,
+    height: 1,
+    format: pc.PIXELFORMAT_RGBA8,
+    mipmaps: false,
+    levels: [new Uint8Array(4)],
+  });
   // UI 是相机后处理截点；水体须保留主场景深度并一起调色。
   const uiLayer = app.scene.layers.getLayerById(pc.LAYERID_UI);
   const uiIndex = uiLayer ? app.scene.layers.getTransparentIndex(uiLayer) : -1;
@@ -201,6 +219,18 @@ export async function createVoxelMaterials(
     material.gloss = category === 'transparent' ? 0.82 : 0.08;
     material.useMetalness = true;
     material.shaderChunksVersion = '2.8';
+    material.useLighting = false;
+    material.useSkybox = false;
+    material.lightMap = receivedLightFeature;
+    material.lightMapUv = 0;
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('lightmapPS', voxelReceivedLightGlsl);
+    material.setParameter('texture_skyVisibility', blockLightFallback);
+    material.setParameter('uSkyVisibilityOrigin', new Float32Array(3));
+    material.setParameter('uSkyVisibilitySize', 1);
+    material.setParameter('uSkyVisibilityReady', 0);
+    material.setParameter('uBlockLightReady', 0);
+    material.setParameter('uSkyRadiance', new Float32Array(3));
+    material.setParameter('uBlockLightTint', new Float32Array(presentation?.lighting?.blockLightTint ?? [1, 1, 1]));
     material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('diffusePS', voxelArrayDiffuseGlsl);
     material.getShaderChunks(pc.SHADERLANGUAGE_WGSL).set('diffusePS', voxelArrayDiffuseWgsl);
     material.setParameter('texture_voxelArray', textureArray);
@@ -235,7 +265,7 @@ export async function createVoxelMaterials(
       material.twoSidedLighting = true;
     }
     if (category === 'transparent') {
-      material.emissive = new pc.Color(0.02, 0.11, 0.15);
+      material.emissive = pc.Color.BLACK;
       const waterSource = assets?.find(
         (asset) => asset.id === terrainMaterials.find((entry) => entry.faceMaterial === FaceMaterial.Water)?.id,
       );
@@ -248,6 +278,7 @@ export async function createVoxelMaterials(
       material.depthWrite = false;
       material.opacityFadesSpecular = false;
       material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('emissivePS', voxelWaterReflectionEmissionGlsl);
+      material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('combinePS', voxelWaterReflectionCombineGlsl);
       material.setParameter('texture_planarReflection', reflectionFallback);
       material.setParameter('uReflectionTextureMatrix', new pc.Mat4().data);
       material.setParameter('uReflectionStrength', 0);
@@ -266,11 +297,13 @@ export async function createVoxelMaterials(
     resolve: (part) => categoryMaterials.get(part.renderCategory)!,
     water: [categoryMaterials.get('transparent')!],
     waterLayer,
+    lightingProfile: presentation?.lighting,
     destroy: () => {
       categoryMaterials.forEach((material) => material.destroy());
       tiles.forEach((texture) => texture.destroy());
       reflectionFallback.destroy();
       blockLightFallback.destroy();
+      receivedLightFeature.destroy();
       textureArray.destroy();
       app.scene.layers.removeTransparent(waterLayer);
     },

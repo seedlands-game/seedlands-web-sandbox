@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   SKY_VISIBILITY_VOLUME_BYTES,
+  SKY_VISIBILITY_DERIVED_BYTES,
   SKY_VISIBILITY_VOLUME_SIZE,
   SkyVisibilityCache,
   buildSkyVisibilityVolume,
@@ -39,6 +40,29 @@ const sink = () => {
 const readyDependency = (key: string, revision: number) => ({ key, resident: true, revision }) as const;
 
 describe('per-chunk sky visibility derived cache', () => {
+  it.each([
+    { roofY: 31, incoming: 255 },
+    { roofY: 32, incoming: 0 },
+  ])('upper surface boundary comes from the full current column: %o', ({ roofY, incoming }) => {
+    const cache = new SkyVisibilityCache(1, { worldTime: 12, profileScalar: 1 });
+    const output = sink();
+    cache.register('0,0,0', [0, 0, 0], ['0,0,0', '0,1,0'], output.value);
+    cache.setDependency(readyDependency('0,0,0', 1));
+    cache.setDependency(readyDependency('0,1,0', 1));
+    const samples = columns(0, 63, (column) => {
+      column.obstruction[roofY] = 255;
+    });
+    const ticket = cache.beginBuild('0,0,0', 63, samples);
+    const result = buildSkyVisibilityVolume(ticket);
+    expect(result.ready).toBe(true);
+    if (!result.ready) throw new Error('Expected complete source.');
+    expect(result.volume.visibility[31 * 32]).toBe(0);
+    expect(result.volume.upperBoundaryVisibility?.[0]).toBe(incoming);
+    expect(cache.publish(ticket, result)).toBe(true);
+    result.volume.upperBoundaryVisibility!.fill(17);
+    expect(output.published[0]?.upperBoundaryVisibility?.[0]).toBe(incoming);
+    cache.dispose();
+  });
   it.each([
     { marker: 2, obstruction: 0, ready: true },
     { marker: 2, obstruction: 1, ready: false },
@@ -268,8 +292,8 @@ describe('per-chunk sky visibility derived cache', () => {
     expect(cache.diagnostics).toMatchObject({
       registeredChunkCount: 2,
       readyChunkCount: 2,
-      allocatedBytes: 2 * SKY_VISIBILITY_VOLUME_BYTES,
-      maximumBytes: 2 * SKY_VISIBILITY_VOLUME_BYTES,
+      allocatedBytes: 2 * SKY_VISIBILITY_DERIVED_BYTES,
+      maximumBytes: 2 * SKY_VISIBILITY_DERIVED_BYTES,
     });
     expect(() => cache.register('2,0,0', [2, 0, 0], ['2,0,0'], sink().value)).toThrow(/capacity/i);
     releaseFirst();
@@ -277,7 +301,7 @@ describe('per-chunk sky visibility derived cache', () => {
     expect(cache.diagnostics).toMatchObject({
       registeredChunkCount: 1,
       dependencyCount: 1,
-      allocatedBytes: SKY_VISIBILITY_VOLUME_BYTES,
+      allocatedBytes: SKY_VISIBILITY_DERIVED_BYTES,
     });
 
     cache.dispose();

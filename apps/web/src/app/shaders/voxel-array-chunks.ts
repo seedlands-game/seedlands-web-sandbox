@@ -1,5 +1,3 @@
-import { voxelBlockLightGlsl } from './voxel-block-light-chunk';
-
 export const voxelArrayDiffuseGlsl = /* glsl */ `
 uniform highp sampler2DArray texture_voxelArray;
 uniform vec3 material_diffuse;
@@ -51,13 +49,22 @@ fn getEmission() {
 export const voxelWaterReflectionEmissionGlsl = /* glsl */ `
 uniform vec3 material_emissive;
 uniform float material_emissiveIntensity;
+
+void getEmission() {
+    dEmission = material_emissive * material_emissiveIntensity;
+}
+`;
+
+/** Planar reflection is a reflected received channel, not light-source self emission. */
+export const voxelWaterReflectionCombineGlsl = /* glsl */ `
 uniform sampler2D texture_planarReflection;
 uniform mat4 uReflectionTextureMatrix;
 uniform float uReflectionStrength;
 uniform float uReflectionWaterPlaneY;
-${voxelBlockLightGlsl}
 
-void getEmission() {
+vec3 combineColor(vec3 albedo, vec3 sheenSpecularity, float clearcoatSpecularity) {
+    vec3 received = albedo * dDiffuseLight;
+    if (uSkyVisibilityReady < 0.5 || uBlockLightReady < 0.5) return received;
     vec4 reflectionClip = uReflectionTextureMatrix * vec4(vPositionW, 1.0);
     vec2 reflectionUv = reflectionClip.xy / max(reflectionClip.w, 0.0001);
     vec2 edgeDistance = min(reflectionUv, vec2(1.0) - reflectionUv);
@@ -68,7 +75,7 @@ void getEmission() {
     float fresnel = pow(1.0 - clamp(dot(max(dNormalW, vec3(0.0)), viewDirection), 0.0, 1.0), 3.0);
     float selectedWaterPlane = 1.0 - smoothstep(0.006, 0.02, abs(vPositionW.y - uReflectionWaterPlaneY));
     float reflectionMix = upwardSurface * selectedWaterPlane * mix(0.22, 1.0, fresnel);
-    dEmission = material_emissive * material_emissiveIntensity + reflectedScene * uReflectionStrength * reflectionMix * validProjection + dAlbedo * blockLightAtSurface() * 0.78;
+    return received + reflectedScene * uReflectionStrength * reflectionMix * validProjection;
 }
 `;
 

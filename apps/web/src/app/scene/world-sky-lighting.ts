@@ -6,6 +6,7 @@ import {
   SkyVisibilityCache,
   buildSkyVisibilityVolume,
   SKY_VISIBILITY_MAX_COLUMN_HEIGHT,
+  SKY_VISIBILITY_DERIVED_BYTES,
   type SkyVisibilitySink,
 } from './sky-visibility-volume';
 
@@ -22,10 +23,11 @@ type Entry = {
   stamp: string;
   release: (() => void) | null;
 };
+const MAX_SKY_CHUNKS = Math.floor((32 * 1024 * 1024) / SKY_VISIBILITY_DERIVED_BYTES);
 
 /** Derived visibility only. The Authority remains the sole voxel/source owner. */
 export class WorldSkyLighting {
-  private readonly cache = new SkyVisibilityCache(1024, { worldTime: 0, profileScalar: 1 });
+  private readonly cache = new SkyVisibilityCache(MAX_SKY_CHUNKS, { worldTime: 0, profileScalar: 1 });
   private readonly entries = new Map<string, Entry>();
   private position: readonly [number, number, number] = [0, 0, 0];
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -45,7 +47,7 @@ export class WorldSkyLighting {
     if (this.disposed) throw new Error('Sky lighting is disposed.');
     const previous = this.entries.get(task.chunkKey);
     if (previous) this.release(previous);
-    if (this.entries.size >= 1024) throw new RangeError('Sky lighting capacity is exhausted.');
+    if (this.entries.size >= MAX_SKY_CHUNKS) throw new RangeError('Sky lighting capacity is exhausted.');
     const entry: Entry = {
       key: task.chunkKey,
       chunk: [task.cx, task.cy, task.cz],

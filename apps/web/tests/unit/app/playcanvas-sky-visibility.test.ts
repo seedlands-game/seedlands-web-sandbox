@@ -31,12 +31,18 @@ describe('actual PlayCanvas R8 CPU resource (Null device, not GPU pixel evidence
       size: 32,
       sourceRevision: 'current',
       visibility: new Uint8Array(32768).fill(255),
+      upperBoundaryVisibility: new Uint8Array(1024).fill(255),
     });
     expect(instance.getParameter('texture_skyVisibility')).toMatchObject({ data: texture });
     expect(water.getParameter('texture_skyVisibility')).toMatchObject({ data: texture });
+    expect(instance.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 1 });
+    expect(water.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 1 });
+    expect(texture.height).toBe(33);
     expect((texture.lock() as Uint8Array).every((value) => value === 255)).toBe(true);
     texture.unlock();
     invalidateChunkSky(resource);
+    expect(instance.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 0 });
+    expect(water.getParameter('uSkyVisibilityReady')).toMatchObject({ data: 0 });
     expect((texture.lock() as Uint8Array).every((value) => value === 0)).toBe(true);
     texture.unlock();
     const destroyed = vi.spyOn(texture, 'destroy');

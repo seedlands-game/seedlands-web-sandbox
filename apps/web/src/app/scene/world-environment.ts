@@ -1,8 +1,11 @@
 import * as pc from 'playcanvas';
 import { EnvironmentPresentationClock } from '../../client/presentation/environment-presentation-clock';
-import { cssRgb, sampleEnvironment, type Rgb } from './environment-palette';
+import { cssRgb, type Rgb } from './environment-palette';
 import type { QualityProfile } from './quality-profile';
 import { celestialDirection, SkySun } from './sky-sun';
+import { sampleLightingFrame } from './lighting-frame';
+import type { VoxelMaterials } from './voxel-materials';
+import type { LinearRgb } from './surface-lighting';
 
 const normalizedColor = ([r, g, b]: Rgb) => new pc.Color(r > 1 ? r / 255 : r, g > 1 ? g / 255 : g, b > 1 ? b / 255 : b);
 const UNDERWATER_FOG = new pc.Color(0.035, 0.22, 0.29, 1);
@@ -23,10 +26,16 @@ export class WorldEnvironment {
     private readonly sun: pc.Entity,
     private readonly quality: QualityProfile,
     private readonly water: readonly pc.StandardMaterial[],
+    private readonly materials?: VoxelMaterials,
+    camera?: pc.Entity,
   ) {
     app.scene.fog.type = pc.FOG_LINEAR;
     app.graphicsDevice.maxPixelRatio = Math.min(window.devicePixelRatio, 2) * quality.resolutionScale;
     this.skySun = new SkySun(app);
+    if (camera?.camera && materials?.lightingProfile) {
+      camera.camera.toneMapping = materials.lightingProfile.toneMapper === 'aces' ? pc.TONEMAP_ACES : pc.TONEMAP_LINEAR;
+      app.scene.exposure = materials.lightingProfile.exposure;
+    }
     this.apply();
   }
 
@@ -86,8 +95,17 @@ export class WorldEnvironment {
     return 'Sunset';
   }
 
+  get lightingFrame(): Readonly<{ skyRadiance: LinearRgb; blockLightTint: LinearRgb }> {
+    return sampleLightingFrame(this.materials?.lightingProfile, this.presentedWorldTime);
+  }
+
   private apply() {
-    const state = sampleEnvironment(this.presentedWorldTime);
+    const frame = sampleLightingFrame(this.materials?.lightingProfile, this.presentedWorldTime);
+    const state = frame.environment;
+    for (const material of this.materials?.categoryMaterials.values() ?? []) {
+      material.setParameter('uSkyRadiance', new Float32Array(frame.skyRadiance));
+      material.setParameter('uBlockLightTint', new Float32Array(frame.blockLightTint));
+    }
     const sunAngle = ((this.presentedWorldTime - 6) / 24) * Math.PI * 2;
     const elevation = Math.sin(sunAngle);
     const azimuth = (this.presentedWorldTime / 24) * 360 - 35;

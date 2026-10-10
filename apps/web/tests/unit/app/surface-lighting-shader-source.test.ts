@@ -5,7 +5,7 @@ import { voxelWaterReflectionEmissionGlsl } from '../../../src/app/shaders/voxel
 
 const emissionExpression = (shader: string) => shader.match(/dEmission\s*=\s*([^;]+);/)?.[1] ?? '';
 
-describe('STATIC_RED_ONLY：表面受光 shader source 合同', () => {
+describe('表面受光 shader source 合同（不替代 GPU 像素验收）', () => {
   it.each([
     ['terrain', voxelAppearanceEmissionGlsl],
     ['water', voxelWaterReflectionEmissionGlsl],
@@ -22,6 +22,7 @@ describe('STATIC_RED_ONLY：表面受光 shader source 合同', () => {
   it('terrain 与 water 通过 WebGL2 lightmap 通道合成 block 和 sky received light', () => {
     const lightingSources = [
       source('apps/web/src/app/shaders/voxel-block-light-chunk.ts'),
+      source('apps/web/src/app/shaders/voxel-received-light-chunk.ts'),
       source('apps/web/src/app/shaders/voxel-appearance-chunks.ts'),
       source('apps/web/src/app/shaders/voxel-array-chunks.ts'),
       source('apps/web/src/app/scene/voxel-materials.ts'),
