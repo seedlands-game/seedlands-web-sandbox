@@ -56,7 +56,7 @@ it('preserves every builtin pixel icon cell, transparency, coordinates and cache
   }
 });
 
-it('bounds the SVG element graph by same-color row segments on the fixed builtin workload', () => {
+it('records the restored unit-rect baseline on the fixed builtin workload', () => {
   const collect = () =>
     workload.reduce(
       (total, { itemId, texture }) => {
@@ -93,6 +93,5 @@ it('bounds the SVG element graph by same-color row segments on the fixed builtin
   const repeat = collect();
   console.info('pixel-icon-geometry-budget', JSON.stringify({ first, repeat }));
   expect(repeat).toEqual(first);
-  expect(first.elements).toBe(first.runBound);
-  expect(first.elements).toBeLessThan(first.opaquePixels);
+  expect(first.elements).toBe(first.opaquePixels);
 });

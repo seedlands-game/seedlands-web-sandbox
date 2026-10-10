@@ -58,31 +58,28 @@ function builtinPixelIcon(textureId: string): string | null {
   const cached = builtinPixelIcons.get(textureId);
   if (cached) return cached;
   const { width, height, palette, pixels } = texture.payload;
-  // Preserve the rect raster primitive and row order at fractional icon scales.
-  const rectangles: string[] = [];
-  for (let index = 0; index < pixels.length;) {
-    const color = pixels[index];
-    if (color === 0) {
-      index++;
-      continue;
-    }
-    const rgb = palette[color].join(',');
-    const x = index % width;
-    const rowEnd = Math.min(pixels.length, index - x + width);
-    let end = index + 1;
-    while (end < rowEnd && pixels[end] !== 0 && palette[pixels[end]].join(',') === rgb) end++;
-    rectangles.push(
-      `<rect x="${x}" y="${Math.floor(index / width)}" width="${end - index}" height="1" fill="rgb(${rgb})"/>`,
-    );
-    index = end;
-  }
+  const rectangles = pixels
+    .flatMap((color, index) =>
+      color === 0
+        ? []
+        : [
+            '<rect x="' +
+              (index % width) +
+              '" y="' +
+              Math.floor(index / width) +
+              '" width="1" height="1" fill="rgb(' +
+              palette[color].join(',') +
+              ')"/>',
+          ],
+    )
+    .join('');
   const svg =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' +
     width +
     ' ' +
     height +
     '" shape-rendering="crispEdges">' +
-    rectangles.join('') +
+    rectangles +
     '</svg>';
   const url = 'data:image/svg+xml,' + encodeURIComponent(svg);
   builtinPixelIcons.set(textureId, url);

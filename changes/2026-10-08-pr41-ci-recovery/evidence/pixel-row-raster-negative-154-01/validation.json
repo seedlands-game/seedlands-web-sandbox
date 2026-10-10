@@ -1,0 +1,46 @@
+{
+  "sourceSha": "0ff82ec7b4a63c85c3121e6f881bafd314c149e1",
+  "runId": "pr41-pixel-row-visual-154-01",
+  "status": "FAIL",
+  "durationMs": 68347,
+  "icons": 130,
+  "cases": 260,
+  "domControlDifferent16": 105,
+  "freshControlDifferent16": 105,
+  "sourceAADifferent16": 1,
+  "sourceAAPaperChannels": 456,
+  "all32Zero": true,
+  "coldStoredSky": "NOT_REACHED",
+  "main151": "NOT_STARTED",
+  "freshCandidateHashesComparedWith152": {
+    "equal": 260,
+    "different": 0
+  },
+  "controlHashesComparedWith152": {
+    "equal": 260,
+    "different": 0
+  },
+  "interpretation": "Candidate not accepted. Identical raster outputs across two geometries leave resource/context baseline confounding unresolved; not proof of geometry cause.",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-visual-154-01.log",
+      "bytes": 16017,
+      "sha256": "2bbf3e65de46254f3669ab9367cc28ef6592ec091d6562c784cf5f7403582062"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-verify-154-01.json",
+      "bytes": 386,
+      "sha256": "591ecabbc717a04f2b2b37e4fd94af4ecab2d6bf3c29beaa8010de5ebcf10d0a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-visual-attachments-154-01.json",
+      "bytes": 189973,
+      "sha256": "07cf8a688608504ade5ad80e87b44d3f3e1672681e9bb96269c1d70ac3869bfe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-visual-result-154-01.json",
+      "bytes": 473829,
+      "sha256": "9013117131643cb435d64090e6fbcc84787db4e84393646a0d940e9e0ca6e495"
+    }
+  ]
+}
