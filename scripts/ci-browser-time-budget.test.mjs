@@ -22,6 +22,7 @@ test('Classic owner contracts remain in the explicit behavior and type selection
     'apps/web/tests/unit/worker/persistence-chunk-directory-revision.test.ts',
     'apps/web/tests/unit/worker/persistence-column-directory.test.ts',
     'apps/web/tests/unit/client/browser-column-directory.test.ts',
+    'apps/web/tests/unit/worker/authority-worker-persistence-column.test.ts',
   ];
   for (const path of [...units, 'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts'])
     assert.ok(script.split(/\s+/).includes(path), `${path} is absent from the existing headless selection`);
