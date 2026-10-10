@@ -1,6 +1,20 @@
 import { CanonicalChunkResidency } from './chunk-residency';
 import type { ServerChunk } from './game-server-types';
 import { chunkKey } from '../world/voxel';
+import type { ChunkPersistence, ChunkPersistenceLoadDiagnostics } from './persistence/chunk-persistence';
+
+export async function ensureCanonicalChunkNeighborhood(
+  chunks: ReadonlyMap<string, unknown>,
+  persistence: ChunkPersistence | undefined,
+  cx: number,
+  cy: number,
+  cz: number,
+): Promise<ChunkPersistenceLoadDiagnostics | void> {
+  const neighborhood = canonicalChunkNeighborhoodKeys(cx, cy, cz);
+  const residentKeys = neighborhood.filter((key) => chunks.has(key));
+  if (residentKeys.length === neighborhood.length) return;
+  return await persistence?.ensureNeighborhood?.(cx, cy, cz, residentKeys);
+}
 
 export function canonicalChunkNeighborhoodKeys(cx: number, cy: number, cz: number): string[] {
   const keys: string[] = [];

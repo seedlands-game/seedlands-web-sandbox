@@ -10,7 +10,8 @@ import type { CanonicalChunkResidencyLimits } from './chunk-residency';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
 import type { WorldComposition } from './composition/contracts';
-import type { KernelWorldgenProvider, KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import type { StandardWorldgenProvider } from './worldgen/standard-worldgen-module';
 import type { CompositionCheckpointIdentity } from './composition/checkpoint-identity';
 
 export type ServerChunk = ChunkCoord & {
@@ -93,7 +94,7 @@ export type GameServerOptions = {
   moduleActorAuthority?: ModuleActorAuthority;
   legacyCompositionIdentity?: CompositionCheckpointIdentity;
   generatorVersion?: number;
-  worldgenProvider?: KernelWorldgenProvider;
+  worldgenProvider?: StandardWorldgenProvider;
   persistence?: ChunkPersistence & Partial<GameplayPersistence>;
   canonicalResidency?: Partial<CanonicalChunkResidencyLimits>;
   onUnknownChunk?: (key: string) => void;
