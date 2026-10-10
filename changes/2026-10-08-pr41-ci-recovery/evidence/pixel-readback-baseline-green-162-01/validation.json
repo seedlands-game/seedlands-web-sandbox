@@ -1,0 +1,40 @@
+{
+  "sourceSha": "5e9cada319ac4a7fbf63362400e193eb2c701a7d",
+  "runId": "pr41-pixel-readback-visual-162-01",
+  "status": "PASS",
+  "durationMs": 88189,
+  "production": "Restored old unit rects",
+  "appArtifactDigest": "a3a0b9a6007286778dd60aa0137167cf3479b5ebf39114890b179add30768ff3",
+  "icons": 130,
+  "cases": 260,
+  "allOriginalRGBAComparisonsZero": true,
+  "allSourceAAZero": true,
+  "allEquivalentResourceZero": true,
+  "allSameObjectRepeatsZero": true,
+  "canvasWillReadFrequently": true,
+  "coldStoredSky": "PASS",
+  "main151": "NOT_STARTED",
+  "interpretation": "Baseline raster measurement is now valid; no production optimization or performance conclusion yet. Prior negatives retained.",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-readback-visual-162-01.log",
+      "bytes": 7369,
+      "sha256": "ac435a2cd9d4889e55229ec76aa5ddb1a1adc503a4321457bac35fb7236e5513"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-readback-verify-162-01.json",
+      "bytes": 386,
+      "sha256": "cd3ebd653de40065404391e0715663fd582f181c7b8cf48568e12465f9a12064"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-readback-visual-attachments-162-01.json",
+      "bytes": 563457,
+      "sha256": "c12db6ebfddd9987aecac0f1cf52c7f024de3883081ef98d1182b9af33c04d36"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-readback-visual-result-162-01.json",
+      "bytes": 522816,
+      "sha256": "5e54c44b53981c83befd95ee9b2d9faaf03f2c241152ad04a15e8519a5d25834"
+    }
+  ]
+}

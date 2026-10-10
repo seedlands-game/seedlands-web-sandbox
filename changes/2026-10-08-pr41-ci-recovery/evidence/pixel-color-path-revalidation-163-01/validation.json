@@ -1,0 +1,55 @@
+{
+  "candidateParentSha": "5e9cada319ac4a7fbf63362400e193eb2c701a7d",
+  "productionOwnerEqualTo": "23e58b5dea144a3337bd72c6d924fb5d303940b3:apps/web/src/app/gameplay/asset-image.ts",
+  "measurementBaseline": "162 old source AA/raster fullvisual PASS; willReadFrequently true, original firsts/repeats retained",
+  "red": {
+    "failed": 1,
+    "passed": 1,
+    "expected": 583,
+    "actual": 37564
+  },
+  "green": {
+    "uniqueFiles": 5,
+    "passed": 13
+  },
+  "controlAA": {
+    "icons": 130,
+    "elements": [37564, 37564],
+    "urlBytes": [4315978, 4315978]
+  },
+  "candidateBB": {
+    "icons": 130,
+    "elements": [583, 583],
+    "urlBytes": [645222, 645222],
+    "opaquePixels": 37564
+  },
+  "classicTypes": "PASS",
+  "lint": "PASS",
+  "webTypes": "Candidate production tree matches149 already typed; new identified build rechecks",
+  "browser164": "NOT_RUN_AT_DELIVERY",
+  "main151": "NOT_STARTED",
+  "rasterContract": "All first/sourceAA/equivalent/repeat zero at16,32,actual DOM width34; no warmup/tolerance changes",
+  "performanceConclusion": "NOT_MEASURED; structure budget only",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-red-163-01.log",
+      "bytes": 1534,
+      "sha256": "501633126c9903ead70546f3097b355e344024a56f51df4e57df2321c7920869"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-green-163-01.log",
+      "bytes": 591,
+      "sha256": "5ad5225002eeb1ab80b7a0a92ffd5a7edc12428308781bc15ea0889de5cb97c9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-types-163-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-lint-163-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

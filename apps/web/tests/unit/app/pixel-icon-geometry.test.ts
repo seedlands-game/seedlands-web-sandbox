@@ -56,7 +56,7 @@ it('preserves every builtin pixel icon cell, transparency, coordinates and cache
   }
 });
 
-it('records the restored unit-rect baseline on the fixed builtin workload', () => {
+it('bounds SVG elements by actual colors after raster AA validation', () => {
   const collect = () =>
     workload.reduce(
       (total, { itemId, texture }) => {
@@ -93,5 +93,6 @@ it('records the restored unit-rect baseline on the fixed builtin workload', () =
   const repeat = collect();
   console.info('pixel-icon-geometry-budget', JSON.stringify({ first, repeat }));
   expect(repeat).toEqual(first);
-  expect(first.elements).toBe(first.opaquePixels);
+  expect(first.elements).toBe(first.colorBound);
+  expect(first.elements).toBeLessThan(first.opaquePixels);
 });

@@ -21,7 +21,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         .join('');
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" shape-rendering="crispEdges">${rectangles}</svg>`;
       const colorCount = new Set(pixels.filter((color) => color !== 0).map((color) => palette[color]!.join(','))).size;
-      const shapeBound = pixels.filter((color) => color !== 0).length;
+      const shapeBound = colorCount;
       return [[binding.itemId, { url: `data:image/svg+xml,${encodeURIComponent(svg)}`, colorCount, shapeBound }]];
     }),
   );
@@ -78,8 +78,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       }
       try {
         await image.decode();
-        // SVG drawImage consumes the source image's concrete container size/style.
-        // Match the real consumer rather than comparing a 34px DOM image with a 150px detached image.
+        // Keep image dimensions and style equal so the comparison varies only SVG geometry.
         const matchingImage = () => {
           const value = new Image(image.width, image.height);
           value.style.imageRendering = getComputedStyle(image).imageRendering;
@@ -99,7 +98,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         const elements = [...svg.matchAll(/<(?:rect|path)\b/g)].length;
         if (elements !== reference.shapeBound)
           errors.push(`${itemId}: ${elements} elements, expected ${reference.shapeBound}`);
-        for (const size of [16, 32]) {
+        for (const size of new Set([16, 32, image.width])) {
           canvas.width = canvas.height = size;
           context.imageSmoothingEnabled = false;
           context.drawImage(control, 0, 0, size, size);

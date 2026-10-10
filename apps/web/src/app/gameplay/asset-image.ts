@@ -58,28 +58,26 @@ function builtinPixelIcon(textureId: string): string | null {
   const cached = builtinPixelIcons.get(textureId);
   if (cached) return cached;
   const { width, height, palette, pixels } = texture.payload;
-  const rectangles = pixels
-    .flatMap((color, index) =>
-      color === 0
-        ? []
-        : [
-            '<rect x="' +
-              (index % width) +
-              '" y="' +
-              Math.floor(index / width) +
-              '" width="1" height="1" fill="rgb(' +
-              palette[color].join(',') +
-              ')"/>',
-          ],
-    )
-    .join('');
+  // Each closed subpath covers the original unit pixel; colors never overlap.
+  const cellsByColor = new Map<string, string[]>();
+  pixels.forEach((color, index) => {
+    if (color === 0) return;
+    const rgb = palette[color].join(',');
+    let cells = cellsByColor.get(rgb);
+    if (!cells) cellsByColor.set(rgb, (cells = []));
+    cells.push('M' + (index % width) + ' ' + Math.floor(index / width) + 'h1v1h-1z');
+  });
+  const paths = Array.from(
+    cellsByColor,
+    ([rgb, cells]) => '<path d="' + cells.join('') + '" fill="rgb(' + rgb + ')"/>',
+  ).join('');
   const svg =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' +
     width +
     ' ' +
     height +
     '" shape-rendering="crispEdges">' +
-    rectangles +
+    paths +
     '</svg>';
   const url = 'data:image/svg+xml,' + encodeURIComponent(svg);
   builtinPixelIcons.set(textureId, url);
