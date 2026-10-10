@@ -990,3 +990,13 @@ CI409于08:26自然结束：dde3c593 build/deterministic/architecture/static成�
 复用private observer86受控脚本的原startClassicWorld/prepareInitialState、原生PointerLock、world clock pause，只是静止生产渲染的因素诊断，不是完整产品验收或真实移动性能。90秒暖机、每段5秒稳定和30秒轻量rAF采样，trace截图/snapshot/source两组均开启，ZIP写在采样外；四段A/A组median差≤15%，失败即停止，禁止提高噪声线或第三次重试。通过后2AB+2BA共八段，primary组median帧时需≥20%改善且p95不回归>10%；完整raw/start/end与DOMcomputed滤镜、trace身份保留。任何场景变化/队列不空/源不匹配均失败，未知不升级为优化采纳。若仅paused idle正收益，需后续独立功能/视觉与动态整帧准入才能采取改动。
 
 Root独占private blur105脚本/config/raw/window/spec/new证据，不委派、不跑并行工作或整900s。所有输出独立命名，保留sealed/history。实际08:26周剩78%，60停止线；AI18min×120%=21.6min，09:02UTC检查点；传统0.18PD×120%=0.216PD。持现有机器性能reservation锁，原浏览器与安全策略不变。
+
+08:46UTC105提前结束：四段actual median300.1/550/483.4/516.65ms，A/A组差30.6083%>15%，FAIL；A/B NOT_RUN，不再重试，不采纳blur候选。完整raw、window FAIL/measurement RECORDED、warmup+四trace保留，public blur-aa-failure-105-01记录产物身份与原始哈希。未改生产CSS/质量/antialias，不从idle/GPU推测做实现。
+
+### 权威列来源106（预注册）
+
+08:50UTC冻结48d9ccde实际生产源；先保存105完整失败。本片仅把94真实provider generatedEmptyAboveY端口与99/103原Persistence列目录接到GameServer同owner只读观察，合并当前resident/dirty chunk metadata，不生成/加载/释放chunk、不读voxel payload、不扫描完整存档。不从generator版本或identity猜51；缺保证/目录unknown继续unknown。合法任意正负高cy与现有世界高度保持，source保证只针对程序生成。
+
+有界resident最多1024 visits，目录与合并结果最多128keys；边界/坐标/版本/损坏记录无部分complete，所有unknown失败关闭。输出同epoch/worldRevision、目录版本、真实provider生成空上界及detached当前resident或persisted metadata；当前resident同key优先，持久化revision更新于resident则拒绝不一致。异步查询前后epoch/worldRevision与resident vector变化superseded，不使用每physics commitSequence导致静态列无条件失效。只形成该点观察，不缓存永久negative proof；后续world epoch/dirty/resident失效、实际voxel/R8/shader消费仍需独立接线，不声称当前Sky已闭合。
+
+先真实GameServer+Memory/受控provider RED，再覆盖空/生成cell上界聚合/高cydirty与persisted/覆盖/unknown/保存/异步edit、纯生成residency变化及restore epoch反例GREEN。原load/gen调用不得被source inspect消费。Root独占新server-column-source helper/类型/GameServer窄接线及Stdlib测试/spec/code-map/evidence；不委派，不改WorldHarness协议、Worker RPC或Sky/shader/input。必要types/lint/原chunk residency与save回归，已有效1235全量不无新理由重复；最终prod实际消费者需后续验收。AI18min×120%=21.6min，09:12UTC检查点；传统0.18PD×120%=0.216PD，实际08:26周78%、60停止线。
