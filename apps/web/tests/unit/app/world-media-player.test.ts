@@ -59,7 +59,7 @@ const source = (): WorldMediaSourcePort & {
   ended(): void;
   removeEnded: ReturnType<typeof vi.fn>;
 } => {
-  let ended = () => undefined;
+  let ended: () => void = () => undefined;
   const removeEnded = vi.fn(() => {
     ended = () => undefined;
   });

@@ -73,6 +73,7 @@ export class WorldMediaPlayer<Decoded = unknown> {
   private disposed = false;
   private desired: MediaPlaybackFactV1 | null = null;
   private active: ActiveSource | null = null;
+  private loadingGeneration: number | null = null;
   private phase: WorldMediaPlayerSnapshot['phase'] = 'idle';
   private error: WorldMediaPlayerError | null = null;
   private paused = false;
@@ -170,6 +171,11 @@ export class WorldMediaPlayer<Decoded = unknown> {
       this.phase = 'resume-pending';
       return false;
     }
+    if (this.active) {
+      this.phase = 'playing';
+      return true;
+    }
+    if (this.loadingGeneration === this.generation) return false;
     return this.startDesired();
   }
 
@@ -196,6 +202,7 @@ export class WorldMediaPlayer<Decoded = unknown> {
     const fact = this.desired;
     if (!fact?.trackId || !fact.resource || this.disposed) return false;
     const generation = ++this.generation;
+    this.loadingGeneration = generation;
     this.phase = 'loading';
     let lease: WorldMediaResourceLease | null = null;
     try {
@@ -249,6 +256,8 @@ export class WorldMediaPlayer<Decoded = unknown> {
       releaseLease(lease);
       if (generation === this.generation && !this.disposed) this.fail('playback-failed', fact);
       return false;
+    } finally {
+      if (this.loadingGeneration === generation) this.loadingGeneration = null;
     }
   }
 

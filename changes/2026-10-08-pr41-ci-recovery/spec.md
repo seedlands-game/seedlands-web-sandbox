@@ -1372,3 +1372,17 @@ Exact e308fcd6原普通Native171完整PASS44179ms，新pulse/neutral ACK/同地�
 本片仅启用已有互斥Authority CPU sampler：同原唯一main，360sec延迟、20sec独占window、10ms采样；精确artifact asset/URL/hash匹配worker target，runtime/read receipt齐全才分析。无mainCPU/nativeTrace/keyboardTiming/benchmark、无额外输入runner/CDP输入/质量/Actor/路线/原900/45/20更改。175 test-only修复提交后新identified build177/verify，原main178一次diagnosticOnly/eligible=false；不是新的性能准入或产品PASS，不能从duration比较得出收益。capture失败/未开始则保留新失败与owner元数据；完整capture若没有新的可归因owner则终止此CPU归因单元，不盲重复。源/HEAD/文档从verify冻结到terminal；CI424自然结束前不推新head取消它。
 
 Root独占既有sampler执行与新证据，不修改sampler/生产owner、不委派、不新增模型/权限/域名。传统.12PD×120%=.144PD，AI22min×120%=26.4min，23:25UTC检查点；真实停止要求优先。完整需求矩阵/136与144/最终精确CI与审查仍开放。
+
+### World media 手势恢复的单播放源生命周期189（RED计划）
+
+183在精确8a0e082e/identified177上的既有5秒native窗口完整无丢失，位于V2开始；最长两个Renderer后台任务明确来自Blink `decodeAudioData`。整条诊断仍FAIL922840ms/原900000总限，C0–C3/Creative/V1完成、V2失败、C4/C5未到达；不从窗口归因或duration宣称旅程收益。CI425同head五非BrowserSUCCESS，Chromium主旅程两次C4 outbound global900 FAIL、visual/nativePASS、Modular及previewSKIP，完整main仍阻塞。
+
+源码新反例：bootstrap每次click调用GlobalAudio.unlock→WorldMediaRuntime.resumeFromGesture；WorldMediaPlayer在已有active source或loading时仍startDesired，重复resolve/decode，并可覆盖active引用而不retire旧source。本片只修正常手势对同一当前desired fact的幂等性：仍正常调用audio.resume、校验generation/disposed/desired/播放许可；已有active保持同一source且不重启，loading保持同一解码；真正pause后旧source正常stop/disconnect，再由合法手势重新启动。新fact、投影失效、失败、epoch、资源lease release及dispose所有权保持，不缓存decoded资源、不改MP3/资产/协议/音量/输入/路线/时限。
+
+先在独立owner测试world-media-gesture-lifecycle.test.ts取得真实RED：playing重复手势应只resolve/decode/start一次且dispose回收唯一source；pending decode期间手势不能替换generation/再decode；真正pause/resume允许第二source并回收旧source。保留原world-media-player.test.ts全部回归，将两文件加入同一既有headless及Classic类型选择；不增加浏览器runner或降低断言。GREEN后相关media owner/consumer定向回归、类型/lint/format/选择合同、identified构建及原无optional main验收分层报告。若main仍失败，保留明确生命周期修复但不称性能改善或可合入。
+
+Root独占world-media-player.ts、新owner test、package/Classic类型选择、本spec/新evidence及私有日志；无agent/新模型/权限/域名。传统.1PD×120%=.12PD，AI20min×120%=24min，2026-10-11 00:14UTC检查点；实际停止要求优先，未核实的费用/总占比不伪造估算。长期docs baseline不更新：只恢复既有单owner生命周期。183 sourcefreeze已在terminal结束；编辑前remote8a/basefba核对一致。完整产品矩阵/136/144/最终CI/review仍开放。
+
+189实际RED2FAIL/1PASS：重复手势resolve三次；pending decode被第二次start替换。生产只增加当前loading generation及finally同generation清理、active/当前loading幂等guard；异步resume许可、代际新鲜度、pause/retire/lease仍沿原路径。加入一次resume许可false后再true的pending反例，6files46unique GREEN；选择合同17PASS、定向lint PASS。首次将原owner测试纳入Classic类型后真实发现既有fixture的ended变量被推断为`() => undefined`，不能接收正式`() => void`监听器；仅添加显式正式端口类型，不改观察或断言。该原fixture路径纳入本片独占编辑范围，类型失败日志保留，修后类型待确认。
+
+189修后Classic类型PASS，6files46unique/定向lint/17选择合同PASS；新evidence media-gesture-lifecycle-189-01绑定旧head实际183/CI425及本片RED/GREEN。下一步提交后identified构建190，只运行原完整无optional main191一次，原900000总限/路线/输入/断言/质量不变；不作duration收益比较，失败保留且不盲重跑。
