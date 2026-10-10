@@ -92,6 +92,31 @@ describe('V2 diagnostic callback and evidence boundaries', () => {
     expect(report.pulses).toHaveLength(512);
     expect(report.truncated).toBe(true);
   });
+  it('route诊断复制已有release观测，保留未消费ACK而不制造完成', async () => {
+    vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', '0');
+    const log = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const nativeMovementInput = {
+      epoch: 'observed-session',
+      release: { code: 'KeyW', sequence: 3, neutral: true },
+    };
+    await withRoutePulseDiagnostics('V2-equipment', [3, 0], 45_000, async (diagnostic) => {
+      diagnostic!.begin(snapshot);
+      diagnostic!.beforeInput(snapshot, 80, 'KeyW');
+      diagnostic!.inputFinished('returned');
+      diagnostic!.observe({ ...snapshot, nativeMovementInput }, false);
+      nativeMovementInput.release.sequence = 100;
+    });
+    const pulse = JSON.parse(log.mock.calls[0]![1] as string).pulses[0];
+    expect(pulse.before.nativeMovementInput).toBeNull();
+    expect(pulse.lastObservation).toMatchObject({
+      acknowledgedInputSequence: 1,
+      nativeMovementInput: {
+        epoch: 'observed-session',
+        release: { code: 'KeyW', sequence: 3, neutral: true },
+      },
+    });
+    expect(pulse.firstSettled).toBeUndefined();
+  });
   it('正式benchmark旁路observer/log/Date.now而仍执行原callback一次', async () => {
     vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', '1');
     const log = vi.spyOn(console, 'info').mockImplementation(() => undefined);

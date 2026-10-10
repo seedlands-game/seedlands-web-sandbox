@@ -5,6 +5,7 @@ import { walkTo } from './harness';
 import type { RouteDirection } from './route-progress';
 
 function motion(value: ClassicSnapshot) {
+  const input = value.nativeMovementInput;
   return {
     player: value.player,
     authorityPosition: value.serverPlayerPosition,
@@ -13,6 +14,7 @@ function motion(value: ClassicSnapshot) {
     colliding: value.colliding,
     physicsTick: value.authority.physicsTick,
     acknowledgedInputSequence: value.authority.acknowledgedInputSequence,
+    nativeMovementInput: input ? { epoch: input.epoch, release: input.release ? { ...input.release } : null } : null,
   };
 }
 
