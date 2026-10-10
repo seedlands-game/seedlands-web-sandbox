@@ -1,6 +1,6 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import { browserArtifact, browserPackLock, compositionIdentity } from './identity';
-import { startClassicWorld } from './start';
+import { confirmClassicPerformanceWarning, startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { aimAtVoxelWithRealMouse } from './aim';
 import { clickCanvasCenter, closeInventory, lockPointer, moveMouseBy, snapshot, type ClassicWindow } from './harness';
@@ -189,6 +189,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#seed').fill(scenario.seed);
   await page.getByRole('button', { name: '进入世界', exact: true }).click();
+  await confirmClassicPerformanceWarning(page);
   await page.locator('#start-card').waitFor({ state: 'hidden' });
   await expect
     .poll(async () => (await transportSnapshot(page))?.transports[0]?.reference)

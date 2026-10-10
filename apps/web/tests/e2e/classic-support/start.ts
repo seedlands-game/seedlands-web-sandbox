@@ -3,6 +3,11 @@ import { waitForSnapshot } from './harness';
 import type { ClassicScenario } from './scenario';
 import { collectClassicFailureDiagnostics } from './evidence';
 
+export async function confirmClassicPerformanceWarning(page: Page): Promise<void> {
+  const warning = page.getByRole('button', { name: '仍然进入', exact: true });
+  if (await warning.isVisible()) await warning.click();
+}
+
 export async function startClassicWorld(
   page: Page,
   scenario: ClassicScenario,
@@ -28,8 +33,7 @@ export async function startClassicWorld(
   await page.locator('#quality').selectOption(scenario.quality);
   await page.locator('#seed').fill(scenario.seed);
   await page.getByRole('button', { name: '进入世界', exact: true }).click();
-  const warning = page.getByRole('button', { name: '仍然进入', exact: true });
-  if (await warning.isVisible()) await warning.click();
+  await confirmClassicPerformanceWarning(page);
   try {
     await page.locator('#start-card').waitFor({ state: 'hidden' });
   } catch (error) {
