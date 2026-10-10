@@ -1,4 +1,4 @@
-import { observeAuthorityColumnSource } from './authority-column-source';
+import { handleAuthorityRendererSource } from './authority-renderer-source';
 /// <reference lib="webworker" />
 
 import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
@@ -444,24 +444,15 @@ const handle = async (message: BrowserAuthorityRequest | DirectLogicAttachReques
     return;
   }
   if (!runtime || message.epoch !== epoch) throw new Error('Authority session is unavailable or stale.');
-  if (message.kind === 'request-column-source') {
+  if (message.kind === 'request-column-source' || message.kind === 'request-sky-source') {
     if (!worldHarness) throw new Error('World Harness is unavailable.');
-    const result = await observeAuthorityColumnSource(
+    await handleAuthorityRendererSource(
+      message,
       worldHarness,
-      () => ({ server: runtime!.server, epoch: runtimeEpoch, worldId: persistence!.worldId }),
-      message.cx,
-      message.cz,
-      message.runtimeEpoch,
-    );
-    post({
-      kind: 'authority-response',
-      protocolVersion: PROTOCOL_VERSION,
+      () => ({ runtime: runtime!, epoch: runtimeEpoch, persistence: persistence! }),
       epoch,
-      runtimeEpoch: message.runtimeEpoch,
-      requestId: message.requestId,
-      ok: true,
-      result,
-    });
+      post,
+    );
     return;
   }
   if (message.kind === 'world-harness-rpc') {

@@ -137,6 +137,9 @@
     "apps/web/tests/unit/app/gameplay-entity-presenter.test.ts",
     "apps/web/tests/unit/app/first-person-viewmodel.test.ts",
     "apps/web/tests/unit/app/surface-lighting.test.ts",
-    "apps/web/tests/unit/app/surface-lighting-contract.test.ts"
+    "apps/web/tests/unit/app/surface-lighting-contract.test.ts",
+    "apps/web/tests/unit/client/browser-chunk-persistence.test.ts",
+    "apps/web/tests/unit/worker/authority-renderer-sky-source.test.ts",
+    "apps/web/tests/unit/client/browser-stored-sky-snapshot.test.ts"
   ]
 }

@@ -1,0 +1,11 @@
+# C4 input cadence diagnosis 118
+
+Read-only analysis of CI413 (`cdd6e1fb`, run 38053557360) and unchanged input owners at current HEAD `7831cb86` found **no confirmed production cause**. No production change, test or browser run was made in this slice.
+
+Keyboard transitions publish independently of render prediction. The four-step prediction cap alone therefore does not establish lost input. Authority rejects late commands and clears pending state, but the existing failure counters cover the entire client lifetime and cannot attribute those rejections to C4. Both series contain positive X progress for every settled pulse; this does not prove that every requested input was effective.
+
+The first series records 69 pulses (68 settled): aim 6,458ms, keyboard calls 22,468ms and observed post-release settlement waits 50,216ms, ending under the original whole-journey limit. The retry records 78 settled pulses: aim 6,859ms, keyboard calls 25,349ms and settlement waits 58,810ms, ending at the original route limit. These are diagnostic observation times, not server ACK times or performance acceptance. In the retry, settled displacement changes from about 1.6m to about 0.8m around pulse 22 at X=112.8645; no corresponding causal input decision or entity state has been captured.
+
+The original complete failure attachment was located through GitHub: artifact 11671885624, 350,789,197 bytes. The transfer interface returns `workspace_path=null`; local inspection awaits the specifically requested `sdmntprjapaneast.oaiusercontent.com` transfer authorization. No network policy was expanded. The raw console log and its hash remain recorded in [CI413 terminal evidence](../ci413-terminal-117-01.json). The independent client-side read-only note is retained at `/workspace/pr41-input-cadence-118-luna-01/diagnosis.md`.
+
+All original physical input, route arrival, settlement, collision, 90/900-second limits and quality assertions remain. CI414 continues naturally on `7831cb86`; no replacement push cancels it. At 14:00UTC reviews and review threads were both empty. This is neither a C4 fix nor full PR acceptance. Latest actual product UI budget remains 75% at 13:27UTC, with the unchanged approximately 60% stop line.

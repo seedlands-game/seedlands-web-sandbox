@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "stage": 118,
+  "status": "NO_CONFIRMED_PRODUCTION_CAUSE",
+  "basedOnHead": "7831cb863227ad21ecde88beca3351aacd8192f3",
+  "ciSource": "cdd6e1fb130c3feeac2ee40176826d98254e99e2",
+  "ciRun": 38053557360,
+  "sourceInputPathsUnchangedSinceCi": true,
+  "productionChanged": false,
+  "testsRun": false,
+  "browserRun": false,
+  "actualBudget": {
+    "observedAtUTC": "2026-10-10 13:27",
+    "weeklyRemainingPercent": 75,
+    "stopRemainingPercent": 60
+  },
+  "artifact": {
+    "id": 11671885624,
+    "sizeBytes": 350789197,
+    "fileId": "file_00000000bd9c820997520cec105a83d0",
+    "workspacePath": null,
+    "requiredTransferHostname": "sdmntprjapaneast.oaiusercontent.com",
+    "authorization": "pending; not fetched to execution environment"
+  },
+  "routes": [
+    {
+      "label": "C4-outbound",
+      "elapsedMs": 79375,
+      "pulseCount": 69,
+      "settledCount": 68,
+      "aimTotalMs": 6458,
+      "keyboardTotalMs": 22468,
+      "settleTotalMs": 50216
+    },
+    {
+      "label": "C4-outbound",
+      "elapsedMs": 91305,
+      "pulseCount": 78,
+      "settledCount": 78,
+      "aimTotalMs": 6859,
+      "keyboardTotalMs": 25349,
+      "settleTotalMs": 58810
+    }
+  ],
+  "limits": [
+    "Cumulative input receipts do not identify decisions during C4.",
+    "Settled positive displacement does not establish every requested input was effective.",
+    "Retry displacement changes around pulse22/x112.8645, while first run does not show the same transition; no causal attribution.",
+    "Snapshot attachment cannot yet be inspected locally.",
+    "No speed, physical pulse, timeout, acceptance or quality change."
+  ]
+}

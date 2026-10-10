@@ -17,7 +17,7 @@ export async function requestBrowserSkyChunk(
   const submittedEpoch = epoch();
   const key = chunkKey(cx, cy, cz);
   const payload = (await request({
-    kind: 'request-collision-baseline',
+    kind: 'request-sky-source',
     key,
     minimumRevision: revision,
   })) as AuthorityCollisionBaselinePayload;

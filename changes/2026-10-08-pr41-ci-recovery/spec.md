@@ -1042,3 +1042,23 @@ Root独占World/cache/sampler、三个实际消费者接线与测试、GPUprobe/
 13:21UTC117首GPU运行：6230b10b/source39e5ad39/artifact0a165895原visual34秒FAIL。原33像素PASS；新增模型received/unknown/invalidation等均符合固定值，但world-item/viewmodel的self-only和self-unknown实得0而期望64。原始66pixels/HTML/day PNG/失败receipt保留，非PASS。SDK实际getEmission为material_emissive×material_emissiveIntensity；控制面只设置颜色而继承非发光源的intensity0，属于probe设置缺项，不是确认生产自己发光缺陷。唯一修正模型probe clone的独立intensity=1并去除借用emissiveMap作为白色控制，生产材质字段不改，64/128/0断言与原输入/时限不变；须新身份构建和原visual再验。不把此失败冒充有效旧生产GPU RED。
 
 13:37UTC117交付：精确d237b27e/source db048b2d/artifactc8ba11c2原visual1.4m PASS、六类66个不同固定GPU像素PASS，Root实际查看日/夜八源/移除源PNG确认手持共同变暗且UI图标保留；原native31.2s PASS（runner34.7s），两者NON_MAIN/noConflict。新证据model-received-lighting-117-01与ledger117绑定。CI413/cdd已自然终态五项非浏览器SUCCESS、main两轮V2返回后C4-outbound失败：首次900秒总限截断，retry90秒route至208.5,0.5未达；原visual1.2m/native28.1sPASS、Modular/previewSKIP。原1.97MB完整日志/两组C4pulse与哈希保留；每settled pulse均有正向位移，不能猜定input丢失。源码确认keydown/up直接capture并发布，否定仅80ms短于RAF就必然丢输入的假设。本组约38分钟内结束，未把时间换算额度；13:27产品UI实测周剩75%，约60%全PR停止线保持。
+
+### C4实际input推进118（13:43UTC预注册）
+
+承接远端7831cb86/生产d237b27e与已结束CI413。两轮C4 outbound69/78个W+Space300ms脉冲，68/78个settled均正向位移，约79秒到x190/91秒到x159；V2先前均返回。只针对真实输入到Authority推进的原因诊断：Root读同次已保存input-decision与Authority scheduler，唯一已有Luna可独立读client prediction/input stream/capture路径并只写private结论，8分钟限时、不跑测试/build/browser、不改源。不得把RAF低频、累计late计数或单次ACK当因果；复现须由真实现有owner的可执行行为反例验证。没有确认原因就不猜改、不追加无依据性能实验。
+
+确认后Root独占最小生产修复及相关测试/证据，保留原W/S+Space、90/900秒、到达/停稳/碰撞和玩法断言，禁止更改测试gate掩盖失败。必要当前源码types/lint/原唯一生产入口按新identity验证；已有73单测/66GPU不无理由重跑。CI414继续自然运行，不取消前驱或提早用新push替换证据。AI30min×120%=36min，14:19UTC本片停止并按新证据重估；传统0.3PD×120%=0.36PD，费率/额度分母未知不换算。13:27实际UI周剩75%，约60%全PR停止线不变。固定汇总先用确定性工具，Luna不再委派；写路径互斥，Root负责集成验收。完整原范围与ledger117保持，不扩大权限或生产部署。
+
+14:00UTC118只读检查点：当前7831与CI413的input capture/prediction/clock/Worker/buffer/Authority源无差异；Root与唯一Luna未确认生产原因，未改源码、未运行新测试/build/browser。两组正向pulse、累计late以及四步预测cap不能单独归因；重试pulse22/x112.8645起约半位移差异保留为未解释事实。新input-cadence-118-01记录原始数据派生与边界。原350789197字节失败ZIP已由GitHub定位，传入workspace_path=null，具体sdmntprjapaneast.oaiusercontent.com单次授权待答，无自行扩权。CI414五非Browser成功/Chromium继续自然运行，14:00reviews/threads均空；保留原W/S+Space/90/900/全部玩法断言，不猜改、不取消、不宣布可合入。13:27实际UI75%与约60%停止线保持；新证据到达后再按有界最小修复复评。
+
+### 非驻留持久化Sky源119（14:04UTC预注册）
+
+现有明确功能缺口：完整列目录包括已保存非驻留cy记录，但116的requestBrowserSkyChunk仅调用resident collision baseline，无法取得该记录的payload，严格保持暗。Root仅补当前world的独立只读Sky源请求，不扩大原碰撞baseline可用性；沿现有Persistence load解码当前seed/generator/provider记录，直接返回独占数据，不消费prepared registry/cache、不ensure/generate/insert/改变residency、无持久缓存。列预算128条/512高度/至多16临时副本与32MiB持久Sky预算不改。
+
+现有Authority列源的短host frontier→队列外IO→短frontier复核模式复用，禁止持有host队列等待存储。请求缺/旧runtime epoch先拒绝，等待期间restore/server/persistence替换、world revision/save fence变化、坐标/key/revision/shape错配或存储缺失都返回未知且不发布部分证明；自己的世界与精确revision严格绑定，canonical/流体借用buffer不detach。BrowserPersistence新增nonconsuming只读读法，所有save/replace/corpus/dispose fences保持。根独占新helper/入口接线/测试/spec/code-map/独立evidence，不新增agent、外部域名或权限；C4附件传输仍待明确答复。
+
+先实际旧非驻留读取RED，再有效持久记录/缺失/版本错配/保存与restore竞态/Host input可在IO期间服务的行为GREEN，复用有效117范围结果，仅核对新增入口和生产/test类型、范围lint/原owned格式与正常hooks。后续源冻结identified build与实际冷存档Sky消费者验收独立记状态，不以单测当像素/整矩阵通过。CI414继续自然终态，不push取消，不重复本地900秒；若取得新C4事实优先转向已证实原因。AI25分钟×120%=30分钟，14:34UTC检查点；传统0.25PD×120%=0.3PD，真实13:27周75%与约60%全PR停止线保持、费用与额度占比未知不估算。
+
+14:19UTC新CI414精确7831自然终态五非BrowserSUCCESS/ChromiumFAIL/previewSKIP，visual1.6m与native34.9sPASS；main首次V1闭门开始not-before-door，retry V2目录铁块button已click action done但等待scheduled navigation触及原10000ms，两轮C4未运行。完整新日志单独保存，sha256 6392aec1df75f8e974f84494fdfff4301968a07dc5f45956fd78b4829b251747。唯一现有Luna做120有界只读首次闭门诊断至14:25，独占private pr41-door-diagnosis-120-luna-01/diagnosis.md，不改仓库/测试/build/browser/网络、不再委派、不处理未确定retry原因；Root独占119剩余类型/证明/证据。没有确认前不弱化before-door/oracle或10秒click/90/900门槛，当前仍不可合入。
+
+14:32UTC119源码检查点：相关5files49PASS（真实持久屋顶进入客户端列proof/无碰撞驻留、队列外IO时输入服务、保存/恢复/版本/借用buffer反例），生产Web/Svelte0error0warning+tsc/tools、最终Classic types、范围500有效行lint、CI选择3合同与diff检查PASS。最后集成proof的provider字面量过窄类型FAIL已修为独立结构声明，原失败保留。新stored-sky-source-119-01记录源码层范围；冷存档Browser/identified build/提交推送尚未执行，不能声称完整矩阵或PR可合入。实际14:25产品UI周75%/4天12小时，60停止线不变。
