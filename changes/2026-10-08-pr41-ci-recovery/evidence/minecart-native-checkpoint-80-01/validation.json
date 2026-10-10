@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "5eee6e15eb165cc4c1898c038ef23ae8ecedb089",
+  "sourceDigest": "99f432fa0207421a5b8b305d214bc77b1b9d97bcd343719949fc2073c96eda48",
+  "artifactDigest": "14285c69e9209342d7d57192ccd232d7cda19c7942b02cb247103caed040aff9",
+  "runId": "pr41-minecart-world-frontier-browser80-01",
+  "runnerOutcome": "passed",
+  "selection": {
+    "mode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "modularSmokeMatches": 0,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-ecbb537107fc1cdb398c",
+        "file": "apps/web/tests/e2e/classic-support/minecart-journey.ts",
+        "test": "Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档",
+        "project": "chromium"
+      }
+    ]
+  },
+  "testDurationSeconds": 45.0,
+  "runnerDurationSeconds": 48.9,
+  "states": {
+    "deployed": {
+      "version": 2,
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 1,
+        "lifetime": 2
+      },
+      "definitionId": "seedlands:minecart",
+      "pose": {
+        "position": [2.5, 31, 0.5],
+        "yaw": 1.5707963267948966
+      },
+      "velocity": [0, 0, 0],
+      "routeCursor": {
+        "family": "seedlands:ordinary-rail",
+        "cell": [2, 31, 0],
+        "variant": "seedlands:rail-east-west",
+        "entry": {
+          "side": "west",
+          "elevation": 0
+        },
+        "exit": {
+          "side": "east",
+          "elevation": 0
+        },
+        "progress": 0.5,
+        "segmentLength": 1
+      },
+      "rider": null,
+      "fuel": null,
+      "inventory": []
+    },
+    "mounted": {
+      "version": 2,
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 1,
+        "lifetime": 2
+      },
+      "definitionId": "seedlands:minecart",
+      "pose": {
+        "position": [2.5, 31, 0.5],
+        "yaw": 1.5707963267948966
+      },
+      "velocity": [0, 0, 0],
+      "routeCursor": {
+        "family": "seedlands:ordinary-rail",
+        "cell": [2, 31, 0],
+        "variant": "seedlands:rail-east-west",
+        "entry": {
+          "side": "west",
+          "elevation": 0
+        },
+        "exit": {
+          "side": "east",
+          "elevation": 0
+        },
+        "progress": 0.5,
+        "segmentLength": 1
+      },
+      "rider": {
+        "entityId": "player-1",
+        "lifetime": 1,
+        "epoch": 1
+      },
+      "fuel": null,
+      "inventory": []
+    },
+    "moved": {
+      "version": 2,
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 1,
+        "lifetime": 2
+      },
+      "definitionId": "seedlands:minecart",
+      "pose": {
+        "position": [9, 31, 0.5],
+        "yaw": 1.5707963267948966
+      },
+      "velocity": [0, 0, 0],
+      "routeCursor": {
+        "family": "seedlands:ordinary-rail",
+        "cell": [8, 31, 0],
+        "variant": "seedlands:rail-east-west",
+        "entry": {
+          "side": "west",
+          "elevation": 0
+        },
+        "exit": {
+          "side": "east",
+          "elevation": 0
+        },
+        "progress": 1,
+        "segmentLength": 1
+      },
+      "rider": {
+        "entityId": "player-1",
+        "lifetime": 1,
+        "epoch": 1
+      },
+      "fuel": null,
+      "inventory": []
+    },
+    "dismounted": {
+      "version": 2,
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 1,
+        "lifetime": 2
+      },
+      "definitionId": "seedlands:minecart",
+      "pose": {
+        "position": [9, 31, 0.5],
+        "yaw": 1.5707963267948966
+      },
+      "velocity": [0, 0, 0],
+      "routeCursor": {
+        "family": "seedlands:ordinary-rail",
+        "cell": [8, 31, 0],
+        "variant": "seedlands:rail-east-west",
+        "entry": {
+          "side": "west",
+          "elevation": 0
+        },
+        "exit": {
+          "side": "east",
+          "elevation": 0
+        },
+        "progress": 1,
+        "segmentLength": 1
+      },
+      "rider": null,
+      "fuel": null,
+      "inventory": []
+    },
+    "restored": {
+      "version": 2,
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 2,
+        "lifetime": 2
+      },
+      "definitionId": "seedlands:minecart",
+      "pose": {
+        "position": [9, 31, 0.5],
+        "yaw": 1.5707963267948966
+      },
+      "velocity": [0, 0, 0],
+      "routeCursor": {
+        "family": "seedlands:ordinary-rail",
+        "cell": [8, 31, 0],
+        "variant": "seedlands:rail-east-west",
+        "entry": {
+          "side": "west",
+          "elevation": 0
+        },
+        "exit": {
+          "side": "east",
+          "elevation": 0
+        },
+        "progress": 1,
+        "segmentLength": 1
+      },
+      "rider": null,
+      "fuel": null,
+      "inventory": []
+    },
+    "staleReferenceInspection": {
+      "ok": true,
+      "data": {
+        "kind": "entity-reference",
+        "reference": {
+          "entityId": "transport-2",
+          "epoch": 1,
+          "lifetime": 2
+        },
+        "status": "stale"
+      },
+      "frontier": {
+        "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+        "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+        "worldRevision": 2,
+        "commitSequence": 3704,
+        "physicsTick": 1629,
+        "fluidWorkSequence": 0,
+        "logicObservationSequence": 6
+      }
+    },
+    "currentReferenceInspection": {
+      "ok": true,
+      "data": {
+        "kind": "entity-reference",
+        "reference": {
+          "entityId": "transport-2",
+          "epoch": 2,
+          "lifetime": 2
+        },
+        "status": "current"
+      },
+      "frontier": {
+        "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+        "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+        "worldRevision": 2,
+        "commitSequence": 3704,
+        "physicsTick": 1629,
+        "fluidWorkSequence": 0,
+        "logicObservationSequence": 6
+      }
+    },
+    "currentWorldIdentity": {
+      "ok": true,
+      "data": {
+        "protocolVersion": 1,
+        "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+        "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+        "seed": 2890198465,
+        "seedText": "classic-ordinary-minecart-75",
+        "generatorVersion": 11,
+        "playerId": "player-1",
+        "runtime": "authority",
+        "supported": {
+          "player": true,
+          "scriptedLogic": true,
+          "existingNpcSimulation": true
+        }
+      },
+      "frontier": {
+        "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+        "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+        "worldRevision": 2,
+        "commitSequence": 3704,
+        "physicsTick": 1629,
+        "fluidWorkSequence": 0,
+        "logicObservationSequence": 6
+      }
+    }
+  },
+  "attachments": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/minecart-world-frontier-native-browser-80-01.log",
+      "bytes": 1007,
+      "sha256": "d4bb58a50740c1d441a8cfb0443dfac9367dad984f234a36f8a8b0a236c9bf3b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/minecart-world-frontier-production-build-80-01.log",
+      "bytes": 3771,
+      "sha256": "5d37abd9663c26cb1c435d8ba5a2b5a304e5468f60bbdbe0d1794e514a920c0b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/minecart-world-frontier-types-80-03.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native80-html-extracted-01/classic-minecart-native-input.json",
+      "bytes": 85498,
+      "sha256": "f3ae950356937bb290713f87e1e135dc07332c611354dbc68d9b0f724c45e917"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/browser80-native-01/html-report/data/9c43f86f8009d2dda16c7092e099f1fda59e30c8.png",
+      "bytes": 372841,
+      "sha256": "4e055d1759c75d67af50ac17cb1bf9401f2bf7f2942da6eb10122a6fe892aa38"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/browser80-native-01/html-report/data/13c9211f4a071a89cd4ba0791549cb54c1ef5f69.png",
+      "bytes": 109285,
+      "sha256": "f1948e9d75adb07db58165e3615fa006b1fe2215b455ddbe71f4b59fdc6b008b"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-minecart-world-frontier-browser80-01/classic.json",
+      "bytes": 698,
+      "sha256": "120204dbe97715f82a804df5c3c9ccef05d9f7cacde4232d6332dbd49be9075d"
+    }
+  ],
+  "fullRegression": {
+    "stdlib": {
+      "passed": 1196,
+      "failed": 1,
+      "isolatedSameTestPassed": 1
+    },
+    "classicHeadless": {
+      "passed": 793,
+      "failed": 2,
+      "isolatedSameFilesPassed": 6
+    }
+  },
+  "limitations": [
+    "NON_MAIN不证明完整Classic或PR可合入",
+    "恢复截图为天空及诊断面板，不能证明恢复后模型可见",
+    "全量stdlib/Headless超时未诊断或改绿",
+    "完整光照、运输、性能及最终精确SHA CI仍待验收"
+  ]
+}
