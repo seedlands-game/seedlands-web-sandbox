@@ -23,6 +23,7 @@ export const commandSourceForPrincipal = (principal: WorldPrincipal, runtime: Au
 });
 
 export const inspectAuthorizationRequest = (request: WorldInspectRequest): WorldAuthorizationRequest => {
+  if (request.kind === 'column-source') return authorizationRequest('world.chunk', 'read');
   const target: WorldAuthorizationTarget =
     request.kind === 'voxel'
       ? { kind: 'voxel', position: request.position }
@@ -68,6 +69,8 @@ export function executeWorldInspect(
   captured: CapturedWorldInspectRequest,
 ): WorldInspectResult {
   const request = requireCapturedInspectRequest(captured);
+  if (request.kind === 'column-source')
+    throw new TypeError('Column source inspection requires asynchronous publication.');
   const server = owner.runtime.server;
   if (request.kind === 'entity-reference') {
     if (!server.resolveEntityReference) throw new Error('Entity reference resolution is unavailable.');

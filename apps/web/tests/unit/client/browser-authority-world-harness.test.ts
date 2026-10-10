@@ -1,9 +1,6 @@
-import { restoredFrontier } from './fixtures/browser-authority';
+import { FakeAuthorityWorker, restoredFrontier } from './fixtures/browser-authority';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  BrowserAuthorityClient,
-  type AuthorityWorkerPort,
-} from '../../../src/client/authority/browser-authority-client';
+import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import type {
   AuthorityReady,
   AuthorityResponse,
@@ -32,19 +29,6 @@ const mediaFact = (revision: number): MediaPlaybackFactV1 => ({
   playing: true,
   resumePending: false,
 });
-
-class FakeAuthorityWorker implements AuthorityWorkerPort {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
-  onerror: ((event: ErrorEvent) => void) | null = null;
-  posts: unknown[] = [];
-  postMessage(message: unknown) {
-    this.posts.push(message);
-  }
-  terminate() {}
-  emit(message: AuthorityResponse) {
-    this.onmessage?.({ data: message } as MessageEvent<AuthorityResponse>);
-  }
-}
 
 const body = (id = 'player-1') => ({
   id,
