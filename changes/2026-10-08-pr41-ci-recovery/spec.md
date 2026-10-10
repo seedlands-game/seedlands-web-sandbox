@@ -1120,3 +1120,11 @@ Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据�
 ### CI416 终态诊断132（16:45UTC）
 
 精确dcb39a9e自然终态：architecture/build/deterministic/static SUCCESS，headless4FAIL/1026PASS（129原两文件RED后7files82PASS本地修复），Chromium1FAIL/1SKIP/2PASS32.4m，previewSKIP。两轮V1 PASS，V2原900000总限中断placeOneEach committedPointer/铁头盔Shiftclick，C4/C5 NOT_RUN；原visual含cold来源1.0m及普通native23.3s PASS，不能代替main。原日志两轮各57routes全部returned、合计866pulses；分段计时与260资源操作均只作diagnosticOnly，不相加包含项、不推断GPU或命令因果。完整raw1595197bytes/SHA20273a92d62a6f2306f7411d05f1033807491c8de621069682b5f6ac25839af6与解析私有保存，marker误名已纠正，ZIP仍不可得。132证据独立ci416-terminal-132-01.md；正常feature push交付129/130与本终态，再按当前来源注册有界诊断。周74%@16:03/约60停止线，PR不可合入。
+
+### 当前来源精确 Authority Worker 诊断133（16:49UTC预注册）
+
+冻结129/130/132源码，在本注册正常提交后的精确HEAD构建一次identified artifact；先将旧5690 dist保留到私有独立路径，不改写旧回执。只选原唯一Classic主旅程完整C0–C5及其扩展，原900000/45000/20000ms、输入、trace、SwiftShader/WebGL2、quality low和全部断言不变；不增加重试。新run pr41-authority-profile-browser-133-01，仅开启现有SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE=1（固定360sec延迟/20sec/10ms sampler），main CPU/native trace/benchmark关闭；runner从本次artifact唯一worker asset/hash派生精确目标，原attach/stop/detach和错误保留。
+
+待检问题是当前统一Sky/模型和新释放边界的生产栈中，V2等待期间同一Authority Worker的采样工作分布；历史旧源主线程idle/program和原生SwapBuffers等待无法回答当前Worker的函数归属。当前原CI416路线全部返回但整场900sec仍失败，计时不提供因果。新诊断仅回答本次精确Worker/source/阶段的热点，不宣称GPU因果、收益、A/A或A/B、可合入；即使main PASS也仍标带sampler的diagnosticOnly/eligible=false，标准最终验收另需无sampler。采样未开始就失败或没有V2采样则如实未覆盖，不补跑盼绿。
+
+Root独占spec/新私有run/回执，源码与生产产物在构建到runner结束冻结；不委派、不增加CPU/网络/线程权限。本轮AI20min×120%=24min，17:13UTC检查点，传统.1PD×120%=.12PD；不将该估计换算实际额度。最新产品UI16:03周74%、约60停止线；正常feature push包含129/130/132/本注册，先复核远端与现有workflow生产仅main/原PR preview，无合并、automerge或生产部署。长期docs baseline未修改，现有证据边界不变。
