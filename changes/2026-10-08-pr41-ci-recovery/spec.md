@@ -1152,3 +1152,29 @@ Luna134只读核实stdlib支持quarter/双向坡但Classic只两直轨；新增r
 17:31UTC135冻结后验收检查点：b705f370 identified build PASS（sourceDigest cb7cc554/artifact fe182af4/lock882341/289files/builtAt17:24:48.677Z），原native135-02 1PASS/48.0sec/runner51.5sec，已读actual artifact/Pack/composition/state、deployed/restored原PNG。135-01选择起始锚点0testsFAIL完整保留，collection-only确认正确原唯一用例后新runId执行，非生产重试盼绿。现有Luna对Root共享resolver/identity/V4窄compat一轮冻结源码review未发现P0/P1/P2，不自审自己的配置、不把源码review当产品。Root identity constant与fixture真实composition equalityPASS。新native证据为route-shapes-native-135-02。
 
 CI417旧356ec528真实终态已保留ci417-terminal-135-01：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS32.0m/previewSKIP；主旅程两次V2失败，首轮900sec截断、retry到78.5,-.5原45sec超时，原visual/nativePASS，C4/C5未跑。39route/132operation原JSON与723656bytes完整raw留私有，真实release+ACK存在，不能声称根因已明。135当前native仅straight NON_MAIN，新shape驾驶/mesh等开放、PR仍Draft/不可合入。CI417已终态，核对最新远端/workflow后只正常feature push135与当前交付记录，最终精确SHA CI独立核对，无merge/automerge/main/生产部署。
+
+### 正式Classic弯道/坡道连续运动诊断136（17:40UTC预注册）
+
+当前本地/远端a1a9ed3b、main fba4486e已17:39UTC fetch核对；135当前source b705f370原nativePASS、CI41838072280710正在验证a1a9ed3b，不取消/抢推。135配置loaded-cell投影不证明实际驾驶。Root先在正式Classic AuthorityRuntime/注册普通矿车部署和relation/motion Owner建立八个行驶用例：四corner从deployment实际选中的有向edge驶入下一平轨，四ascending方向在实际Stone支持台阶上驶入上层平轨，检查carrier真实position/height/cursor/rider/reference同次保持；显式已加载Air与Stone地形，不用无支持的浮空假轨证明可玩，不直接写carrierstate。使用现有InputBuffer接口与原推进，非Browser原生按键验收；Browser/mesh与全矩阵仍开放。
+
+先取得当前精确owner的可执行RED/结果与stop路径，再选择最小修复；此诊断不修改生产geometry/碰撞/route配置/identity/存档，不弱化原wall/unknown/mixed collision或输入约束，不向当前正式CI提交未修复的RED用例，不作性能声明。新增owner测试路径classic-rail-motion-shapes.test.ts由Root独占，根spec/独立私有日志亦独占，不委派/新增模型/权限，不改长期baseline。若修复会扩大route/identity或collision语义，需要带新证据另注册有限范围，保留135及当前非空save兼容后再交付。AI12min×120%=14.4min，17:54UTC检查点；实际UI最近16:55周74%共享账户、约60停止线保持，不推算tokens。
+
+17:54UTC136检查点：8正式Owner例中4corner PASS/4受Stone支撑ascending FAIL，实际沿坡约0.049912m即停止；当前source a1a9ed3b，未修改生产geometry。原始日志shape-owner-red-136-01完整私有保留，新RED测试未加入CI/未提交。Luna只读方案指出yaw-only compound AABB和整格Stone可能冲突，但首个collider尚未直接观察；仅pitch OBB也不能覆盖flat→slope接缝，不据猜测修复。现有Luna仅以私有新supported-slope-collider-136-luna-02路径做8min×120%=9.6min原实现观察，18:04UTC检查点，不写生产、不再委派、不声明候选即命中。
+
+### 坡顶平轨连接选择与当前非空V4兼容137（17:55UTC预注册）
+
+136真实Stone坡道失败之外，Root源码发现上层平轨的邻居可同时有一个低位incoming slope和一个同层延伸；loadedRouteConnections因全Rail voxel可暴露其合法端点，当前flat rule准确要求两个高位probe，而坡顶实际只有一个，会令另一个entry的flat/ascending同时候选。先在原正式projectTransportDeploymentSite loaded-cell测试增加四方向一个低邻居的坡顶反例及两方向双低邻居基线，证明准确variant/平height/双entry一致，不修改loaded/unknown/resolver/rail邻居逻辑。
+
+若RED成立，仅为既有EW/NS flat variant补四个准确单高probe placement pattern；不加入第三/四方向或unknown默认选择，不展开32组合，不改motion/物理/pitch/renderer。此配置变动会改变transport definition identity，因此已在17:49执行一次当前精确十variant正式Authority nonempty V4 capture（source a1a9ed3b，composition等于actual135-02 native source b705f370；mounted/moving同一carrier、七铁块/schedule）；raw95032bytes/SHA b1e64969f503e2939d9f03ebf88fc9865e4aa964f97978c27f6ee598a3cca81f。它是headless capture，不能称Browser capture。新增窄exact identity predecessor只允许V4，保留135旧straight-only；真实nonempty恢复/未知digest/配置篡改拒绝，既有旧fixture不改写。
+
+Root独占transport.ts原route声明、原route-definition.test新断言、新pre-route-transitions fixture/identity与原lineage.test扩展、spec/私有日志，Luna只读私有136观察路径互斥。传统.15PD×120%=.18PD，AI15min×120%=18min，18:13UTC检查点；最新UI16:55实际74%，17:54已请求主对话新读数，60%停止线保持。必要定向Web/stdlib回归、types/lint/format/hooks；不运行Browser来证明坡道已修复，不以此规则修复宣布136闭环。CI418目前五非Browser成功/Chromium自然运行，不取消或提前push。长期baseline不修改，当前物理/mesh/full产品矩阵仍开放。
+
+18:05UTC137定向检查点：正式坡顶反例校正deployment字段position后4FAIL/40PASS→仅四个flat placement rule新增后44PASS；初轮错误使用option.pose导致另两非生产FAIL，原日志保留、不算产品失败。新十shape旧V4身份/restore RED2FAIL/4PASS→窄predecessor后原三文件55PASS，两正式transport Authority deployment/route-motion回归16PASS，共5实际文件71PASS。Root曾请求两个不存在mounted/save文件，Vitest只执行实际三文件，不计五文件；有效另两文件由rg定位、另次运行，保留原命令。Pack types/Classic types/roottest types/lint PASS，首个Classic type路径apps/web/不存在造成NOT_RUN，已按实际root tsconfig.classic-tests.json修正一次并通过，旧失败日志保留。身份constant用TypeScript AST解码、fixture/raw实际composition语义等同PASS；Prettier把JSON literal改为single quote，首次JSON直解析方法失败不算源码测试，正确AST方法只验同一数据。
+
+136首实际sweep contact已由Luna spy调用原实现直接观察，voxel:3,31,2:0/[3,31,2]–[4,32,3]，normal(-1,0,0)，body局部半宽.45/y0–2.35含rider，position约[2.55,31.55,2.5]；原east 1.5sec/位移断言不改仍RED。运行时HEAD a1a但含137工作树flat rules，movement/collision未变、接触在crest前；原JSON/raw保留，独立source-correction sidecar声明dirty状态，不称exact clean artifact。该新证据拒绝“只是unknown或候选”的旧推测；完整一致姿态与接缝连续碰撞尚未设计实施，未绕过Stone。
+
+当前完整原Classic headless选择152files执行一次137回归（新增shape RED不登记、不算通过）；生产generic stdlib逻辑未变，复用135已通过1274作为原代码回归背景、不得称137精确源码全stdlib重跑。无Browser/build/性能验收，本地137可提交交付有限规则修复后待CI418自然终态正常feature push。主对话17:54实际UI周74%/4d9h，60停止线保持，本轮不因额度回传新增诊断。
+
+18:11UTC137完整回归完成：原152files/1081PASS/252.63sec（原150文件加135两文件的152选择完整保留；137只在原两文件增加九例）。未登记仍RED的136新增文件，保留待修复；不把未覆盖坡道称PASS。types/lint/format/identity语义校验以上，工作树生产定义冻结，交付137规则、旧存档保护及检查记录。
+
+CI418精确a1a9ed3b自然终态：五非Browser SUCCESS，Chromium1FAIL1SKIP2PASS/27.9m，previewSKIP。主旅程首轮V2路线82.5,-.5原45sec超时45141ms，25pulse，末段在z=-.2828546与-.7328519/-.8078514之间反向来回；实际原生请求65.9–78.5ms、键盘wall206–343ms，真实fresh release/ACK/ground/noCollision/zeroV均有，不能归因未keyup或伪造settle。retry原900sec总限截断route78.5,-.5，route自身26.363sec尚剩18.637sec。原visual1.3m/普通native28.2sec PASS，ModularSKIP，C4/C5未跑；主旅程并未通过。完整raw1037754bytes/SHA651bd41692c1f7c74ea6533e043595afa1ba239d45ae02fe9bd65a22d1bd9c3a和54route/155operation解析留私有，首解析错误将operation outcome误认status已纠正、不改raw、不重新运行CI。计时仅diagnosticOnly，不推断GPU/优化因果。CI418已终态，可以远端/workflow复核后正常feature push137有限修复，精确后续CI独立判断。
