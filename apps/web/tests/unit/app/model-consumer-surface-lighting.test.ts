@@ -5,6 +5,11 @@ import { GameplayEntityPresenter } from '../../../src/app/gameplay/gameplay-enti
 import { FirstPersonViewmodel } from '../../../src/app/player/first-person-viewmodel';
 import { createSurfaceLightingSample } from '../../../src/app/scene/surface-lighting';
 import type { GameplayModelAssets } from '../../../src/app/gameplay/gameplay-model-assets';
+import { ModelSurfaceLighting } from '../../../src/app/scene/model-surface-lighting';
+import {
+  createPresentedSurfaceLightingSampler,
+  createWorldSurfaceLightingSampler,
+} from '../../../src/app/scene/world-surface-lighting';
 
 const fixture = vi.hoisted(() => ({ material: null as pc.StandardMaterial | null }));
 function addPart(parent: pc.Entity, name: string) {
@@ -74,6 +79,133 @@ function received(material: pc.StandardMaterial) {
 }
 
 describe('实际模型消费者的共同受光', () => {
+  it('bounds four-material model sampling to one coherent world read per apply', () => {
+    const f = setup();
+    const sky = vi.fn(() => ({ ready: true, visibility: 0.5 }));
+    const block = vi.fn(() => 15);
+    const world = {
+      sampleSurfaceLighting: createWorldSurfaceLightingSampler({ sample: sky }, { sampleKnown: block }),
+    };
+    const frame = { skyRadiance: [0.4, 0.4, 0.4] as const, blockLightTint: [0.1, 0.2, 0.3] as const };
+    const sample = createPresentedSurfaceLightingSampler(() => [world, frame]);
+    const light = new ModelSurfaceLighting(f.device, sample);
+    for (let i = 0; i < 4; i++) addPart(f.root, `part-${i}`);
+    light.register(f.root);
+    const counts = [];
+    for (let repeat = 0; repeat < 2; repeat++) {
+      sky.mockClear();
+      block.mockClear();
+      for (let i = 0; i < 64; i++) light.apply(f.root, [1, 2, 3]);
+      counts.push({ sky: sky.mock.calls.length, block: block.mock.calls.length });
+    }
+    for (const node of f.root.children)
+      expect(received((node as pc.Entity).render!.material as pc.StandardMaterial)).toEqual([
+        expect.closeTo(0.3),
+        expect.closeTo(0.4),
+        expect.closeTo(0.5),
+      ]);
+    console.info('Model lighting exact world query counts:', JSON.stringify({ materials: 4, applies: 64, counts }));
+    light.dispose();
+    expect(counts).toEqual([
+      { sky: 64, block: 64 },
+      { sky: 64, block: 64 },
+    ]);
+  });
+
+  it('retains each opaque legacy sampler invocation and material emission independently', () => {
+    const f = setup();
+    const light = new ModelSurfaceLighting(f.device, f.sample);
+    for (let i = 0; i < 4; i++) addPart(f.root, `part-${i}`);
+    light.register(f.root);
+    light.apply(f.root, [1, 2, 3]);
+    expect(f.sample).toHaveBeenCalledTimes(4);
+    for (const call of f.sample.mock.calls) expect(call[0]).toEqual([1, 2, 3]);
+    f.unknown();
+    light.apply(f.root, [1, 2, 3]);
+    expect(f.sample).toHaveBeenCalledTimes(8);
+    for (const node of f.root.children) {
+      const material = (node as pc.Entity).render!.material as pc.StandardMaterial;
+      expect(received(material)).toEqual([0, 0, 0]);
+      expect(material.emissiveIntensity).toBe(0.7);
+    }
+    light.dispose();
+  });
+
+  it('rejects a malformed batch before assigning undefined material lighting', () => {
+    const f = setup();
+    const sample = Object.assign(f.sample, { batch: () => [] });
+    const light = new ModelSurfaceLighting(f.device, sample);
+    addPart(f.root, 'part');
+    light.register(f.root);
+    expect(() => light.apply(f.root, [1, 2, 3])).toThrow('Surface lighting batch length');
+    light.dispose();
+  });
+
+  it('rejects a sparse batch and keeps empty models free of sampler reads', () => {
+    const f = setup();
+    const batch = vi.fn(() => Array(1));
+    const sample = Object.assign(f.sample, { batch });
+    const light = new ModelSurfaceLighting(f.device, sample);
+    light.apply(f.root, [1, 2, 3]);
+    expect(batch).not.toHaveBeenCalled();
+    expect(f.sample).not.toHaveBeenCalled();
+    addPart(f.root, 'part');
+    light.register(f.root);
+    expect(() => light.apply(f.root, [1, 2, 3])).toThrow('Surface lighting batch length');
+    light.dispose();
+  });
+
+  it('updates every batch material immediately on unknown while retaining independent damage emission and sources', () => {
+    const f = setup();
+    let ready = true;
+    const world = {
+      sampleSurfaceLighting: createWorldSurfaceLightingSampler(
+        { sample: () => ({ ready, visibility: 0.5 }) },
+        { sampleKnown: () => 15 },
+      ),
+    };
+    const frame = { skyRadiance: [0.4, 0.4, 0.4] as const, blockLightTint: [0.1, 0.2, 0.3] as const };
+    const sample = createPresentedSurfaceLightingSampler(() => [world, frame]);
+    const batch = vi.fn(sample.batch!);
+    const tracked = Object.assign((...args: Parameters<typeof sample>) => sample(...args), { batch });
+    const sources = [fixture.material!.clone(), fixture.material!.clone()];
+    sources[1]!.emissive.set(0.7, 0.1, 0.5);
+    const parts = sources.map((source, index) => {
+      const part = addPart(f.root, `part-${index}`);
+      part.render!.meshInstances[0]!.material = source;
+      return part;
+    });
+    const light = new ModelSurfaceLighting(f.device, tracked, (source) => source.clone());
+    light.register(f.root);
+    light.apply(f.root, [1, 2, 3]);
+    const original = parts.map((part) => part.render!.material as pc.StandardMaterial);
+    light.apply(f.root, [1, 2, 3], true);
+    const damaged = parts.map((part) => part.render!.material as pc.StandardMaterial);
+    expect(batch.mock.calls[1]![1]).toEqual(
+      sources.map((source) => {
+        const color = source.emissive.clone().linear();
+        return [
+          color.r * source.emissiveIntensity,
+          color.g * source.emissiveIntensity,
+          color.b * source.emissiveIntensity,
+        ];
+      }),
+    );
+    expect(batch.mock.calls[1]![1][0]).not.toEqual(batch.mock.calls[1]![1][1]);
+    ready = false;
+    light.apply(f.root, [1, 2, 3], true);
+    damaged.forEach((material, index) => {
+      expect(material).not.toBe(original[index]);
+      expect(material).not.toBe(sources[index]);
+      expect(received(material)).toEqual([0, 0, 0]);
+      expect(material.emissiveIntensity).toBe(sources[index]!.emissiveIntensity);
+      expect(material.emissive.equals(sources[index]!.emissive)).toBe(true);
+      expect(sources[index]!.getParameter('uSurfaceReceivedLighting')).toBeUndefined();
+    });
+    light.dispose();
+    sources.forEach((source) => source.destroy());
+  });
+
   it('world-item 不把方块光写成自身发光，unknown当帧清received并保留借用源', () => {
     const f = setup();
     const presenter = new GameplayEntityPresenter(f.app, undefined, f.sample);

@@ -26,10 +26,17 @@ export type SurfaceLightingSample =
       selfEmission: LinearRgb;
     }>;
 
-export type SurfaceLightingSampler = (
+export type SurfaceLightingSampler = ((
   position: readonly [number, number, number],
   selfEmission: LinearRgb,
-) => SurfaceLightingSample;
+) => SurfaceLightingSample) &
+  Readonly<{
+    /** One synchronous model uses a coherent world frame, with each material's own emission. */
+    batch?: (
+      position: readonly [number, number, number],
+      selfEmissions: readonly LinearRgb[],
+    ) => readonly SurfaceLightingSample[];
+  }>;
 
 export type SurfaceLightingChannels = Readonly<{
   receivedLighting: LinearRgb;

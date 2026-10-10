@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-sky-point-browser-141-01",
+  "status": "FAIL",
+  "artifact": {
+    "schemaVersion": 1,
+    "sourceSha": "f01a69fa655468a64ed41a3fdbf6e11483f907b2",
+    "sourceDigest": "5fd103a24602fe3677d5f74238bf0b51190975ecc4aae5ae92a138b0d50af49d",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "679503c869d23e93f075b27ce0a9b420c262788e358505f5fdbf41d06db6bba5",
+    "builtAt": "2026-10-10T18:56:21.520Z"
+  },
+  "artifactFiles": 289,
+  "build": "PASS",
+  "verifyArtifact": "PASS before run",
+  "samplersAndBenchmark": "ALL_DISABLED",
+  "originalInputsTimeoutsPredicatesAssertions": "UNCHANGED",
+  "attempts": 1,
+  "originalMainTimeoutMs": 900000,
+  "resultDurationMsIncludingCleanup": 917325,
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "Creative": "PASS",
+    "V1": "PASS",
+    "V2": "FAIL total deadline during takeCraftResult→committedPointer→waitForEquipmentSnapshot",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "errors": ["Error: Test timeout of 900000ms exceeded"],
+  "lastOperations": [
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:pickup-route",
+      "target": [84, 31, 2],
+      "elapsedMs": 9295,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:inventory-after",
+      "target": [84, 31, 2],
+      "elapsedMs": 55,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:return-route",
+      "target": [84, 31, 2],
+      "elapsedMs": 8097,
+      "outcome": "returned"
+    }
+  ],
+  "lastRoutes": [
+    {
+      "target": [78.5, -0.5],
+      "status": "returned",
+      "elapsedMs": 7823,
+      "remainingMs": 37177,
+      "pulseCount": 8
+    },
+    {
+      "target": [78.5, 0.5],
+      "status": "returned",
+      "elapsedMs": 4479,
+      "remainingMs": 40521,
+      "pulseCount": 4
+    }
+  ],
+  "routes": 28,
+  "pulses": 172,
+  "operations": 81,
+  "failurePlayer": [78.48389434814453, 32.599998474121094, 0.4413815140724182],
+  "visual": "Final trace screencast frame actually viewed: inventory/crafting interface with remaining planks/sticks/sword. Does not prove craft completion or full product acceptance.",
+  "interpretation": "Original global900000ms truncation, not a45sec route timeout and not proof of specific command corruption. Old139creative selection at82 was passed this run; sampler configuration differs, not a controlled latency A/B. No repeat.",
+  "performance": "NOT_ELIGIBLE, functional run only",
+  "ci420": {
+    "runId": 38077752561,
+    "sourceSha": "f01a69fa655468a64ed41a3fdbf6e11483f907b2",
+    "status": "RUNNING at19:15",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": "RUNNING",
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38077752561"
+  },
+  "remainingBlockers": [
+    "complete main journey and remaining product matrix",
+    "136supported-slope real Stone contact",
+    "exact CI and review final acceptance"
+  ],
+  "budget": {
+    "actualUiUtc": "2026-10-10T18:56:00Z",
+    "remainingPercent": 74,
+    "reset": "4d8h",
+    "stopPercent": 60,
+    "cloudUiAccess": false
+  },
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-build-141-01.log",
+      "bytes": 3771,
+      "sha256": "8aebc94456741ad3d41a50acfa146f9a7004db3518b76366affa2a8d86d82eff"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-browser-141-01.log",
+      "bytes": 449170,
+      "sha256": "c79dc0375275549653ad052ac0526ada3ba0e2bd443b179e8cd40f3bacc6e620"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-browser-attachments-141-01.json",
+      "bytes": 245235,
+      "sha256": "ba4baba0c5c8649dcf92a70b994b0fe5bb2bf245d52d8363c6ce7c9231577c94"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-route-operations-141-01.json",
+      "bytes": 809667,
+      "sha256": "6b3334d2bf2dacfc0d475fbde4277986f058c1e922c88e810d722ca90d88b67d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-browser-141-01.prereg.json",
+      "bytes": 717,
+      "sha256": "9faf63c68d3317d6c839bdc1903f791381b6e1b4540cde62b50043e939f0ddf9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-final-frame-141-01.jpeg",
+      "bytes": 29705,
+      "sha256": "ef007acd5f626769bac2dda67c33941c53c99d8c29f2f2ae076b2dbe0ac9959b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-final-frame-141-01.source.json",
+      "bytes": 259,
+      "sha256": "5c982e8d1b734305c3b56931788597041e607bd8df37d7761252c2daf071f0e1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-point-results-141-01/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+      "bytes": 106420989,
+      "sha256": "761d59671be8684955588fda9308ed19bd2d7036003bac5cf2fcc0882d24d222"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-sky-point-browser-141-01/classic.json",
+      "bytes": 182294,
+      "sha256": "ad6be8882e4f41baac45ec04cb6184094611b2eec5cc32e1cbd960a5a09521c6"
+    }
+  ]
+}
