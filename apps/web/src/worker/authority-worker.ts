@@ -1,3 +1,4 @@
+import { observeAuthorityColumnSource } from './authority-column-source';
 /// <reference lib="webworker" />
 
 import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
@@ -16,7 +17,7 @@ import { MemoryGamePersistence } from '@seedlands/stdlib/server/persistence/memo
 import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 import { AuthorityWorldHarness, type AuthorityWorldOwner } from '@seedlands/stdlib/server/harness/authority-world-harness'; // prettier-ignore
 import { WorldResourceAuthorizer, developmentWorldAuthorizationPolicy } from '@seedlands/stdlib/server/harness/world-authorization'; // prettier-ignore
-import { dispatchWorldHarnessRpc } from '@seedlands/stdlib/server/harness/world-harness-jsonl';
+import { handleBrowserWorldRpc } from './authority-world-rpc';
 import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authority-worker-ingress';
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
@@ -443,32 +444,29 @@ const handle = async (message: BrowserAuthorityRequest | DirectLogicAttachReques
     return;
   }
   if (!runtime || message.epoch !== epoch) throw new Error('Authority session is unavailable or stale.');
-  if (message.kind === 'world-harness-rpc') {
+  if (message.kind === 'request-column-source') {
     if (!worldHarness) throw new Error('World Harness is unavailable.');
-    if (message.runtimeEpoch !== runtimeEpoch) {
-      fail(message.requestId, new Error('WORLD_EPOCH_STALE: World request was submitted for a stale runtime epoch.'));
-      return;
-    }
-    const result = await dispatchWorldHarnessRpc(worldHarness, {
-      protocolVersion: 1,
-      requestId: message.requestId,
-      method: message.method,
-      args: message.args,
-    });
+    const result = await observeAuthorityColumnSource(
+      worldHarness,
+      () => ({ server: runtime!.server, epoch: runtimeEpoch, worldId: persistence!.worldId }),
+      message.cx,
+      message.cz,
+      message.runtimeEpoch,
+    );
     post({
-      kind: 'world-harness-response',
+      kind: 'authority-response',
       protocolVersion: PROTOCOL_VERSION,
       epoch,
+      runtimeEpoch: message.runtimeEpoch,
       requestId: message.requestId,
-      result: result.result,
-      ...(message.method === 'checkpoint' &&
-      result.result.ok &&
-      result.result.data &&
-      typeof result.result.data === 'object' &&
-      'restored' in result.result.data
-        ? { ready: runtime!.ready(), runtimeEpoch }
-        : {}),
+      ok: true,
+      result,
     });
+    return;
+  }
+  if (message.kind === 'world-harness-rpc') {
+    if (!worldHarness) throw new Error('World Harness is unavailable.');
+    await handleBrowserWorldRpc(message, worldHarness, () => ({ epoch, runtimeEpoch, runtime: runtime! }), post, fail);
     return;
   }
   if (message.kind === 'dispose-authority') {

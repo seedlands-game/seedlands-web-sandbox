@@ -1,7 +1,7 @@
 import { buildBlockLightVolume, sampleBlockLight, type BlockLightVolume } from '@seedlands/stdlib/world/voxel-light';
 import { sampleLoadedVoxelRegion, type LoadedVoxelRegion } from '../../client/authority/loaded-voxel-region';
 import type { VoxelSemanticsResolver } from '@seedlands/stdlib/world/voxel-semantics';
-import { chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 
 /**
  * The camera stays in the middle 32 cells, with a 16-cell propagation halo on
@@ -326,4 +326,18 @@ export class ChunkBlockLightCache {
     this.entries.clear();
     this.dirtySinceRebuild.clear();
   }
+}
+
+export function loadedBlockLightRevision(
+  authority: { getChunkRevision(cx: number, cy: number, cz: number): number | null },
+  origin: readonly [number, number, number],
+  size: number,
+): string {
+  const max = [origin[0] + size - 1, origin[1] + size - 1, origin[2] + size - 1] as const;
+  const revisions: string[] = [];
+  for (let cy = floorDiv(origin[1], CHUNK_SIZE); cy <= floorDiv(max[1], CHUNK_SIZE); cy += 1)
+    for (let cz = floorDiv(origin[2], CHUNK_SIZE); cz <= floorDiv(max[2], CHUNK_SIZE); cz += 1)
+      for (let cx = floorDiv(origin[0], CHUNK_SIZE); cx <= floorDiv(max[0], CHUNK_SIZE); cx += 1)
+        revisions.push(`${cx},${cy},${cz}:${authority.getChunkRevision(cx, cy, cz) ?? 'unavailable'}`);
+  return revisions.join('|');
 }

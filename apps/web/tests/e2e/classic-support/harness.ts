@@ -60,6 +60,7 @@ export type ChromeTrace = Readonly<{
 }>;
 
 export type HarnessApi = {
+  skyVisibilityDiagnostics: import('../../../src/app/gameplay/game-harness-contract').HarnessApi['skyVisibilityDiagnostics'];
   inputDecisionDiagnostics():
     import('../../../src/client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;

@@ -1,3 +1,4 @@
+import { WorldSkyLighting } from '../scene/world-sky-lighting';
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
 import { CHUNK_SIZE, chunkKey, floorDiv, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
@@ -19,7 +20,7 @@ import {
 import type { QualityProfile } from '../scene/quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from '../gameplay/fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
-import { ChunkBlockLightCache } from '../scene/block-light-volume';
+import { ChunkBlockLightCache, loadedBlockLightRevision } from '../scene/block-light-volume';
 import { BlockLightRebuildPump } from '../scene/block-light-rebuild-pump';
 import {
   acceptStreamingCanonical,
@@ -70,6 +71,7 @@ export class World {
   private readonly streamingAdmissionRetry = new StreamingAdmissionRetry();
   private readonly blockLightCache: ChunkBlockLightCache;
   private readonly blockLightRebuildPump: BlockLightRebuildPump;
+  private readonly skyLighting: WorldSkyLighting;
   private lastCenter = '';
   private disposed = false;
   private readonly crops: WorldCropPresentation | null;
@@ -103,6 +105,7 @@ export class World {
       voxelSemantics: authority.voxelSemantics,
     });
     this.blockLightRebuildPump = new BlockLightRebuildPump(this.blockLightCache);
+    this.skyLighting = new WorldSkyLighting(authority);
     const source: MeshTaskSource = {
       get seed() {
         return authority.seed;
@@ -140,6 +143,7 @@ export class World {
         this.waterTransitions,
         undefined,
         {
+          skyAttached: (task, sink) => this.skyLighting.register(task, sink),
           attached: (task, sink) => {
             return this.blockLightCache.register(task.chunkKey, task.cx, task.cy, task.cz, sink);
           },
@@ -284,6 +288,10 @@ export class World {
     return this.blockLightCache.snapshot;
   }
 
+  getSkyVisibilityDiagnostics() {
+    return this.skyLighting.diagnostics;
+  }
+
   getBlockLightDiagnostics() {
     return this.blockLightCache.diagnostics;
   }
@@ -332,6 +340,7 @@ export class World {
     this.scheduler.beginScenario();
     this.repository.clear();
     this.crops?.reset();
+    this.skyLighting?.clear();
     this.blockLightCache.clear();
     this.fluidFeedback.reset();
     this.waterTransitions.reset();
@@ -361,11 +370,13 @@ export class World {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.skyLighting?.dispose();
     this.blockLightRebuildPump.dispose();
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.scheduler.dispose();
     this.repository.dispose();
     this.crops?.dispose();
+    this.skyLighting?.clear();
     this.blockLightCache.clear();
     this.dirtyChunks.clear();
     this.fluidDirtyChunks.clear();
@@ -386,13 +397,7 @@ export class World {
 
   /** Includes residency as well as revisions, because a baseline may arrive without a world edit. */
   blockLightRevision(origin: readonly [number, number, number], size: number): string {
-    const max = [origin[0] + size - 1, origin[1] + size - 1, origin[2] + size - 1] as const;
-    const revisions: string[] = [];
-    for (let cy = floorDiv(origin[1], CHUNK_SIZE); cy <= floorDiv(max[1], CHUNK_SIZE); cy += 1)
-      for (let cz = floorDiv(origin[2], CHUNK_SIZE); cz <= floorDiv(max[2], CHUNK_SIZE); cz += 1)
-        for (let cx = floorDiv(origin[0], CHUNK_SIZE); cx <= floorDiv(max[0], CHUNK_SIZE); cx += 1)
-          revisions.push(`${cx},${cy},${cz}:${this.authority.getChunkRevision(cx, cy, cz) ?? 'unavailable'}`);
-    return revisions.join('|');
+    return loadedBlockLightRevision(this.authority, origin, size);
   }
 
   getFluidCell(x: number, y: number, z: number) {
@@ -461,6 +466,7 @@ export class World {
   }
 
   consumeServerCommit(result: WorldCommitResult) {
+    if (result.committed) this.skyLighting?.notifyCommit(result.worldRevision);
     const change = result.structuralChange;
     if (!change) return;
     const fluidPriority = change.actorId === 'fluid-v2';
@@ -502,10 +508,12 @@ export class World {
   }
 
   drainCommits(cameraPosition?: readonly [number, number, number]) {
+    this.skyLighting?.invalidateStale();
     this.blockLightCache.invalidateStale();
     this.repository.drain();
     this.crops?.update(this.scenarioId, this.authority.gameplay.cropStages ?? []);
     if (cameraPosition) this.blockLightRebuildPump.request(cameraPosition);
+    this.skyLighting?.request(cameraPosition);
   }
 
   private request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {

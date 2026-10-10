@@ -406,6 +406,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
     getChunkRevision: (cx, cy, cz) => bindings.world()?.getChunkRevision(cx, cy, cz) ?? null,
     getRenderedChunkRevision: (cx, cy, cz) => bindings.world()?.getRenderedChunkRevision(cx, cy, cz) ?? null,
     blockLightDiagnostics: () => bindings.world()?.getBlockLightDiagnostics() ?? null,
+    skyVisibilityDiagnostics: () => bindings.world()?.getSkyVisibilityDiagnostics() ?? null,
     inputDecisionDiagnostics: () => readInputDecisionDiagnostics(bindings.authority()),
     getVoxelAt: (x, y, z) => bindings.world()?.getVoxel(x, y, z) ?? null,
     sunSnapshot: () => {

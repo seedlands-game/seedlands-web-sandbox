@@ -102,3 +102,9 @@ export type AuthorityCachedPreparation = {
   fluid?: Uint8Array;
   overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
 };
+
+export type AuthorityCanonicalResult = Readonly<{
+  canonical?: ArrayBuffer;
+  generatorVersion?: number;
+  provider?: import('@seedlands/kernel/spatial').KernelWorldgenProviderIdentity;
+}>;

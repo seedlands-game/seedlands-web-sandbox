@@ -1,3 +1,5 @@
+import { createChunkSkyTexture, bindChunkSky, applyChunkSky, invalidateChunkSky } from './playcanvas-sky-visibility';
+import type { SkyVisibilitySink } from '../scene/sky-visibility-volume';
 import * as pc from 'playcanvas';
 import { CHUNK_SIZE } from '@seedlands/stdlib/world/voxel';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
@@ -32,6 +34,9 @@ export type PlayCanvasChunkResource = RenderedMaterialMeshResource & {
   waterTransition: PlayCanvasWaterTransition | null;
   waterTransitionLayer?: pc.Layer;
   transitionCancel: (() => void) | null;
+  skyTexture?: pc.Texture;
+  skyOrigin?: Float32Array;
+  skyRelease?: (() => void) | null;
   blockLightTexture?: pc.Texture;
   blockLightOrigin?: Float32Array;
   blockLightSize?: number;
@@ -40,6 +45,7 @@ export type PlayCanvasChunkResource = RenderedMaterialMeshResource & {
 
 export type ChunkBlockLightResourceHooks = Readonly<{
   attached: (task: PendingMeshTask, sink: ChunkBlockLightSink) => () => void;
+  skyAttached?: (task: PendingMeshTask, sink: SkyVisibilitySink) => () => void;
 }>;
 
 const createChunkBlockLightTexture = (device: pc.GraphicsDevice, key: string) =>
@@ -189,6 +195,10 @@ export const createPlayCanvasChunkAdapter = (
   },
   attach: (resource, task, onPostrender) => {
     const span = telemetry.beginSpan('render', 'SceneAttach', 'main', task.traceId);
+    resource.skyTexture = createChunkSkyTexture(app.graphicsDevice, task.chunkKey);
+    resource.skyOrigin = new Float32Array([task.cx * CHUNK_SIZE, task.cy * CHUNK_SIZE, task.cz * CHUNK_SIZE]);
+    for (const instance of resource.instances) bindChunkSky(instance, resource);
+    if (resource.waterTransition) bindChunkSky(resource.waterTransition.instance, resource);
     resource.blockLightTexture = createChunkBlockLightTexture(app.graphicsDevice, task.chunkKey);
     for (const instance of resource.instances) bindBlockLight(instance, resource);
     if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
@@ -212,6 +222,12 @@ export const createPlayCanvasChunkAdapter = (
       blockLightHooks?.attached(task, {
         apply: (volume) => applyChunkBlockLightVolume(resource, volume),
         failDark: () => invalidateChunkBlockLightVolume(resource),
+      }) ?? null;
+    resource.skyRelease =
+      blockLightHooks?.skyAttached?.(task, {
+        failDark: () => invalidateChunkSky(resource),
+        publish: (volume) => applyChunkSky(resource, volume),
+        dispose: () => undefined, // Texture lifetime belongs to the mesh resource.
       }) ?? null;
     telemetry.endSpan(span);
     telemetry.markTrace(task.traceId, 'scene-attached', 'main');
@@ -241,6 +257,7 @@ export const createPlayCanvasChunkAdapter = (
     try {
       current.waterTransition = createWaterTransition(app, plan.geometry, material, transparent);
       if (current.blockLightTexture) bindBlockLight(current.waterTransition.instance, current);
+      bindChunkSky(current.waterTransition.instance, current);
     } catch {
       clearWaterTransition(current);
       telemetry.markTrace(task.traceId, 'water-transition-skipped-renderer', 'main');
@@ -359,6 +376,10 @@ export const createPlayCanvasChunkAdapter = (
   destroy: (resource) => {
     resource.transitionCancel?.();
     clearWaterTransition(resource);
+    resource.skyRelease?.();
+    resource.skyRelease = null;
+    resource.skyTexture?.destroy();
+    resource.skyTexture = undefined;
     resource.blockLightRelease?.();
     resource.blockLightRelease = null;
     resource.meshes.forEach((mesh) => mesh.destroy());

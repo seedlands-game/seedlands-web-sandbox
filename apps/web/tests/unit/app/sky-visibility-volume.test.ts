@@ -39,6 +39,22 @@ const sink = () => {
 const readyDependency = (key: string, revision: number) => ({ key, resident: true, revision }) as const;
 
 describe('per-chunk sky visibility derived cache', () => {
+  it.each([
+    { marker: 2, obstruction: 0, ready: true },
+    { marker: 2, obstruction: 1, ready: false },
+    { marker: 3, obstruction: 0, ready: false },
+  ])('proven-empty marker validates zero obstruction: %o', ({ marker, obstruction, ready }) => {
+    const cache = new SkyVisibilityCache(1, { worldTime: 9, profileScalar: 1 });
+    cache.register('0,0,0', [0, 0, 0], ['0,0,0'], sink().value);
+    cache.setDependency({ key: '0,0,0', resident: true, revision: 0 });
+    const samples = columns(0, 31, (column) => {
+      column.loaded.fill(marker);
+      column.obstruction[0] = obstruction;
+    });
+    expect(buildSkyVisibilityVolume(cache.beginBuild('0,0,0', 31, samples))).toMatchObject({ ready });
+    cache.dispose();
+  });
+
   it('fails dark when any dependency or relevant column cell is unknown', () => {
     const output = sink();
     const cache = new SkyVisibilityCache(2, { worldTime: 6, profileScalar: 0.4 });

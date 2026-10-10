@@ -168,6 +168,15 @@ export class BrowserAuthorityChunkClient {
     return this.baselines.getFluidCell(x, y, z);
   }
 
+  setFluidActiveChunks(keys: readonly string[]): void {
+    this.post({
+      kind: 'set-fluid-active-chunks',
+      protocolVersion: PROTOCOL_VERSION,
+      epoch: this.epoch,
+      keys,
+    });
+  }
+
   getChunkRevision(cx: number, cy: number, cz: number) {
     return this.baselines.getChunkRevision(cx, cy, cz);
   }
