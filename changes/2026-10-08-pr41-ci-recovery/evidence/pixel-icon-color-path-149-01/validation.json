@@ -1,0 +1,137 @@
+{
+  "candidateParentSha": "f01f22dce3de3ab4e0a7b17dcfa0fb210b60820b",
+  "measuredAxis": "Serialized builtin pixel SVG element graph; exact geometry retained",
+  "workload": "130 unique existing builtin pixel bindings; cached repeat",
+  "controlAA": {
+    "first": {
+      "icons": 130,
+      "elements": 37564,
+      "colorBound": 583,
+      "opaquePixels": 37564,
+      "urlBytes": 4315978
+    },
+    "repeat": {
+      "icons": 130,
+      "elements": 37564,
+      "colorBound": 583,
+      "opaquePixels": 37564,
+      "urlBytes": 4315978
+    }
+  },
+  "candidateBB": {
+    "first": {
+      "icons": 130,
+      "elements": 583,
+      "colorBound": 583,
+      "opaquePixels": 37564,
+      "urlBytes": 645222
+    },
+    "repeat": {
+      "icons": 130,
+      "elements": 583,
+      "colorBound": 583,
+      "opaquePixels": 37564,
+      "urlBytes": 645222
+    }
+  },
+  "pixelGeometryAndCache": "PASS all 37564 opaque cells and every transparent cell",
+  "primary": "SVG element count 37564 to 583",
+  "secondary": "URL bytes 4315978 to 645222",
+  "timingConclusion": "NOT_MEASURED",
+  "functionalProductAcceptance": "NOT_RUN_AT_DELIVERY",
+  "browserRasterEquivalence": "NOT_RUN_AT_DELIVERY",
+  "ownerTests": {
+    "files": 1,
+    "passed": 2
+  },
+  "resourceRegression": {
+    "files": 4,
+    "passed": 11
+  },
+  "uniqueTotals": {
+    "files": 5,
+    "passed": 13
+  },
+  "types": {
+    "web": "PASS",
+    "classicFinal": "PASS"
+  },
+  "targetedLint": "PASS",
+  "ciSelectionAndBudgetContracts": {
+    "passed": 17,
+    "failed": 0
+  },
+  "authorErrorsRetained": [
+    "initial unit relative import: no tests; corrected before valid RED",
+    "browser helper NodeList DOM.Iterable type error; fixed via Array.from without tsconfig change"
+  ],
+  "scope": "asset-image color paths, app unit/CI registration, original visual catalog consumer raster diagnostic; no quality/input/timeout reductions",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-red-149-01.log",
+      "bytes": 1220,
+      "sha256": "64a70798a7a0eda3d8b2a64f73c093ee54f0f12f8d0b3293b6aa70da0d28d03b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-red-149-02.log",
+      "bytes": 1626,
+      "sha256": "6b9b89e55cc6c2d15aa5f45719cdba695371323fc892d7bfcb292becd1c4952d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-green-149-01.log",
+      "bytes": 339,
+      "sha256": "1c1a489db2a8806f2016c760ebad9b024568e59a40c19d8efbd6a86d71701f71"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-green-149-02.log",
+      "bytes": 339,
+      "sha256": "a33a5eecd34bb266b3272165edef45e79bc1b3c757b2ffbe252a3c92d99d14fb"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-green-149-03.log",
+      "bytes": 555,
+      "sha256": "6fdda6c8a8ea226c722f1b7f2d97db3e61cd9da8aba212f282313f5da9106865"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-regression-149-01.log",
+      "bytes": 341,
+      "sha256": "d5ca96a65fcf4eb28b54458f207c91cb9da75d83bd056b776352efcf833ed71a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-classic-types-149-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-classic-types-149-02.log",
+      "bytes": 408,
+      "sha256": "eae5f6b482a7e6b8a1ca280e2230bf94ba82a1d72075ada5f643c7f4519181ce"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-classic-types-149-03.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-web-types-149-01.log",
+      "bytes": 265,
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-lint-149-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-browser-lint-149-03.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-ci-selection-149-01.log",
+      "bytes": 3984,
+      "sha256": "7a9553397eab1bcced50b80d4dc294afa31eca6e08fb9ed53ec0cad055e75733"
+    }
+  ],
+  "longTermDocsBaseline": "unchanged; no product/architecture policy changed"
+}

@@ -11,6 +11,7 @@ import { lockPointer, snapshot, voxelAt, waitForSnapshot, type ClassicWindow } f
 import { clickSingleBlockWithRealMouse } from './single-block-click';
 import type { HarnessSnapshot } from '../../../src/app/app-contracts';
 import { verifyStoredSkyAfterReload } from './visual-stored-sky';
+import { verifyPixelIconRaster } from './pixel-icon-browser';
 
 const observeSingleClick = (page: Page) =>
   page.evaluate(async () => {
@@ -335,6 +336,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   await capture('creative-one-click-one-block');
   await page.keyboard.press('KeyE');
   await expect(page.locator('#creative-catalog')).toBeVisible();
+  await verifyPixelIconRaster(page, testInfo);
   await testInfo.attach('creative-catalog-icons', { body: await page.screenshot(), contentType: 'image/png' });
   await page.locator('#creative-item-filter').fill('楼梯');
   await testInfo.attach('creative-stair-icons', { body: await page.screenshot(), contentType: 'image/png' });
