@@ -35,7 +35,13 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       equivalentResourceDifferentChannels: number;
       sourceIdentityMatchesControl: boolean;
       domImage: { width: number; height: number; naturalWidth: number; naturalHeight: number; imageRendering: string };
-      freshImage: { width: number; height: number; naturalWidth: number; naturalHeight: number };
+      freshImage: {
+        width: number;
+        height: number;
+        naturalWidth: number;
+        naturalHeight: number;
+        imageRendering: string;
+      };
       actualSha256: string;
       freshActualSha256: string;
       controlSha256: string;
@@ -69,14 +75,21 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       }
       try {
         await image.decode();
-        const control = new Image();
+        // SVG drawImage consumes the source image's concrete container size/style.
+        // Match the real consumer rather than comparing a 34px DOM image with a 150px detached image.
+        const matchingImage = () => {
+          const value = new Image(image.width, image.height);
+          value.style.imageRendering = getComputedStyle(image).imageRendering;
+          return value;
+        };
+        const control = matchingImage();
         control.src = reference.url;
         await control.decode();
-        const freshActual = new Image();
+        const freshActual = matchingImage();
         freshActual.src = image.src;
         await freshActual.decode();
         // Same old geometry; different resource URL prevents reuse of the DOM-seeded resource.
-        const equivalentControl = new Image();
+        const equivalentControl = matchingImage();
         equivalentControl.src = `${reference.url}%0A`;
         await equivalentControl.decode();
         const svg = decodeURIComponent(image.src.slice('data:image/svg+xml,'.length));
@@ -130,6 +143,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
               height: freshActual.height,
               naturalWidth: freshActual.naturalWidth,
               naturalHeight: freshActual.naturalHeight,
+              imageRendering: freshActual.style.imageRendering,
             },
             elements,
             colorCount: reference.colorCount,

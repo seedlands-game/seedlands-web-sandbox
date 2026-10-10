@@ -1302,3 +1302,11 @@ CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，�
 新有界问题：恢复f01原逐像素rect生产owner，验证同sourceDOM/fresh/reference，以及几何完全相同仅尾部换行的另一URL是否获得同16/32px结果。除生产owner精确恢复旧字节外不改玩法/视觉质量，保留当前新增RGBA零差异与sourceAA断言；元素合同回到未优化旧opaque计数，不冒充新硬预算准出。另为freshEquivalentControl记actual DOM与fresh source的natural/CSS尺寸和imageRendering，等价URL任一RGBA非0也FAIL，不能以它替换原比较或容差。
 
 Root独占原3TS/spec/evidence，新unit/Classic types/lint后提交build/verify，原visual一次156，源码从verify冻结到terminal。仅诊断measurementValidity，不是新生产候选或性能样本；基线失效则先纠正对照环境再考虑候选，不盲重试主旅程。原main151保持未启动，21:40UTC检查点；无新agent/权限/网络，不修改原240秒、旧断言或CI口径。
+
+21:32UTC156终态：localc012e9e6、identified build/verify PASS且生产bytes精确a3a0b9a6旧实现。原visual一次FAIL74132ms；全部260case DOM/reference URL相同，但104个16px仍不同；paper sourceAA/等价URL621channel不同，32px全同。实际DOM width/height34、natural150、imageRendering pixelated；fresh width/height150。旧实现A/A失败说明150/152/154measurement validity未成立，不得继续称几何缺陷，原负结果全保留。
+
+### 同一图像尺寸与绘制样式A/A157（21:32UTC预注册）
+
+唯一新轴是在创建参考、fresh同源、尾换行等价资源Image时，都显式匹配实际DOM image.width/height及computed imageRendering。资源src、原生产owner、canvas16/32/imageSmoothing=false、原全部differentChannels/sourceAA/equivalentResource零断言保持不变，补充完整fresh样式记录。不切掉失败icon、不调整容差或原visual输入/240sec/旧断言。156是当前旧A/A真实RED；先必要Classic types/lint/hooks、新test-only commit/build/verify，原visual一次158，只检验旧measurement GREEN。旧A/A未通过前不得重启生产候选或main151。
+
+Root独占既有helper/spec/新证据，无agent/新权限。21:42UTC检查点；非性能采样，不从不同运行duration推断优化；完整产品/CI/review继续开放。
