@@ -1104,3 +1104,9 @@ Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据�
 15:48UTC128范围检查点：原实际Controller/InputCommandBuffer旧空闲ACK反例RED成立；10files75PASS，生产Controller记录复制隔离/非neutral/换epoch反例补充后17PASS；Classic类型、生产Web/Svelte0error0warning及tsc/tools、范围lint PASS。原路线夹具显式升级合成post-release协议观察，物理模型只在keyboard.up记录；不作为真实浏览器证明。finally诊断仅复用同一次已有查询。128不委派，root逐文件复核输入与观察边界；等待额外Harness/选择检查后冻结一次build及原入口Browser。125独立review/build PASS不证明冷Sky已验收，127原CI失败保持。预算真实读数仍14:25的75%，刷新待回复；16:04检查点与约60%停止线保持。
 
 15:55UTC128真实输入检查点：精确5690ed3c identified build PASS（sourceDigest ba947271c79871781d42fe02f9db9d6c3d9689fc58de44873fbca14f9c63e066/artifactDigest6df19efb5c70b9c688fc9bdd063b5acc19cbb776b8a8b6922b4dcec71b9418e8/289files），原入口visual1.5m及native47.0s，两例PASS/NON_MAIN。原cold121 stored source首次本地PASS：同worldId、roof revision1在cold/after均nonresident/clean/canonicalRevision null，原20sec目标0,1,0ready；不归因旧启动timeout或声明冷遮挡像素。原单击3→0/neighbor3/PointerLock有效；真实模型66GPU像素（普通33为子集）原断言PASS，Root看本次夜景及cold暗场。主V2释放消费与V1–V4/C4尚待下一精确远端CI，完整ledger117保持未关闭。下一正常push须复核远端/workflow，无生产部署，仅既有PR预览；预算最新真实75%@14:25，刷新待答复、60%停止线不变。
+
+### 遗漏的间接路线页面夹具129（16:01UTC预注册）
+
+冻结dcb39a9e，CI416 Classic headless终态4FAIL/1026PASS：mining-approach-handoff三例及target-aim一例原5000ms超时，Chromium仍自然运行。128范围漏查了mineVoxel/placeVoxel的间接walkTo页面，现先以原两文件复现RED。Root独占这两处测试夹具/spec/新证据，不改生产128 release约束，不增超时/重试或弱化原range/target/assertion。Browser64 replay明确补合成post-release metadata，不将新字段称历史浏览器原值；target-aim fake只在modeled keyboard.up记释放序列。相关间接消费者索引复核并选择最小必要检查；范围GREEN/types/lint/hooks，不重复production build/Browser，因为生产及唯一Browser入口无改动。后续正常push要等CI416 Chromium自然结束，禁止取消来掩盖失败。传统.05PD×120%=.06PD，AI8min×120%=9.6min，16:12UTC检查点；真实预算仍14:25周75%，新UI待回复，全PR≈60%停止线保持，无额度换算。
+
+16:03UTC129检查点：CI416遗漏夹具失败在原两文件本地RED4FAIL/14PASS复现；显式补合成release后7files82PASS，Classic types及范围lint PASS，生产/唯一Browser入口未改，build/Browser不重复。原未改1026例CI通过复用，所有间接路线调用索引复核；不把新metadata标作Browser64历史原值。正常hooks提交后先留本地，CI416 Chromium自然运行不取消；全PR仍不可合入，真实75%@14:25额度刷新待回复。

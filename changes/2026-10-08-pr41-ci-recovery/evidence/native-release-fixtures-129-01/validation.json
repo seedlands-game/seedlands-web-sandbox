@@ -1,0 +1,46 @@
+{
+  "runId": "native-release-fixtures-129-01",
+  "baselineSHA": "dcb39a9e742bb859b691f7dfd38c89a3f5407e97",
+  "resultSource": "本证据目录所在后续提交",
+  "ci416": {
+    "run": 38065570619,
+    "classicHeadless": "4FAIL/1026PASS,150files,1030tests",
+    "failedFiles": ["mining-approach-handoff.test.ts", "target-aim.test.ts"],
+    "Chromium": "IN_PROGRESS at16:02UTC; do not cancel"
+  },
+  "red": "same2files4FAIL/14PASS; original5000ms timeout",
+  "green": "7files82PASS",
+  "classicTypes": "PASS",
+  "scopedLint": "PASS",
+  "productionCode": "UNCHANGED",
+  "browserAndBuild129": "NOT_RUN; test-only modeled observation fix, source128 result remains5690 not relabeled",
+  "fix": "synthetic post-release metadata in Browser64 replay, explicitly not original observed field; placementfake keyboard.up publishes modeled release and consumed sequence",
+  "budget": "last actual14:25UTC75%, refresh pending, stop≈60%",
+  "logs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci416-headless-raw-128-01.log",
+      "bytes": 204408,
+      "sha256": "34ad7137ec98e86f56e749b6de2ca566921cbfb8fdc1e326eb89cc6d59596dbe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-fixture-red-129-01.log",
+      "bytes": 4047,
+      "sha256": "f2fa64b524fa5d963cb23d52e31b7dedbed332f3c3baac958cf45387ac730d3c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-fixture-green-129-01.log",
+      "bytes": 341,
+      "sha256": "10b6cbfbca88f0d9386498d5646c24d9c7c1acddf4e29ca8ee5f0edba44966bc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-fixture-types-129-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-fixture-lint-129-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
