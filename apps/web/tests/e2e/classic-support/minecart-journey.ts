@@ -195,8 +195,10 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     data: { kind: 'entity-reference', reference: restored.reference, status: 'current' },
   });
   if (!currentWorldIdentity.ok) throw new Error(currentWorldIdentity.error.message);
+  if (!staleReferenceInspection.ok) throw new Error(staleReferenceInspection.error.message);
+  if (!currentReferenceInspection.ok) throw new Error(currentReferenceInspection.error.message);
   const worldEpoch = currentWorldIdentity.data.epoch;
-  expect(worldEpoch).toEqual(expect.any(String));
+  if (typeof worldEpoch !== 'string') throw new Error('World identity has no string epoch.');
   expect(worldEpoch.length).toBeGreaterThan(0);
   expect(currentWorldIdentity.frontier.epoch).toBe(worldEpoch);
   expect(staleReferenceInspection.frontier?.epoch).toBe(worldEpoch);
