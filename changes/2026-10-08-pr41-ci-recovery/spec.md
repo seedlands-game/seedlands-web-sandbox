@@ -1178,3 +1178,13 @@ Root独占transport.ts原route声明、原route-definition.test新断言、新pr
 18:11UTC137完整回归完成：原152files/1081PASS/252.63sec（原150文件加135两文件的152选择完整保留；137只在原两文件增加九例）。未登记仍RED的136新增文件，保留待修复；不把未覆盖坡道称PASS。types/lint/format/identity语义校验以上，工作树生产定义冻结，交付137规则、旧存档保护及检查记录。
 
 CI418精确a1a9ed3b自然终态：五非Browser SUCCESS，Chromium1FAIL1SKIP2PASS/27.9m，previewSKIP。主旅程首轮V2路线82.5,-.5原45sec超时45141ms，25pulse，末段在z=-.2828546与-.7328519/-.8078514之间反向来回；实际原生请求65.9–78.5ms、键盘wall206–343ms，真实fresh release/ACK/ground/noCollision/zeroV均有，不能归因未keyup或伪造settle。retry原900sec总限截断route78.5,-.5，route自身26.363sec尚剩18.637sec。原visual1.3m/普通native28.2sec PASS，ModularSKIP，C4/C5未跑；主旅程并未通过。完整raw1037754bytes/SHA651bd41692c1f7c74ea6533e043595afa1ba239d45ae02fe9bd65a22d1bd9c3a和54route/155operation解析留私有，首解析错误将operation outcome误认status已纠正、不改raw、不重新运行CI。计时仅diagnosticOnly，不推断GPU/优化因果。CI418已终态，可以远端/workflow复核后正常feature push137有限修复，精确后续CI独立判断。
+
+### V2 真实键盘事件与输入调度诊断138（18:16UTC预注册）
+
+137当前feature b47a6c22、base fba4486e已18:13 fetch/远端PR核实，CI41938074837191自然运行，不取消/抢推。CI418首次原45sec路线的最后7pulse真实W/S requested65.9–78.5ms而keyboardWall206–343ms，稳态z在-.2828546和-.7328519/-.8078514反复越过目标-.5，fresh release/ACK已到且ground/noCollision/zeroV成立；不能推断缺keyup，也未有实际DOM事件时长或packet targettick证据。Root因此优先诊断当前原主旅程输入链，连续坡道仍公开未解决，不加入忽略solid/pitch猜测性生产补丁。
+
+源码冻结后仅构建一次identified production artifact，再选原唯一classic-runtime.spec.ts原完整C0–C5主旅程一次，原900000/45000/20000ms、输入/predicate/断言/quality/SwiftShader不变，不加重试；只开启现有passive keyboard timing（真实trusted事件timeStamp/observedAt、1024有界ring、清理）读回DOM down/up间隔与handler延迟。所有CPU/nativeTrace/benchmark/Authority sampler均关闭；该观察不生成事件/核心注入，不证明性能或GPU根因，functional结果亦明示带passive observer，最终无观察器CI另看419。若C0早失败则timing NOT_STARTED/无V2覆盖，如实停止该候选、不盲重跑。build前保留旧b705 dist到私有独立路径，source/artifact/lock/Pack/实际阶段/失败/trace完整记录。
+
+136尚未交付的新8例RED源码现从Root创建的untracked repo文件无损移动至私有shape-owner-pending-138-01.test.ts（SHA作为私有记录），不是删用户文件或排除原CI用例；原152headless选择未包含该未通过的新文件。将来坡道真正修好再恢复原路径/登记，公开137已有4FAIL/4PASS和首contact未修复声明，PR仍不可合入。此移动用于保存可恢复进度及本轮生产源码clean freeze，不能当功能通过。
+
+Root独占spec/identified build/唯一原主旅程及私有run pr41-keyboard-event-browser-138-01。现有Luna可只读输入Owner链并在独占私有v2-input-scheduling-138-luna-01路径记录有界counterexample或否定证据，不写生产、不再委派；Root负责集成，不因模型或配额探测开新会话。传统.1PD×120%=.12PD，AI20min×120%=24min，18:40UTC检查点。实际产品UI17:54周74%/4d9h，约60停止线，额度下降时停止保留记录；不换算tokens。长期baseline不改，CI/workflow不改，不做生产或合并。
