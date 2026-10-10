@@ -1,0 +1,105 @@
+{
+  "browserSourceSha": "e308fcd6e0b941a11d99436b0ebf597893f3e4d5",
+  "native171": {
+    "status": "PASS",
+    "durationMs": 44179,
+    "newPulseAndNativePointReturn": "PASS",
+    "returnHorizontalErrorLessThan": 0.06,
+    "originalDeploymentMountRailEndDismountSaveRestore": "PASS"
+  },
+  "main172": {
+    "status": "FAIL",
+    "durationMs": 924580,
+    "originalTotalLimitMs": 900000,
+    "completed": ["C0", "C1", "C2", "C3", "Creative", "V1"],
+    "failure": "V2 craftArmor opening workbench: original global900000ms limit during original release-settle predicate",
+    "notReached": ["C4", "C5"],
+    "performanceEligible": false
+  },
+  "headless424": {
+    "sourceSha": "e308fcd6e0b941a11d99436b0ebf597893f3e4d5",
+    "runId": 38092118531,
+    "files": 154,
+    "passedTests": 1099,
+    "failedTests": 3,
+    "failureOwner": "mining-approach-handoff observation mock advanced only keyboard.press; native down/up were no-op"
+  },
+  "fixture175": {
+    "red": {
+      "failedTests": 3,
+      "passedTests": 1
+    },
+    "green": {
+      "files": 4,
+      "uniqueTests": 36,
+      "status": "PASS"
+    },
+    "classicTypes": "PASS",
+    "changedFileLint": "PASS",
+    "change": "Replay unchanged Browser64 observations on native KeyS release; fake time preserves exact100ms pulse and all existing safety assertions",
+    "productionApplicationSourceChanged": false
+  },
+  "nextBrowserAcceptance": "NOT_RUN_AT_DELIVERY",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-171-01.log",
+      "bytes": 1022,
+      "sha256": "ee9a19c92661b83859638b112b52a014b5dfa0f3cf14dbd2f970c9b643f547b1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-attachments-171-01.json",
+      "bytes": 142334,
+      "sha256": "44071f662002f05bcf08cf4b18c557deb20cd168392eaa4647ba3c01aaa711b1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-result-171-01.json",
+      "bytes": 319424,
+      "sha256": "be2ce6bd7919fa5d47be9bca9ad8f20aa24739c36f7df3f4857e633681af59d2"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-main-172-01.log",
+      "bytes": 1136755,
+      "sha256": "103eaf62099d2162082a4aebd6a39ec069ea5212ad2f9de8e596b6578858ab04"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-main-verify-172-01.json",
+      "bytes": 386,
+      "sha256": "252c0a51e9dfa06c0cb7495f86413c587ee7677bf98c5da1d1066fec939d9396"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-main-attachments-172-01.json",
+      "bytes": 259583,
+      "sha256": "b52285f7352891b39c32e6a946c4fe984d912f9a43049231275f4c3779d10b6b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-main-result-172-01.json",
+      "bytes": 6302766,
+      "sha256": "7e21efcb48501ce0788a2bee4e7d9809abe8b9e99b35ad0d1897e77c921a42a8"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci424-headless-raw-175-01.log",
+      "bytes": 230675,
+      "sha256": "a10b2fc50836fda09cceed414cf3b558c7b6bec0341675bffb11fb354e7c63b7"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/headless-native-fixture-red-175-01.log",
+      "bytes": 3418,
+      "sha256": "98c59f5928c5bde56092629099fa9b9f55d12166a15360e64f2b17b7f876e16a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/headless-native-fixture-green-175-01.log",
+      "bytes": 664,
+      "sha256": "6a8e857f85d2164ee3231d9316cd5d89fb9a8436c2dd67c13b4c4b5c801a68c6"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/headless-native-fixture-types-175-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/headless-native-fixture-lint-175-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}
