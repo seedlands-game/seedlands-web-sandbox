@@ -1,0 +1,70 @@
+{
+  "parentSourceSha": "8a0e082e66499bd1549fcddb37a4ff01c471d8bc",
+  "change": "普通手势保留同一active source及同generation解码；真实pause仍正常回收和重启",
+  "red": {
+    "failed": 2,
+    "passed": 1
+  },
+  "green": {
+    "files": 6,
+    "uniqueTests": 46,
+    "status": "PASS"
+  },
+  "classicTypes": {
+    "initial": "FAIL: 新纳入旧fixture ended监听器类型推断不匹配",
+    "afterExplicitVoidAnnotation": "PASS"
+  },
+  "lint": "PASS",
+  "selectionContracts": {
+    "passed": 17
+  },
+  "nextExactBrowser": "NOT_RUN_AT_DELIVERY",
+  "performanceClaim": false,
+  "previousBrowser": {
+    "sourceSha": "8a0e082e66499bd1549fcddb37a4ff01c471d8bc",
+    "native183": "完整5秒捕获无错误；两个后台长任务src_func=decodeAudioData，完整main FAIL922840ms",
+    "ci425": "Kernel28/stdlib1274/headless1102/architecture/build/static PASS；main两次C4 global900000 FAIL，visual/native PASS，Modular/preview SKIP"
+  },
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-red-189-01.log",
+      "bytes": 2624,
+      "sha256": "27558835a2285c07db48238ea8ea327b1ac73a7756be4f98dfbc6bbc49048fd0"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-green-189-02.log",
+      "bytes": 750,
+      "sha256": "8c6cfa5317ab9343009982fe4e8395463327b8574a21a9905cb567da49609cfd"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-types-189-01.log",
+      "bytes": 280,
+      "sha256": "170f032a70e337c55e3b6b3a885f3a3e78b62099f2c7c4a71fdd25f81b965755"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-types-189-02.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-lint-189-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/media-gesture-selection-189-01.log",
+      "bytes": 3985,
+      "sha256": "ab52f46688dffcc1be4987dee5e8eb8a672d2a6bc414782711d894160190b275"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/post-icon-native-analysis-187-01.json",
+      "bytes": 22920,
+      "sha256": "a2a032618349d0cff41b972397e649ddb77da6e0f2a3ed793703e7c0dc2b4a72"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci425-terminal-188-01.json",
+      "bytes": 576409,
+      "sha256": "53fc6dfe149d3fc17abff8928d1f64a78a6d32a885cdbcbee391f26992fb7b0d"
+    }
+  ]
+}
