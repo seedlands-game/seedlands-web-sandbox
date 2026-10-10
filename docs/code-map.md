@@ -298,3 +298,5 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 ### 持久化 Sky 源读取
 
 `client/persistence/browser-persistence-source-reads.ts` 将列目录和单个持久快照的只读读取绑定到现有存档身份及保存/释放 fence；`browser-stored-sky-snapshot.ts` 复用存档解码返回精确 revision 的独占副本，不消费 prepared registry/cache。`worker/authority-renderer-source.ts` 复用短 Host frontier、队列外 IO、最终 owner/worldRevision/fence 复核，为当前 renderer 提供 `request-sky-source`；原 `request-collision-baseline` 仍只观察驻留区块。`client/authority/browser-authority-sky-chunk.ts` 的副本只供原有有界列证明，不插入碰撞/mesh cache、不生成区块。静态、行为、冷存档场景/像素和整矩阵分别验收。
+
+当前身份的 Sky 响应明确 `superseded` 时，客户端向 `WorldSkyLighting` 传递有类型的临时失效，列目录同原因也仅重新排队原有单任务证明；缺失、损坏、预算超限及已释放来源保持暗且不轮询。该恢复合同不改变碰撞可用性或上述存储/派生所有者。

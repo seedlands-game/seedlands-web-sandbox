@@ -1,0 +1,64 @@
+{
+  "baseSha": "308d2cc58e3c7c2059abedad24f04f6861be8b58",
+  "scope": "Sky superseded recovery functional source validation",
+  "red": {
+    "failed": 2,
+    "passed": 20
+  },
+  "green": {
+    "files": 5,
+    "passed": 62
+  },
+  "finalWorldSky": {
+    "passed": 27
+  },
+  "productionWebTypes": "PASS; Svelte 0 errors and 0 warnings",
+  "classicTypes": ["FAIL: fixture coordinate method inferred zero parameters", "PASS: actual coordinate signature"],
+  "scopeLint": "PASS",
+  "browser": "NOT_RUN in125;121 overall FAIL and cold proof NOT_RUN",
+  "performance": "NOT_RUN; no performance claim",
+  "budget": {
+    "observedAtUTC": "2026-10-10 14:25",
+    "weeklyRemainingPercent": 75,
+    "stopRemainingPercent": 60,
+    "source": "parent actual product UI"
+  },
+  "privateLogs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-red-125-01.log",
+      "sha256": "61f17ef3421290d8aafa7fafbf6476bfcba077e298b214238e07ced4154fce4d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-green-125-01.log",
+      "sha256": "2106b59062c956310258a65b1c822cd541229aa009398786974b3b582fd4de9e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-green-125-02.log",
+      "sha256": "ca0b06c962c6215bd02af1a9d822b5223ae202861631319e5c0b03e411423be4"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-green-125-03.log",
+      "sha256": "ee6619046e85bd69a9a00e0451aff1c517ef8a89611fe3ed2f20e1fe59187c11"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-web-types-125-01.log",
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-classic-types-125-01.log",
+      "sha256": "4e7d35f62e7d161c395e60a6b78112f6f1664b49016ec147771e6b537305c906"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-classic-types-125-02.log",
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-lint-125-01.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-lint-125-02.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

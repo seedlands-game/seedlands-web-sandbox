@@ -3,6 +3,7 @@ import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicContent } from '../../fixtures/classic/content';
 import { WorldSkyLighting } from '../../../src/app/scene/world-sky-lighting';
 import type { SkyColumnSource } from '../../../src/app/scene/sky-column-source';
+import { requestBrowserSkyChunk } from '../../../src/client/authority/browser-authority-sky-chunk';
 
 const complete = (revision = 0): Extract<SkyColumnSource, { status: 'complete' }> => ({
   status: 'complete',
@@ -22,7 +23,7 @@ const fixture = (options?: { yieldTask: () => Promise<void> }) => {
     worldTime: 9,
     voxelSemantics: classicContent.voxelSemantics,
     getVoxel: () => Voxel.Air,
-    getChunkRevision: (): number | null => 0,
+    getChunkRevision: (_cx: number, _cy: number, _cz: number): number | null => 0,
     inspectColumnSource: vi.fn(async (): Promise<SkyColumnSource> => complete()),
     readSkyColumnChunk: vi.fn(
       async (
@@ -44,6 +45,82 @@ const fixture = (options?: { yieldTask: () => Promise<void> }) => {
 afterEach(() => vi.useRealTimers());
 
 describe('production World sky derived owner', () => {
+  it('rebuilds a column superseded by a save without a world revision change', async () => {
+    const { light, sink, authority } = fixture();
+    authority.inspectColumnSource.mockResolvedValueOnce({ status: 'unknown', reason: 'superseded' });
+    await vi.advanceTimersByTimeAsync(16);
+    expect(sink.publish).not.toHaveBeenCalled();
+    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
+    await vi.advanceTimersByTimeAsync(16);
+    expect(authority.inspectColumnSource).toHaveBeenCalledTimes(2);
+    expect(sink.publish).toHaveBeenCalledOnce();
+    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: true, visibility: 1 });
+    light.dispose();
+  });
+  it('retries a save-fenced nonresident roof through the real Sky response decoder', async () => {
+    const { light, sink, authority } = fixture();
+    authority.getChunkRevision = (_cx = 0, cy = 0) => (cy < 2 ? 0 : null);
+    authority.inspectColumnSource.mockResolvedValue({
+      ...complete(),
+      entries: [{ key: '0,2,0', cx: 0, cy: 2, cz: 0, revision: 0, resident: false, dirty: false }],
+    });
+    const roof = new Uint16Array(32 ** 3).fill(Voxel.Stone);
+    const request = vi
+      .fn()
+      .mockResolvedValueOnce({ status: 'unavailable', key: '0,2,0', reason: 'superseded' })
+      .mockImplementation(async () => ({
+        status: 'available',
+        key: '0,2,0',
+        chunkRevision: 0,
+        canonical: roof.slice().buffer,
+        fluid: new ArrayBuffer(32 ** 3),
+      }));
+    authority.readSkyColumnChunk.mockImplementation((cx, cy, cz, revision) =>
+      requestBrowserSkyChunk(request, () => authority.runtimeEpoch, cx, cy, cz, revision),
+    );
+    await vi.advanceTimersByTimeAsync(16);
+    expect(sink.publish).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(16);
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(request).toHaveBeenLastCalledWith({ kind: 'request-sky-source', key: '0,2,0', minimumRevision: 0 });
+    expect(sink.publish).toHaveBeenCalledOnce();
+    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: true, visibility: 0 });
+    expect(authority.getChunkRevision(0, 2, 0)).toBeNull();
+    light.dispose();
+  });
+  it.each(['release', 'dispose'] as const)('cancels a superseded source retry after %s', async (action) => {
+    const { light, sink, authority, release } = fixture();
+    authority.inspectColumnSource.mockResolvedValueOnce({ status: 'unknown', reason: 'superseded' });
+    await vi.advanceTimersByTimeAsync(16);
+    if (action === 'release') release();
+    else light.dispose();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(authority.inspectColumnSource).toHaveBeenCalledOnce();
+    expect(sink.publish).not.toHaveBeenCalled();
+    light.dispose();
+  });
+  it('keeps one pending rebuild while a superseded column retry waits for its source', async () => {
+    const { light, sink, authority } = fixture();
+    let resolve!: (source: SkyColumnSource) => void;
+    authority.inspectColumnSource
+      .mockResolvedValueOnce({ status: 'unknown', reason: 'superseded' })
+      .mockImplementationOnce(
+        () =>
+          new Promise((done) => {
+            resolve = done;
+          }),
+      );
+    await vi.advanceTimersByTimeAsync(32);
+    for (let i = 0; i < 3; i++) light.request([0, 0, 0]);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(authority.inspectColumnSource).toHaveBeenCalledTimes(2);
+    expect(light.diagnostics.pending).toBe(true);
+    resolve(complete());
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sink.publish).toHaveBeenCalledOnce();
+    expect(light.diagnostics.pending).toBe(false);
+    light.dispose();
+  });
   it.each(['epoch', 'revision', 'release'] as const)(
     'rejects a delayed above-render copy after %s changes',
     async (change) => {
@@ -106,8 +183,9 @@ describe('production World sky derived owner', () => {
             revision: failure === 'revision' ? 1 : 0,
           },
     );
-    await vi.advanceTimersByTimeAsync(16);
+    await vi.advanceTimersByTimeAsync(100);
     expect(sink.publish).not.toHaveBeenCalled();
+    expect(authority.readSkyColumnChunk).toHaveBeenCalledOnce();
     expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
     light.dispose();
   });
@@ -234,14 +312,18 @@ describe('production World sky derived owner', () => {
     expect(sink.publish).not.toHaveBeenCalled();
     light.dispose();
   });
-  it('keeps unknown metadata dark instead of constructing partial sky', async () => {
-    const { light, sink, authority } = fixture();
-    authority.inspectColumnSource.mockResolvedValue({ status: 'unknown', reason: 'budget-exhausted' });
-    await vi.advanceTimersByTimeAsync(16);
-    expect(sink.publish).not.toHaveBeenCalled();
-    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
-    light.dispose();
-  });
+  it.each(['budget-exhausted', 'invalid-data', 'source-unavailable'] as const)(
+    'keeps %s metadata dark without polling',
+    async (reason) => {
+      const { light, sink, authority } = fixture();
+      authority.inspectColumnSource.mockResolvedValue({ status: 'unknown', reason });
+      await vi.advanceTimersByTimeAsync(100);
+      expect(sink.publish).not.toHaveBeenCalled();
+      expect(authority.inspectColumnSource).toHaveBeenCalledOnce();
+      expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
+      light.dispose();
+    },
+  );
   it('current metadata cannot conceal a client/source revision mismatch', async () => {
     const { light, sink, authority } = fixture();
     authority.inspectColumnSource.mockResolvedValue(complete(1));

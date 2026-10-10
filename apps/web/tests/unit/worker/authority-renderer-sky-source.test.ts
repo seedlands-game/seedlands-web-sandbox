@@ -174,7 +174,36 @@ describe('durable Sky source on the current Authority renderer frontier', () => 
     await started;
     persistence.sourceReadFence.mockReturnValue(Symbol());
     release(stored);
-    expect(await pending).toEqual({ status: 'unavailable', key: KEY });
+    expect(await pending).toEqual({ status: 'unavailable', key: KEY, reason: 'superseded' });
+  });
+  it('reports a save fence change before its first queued frontier without accessing storage', async () => {
+    const { persistence, harness, owner } = await make();
+    let enter!: () => void, release!: () => void;
+    const started = new Promise<void>((resolve) => {
+      enter = resolve;
+    });
+    const blocking = harness.hostOperation(() => {
+      enter();
+      return new Promise<void>((resolve) => {
+        release = resolve;
+      });
+    });
+    await started;
+    const pending = observeAuthoritySkySource(harness, owner, KEY, 7, 'world:1');
+    persistence.sourceReadFence.mockReturnValue(Symbol());
+    release();
+    await blocking;
+    expect(await pending).toEqual({ status: 'unavailable', key: KEY, reason: 'superseded' });
+    expect(persistence.readStoredSkySnapshot).not.toHaveBeenCalled();
+  });
+  it('keeps a disposed source unavailable without requesting a retry or reading storage', async () => {
+    const { persistence, harness, owner } = await make();
+    persistence.sourceReadFence.mockReturnValue(null);
+    expect(await observeAuthoritySkySource(harness, owner, KEY, 7, 'world:1')).toEqual({
+      status: 'unavailable',
+      key: KEY,
+    });
+    expect(persistence.readStoredSkySnapshot).not.toHaveBeenCalled();
   });
   it.each(['key', 'revision', 'shape', 'seed', 'generator', 'fluid'] as const)(
     'does not publish a mismatched durable %s',
@@ -238,7 +267,7 @@ describe('durable Sky source on the current Authority renderer frontier', () => 
       clearTimeout(timer);
       release(stored);
     }
-    expect(await pending).toEqual({ status: 'unavailable', key: KEY });
+    expect(await pending).toEqual({ status: 'unavailable', key: KEY, reason: 'superseded' });
   });
   it('publishes the new response with only its owned transfer buffers', async () => {
     const { harness, owner } = await make();
