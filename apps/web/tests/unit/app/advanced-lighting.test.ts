@@ -1,4 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import * as pc from 'playcanvas';
+import { AdvancedVisualEffects } from '../../../src/app/scene/advanced-visual-effects';
+import type { World } from '../../../src/app/world/world-runtime';
+import type { VoxelMaterials } from '../../../src/app/scene/voxel-materials';
 import {
   LIGHTING_QUALITY_BUDGETS,
   localShadowCasterSignature,
@@ -8,6 +12,17 @@ import {
 } from '../../../src/app/scene/advanced-lighting-budget';
 
 describe('高级光影预算', () => {
+  it('质量特效保留相机已配置的 tone mapping 和曝光', () => {
+    const settings = { toneMapping: pc.TONEMAP_ACES, exposure: 1.25 };
+    const camera = { camera: settings } as unknown as pc.Entity;
+    // Low creates no GPU resources, so this exercises the production constructor
+    // without substituting its camera configuration behavior.
+    new AdvancedVisualEffects({} as pc.Application, camera, {} as World, LIGHTING_QUALITY_BUDGETS.low, {
+      water: [],
+    } as unknown as VoxelMaterials);
+    expect(settings).toEqual({ toneMapping: pc.TONEMAP_ACES, exposure: 1.25 });
+  });
+
   it('为每个画质档位提供严格递增且有界的 GPU 预算', () => {
     expect(LIGHTING_QUALITY_BUDGETS.low).toMatchObject({
       sunShadowResolution: 0,

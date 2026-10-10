@@ -862,3 +862,11 @@ modelReady/位置与截图需要分层：数值观察不是像素证明；Root�
 05:55UTC，冻结c889实际生产源码及原已批准Classic spec/architecture。当前SkyVisibilityCache需要worldTopY而source没有可信合法上界，不能从展示cy0..1臆造63、unloaded当Air或添加未授权world-height限制。本片只读定位可验证的现有Worldgen/Authority/Persistence元数据、列上方编辑完整性与最高生成solid保证；提出能保留既有合法存档/无新dimension/unknown fail-dark/同per-chunk owner的最小接线合同，并明确缺少事实，不能写假顶界或未测收益。
 
 复用唯一既有Luna/medium请求会话做有界leaf只读任务，服务型号仍未核实、不新开probe、不再委派；独占private task140-sky-source-readonly-01.md，禁止源文件/测试/构建/Browser/远端写入/全历史复制或size枚举。Root独占88 evidence/spec/metadata与CI状态，负责集成和验收，不重复Luna来源调查。此片无新增source/协议/发布，不以架构建议当产品通过。传统0.1PD×120%=0.12PD，AI20min×120%=24min，06:19UTC检查点；真实05:29周剩80%/4d21h，60%停止线；credits/API/费率/占比未知不换算。当前CI407自然终态前不抢推/取消；88有界纵向PASS不替代mainFAIL或194矩阵。
+
+06:07UTC checkpoint89只读终态：Luna报告由Root核对provider、持久化、浏览器高度与Sky cache源码，现有合同没有可证明完整的worldTopY。Kernel provider无天空边界；持久化只能按已知key读，不能发现未加载高层存档；512样本/64依赖是资源上限，不是世界高度。最小接线方向是Pack/stdlib拥有生成边界证明、同一持久化owner提供完整列key目录，并绑定world epoch及目录/Chunk revision；缺证明、超预算或失效均unknown/fail-dark。仍为待实施合同，不新增Kernel字段/第二可写truth/世界高度限制、不宣称Sky产品通过。私有task140-sky-source-readonly-01.md保存来源；公共sky-source-contract-89-01.md保存可恢复边界。
+
+### 质量预算不覆盖相机tone mapping checkpoint90（预注册）
+
+06:07UTC，远端34fee5f1与base fba4486e精确核对未变，CI407自然运行。源码advanced-visual-effects.ts按colorGradeStrength/postProcessing把相机切为ACES/NEUTRAL/LINEAR，违反已批准固定tone mapper/exposure与质量预算分离合同。此片只移除质量owner对camera.toneMapping的覆盖，让相机既有配置保留；不在此臆造Pack profile、不改曝光、阴影/反射/postprocess质量预算，不宣称统一受光或性能收益。当前相机创建使用引擎默认tone mapper，因此low现有实际取值保持；medium/high由质量强制覆盖的路径移除。
+
+RED设计：在原AdvancedVisualEffects真实构造函数的low无GPU特效路径中传入预配置ACES与exposure1.25的相机，原代码会错误改为LINEAR；断言原配置保持。复用既有STATIC_RED_ONLY质量不选tone mapper断言做定向静态检查，其余未接线lighting RED仍不写PASS。Root独占advanced-visual-effects.ts、advanced-lighting.test.ts/spec及新证据，Luna无任务；不改变唯一browser入口与原断言/超时。必要定向测试、Classic类型、范围lint/格式、冻结/路径检查，生产build与后续同精确产物原visual旅程；完整main不盲目重跑，CI407不取消。AI20min×120%=24min，06:31UTC检查点；传统0.15PD×120%=0.18PD；最新05:29真实80%/4d21h，约60%停止线，费用/credits/API/占比未知不换算。
