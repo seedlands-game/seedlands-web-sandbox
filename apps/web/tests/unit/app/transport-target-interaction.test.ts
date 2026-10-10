@@ -1,4 +1,7 @@
 import { expect, it, vi } from 'vitest';
+import * as pc from 'playcanvas';
+import { performPlayerSecondaryInteraction } from '../../../src/app/player/secondary-interaction';
+import type { PlayerControllerOptions } from '../../../src/app/player/player-controller-types';
 import { ready } from '../client/fixtures/browser-authority';
 import {
   defineTransportV1,
@@ -29,6 +32,49 @@ const cart: TransportStateV2 = {
   inventory: [],
 };
 const gameplay = () => ({ ...ready().gameplay, transports: [cart], transportDefinitions: [definition] });
+
+it.each([
+  [false, 'entity'],
+  [true, 'target'],
+  [undefined, 'target'],
+])('native adapter clips accepted solid/unknown cells but permits non-solid cells: %s', async (solid, expected) => {
+  const camera = new pc.Entity();
+  camera.setPosition(0, 0.3, 0);
+  const useTarget = vi.fn(async () => 'handled' as const);
+  const options: Pick<
+    PlayerControllerOptions,
+    'camera' | 'getWorld' | 'onUseEntityTarget' | 'onUseTarget' | 'onUseHeldItem' | 'onPlace' | 'onFeedback'
+  > = {
+    camera,
+    getWorld: () =>
+      ({
+        authority: { voxelSemantics: { get: () => (solid === undefined ? undefined : { solid }) } },
+      }) as unknown as ReturnType<PlayerControllerOptions['getWorld']>,
+    onUseEntityTarget: vi.fn(async (origin, direction, maxDistance, intent) =>
+      transportTargetAction(gameplay(), origin, direction, maxDistance, intent)
+        ? ('handled' as const)
+        : ('fallback' as const),
+    ),
+    onUseTarget: useTarget,
+    onUseHeldItem: vi.fn(() => false),
+    onPlace: vi.fn(),
+    onFeedback: vi.fn(),
+  };
+  expect(
+    await performPlayerSecondaryInteraction(
+      options,
+      {
+        voxel: 500,
+        position: [0, 0, -3],
+        adjacent: [0, 0, -2],
+        distance: 2,
+        inRange: true,
+      },
+      false,
+    ),
+  ).toBe(expected);
+  expect(useTarget).toHaveBeenCalledTimes(expected === 'entity' ? 0 : 1);
+});
 
 it('native ray submits accepted lifetime and four selection revisions without changing the view', () => {
   const view = gameplay();

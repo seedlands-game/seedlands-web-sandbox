@@ -1,0 +1,9 @@
+# 原生矿车非实心单元遮挡修复
+
+2026-10-10，parent `397ec45f8d42c40406454354aed84500bf81774d`。生产artifact `57cf4d8e1dadc950907051ef7d9e4367498df98807cfaf220aac6cdfcc483d33` 原native run `pr41-classic-minecart-browser75-01` 实际27.6秒FAIL：部署及GLB lease就绪通过，截图可见准星位于车体，上车5秒poll无rider。失败trace/HTML保留 `/workspace/pr41-recovery-20261008-root-01/browser75-native-01`。
+
+客户端voxel target是整格入口；非实心轨道和车体位于同格，用其入口截断ray会丢弃车体。通用secondary adapter仅在正式semantics.solid不是false时继续截断到原target.distance；明确非实心使用既有5m上限。没有内容ID分支、距离增加或Authority写入。Authority relation原assertReach仍独立核实5m、未知/实心LOS、生命周期和占位。实心/未知及后续遮挡不能获准穿透。
+
+实际适配器结合accepted transportTargetAction的有效RED为1FAIL/6PASS：非实心500误走voxel；solid/unknown仍正确阻挡。修复后连同原container输入优先级16PASS。原生旅程的输入、5秒上车断言、120秒总限、渲染质量和保存恢复断言完全保留。此次source提交时新Browser尚未运行，必须新identified生产artifact复验；不能宣称整个Classic或PR可合入。
+
+复用第75组最终串行headless121文件764PASS、stdlib166文件1195PASS和完整static；当前小片定向lint、Classic/Web类型PASS，Svelte零错误/警告，diff检查PASS。旧失败与原sealed证据保持。长期docs baseline不更新：修正既有通用输入接线，没有新增架构职责或性能声明。

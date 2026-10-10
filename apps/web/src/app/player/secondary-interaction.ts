@@ -11,7 +11,7 @@ export type TargetInteractionResult = 'handled' | 'fallback';
 export function performPlayerSecondaryInteraction(
   options: Pick<
     PlayerControllerOptions,
-    'camera' | 'onUseEntityTarget' | 'onUseTarget' | 'onUseHeldItem' | 'onPlace' | 'onFeedback'
+    'camera' | 'getWorld' | 'onUseEntityTarget' | 'onUseTarget' | 'onUseHeldItem' | 'onPlace' | 'onFeedback'
   >,
   target: VoxelTarget | null,
   bypassTarget: boolean,
@@ -23,10 +23,13 @@ export function performPlayerSecondaryInteraction(
       ? (intent) => {
           const origin = options.camera.getPosition(),
             direction = options.camera.forward;
+          // Target distance is the voxel-cell entry, not the visible model surface.
+          // Unknown semantics stay opaque; Authority independently verifies entity LOS.
+          const occludes = target && options.getWorld()?.authority.voxelSemantics.get(target.voxel)?.solid !== false;
           return options.onUseEntityTarget!(
             [origin.x, origin.y, origin.z],
             [direction.x, direction.y, direction.z],
-            Math.min(5, target?.distance ?? 5),
+            occludes ? Math.min(5, target.distance) : 5,
             intent,
           );
         }
