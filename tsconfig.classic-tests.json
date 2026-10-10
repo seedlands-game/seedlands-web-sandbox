@@ -108,6 +108,7 @@
     "apps/web/tests/integration/runtime/server/composition/transport-authority-route-motion.test.ts",
     "apps/web/tests/unit/client/performance-telemetry.test.ts",
     "apps/web/tests/unit/app/mesh-task-scheduler-diagnostics.test.ts",
-    "apps/web/tests/e2e/classic-support/failure-motion-diagnostics.test.ts"
+    "apps/web/tests/e2e/classic-support/failure-motion-diagnostics.test.ts",
+    "apps/web/tests/unit/app/block-light-volume.test.ts"
   ]
 }

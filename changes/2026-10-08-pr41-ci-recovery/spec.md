@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Block-light消费者陈旧读 checkpoint72（预注册）
+
+2026-10-10 00:19UTC，精确66467feb的CI71自然运行，不取消或抢推。生产entity/drop经Game→AdvancedVisualEffects→WorldRuntime→ChunkBlockLightCache.sample取得block光；sample目前只检查缓存是否存在，未核对当前Authority halo revision，invalidateAround也只标记待重建。先用真实缓存/体积及Classic voxel semantics建立反例：移除光源后的显式失效、revision先于mesh通知变化、区域变unknown，重建前不得继续采样旧光值；同revision控制保持原亮度。若有效RED成立，仅在sample使用当前既有chunkBlockLightNeedsRefresh合同失败暗化，不改变重建、sink、texture、帧预算、队列优先级或GPU资产。
+
+本片只闭合entity/drop CPU采样的新鲜度，terrain/crop GPU立即失效、sky可见度与统一SurfaceLightingSample仍需生产接线和像素验收。无性能改善声明，不改全局sun/ambient。Root独占block-light-volume.ts及其既有测试、package/type追加、spec/evidence；现有Luna只读Task134已完成，无新委派。传统0.1PD×120%=0.12PD、AI8min×120%=9.6min，00:29前checkpoint。最新真实额度82%/5d3h（23:09），刷新待答，约60%停止线；无法核实实际型号/credits/API，不作换算。长期docs暂不更新，复用既有缓存owner和revision合同。
+
+00:22本地checkpoint72：三类有效RED3FAIL/10PASS；最小采样revision检查后五文件32PASS/EXIT0，Web生产/Svelte/tools与Classic测试类型通过，相关lint/paths通过。package/type集合仅追加原block-light-volume测试，所有原字段/选择保持。源sample不修改owner状态或重建，仅陈旧返回0；GPU失效和sky统一接线仍未完成。实际生产代理精确核对后更正早期WorldEnvironment误写为AdvancedVisualEffects；不是新owner。详见evidence/block-light-stale-sample-checkpoint-72-01.md，CI71尚在运行，不抢推。
+
 ## V2失败控制台快照 checkpoint71（预注册）
 
 2026-10-10 00:12UTC，第70组本地commit d9d41f18已完成，尚未push；CI69自然terminal FAIL。真实ZIP传入仍待具体域名授权，现有failure collector已读取同一正式harness.snapshot，却仅输出chunk/trace而丢弃玩家与Authority位置、速度、ground/collision及ACK字段。仅将该次既有读回的窄motion字段加入diagnosticOnly/eligible:false控制台结果；不添加采样、不改输入/状态、超时、断言、质量或产品路径。用实际collector执行取得缺字段RED，覆盖有效snapshot、未启动无harness、snapshot异常时原错误及input诊断保持；必要类型/lint及定向测试后与70一起正常推送，不重复全量headless以凑证据。真实console新字段仍需新head唯一CI runner验证，不宣称V2修复。
