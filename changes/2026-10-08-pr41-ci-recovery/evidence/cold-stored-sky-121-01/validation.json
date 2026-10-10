@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "overall": "FAIL_NOT_MERGE_READY",
+  "sourceSha": "999dadf77584d7aa27f5f7cfbb5dace99c7943e7",
+  "sourceDigest": "d2cfc7046f2240eac51900ce8210834be23f8e19ab15d5ebf5039754bd7b1d3d",
+  "artifactDigest": "42a2687f3f7b742be57dd1e8c419115b48154102499ef4f91a2396063a8fc518",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "builtAt": "2026-10-10T14:42:15.636Z",
+  "files": 289,
+  "validation": {
+    "storedSkyUnits": "5文件49PASS",
+    "doorUnits": "5文件50PASS，最终实际wall/default crossing+point20PASS",
+    "webTypes": "PASS0error0warning",
+    "classicTypes": "PASS",
+    "stdlibAndRootTestTypes": "PASS",
+    "scopedLint": "PASS500有效行上限",
+    "ciSelection": "PASS3",
+    "build": "PASS",
+    "visual": "FAIL2.9分钟，cold restore start-card原10000ms",
+    "hotGpuPixels": "PASS六类66个不同case，前段33为子集",
+    "native": "PASS56.4秒/runner59.4秒 NON_MAIN",
+    "coldNonresidentSkyConsumer": "NOT_RUN，启动失败先于cold source/ready断言",
+    "canonicalMain": "NOT_RUN本地；待新精确SHA远端CI",
+    "fullLightingContentTransportAndPerformanceMatrix": "NOT_CLOSED原ledger117保持"
+  },
+  "coldStartupPhaseTimesMs": {
+    "save-flush": 4606.899999976158,
+    "save-flush:complete": 4630.399999976158,
+    "scene": 4630.699999988079,
+    "scene:complete": 4785.399999976158,
+    "materials": 4786.299999982119,
+    "materials:complete": 6752.399999976158,
+    "media": 6757.5999999940395,
+    "media:complete": 6784.899999976158,
+    "worker": 6784.899999976158,
+    "worker:complete": 11360.09999999404,
+    "first-visible": 11534.5,
+    "first-visible:complete": 15946.59999999404
+  },
+  "coldStartupDurationMs": 11339.700000017881,
+  "startupAfterFailure": {
+    "cardDisplay": "none",
+    "residentCount": 5
+  },
+  "receipts": {
+    "pr41-cold-stored-sky-121-01": {
+      "status": "FAIL",
+      "sourceSha": "999dadf77584d7aa27f5f7cfbb5dace99c7943e7",
+      "selection": "NON_MAIN",
+      "runnerOutcome": "failed",
+      "bytes": 638,
+      "sha256": "d307d24790fb0215ec287bf11dccd6d135a0cea9d44417521694501374678314"
+    },
+    "pr41-cold-stored-native-121-02": {
+      "status": "PASS",
+      "sourceSha": "999dadf77584d7aa27f5f7cfbb5dace99c7943e7",
+      "selection": "NON_MAIN",
+      "runnerOutcome": "passed",
+      "bytes": 687,
+      "sha256": "c647676c666719e32a0fabbfa2043cc72d8cfb965de9135fcd0175ec25a4ccda"
+    }
+  },
+  "privateRawFiles": {
+    "cold-sky-browser-121-01.log": {
+      "bytes": 31509,
+      "sha256": "3ff8bc3b7c2b391b60a1b71d0a6c70c389b75d3e94124e8e00c83b27d0fd2660"
+    },
+    "cold-sky-startup-failure-121-01.json": {
+      "bytes": 29997,
+      "sha256": "7869bec6d2a20df319185d5295717d5d8e763e4f405dc93403d5784eec7a50fb"
+    },
+    "cold-sky-model-received-lighting-webgl2-pixels-121-01.json": {
+      "bytes": 5091,
+      "sha256": "192bc519e71e417d595c6154c158ee8753289e40641267323ba75efac8d187a9"
+    },
+    "cold-sky-received-lighting-webgl2-pixels-121-01.json": {
+      "bytes": 2547,
+      "sha256": "41478fcf4d864587b21e667ed7c35e85ae7719550d40cf5aafc7a1c4410fccec"
+    },
+    "cold-sky-native-121-02.log": {
+      "bytes": 1026,
+      "sha256": "4e1e3caa0ef54ca13c8081c4941e3a4b8bc0cfc84c40aebd8a5e99168dd47805"
+    },
+    "cold-sky-build-121-01.log": {
+      "bytes": 3771,
+      "sha256": "433569084e5d48aa2ea91f86dbfc348c4a9268416301af3c9721ecdb45790dfa"
+    }
+  },
+  "budget": {
+    "observedAtUTC": "2026-10-10 14:25",
+    "weeklyRemainingPercent": 75,
+    "stopRemainingPercent": 60,
+    "source": "parent actual product UI",
+    "notPRExclusive": true
+  },
+  "limitations": [
+    "cold启动11.34秒未确认单一原因，不提高10秒等待，不宣称其性能因果",
+    "截图不代表冷Sky遮挡像素；Root实际查看热场景night-sources-removed PNG",
+    "首轮HTML抽取脚本attachments统计字段错误保留，33/66原始JSON已正确抽取且66值核验通过",
+    "未merge/automerge/main/production，feature PR既有preview边界保持"
+  ]
+}
