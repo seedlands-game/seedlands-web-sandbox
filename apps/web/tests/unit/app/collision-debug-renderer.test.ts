@@ -62,6 +62,29 @@ vi.mock('playcanvas', () => {
 });
 
 describe('碰撞调试渲染资源', () => {
+  it('enabling debug with a configured carrier preserves its body without fixed BodyKind lookup', async () => {
+    const { CollisionDebugRuntime } = await import('../../../src/app/player/collision-debug-runtime');
+    const debug = new CollisionDebugRuntime({ graphicsDevice: {}, root: { addChild: vi.fn() } } as never);
+    debug.setEnabled(true);
+    const player = {
+      id: 'player',
+      type: 'player',
+      body: { position: { x: 0, y: 33, z: 0 }, velocity: { x: 0, y: 0, z: 0 } },
+      grounded: false,
+      contacts: [],
+    };
+    const carrier = {
+      ...player,
+      id: 'carrier',
+      type: 'transport',
+      bodyAabb: { min: { x: -0.25, y: 0, z: -1.5 }, max: { x: 0.25, y: 0.8, z: 1.5 } },
+    };
+    expect(() =>
+      debug.update({ epoch: 'carrier', physicsTick: 1, player, entities: [player, carrier] } as never, null, null),
+    ).not.toThrow();
+    expect(debug.status?.visibleBodyCount).toBe(2);
+    debug.dispose();
+  });
   beforeEach(() => vi.clearAllMocks());
 
   it('关闭后释放唯一批次资源且不会在后台继续重建', async () => {

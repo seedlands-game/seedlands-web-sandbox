@@ -9,6 +9,8 @@ import { AutonomyRuntime } from '../simulation/autonomy-runtime';
 import { createGameplayCharacterDomain } from './gameplay-character-domain';
 import { createGameplayCombatCallbacks } from './gameplay-combat-callbacks';
 import { optionalRegisteredCombatRequest } from './optional-registered-combat-request';
+import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
+import { transportBodyConfig } from './transport-body-config';
 import { Voxel } from '../../world/voxel';
 
 export function createGameplayAutonomyRuntime(
@@ -40,6 +42,15 @@ export function createGameplayAutonomyRuntime(
       : null;
   return new AutonomyRuntime({
     entities: options.entities,
+    bodyConfig: (entity) => {
+      if (entity.type !== 'transport') return bodyConfigFor(bodyKindForEntity(entity));
+      const reference = options.entities.createReference(entity.id);
+      const state = reference && options.entities.transportState(reference);
+      const definition = state && options.content.transportDefinitions?.require(state.definitionId);
+      if (!state || !definition)
+        throw new Error('Navigation transport body requires its current configured definition.');
+      return transportBodyConfig(definition, state.pose.yaw);
+    },
     registeredNeeds: !!callbacks.composition,
     registeredCombat: !!callbacks.composition,
     combatOrigin: options.registeredCombat?.environment.originOptions,

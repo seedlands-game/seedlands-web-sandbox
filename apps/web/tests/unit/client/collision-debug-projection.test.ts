@@ -2,6 +2,31 @@ import { describe, expect, it } from 'vitest';
 import { createCollisionDebugBatch } from '../../../src/client/presentation/collision-debug-projection';
 
 describe('碰撞调试投影', () => {
+  it('projects the configured carrier bounds and rejects a carrier without its authoritative geometry', () => {
+    const carrier = {
+      id: 'carrier',
+      kind: null,
+      state: { position: { x: 32, y: 33, z: 32 }, velocity: { x: 0, y: 0, z: 0 } },
+      grounded: false,
+      contacts: [],
+      localAabb: { min: { x: -0.25, y: 0, z: -1.5 }, max: { x: 0.25, y: 0.8, z: 1.5 } },
+    };
+    const snapshot = { epoch: 'carrier-debug', physicsTick: 1, authoritative: [carrier], truncatedBodyCount: 0 };
+    const batch = createCollisionDebugBatch(snapshot, carrier.state.position);
+    expect(batch.lines).toHaveLength(12);
+    const xs = [...batch.positions].filter((_, i) => i % 3 === 0);
+    const zs = [...batch.positions].filter((_, i) => i % 3 === 2);
+    expect(Math.min(...xs)).toBe(31.75);
+    expect(Math.max(...xs)).toBe(32.25);
+    expect(Math.min(...zs)).toBe(30.5);
+    expect(Math.max(...zs)).toBe(33.5);
+    expect(() =>
+      createCollisionDebugBatch(
+        { ...snapshot, authoritative: [{ ...carrier, localAabb: undefined }] },
+        carrier.state.position,
+      ),
+    ).toThrow('configured body');
+  });
   it('从同一身体注册表投影权威和预测箱，且来源和颜色可区分', () => {
     const batch = createCollisionDebugBatch(
       {

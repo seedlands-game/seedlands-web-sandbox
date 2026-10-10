@@ -1,4 +1,3 @@
-import { bodyConfigFor, bodyKindForEntity } from '@seedlands/stdlib/physics/body-registry';
 import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
 import type { AuthorityAdvanceResult } from '@seedlands/stdlib/server/authority/authority-runtime-types';
 import { WORLD_HARNESS_MAX_ADVANCE_MS } from '@seedlands/stdlib/server/harness/world-harness-contract';
@@ -32,7 +31,7 @@ type Options = Readonly<{
 function entityCollisionChunks(runtime: AuthorityRuntime): readonly (readonly [number, number, number])[] {
   const chunks = new Map<string, readonly [number, number, number]>();
   for (const entity of runtime.server.queryEntities()) {
-    const config = bodyConfigFor(bodyKindForEntity(entity));
+    const config = runtime.bodyConfigForEntity(entity);
     const min = [config.localAabb.min.x, config.localAabb.min.y, config.localAabb.min.z] as const;
     const max = [config.localAabb.max.x, config.localAabb.max.y, config.localAabb.max.z] as const;
     const lower = entity.position.map((value, axis) => floorDiv(value + min[axis] - 0.05, CHUNK_SIZE));

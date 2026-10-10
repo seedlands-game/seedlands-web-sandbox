@@ -111,6 +111,13 @@
     "apps/web/tests/e2e/classic-support/failure-motion-diagnostics.test.ts",
     "apps/web/tests/unit/app/block-light-volume.test.ts",
     "apps/web/tests/unit/app/block-light-invalidation.test.ts",
-    "apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts"
+    "apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts",
+    "apps/web/tests/unit/client/authority-worker-deterministic-advance.test.ts",
+    "apps/web/tests/unit/client/authority-worker-configured-body-preload.test.ts",
+    "apps/web/tests/unit/worker/game-logic-worker.test.ts",
+    "apps/web/tests/unit/client/browser-logic-client.test.ts",
+    "apps/web/tests/unit/client/collision-debug-projection.test.ts",
+    "apps/web/tests/unit/app/collision-debug-renderer.test.ts",
+    "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts"
   ]
 }

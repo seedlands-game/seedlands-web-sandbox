@@ -44,7 +44,14 @@ export function projectMovementBodies(
   const projected = movement ? { ...player, movement } : player;
   return {
     player: projected,
-    entities: [...bodies.values()].map((body) => (body.id === player.id ? projected : body)),
+    entities: [...bodies.values()].map((body) => {
+      if (body.id === player.id) return projected;
+      if (body.type !== 'transport') return body;
+      const entity = options.server.getEntity(body.id);
+      if (!entity) throw new Error(`Authority carrier is missing: ${body.id}`);
+      const bounds = options.bodyConfigFor(entity).localAabb;
+      return { ...body, bodyAabb: { min: { ...bounds.min }, max: { ...bounds.max } } };
+    }),
   };
 }
 

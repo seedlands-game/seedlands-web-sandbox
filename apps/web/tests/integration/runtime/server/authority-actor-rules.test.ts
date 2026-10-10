@@ -205,7 +205,7 @@ describe('Authority actor rules', () => {
     const observation = observations.at(-1)!;
     const actor = observation.entities.find((entity) => entity.id === 'grazer')!;
     const batch = {
-      protocolVersion: 1 as const,
+      protocolVersion: 2 as const,
       epoch: 'actor-replay',
       observationSequence: observation.observationSequence,
       expiresAtPhysicsTick: observation.physicsTick + 12,

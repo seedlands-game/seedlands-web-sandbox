@@ -90,7 +90,7 @@ async function movementFixture() {
   expect(runtime.acceptGeneratedChunk({ ...prepared, canonical: flatChunk() })).toBe(true);
   const actor = runtime.server.spawnAutonomousActor({
     id: 'browser-moving-actor',
-    archetype: 'settler',
+    archetype: 'cow',
     position: [10.5, 1, 10.5],
   });
   expect(
@@ -198,7 +198,7 @@ describe('Browser Authority deterministic paused advance', () => {
       timers: { set: setTimer, clear: clearTimer },
     });
     const batch = (observation: LogicObservation): LogicIntentBatch => ({
-      protocolVersion: 1,
+      protocolVersion: 2,
       epoch: observation.epoch,
       observationSequence: observation.observationSequence,
       expiresAtPhysicsTick: observation.physicsTick + 12,
@@ -354,13 +354,13 @@ describe('Browser Authority deterministic paused advance', () => {
       yieldTurn: testCorePlatform.yieldTurn,
       timers: testCorePlatform.timers,
     });
-    fixture.install(coordinator);
     const beforeInvalid = fixture.runtime.snapshot();
     await expect(coordinator.advancePaused(-1, false)).rejects.toThrow('within 0..60000ms');
     expect(fixture.runtime.snapshot()).toEqual(beforeInvalid);
     fixture.runtime.resume(0);
     fixture.runtime.wake(500);
     fixture.runtime.pause(500);
+    fixture.install(coordinator);
     expect(fixture.runtime.snapshot().physicsDebtMs).toBeGreaterThan(200);
 
     const result = await coordinator.advancePaused(0, false);
@@ -382,10 +382,10 @@ describe('Browser Authority deterministic paused advance', () => {
       yieldTurn: testCorePlatform.yieldTurn,
       timers: { set: setTimer, clear: testCorePlatform.timers.clear },
     });
-    fixture.install(coordinator);
     fixture.runtime.resume(0);
     fixture.runtime.wake(500);
     fixture.runtime.pause(500);
+    fixture.install(coordinator);
 
     await expect(coordinator.advancePaused(100, true)).rejects.toThrow('direct-port-failed');
     expect(setTimer).toHaveBeenCalledOnce();
@@ -514,7 +514,7 @@ describe('Browser Authority deterministic paused advance', () => {
     holder.runtime = runtime;
     const actor = runtime.server.spawnAutonomousActor({
       id: 'generated-collision-actor',
-      archetype: 'settler',
+      archetype: 'cow',
       position: [10.5, 1, 10.5],
     });
     runtime.server.applyActorAuthorityAction(actor.id, { type: 'move-to', target: [16.5, 1, 10.5] });

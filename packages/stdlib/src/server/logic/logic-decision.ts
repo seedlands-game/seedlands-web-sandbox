@@ -12,6 +12,7 @@ import {
   type LogicPosition,
 } from './logic-protocol';
 import { LogicTerrain } from './logic-terrain';
+import { finiteAabb } from '../../physics/geometry';
 
 export type LogicDecisionOptions = Readonly<{ physicsHz: 30 | 60 | 120 }>;
 
@@ -64,7 +65,9 @@ function validateObservation(observation: LogicObservation): void {
       !Number.isInteger(entity.poseRevision) ||
       entity.poseRevision < 0 ||
       !finitePosition(entity.position) ||
-      !finitePosition(entity.velocity)
+      !finitePosition(entity.velocity) ||
+      (entity.bodyKind === null && !entity.bodyAabb) ||
+      (entity.bodyAabb !== undefined && !finiteAabb(entity.bodyAabb))
     )
       throw new TypeError('Logic entity is invalid or duplicated.');
     entities.add(entity.id);
@@ -264,7 +267,7 @@ function holdIntent(entry: ActorObservation, entity: LogicEntity, terrain: Logic
 
 function decideActor(entry: ActorObservation, observation: LogicObservation): LogicIntent | null {
   const entity = observation.entities.find((candidate) => candidate.id === entry.state.entityId);
-  if (!entity || entity.identityRevision !== entry.identityRevision) return null;
+  if (!entity || entity.identityRevision !== entry.identityRevision || entity.bodyKind === null) return null;
   const terrain = new LogicTerrain(observation.decisionContext.terrainWindows);
   const goal = chooseGoal(entry, entity, observation, terrain);
   if (terrain.hasMissingData || goal.kind === 'hold') return holdIntent(entry, entity, terrain);

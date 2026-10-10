@@ -1,10 +1,11 @@
 import type { BodyKind } from '../../physics/body-registry';
+import type { WorldAabb } from '../../physics';
 import type { ActorAction } from '../simulation/action-runtime';
 import type { ActorState } from '../simulation/actor-state';
 import type { PoiSnapshot } from '../simulation/poi-registry';
 import type { ActorControlSource } from '../gameplay/ecs-actor-components';
 
-export const LOGIC_PROTOCOL_VERSION = 1 as const;
+export const LOGIC_PROTOCOL_VERSION = 2 as const;
 export const LOGIC_INTENT_TTL_MS = 200;
 export const MAX_LOGIC_TERRAIN_AXIS = 32;
 export const MAX_LOGIC_TERRAIN_CELLS = 32_768;
@@ -15,7 +16,9 @@ export type ActorActionSnapshot = Readonly<ActorAction>;
 
 export type LogicEntity = Readonly<{
   id: string;
-  bodyKind: BodyKind;
+  /** Configured carriers remain observable without pretending to be a fixed actor body. */
+  bodyKind: BodyKind | null;
+  bodyAabb?: WorldAabb;
   identityRevision: number;
   poseRevision: number;
   position: LogicPosition;
