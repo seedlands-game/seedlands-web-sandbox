@@ -1,8 +1,48 @@
+import { requestBrowserColumnSource } from '../../../src/client/authority/browser-authority-column-source';
 import { describe, expect, it } from 'vitest';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import { FakeAuthorityWorker } from './fixtures/browser-authority';
 
 describe('Browser Authority column inspection', () => {
+  it('rejects a late response after the client runtime epoch changes', async () => {
+    let epoch = 'old';
+    let release!: (value: unknown) => void;
+    const pending = requestBrowserColumnSource(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+      () => epoch,
+      0,
+      0,
+    );
+    epoch = 'new';
+    release({ status: 'complete', epoch: 1 });
+    await expect(pending).resolves.toEqual({ status: 'unknown', reason: 'superseded' });
+  });
+  it('normal renderer metadata uses its current runtime envelope without granting World chunk read', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const pending = client.inspectColumnSource(0, 0);
+    const request = worker.posts.at(-1) as { requestId: number };
+    expect(request).toMatchObject({
+      kind: 'request-column-source',
+      cx: 0,
+      cz: 0,
+      epoch: 'world:1',
+      runtimeEpoch: 'world:1',
+    });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      ok: true,
+      result: { status: 'unknown', reason: 'source-unavailable' },
+    });
+    await expect(pending).resolves.toEqual({ status: 'unknown', reason: 'source-unavailable' });
+  });
+
   it('carries column metadata through the existing inspect RPC without a mesh request', async () => {
     const worker = new FakeAuthorityWorker();
     const client = new BrowserAuthorityClient(worker, 'world:1');

@@ -37,6 +37,7 @@ type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 export type HarnessApi = {
   inputDecisionDiagnostics: () =>
     import('../../client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
+  skyVisibilityDiagnostics: () => ReturnType<World['getSkyVisibilityDiagnostics']> | null;
   blockLightDiagnostics: () => import('../scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   world: WorldHarnessPort;
   snapshot: () => HarnessSnapshot;

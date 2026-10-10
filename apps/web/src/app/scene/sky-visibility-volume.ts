@@ -17,7 +17,7 @@ export type SkyColumnObstructionSample = Readonly<{
   bottomY: number;
   /** Zero is transparent and 255 is fully obstructed. */
   obstruction: Uint8Array;
-  /** One byte per obstruction sample. Only 1 means loaded. */
+  /** 0 is unknown, 1 is current loaded data, 2 is authoritative proven empty (zero obstruction). */
   loaded: Uint8Array;
 }>;
 
@@ -186,7 +186,9 @@ export function buildSkyVisibilityVolume(ticket: SkyVisibilityBuildTicket): SkyV
   };
   if (
     ticket.dependencies.some(({ resident }) => !resident) ||
-    ticket.columns.some(({ loaded }) => loaded.some((value) => value !== 1))
+    ticket.columns.some(({ loaded, obstruction }) =>
+      loaded.some((value, index) => value !== 1 && (value !== 2 || obstruction[index] !== 0)),
+    )
   )
     return Object.freeze({ ...base, ready: false, reason: 'source-unavailable' });
 

@@ -25,6 +25,11 @@ test('Classic owner contracts remain in the explicit behavior and type selection
     'apps/web/tests/unit/client/browser-authority-world-harness.test.ts',
     'apps/web/tests/unit/client/browser-authority-column-inspection.test.ts',
     'apps/web/tests/integration/runtime/server/world-harness-session.test.ts',
+    'apps/web/tests/unit/app/sky-column-source.test.ts',
+    'apps/web/tests/unit/app/sky-visibility-volume.test.ts',
+    'apps/web/tests/unit/app/world-sky-lighting.test.ts',
+    'apps/web/tests/unit/app/playcanvas-sky-visibility.test.ts',
+    'apps/web/tests/unit/worker/authority-column-source.test.ts',
     'apps/web/tests/unit/worker/authority-worker-persistence-column.test.ts',
   ];
   for (const path of [...units, 'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts'])

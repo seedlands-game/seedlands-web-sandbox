@@ -258,6 +258,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       modelReady: h.presentedEntityModelReady(id),
       position: h.presentedEntityPosition(id),
       viewAngles: h.snapshot().viewAngles,
+      skyVisibilityDiagnostics: h.skyVisibilityDiagnostics(),
     };
   }, restored.reference.entityId);
   expect(restoredPresentation.modelReady).toBe(true);

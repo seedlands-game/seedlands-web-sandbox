@@ -6,6 +6,16 @@ import type { VoxelSemanticsDefinition, VoxelSemanticsRegistry } from '@seedland
 import type { VoxelGeometryDefinitionV1, VoxelGeometryRegistryV1 } from '@seedlands/stdlib/mod-api';
 
 export type WorldAuthorityPort = Readonly<{
+  inspectColumnSource?(
+    cx: number,
+    cz: number,
+  ): Promise<
+    Extract<
+      import('@seedlands/stdlib/server/harness/world-harness-contract').WorldInspectResult,
+      { kind: 'column-source' }
+    >['source']
+  >;
+  runtimeEpoch?: string;
   seedText: string;
   seed: number;
   generatorVersion: number;

@@ -1,3 +1,5 @@
+import type { AuthorityCanonicalResult } from './browser-authority-client-contract';
+import { requestBrowserColumnSource } from './browser-authority-column-source';
 // prettier-ignore
 import type { CommandResult, CommandSource, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
@@ -249,14 +251,7 @@ export class BrowserAuthorityClient {
     return this.chunks.prepareWorkerInput(cx, cy, cz);
   }
 
-  async acceptWorkerCanonical(
-    task: VisibilityTask,
-    result: Readonly<{
-      canonical?: ArrayBuffer;
-      generatorVersion?: number;
-      provider?: import('@seedlands/kernel/spatial').KernelWorldgenProviderIdentity;
-    }>,
-  ): Promise<boolean> {
+  async acceptWorkerCanonical(task: VisibilityTask, result: AuthorityCanonicalResult): Promise<boolean> {
     return this.chunks.acceptCanonical(task, result);
   }
 
@@ -272,17 +267,21 @@ export class BrowserAuthorityClient {
     return this.chunks.getFluidCell(x, y, z);
   }
 
+  inspectColumnSource(cx: number, cz: number) {
+    return requestBrowserColumnSource(
+      (payload) => this.request(payload),
+      () => this.runtimeEpoch,
+      cx,
+      cz,
+    );
+  }
+
   getChunkRevision(cx: number, cy: number, cz: number): number | null {
     return this.chunks.getChunkRevision(cx, cy, cz);
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
-    this.post({
-      kind: 'set-fluid-active-chunks',
-      protocolVersion: PROTOCOL_VERSION,
-      epoch: this.epoch,
-      keys,
-    });
+    this.chunks.setFluidActiveChunks(keys);
   }
 
   async editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {

@@ -1,3 +1,4 @@
+import type { AuthorityRendererReadRequest } from './authority-renderer-requests';
 import type { AuthoritySnapshotMessage } from './authority-snapshot-message';
 import type { AuthorityCropStageProjection } from './authority-gameplay-projections';
 export type { AuthorityCropStageProjection } from './authority-gameplay-projections';
@@ -236,6 +237,7 @@ export type AuthorityTransactionKey = Readonly<{
 }>;
 
 export type AuthorityRequest = (
+  | AuthorityRendererReadRequest
   | Readonly<{
       kind: 'start-authority';
       protocolVersion: typeof PROTOCOL_VERSION;
@@ -255,23 +257,6 @@ export type AuthorityRequest = (
       epoch: SessionEpoch;
       requestId: number;
       transaction: AuthorityTransactionKey;
-    }>
-  | Readonly<{
-      kind: 'prepare-mesh';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      requestId: number;
-      cx: number;
-      cy: number;
-      cz: number;
-    }>
-  | Readonly<{
-      kind: 'request-collision-baseline';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      requestId: number;
-      key: string;
-      minimumRevision: number;
     }>
   | Readonly<{
       kind: 'release-mesh';
@@ -470,6 +455,7 @@ export type AuthorityResponse =
       kind: 'authority-response';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
+      runtimeEpoch?: SessionEpoch;
       requestId: number;
       ok: true;
       result: unknown;
