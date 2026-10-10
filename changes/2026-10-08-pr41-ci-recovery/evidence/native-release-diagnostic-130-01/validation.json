@@ -1,0 +1,43 @@
+{
+  "runId": "native-release-diagnostic-130-01",
+  "baselineSHA": "183f339d5a0df029f64494a8a167451fe70f3f28",
+  "remoteSHA": "dcb39a9e742bb859b691f7dfd38c89a3f5407e97",
+  "ci416Chromium": "IN_PROGRESS; no cancellation",
+  "red": "1FAIL/5PASS; original Node report lacked native release field",
+  "green": "5files50PASS including copying and no synthetic settled result",
+  "classicTypes": "PASS",
+  "scopedLint": "PASS",
+  "scope": "2 lines in existing Node motion snapshot; original sampling/512 cap/benchmark bypass and route predicate unchanged",
+  "productionWeb": "UNCHANGED",
+  "browserAndBuild130": "NOT_RUN; previous current production two-test receipt remains source5690; exact new CI pending",
+  "budget": {
+    "actualUTC": "2026-10-10 16:03",
+    "weeklyRemainingPercent": 74,
+    "reset": "4d11h",
+    "stopRemainingPercent": 60,
+    "sharedAccountDropPoints": 24,
+    "notPRPreciseUsage": true
+  },
+  "logs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-diagnostic-red-130-01.log",
+      "bytes": 1428,
+      "sha256": "7ce377dbb46b915516728cfe42e6b925d5e5eef422ac5bdfa4e864333f4b17e9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-diagnostic-green-130-01.log",
+      "bytes": 341,
+      "sha256": "f995418993fc52d3665cc588ea8e00004a5b95b45bb9c6bd590cecd2e6aadcb6"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-diagnostic-types-130-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-diagnostic-lint-130-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

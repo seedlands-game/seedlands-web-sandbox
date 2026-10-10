@@ -1110,3 +1110,9 @@ Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据�
 冻结dcb39a9e，CI416 Classic headless终态4FAIL/1026PASS：mining-approach-handoff三例及target-aim一例原5000ms超时，Chromium仍自然运行。128范围漏查了mineVoxel/placeVoxel的间接walkTo页面，现先以原两文件复现RED。Root独占这两处测试夹具/spec/新证据，不改生产128 release约束，不增超时/重试或弱化原range/target/assertion。Browser64 replay明确补合成post-release metadata，不将新字段称历史浏览器原值；target-aim fake只在modeled keyboard.up记释放序列。相关间接消费者索引复核并选择最小必要检查；范围GREEN/types/lint/hooks，不重复production build/Browser，因为生产及唯一Browser入口无改动。后续正常push要等CI416 Chromium自然结束，禁止取消来掩盖失败。传统.05PD×120%=.06PD，AI8min×120%=9.6min，16:12UTC检查点；真实预算仍14:25周75%，新UI待回复，全PR≈60%停止线保持，无额度换算。
 
 16:03UTC129检查点：CI416遗漏夹具失败在原两文件本地RED4FAIL/14PASS复现；显式补合成release后7files82PASS，Classic types及范围lint PASS，生产/唯一Browser入口未改，build/Browser不重复。原未改1026例CI通过复用，所有间接路线调用索引复核；不把新metadata标作Browser64历史原值。正常hooks提交后先留本地，CI416 Chromium自然运行不取消；全PR仍不可合入，真实75%@14:25额度刷新待回复。
+
+### 原路线诊断的释放观测130（16:15UTC预注册）
+
+冻结本地183f339d/远端dcb39a9e，CI416 Chromium自然运行，129夹具已本地修复未push。原route pulse JSON不包含128消费者已使用的nativeMovementInput，远端ZIP不可得时无法从原Node日志区分release缺失/旧epoch/非neutral/ACK未消费。仅将已有snapshot的nativeMovementInput复制到motion观测，不新增浏览器RPC、轮询、输入、计时或判定；原512样本上限、benchmark旁路、标签/错误返回保持。先用现有equipment-diagnostics-contract取得缺字段/复制隔离RED，再范围GREEN/types/lint；源码仅原Node诊断与现有测试/spec/新证据，Root独占、不委派，不据诊断声明性能或CI主路线通过。原生产Web产物不变，且CI416终态前不push取消。传统.03PD×120%=.036PD，AI6min×120%=7.2min，16:22UTC检查点；16:03实际产品UI周剩74%、重置4d11h、共享账户降24pp，约60%停止线保持，不另启额度验证或换算。
+
+16:17UTC130检查点：原Node诊断缺release字段RED1FAIL/5PASS，补仅两行复制后5files50PASS（含复制隔离与不制造firstSettled），Classic types、范围lint/diff PASS。生产Web/路线predicate/输入/等待/512cap不改，不重复build/Browser；本地129/130待CI416 Chromium自然终态后正常push，仍不得宣布全PR可合入。主对话实际16:03周74%、4d11h重置，共享账户下降24pp，约60%停止线保持，额度更新不另开验证。
