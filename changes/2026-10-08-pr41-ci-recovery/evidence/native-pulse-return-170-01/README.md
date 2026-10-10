@@ -1,0 +1,7 @@
+# Native pulse return 170
+
+Native168 on ec929b7a failed the original minecart deployment assertion after 16,584ms. The new native pulse itself moved the player 1.383m, returned to the original height and settled with neutral release57 acknowledged69. This movement left the player closer to the deployment rail. The production owner rejects complete AABB overlap with any entity; this is consistent with the observed position, but no independent rejection-reason receipt was captured. The failure remains recorded. Full main169 was not started.
+
+The correction uses the existing walkTo with native KeyS and real mouse to return to the original baseline before the original inventory/deployment steps. Point arrival requires distance below0.06 and the original floor height. Original targets, geometry, deployment/mount/rail-end/dismount/save assertions and deadlines remain. Three targeted route files pass32unique tests, Classic types and changed-file lint pass. An initial wrong-project invocation selected no test files and was corrected explicitly. Browser171 and full main172 remain pending at delivery.
+
+Remote CI423 on93c4cd60 naturally ended with five non-browser successes and Chromium failure: both main attempts reached the original900000ms total limit inV2, the first also recorded a20000ms settle failure. Visual and ordinary Native passed; preview skipped. Neither this CI nor the local pulse proves full playability or performance. Raw evidence hashes are in validation.json.

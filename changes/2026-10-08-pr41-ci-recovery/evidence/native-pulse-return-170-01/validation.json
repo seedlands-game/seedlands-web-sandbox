@@ -1,0 +1,86 @@
+{
+  "parentSourceSha": "ec929b7aba6c06362a5ec4f94c33e38a6793f616",
+  "browser168": {
+    "status": "FAIL",
+    "durationMs": 16584,
+    "nativePulseAssertions": "PASS",
+    "before": [2.5, 32.60000228881836, 2.5],
+    "after": [2.5, 32.60000228881836, 1.116667628288269],
+    "neutralReleaseSequence": 57,
+    "authorityAcknowledgedSequence": 69,
+    "failure": "Original deployment expected one transport, observed zero",
+    "deploymentRejectionReason": "NOT_INDEPENDENTLY_OBSERVED; source full AABB target-occupied check consistent with player overlap"
+  },
+  "main169": "NOT_RUN; Native168 failure blocks it",
+  "correction": "Native walkTo KeyS point return to original baseline before original deployment, tolerance0.06; no teleport or collision bypass",
+  "validation170": {
+    "routeContracts": {
+      "files": 3,
+      "uniqueTests": 32,
+      "status": "PASS"
+    },
+    "classicTypes": "PASS",
+    "changedFileLint": "PASS",
+    "initialTestInvocation": "Wrong root Vitest projects selected no test files; exit1 retained, corrected explicit web project passes"
+  },
+  "browser171": "NOT_RUN_AT_DELIVERY",
+  "main172": "NOT_RUN_AT_DELIVERY",
+  "ci423": {
+    "sourceSha": "93c4cd60742e246950e866b19a4a2d94d170e514",
+    "runId": 38089184294,
+    "nonBrowserJobs": "5 SUCCESS",
+    "chromium": "FAILURE",
+    "main": "Both attempts original900000ms limit at V2; first also original20000ms settle failure",
+    "visual": "PASS",
+    "ordinaryNative": "PASS",
+    "preview": "SKIP"
+  },
+  "performanceEligible": false,
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-168-01.log",
+      "bytes": 6281,
+      "sha256": "7924e47d5fbeae74e181c317d49547475ed8288c428aae309a317162decdf6e2"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-build-168-01/verify.json",
+      "bytes": 386,
+      "sha256": "bdbfa0dbd1ea90fb1fd5359b75ca26a9486685693c1f071950cc7c01d7922e28"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-attachments-168-01.json",
+      "bytes": 93468,
+      "sha256": "1df1442247c3595842ab597e1a34fd6abfa949b4074fbe36d5efae3a5b690d54"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-browser-result-168-01.json",
+      "bytes": 77914,
+      "sha256": "a50f7fae503dd992c0e096f8090ac85a6066e700759a9e1c806851a03f83c1dd"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-return-tests-170-01.log",
+      "bytes": 503,
+      "sha256": "59a2bca67008a3475dbada2d5d0b15fd5e8b99f56d7f3ce5338f77ced7111715"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-return-tests-170-02.log",
+      "bytes": 597,
+      "sha256": "62e632218bafde088e672ccdbc12fa9487464fdf028aa4e130a36268e18ebbc3"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-return-types-170-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-return-lint-170-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci423-chromium-raw-167-01.log",
+      "bytes": 2055975,
+      "sha256": "3738b9a98dfe6bd315611f40c156dd93b4dd68dd567be6fa08193570cc7b3066"
+    }
+  ]
+}

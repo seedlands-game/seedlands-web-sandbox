@@ -10,6 +10,7 @@ import {
   moveMouseBy,
   snapshot,
   waitForSnapshot,
+  walkTo,
   type ClassicWindow,
 } from './harness';
 import { observeBrowserRuntime, collectClassicFailureDiagnostics } from './evidence';
@@ -130,6 +131,16 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     Math.hypot(pulseAfter.player[0] - pulseBaseline.player[0], pulseAfter.player[2] - pulseBaseline.player[2]),
   ).toBeGreaterThan(0.05);
   expect(pulseAfter.serverPlayerPosition[1]).toBeCloseTo(pulseBaseline.serverPlayerPosition[1], 1);
+  const pulseReturned = await walkTo(page, [pulseBaseline.player[0], pulseBaseline.player[2]], {
+    key: 'KeyS',
+    jump: true,
+    arrival: 'point',
+    tolerance: 0.06,
+  });
+  expect(
+    Math.hypot(pulseReturned.player[0] - pulseBaseline.player[0], pulseReturned.player[2] - pulseBaseline.player[2]),
+  ).toBeLessThan(0.06);
+  expect(pulseReturned.serverPlayerPosition[1]).toBeCloseTo(pulseBaseline.serverPlayerPosition[1], 1);
   await testInfo.attach('classic-native-movement-pulse.json', {
     contentType: 'application/json',
     body: JSON.stringify({
@@ -140,6 +151,9 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       after: pulseAfter.player,
       neutralRelease: pulseAfter.nativeMovementInput,
       acknowledgedInputSequence: pulseAfter.authority.acknowledgedInputSequence,
+      returned: pulseReturned.player,
+      returnNeutralRelease: pulseReturned.nativeMovementInput,
+      returnAcknowledgedInputSequence: pulseReturned.authority.acknowledgedInputSequence,
       performanceEligible: false,
     }),
   });

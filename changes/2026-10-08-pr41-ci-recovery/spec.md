@@ -1350,3 +1350,11 @@ Root独占原asset-image、既有unit/helper、spec/evidence，无agent/权限�
 仅原普通矿车同spec在既有地形fixture后增一个真实W+Space pulse：PointerLock/初始onGround，原API和新helper，等待新native neutral release被Authority ACK、角色真实运动后停稳/回到同地板高度；原deployment/mount/rail-end/Shift右键/durable恢复断言保持。该附加输入不是其他spec/runner，仍headless/原120sec，无伪造坐标或证据。必要路由/Native unit与Classic类型/lint、显式headless注册、hooks后新身份commit/build/verify，原普通Native一次168严格PASS才原完整无sampler main169一次；失败新事实前不重试。CI423自然终态前不推新head以取消旧CI。
 
 Root独占harness.ts、新native-movement-pulse.ts与test、minecart-journey.ts、package显式登记、spec/public/private证据，不委派。22:40UTC检查点；只修测试原生gesture请求协议，不宣称性能收益。完整136/144/需求矩阵/finalCI/review继续开放，无新权限/网络/模型会话/合并或生产部署。
+
+### 矿车前置脉冲的原生返回170（预注册）
+
+168 exact ec929b7a、build/verify PASS，但完整普通Native FAIL16584ms，后续部署未生成矿车。新增脉冲本身通过：从[2.5,32.600002,2.5]到[2.5,32.600002,1.116668]，neutral KeyW sequence57、Authority ACK69、原高度/落地/停止成立。部署owner对所有实体执行完整AABB overlap并拒绝target-occupied；当前玩家已靠近目标轨道，源码碰撞判定与部署失败一致，尚无独立拒绝receipt，不称已观测拒绝reason。原168负证据保留，main169未启动。
+
+新唯一轴是在新增脉冲之后、原库存/部署步骤之前，用现有walkTo/真实鼠标与KeyS回到原baseline水平坐标，arrival point/tolerance0.06，原300ms最大pulse、45sec路线/20secsettle/120sec整体不变；新增返回原高度与距离断言，保留第一次真实移动与ACK证据并附返回证据。不teleport/reset、不移动地形或目标、不忽略碰撞、不改原矿车断言，不修改生产helper。必要定向回归/types/lint/hooks后新commit/identified build，原普通Native171一次，严格PASS才原完整无观察器main172一次。失败须有新事实再决定下一单元。Root独占minecart/spec/新证据，无agent/权限，22:40UTC检查点保持。
+
+170定向交付：3files/32unique路由契约PASS、Classic类型与changed-file lint PASS。初始root Vitest选错project未找到文件exit1，保留日志并显式web project完成实际验证；不计为测试通过。生产source不变，原Native171/main172仍待验收。
