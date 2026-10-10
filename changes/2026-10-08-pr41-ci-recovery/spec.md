@@ -846,3 +846,11 @@ Root只运行/读取诊断与metadata，不改源文件，不新建浏览器入�
 仍只私有暂停静止renderer诊断，不是正式产品或组合准入；不删正式trace/截图，不改CI或断言。固定同source2b17241b/artifactefd549f3/lock、Chromium151/SwiftShader、独占lock，不与其他测试/构建并行。实际新run pr41-observer-warm-aa-ab-86-02（使用正确SEEDLANDS_RESERVATION_RUN）。Root只一脚本与证据/spec，其他agent无工作。AI14min×120%=16.8min，05:42UTC检查点，传统0.15PD×120%=0.18PD；最新04:33真实80%，05:17刷新待答，约60%停止线，费用/credits/API/占比未知不换算。此有界控制修正若AA仍失败则关闭观察成本候选，不进行第三次控制重试。
 
 05:35UTC checkpoint86-02自然终态：原90s warm、四AA和2AB+2BA全完成、12段场景身份PASS。AA11.051%≤原15%，AB median A345.85/B370.775ms，改善-7.207%不达≥20%，p95 A924.9/B908.3ms。结论NO_PREDECLARED_BENEFIT；window PASS/measurement RECORDED不表示收益或产品通过。关闭截图观察轴候选，正式trace/CI/时限/质量不改，不做第三次控制试验；86-01原AAFAIL、全部raw/trace保留。公共observer-no-benefit-86-02绑定身份/限制。05:29主对话实际产品UI剩80%/4天21小时重置，60%停止线保持；用户要求等待自然终态不重复运行已遵守，本轮05:34:24完成（早于05:42上限）。后续先整理可恢复证据/精确分支状态，不盲目full重试。
+
+### 保存重开矿车实际呈现 checkpoint88（预注册）
+
+05:49UTC，精确远端34fee5f1的CI407运行，不取消/抢推；五项非浏览器SUCCESS，Chromium待终态。既有native旅程只在deployed阶段等待模型ready，保存重开后虽然pose/rider/epoch/reference正确，截图仍朝天空/背离模型，实际恢复模型可见性未验证。控制观察预期：当前真实原native82/83保存重开附件不足以确认画面，保留此缺口，不伪造自动产品RED。
+
+本片只增强原唯一Classic spec已注册native矿车旅程：保存重开后的accepted transport当前ID在现有presentedEntityModelReady中就绪，使用真实首次canvas左键获取PointerLock、现有18次aimAtCart原生鼠标转向，确认呈现位置与acceptedpose一致，再取得原restored截图。重查cart pose/rider/reference及当前epoch，原120000/10000ms和所有原断言保持，不通过harness.setView/teleport或额外状态写入取得画面。source PlayerController证明未锁定时左键mousedown立即返回，onclick请求PointerLock，因此首次重锁不挖掘；明确断言开始未锁定，避免误在已锁定场景点击。
+
+modelReady/位置与截图需要分层：数值观察不是像素证明；Root实际查看PNG，模型未见仍记未通过/阻塞，不因为helper通过宣布连续运动或194矩阵/整个运输完成。production无变更，不另造浏览器入口；保持原runtime失败记录与真实输入。Root独占minecart-journey.ts、本spec与新私有run/evidence，无其他agent。必要Classic类型/范围lint/格式；test口径增强后冻结精确SHA、新identified build，再原native纵向验证（NON_MAIN），原83mainFAIL与当前远端CI结果保持。AI15min×120%=18min，06:07UTC检查点；传统0.15PD×120%=0.18PD。最新05:29真实80%/4d21h，60%停止线；费用/credits/API/占比未知不换算。
