@@ -465,6 +465,7 @@ export function baseVoxel(
   context = macroAt(seed, x, z, GENERATOR_VERSION),
   queryMacro = (qx: number, qz: number) => macroAt(seed, qx, qz, GENERATOR_VERSION),
   generatorVersion = GENERATOR_VERSION,
+  sampleTreeColumn?: (y: number) => 4 | 5 | null,
 ): VoxelId {
   const h = context.terrainHeight;
   const kind = context.biome;
@@ -497,16 +498,18 @@ export function baseVoxel(
     return geologyVoxel(seed, x, y, z, context, generated, generatorVersion);
   }
   // A feature can be sampled locally from nearby deterministic anchor points.
-  for (let tx = x - 3; tx <= x + 3; tx += 1)
-    for (let tz = z - 3; tz <= z + 3; tz += 1) {
-      const treeContext = queryMacro(tx, tz);
-      if (!isTreeOriginContext(treeContext, hash2(seed ^ 0x44af, tx, tz), generatorVersion)) continue;
-      const th = treeContext.terrainHeight;
-      const dx = Math.abs(x - tx),
-        dz = Math.abs(z - tz);
-      const treeVoxel = treeVoxelAtOffset(dx, y, dz, th, generatorVersion);
-      if (treeVoxel !== null) return treeVoxel;
-    }
+  const sampledTreeVoxel = sampleTreeColumn?.(y) ?? null;
+  if (sampledTreeVoxel !== null) return sampledTreeVoxel;
+  if (!sampleTreeColumn)
+    for (let tx = x - 3; tx <= x + 3; tx += 1)
+      for (let tz = z - 3; tz <= z + 3; tz += 1) {
+        const treeContext = queryMacro(tx, tz);
+        if (!isTreeOriginContext(treeContext, hash2(seed ^ 0x44af, tx, tz), generatorVersion)) continue;
+        const dx = Math.abs(x - tx),
+          dz = Math.abs(z - tz);
+        const treeVoxel = treeVoxelAtOffset(dx, y, dz, treeContext.terrainHeight, generatorVersion);
+        if (treeVoxel !== null) return treeVoxel;
+      }
   if (generatorVersion >= 7) {
     const vegetation = vegetationAt(seed, x, y, z, context, generatorVersion);
     if (vegetation !== null) return vegetation as VoxelId;

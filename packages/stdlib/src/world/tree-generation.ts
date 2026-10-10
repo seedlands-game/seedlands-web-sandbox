@@ -27,3 +27,25 @@ export const treeVoxelAtOffset = (
     ? 5
     : null;
 };
+
+/** Retains the original anchor order for one column, without carrying state across chunks. */
+export function createTreeColumnSampler(
+  x: number,
+  z: number,
+  generatorVersion: number,
+  originHeightAt: (x: number, z: number) => number | null,
+): (y: number) => 4 | 5 | null {
+  const origins: Array<Readonly<{ dx: number; dz: number; height: number }>> = [];
+  for (let tx = x - 3; tx <= x + 3; tx += 1)
+    for (let tz = z - 3; tz <= z + 3; tz += 1) {
+      const height = originHeightAt(tx, tz);
+      if (height !== null) origins.push({ dx: Math.abs(x - tx), dz: Math.abs(z - tz), height });
+    }
+  return (y) => {
+    for (const origin of origins) {
+      const voxel = treeVoxelAtOffset(origin.dx, y, origin.dz, origin.height, generatorVersion);
+      if (voxel !== null) return voxel;
+    }
+    return null;
+  };
+}
