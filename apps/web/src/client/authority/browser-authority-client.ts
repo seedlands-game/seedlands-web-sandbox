@@ -1,5 +1,5 @@
 import type { AuthorityCanonicalResult } from './browser-authority-client-contract';
-import { requestBrowserColumnSource } from './browser-authority-column-source';
+import { createBrowserSkySourcePort } from './browser-authority-column-source';
 // prettier-ignore
 import type { CommandResult, CommandSource, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
@@ -52,6 +52,12 @@ import {
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
 export class BrowserAuthorityClient {
+  private readonly skySource = createBrowserSkySourcePort(
+    (payload) => this.request(payload),
+    () => this.runtimeEpoch,
+  );
+  readonly inspectColumnSource = this.skySource.inspectColumnSource;
+  readonly readSkyColumnChunk = this.skySource.readSkyColumnChunk;
   readonly mode = 'local' as const;
   readonly world: WorldHarnessPort;
   readonly estimatedInputTransitMs: number;
@@ -265,15 +271,6 @@ export class BrowserAuthorityClient {
 
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null {
     return this.chunks.getFluidCell(x, y, z);
-  }
-
-  inspectColumnSource(cx: number, cz: number) {
-    return requestBrowserColumnSource(
-      (payload) => this.request(payload),
-      () => this.runtimeEpoch,
-      cx,
-      cz,
-    );
   }
 
   getChunkRevision(cx: number, cy: number, cz: number): number | null {

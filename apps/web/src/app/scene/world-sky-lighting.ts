@@ -2,6 +2,7 @@ import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
 import type { PendingMeshTask } from '../app-contracts';
 import type { WorldAuthorityPort } from '../world/world-authority-port';
 import { readSkyColumnProofByTask } from './sky-column-source';
+import { prepareSkyColumnReader } from './sky-column-reader';
 import {
   SkyVisibilityCache,
   buildSkyVisibilityVolume,
@@ -13,7 +14,8 @@ import {
 type SkyAuthority = Pick<
   WorldAuthorityPort,
   'runtimeEpoch' | 'worldRevision' | 'worldTime' | 'getChunkRevision' | 'getVoxel' | 'voxelSemantics'
-> & { inspectColumnSource?: WorldAuthorityPort['inspectColumnSource'] };
+> &
+  Pick<WorldAuthorityPort, 'inspectColumnSource' | 'readSkyColumnChunk'>;
 
 type Entry = {
   key: string;
@@ -189,9 +191,18 @@ export class WorldSkyLighting {
       }
       entry.stamp = stamp;
       if (source.status !== 'complete' || source.worldRevision !== this.authority.worldRevision) return;
-      const proof = await readSkyColumnProofByTask(source, entry.chunk, this.authority, {
+      const isCurrent = () => !this.disposed && this.entries.get(entry.key) === entry && stamp === this.stamp(entry);
+      const reader = await prepareSkyColumnReader(
+        source,
+        entry.chunk,
+        this.authority,
+        this.authority.readSkyColumnChunk?.bind(this.authority),
+        isCurrent,
+      );
+      if (!reader || !isCurrent()) return;
+      const proof = await readSkyColumnProofByTask(source, entry.chunk, reader, {
         yieldTask: this.proofScheduling.yieldTask,
-        isCurrent: () => !this.disposed && this.entries.get(entry.key) === entry && stamp === this.stamp(entry),
+        isCurrent,
       });
       if (this.disposed || this.entries.get(entry.key) !== entry) return;
       if (stamp !== this.stamp(entry)) {

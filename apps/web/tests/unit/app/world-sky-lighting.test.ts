@@ -24,6 +24,17 @@ const fixture = (options?: { yieldTask: () => Promise<void> }) => {
     getVoxel: () => Voxel.Air,
     getChunkRevision: (): number | null => 0,
     inspectColumnSource: vi.fn(async (): Promise<SkyColumnSource> => complete()),
+    readSkyColumnChunk: vi.fn(
+      async (
+        _cx: number,
+        _cy: number,
+        _cz: number,
+        _revision: number,
+      ): Promise<{
+        canonical: Uint16Array;
+        revision: number;
+      } | null> => null,
+    ),
   };
   const light = new WorldSkyLighting(authority, options ?? { yieldTask: async () => undefined });
   const sink = { failDark: vi.fn(), publish: vi.fn(), dispose: vi.fn() };
@@ -33,6 +44,100 @@ const fixture = (options?: { yieldTask: () => Promise<void> }) => {
 afterEach(() => vi.useRealTimers());
 
 describe('production World sky derived owner', () => {
+  it.each(['epoch', 'revision', 'release'] as const)(
+    'rejects a delayed above-render copy after %s changes',
+    async (change) => {
+      const { light, sink, authority, release } = fixture();
+      authority.getChunkRevision = (_cx = 0, cy = 0) => (cy < 2 ? 0 : null);
+      authority.inspectColumnSource.mockResolvedValue({
+        ...complete(),
+        entries: [
+          {
+            key: '0,2,0',
+            cx: 0,
+            cy: 2,
+            cz: 0,
+            revision: 0,
+            resident: true,
+            dirty: false,
+          },
+        ],
+      });
+      let completeCopy!: (copy: { canonical: Uint16Array; revision: number }) => void;
+      authority.readSkyColumnChunk.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            completeCopy = resolve;
+          }),
+      );
+      await vi.advanceTimersByTimeAsync(16);
+      expect(authority.readSkyColumnChunk).toHaveBeenCalledOnce();
+      if (change === 'epoch') authority.runtimeEpoch = 'world:2';
+      if (change === 'revision') authority.worldRevision = 1;
+      if (change === 'release') release();
+      completeCopy({ canonical: new Uint16Array(32 ** 3).fill(Voxel.Air), revision: 0 });
+      await vi.advanceTimersByTimeAsync(0);
+      expect(sink.publish).not.toHaveBeenCalled();
+      light.dispose();
+    },
+  );
+  it.each(['unknown', 'revision', 'shape'] as const)('keeps a %s above-render copy dark', async (failure) => {
+    const { light, sink, authority } = fixture();
+    authority.getChunkRevision = (_cx = 0, cy = 0) => (cy < 2 ? 0 : null);
+    authority.inspectColumnSource.mockResolvedValue({
+      ...complete(),
+      entries: [
+        {
+          key: '0,2,0',
+          cx: 0,
+          cy: 2,
+          cz: 0,
+          revision: 0,
+          resident: true,
+          dirty: false,
+        },
+      ],
+    });
+    authority.readSkyColumnChunk.mockResolvedValue(
+      failure === 'unknown'
+        ? null
+        : {
+            canonical: new Uint16Array(failure === 'shape' ? 1 : 32 ** 3),
+            revision: failure === 'revision' ? 1 : 0,
+          },
+    );
+    await vi.advanceTimersByTimeAsync(16);
+    expect(sink.publish).not.toHaveBeenCalled();
+    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
+    light.dispose();
+  });
+  it.each([false, true])('reads actual above-render source copies and preserves roof=%s obstruction', async (roof) => {
+    const { light, sink, authority } = fixture();
+    authority.getChunkRevision = (_cx = 0, cy = 0) => (cy < 2 ? 0 : null);
+    authority.inspectColumnSource.mockResolvedValue({
+      ...complete(),
+      entries: Array.from({ length: 5 }, (_, cy) => ({
+        key: `0,${cy},0`,
+        cx: 0,
+        cy,
+        cz: 0,
+        revision: 0,
+        resident: true,
+        dirty: false,
+      })),
+    });
+    authority.readSkyColumnChunk.mockImplementation(async (_cx, cy) => {
+      const canonical = new Uint16Array(32 ** 3).fill(Voxel.Air);
+      if (roof && cy === 2)
+        for (let z = 0; z < 32; z++) for (let x = 0; x < 32; x++) canonical[x + 32 * z] = Voxel.Stone;
+      return { canonical, revision: 0 };
+    });
+    await vi.advanceTimersByTimeAsync(16);
+    expect(authority.readSkyColumnChunk).toHaveBeenCalledTimes(3);
+    expect(sink.publish).toHaveBeenCalledOnce();
+    expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: true, visibility: roof ? 0 : 1 });
+    light.dispose();
+  });
   it('completes the full legal column proof with bounded voxel reads in each task', async () => {
     let reads = 0;
     let previous = 0;

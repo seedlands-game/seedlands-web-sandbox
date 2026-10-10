@@ -6,6 +6,12 @@ import type { VoxelSemanticsDefinition, VoxelSemanticsRegistry } from '@seedland
 import type { VoxelGeometryDefinitionV1, VoxelGeometryRegistryV1 } from '@seedlands/stdlib/mod-api';
 
 export type WorldAuthorityPort = Readonly<{
+  readSkyColumnChunk?(
+    cx: number,
+    cy: number,
+    cz: number,
+    revision: number,
+  ): Promise<import('../../client/authority/browser-authority-sky-chunk').SkySourceChunk | null>;
   inspectColumnSource?(
     cx: number,
     cz: number,

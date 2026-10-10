@@ -1,9 +1,72 @@
 import { requestBrowserColumnSource } from '../../../src/client/authority/browser-authority-column-source';
+import { requestBrowserSkyChunk } from '../../../src/client/authority/browser-authority-sky-chunk';
 import { describe, expect, it } from 'vitest';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
 import { FakeAuthorityWorker } from './fixtures/browser-authority';
 
 describe('Browser Authority column inspection', () => {
+  it.each(['key', 'revision', 'shape'] as const)('rejects a Sky baseline with wrong %s', async (failure) => {
+    const payload = {
+      status: 'available',
+      key: failure === 'key' ? '0,4,0' : '0,3,0',
+      chunkRevision: failure === 'revision' ? 8 : 7,
+      canonical: new ArrayBuffer(failure === 'shape' ? 1 : 65536),
+      fluid: new ArrayBuffer(32768),
+    };
+    await expect(
+      requestBrowserSkyChunk(
+        async () => payload,
+        () => 'world:1',
+        0,
+        3,
+        0,
+        7,
+      ),
+    ).resolves.toBeNull();
+  });
+  it('discards the exact Sky copy if the runtime changes during transfer', async () => {
+    let epoch = 'world:1';
+    const request = async () => {
+      epoch = 'world:2';
+      return {
+        status: 'available',
+        key: '0,3,0',
+        chunkRevision: 7,
+        canonical: new ArrayBuffer(65536),
+        fluid: new ArrayBuffer(32768),
+      };
+    };
+    await expect(requestBrowserSkyChunk(request, () => epoch, 0, 3, 0, 7)).resolves.toBeNull();
+  });
+  it('reads an exact versioned transferred Sky copy without inserting a collision or mesh resource', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const pending = client.readSkyColumnChunk(0, 3, 0, 7);
+    const request = worker.posts.at(-1) as { requestId: number };
+    expect(request).toMatchObject({
+      kind: 'request-collision-baseline',
+      key: '0,3,0',
+      minimumRevision: 7,
+      runtimeEpoch: 'world:1',
+    });
+    worker.emit({
+      kind: 'authority-response',
+      protocolVersion: 1,
+      epoch: 'world:1',
+      requestId: request.requestId,
+      ok: true,
+      result: {
+        status: 'available',
+        key: '0,3,0',
+        chunkRevision: 7,
+        canonical: new ArrayBuffer(65536),
+        fluid: new ArrayBuffer(32768),
+      },
+    });
+    await expect(pending).resolves.toMatchObject({ revision: 7, canonical: expect.any(Uint16Array) });
+    expect(client.getChunkRevision(0, 3, 0)).toBeNull();
+    expect(worker.posts).toHaveLength(1);
+  });
   it('rejects a late response after the client runtime epoch changes', async () => {
     let epoch = 'old';
     let release!: (value: unknown) => void;
