@@ -123,6 +123,8 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 
 ## 主世界工位、矿石与可再生食物
 
+Persistence Worker 保留消息和串行任务入口；[persistence-seed-corpus.ts](../apps/web/src/worker/persistence-seed-corpus.ts) 接收该入口的既有 config/database/程序生成端口，拥有原 benchmark corpus 写入。[persistence-chunk-directory-revision.ts](../apps/web/src/worker/persistence-chunk-directory-revision.ts) 将普通保存和 corpus 的区块变化与目录版本放在同一 worlds/chunks 事务，冻结保存使用同一版本校验。目录版本是持久化 owner 的失效元数据，不是世界 checkpoint、合法高度或光照 truth；完整列查询与 Sky 消费者仍未接线。
+
 - [inventory-pointer-model.ts](../packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts) 计算库存、工位和 Actor 游标的交互候选；现有注册运行时授权并原子提交。[browser-inventory-pointer.ts](../apps/web/src/app/gameplay/browser-inventory-pointer.ts) 将意图绑定 Actor/工位身份后串行发送；[inventory-pointer-gestures.ts](../apps/web/src/app/ui/inventory-pointer-gestures.ts) 管理可取消的手势，[inventory-slot.svelte](../apps/web/src/app/ui/primitives/inventory-slot.svelte) 供背包和工位共用。
 - [inventory-pointer-contract.ts](../packages/stdlib/src/server/gameplay/modules/inventory-pointer-contract.ts) 拥有纯合同与校验；[gameplay-inventory-pointer.ts](../packages/stdlib/src/server/gameplay/gameplay-inventory-pointer.ts) 路由注册组合或旧宿主路径。[inventory-cursor-settlement.ts](../packages/stdlib/src/server/gameplay/modules/inventory-cursor-settlement.ts) 复用归包/掉落规则，[gameplay-runtime-lifecycle.ts](../packages/stdlib/src/server/gameplay/gameplay-runtime-lifecycle.ts) 收拢实体移除、运行时清理与注册 Actor 请求绑定。
 - [ecs-station-state.ts](../packages/stdlib/src/server/gameplay/ecs-station-state.ts) 与 [entity-store.ts](../packages/stdlib/src/server/gameplay/entity-store.ts) 拥有工作台、箱子和熔炉的组件、身份与快照；[prepared-entity-mutation.ts](../packages/stdlib/src/server/gameplay/prepared-entity-mutation.ts) 原子提交库存、工位、掉落和销毁。

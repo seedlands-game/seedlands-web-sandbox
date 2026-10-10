@@ -7,6 +7,7 @@ import { clickCanvasCenter, closeInventory, lockPointer, moveMouseBy, snapshot, 
 import { observeBrowserRuntime, collectClassicFailureDiagnostics } from './evidence';
 import { mouseCorrectionToPoint } from './target-aim';
 import { modularPackSmokeEnabled } from './modular-pack-smoke';
+import { observePersistedChunkDirectory } from './persisted-directory-observation';
 
 export function registerClassicMinecartJourney(test: typeof import('@playwright/test').test) {
   test('Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档', async ({ page }, testInfo) => {
@@ -186,6 +187,8 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   const dismountedSnapshot = (await transportSnapshot(page))!;
   const dismounted = dismountedSnapshot.transports[0]!;
   await page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.flushSave());
+  const savedDirectory = await observePersistedChunkDirectory(page);
+  expect(savedDirectory.revision).toBeGreaterThan(0);
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#seed').fill(scenario.seed);
   await page.getByRole('button', { name: '进入世界', exact: true }).click();
@@ -226,6 +229,9 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   expect(currentReferenceInspection.frontier?.epoch).toBe(worldEpoch);
   expect(restored.pose.position).toEqual(dismounted.pose.position);
   expect(restored.rider).toBeNull();
+  const restoredDirectory = await observePersistedChunkDirectory(page);
+  expect(restoredDirectory.worldId).toBe(savedDirectory.worldId);
+  expect(restoredDirectory.revision).toBeGreaterThanOrEqual(savedDirectory.revision);
   await expect
     .poll(() =>
       page.evaluate(
@@ -277,6 +283,8 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       currentReferenceInspection,
       currentWorldIdentity,
       restoredPresentation,
+      savedDirectory,
+      restoredDirectory,
       advertisedCoreDiagnostic: await page.evaluate(
         () => (window as unknown as { __seedlandsCoreDiagnostic?: unknown }).__seedlandsCoreDiagnostic ?? null,
       ),

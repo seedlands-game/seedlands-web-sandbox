@@ -916,3 +916,17 @@ RED：真实Classic默认provider缺该能力；实际stdlib注册模块freeze�
 Root独占该Web fixture/spec/新证据，无新agent；相关Web7例、types/范围lint/格式后独立提交，94production不变。最终identified build与唯一原native仅做现有Worker/保存恢复回归，不宣称空域能力已接到Browser Sky；full main不重复，CI408自然终态前不推取消。AI10min×120%=12min，07:16UTC checkpoint；传统0.1PD×120%=0.12PD；真实06:10剩80%/约60%停止线，07:10额度刷新，unknown费用/credits不换算。
 
 07:14UTC checkpoint94/95终态：本地2682a223 sourceDigest de88a861/artifact f21f6819/lock44db46fb、289files identified build PASS；默认真实核数无故障注入的原native1.6m PASS，原120000/10000ms与真实鼠标/键盘/存档恢复断言保持，NON_MAIN/attempts空。原JSON85639bytes/SHAae64adaf绑定恢复epoch2/current、epoch1/stale、pose[9,31,0.5]、rider=null及模型ready/位置一致。私有raw HTML/trace/receipt与公共94/95证据保留，Root范围复核不等于独立LGTM。生成源端口未接Browser Sky；持久化高层发现/失效、GPU、完整主旅程、运输与194矩阵仍未闭合。远端407 CI408五非BrowserSUCCESS、Chromium仍运行，未抢推取消。07:10主对话产品UI实测周剩79%、4天19小时重置，约60%停止线；费用/credits不换算。
+
+### 同事务区块目录版本 checkpoint96（预注册）
+
+07:18UTC，冻结cbce2e9a，普通chunks save没有能证明目录新鲜度的版本。先在同一worlds/chunks事务维护可选chunkDirectoryRevision；旧记录缺字段按0起步，坏整数/溢出拒绝且回滚。普通save、frozen save/replace、seed corpus的clear/每batch覆盖全部现有chunk写入，保留世界其他元数据和原checkpoint顺序。delete-world删世界后目录来源须unknown，不能把旧ticket延续到新runtime epoch；本片不宣称跨旧客户端的目录事件协议已完成，也不提供Sky消费者或假世界高度。
+
+RED用真实persistChunkSnapshots/persistFrozenGameSnapshot函数在IndexedDB兼容事务适配内验证普通save没有版本；GREEN覆盖单事务版本增长、equal-revision conflict/后续record失败/坏目录版本/溢出时所有chunk及metadata不部分提交、replace删高层旧chunk并增长、旧metadata保持。优先复用已安装能力，缺IndexedDB测试适配时仅增加有界dev测试依赖并保留lock校验，不重新setup。测试适配不冒充真实浏览器；最终源码identified build+唯一原native检验真实Worker保存/恢复，新增字段不改generator/存档组成身份。完整列cursor/Memory/Switchable/query新鲜度另片；本片不能宣布Sky/GPU完成。
+
+Root独占persistence写入源码/protocol、相关新owner事务测试、package/lock（如需）、spec/code-map与独立新证据；无新agent。原CI408等自然终态，拿到C4事实优先处理，实施中可保存有界进度，不推取消它。AI30min×120%=36min、07:54UTC checkpoint；传统0.3PD×120%=0.36PD。真实07:10周剩79%/4天19小时、约60%线；本环境无实际UI、费用/credits/API占比未知不换算。
+
+07:27UTC实施细化：seed corpus原先会重置player/gameplay/checkpoint元数据，保持这个既有benchmark语义，仅在末尾保留同事务目录版本，不将旧checkpoint接到新corpus。原body精确保留私有控制；提取到同worker owner文件后，原逻辑真实RED为末尾版本undefined，修复后版本save+clear+两batch为4。native原用例新增只读观察现有IndexedDB worlds记录，缺DB时abort upgrade，不初始化；在原flush之后及同存档reload后验证目录版本存在/非负/前进且worldId一致，保留原input/模型/存档断言及原时限。该观察不冒充完整列查询或Sky，也不另开浏览器线路；生产RED已有事务测试，浏览器正例待最终冻结artifact。
+
+### CI408自然终态 checkpoint97
+
+07:22UTC已读精确407/run38031941067原job日志：五非Browser SUCCESS、Chromium FAILURE/preview SKIP；原900000ms主旅程first/retry均15.3m在V2资源链失败，C4 NOT_RUN/pulse诊断0。首次walk settle栈、retry drop/pickup栈均由整体时限中断，不能把8.4m/8.6m失败step结束记为V2成功或臆测局部永久不满足。视觉1.6m PASS、native42.5s PASS；细节与原始/派生身份见ci408-terminal-97-01.md。新V2诊断另预注册，不盲目重跑旧full、不放宽时限/断言/质量，当前仍不可合入。真实07:10剩79%/约60%停止线保持。

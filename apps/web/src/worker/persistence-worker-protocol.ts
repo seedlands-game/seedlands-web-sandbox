@@ -97,6 +97,7 @@ export type PersistenceWorldRecord = {
   updatedAt: number;
   commitSequence?: number;
   worldRevision?: number;
+  chunkDirectoryRevision?: number;
 };
 
 export type PersistenceWorkerSuccess = { requestId: number; ok: true; result: unknown };
