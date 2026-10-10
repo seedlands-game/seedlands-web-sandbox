@@ -104,6 +104,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   await expect.poll(() => glbs.size, { timeout: 30_000 }).toBe(12);
   await waitForSnapshot(page, (s) => s.gameplay.presentedEntityCount >= 12 && s.renderedChunks > 0);
   const capture = async (name: string) => {
+    const skyTargets = [-1, 0].flatMap((x) => [-1, 0].map((z) => `${x},1,${z}`));
     await expect
       .poll(
         () =>
@@ -121,6 +122,35 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
         { timeout: 30_000 },
       )
       .toBe(true);
+    try {
+      await expect
+        .poll(
+          () =>
+            page.evaluate((keys) => {
+              const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+              const ready = h.skyVisibilityDiagnostics()?.readyChunkKeys ?? [];
+              return keys.every((key) => ready.includes(key));
+            }, skyTargets),
+          { timeout: 20_000 },
+        )
+        .toBe(true);
+    } catch (error) {
+      await testInfo.attach('real-scene-sky-readiness-failure.json', {
+        contentType: 'application/json',
+        body: JSON.stringify(
+          await page.evaluate(async (keys) => {
+            const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+            const sources = [];
+            for (const key of keys) {
+              const [x, , z] = key.split(',').map(Number);
+              sources.push(await h.world.inspect({ kind: 'column-source', column: [x!, z!] }));
+            }
+            return { name: 'visible-gallery-chunks', keys, sky: h.skyVisibilityDiagnostics(), sources };
+          }, skyTargets),
+        ),
+      });
+      throw error;
+    }
     try {
       await waitForSnapshot(
         page,

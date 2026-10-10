@@ -112,7 +112,13 @@ export class WorldSkyLighting {
   }
 
   get diagnostics() {
-    return { pending: this.pending, ...this.cache.diagnostics };
+    return {
+      pending: this.pending,
+      ...this.cache.diagnostics,
+      readyChunkKeys: this.disposed
+        ? []
+        : [...this.entries.keys()].filter((key) => this.cache.sample(key, 0, 0, 0).ready),
+    };
   }
 
   private refreshEpoch(): void {
