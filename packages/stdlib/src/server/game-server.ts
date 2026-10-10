@@ -17,7 +17,7 @@ import { isFluidVoxel } from './fluid/fluid-cell-state';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
 import { peekLoadedVoxel } from './loaded-voxel-reader';
-import { validateServerStationCheckpoint, validServerChunkSnapshot } from './game-server-restore';
+import { validateServerStationCheckpoint, validLoadedServerChunkSnapshot } from './game-server-restore';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
 import { readGameSaveCheckpoint } from './persistence/game-save-checkpoint';
@@ -39,11 +39,13 @@ import { acceptServerWorkerCanonical } from './game-server-canonical-admission';
 import { readLoadedCollisionBaseline } from './loaded-collision-baseline';
 import {
   canonicalChunkNeighborhoodKeys,
+  ensureCanonicalChunkNeighborhood,
   hasLoadedCanonicalChunk,
   retainCanonicalPreparation,
 } from './canonical-chunk-observation';
 import { assertCorePlatformPorts } from '../runtime/platform-ports';
-import type { KernelWorldgenProvider, KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
+import { inspectServerColumnSource } from './server-column-source';
 import { voxelGeometryForComposition } from './gameplay/modules/voxel-geometry-module';
 import type { VoxelGeometryRegistryV1 } from '../world/voxel-geometry';
 
@@ -63,7 +65,7 @@ class GameServerWorld {
   readonly generatorVersion: number;
   readonly worldgenProvider?: KernelWorldgenProviderIdentity;
   readonly voxelGeometry?: VoxelGeometryRegistryV1;
-  private readonly worldgenRuntime?: KernelWorldgenProvider;
+  private readonly worldgenRuntime: GameServerOptions['worldgenProvider'];
   private readonly chunks = new Map<string, ServerChunk>();
   private accessSequence = 0;
   private readonly persistence?: ChunkPersistence & Partial<GameplayPersistence>;
@@ -167,7 +169,21 @@ class GameServerWorld {
   get worldTime(): number { return this.kernelState.worldTime; }
 
   // prettier-ignore
-  get executableWorldgenProvider(): KernelWorldgenProvider | undefined { return this.worldgenRuntime; }
+  get executableWorldgenProvider(): GameServerOptions['worldgenProvider'] { return this.worldgenRuntime; }
+
+  inspectColumnSource(cx: number, cz: number) {
+    return inspectServerColumnSource(
+      {
+        seed: this.seed,
+        generatorVersion: this.generatorVersion,
+        provider: this.worldgenRuntime,
+        persistence: this.persistence,
+        state: () => ({ epoch: this.kernelState.epoch, worldRevision: this.worldRevision, chunks: this.chunks }),
+      },
+      cx,
+      cz,
+    );
+  }
   // prettier-ignore
   private get gameplay() { return this.gameplayHost.gameplay; }
   // prettier-ignore
@@ -320,11 +336,8 @@ class GameServerWorld {
     return chunk;
   }
 
-  async ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
-    const neighborhood = canonicalChunkNeighborhoodKeys(cx, cy, cz);
-    const residentKeys = neighborhood.filter((key) => this.chunks.has(key));
-    if (residentKeys.length === neighborhood.length) return;
-    return await this.persistence?.ensureNeighborhood?.(cx, cy, cz, residentKeys);
+  ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<ChunkPersistenceLoadDiagnostics | void> {
+    return ensureCanonicalChunkNeighborhood(this.chunks, this.persistence, cx, cy, cz);
   }
 
   async prepareCanonicalChunkForMutation(cx: number, cy: number, cz: number): Promise<boolean> {
@@ -495,18 +508,7 @@ class GameServerWorld {
   }
 
   private isValidSnapshot(snapshot: ChunkSnapshot, key: string, cx: number, cy: number, cz: number): boolean {
-    return validServerChunkSnapshot(
-      snapshot,
-      {
-        seedText: this.options.seedText,
-        generatorVersion: this.generatorVersion,
-        key,
-        cx,
-        cy,
-        cz,
-      },
-      this.options.composition ? this.voxelSemantics : undefined,
-    );
+    return validLoadedServerChunkSnapshot(this, snapshot, key, cx, cy, cz);
   }
 
   private readAuthoritativeChunk(
