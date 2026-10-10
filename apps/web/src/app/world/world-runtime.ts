@@ -1,3 +1,4 @@
+import { createWorldSurfaceLightingSampler, type WorldSurfaceLightingSampler } from '../scene/world-surface-lighting';
 import { WorldSkyLighting } from '../scene/world-sky-lighting';
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
@@ -72,6 +73,7 @@ export class World {
   private readonly blockLightCache: ChunkBlockLightCache;
   private readonly blockLightRebuildPump: BlockLightRebuildPump;
   private readonly skyLighting: WorldSkyLighting;
+  readonly sampleSurfaceLighting: WorldSurfaceLightingSampler;
   private lastCenter = '';
   private disposed = false;
   private readonly crops: WorldCropPresentation | null;
@@ -106,6 +108,7 @@ export class World {
     });
     this.blockLightRebuildPump = new BlockLightRebuildPump(this.blockLightCache);
     this.skyLighting = new WorldSkyLighting(authority);
+    this.sampleSurfaceLighting = createWorldSurfaceLightingSampler(this.skyLighting, this.blockLightCache);
     const source: MeshTaskSource = {
       get seed() {
         return authority.seed;
@@ -295,8 +298,6 @@ export class World {
   getBlockLightDiagnostics() {
     return this.blockLightCache.diagnostics;
   }
-
-  sampleBlockLight = (position: readonly [number, number, number]) => this.blockLightCache.sample(position);
 
   waitForInitialVisibleChunk = () => this.repository.waitForFirstVisible();
 

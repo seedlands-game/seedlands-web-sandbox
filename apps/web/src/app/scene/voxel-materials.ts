@@ -15,7 +15,7 @@ import type { QualityProfile } from './quality-profile';
 import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 import { MATERIAL_LAYER_COUNT, type RenderCategory } from './voxel-render-pipeline';
 import { voxelEmissionRedDominance, voxelEmissionThreshold } from './voxel-emission-profile';
-import { voxelReceivedLightGlsl } from '../shaders/voxel-received-light-chunk';
+import { voxelReceivedLightingGlsl } from '../shaders/voxel-received-light-chunk';
 import type { PackLightingProfile } from '../../client/presentation/pack-lighting-profile';
 import {
   voxelArrayDiffuseGlsl,
@@ -228,7 +228,7 @@ export async function createVoxelMaterials(
     material.useSkybox = false;
     material.lightMap = receivedLightFeature;
     material.lightMapUv = 0;
-    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('lightmapPS', voxelReceivedLightGlsl);
+    material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('lightmapPS', voxelReceivedLightingGlsl);
     material.setParameter('texture_skyVisibility', blockLightFallback);
     material.setParameter('uSkyVisibilityOrigin', new Float32Array(3));
     material.setParameter('uSkyVisibilitySize', 1);

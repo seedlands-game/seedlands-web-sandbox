@@ -352,7 +352,8 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
 
 export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): HarnessApi {
   return {
-    receivedLightingGpuProbe: () => bindings.visualEffects()?.receivedLightingGpuProbe() ?? null,
+    receivedLightingGpuProbe: (includeModels) =>
+      bindings.visualEffects()?.receivedLightingGpuProbe(includeModels) ?? null,
     ...createHarnessObservability({
       authority: bindings.authority,
       renderedMaterialMesh: bindings.renderedMaterialMesh,

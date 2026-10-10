@@ -193,13 +193,8 @@ export class AdvancedVisualEffects {
     this.postProcessing?.destroy();
   }
 
-  /** 0..1 block light for presentation consumers such as animated actors. */
-  sampleBlockLight(position: readonly [number, number, number]): number {
-    return this.world.sampleBlockLight(position) / 15;
-  }
-
-  receivedLightingGpuProbe() {
-    return receivedLightingGpuProbe(this.app, this.materials);
+  receivedLightingGpuProbe(includeModels = false) {
+    return receivedLightingGpuProbe(this.app, this.materials, includeModels);
   }
 
   private scanNearbyVoxels(): void {

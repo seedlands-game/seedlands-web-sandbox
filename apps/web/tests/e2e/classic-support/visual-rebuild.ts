@@ -92,6 +92,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
           archetype: kinds[i],
           position: [-6 + (i % 4) * 4, 60, -6 + Math.floor(i / 4) * 4],
         });
+      await command({ type: 'spawn-world-item', itemId: 'dirt-block', count: 1, position: [0, 60.2, 4] });
       for (const [i, voxel] of [31, 32, 33, 34, 35, 59, 61, 62].entries())
         await harness.setVoxelAt(-7 + i * 2, 60, 9, voxel);
       await command({ type: 'teleport', position: [0.5, 61.6, 19.5] });
@@ -184,6 +185,27 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
     });
   };
   await capture('day-gallery');
+  const modelPixels = await page.evaluate(() =>
+    (window as unknown as ClassicWindow).__seedlandsHarness!.receivedLightingGpuProbe(true),
+  );
+  await testInfo.attach('model-received-lighting-webgl2-pixels.json', {
+    contentType: 'application/json',
+    body: JSON.stringify({ diagnosticOnly: true, pixels: modelPixels }),
+  });
+  expect(modelPixels).toHaveLength(66);
+  for (const pixel of modelPixels ?? []) {
+    const expected =
+      pixel.name === 'combined'
+        ? 128
+        : pixel.name === 'sky-only' ||
+            pixel.name === 'block-only' ||
+            pixel.name.startsWith('self-') ||
+            pixel.name === 'upper-boundary-clear'
+          ? 64
+          : 0;
+    for (const channel of pixel.rgba.slice(0, 3))
+      expect(Math.abs(channel - expected), `${pixel.category}:${pixel.name}`).toBeLessThanOrEqual(3);
+  }
   for (const view of [
     { name: 'pig-front-closeup', position: [-6, 61.1, -9.2], target: [-6, 60.45, -6] },
     { name: 'skeleton-bow-front-closeup', position: [6, 61.2, -5.2], target: [6, 60.9, -2] },

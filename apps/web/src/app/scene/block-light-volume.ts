@@ -270,6 +270,15 @@ export class ChunkBlockLightCache {
   }
 
   sample(position: readonly [number, number, number]): number {
+    return this.sampleKnown(position) ?? 0;
+  }
+
+  sampleKnown(position: readonly [number, number, number]): number | null {
+    if (
+      !position.every(Number.isFinite) ||
+      this.reader.getVoxelIfLoaded(...(position.map(Math.floor) as [number, number, number])) === undefined
+    )
+      return null;
     const key = chunkKey(
       floorDiv(position[0], BLOCK_LIGHT_CHUNK_CORE_SIZE),
       floorDiv(position[1], BLOCK_LIGHT_CHUNK_CORE_SIZE),
@@ -277,7 +286,7 @@ export class ChunkBlockLightCache {
     );
     const entry = this.entries.get(key);
     if (!entry?.snapshot || chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz))
-      return 0;
+      return null;
     return sampleBlockLight(entry.snapshot.volume, position[0], position[1], position[2]);
   }
 

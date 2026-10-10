@@ -290,3 +290,7 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 导航策略与注册 self producer 归 `packages/stdlib/src/server/gameplay/modules/navigation-{policy,interaction-model,interaction-module,state-port}.ts`；原 `navigation-items-runtime.ts` 仍唯一拥有地图、序列和V1 checkpoint，prepared port 不另建状态。Classic内容配置归 `playbooks/classic/src/navigation-policy.ts`，旧V4身份只取实际 Browser30 export。Authority 接受的持有视图经 UI projector 到 `app/ui/navigation-item-hud.svelte`；实际右键与原食品消费归 `app/gameplay/held-item-interaction.ts`。`server/protocol/authority-gameplay-projections.ts` 只容纳派生 crop 类型，原protocol公开类型入口保持 re-export。唯一Classic runner内，`classic-support/portable-item-journeys.ts` 顺序编排原作物及新导航输入/保存恢复；`navigation-journey.ts` 不作为独立浏览器入口。
 
 配置型载具的身体仍由当前世界 transport definition 与 ECS pose yaw 决定；AuthorityRuntime 的只读 `bodyConfigForEntity` 让 Browser 确定性推进和 Headless preload 与正式物理使用相同边界。Logic observation v2 对被动载具发布 `bodyKind:null` 和当前 `bodyAabb`，不赋予 Actor 控制。Authority snapshot 的可选 `bodyAabb` 是同一配置的派生投影，供碰撞诊断显示；导航从当前 EntityStore 配置解析障碍，station 的碰撞由体素 owner 提供。
+
+### 模型受光展示 owner
+
+`app/scene/world-surface-lighting.ts`将同World Sky/方块光可用性与当前环境frame组合为SurfaceLightingSample；World持有派生采样器，恢复后的Game闭包读取当前owner。`app/scene/playcanvas-surface-lighting.ts`只拥有feature lightmap及received uniform，`app/scene/model-surface-lighting.ts`只拥有每mesh-instance的材质clone，保持资产纹理借用。`app/gameplay/browser-gameplay-presentation.ts`为角色/掉落物presenter与first-person viewmodel装配同一sampler，不获取Authority提交权。材质/Null测试、真实GPU控制面、实际模型场景与完整矩阵仍分别验收。

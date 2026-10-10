@@ -104,7 +104,7 @@ describe('玩法实体的独立表现时钟', () => {
     };
     const transport = {
       version: 2 as const,
-      reference: { entityId: 'carrier', lifetime: 1 },
+      reference: { entityId: 'carrier', epoch: 0, lifetime: 1 },
       definitionId: definition.id,
       pose: { position: [2, 31, 0] as const, yaw: Math.PI / 2 },
       velocity: [0, 0, 0] as const,
@@ -126,7 +126,12 @@ describe('玩法实体的独立表现时钟', () => {
     expect(animationState.addGlbModel.mock.calls[0]![6]).toBe('blob:verified-carrier');
     expect(root.findByName('gameplay:carrier')!.getEulerAngles().y).toBeCloseTo(90);
     const lease = await animationState.addGlbModel.mock.results[0]!.value;
-    presenter.reconcile([entity], 0, [{ ...transport, reference: { entityId: 'carrier', lifetime: 2 } }], [definition]);
+    presenter.reconcile(
+      [entity],
+      0,
+      [{ ...transport, reference: { entityId: 'carrier', epoch: 0, lifetime: 2 } }],
+      [definition],
+    );
     await vi.waitFor(() => expect(animationState.addGlbModel).toHaveBeenCalledTimes(2));
     expect(lease.release).toHaveBeenCalledTimes(1);
     const replacement = await animationState.addGlbModel.mock.results[1]!.value;

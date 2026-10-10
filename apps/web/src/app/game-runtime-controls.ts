@@ -73,6 +73,15 @@ export function setGamePaused(
   options.media?.(paused);
 }
 
+export async function setWorldPresentationTime(
+  world: World | null,
+  environment: WorldEnvironment | null,
+  hour: number,
+) {
+  if (!world || !environment) return;
+  environment.setTime(await world.setWorldTime(hour));
+}
+
 export async function setAuthorityWorldClockPaused(
   environment: WorldEnvironment | null,
   authority: BrowserAuthorityClient | null,

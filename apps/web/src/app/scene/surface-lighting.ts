@@ -26,6 +26,11 @@ export type SurfaceLightingSample =
       selfEmission: LinearRgb;
     }>;
 
+export type SurfaceLightingSampler = (
+  position: readonly [number, number, number],
+  selfEmission: LinearRgb,
+) => SurfaceLightingSample;
+
 export type SurfaceLightingChannels = Readonly<{
   receivedLighting: LinearRgb;
   selfEmission: LinearRgb;
