@@ -62,3 +62,7 @@ Classic art direction is documented in [Classic visual style](docs/classic-visua
 ## Classic crop stages
 
 `playbooks/classic/assets/crops/wheat-stage-*.svg` are eight original repository-authored 16×16 pixel textures, offered under Apache-2.0. Their transparent stems, leaves and mature grain heads use no third-party artwork. The Classic Pack declares their world dimensions and resource locks; the SVG files are the editable source.
+
+## Classic ordinary minecart
+
+`playbooks/classic/assets/transport/minecart.glb` is original repository-authored cuboid geometry and two solid-color materials, offered under Apache-2.0. It contains no external textures or third-party media. `scripts/generate-classic-minecart-glb.mjs` reproduces the asset; `--verify` compares its bytes with the deterministic source. The Classic Pack locks the resource and declares its body bounds and presentation ID.

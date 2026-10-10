@@ -37,6 +37,12 @@ export type PlayerControllerOptions = {
     target: Pick<VoxelTarget, 'position' | 'adjacent'>,
     intent: 'use' | 'alternate',
   ) => Promise<'handled' | 'fallback'>;
+  onUseEntityTarget?: (
+    origin: [number, number, number],
+    direction: [number, number, number],
+    maxDistance: number,
+    intent: 'use' | 'alternate',
+  ) => Promise<'handled' | 'fallback'>;
   isUiBlockingInput: () => boolean;
   onUseHeldItem: () => boolean;
   onCloseUi: () => void;

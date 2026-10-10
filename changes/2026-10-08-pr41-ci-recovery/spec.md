@@ -1,5 +1,19 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Classic普通矿车生产入口 checkpoint75（预注册）
+
+2026-10-10 00:49UTC，冻结09f2803e，CI74自然运行，Root先以正式Classic Pack/Authority use请求验证当前矿车未注册的有效RED，并保存当前V4 composition及恢复基线。最小产品范围普通minecart/普通rail39：正式definition/provider/item binding，真实消耗与ECS lifetime/projection原子提交，已占位/陈旧选择/unknown拒绝，原V4身份显式兼容；接续同accepted transport投影的通用呈现、真实use entity mount/alternate self dismount以及已接受输入。直线先闭合，角/坡、powered/detector、燃料货箱及非空旧V1迁移另验，不从sample参数臆造Classic合同。新增namespace和composition不能悄然损坏当前存档；完整产品Browser待新identified artifact原唯一runner。
+
+Root独占Classic transport及binding/pack/migration、既有Web生产目标/呈现文件、新Classic Authority测试、selector/type/spec/evidence；Luna只读Task136已完成，无新实现委派。传统1PD×120%=1.2PD，AI60min×120%=72min，01:01首次有界checkpoint，02:01保守上限，到点必须重估或保留可恢复进度。最新真实UI00:09剩82%/5d2h，00:44已请求刷新；约60%立即停止线。此功能片不声称性能收益，守原超时/质量/键鼠与存档整体验证；CI74不取消、不抢push。长期docs和codemap仅随实际新职责更新，不先宣称完整运输。
+
+01:02首次checkpoint75：正式Classic部署有效RED1FAIL，候选正确接入后1PASS。真实09f生产Pack及exact host admission校验后保存Authority V4；占位a/b/c fixture另标。恢复先因缺新manual system再因顺序失败，保留全部日志；按target注册顺序插入唯一zero cursor并保持旧时钟后四项PASS，未知摘要/缺旧system仍拒绝。Singleton item interaction门禁保留，binding并入原provider；deployments使用现有runtime storage item key，selector仍作者namespace。当前只是未提交候选，真实呈现/上下车、原子负例与完整检查未完成；预计继续在02:01保守上限内复验。CI74已自然terminal FAIL（五非浏览器SUCCESS、C0/V1失败、VisualPASS、Modular/部署SKIP），PR仍不可合入。
+
+01:49静态checkpoint75：普通矿车/普通直轨39正式注册和生产准入，原创GLB10,140bytes/2primitives，generic accepted定义/pose/yaw及lifetime替换释放，原生右键entity/Shift右键self入口已接通。正式Authority占位、陈旧selection/lifetime、无效site拒绝并保持原子性；use上车、真实协议input推进、alternate下车通过。实际09f生产Pack旧V4捕获推进175ms后time0.15/forage remainder0.15，迁移保留旧lifetime/inventory/时钟；非空V1明确拒绝并保留原存档，不宣称完整legacy转换。pre-Media来源从固定真实pre-transport图派生，保留既有075摘要；新target不能改写允许集合。旧身份手工fixture同步去除未来system，sealed真实捕获字节不动。Task137只读指出身份/lifetime事项后Root已修复，9文件68PASS及后续完整覆盖，不把其早期报告当最新GREEN。
+
+完整headless首轮760PASS/4FAIL（旧fixture和新增空ECS字段断言）；修正后与静态并行时原木板5秒超时，763PASS/1FAIL；孤立木板+本片7PASS，最终串行121files/764PASS。lint/paths、16工程测试、全仓Web/Svelte/tools/Classic类型、完整format及5/5sealed字节校验均PASS；Classic Pack26PASS。Stdlib并行1194PASS/1原mesh5秒超时，孤立4PASS，串行全量此刻进行中。所有原FAIL日志保留，不改原时限或断言。新矿车Browser在原唯一spec注册120秒用例；主900秒/visual240秒/Modular90秒不变，诊断重试下总容纳42分钟＋原5分钟报告余量，CI job45→47分钟，容量合同有效RED后16工程PASS。该附加测试用独立失败附件，不继承主旅程stage状态。当前无BrowserPASS，旧894e dist保留，须新identified build与原runner；不宣称性能收益或整帧A/A/A+B。最新真实UI01:24剩81%/5d1h，约60%停止线，02:01片内保守上限保持。远端01:45fetch仍09f/mainfba，未提交推送，无merge/automerge/生产部署。
+
+01:50收尾checkpoint75：Stdlib最终单worker166files/1195PASS/191.53s，前一默认并行超时与孤立4PASS保留。其他静态/764headless均已通过；先保存源码commit，再保留旧产物、构建新精确identity和原唯一runner验证原生矿车。此时Browser仍NOT_RUN，PR仍不可合入。
+
 ## 控制台Authority字段收窄 checkpoint74（预注册）
 
 2026-10-10 00:38UTC，73已提交7928a990。CI71实际motion.authority除类型声明的tick/ACK/commit/residency外还含physicsCost样本数组；原直接复制对象未执行窄字段合同。仅在既有同次snapshot控制台presentation显式挑选声明字段和三个residency计数，完整snapshot附件保持。实际collector新增额外运行时字段反例，原三例保持；不改输入、断言、超时、生产行为或性能结论。

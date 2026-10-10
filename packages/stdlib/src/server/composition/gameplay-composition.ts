@@ -58,6 +58,7 @@ export const OVERWORLD_PRODUCT_PERMISSIONS: readonly ModulePermission[] = Object
   { resource: 'seedlands.structure', operations: ['read', 'execute'] },
   { resource: 'seedlands.media-playback', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.navigation-item', operations: ['read', 'write', 'execute'] },
+  { resource: 'seedlands.transport', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.ruleset', operations: ['read'] },
   { resource: 'seedlands.needs', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.combat', operations: ['read', 'execute'] },

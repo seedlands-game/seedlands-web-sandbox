@@ -8,6 +8,7 @@ import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
 import { classicPreNavigationV4CompositionIdentity } from '../../../../../../../playbooks/classic/src/pre-navigation-v4-composition-identity';
 import { classicOptions } from '../../../../fixtures/classic/content';
+import { preTransportGameplayFixture } from '../../../../fixtures/classic/pre-transport-schedule';
 
 type Runtime = Awaited<ReturnType<typeof create>>;
 const create = (platform: CorePlatformPorts = testCorePlatform, persistence?: MemoryGamePersistence) =>
@@ -117,7 +118,10 @@ it('accepts only the captured pre-navigation V4 identity without its optional ch
   const mapAction = await source.performAction(exploreMap(source));
   expect(mapAction.result, JSON.stringify(mapAction.result)).toMatchObject({ success: true, handled: true });
   const current = source.exportPortableCheckpoint();
-  const legacyGameplay = { ...current.gameplay, composition: classicPreNavigationV4CompositionIdentity };
+  const legacyGameplay = {
+    ...preTransportGameplayFixture(current.gameplay),
+    composition: classicPreNavigationV4CompositionIdentity,
+  };
   delete legacyGameplay.navigationItems;
   persistence.saveFrozenSnapshot({ ...current, gameplay: legacyGameplay });
 

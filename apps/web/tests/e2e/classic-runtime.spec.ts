@@ -1,4 +1,5 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
+import { registerClassicMinecartJourney } from './classic-support/minecart-journey';
 import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDropOrPickup } from './classic-support/drops';
@@ -517,3 +518,5 @@ test(
   '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
   verifyModularPackSmoke,
 );
+
+registerClassicMinecartJourney(test);

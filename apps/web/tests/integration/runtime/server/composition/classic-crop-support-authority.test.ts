@@ -10,6 +10,7 @@ import { MemoryGamePersistence } from '../../../../../../../packages/stdlib/src/
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
 import { classicOptions } from '../../../../fixtures/classic/content';
+import { preTransportGameplayFixture } from '../../../../fixtures/classic/pre-transport-schedule';
 
 type Runtime = Awaited<ReturnType<typeof create>>;
 type Position = [number, number, number];
@@ -169,7 +170,7 @@ it('accepts the actual pre-support identity in a V4 restore fixture and removes 
   // The identity is a real production capture; the child payload is a focused compatibility fixture.
   persistence.saveFrozenSnapshot({
     ...checkpoint,
-    gameplay: { ...checkpoint.gameplay, composition: previousIdentity() },
+    gameplay: { ...preTransportGameplayFixture(checkpoint.gameplay), composition: previousIdentity() },
   });
   const restored = await create(testCorePlatform, persistence);
   expect(restored.server.crops.checkpoint()).toEqual(runtime.server.crops.checkpoint());

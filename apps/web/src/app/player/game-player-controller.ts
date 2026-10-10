@@ -6,6 +6,7 @@ import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';
 import type { BrowserGameplay } from '../gameplay/browser-gameplay';
 import { PlayerController } from './player-controller';
+import { performTransportTargetInteraction } from '../gameplay/transport-target-interaction';
 import type {
   AuthorityActionResult,
   AuthorityReady,
@@ -62,6 +63,8 @@ export function createAuthorityPlayerCallbacks(
 
 export function createGamePlayerController(options: Options): PlayerController {
   const gameplay = () => options.getGameplay();
+  const feedback = (message: string, tone: 'info' | 'success' | 'error') =>
+    options.getUiSession()?.publishFeedback(options.nextInteractionSequence(), { message, tone, durationMs: 900 });
   return new PlayerController({
     camera: options.camera,
     canvas: options.canvas,
@@ -90,6 +93,21 @@ export function createGamePlayerController(options: Options): PlayerController {
     onCancelBreak: () => gameplay()?.cancelBreak(),
     onPlace: (position) => gameplay()?.place(position),
     onUseTarget: (target, intent) => gameplay()?.useTarget(target, intent) ?? Promise.resolve('fallback'),
+    onUseEntityTarget: (origin, direction, maxDistance, intent) =>
+      performTransportTargetInteraction({
+        gameplay: options.authority.gameplay,
+        origin,
+        direction,
+        maxDistance,
+        intent,
+        perform: (action) => options.authority.performAction(action),
+        refresh: () => gameplay()?.refresh(),
+        succeeded: () => {
+          options.queueSave();
+          feedback(intent === 'alternate' ? '已下车' : '已上车', 'success');
+        },
+        failed: (reason) => feedback(`无法交互 · ${reason}`, 'error'),
+      }),
     onUseHeldItem: () => gameplay()?.useHeldItem() ?? false,
     isUiBlockingInput: () =>
       Boolean(
@@ -100,8 +118,7 @@ export function createGamePlayerController(options: Options): PlayerController {
       options.actions.closeMap();
       options.actions.closeCommandShell();
     },
-    onFeedback: (message, tone) =>
-      options.getUiSession()?.publishFeedback(options.nextInteractionSequence(), { message, tone, durationMs: 900 }),
+    onFeedback: feedback,
     onQueueSave: options.queueSave,
     onFlushSave: options.flushSave,
     authority: {

@@ -210,7 +210,7 @@ export class BrowserGameplay {
     if (becameDead) this.inventoryOpen = false;
     const entities = view.entities.filter((entity) => entity.type !== 'player');
     const actorStates = new Map(view.actors.map((actor) => [actor.entityId, actor] as const));
-    this.presenter.reconcile(entities, renderDeltaSeconds);
+    this.presenter.reconcile(entities, renderDeltaSeconds, view.transports, view.transportDefinitions);
     if (this.previousHealth !== null && player.health < this.previousHealth) {
       const amount = this.previousHealth - player.health;
       this.options.onPlayerDamage?.(amount);
@@ -465,9 +465,8 @@ export class BrowserGameplay {
     return { breakingOverlay: this.breakOverlay.snapshot, viewmodel: this.viewmodel.snapshot } as const;
   }
 
-  presentedEntityPosition(id: string): [number, number, number] | null {
-    return this.presenter.presentedPosition(id);
-  }
+  presentedEntityPosition = (id: string): [number, number, number] | null => this.presenter.presentedPosition(id);
+  presentedEntityModelReady = (id: string): boolean => this.presenter.presentedModelReady(id);
 
   dispose(): void {
     this.inventoryPointerClient.dispose();

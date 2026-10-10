@@ -2,17 +2,19 @@ import * as pc from 'playcanvas';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { GameplayEntityPresenter } from '../../../src/app/gameplay/gameplay-entity-presenter';
 import type { GameplayEntity } from '../../../../../packages/stdlib/src/server/gameplay/entity-store';
+import { defineTransportV1 } from '../../../../../packages/stdlib/src/server/gameplay/modules/transport-model';
 
 const animationState = vi.hoisted(() => ({
   bindings: {} as Record<string, unknown>,
   blob: undefined as Blob | undefined,
   addGlbModel: vi.fn(),
+  pack: null as null | { binding: { id: string; model: string; texture: string }; url: string },
 }));
 
 vi.mock('../../../src/app/gameplay/appearance-runtime', () => ({
   getAppearanceAnimationBindings: () => animationState.bindings,
   getAppearanceModelBlob: () => animationState.blob,
-  getPackActorPresentation: () => null,
+  getPackActorPresentation: () => animationState.pack,
 }));
 
 vi.mock('../../../src/app/gameplay/glb-model-resource', () => ({
@@ -70,6 +72,7 @@ const reconcileFrame = (
 describe('玩法实体的独立表现时钟', () => {
   beforeEach(() => {
     animationState.bindings = {};
+    animationState.pack = null;
     animationState.blob = undefined;
     animationState.addGlbModel.mockReset();
     animationState.addGlbModel.mockImplementation(async (_app: pc.Application, parent: pc.Entity) => {
@@ -82,6 +85,55 @@ describe('玩法实体的独立表现时钟', () => {
         release: vi.fn(),
       };
     });
+  });
+
+  it('同份accepted transport定义取得Pack模型，静止时保留Authority yaw并在移除时释放', async () => {
+    const root = new pc.Entity('root');
+    const presenter = new GameplayEntityPresenter({ root } as pc.Application);
+    const definition = defineTransportV1({
+      version: 1,
+      id: 'test:carrier',
+      locomotion: { provider: 'route', providerId: 'test:rail' },
+      bodyAabb: { min: { x: -0.4, y: 0, z: -0.4 }, max: { x: 0.4, y: 0.7, z: 0.4 } },
+      seatOffset: [0, 0.55, 0],
+      presentationId: 'test:carrier-model',
+    });
+    animationState.pack = {
+      binding: { id: 'test:carrier-model', model: 'models/carrier.glb', texture: 'models/carrier.glb' },
+      url: 'blob:verified-carrier',
+    };
+    const transport = {
+      version: 2 as const,
+      reference: { entityId: 'carrier', lifetime: 1 },
+      definitionId: definition.id,
+      pose: { position: [2, 31, 0] as const, yaw: Math.PI / 2 },
+      velocity: [0, 0, 0] as const,
+      routeCursor: null,
+      rider: null,
+      fuel: null,
+      inventory: [],
+    };
+    const entity: GameplayEntity = {
+      id: 'carrier',
+      type: 'transport',
+      kind: 'transport',
+      lifecycle: 'active',
+      position: [2, 31, 0],
+    };
+    presenter.reconcile([entity], 0, [transport], [definition]);
+    await vi.waitFor(() => expect(animationState.addGlbModel).toHaveBeenCalledTimes(1));
+    expect(animationState.addGlbModel.mock.calls[0]![2]).toBe('pack:test:carrier-model');
+    expect(animationState.addGlbModel.mock.calls[0]![6]).toBe('blob:verified-carrier');
+    expect(root.findByName('gameplay:carrier')!.getEulerAngles().y).toBeCloseTo(90);
+    const lease = await animationState.addGlbModel.mock.results[0]!.value;
+    presenter.reconcile([entity], 0, [{ ...transport, reference: { entityId: 'carrier', lifetime: 2 } }], [definition]);
+    await vi.waitFor(() => expect(animationState.addGlbModel).toHaveBeenCalledTimes(2));
+    expect(lease.release).toHaveBeenCalledTimes(1);
+    const replacement = await animationState.addGlbModel.mock.results[1]!.value;
+    presenter.reconcile([], 0, [], [definition]);
+    expect(root.findByName('gameplay:carrier')).toBeNull();
+    expect(lease.release).toHaveBeenCalledTimes(1);
+    expect(replacement.release).toHaveBeenCalledTimes(1);
   });
 
   it('每50ms前进2cm的慢速目标不会在快照回调跳动，并在中间渲染帧继续前进', () => {

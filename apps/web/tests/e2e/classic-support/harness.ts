@@ -64,6 +64,8 @@ export type HarnessApi = {
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   snapshot(): ClassicSnapshot;
   presentedEntityPosition(entityId: string): Point | null;
+  presentedEntityModelReady(entityId: string): boolean;
+  transportSnapshot(): import('../../../src/app/gameplay/game-harness-contract').HarnessTransportSnapshot | null;
   aimedEntityId(): string | null;
   aimedVoxelTarget(): Readonly<{ position: Point; adjacent: Point | null }> | null;
   setView(yaw: number, pitch: number): void;

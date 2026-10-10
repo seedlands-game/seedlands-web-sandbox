@@ -24,6 +24,13 @@ export type HarnessCropStageSnapshot = Readonly<{
   cropStages: readonly AuthorityCropStageProjection[];
   renderedBatches: readonly CropRenderBatchSnapshot[];
 }>;
+export type HarnessTransportSnapshot = Readonly<{
+  runtimeEpoch: string;
+  gameplayRevision: number;
+  transports: NonNullable<
+    import('@seedlands/stdlib/server/protocol/authority-worker-protocol').AuthorityGameplayView['transports']
+  >;
+}>;
 
 type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 
@@ -70,6 +77,7 @@ export type HarnessApi = {
   ) => RenderedMaterialMeshSummary | null;
   mediaSnapshot: () => HarnessMediaSnapshot;
   cropStageSnapshot: () => HarnessCropStageSnapshot | null;
+  transportSnapshot: () => HarnessTransportSnapshot | null;
   equipmentSnapshot: () => HarnessEquipmentSnapshot | null;
   sunSnapshot?: () => { direction: [number, number, number]; screen: [number, number] | null; facing: boolean };
   flushSave: () => Promise<void>;
@@ -81,6 +89,7 @@ export type HarnessApi = {
     grounded: boolean;
   } | null;
   presentedEntityPosition: (entityId: string) => [number, number, number] | null;
+  presentedEntityModelReady: (entityId: string) => boolean;
   aimedEntityId: () => string | null;
   aimedVoxelTarget: () => {
     position: readonly [number, number, number];

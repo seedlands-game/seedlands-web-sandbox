@@ -7,12 +7,14 @@ import {
 } from '@seedlands/stdlib/host';
 import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { classicGameplaySnapshotPredecessors } from '../../../../../../../playbooks/classic/src/legacy-composition-identities';
+import { classicPreTransportV4CompositionIdentity } from '../../../../../../../playbooks/classic/src/pre-transport-v4-composition-identity';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
 import type { CompositionCheckpointIdentity } from '../../../../../../../packages/stdlib/src/server/composition/checkpoint-identity';
 import { prepareWorldCommitMetadata } from '../../../../../../../packages/stdlib/src/server/prepared-world-commit-metadata';
 import { prepareWorldEditBatch } from '../../../../../../../packages/stdlib/src/server/world-transaction-commit';
 import type { ServerChunk } from '../../../../../../../packages/stdlib/src/server/game-server-types';
 import { CHUNK_SIZE, chunkKey, floorDiv, mod, voxelIndex } from '@seedlands/stdlib/world/voxel';
+import { preTransportGameplayFixture } from '../../../../fixtures/classic/pre-transport-schedule';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
 
 const PRECHANGE_CLASSIC_PACK_INTEGRITY = {
@@ -48,7 +50,8 @@ function prechangeClassicIdentity(): CompositionCheckpointIdentity {
   };
 }
 
-function preMediaClassicIdentity(current: CompositionCheckpointIdentity): CompositionCheckpointIdentity {
+function preMediaClassicIdentity(): CompositionCheckpointIdentity {
+  const current = classicPreTransportV4CompositionIdentity;
   const pack = current.packLock[0]!;
   return {
     ...current,
@@ -225,6 +228,7 @@ describe('gameplay composition checkpoint', () => {
     });
     // This is a synthetic V4 payload under Classic's frozen pre-pointer source envelope.
     legacySaved.composition = structuredClone(predecessor.identity);
+    legacySaved.moduleSchedule = preTransportGameplayFixture(legacySaved).moduleSchedule;
     const legacyActor = legacySaved.entityStore.actors.find((actor) => actor.entityId === 'saved')! as {
       inventoryRevision?: number;
       inventoryCursor?: unknown;
@@ -261,7 +265,8 @@ describe('gameplay composition checkpoint', () => {
     source.spawnPlayer({ id: 'saved', position: [0, 2, 0] });
     source.giveItem('saved', { itemId: 'record-13', count: 1 });
     const saved = source.createSnapshot();
-    saved.composition = preMediaClassicIdentity(saved.composition!);
+    saved.composition = preMediaClassicIdentity();
+    saved.moduleSchedule = preTransportGameplayFixture(saved).moduleSchedule;
     delete saved.media;
     const target = create('c');
 
@@ -313,6 +318,7 @@ describe('gameplay composition checkpoint', () => {
     source.giveItem('keeper', { itemId: 'plank', count: 9 });
     const saved = source.createSnapshot();
     saved.composition = prechangeClassicIdentity();
+    saved.moduleSchedule = preTransportGameplayFixture(saved).moduleSchedule;
     saved.simulation.combat = {
       version: 3,
       actionSequence: 1,
@@ -471,6 +477,7 @@ describe('gameplay composition checkpoint', () => {
       ],
     };
     saved.composition = prechangeClassicIdentity();
+    saved.moduleSchedule = preTransportGameplayFixture(saved).moduleSchedule;
     const original = structuredClone(saved);
     const target = create('d');
 

@@ -36,7 +36,12 @@ export type HarnessObservabilityBindings = Readonly<{
 
 type HarnessObservabilityApi = Pick<
   HarnessApi,
-  'getVoxelGeometry' | 'getRenderedMaterialMesh' | 'mediaSnapshot' | 'equipmentSnapshot' | 'cropStageSnapshot'
+  | 'getVoxelGeometry'
+  | 'getRenderedMaterialMesh'
+  | 'mediaSnapshot'
+  | 'equipmentSnapshot'
+  | 'cropStageSnapshot'
+  | 'transportSnapshot'
 >;
 
 const cloneFrozenStack = (stack: AuthorityInventoryView['slots'][number]): AuthorityInventoryView['slots'][number] =>
@@ -131,6 +136,33 @@ function cloneHarnessMediaSnapshot(
 
 export function createHarnessObservability(bindings: HarnessObservabilityBindings): HarnessObservabilityApi {
   return Object.freeze({
+    transportSnapshot: () => {
+      const authority = bindings.authority();
+      if (!authority?.isReady) return null;
+      const runtimeEpoch = authority.runtimeEpoch;
+      if (!runtimeEpoch || bindings.renderedWorldEpoch() !== runtimeEpoch) return null;
+      const gameplay = authority.gameplay;
+      const snapshot = structuredClone({
+        runtimeEpoch,
+        gameplayRevision: gameplay.gameplayRevision,
+        transports: gameplay.transports ?? [],
+      });
+      const freeze = (value: unknown): void => {
+        if (!value || typeof value !== 'object') return;
+        for (const child of Object.values(value)) freeze(child);
+        Object.freeze(value);
+      };
+      freeze(snapshot);
+      if (
+        bindings.authority() !== authority ||
+        !authority.isReady ||
+        authority.runtimeEpoch !== runtimeEpoch ||
+        authority.gameplay !== gameplay ||
+        bindings.renderedWorldEpoch() !== runtimeEpoch
+      )
+        return null;
+      return snapshot;
+    },
     getVoxelGeometry: (voxel) => cloneHarnessVoxelGeometry(bindings.authority()?.voxelGeometry, voxel),
     getRenderedMaterialMesh: (cx, cy, cz, material): RenderedMaterialMeshSummary | null => {
       const authority = bindings.authority();

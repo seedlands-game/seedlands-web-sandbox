@@ -15,6 +15,7 @@ import { defineCropInteractionModule } from '@seedlands/stdlib/mod-api';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicWorldgenProvider } from '@seedlands/playbook-classic/worldgen';
 import { classicOptions } from '../../../../fixtures/classic/content';
+import { preTransportGameplayFixture } from '../../../../fixtures/classic/pre-transport-schedule';
 import { pack as classicPack } from '../../../../../../../playbooks/classic/src/pack';
 import { classicCropConfig } from '../../../../../../../playbooks/classic/src/crop-policy';
 
@@ -168,7 +169,7 @@ it('restores only the exact captured pre-presentation V4 composition identity', 
   const checkpoint = runtime.exportPortableCheckpoint();
   persistence.saveFrozenSnapshot({
     ...checkpoint,
-    gameplay: { ...checkpoint.gameplay, composition: prePresentationIdentity() },
+    gameplay: { ...preTransportGameplayFixture(checkpoint.gameplay), composition: prePresentationIdentity() },
   });
 
   const restored = await create(testCorePlatform, persistence);

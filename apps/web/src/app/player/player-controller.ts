@@ -14,7 +14,7 @@ import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/autho
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
-import { performSecondaryInteraction } from './secondary-interaction';
+import { performPlayerSecondaryInteraction } from './secondary-interaction';
 import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 import { createFluidAwareTargetPredicate } from './fluid-source-target';
 import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
@@ -484,14 +484,7 @@ export class PlayerController {
     this.attempts += 1;
     const target = this.aimTarget;
     if (place) {
-      performSecondaryInteraction({
-        target,
-        bypassTarget,
-        useTarget: this.options.onUseTarget,
-        useHeldItem: this.options.onUseHeldItem,
-        place: this.options.onPlace,
-        feedback: this.options.onFeedback,
-      });
+      void performPlayerSecondaryInteraction(this.options, target, bypassTarget);
       return;
     }
     if (!target) this.options.onFeedback('距离过远', 'error');

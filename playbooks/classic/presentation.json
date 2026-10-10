@@ -19,6 +19,11 @@
       "id": "seedlands:zombie",
       "model": "builtin:models/classic/zombie.glb",
       "texture": "builtin:models/classic/zombie.glb"
+    },
+    {
+      "id": "seedlands:minecart",
+      "model": "playbooks/classic/assets/transport/minecart.glb",
+      "texture": "playbooks/classic/assets/transport/minecart.glb"
     }
   ],
   "materials": [

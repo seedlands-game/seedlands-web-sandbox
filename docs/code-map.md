@@ -199,6 +199,8 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 
 
 ## 可组合玩法内容与执行
 
+Classic 的普通矿车入口由 `playbooks/classic/src/transport.ts` 声明直线轨道、部署、关系和移动模块；`scripts/generate-classic-minecart-glb.mjs` 生成其 Pack 资源。Web 的 `gameplay/transport-target-interaction.ts` 只从同份 accepted projection 取得旋转后的命中边界和 lifetime，再走原生右键/Shift+右键的 Authority 请求。`gameplay-entity-presenter.ts` 从运输定义的 presentation ID 取得模型并沿用实体资源释放路径。生产合同由 `classic-minecart-authority.test.ts`、`transport-target-interaction.test.ts` 和现有实体表现测试验证；这部分尚不包含完整运输变体和旧非空载具迁移。`fixtures/classic/pre-transport-schedule.ts` 让手工旧身份 fixture 同步移除新系统，真实捕获旧字节仍原样使用；`classic-support/minecart-journey.ts` 在既有唯一规范入口注册独立原生输入验收。
+
 `server/gameplay/playbooks/overworld/` 保存默认 Playbook 的物品、配方、方块定义与版本化旧 ID 映射；只经 `mod-api` 消费标准机制。`server/gameplay/modules/` 保存可复用机制；`server/composition/` 的注册操作、状态提交与逻辑生命周期由宿主绑定权限后执行。旧自由函数在迁移期读取同一份第一方定义，不能另维护内容副本。
 
 `server/gameplay/modules/actor-vitals-runtime.ts` 与 `block-interaction-runtime.ts` 承接原 GameplayRuntime 的生命和方块流程，迁移中的规则 owner 仍以当前 spec 为准。`server/authority/actor-movement-projection.ts` 派生模式/飞行版本并防止旧输入重放；`authority-gameplay-view.ts` 投影实际每世界内容。Browser `worker/pack-loader.ts` 与 Headless 共用构建产物身份，`scripts/build-gameplay-packs.mjs` 生成被忽略的 ESM/manifest/lock。

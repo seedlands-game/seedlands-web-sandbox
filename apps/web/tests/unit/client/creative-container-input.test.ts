@@ -14,6 +14,28 @@ const target = {
 };
 
 describe('secondary player interaction precedence', () => {
+  it('awaits entity Authority handling before voxel, held item or placement; alternate reaches it without a voxel', async () => {
+    const useTarget = vi.fn(),
+      useHeldItem = vi.fn(),
+      place = vi.fn();
+    const useEntity = vi.fn(async () => 'handled' as const);
+    expect(
+      await performSecondaryInteraction({
+        target: null,
+        bypassTarget: true,
+        useEntity,
+        useTarget,
+        useHeldItem,
+        place,
+        feedback: vi.fn(),
+      }),
+    ).toBe('entity');
+    expect(useEntity).toHaveBeenCalledWith('alternate');
+    expect(useTarget).not.toHaveBeenCalled();
+    expect(useHeldItem).not.toHaveBeenCalled();
+    expect(place).not.toHaveBeenCalled();
+  });
+
   it('builds a voxel interact action from the authoritative survival or creative selection', () => {
     const gameplay = {
       inventory: { revision: 7 },
