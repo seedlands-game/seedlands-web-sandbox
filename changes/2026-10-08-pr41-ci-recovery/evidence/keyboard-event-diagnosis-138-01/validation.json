@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-keyboard-event-browser-138-01",
+  "status": "FAIL",
+  "diagnosticOnly": true,
+  "performanceEligible": false,
+  "productionSourceSha": "b47a6c22defacc99a3090f8584ae5c63b2274cbb",
+  "artifact": {
+    "schemaVersion": 1,
+    "sourceSha": "53d29c1fae1c4aa77e165abe5b6214fb1f8dccf0",
+    "sourceDigest": "49b149dca64ce8569607eb8f04a07fe5c6761fe6d806003490141ff682c1a68d",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "e9f51798484d7d4bf87dbefe3b00c084031535d23db3526eda4e2518dc858e69",
+    "builtAt": "2026-10-10T18:17:47.157Z"
+  },
+  "artifactFiles": 289,
+  "build": "PASS",
+  "verifyArtifact": "PASS before run",
+  "observers": {
+    "keyboardTiming": true,
+    "mainCpu": false,
+    "nativeTrace": false,
+    "authorityCpu": false,
+    "benchmark": false
+  },
+  "originalInputTimeoutPredicateAssertions": "UNCHANGED",
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "creative": "PASS crop and navigation",
+    "V1": "FAIL first water approach 66,2.5",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "error": ["Error: Real input route left its supported surface before 66,2.5."],
+  "finalPlayer": [64.88590240478516, 19.600000381469727, 4.635086536407471],
+  "finalAuthorityPlayer": [64.8859022338868, 19.600001000000002, 4.635086516063011],
+  "nativeRelease": {
+    "epoch": "seedlands:classic-canonical-runtime-v11:1",
+    "release": {
+      "code": "KeyS",
+      "sequence": 3402,
+      "neutral": true
+    }
+  },
+  "lastKeySPairs": [
+    {
+      "code": "KeyS",
+      "downMs": 253081.09999999404,
+      "upMs": 253421.09999999404,
+      "stampHeldMs": 340.0,
+      "observedHeldMs": 517.6999999880791,
+      "downHandlingMs": 27.400000005960464,
+      "upHandlingMs": 205.09999999403954,
+      "trusted": true,
+      "pointerLocked": true
+    },
+    {
+      "code": "KeyS",
+      "downMs": 255563.90000000596,
+      "upMs": 256022.5,
+      "stampHeldMs": 458.59999999403954,
+      "observedHeldMs": 675.3000000119209,
+      "downHandlingMs": 23.299999982118607,
+      "upHandlingMs": 240.0,
+      "trusted": true,
+      "pointerLocked": true
+    }
+  ],
+  "actualRequestedDelaysMs": [300, 200.97144205299264],
+  "interpretation": "V1 overshoot beyond the fixed support observed with trusted KeyS handlers delayed; no packet target ticks or execution-tick attribution. Different stage from CI418 V2. Main-thread CPU/GPU cause unproven. No rerun of 138.",
+  "keyboardPairs": 110,
+  "traceFinalFrame": "Viewed final pre-failure screencast frame; night/workbench scene, not proof of V2 or exact collision trajectory",
+  "review": "One bounded readonly input-owner audit found no confirmed scheduler defect; not an approval",
+  "unresolved": [
+    "supported slope compound body contacts real Stone",
+    "complete main journey and remaining product matrix",
+    "exact CI419 still naturally in progress at18:30"
+  ],
+  "budget": {
+    "actualUiUtc": "2026-10-10T17:54:00Z",
+    "remainingPercent": 74,
+    "stopPercent": 60,
+    "cloudUiAccess": false
+  },
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-browser-138-01.log",
+      "bytes": 85876,
+      "sha256": "d61adea9b3362cd15181da44b7258abef71c7a6175335cc7a5decd458a5ec176"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-browser-attachments-138-01.json",
+      "bytes": 282325,
+      "sha256": "4d7d8e3d2ed29f5c3fcb0d6aa570a68d2acd4f5b39c3ebeba8c85e07cde502c5"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-pairs-138-01.json",
+      "bytes": 34510,
+      "sha256": "9466b4db32f8e8bf4b236ecfad3c996f79606d405a1f573c85af39745af82a94"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-route-snapshots-138-01.json",
+      "bytes": 5859,
+      "sha256": "795b6dd29f32c52574af53b8339f0ee819aeccbc5d3ba1ea0ec00e4bc6f71a73"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-final-frame-138-01.jpeg",
+      "bytes": 40839,
+      "sha256": "fad1b3f5f9ef52001de0a03b69be21231c51bfb7c5198460da0ef6d6288665a1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/v2-input-scheduling-138-luna-01.md",
+      "bytes": 5229,
+      "sha256": "c0fe3f9a9919d600df2b3aac25e72daa383176976e4388bf49ee014edf65b4a0"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/keyboard-event-results-138-01/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+      "bytes": 48045032,
+      "sha256": "55962e237d2915a968f4104483efb8dc85784bdc10e8d3027975932689a37f40"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-keyboard-event-browser-138-01/classic.json",
+      "bytes": 153350,
+      "sha256": "cc91a1b84a944ec7c1f4e1aa164145cf74c2e61c67c67c9acfe7c737f45cf1d9"
+    }
+  ]
+}

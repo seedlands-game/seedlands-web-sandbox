@@ -1188,3 +1188,33 @@ CI418精确a1a9ed3b自然终态：五非Browser SUCCESS，Chromium1FAIL1SKIP2PAS
 136尚未交付的新8例RED源码现从Root创建的untracked repo文件无损移动至私有shape-owner-pending-138-01.test.ts（SHA作为私有记录），不是删用户文件或排除原CI用例；原152headless选择未包含该未通过的新文件。将来坡道真正修好再恢复原路径/登记，公开137已有4FAIL/4PASS和首contact未修复声明，PR仍不可合入。此移动用于保存可恢复进度及本轮生产源码clean freeze，不能当功能通过。
 
 Root独占spec/identified build/唯一原主旅程及私有run pr41-keyboard-event-browser-138-01。现有Luna可只读输入Owner链并在独占私有v2-input-scheduling-138-luna-01路径记录有界counterexample或否定证据，不写生产、不再委派；Root负责集成，不因模型或配额探测开新会话。传统.1PD×120%=.12PD，AI20min×120%=24min，18:40UTC检查点。实际产品UI17:54周74%/4d9h，约60停止线，额度下降时停止保留记录；不换算tokens。长期baseline不改，CI/workflow不改，不做生产或合并。
+
+18:34UTC138有界检查点：identified source53d29c1f/build PASS/sourceDigest49b149dc/artifacte9f51798/lock882341/289files。原唯一主旅程一次FAIL4.4min，C0–C3/Creative PASS，V1首水区66,2.5跌落FAIL，V2/C4/C5 NOT_REACHED；非CI418 V2复现。真实220event/110pair完整无丢弃，末两KeyS事件stampHeld340/458.6ms、observedHeld517.7/675.3ms，原请求300/200.97ms，keyup handling205.1/240ms。trace从[66.4353,32.6,1.7073]到[64.8859,19.6,4.6351]，原支撑Z最大3 voxel、world面到4；fresh neutral release被ACK后角色已落地。只观察handler延迟及实际路线过冲，不归因GPU/native/输入queue，无实际packet tick。只读138审计没有confirmed scheduler defect。当前FAIL/完整trace/原raw保留，138不重跑；public keyboard-event-diagnosis-138-01，136未解决，CI41918:30仍运行，不取消/抢推。
+
+### 主线程延迟栈诊断139（18:34UTC预注册）
+
+新问题是138实际KeyS handler延迟与可见过冲期间的主线程采样Owner，而非盼原旅程变绿。生产代码保持b47/identified artifact53d，138后仅spec/evidence变化不在artifact sourceDigest过滤范围；先再次verifyArtifact校验sourceSHA/digest/lock/每个dist byte，相同生产artifact有效则复用、不重复build，不提交docs改变HEAD直到采样结束。原唯一完整主旅程一次，runId pr41-main-cpu-browser-139-01，保持原输入、45/20/900sec、断言/predicate/质量/SwiftShader与无额外retry。仅既有main CPU profiler10ms与passive keyboard timing开启，Authority/nativeTrace/benchmark全部关闭；每个实际profile/事件/阶段必须留存，若早失败仍保留profile/NOT_REACHED不盲重跑。
+
+Root独占spec/public证据与私有main-cpu-*139-01，不启动新agent。通过actual profile node/callFrame及sample/timeDelta关联真实DOM事件附近栈，只分JS采样Owner与未归属native/idle，不将采样计数当exclusive时长、不嵌套相加、不称GPU根因或性能A/B。profiling运行功能结果diagnosticOnly，最终精确CI仍独立判断。传统.1PD×120%=.12PD，AI20min×120%=24min，18:58UTC检查点；实际UI17:54周74%/4d9h，18:54再请求主对话实际读数，约60停止线。长期baseline/CI/workflow/production代码不改，不做合并或生产部署。
+
+18:48UTC139提前检查点：原唯一主旅程583984ms/FAIL，C0–C3/Creative/V1 PASS，V2 creative catalog原5000ms可见性失败，C4/C5未到达；46416实际main CPU样本和338events无丢弃完整回收。trace/原日志/结果全部保留，不重跑。profile与DOM精确时钟桥接未建立，不作单keyup因果。实际bundle stamp/readableChunk体与只读源码唯一Owner核实，主要leaf来自WorldSkyLighting.sample全entries invalidation，通过snapshot onGameplay与frame gameplay.advance两路；只记leaf observed sample，不嵌套计时、不推断GPU。CI419精确b47已自然FAIL，五非Browser PASS，Chromium首轮V1 closed-door pending/insufficient-progress；retry V1 PASS后V2原900sec总限在route78.5,-.5/2031ms截断，非45sec超时；visual1.7min/native35.6sec PASS，previewSKIP。public main-cpu-sky-owner-139-01，不把原先step duration印出误认为失败stagePASS。
+
+### 单列Sky采样查询合同140（18:48UTC预注册）
+
+新实际owner证据允许独立最小候选：sample只校验其请求chunk的完整16个column dependency revisions，保留request/notifyCommit/每帧invalidateStale的全局检查、原stale failDark、epoch/revisionFloor、unknown、async publication fences/reader/task不变。没有时间缓存、不靠epoch/worldRevision粗缓存掩盖same-revision residency变化；不删/减原sky proof，不改输入/renderer/CI/原断言。Root独占world-sky-lighting.ts、原world-sky-lighting.test.ts新增多column合同、spec/public/私有sky-sample-*140-01，不委派。
+
+按治理受控exact A/A与A/B，只声明独立硬预算：一个sample当前column16个revision lookup，数量不随其他registered columns增长；唯一主指标是固定4个ready column、64个目标column sample的getChunkRevision调用数，A/A各4096预期、B上限1024，最小75%减少，确定性计数不用计时噪声替代、不声称尾延迟收益。sample相同返回值/current readiness，目标same-revision revision/residency变更必须立即dark，其他column在原全局invalidate/commit/epoch变更下仍dark、异步源拒绝和全原测试为否决项。先旧owner新增合同RED/精确A/A记录，再一维B/GREEN；不通过则恢复A并保留负结果。该合同仅准入查询硬预算及语义，不证明139主旅程/GPU/最终组合产品性能。
+
+定向实际sky source/reader/cache/surface/model消费者回归、必要types/lint/format；生产变更后新的identified artifact与原无sampler主旅程另登记，不将当前139或CI419代替B验收。传统.1PD×120%=.12PD，AI15min×120%=18min，19:06UTC检查点；UI17:54周74%/60停止线，18:54请求真实新读数；无tokens换算/新权限。CI419已终态，后续交付仍先remote/workflow核实再正常featurepush。supported slope、mesh/full产品矩阵仍开放，长期baseline不改。
+
+18:54UTC140提前检查点：正确actual Web config旧Owner预算RED1FAIL32PASS，A/A[4096,4096]；B原Owner33PASS、最后primary exact[1024,1024] assertion1PASS32SKIP，8消费者文件59PASS，共9unique files92tests，不重复叠加。最小75%硬查询预算通过，同revision target dependency/residency即时dark、原frame/commit/epoch全局失效及27旧async/source保护保持。Webtypes/Svelte0errors0warnings、Classictypes（实际包括该unit）、lint通过。初次root Vitest onlyKernel/stdlib NoTestsFound NOT_RUN、五个新增registration failDark基数写错均留原日志、纠正后不算产品缺陷；passingconsole未打印，B用实际exact assertion证明两个1024，不伪造raw。生产仅point lookup/helper抽取，无timecache/粗revisioncache/input/shader/CI变更；Root核实cache.sample仅一entry、GameFrameLoop原全局drain在render前，未省全局边界。公开sky-point-query-budget-140-01；只声明query count，不称139延迟/GPU修复或组合产品性能。
+
+18:48 remote编辑前fetch后feature tracking仍a1a仅因既有fetch refspec只main；精确ls-remote确认actualfeatureb47/basefba，无远端变更，不扩大refspec。140正式交付前正常remote/workflow复核；CI419已自然终态不抢推。实际额度新读数18:52 async请求PENDING，仍以17:54真实74%为最近观测，不用tokens估算。
+
+### 冻结后原无sampler产品验收141（18:54UTC预注册）
+
+140有界候选正式commit后保存旧53d identified dist到新私有路径，新的pnpm build一次冻结source/artifact/lock/Pack bytes，verifyArtifact通过后只选原唯一完整C0–C5主旅程一次，runId pr41-sky-point-browser-141-01。原输入/quality/SwiftShader/20/45/90/900sec/predicate/断言保持，keyboard/mainCPU/nativeTrace/AuthorityCPU/benchmark全部关闭，不额外retry或核心注入。实际结果按阶段/精确artifact记录；早失败原trace/evidence保留，不盲重跑，不以old139/CI419代替当前。源码与docs冻结直到Browser结束，正式push若先行则同一feature正常push且不触发main production；CI420自然结束不取消。
+
+Root独占spec/私有sky-point-*141-01，不启动agent。仅产品功能，不宣称性能有效；最终exact CI、review/conflict/full产品矩阵和136仍须独立验收。传统.1PD×120%=.12PD，AI20min×120%=24min，19:18UTC检查点，actual UI17:54周74%及18:52新请求PENDING/60停止线；预算回传触停止时立即保存可恢复状态。无权限/预算扩大、长期baseline未改、不merge/auto-merge/生产部署。
+
+18:55UTC140正常commit hook：staged ESLint/format与ls-lint通过，但commit-msg拒绝未支持的perf type（允许feat/fix/refactor/test/docs/chore/ci/build）。保留原失败log，改用refactor消息再次走完整hook，不绕过；生产与查询合同不变。

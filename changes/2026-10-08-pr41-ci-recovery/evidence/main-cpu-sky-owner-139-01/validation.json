@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-main-cpu-browser-139-01",
+  "status": "FAIL",
+  "durationMs": 583984,
+  "artifact": {
+    "schemaVersion": 1,
+    "sourceSha": "53d29c1fae1c4aa77e165abe5b6214fb1f8dccf0",
+    "sourceDigest": "49b149dca64ce8569607eb8f04a07fe5c6761fe6d806003490141ff682c1a68d",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "e9f51798484d7d4bf87dbefe3b00c084031535d23db3526eda4e2518dc858e69",
+    "builtAt": "2026-10-10T18:17:47.157Z"
+  },
+  "productionSourceSha": "b47a6c22defacc99a3090f8584ae5c63b2274cbb",
+  "artifactReuse": "verifyArtifact PASS, HEAD/sourceDigest/lock/all dist bytes unchanged, docs-only spec/evidence outside filtered digest",
+  "diagnosticOnly": true,
+  "performanceEligible": false,
+  "mainCpu": true,
+  "keyboardTiming": true,
+  "nativeTrace": false,
+  "authorityCpu": false,
+  "benchmark": false,
+  "originalInputsTimeoutsPredicatesAssertions": "UNCHANGED",
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "Creative": "PASS",
+    "V1": "PASS",
+    "V2": "FAIL creative catalog original5000ms visibility after resources placement",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "error": [
+    "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('dialog', { name: '创造内容目录' })\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('dialog', { name: '创造内容目录' })\u001b[22m\n"
+  ],
+  "profile": {
+    "status": "COMPLETE",
+    "samples": 46416,
+    "samplingIntervalUs": 10000,
+    "clockAlignment": "NOT_ESTABLISHED; no exact keyup window causal attribution",
+    "countsMeaning": "Observed leaf samples only; not exclusive CPU duration, no nested sums",
+    "topLeafNodes": [
+      {
+        "nodeId": 3,
+        "observedSamples": 10589,
+        "callFrame": {
+          "functionName": "(idle)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1
+        }
+      },
+      {
+        "nodeId": 1599,
+        "observedSamples": 6702,
+        "callFrame": {
+          "functionName": "stamp",
+          "scriptId": "13",
+          "url": "http://127.0.0.1:4273/assets/bootstrap-D67CyQC_.js",
+          "lineNumber": 15,
+          "columnNumber": 147055
+        }
+      },
+      {
+        "nodeId": 2,
+        "observedSamples": 5404,
+        "callFrame": {
+          "functionName": "(program)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1
+        }
+      },
+      {
+        "nodeId": 1604,
+        "observedSamples": 3758,
+        "callFrame": {
+          "functionName": "readableChunk",
+          "scriptId": "13",
+          "url": "http://127.0.0.1:4273/assets/bootstrap-D67CyQC_.js",
+          "lineNumber": 29,
+          "columnNumber": 21916
+        }
+      },
+      {
+        "nodeId": 1606,
+        "observedSamples": 1590,
+        "callFrame": {
+          "functionName": "stamp",
+          "scriptId": "13",
+          "url": "http://127.0.0.1:4273/assets/bootstrap-D67CyQC_.js",
+          "lineNumber": 15,
+          "columnNumber": 147055
+        }
+      },
+      {
+        "nodeId": 467,
+        "observedSamples": 1207,
+        "callFrame": {
+          "functionName": "",
+          "scriptId": "13",
+          "url": "http://127.0.0.1:4273/assets/bootstrap-D67CyQC_.js",
+          "lineNumber": 29,
+          "columnNumber": 31132
+        }
+      },
+      {
+        "nodeId": 4,
+        "observedSamples": 1026,
+        "callFrame": {
+          "functionName": "(garbage collector)",
+          "scriptId": "0",
+          "url": "",
+          "lineNumber": -1,
+          "columnNumber": -1
+        }
+      },
+      {
+        "nodeId": 1611,
+        "observedSamples": 889,
+        "callFrame": {
+          "functionName": "readableChunk",
+          "scriptId": "13",
+          "url": "http://127.0.0.1:4273/assets/bootstrap-D67CyQC_.js",
+          "lineNumber": 29,
+          "columnNumber": 21916
+        }
+      }
+    ],
+    "sourceOwner": "Production bundle exact stamp/readableChunk bodies match WorldSkyLighting and AuthorityCollisionBaselineClient. Ancestor chains reach Sky sample through snapshot onGameplay and per-frame advance.",
+    "conclusion": "Global Sky invalidation is a concrete repeated application work owner. This does not prove input delay cause or product benefit of a future candidate."
+  },
+  "keyboard": {
+    "status": "COMPLETE",
+    "events": 338,
+    "dropped": 0,
+    "handlerDelayP50Ms": 0.7000000178813934,
+    "handlerDelayP95Ms": 41.900000005960464,
+    "handlerDelayMaxMs": 160.59999999403954
+  },
+  "ci419": {
+    "sourceSha": "b47a6c22defacc99a3090f8584ae5c63b2274cbb",
+    "runId": 38074837191,
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38074837191",
+    "status": "FAIL",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": {
+      "failed": 1,
+      "skipped": 1,
+      "passed": 2,
+      "durationMinutes": 24.4,
+      "firstMain": "V1 closed door expected blocked but pending insufficient-progress",
+      "retryMain": "V1 PASS then original900000ms total limit duringV2 route78.5,-.5; routeelapsed2031ms remaining42969, not45sec route timeout",
+      "visual": "PASS1.7min",
+      "ordinaryMinecartNative": "PASS35.6sec",
+      "C4C5": "NOT_RUN"
+    },
+    "preview": "SKIPPED",
+    "derivedRoutes": 19,
+    "derivedPulses": 103,
+    "derivedOperations": 60
+  },
+  "remainingBlockers": [
+    "supported slope real Stone contact unresolved",
+    "complete main journey and product matrix",
+    "exact final CI/review not approved"
+  ],
+  "budget": {
+    "actualUiUtc": "2026-10-10T17:54:00Z",
+    "remainingPercent": 74,
+    "stopPercent": 60,
+    "cloudUiAccess": false
+  },
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-browser-139-01.log",
+      "bytes": 164036,
+      "sha256": "f350b03838c46946cdf296c177dd4c151a050cdfb346677467b9ba31557c4c4a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-browser-attachments-139-01.json",
+      "bytes": 3978797,
+      "sha256": "1c5defc7bfbaa56825d8ed36794933e137f255643ab5036dbd4ecbbaf326a916"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-summary-139-01.json",
+      "bytes": 20451,
+      "sha256": "1e94fcaa35f8680ae360f649ad6ecc063eb466dc6be475b6cc63439373281b99"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-sky-owner-stacks-139-01.json",
+      "bytes": 25556,
+      "sha256": "4841b33e750727edd87d804ac22737faac9dcc19669d1bd3b355116356f82c28"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-browser-139-01.prereg.json",
+      "bytes": 981,
+      "sha256": "ef1db166bb5795cc498bfe6d593e41bc459f7086fce339c29dd1ea0cfdb6ac61"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci419-chromium-raw-139-01.log",
+      "bytes": 414478,
+      "sha256": "6c16d479882c03fa2995964bd4ac31018e87e3eacca8eb781da28f4c4b9ad64a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci419-route-operations-139-01.json",
+      "bytes": 487641,
+      "sha256": "7c3c7afff2558e8996592d9d098c6ce627d6b4f195027f9be85ab961bd5eeac8"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/main-cpu-results-139-01/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+      "bytes": 84192108,
+      "sha256": "a29a3d65058d9879d5a42169807a5489bb21aec17030d8b1049af71a36a728ca"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-main-cpu-browser-139-01/classic.json",
+      "bytes": 177155,
+      "sha256": "cab1c7f80844b8eac7c32384262a4ec7c46fa5f3087ef33e8d483baf6ab28c4d"
+    }
+  ]
+}
