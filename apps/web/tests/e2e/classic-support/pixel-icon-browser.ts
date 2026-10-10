@@ -29,7 +29,10 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       itemId: string;
       size: number;
       differentChannels: number;
+      sourceAADifferentChannels: number;
+      equalContextDifferentChannels: number;
       actualSha256: string;
+      freshActualSha256: string;
       controlSha256: string;
       elements: number;
       colorCount: number;
@@ -63,6 +66,9 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         const control = new Image();
         control.src = reference.url;
         await control.decode();
+        const freshActual = new Image();
+        freshActual.src = image.src;
+        await freshActual.decode();
         const svg = decodeURIComponent(image.src.slice('data:image/svg+xml,'.length));
         const elements = [...svg.matchAll(/<(?:rect|path)\b/g)].length;
         if (elements !== reference.colorCount)
@@ -76,16 +82,32 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
           context.drawImage(image, 0, 0, size, size);
           const after = context.getImageData(0, 0, size, size).data;
           const differentChannels = after.reduce((count, value, index) => count + Number(value !== before[index]), 0);
+          context.clearRect(0, 0, size, size);
+          context.drawImage(freshActual, 0, 0, size, size);
+          const fresh = context.getImageData(0, 0, size, size).data;
+          const sourceAADifferentChannels = fresh.reduce(
+            (count, value, index) => count + Number(value !== after[index]),
+            0,
+          );
+          const equalContextDifferentChannels = fresh.reduce(
+            (count, value, index) => count + Number(value !== before[index]),
+            0,
+          );
           rows.push({
             itemId,
             size,
             differentChannels,
+            sourceAADifferentChannels,
+            equalContextDifferentChannels,
             elements,
             colorCount: reference.colorCount,
             actualSha256: await hash(after),
+            freshActualSha256: await hash(fresh),
             controlSha256: await hash(before),
           });
           if (differentChannels) errors.push(`${itemId}@${size}: ${differentChannels} different RGBA channels`);
+          if (sourceAADifferentChannels)
+            errors.push(`${itemId}@${size}: same-source contexts differ by ${sourceAADifferentChannels} channels`);
         }
       } catch (error) {
         errors.push(`${itemId}: ${String(error)}`);

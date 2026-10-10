@@ -1282,3 +1282,7 @@ CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，�
 20:59UTC149检查点：有效旧RED1FAIL/1PASS，几何/缓存2PASS与4资源文件11PASS=5unique13PASS；旧A/A130icons各37564elements/4315978URLbytes，新B/B各583elements/645222bytes，主次指标实际raw已显式打印，无计时收益声明。Web/Svelte0error0warning+tsc/tools PASS，最终Classic types/四TS lint PASS；初始import0tests及NodeList helper类型失败保留并已修正，不改tsconfig。新build后先原visual一次run150验证RGBA否决项，只有该图像合同通过才启动原无观察器main一次run151，不为错误或NOT_REACHED重复原场景；真实玩法/旧visual结果分别保留。
 
 传统.15PD×120%=.18PD，AI25min×120%=30min，21:20UTC检查点；先做范围unit/types/lint与已有CI预算/选择合同，再正常commit/newbuild。CI422自然运行期间不抢推以取消原CI；其终态后按实际远端与workflow复核正常feature push。原唯一Browser/source从verify到结束冻结，不改CI阈值/采样baseline/生产部署或长期docs baseline。完整产品准出、136/144及最终精确CI/review继续开放，真实预算停止要求优先。
+
+21:06UTC150否决检查点：local23e58b5d正常commit，尚未push；identified build/verify PASS（sourceDigestb0c5d8f2/artifact06d64718/289files/built21:01:15.378Z）。原visual一次FAIL101476ms；旧前段素材/连续帧/单击步骤完成，新图标260case覆盖130项、32像素全相同，16像素105项RGBA不同。cold-stored-sky未到达，不能宣布完整visual通过。原raw/图像/hash保留，main151 NOT_STARTED，候选不准出。
+
+152有界新问题是150对照环境：actualDOM Image与新建reference Image的相同URL A/A是否仍相同。只为现有helper每个case增加同source fresh Image对照及equal-context candidate/control指标，原differentChannels断言、元素budget、所有旧输入/240秒/断言保持；不先假定path绘制或DOM上下文谁有问题，不修改生产候选。新test-only commit/newidentified build后原visual一次run152，实际A/A决定原对照能否归因；失败/负样本原样保留，未确证前不推23、不启main。传统.05PD×120%=.06PD，AI8min×120%=9.6min，21:15UTC检查点；仅Root两TS/spec/evidence私有，无新模型/权限/网络，真实停止要求优先。21:20总修复检查点保持。
