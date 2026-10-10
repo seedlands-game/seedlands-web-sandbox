@@ -1264,3 +1264,21 @@ CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，�
 仅将opt-in native trace duration从20000缩到5000ms；delay360000、16MiB buffer、64MiB stream、全部类别及data loss即FAILED保持。实际146 data loss是RED观察；原既有定向unit先在5000ms检查Tracing.end及metadata时限取得旧实现RED，再改duration，回归原缺category、not-started、读/关闭/启动/完成失败、benchmark冲突与raw保留合同。此项不触碰生产玩法、原main输入/predicate/900000/45000/20000ms验收、CI选择或quality/SwiftShader。
 
 完成必要types/lint/unit后正常feature commit，新identified build/verify冻结身份；原唯一完整main仅nativeTrace开启运行一次pr41-combined-native-browser-147-01。唯一采集轴是5000ms窗口；若NOT_STARTED/data loss/early fail保留负证据，不为取得V2补跑，按actual metadata和步骤报告阶段。诊断非产品/性能A/B准出。Root独占两TS及spec/evidence，无agent/新权限；传统.1PD×120%=.12PD，AI20min×120%=24min，20:59UTC检查点；136/144/完整旅程/最终精确CI及review保持开放。长期docs baseline无需更新：只修既有opt-in诊断，未改产品合同。
+
+20:38UTC147交付/启动检查点：f01f22dce3de3ab4e0a7b17dcfa0fb210b60820b正常feature commit/push完成，5files35PASS/Classic types/lint/hooks PASS，新identified build/verify PASS（sourceDigest071f2a07/artifacta3a0b9a6/289files/builtAt20:36:25.359Z），CI42238084363062运行中。Root启动命令错误使用标题起始锚点，Playwright实际No tests found/EXIT1，没有运行浏览器玩法或采集；保留prereg/log，不将其标作功能或诊断PASS。
+
+148只纠正selector：实际playwright --list --grep 'Classic 生产旅程'明确1test/1file，原唯一classic-runtime.spec.ts:71。新独立runId pr41-combined-native-browser-148-01，仅复用f01已verify的同产物，保持147所有条件及5000ms诊断窗口，不改变源码/输入/断言/超时。147是启动选择失败，不是重复功能采样；148运行时source/HEAD/docs冻结，实际窗口阶段与缺失如实记录，不为拿V2补跑。20:59UTC检查点不变，无模型/权限/生产部署扩张。
+
+20:49UTC148终态：原一次main FAIL413387ms，C0–C3/Creative PASS，V1原水区66,2.5路线跌落，V2/C4/C5未到达。native实际20:44:55.841–20:45:00.908UTC在Creative导航目录，COMPLETE/dataLossOccurred=false，15850311bytes/47913events；147窗口修复真实Chrome采集合同通过，不代表完整主旅程准出。最长SwapBuffers wall1787815us/threadCPU1819us，main HandlePostMessage wall1215673us/threadCPU1042572us；不嵌套相加、不称exclusive GPU耗时。121个实际不同像素SVG请求合计35333rects，122layout frame/121ParseHTML事件；精确resource→document映射尚未建立，证据不能单独证明SVG为全部延迟或跌落原因。
+
+### 像素图标几何等价的元素预算149（20:50UTC预注册）
+
+实际Owner asset-image.ts builtinPixelIcon为每个非透明像素发一个rect。唯一候选轴：相同RGB的互不重叠1×1像素合并到一个SVG path的独立闭合子路径；viewBox、crispEdges、RGB、透明index0、像素坐标、旧缓存、Pack/appearance优先级均保持，不改世界/玩法/质量/输入/原验收时限。不是删除图标或改成低分辨率。Root独占asset-image.ts、owner app unit、package显式CI登记及本spec/evidence，无agent。
+
+受控A/A固定现有全部唯一builtin pixel binding：原URL解码逐像素重建，记录重复请求的SVG元素与字节相等；B在同一工作负载断言逐像素RGB/透明/边界完全等价、元素数等于实际不透明RGB颜色数。新预算测试先在旧实现RED，生产候选后GREEN；主指标为实际SVG元素数量，次指标URL字节，否决任一像素差异/缓存或优先级变化。只宣称结构预算，不宣称帧、输入或主旅程延迟收益。原真实无观察器主旅程与visual由新identified身份验收，结果与未到达项分别记录。
+
+149真实浏览器补充只进入原visual既有打开Creative目录与截图之间：消费实际DOM img.src中的builtin pixel SVG，以原逐像素rect reference在同一Chromium Canvas2D按16/32像素栅格逐RGBA对照，任一不同即FAIL。检查实际压缩元素预算；PNG/blob等Pack/appearance override逐项记录为非本轴，不用它们冒充SVG覆盖。覆盖所有该目录实际pixel SVG并要求超过100项，附件保留每case像素hash及错误；这是图像解码/栅格正确性诊断，不是WebGL或性能采样。不增加第二spec/runner，不改变原输入、240秒visual或任何旧断言；新增helper及窄调用纳入Root独占写路径与types/lint。
+
+20:59UTC149检查点：有效旧RED1FAIL/1PASS，几何/缓存2PASS与4资源文件11PASS=5unique13PASS；旧A/A130icons各37564elements/4315978URLbytes，新B/B各583elements/645222bytes，主次指标实际raw已显式打印，无计时收益声明。Web/Svelte0error0warning+tsc/tools PASS，最终Classic types/四TS lint PASS；初始import0tests及NodeList helper类型失败保留并已修正，不改tsconfig。新build后先原visual一次run150验证RGBA否决项，只有该图像合同通过才启动原无观察器main一次run151，不为错误或NOT_REACHED重复原场景；真实玩法/旧visual结果分别保留。
+
+传统.15PD×120%=.18PD，AI25min×120%=30min，21:20UTC检查点；先做范围unit/types/lint与已有CI预算/选择合同，再正常commit/newbuild。CI422自然运行期间不抢推以取消原CI；其终态后按实际远端与workflow复核正常feature push。原唯一Browser/source从verify到结束冻结，不改CI阈值/采样baseline/生产部署或长期docs baseline。完整产品准出、136/144及最终精确CI/review继续开放，真实预算停止要求优先。
