@@ -1326,3 +1326,15 @@ Root独占原helper/spec/evidence，无agent/权限，Classic types/lint/hooks�
 唯一轴getContext('2d',{willReadFrequently:true})，增加getContextAttributes实际配置回执。旧生产/图像尺寸与style/16&32/first/每条draw顺序、imageSmoothing=false和原different/sourceAA/equivalent/同对象repeat全零断言保持，不warmup、不丢掉first、不改变GPU/WebGL质量。160实际同对象重复是此诊断RED；新test-only commit/build/verify后原visual一次162，检验全部first/repeat稳定性。此API配置不单独证明浏览器backend或GPU性能，只有RGBA/A/A实际结果才准出测量；若仍失败停止此图标优化单元并保持旧生产。
 
 Root独占helper/spec/evidence，无agent/权限/域名扩张；Classic types/lint/hooks适度验证，原主旅程151仍未启动，21:47UTC检查点不变。
+
+21:44UTC162准出检查点：local5e9cada3、build/verify PASS，appbytes仍原a3a0b9a6。原完整visual一次PASS88189ms，130图标260case、16/32px全部首次/sourceAA/等价URL/同对象repeat零差异；原cold stored sky也PASS。willReadFrequently实际配置true，测量基线成立，不宣称engine backend/GPU因果或优化收益。所有负样本保留。
+
+### 有效测量基线下颜色path结构预算163（21:44UTC预注册）
+
+162旧A/A GREEN允许重新检验149的有界单轴候选：原相同RGB单位rect逻辑合并为一个path的独立闭合unit子路径，所有37564像素/RGB/透明/cache/override/坐标/viewBox/crispEdges保持。仍同130bindings，主指标SVG元素37564→实际RGB颜色数583，次指标URLbytes，不宣称任何时长或GPU收益。先新budget unit在旧owner有效RED，恢复该精确候选owner后GREEN与4资源既有回归；不混入rowrect或world/input/quality变化。
+
+Browser测量保留162全部first/repeat/AA/equivalent零断言，新增实际DOM显示宽度（当前34）到原16/32案例，不移除任何原案例；控制同对象repeat同时覆盖这个新增尺寸A/A。控制元素budget按同一候选RGB独立计数，不改变原玩法或视觉阈值/240秒。新commit/build/verify后原visual一次164，严格PASS才原无观察器main151一次。负结果保留，不以默认context的旧无效测量重新归因，164不通过则撤销生产候选。
+
+Root独占原asset-image、既有unit/helper、spec/evidence，无agent/权限。必要13tests/Classic类型/lint/hooks，Web类型复用候选旧已通过且新build仍执行Web类型。21:55UTC检查点，最新远端/工作流正常feature push前复核，未merge/生产部署。完整136/144/矩阵/最终精确CI/review仍开放。
+
+21:46UTC163定向交付：有效旧budget RED1FAIL/1PASS；新5unique13PASS，Classic types/lint PASS，production source树与149相同，Web类型由旧有效输出加新build复验。固定A/A37564元素/4315978bytes，新B/B583元素/645222bytes，尚未browser164/main151或时间性能准出。
