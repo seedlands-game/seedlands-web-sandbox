@@ -21,17 +21,7 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         .join('');
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" shape-rendering="crispEdges">${rectangles}</svg>`;
       const colorCount = new Set(pixels.filter((color) => color !== 0).map((color) => palette[color]!.join(','))).size;
-      const shapeBound = pixels.reduce(
-        (count, color, index) =>
-          count +
-          Number(
-            color !== 0 &&
-              (index % width === 0 ||
-                pixels[index - 1] === 0 ||
-                palette[color]!.join(',') !== palette[pixels[index - 1]!]!.join(',')),
-          ),
-        0,
-      );
+      const shapeBound = pixels.filter((color) => color !== 0).length;
       return [[binding.itemId, { url: `data:image/svg+xml,${encodeURIComponent(svg)}`, colorCount, shapeBound }]];
     }),
   );
@@ -42,6 +32,10 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       differentChannels: number;
       sourceAADifferentChannels: number;
       equalContextDifferentChannels: number;
+      equivalentResourceDifferentChannels: number;
+      sourceIdentityMatchesControl: boolean;
+      domImage: { width: number; height: number; naturalWidth: number; naturalHeight: number; imageRendering: string };
+      freshImage: { width: number; height: number; naturalWidth: number; naturalHeight: number };
       actualSha256: string;
       freshActualSha256: string;
       controlSha256: string;
@@ -81,6 +75,10 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
         const freshActual = new Image();
         freshActual.src = image.src;
         await freshActual.decode();
+        // Same old geometry; different resource URL prevents reuse of the DOM-seeded resource.
+        const equivalentControl = new Image();
+        equivalentControl.src = `${reference.url}%0A`;
+        await equivalentControl.decode();
         const svg = decodeURIComponent(image.src.slice('data:image/svg+xml,'.length));
         const elements = [...svg.matchAll(/<(?:rect|path)\b/g)].length;
         if (elements !== reference.shapeBound)
@@ -105,12 +103,34 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             (count, value, index) => count + Number(value !== before[index]),
             0,
           );
+          context.clearRect(0, 0, size, size);
+          context.drawImage(equivalentControl, 0, 0, size, size);
+          const equivalent = context.getImageData(0, 0, size, size).data;
+          const equivalentResourceDifferentChannels = equivalent.reduce(
+            (count, value, index) => count + Number(value !== after[index]),
+            0,
+          );
           rows.push({
             itemId,
             size,
             differentChannels,
             sourceAADifferentChannels,
             equalContextDifferentChannels,
+            equivalentResourceDifferentChannels,
+            sourceIdentityMatchesControl: image.src === reference.url,
+            domImage: {
+              width: image.width,
+              height: image.height,
+              naturalWidth: image.naturalWidth,
+              naturalHeight: image.naturalHeight,
+              imageRendering: getComputedStyle(image).imageRendering,
+            },
+            freshImage: {
+              width: freshActual.width,
+              height: freshActual.height,
+              naturalWidth: freshActual.naturalWidth,
+              naturalHeight: freshActual.naturalHeight,
+            },
             elements,
             colorCount: reference.colorCount,
             shapeBound: reference.shapeBound,
@@ -119,6 +139,10 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             controlSha256: await hash(before),
           });
           if (differentChannels) errors.push(`${itemId}@${size}: ${differentChannels} different RGBA channels`);
+          if (equivalentResourceDifferentChannels)
+            errors.push(
+              `${itemId}@${size}: equivalent resource differs by ${equivalentResourceDifferentChannels} channels`,
+            );
           if (sourceAADifferentChannels)
             errors.push(`${itemId}@${size}: same-source contexts differ by ${sourceAADifferentChannels} channels`);
         }

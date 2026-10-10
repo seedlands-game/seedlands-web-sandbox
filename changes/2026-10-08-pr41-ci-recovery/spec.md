@@ -1294,3 +1294,11 @@ CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，�
 149 path逻辑像素等价但缩小栅格不等价，撤销该生产分支。新唯一候选轴只把同一行、相邻同RGB的不透明单位rect合并成一条height=1的rect；保留原rect原语、逐行绘制顺序、透明间隔、RGB/边界/viewBox/crispEdges/cache/override，禁止跨行或跨不同颜色合并。仍DOM-free，不引入PNG编译器或canvas平台依赖。
 
 固定149同130图标A/A原37564elements/4315978bytes，新的硬预算为实际行内色段数（按行首、透明到不透明、RGB变化独立计数），逐格展开rect验证全像素。当前未采用path实现先取得新representation contract RED，C后GREEN并打印counter；将元素预算更新为新候选的行段合同，不改变原任何玩法/视觉断言。原260case 16/32逐RGBA零差异与source A/A保持，任何非0拒绝。Root独占原asset-image/既有两个helper与unit/spec/evidence，没有新agent/权限；必要unit/types/lint后commit/newidentified build，原visual一次154，严格通过才启动原main151。失败必须产生新证据后才进入下一候选，21:25UTC检查点；长期docs/CI质量与原资源时限不改。
+
+21:28UTC154终态：local0ff82ec7，新identified build/verify PASS，原visual一次FAIL68347ms；130icons/260case、105个16px不同、32px全同，paper source A/A456channel，cold sky未到达/main151未启动。候选未准出/未push。152与154 fresh候选260个hash全相等，控制260hash也相等，未证实原几何原因；旧结论仅代表候选被测试否决，不能称实际几何缺陷。
+
+### 原资源身份与等价资源A/A155（21:28UTC预注册）
+
+新有界问题：恢复f01原逐像素rect生产owner，验证同sourceDOM/fresh/reference，以及几何完全相同仅尾部换行的另一URL是否获得同16/32px结果。除生产owner精确恢复旧字节外不改玩法/视觉质量，保留当前新增RGBA零差异与sourceAA断言；元素合同回到未优化旧opaque计数，不冒充新硬预算准出。另为freshEquivalentControl记actual DOM与fresh source的natural/CSS尺寸和imageRendering，等价URL任一RGBA非0也FAIL，不能以它替换原比较或容差。
+
+Root独占原3TS/spec/evidence，新unit/Classic types/lint后提交build/verify，原visual一次156，源码从verify冻结到terminal。仅诊断measurementValidity，不是新生产候选或性能样本；基线失效则先纠正对照环境再考虑候选，不盲重试主旅程。原main151保持未启动，21:40UTC检查点；无新agent/权限/网络，不修改原240秒、旧断言或CI口径。
