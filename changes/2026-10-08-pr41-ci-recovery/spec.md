@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## V2失败控制台快照 checkpoint71（预注册）
+
+2026-10-10 00:12UTC，第70组本地commit d9d41f18已完成，尚未push；CI69自然terminal FAIL。真实ZIP传入仍待具体域名授权，现有failure collector已读取同一正式harness.snapshot，却仅输出chunk/trace而丢弃玩家与Authority位置、速度、ground/collision及ACK字段。仅将该次既有读回的窄motion字段加入diagnosticOnly/eligible:false控制台结果；不添加采样、不改输入/状态、超时、断言、质量或产品路径。用实际collector执行取得缺字段RED，覆盖有效snapshot、未启动无harness、snapshot异常时原错误及input诊断保持；必要类型/lint及定向测试后与70一起正常推送，不重复全量headless以凑证据。真实console新字段仍需新head唯一CI runner验证，不宣称V2修复。
+
+Root独占evidence.ts、新failure-motion-diagnostics.test.ts、package/type选择及spec/evidence；无新委派。传统0.1PD×120%=0.12PD、AI12min×120%=14.4min，最晚00:27有界checkpoint。真实额度最新82%（23:09），刷新仍待答，不换算tokens/credits，不扩预算。长期产品docs不更新，既有失败附件仍保留完整snapshot及restoreEvidence；此片仅补控制台可得字段。
+
+00:14本地checkpoint71：有效RED2FAIL/1PASS；四文件17PASS/EXIT0、Classic测试类型、相关lint/paths及工程16项通过。确定性JSON比较证明package仅追加新headless测试、类型集合仅追加同一路径。复用70完整static/113文件704PASS，不凑重复全量检查；真实浏览器字段输出及V2尚未验收。00:12–00:14约2分钟本地实现/验证，保存证据/正常提交推送另记实际墙钟，仍在14.4分钟保守量内。详见evidence/failure-motion-console-checkpoint-71-01.md。
+
 ## 网格失败诊断 checkpoint70（预注册）
 
 2026-10-09 23:48UTC，精确5790da0的CI69仍自然运行，五项非浏览器SUCCESS；不取消、不抢推。CI68重试实际下半门chunk 2,0,0 authority126/render125，trace105已worker完成但仅见两个part提交，没有发布事件。现有日志缺请求优先级/可见屏障及分片总数，不能据此认定producer缺陷或starvation。仅补充现有trace mark可选不可变属性：请求有效priority/排队状态/barrier、accepted result的partsTotal/taskId/revision、实际adapter已提交partsCommitted。trace身份不可被属性覆盖，未完成trace也须导出字段；原发布、取消、丢弃边界不变。以当前导出丢失属性的执行RED先证明诊断缺口，再验证实际scheduler请求和accepted worker结果产生字段。保留原输入、5/900秒、帧预算、优先级算法、门断言、质量与runner；不声称修复门或取得性能收益。

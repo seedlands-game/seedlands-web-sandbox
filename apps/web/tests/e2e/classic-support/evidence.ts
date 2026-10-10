@@ -264,6 +264,18 @@ export async function collectClassicFailureDiagnostics(page: Page) {
         presentation = {
           diagnosticOnly: true,
           eligible: false,
+          motion: current
+            ? {
+                player: current.player,
+                serverPlayerPosition: current.serverPlayerPosition,
+                serverPlayerVelocity: current.serverPlayerVelocity,
+                viewAngles: current.viewAngles,
+                onGround: current.onGround,
+                colliding: current.colliding,
+                worldRevision: current.worldRevision,
+                authority: current.authority,
+              }
+            : null,
           chunks: [...chunks].map(([key, chunk]) => ({
             key,
             authorityRevision: harness?.getChunkRevision?.(...chunk) ?? null,
