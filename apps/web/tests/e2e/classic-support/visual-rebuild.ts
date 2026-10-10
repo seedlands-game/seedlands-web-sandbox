@@ -10,6 +10,7 @@ import { classicBenchmark } from './settings';
 import { lockPointer, snapshot, voxelAt, waitForSnapshot, type ClassicWindow } from './harness';
 import { clickSingleBlockWithRealMouse } from './single-block-click';
 import type { HarnessSnapshot } from '../../../src/app/app-contracts';
+import { verifyStoredSkyAfterReload } from './visual-stored-sky';
 
 const observeSingleClick = (page: Page) =>
   page.evaluate(async () => {
@@ -362,6 +363,7 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
     });
   });
   await capture('sealed-room-occluding-wall');
+  await verifyStoredSkyAfterReload(page, testInfo);
   expect(observed.pageErrors).toEqual([]);
   expect(observed.failedResponses).toEqual([]);
   expect(renderErrors).toEqual([]);

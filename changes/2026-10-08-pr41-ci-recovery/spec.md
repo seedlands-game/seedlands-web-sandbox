@@ -1069,4 +1069,10 @@ CI414第一次main在真实probe键盘之前被原oracle正确拒绝；日志X�
 
 独占harness、route-progress、现有route-aim-contract测试与v1-slice及spec/evidence，复用已结束Luna只读结果，不新增委派。AI20min×120%=24min，14:57UTC检查点；传统.2PD×120%=.24PD。14:25实际产品UI周75%，60停止线，credits/API/比例未知不估算。119源码已保存，冷存档验收需随后与新身份绑定；不盲跑原900秒，不提高原门槛。
 
-14:39UTC120范围检查点：真实stepBody+闭门+实际walkTo旧入口RED1FAIL/19PASS，point模式相关5files50PASS，最终Classic types与范围lint PASS；原harness501行FAIL已通过把同一arrival谓词归属既有route-progress处理，没有提高500上限。默认crossing保持（新测试同一墙边case直接验证无输入默认越线，再point实际退回），门前1米/.06/.08/80ms及原oracle/时限不变。新door-point-120-01证据保留条件几何推断边界；原main/远端CI尚未验证，retry scheduled navigation及C4原因仍未确认。实际14:25周75%，60停止线保持。
+14:37UTC120范围检查点：真实stepBody+闭门+实际walkTo旧入口RED1FAIL/19PASS，point模式相关5files50PASS，最终Classic types与范围lint PASS；原harness501行FAIL已通过把同一arrival谓词归属既有route-progress处理，没有提高500上限。默认crossing保持（新测试同一墙边case直接验证无输入默认越线，再point实际退回），门前1米/.06/.08/80ms及原oracle/时限不变。新door-point-120-01证据保留条件几何推断边界；原main/远端CI尚未验证，retry scheduled navigation及C4原因仍未确认。实际14:25周75%，60停止线保持。
+
+### 冷存档Sky来源121（14:38UTC预注册）
+
+在原唯一visual用例结束前追加当前生产保存/重新进入同seed世界的Sky只读验收，不新开spec/旁路或改变240秒、既有33/66像素/场景/真实单击断言。当前已证实119非resident持久payload缺口修复；设置可验证opaque屋顶[0,226,0]（cy7超过当前startup驻留层），正式world edit后flushSave，记录column-source/key/revision与world identity，再从原startClassicWorld真实UI进入同存档。必须再次观察同世界、精确row revision、resident false/client canonical revision null，以及目标0,1,0 Sky ready；只读column inspection不能加载屋顶，原consumer从persistence Worker读取证明后仍非resident。失败保留，不扩大20秒Sky时限或让unknown变亮；截图只补场景观察，ready不冒充遮挡像素矩阵。
+
+Root独占新visual-stored-sky helper/原visual窄调用及spec/evidence；复用119有效旧生产入口RED，冷Browser本项没有伪造旧产物RED。代码类型/lint/collector检查后冻结全部源码、正常提交、identified build并原visual/native局部验收；当前新door setup需要最终main远端CI，避免同时重复本地900秒。AI20分钟×120%=24分钟，15:02UTC检查点；传统.2PD×120%=.24PD，实际14:25周75%，60停止线，费率/分母未知不换算。无新模型、权限、生产部署，单组通过不关闭原ledger117。
