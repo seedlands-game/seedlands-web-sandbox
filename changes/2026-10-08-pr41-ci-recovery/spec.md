@@ -786,3 +786,15 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 03:37UTC补判别联合/string守卫后的Classic类型检查80-03 exit0；80-02日志无错误但上次工具会话退出状态不可恢复，未将其单独声称PASS。只为取得丢失的退出证据执行同一静态检查，非浏览器重试。下一步提交并构建精确SHA，按03:38检查点继续有界6分钟×120%=7.2分钟至03:45；传统0.05PD×120%=0.06PD，周额度仍以03:09实际81%为最新、停止线约60%。
 
 03:40UTC checkpoint80：5eee6e15/14285c69原生普通矿车45.0s PASS，runner48.9s，canonical NON_MAIN；真实部署/骑乘/W行驶x2.5→9/停稳/下车/保存重开与旧stale新current、位置和rider断言均PASS。完整HTML内嵌raw JSON及两张PNG已核验，PASS不保留trace；恢复截图不能证明模型可见，未宣称视觉运动/照明/性能。全stdlib与Headless原超时保留，PR仍不可合入。远端main/feature未变，reviews/threads空、Draft/无冲突；当前授权范围内正常推feature并等待最终SHA CI，生产main工作流不触发。后续主旅程失败诊断有界AI15分钟×120%=18分钟，传统0.1PD×120%=0.12PD，约03:59 checkpoint；03:09实际81%为最新周额度。
+
+## 出生路径区块列内邻树复用 checkpoint82（性能候选预注册）
+
+04:04UTC，当前778811f6 CI80五非浏览器SUCCESS/Chromium未结束，不抢推/取消。只读canonical源码fixture计数20generate/20unique，排除重复chunk假设；单次CPU诊断queryMacro自身41%/makeChunk包含79.9%，仅diagnosticOnly，不能冒充性能或浏览器根因。当前C0原10秒FAIL为实际产品RED观察，启动worker阶段8.156秒；下一候选只触碰已观察的出生区块生成热点。
+
+固定A为778811f6的voxel/chunk-generation/tree-generation三个原始文件，独立私有保存原字节及仅改相对import的可执行control，其他依赖和锁不变；不拷贝历史 evidence。B只在makeChunk每个x/z列中惰性收集原顺序49邻树anchor一次，每个y按原treeVoxelAtOffset查询；点采样默认路径、地下/水/dungeon/植被顺序、generator2–11、seed、完整体素输出及edits次序不变。不缓存跨chunk/世界/版本，不添加合法topY或unknown=Air，也不改C0/门/900秒/质量/输入/帧预算。
+
+首测预约性能窗口中的固定20chunk batch（seed2726385568/g11、81观察的keys），先一轮预热再5对交错A/A，原始输入/输出摘要/样本全部保留。A/A两组median相对差须≤15%，否则停止优化并记录无有效收益证据。随后A/B 5对交错且倒置顺序，primary=batch生成median至少20%下降，p95不得回归>10%，所有chunk完整bytes一致；内存和候选临时数组/闭包数量另记，不能用SoA或CPU诊断冒充整帧收益。功能对照覆盖种子/负坐标/所有gen2–11/高空与地下/跨边界树/edits。A/A或否决项失败撤候选，不提高噪声线。此独立batch不证明cold worker、浏览器C0或whole-frame；若采用仍须生产startup与组合浏览器/整帧A/B，原整PR阻塞保持。
+
+传统0.2PD×120%=0.24PD，AI20分钟×120%=24分钟，04:28检查点。credits/费率/API等价及周分母不可读，不换算；周额度最新03:09实际81%，03:38刷新待答、原60%停止线。Root独占三生产文件、相关真实等值测试与本spec/新独立输出；Luna Task139已结束无新实现委派。候选空间每列至多49个anchor、1024列每chunk，惰性只在above-ground树分支使用；实际数量与bytes待测，现阶段不保留未测优化结论。
+
+04:23UTC checkpoint82：最终源码范围lint/格式、完整类型及最终stdlib范围类型、路径lint、五冻结证据字节检查PASS；全stdlib167files1211tests PASS，完整Headless128files795tests PASS。A/A相对差0.494%，原15%线保持；第一轮AB89.750%与静态简化后的最终字节AB91.114%改善均保存原始样本/绑定字节，20chunk全摘要一致。两轮control median发生变化，不能拼样本或外推产品收益。内部列缓存最多49anchor、1024列/chunk，原65536B输出/传输不变；对象/闭包实际字节NOT_COLLECTED。新evidence/tree-column-micro-candidate-82-01明确仅warmNode分项候选；生产startup/矿车reload/组合Browser及whole-frame门禁仍待完成。下一步仅本地冻结candidate source供identified artifact验证，未采用/未推送/不可合入，原CI80终态ChromiumFAIL保留。长期docs不变：无新owner、协议或持久化语义。周额度最新03:09实际81%，04:18请求更新待答，约60%停止线保持；仍按04:28 checkpoint。
