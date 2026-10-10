@@ -1236,3 +1236,31 @@ Root独占scene/surface-lighting.ts（可选readonly batch type）、world-surfa
 ### 冻结后原无观察器完整主旅程143（19:40UTC预注册）
 
 142有界源码及141/142新证据正常feature commit/push后，保留旧f01 identified dist到独立私有路径，新pnpm build一次并verifyArtifact全bytes。只运行原唯一完整C0–C5主旅程一次，runId pr41-model-world-batch-browser-143-01，所有keyboard/mainCPU/AuthorityCPU/nativeTrace/benchmark为0，原SwiftShader/input/20/45/90/900sec/predicate/assertions保持，无额外retry。冻结HEAD/source/docs直到Browser结束；若失败记录实际阶段/trace/source不盲重复，无完整mainPASS不宣布可合入。Root独占spec/evidence/private model-world-batch-*143-01，不派agent。传统.1PD×120%=.12PD，AI20min×120%=24min，20:04UTC检查点；UI18:56实际74%/4d8h，约60停止线，19:56请求实际读数，不以额度更新增加验证。136/full矩阵仍开放，无合并/auto-merge/main/生产部署，无新权限或长期baseline变更。
+
+19:59UTC143终态检查点：source21c0739e identifiedbuild/verify PASS（sourceDigestd7883734/artifacta3a0b9a6/289files/builtAt19:40:22.394Z），原一次无观察器main FAIL，C0–C3/Creative/V1 PASS，V2石料90.5,2.5 pickup原global900000ms截断，C4/C5未到达。result928510ms含cleanup，最后route31527ms仍剩13473ms，非45sec超时；次20sec settle与After Hooks重叠（After Hooks19:55:55.178Z，28.473s），不能把finalAuthority paused/ACK停止猜为input defect。实际trace末帧已看，woodpick57/60/cobble3/sticks5/sword/planks14，没有全装备。原日志/7实际JSON attachments/39route100ops/trace/receipt保留public model-world-main-timeout-143-01；不重跑盼绿，142只查询预算PASS不宣称端到端性能。143手工19:40标题为近似标签；注册在19:38commit前，actual privateprereg19:39:24.984Z，执行19:40:55.101Z，按实际时间纠正，不改历史。
+
+144现有Luna只读核实CPU/descriptor普通Rail都固定水平[1,.08,1]薄盒、不读取neighbor选择variant，entitypresenter仅yaw；source21c0739e，私有rail-presentation-owner-144-luna-01.md。无tests/build/Browser/source写，与136实际Stone collider独立，configvariants不冒充mesh/drive。Root未选择physical candidate。CI421五非Browser SUCCESS/Chromium19:58自然运行，不取消/抢推；预算授权和停止条件保持，真实额度仅记私有恢复记录。
+
+### 当前组合生产栈归属诊断145（19:59UTC预注册）
+
+139profile所见Model→全column stamp已由140/142两条独立硬预算修复，143当前原main仍FAIL；旧139profile不能回答新source21c0739e的剩余主线程工作归属。新诊断只回答当前组合V2过程中真实JS leaf及ancestor Owner，非重复盼main变绿，不将functionalduration作为A/B性能、不归因GPU/单事件时钟。保持source/HEAD21、现有143已verified productionartifact，docs outside sourcefilter；verifyArtifact再次通过才复用，不重建。原唯一完整main一次，runId pr41-combined-main-cpu-browser-145-01，只开启既有mainCPU10ms，keyboard/AuthorityCPU/nativeTrace/benchmark全0；原输入/quality/SwiftShader/20/45/90/900sec/predicate/assertions保持，无extra retry/注入。只对实际采样到的阶段归属；早失败NOT_REACHED/采样NOT_STARTED如实，不补跑。profile rawnode/callframe/sample/timeDelta与exactbundle绑定，只统计leaf observed count、不嵌套相加或冒充exclusiveCPU时间；DOM精确时钟桥未建立，不作keyup因果。
+
+Root独占spec/public及私有combined-main-cpu-*145-01，源代码/HEAD/docs从verify到runner结束冻结，不派新agent/模型，不增加权限/改变CI/长期baseline。后续候选只由新Owner证据建立原实现反例后选择，禁止猜修输入或回收API语义。传统.1PD×120%=.12PD，AI20min×120%=24min，20:24UTC检查点；真实额度仅留私有恢复记录，授权预算停止条件保持，收到停止或触线立即保存停，不新增额度验证。PR仍Draft，136/144/fullmatrix/finalCI/review开放，无merge/automerge/main/production。
+
+20:21UTC145有界检查点：source21c0739e，143同产物verify PASS复用，无rebuild。原一次mainCPU10ms/其他observer0诊断FAIL，global900000ms在石料86.5,-.5接近期间截断，result923801ms含cleanup，最后route4743ms非45sec超时；C0–C3/Creative/V1 PASS，C4/C5未到达。70034actualleaf samples，idle29373/program17769；剩余可归属JS为Workeronmessage receive wrapper1891、HUD JSON比较735、取消Skyproof/generator/reader471/400/453，stamp198/readableChunk840为互斥leaf总数。actualframe/body/bundle/source祖先链核实，不嵌套计时、不称exclusiveCPU/GPU因果。旧139flags/阶段/时长不同，不能作时延A/B；未确认剩余JS端到端瓶颈，不猜修UI比较或cache。public combined-main-cpu-owner-145-01；一次结束不重跑。
+
+CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，两次main原900000ms截断，首轮craftArmor/placeOneEach pointer，visual1.5m/native33.2sPASS/previewSKIP。完整decodedraw2241696bytes SHA7b450ef4b2b029a82b272cb2af06d18dd4017fe4b0e3792c1d6635883c6746e8，114routes260ops，原负结果保留。PR正文已如实更新工程进展。新公开证据仅保留工程证据，个人额度真实读数仅私有，不改sealedhistory。
+
+### 当前原生任务窗口归属146（20:21UTC预注册）
+
+新问题是145 currentJS叶多数idle/program未归属等待的原生任务分布；不将这两个category直接称GPU耗时或原因，不继续猜修JS函数。保持HEAD/source21及同143productionartifact，docs outside sourcefilter，verifyArtifact通过才复用、不重复build。原唯一完整main一次，runId pr41-combined-native-browser-146-01，仅既有nativeTrace=1，mainCPU/AuthorityCPU/keyboard/benchmark0，原SwiftShader/input/20/45/90/900sec/predicate/assertions不变。完全保留既有nativeTrace延后360000ms、窗口20000ms、16MiBbuffer/64MiBstream及原categories，不改采样器或强制V2；若窗口落V1/其它阶段如实标注，早失败NOT_STARTED/NOT_REACHED，不为拿到V2补跑。
+
+只由actualtrace的pid/tid/process/thread/name/timestamp/duration/metadata归属native task、render/IPC/GPU-service可观察边界；CPU任务duration不等于deviceexecution，未有clockbridge不作单DOM事件因果，不嵌套加sum、无性能A/B/准出声明。诊断main结果非普通产品验收。Root独占spec/public/private combined-native-*146-01，不派agent或新model，无新权限或networkdomain。原source/HEAD/docs从verify到runner结束冻结；后续fix须实际Owner反例，不遮断言/加timeout。传统.1PD×120%=.12PD，AI20min×120%=24min，20:45UTC检查点；既有授权预算停止条件保持，真实额度仅私有，收到停止立即保存停。136/144/fullmatrix/finalCI/review开放，无merge/automerge/main/production/长期baseline修改。
+
+20:34UTC146终态：一次原main FAIL426843ms，C0–C3/Creative PASS，V1闭门探针pending/no-observations，V2/C4/C5未到达。native实际20:28:03.333–20:28:23.366UTC窗口在V1，38711768bytes/141984个保留event，metadata FAILED/dataLossOccurred=true；原检查正确拒绝完整归属结论。丢失trace中个别CrGpuMain SwapBuffers任务可见，但不能恢复缺失事件、推导完整工作分布或宣称device执行/产品GPU根因。保留raw/结果/trace/receipt，不相同条件补跑。
+
+### 原生诊断窗口有界修复147（20:35UTC预注册）
+
+仅将opt-in native trace duration从20000缩到5000ms；delay360000、16MiB buffer、64MiB stream、全部类别及data loss即FAILED保持。实际146 data loss是RED观察；原既有定向unit先在5000ms检查Tracing.end及metadata时限取得旧实现RED，再改duration，回归原缺category、not-started、读/关闭/启动/完成失败、benchmark冲突与raw保留合同。此项不触碰生产玩法、原main输入/predicate/900000/45000/20000ms验收、CI选择或quality/SwiftShader。
+
+完成必要types/lint/unit后正常feature commit，新identified build/verify冻结身份；原唯一完整main仅nativeTrace开启运行一次pr41-combined-native-browser-147-01。唯一采集轴是5000ms窗口；若NOT_STARTED/data loss/early fail保留负证据，不为取得V2补跑，按actual metadata和步骤报告阶段。诊断非产品/性能A/B准出。Root独占两TS及spec/evidence，无agent/新权限；传统.1PD×120%=.12PD，AI20min×120%=24min，20:59UTC检查点；136/144/完整旅程/最终精确CI及review保持开放。长期docs baseline无需更新：只修既有opt-in诊断，未改产品合同。

@@ -1,0 +1,63 @@
+{
+  "runId": "pr41-combined-native-browser-146-01",
+  "sourceSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+  "functionalStatus": "FAIL",
+  "durationMs": 426843,
+  "passed": ["C0", "C1", "C2", "C3", "Creative"],
+  "failed": "V1 closed-door collision probe pending/no-observations",
+  "notReached": ["V2", "C4", "C5"],
+  "nativeMetadata": {
+    "status": "FAILED",
+    "diagnosticOnly": true,
+    "eligible": false,
+    "delayMs": 360000,
+    "durationMs": 20000,
+    "traceBufferSizeInKb": 16384,
+    "maxBytes": 67108864,
+    "startedAt": "2026-10-10T20:28:03.333Z",
+    "endedAt": "2026-10-10T20:28:23.366Z",
+    "captureElapsedMs": 20032.89009,
+    "dataLossOccurred": true,
+    "bytes": 38711768,
+    "errors": ["Native trace reported data loss."]
+  },
+  "actualCaptureStage": "V1",
+  "rawEventCount": 141984,
+  "completeOwnershipConclusion": "BLOCKED_DATA_LOSS",
+  "productAcceptance": "FAIL",
+  "performanceConclusion": "NOT_ELIGIBLE",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-browser-146-01.log",
+      "bytes": 83950,
+      "sha256": "162059b93f838274b85a6bdc693530995949118c17fa545b04acbb0dde665cab"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-browser-attachments-146-01.json",
+      "bytes": 65961936,
+      "sha256": "c48a22f43550908ac6904de9725d16520203cc9ba371ad0439aa2afd7896033b"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-browser-result-146-01.json",
+      "bytes": 1533290,
+      "sha256": "fda8428f015f546fcc26350a82e8045e8428c9de1054be33270188021310b23a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-route-operations-146-01.json",
+      "bytes": 64759,
+      "sha256": "0981776c768b50a63659776c45e4d7787d7f2ef1cbcdd287cfc64d6a6844d231"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-verify-146-01.json",
+      "bytes": 386,
+      "sha256": "f5beec390c2eb641d85f0b07663f6be0dc37328856d12b0d05f29eca525fad0d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-native-browser-146-01.prereg.json",
+      "bytes": 630,
+      "sha256": "72676d699c97f4546fe8e40b6e5ff42addbae4c207481ed3ecf3de1e197b4a17"
+    }
+  ],
+  "sameConditionRetry": false,
+  "longTermDocsBaseline": "unchanged; no product or architecture decision"
+}

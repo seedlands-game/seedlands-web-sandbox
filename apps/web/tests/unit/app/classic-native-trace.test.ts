@@ -144,7 +144,8 @@ describe('optional Classic native trace', () => {
         traceConfig: expect.objectContaining({ recordMode: 'recordUntilFull', traceBufferSizeInKb: 16_384 }),
       }),
     );
-    await vi.advanceTimersByTimeAsync(20_000);
+    await vi.advanceTimersByTimeAsync(5_000);
+    expect(run.session.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
     await stopClassicNativeTrace(run.page, run.info);
     await stopClassicNativeTrace(run.page, run.info);
     expect(run.session.send.mock.calls.filter(([method]) => method === 'Tracing.end')).toHaveLength(1);
@@ -162,6 +163,7 @@ describe('optional Classic native trace', () => {
       runId: 'browser-run-86',
       sourceSha: 'source-sha-86',
       dataLossOccurred: false,
+      durationMs: 5_000,
     });
   });
 
