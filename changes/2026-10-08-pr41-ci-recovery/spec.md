@@ -964,3 +964,19 @@ Browser公开可选端口经原worker队列发送，结果校验坐标、身份�
 08:12UTC checkpoint99/101：真实保存记录与主键查询RED4FAIL/15PASS，GREEN2files29PASS；最终6files75PASS。首个手写fixture GREEN不覆盖真实producer，旧错误签名/provider及507/504行lint/编译失败全部保留。真实Classic收集暴露新Web夹具类型盲区，按ES2022与原FrozenSnapshot身份补齐后第三轮types PASS，75回归及范围lint PASS；收集RED1/2→GREEN3，原全部旅程/timeout/断言保留。99约19min、101约4min，最后CI选择/冻结校验及提交后记录；08:10实际产品UI查询已发送而未回复，不假设额度。新query只是point-in-time目录，Matched IDB get仍克隆stored record，Memory/Switchable、旧客户端/跨tab新鲜度、Authority dirty/resident与Sky/GPU未闭合；不宣称性能、实际Browser query或PR可合入。
 
 08:15UTC最终CI选择17PASS、格式/路径/冻结5份PASS，99/101共同提交以保持新端口和保护收集一致；101墙钟约7min略超过预估6min，失败和类型盲区产生了新证据，没有全量盲重测或扩用户预算。唯一既有Luna/medium Task144只读此次冻结query commit（从main fba取规则）做一次有界风险审阅，独占私有task144-column-*报告路径；禁止仓库写/测试/Browser/build/远端/网络/.env/再委派，只关注cursor完整性、point-in-time/异步fence、身份与误报完整。AI5min×120%=6min、08:21UTC回报，传统0.05PD×120%=0.06PD，模型服务元数据仍未核实；整个PR共享预算且08:10真实额度回复未到。不是完整PR批准，不追加重复多阶段review。
+
+### Memory/Switchable列目录端口 checkpoint103（预注册）
+
+08:19UTC冻结a00eb730；Task144有限审阅未发现确认P0/P1/P2，不是整PR批准。Memory在原snapshot Map同owner维护按canonical key的列key派生索引和安全单调目录版本，非空普通/冻结保存仅在原copies全部成功后一起更新；查询最多128项，只给同cx/cz所有合法cy的key/revision，损坏数据unknown。索引由唯一commitSnapshots维护，不引入worldgen/渲染/第二世界truth，不扫描整个Memory存档、不宣称速度收益。原load clone/写记录及失败语义保留，空写不推进目录。查询期间写入使旧观察superseded，返回metadata detached。
+
+SwitchableAuthorityPersistence从当前delegate转发可选端口；无能力返回source-unavailable而非空完整列。replace即使同delegate对象及其转发的chunk/frozen save均换fence，旧异步回复unknown，不复活旧world来源。World epoch/dirty/resident与实际Sky仍未接线，目录point-in-time不保证永久缓存有效。
+
+先真实Memory/Switchable类测试RED，再空/正负高cy/跨列/覆盖键/不消费load或泄漏voxel/普通及冻结写版本/clone失败/坏key/128超限/异步写/替换同对象/无能力反例GREEN；按纯Stdlib owner及Web现有restore范围核验，给新Web unit登记原CI/类型，Stdlib tests由既有扫描收集。Root独占Memory、Switchable、新tests/CI收集/spec/code-map；不再委派，不改Sky/shader/世界高度/生产输入。AI12min×120%=14.4min，08:34检查点；传统0.12PD×120%=0.144PD。最新真实07:10周79%，08:10请求待答，约60%线保持；未知credits不换算，不提前推送或重跑CI409。
+
+### Memory/Switchable103 结果与 CI409 诊断104预注册
+
+08:30UTC：Memory实际RED9FAIL→GREEN10PASS（含目录计数安全上限）；Switchable首次RED夹具相对路径错误，纠正后实际缺方法RED6FAIL→GREEN6PASS，错误日志保留。真实冻结写、空冻结、失败冻结、同对象替换和异步回复均覆盖。最终 stdlib169files/1235PASS，Web列查询/版本/恢复/冻结6files/61PASS，实际Classic与根stdlib测试类型、stdlib生产类型、范围ESLint、CI选择17PASS。newWeb unit加入原headless/types名单，既有行为与浏览器验收范围保留。目录入口完成，Sky和world epoch/resident/dirty组合仍待实现，整PR不可合入；源码与证据同提交，最终SHA CI未运行。实际08:26周剩78%，约60停止线不变。
+
+CI409于08:26自然结束：dde3c593 build/deterministic/architecture/static成功，headless795/1FAIL（100本地已修，远端尚未验证），Chromium主旅程首次与retry均900000ms超时；visual1.7m/native42.7sPASS、modular分支SKIP、previewSKIP。完整新V2原始日志保留，190 operation/74route只是诊断，不是性能准入或因果证明。
+
+104于08:30UTC预注册：现有唯一Luna Task145仅只读精确dde3源与CI409日志，Root独占实现，Luna输出独占private task145-ci409-v2-diagnosis-01.md。目标定位模式切换/重复等待或80ms真实输入与ACK/投影迟到的问题；区别确认与推断，6分钟上限到08:36UTC，不运行测试/Browser/build，不改源或网络，不调高900000ms、不降低断言。Root先保存103并分析同日志，失败重试需新证据；未确认原因不实施猜测。

@@ -1,14 +1,24 @@
 import type { AuthorityPersistence } from '@seedlands/stdlib/server/authority/authority-runtime-options';
-import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
+import type { ChunkColumnDirectory, ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
 import type { GameplaySnapshot } from '@seedlands/stdlib/server/gameplay/gameplay-runtime';
 import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 
 /** Keeps an already validated runtime alive while its durable backing store is atomically replaced. */
 export class SwitchableAuthorityPersistence implements AuthorityPersistence {
+  private directoryFence = Symbol();
   constructor(private delegate: AuthorityPersistence) {}
 
   replace(delegate: AuthorityPersistence): void {
+    this.directoryFence = Symbol();
     this.delegate = delegate;
+  }
+
+  async inspectColumnDirectory(cx: number, cz: number): Promise<ChunkColumnDirectory> {
+    if (!Number.isSafeInteger(cx) || !Number.isSafeInteger(cz)) throw new RangeError('Column coordinates are invalid.');
+    const fence = this.directoryFence;
+    const result = await (this.delegate.inspectColumnDirectory?.(cx, cz) ??
+      Promise.resolve<ChunkColumnDirectory>({ status: 'unknown', reason: 'source-unavailable' }));
+    return fence === this.directoryFence ? result : { status: 'unknown', reason: 'superseded' };
   }
 
   loadSnapshot(key: string) {
@@ -16,6 +26,7 @@ export class SwitchableAuthorityPersistence implements AuthorityPersistence {
   }
 
   saveSnapshots(snapshots: readonly ChunkSnapshot[]) {
+    this.directoryFence = Symbol();
     return this.delegate.saveSnapshots(snapshots);
   }
 
@@ -48,6 +59,7 @@ export class SwitchableAuthorityPersistence implements AuthorityPersistence {
   }
 
   saveFrozenSnapshot(snapshot: FrozenGameSaveSnapshot) {
+    this.directoryFence = Symbol();
     return this.delegate.saveFrozenSnapshot?.(snapshot) ?? Promise.resolve();
   }
 
