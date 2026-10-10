@@ -41,6 +41,11 @@ const routeSnapshot = (
   storageBytes: 0,
   runtime: 'authority-worker',
   workers: { authority: 1, logic: 0, persistence: 0, fluid: 0, general: 0 },
+  // Synthetic post-release protocol observation; not native browser evidence.
+  nativeMovementInput: {
+    epoch: 'route-fixture',
+    release: { code: 'KeyS', sequence: acknowledgedInputSequence, neutral: true },
+  },
   authority: {
     physicsTick,
     acknowledgedInputSequence,

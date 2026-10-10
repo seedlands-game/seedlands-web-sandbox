@@ -54,6 +54,11 @@ function mousePage() {
           viewAngles: [yaw, -29.39],
           onGround: true,
           colliding: false,
+          // Synthetic post-release protocol observation.
+          nativeMovementInput: {
+            epoch: 'route-fixture',
+            release: { code: 'KeyW', sequence: arrived ? 2 : 1, neutral: true },
+          },
           authority: { acknowledgedInputSequence: arrived ? 2 : 1 },
         };
       }

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { reachedRouteTarget, routeInputSettled, routePulseDurationMs } from './route-progress';
+import {
+  reachedRouteTarget,
+  routeInputSettled,
+  routePulseDurationMs,
+  routePulseSettledPredicate,
+} from './route-progress';
 import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
 
 const floor: PhysicsWorld = {
@@ -33,6 +38,40 @@ function pulse(body: BodyState, milliseconds: number, physicsHz: number): BodySt
 }
 
 describe('Classic real-input route progress', () => {
+  it('requires a fresh neutral native release in the same epoch and its consumed sequence', () => {
+    const before = {
+      authority: { acknowledgedInputSequence: 10 },
+      nativeMovementInput: { epoch: 'session-a', release: { code: 'KeyW', sequence: 10, neutral: true } },
+    };
+    const released = {
+      ...before,
+      authority: { acknowledgedInputSequence: 12 },
+      nativeMovementInput: { epoch: 'session-a', release: { code: 'KeyW', sequence: 12, neutral: true } },
+      player: [0, 0, 0] as const,
+      serverPlayerPosition: [0, 0, 0] as const,
+      serverPlayerVelocity: [0, 0, 0] as const,
+      onGround: true,
+      colliding: false,
+    };
+    const settled = routePulseSettledPredicate(before);
+    expect(settled(released)).toBe(true);
+    expect(settled({ ...released, nativeMovementInput: before.nativeMovementInput })).toBe(false);
+    expect(settled({ ...released, nativeMovementInput: { ...released.nativeMovementInput, epoch: 'session-b' } })).toBe(
+      false,
+    );
+    expect(
+      settled({
+        ...released,
+        nativeMovementInput: {
+          ...released.nativeMovementInput,
+          release: { code: 'KeyW', sequence: 12, neutral: false },
+        },
+      }),
+    ).toBe(false);
+    expect(settled({ ...released, authority: { acknowledgedInputSequence: 11 } })).toBe(false);
+    expect(settled({ ...released, nativeMovementInput: null })).toBe(false);
+    expect(routePulseSettledPredicate({ authority: before.authority })(released)).toBe(false);
+  });
   it('Browser06固定80ms脉冲越过原窄走廊，反向修正仍越窗', () => {
     let body: BodyState = { position: failedPosition, velocity: { x: 0, y: 0, z: 0 } };
     for (let attempt = 0; attempt < 4; attempt++) {

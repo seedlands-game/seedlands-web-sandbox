@@ -2,6 +2,7 @@ import type { Page } from '@playwright/test';
 import { vi } from 'vitest';
 import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
 import type { ClassicSnapshot } from './harness';
+import type { NativeMovementInput } from '../../../src/app/player/native-movement-input';
 
 export const EQUIPMENT_ROUTE_TARGET = [78.5, -0.5] as const;
 export const EQUIPMENT_ROUTE_LONG_START = [98.5, 32.6, -0.5] as const;
@@ -35,6 +36,8 @@ export function makeEquipmentRoutePhysicsModel(
   let key: string | null = null;
   let physicsTick = 0;
   let acknowledgedInputSequence = 100;
+  // Synthetic release is recorded only by the modeled keyboard.up transition.
+  let release: NativeMovementInput['release'] = null;
   const keyDowns: string[] = [];
   const keyUps: string[] = [];
   const pulseDurations: number[] = [];
@@ -77,6 +80,7 @@ export function makeEquipmentRoutePhysicsModel(
       storageBytes: 0,
       runtime: 'authority-worker' as const,
       workers: { authority: 1, logic: 0, persistence: 0, fluid: 0, general: 0 },
+      nativeMovementInput: { epoch: 'route-physics-fixture', release },
       authority: {
         physicsTick,
         acknowledgedInputSequence,
@@ -136,6 +140,7 @@ export function makeEquipmentRoutePhysicsModel(
       pulseEndPositions.push([state.position.x, state.position.y, state.position.z]);
     }
     acknowledgedInputSequence += 1;
+    release = { code: nextKey, sequence: acknowledgedInputSequence, neutral: true };
     return true;
   };
   const delayReply = async () => {

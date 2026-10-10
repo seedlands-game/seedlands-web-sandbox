@@ -12,6 +12,7 @@ export type ClassicSnapshot = Readonly<{
   onGround: boolean;
   colliding: boolean;
   interactionAttempts: number;
+  nativeMovementInput?: import('../../../src/app/player/native-movement-input').NativeMovementInput | null;
   mutationCount: number;
   worldRevision: number;
   remeshSchedulingCount: number;

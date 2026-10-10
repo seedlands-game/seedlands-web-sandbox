@@ -133,6 +133,8 @@ const routeSnapshot = (player: Point, yaw: number, tick: number, ack: number): C
     onGround: true,
     colliding: false,
     interactionAttempts: 1,
+    // Synthetic post-release protocol observation; not native browser evidence.
+    nativeMovementInput: { epoch: 'route-fixture', release: { code: 'KeyS', sequence: ack, neutral: true } },
     authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
   }) as unknown as ClassicSnapshot;
 
