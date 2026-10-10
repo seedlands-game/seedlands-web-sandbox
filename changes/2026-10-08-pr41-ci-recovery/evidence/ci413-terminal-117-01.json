@@ -1,0 +1,93 @@
+{
+  "headSha": "cdd6e1fb130c3feeac2ee40176826d98254e99e2",
+  "runId": 38053557360,
+  "runNumber": 413,
+  "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38053557360",
+  "status": "completed",
+  "conclusion": "failure",
+  "nonBrowserJobs": "all five SUCCESS",
+  "chromium": {
+    "main": "both FAIL in C4 outbound to208.5,0.5 after V2 returned",
+    "first": "original900000ms total timeout; outbound79.375s interrupted",
+    "retry": "original90000ms route exceeded,91305ms observed",
+    "visual": "PASS1.2m",
+    "native": "PASS28.1s",
+    "modular": "SKIP",
+    "preview": "SKIP"
+  },
+  "c4": [
+    {
+      "label": "C4-outbound",
+      "target": [208.5, 0.5],
+      "status": "threw",
+      "elapsedMs": 79375,
+      "timeoutMs": 90000,
+      "pulseCount": 69,
+      "settledPulseCount": 68,
+      "firstBefore": {
+        "player": [78.49996948242188, 32.599998474121094, -1.489924669265747],
+        "authorityPosition": [78.49997190094145, 32.6, -1.489924662755643],
+        "velocity": [0, 0, 0],
+        "onGround": true,
+        "colliding": false,
+        "physicsTick": 54560,
+        "acknowledgedInputSequence": 8768,
+        "elapsedMs": 76
+      },
+      "lastObserved": {
+        "player": [190.07089233398438, 32.60000228881836, 0.11074407398700714],
+        "authorityPosition": [190.0708862140129, 32.600001, 0.11074407105295067],
+        "velocity": [0, 0, 0],
+        "onGround": true,
+        "colliding": false,
+        "physicsTick": 59293,
+        "acknowledgedInputSequence": 9931,
+        "elapsedMs": 78985
+      },
+      "settledDxSum": 111.57091431307144,
+      "minimumSettledDx": 1.4580509163936597,
+      "diagnosticOnly": true,
+      "eligible": false
+    },
+    {
+      "label": "C4-outbound",
+      "target": [208.5, 0.5],
+      "status": "threw",
+      "elapsedMs": 91305,
+      "timeoutMs": 90000,
+      "pulseCount": 78,
+      "settledPulseCount": 78,
+      "firstBefore": {
+        "player": [78.49898529052734, 32.599998474121094, -1.496665596961975],
+        "authorityPosition": [78.4989888737359, 32.6, -1.4966655661429256],
+        "velocity": [0, 0, 0],
+        "onGround": true,
+        "colliding": false,
+        "physicsTick": 52649,
+        "acknowledgedInputSequence": 8546,
+        "elapsedMs": 78
+      },
+      "lastObserved": {
+        "player": [159.8053741455078, 32.60000228881836, 0.07171780616044998],
+        "authorityPosition": [159.80537130882422, 32.600001, 0.07171780647478745],
+        "velocity": [0, 0, 0],
+        "onGround": true,
+        "colliding": false,
+        "physicsTick": 58120,
+        "acknowledgedInputSequence": 9761,
+        "elapsedMs": 91299
+      },
+      "settledDxSum": 81.30638243508832,
+      "minimumSettledDx": 0.766579540245246,
+      "diagnosticOnly": true,
+      "eligible": false
+    }
+  ],
+  "rawPrivate": {
+    "path": "/workspace/pr41-recovery-20261008-root-01/ci413-chromium-raw-117-01.log",
+    "bytes": 1970814,
+    "sha256": "456254768f591b09214c8e1f3c9ce0a020a78396c3a7e14c085541c74d61e0ab",
+    "apiReturnedLogPreservesTrailingNewline": true
+  },
+  "inferenceLimits": "each settled pulse progresses; keyboard-edge capture already directly publishes input. No confirmed production cause or performance claim."
+}

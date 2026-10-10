@@ -1,0 +1,118 @@
+{
+  "status": "PARTIAL_DELIVERED_NOT_MERGE_READY",
+  "sourceSha": "d237b27efaef4ea2e23f08a05d42d7e49b29d8d2",
+  "sourceDigest": "db048b2d693de8a637ce3bba93cae6ef3fe6f1bb3d5546b16a793debc847d8ca",
+  "artifactDigest": "c8ba11c2123012143b846b7fca16e588fb654e31cf6901b7c3b9d6ed15218188",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "files": 289,
+  "builtAtUTC": "2026-10-10T13:23:23.289Z",
+  "tests": {
+    "unitScope": {
+      "files": 9,
+      "passed": 73
+    },
+    "finalLifetimeRegression": {
+      "files": 2,
+      "passed": 13
+    },
+    "visual": {
+      "runId": "pr41-model-received-lighting-117-02",
+      "status": "PASS",
+      "reportedDuration": "1.4m",
+      "canonical": "NON_MAIN"
+    },
+    "native": {
+      "runId": "pr41-model-received-native-117-03",
+      "status": "PASS",
+      "durationSeconds": 31.2,
+      "runnerReportedSeconds": 34.7,
+      "canonical": "NON_MAIN"
+    },
+    "gpu": {
+      "distinctPixels": 66,
+      "categories": ["opaque", "transparent", "crop", "actor", "world-item", "viewmodel"],
+      "fixedRgbOracles": [0, 64, 128],
+      "tolerance": 3,
+      "backend": "WebGL2 SwiftShader",
+      "physicalGpuPerformanceEvidence": false
+    }
+  },
+  "red": {
+    "oldConsumerBehavior": "2 FAIL on corrected fixture",
+    "firstUnitFixture": "invalid selfEmission fixture, retained",
+    "firstGpuRunSource": "6230b10bd358596f2deb2008d79ce685f3e9fddb",
+    "firstGpuRunStatus": "FAIL",
+    "firstGpuFailureClassification": "model probe independent emissiveIntensity inherited zero; not a production emission RED"
+  },
+  "budget": {
+    "observedAtUTC": "2026-10-10 13:27",
+    "weeklyRemainingPercent": 75,
+    "source": "parent actual product UI",
+    "stopRemainingPercent": 60,
+    "accountShared": true
+  },
+  "currentRemoteBeforePush": "cdd6e1fb130c3feeac2ee40176826d98254e99e2",
+  "remoteCi413": "TERMINAL FAILURE; five non-browser SUCCESS, main twice C4 outbound FAIL, visual/native PASS, Modular/preview SKIP",
+  "rawPrivate": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-consumer-red-117-01.log",
+      "bytes": 4147,
+      "sha256": "e3ea7703affc311f9c1e5f88562e4f997fdf19488819cd42987178d3f90bef64"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-consumer-red-117-02.log",
+      "bytes": 3791,
+      "sha256": "c5c8b3cbf1fb216c28de71c5e708779e0498f0c6951b299a35dba494935cb211"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-unit-117-03.log",
+      "bytes": 342,
+      "sha256": "c693a0f17577abd729e795e8c54b7e24bcd2c2d6047e3a9fbf68ce14d5698451"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-final-lifetime-117-01.log",
+      "bytes": 341,
+      "sha256": "977dd7ac77477923adedc366289c1bc3fec2d186ec603c2a1488333302b7938a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-red-pixels-117-01.json",
+      "bytes": 9578,
+      "sha256": "c8c352ad76360e0937c81d1454bacced1a49f6f239c38335c5a5856aa8cf2c59"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-red-receipt-117-01.json",
+      "bytes": 646,
+      "sha256": "39310721671b2d4b29396aebb44a95cda13af6f81233f7b79e95cd99efeac213"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-green-pixels-117-02.json",
+      "bytes": 9590,
+      "sha256": "d5d8f77ba8c8af14889d0ff5559adbd78c873a2b8e883b828aa325d385c1e9bc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-green-receipt-117-02.json",
+      "bytes": 646,
+      "sha256": "f95af01cb3cde1d760e20e4a0f08330fcf43e9082b5df8a23a344c22c0e94cb1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-native-receipt-117-03.json",
+      "bytes": 690,
+      "sha256": "92ca32b364a81bc952c79590ab1e7f64cd3dbd876cb43a691b8863d9921c78da"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-browser-117-01.log",
+      "bytes": 3970,
+      "sha256": "9fd1728329e6cc3c56af2eddebcacf02972580c0402d8d7457a50ba2ad53dbc1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-browser-117-02.log",
+      "bytes": 954,
+      "sha256": "03da4195e7b7970d5dcec85b193c28cbb55d7c9f247d1ed03fa6ad198cda43a2"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-received-native-117-03.log",
+      "bytes": 1032,
+      "sha256": "11b7710c95610164e7ce0989f58d0aa0a1a9c79fd343149f1799208a0295328a"
+    }
+  ]
+}
