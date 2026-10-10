@@ -1,5 +1,13 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 控制台Authority字段收窄 checkpoint74（预注册）
+
+2026-10-10 00:38UTC，73已提交7928a990。CI71实际motion.authority除类型声明的tick/ACK/commit/residency外还含physicsCost样本数组；原直接复制对象未执行窄字段合同。仅在既有同次snapshot控制台presentation显式挑选声明字段和三个residency计数，完整snapshot附件保持。实际collector新增额外运行时字段反例，原三例保持；不改输入、断言、超时、生产行为或性能结论。
+
+Root独占evidence.ts及既有failure-motion-diagnostics.test.ts、spec/evidence，无新委派。传统0.05PD×120%=0.06PD；AI5min×120%=6min，00:44前checkpoint。最近真实UI00:09UTC剩82%/5d2h，约60%停止线；实际型号未核实、不换算额度。定向测试/Classic类型/lint/format，复用73完整headless，不重复无关全量。长期docs不改。CI71已自然terminal；后续推送仅已授权PR preview，无生产部署。
+
+00:39本地checkpoint74：实际collector有效RED1FAIL/3PASS，候选4PASS/EXIT0；Classic类型与相关lint通过。显式字段保持null及原snapshot对象，完整附件不变；复用73完整headless及工程16项。详见evidence/failure-motion-narrow-checkpoint-74-01.md，精确SHA CI仍待验。
+
 ## Block-light GPU立即失效 checkpoint73（预注册）
 
 2026-10-10 00:25UTC，本地78fb17d0仅完成CPU陈旧采样；远端66467feb的CI71仍自然运行。当前cache失效仅标记待重建，sink没有失败暗化端口，terrain/water/crop借用的同一R8纹理可继续保留旧亮度。先用真实cache的显式编辑与另一brick优先重建反例证明旧sink未失效，再给现有sink补必需failDark，首次失效清空同一R8像素并unlock，已有borrowers保持相同texture引用；多次失效不重复清空，成功重建沿原apply发布。
