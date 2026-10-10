@@ -854,3 +854,11 @@ Root只运行/读取诊断与metadata，不改源文件，不新建浏览器入�
 本片只增强原唯一Classic spec已注册native矿车旅程：保存重开后的accepted transport当前ID在现有presentedEntityModelReady中就绪，使用真实首次canvas左键获取PointerLock、现有18次aimAtCart原生鼠标转向，确认呈现位置与acceptedpose一致，再取得原restored截图。重查cart pose/rider/reference及当前epoch，原120000/10000ms和所有原断言保持，不通过harness.setView/teleport或额外状态写入取得画面。source PlayerController证明未锁定时左键mousedown立即返回，onclick请求PointerLock，因此首次重锁不挖掘；明确断言开始未锁定，避免误在已锁定场景点击。
 
 modelReady/位置与截图需要分层：数值观察不是像素证明；Root实际查看PNG，模型未见仍记未通过/阻塞，不因为helper通过宣布连续运动或194矩阵/整个运输完成。production无变更，不另造浏览器入口；保持原runtime失败记录与真实输入。Root独占minecart-journey.ts、本spec与新私有run/evidence，无其他agent。必要Classic类型/范围lint/格式；test口径增强后冻结精确SHA、新identified build，再原native纵向验证（NON_MAIN），原83mainFAIL与当前远端CI结果保持。AI15min×120%=18min，06:07UTC检查点；传统0.15PD×120%=0.18PD。最新05:29真实80%/4d21h，60%停止线；费用/credits/API/占比未知不换算。
+
+05:54UTC checkpoint88产品纵向终态：c889f405/artifactefd549f3/sourceDigest34aee033，原native120000ms用例39.9s PASS/runner43.5s、NON_MAIN，receipt PASS（attempts空，不伪造main阶段）。恢复模型ready与实际presented位置[9,31,0.5]、epoch2/current与epoch1/stale、转向后pose/rider/reference保持均PASS。Root实际查看restored PNG，中央灰色空矿车与准星/矿车HUD可见，不再朝天空/被debug覆盖；此静止恢复画面不是连续运动、统一lighting或完整运输矩阵。原始HTML重复PNG附件第一次提取FAIL保留空目录，第二次按rawSHA验证两个引用的唯一payload成功；PNG362671bytes/SHA3b7a8d7b17689f0d0091c34ceb645e7a9a2a38e2c30f80b74b1a3a2f6684cc28。新私有browser88-*及公共minecart-restored-presentation-88-01绑定，原失败不改。当前本地c889未推送，远端34 CI407五非BrowserSUCCESS/Chromium运行，原60%线保持。
+
+### 未接线Sky来源只读合同定位 checkpoint89（预注册）
+
+05:55UTC，冻结c889实际生产源码及原已批准Classic spec/architecture。当前SkyVisibilityCache需要worldTopY而source没有可信合法上界，不能从展示cy0..1臆造63、unloaded当Air或添加未授权world-height限制。本片只读定位可验证的现有Worldgen/Authority/Persistence元数据、列上方编辑完整性与最高生成solid保证；提出能保留既有合法存档/无新dimension/unknown fail-dark/同per-chunk owner的最小接线合同，并明确缺少事实，不能写假顶界或未测收益。
+
+复用唯一既有Luna/medium请求会话做有界leaf只读任务，服务型号仍未核实、不新开probe、不再委派；独占private task140-sky-source-readonly-01.md，禁止源文件/测试/构建/Browser/远端写入/全历史复制或size枚举。Root独占88 evidence/spec/metadata与CI状态，负责集成和验收，不重复Luna来源调查。此片无新增source/协议/发布，不以架构建议当产品通过。传统0.1PD×120%=0.12PD，AI20min×120%=24min，06:19UTC检查点；真实05:29周剩80%/4d21h，60%停止线；credits/API/费率/占比未知不换算。当前CI407自然终态前不抢推/取消；88有界纵向PASS不替代mainFAIL或194矩阵。

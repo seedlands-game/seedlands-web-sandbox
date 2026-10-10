@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "native ordinary-minecart vertical slice and one restored image; NOT canonical main or full transport/lighting matrix",
+  "runId": "pr41-restored-cart-presentation-browser88-01",
+  "sourceSha": "c889f40554e592e30c4035143756b6adfd5c741f",
+  "sourceDigest": "34aee033f80932818f77e40eae078156427409240be2e5ffac426b23641de6c3",
+  "artifactDigest": "efd549f30cc12570084c5742f33bbe9de2b3e522582dafe114a68600ffd5a580",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "durationSeconds": 39.9,
+  "runnerDurationSeconds": 43.5,
+  "receiptStatus": "PASS",
+  "receiptMode": "NON_MAIN",
+  "receiptAttempts": [],
+  "restored": {
+    "version": 2,
+    "reference": {
+      "entityId": "transport-2",
+      "epoch": 2,
+      "lifetime": 2
+    },
+    "definitionId": "seedlands:minecart",
+    "pose": {
+      "position": [9, 31, 0.5],
+      "yaw": 1.5707963267948966
+    },
+    "velocity": [0, 0, 0],
+    "routeCursor": {
+      "family": "seedlands:ordinary-rail",
+      "cell": [8, 31, 0],
+      "variant": "seedlands:rail-east-west",
+      "entry": {
+        "side": "west",
+        "elevation": 0
+      },
+      "exit": {
+        "side": "east",
+        "elevation": 0
+      },
+      "progress": 1,
+      "segmentLength": 1
+    },
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "restoredPresentation": {
+    "modelReady": true,
+    "position": [9, 31, 0.5],
+    "viewAngles": [-89.96000000000001, -56.82]
+  },
+  "staleReferenceInspection": {
+    "ok": true,
+    "data": {
+      "kind": "entity-reference",
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 1,
+        "lifetime": 2
+      },
+      "status": "stale"
+    },
+    "frontier": {
+      "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+      "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+      "worldRevision": 2,
+      "commitSequence": 3208,
+      "physicsTick": 1200,
+      "fluidWorkSequence": 0,
+      "logicObservationSequence": 46
+    }
+  },
+  "currentReferenceInspection": {
+    "ok": true,
+    "data": {
+      "kind": "entity-reference",
+      "reference": {
+        "entityId": "transport-2",
+        "epoch": 2,
+        "lifetime": 2
+      },
+      "status": "current"
+    },
+    "frontier": {
+      "worldId": "seedlands:g11:classic-ordinary-minecart-75",
+      "epoch": "seedlands:classic-ordinary-minecart-75:1:world:0",
+      "worldRevision": 2,
+      "commitSequence": 3208,
+      "physicsTick": 1200,
+      "fluidWorkSequence": 0,
+      "logicObservationSequence": 46
+    }
+  },
+  "rawAttachments": [
+    {
+      "name": "classic-minecart-deployed.png",
+      "attachmentReferences": 2,
+      "uniquePayloads": 1,
+      "bytes": 437883,
+      "sha256": "9dd5de189fb9e4f478f2edd428a5fbb77f62244f5df3f11c586e445323c2fcab"
+    },
+    {
+      "name": "classic-minecart-restored.png",
+      "attachmentReferences": 2,
+      "uniquePayloads": 1,
+      "bytes": 362671,
+      "sha256": "3b7a8d7b17689f0d0091c34ceb645e7a9a2a38e2c30f80b74b1a3a2f6684cc28"
+    },
+    {
+      "name": "classic-minecart-native-input.json",
+      "attachmentReferences": 1,
+      "uniquePayloads": 1,
+      "bytes": 85607,
+      "sha256": "4f3ea2fa6b6b55933714a337b8b00366aa8684aabd97c6813bd67bf69d091b47"
+    }
+  ],
+  "visualReview": {
+    "reviewed": true,
+    "observation": "Root 实际查看原始 restored PNG；灰色空矿车在准星中央，轨道与矿车 HUD 可见，debug 面板未遮挡。",
+    "continuousMovement": "NOT_VERIFIED",
+    "unifiedLighting": "NOT_VERIFIED"
+  },
+  "originalAssertionsPreserved": true,
+  "originalTimeoutMs": 120000,
+  "productionCodeChanges": false
+}
