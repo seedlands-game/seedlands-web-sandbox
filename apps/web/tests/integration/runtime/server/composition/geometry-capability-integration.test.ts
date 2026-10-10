@@ -12,10 +12,10 @@ import {
 import type { WorldComputePayload } from '@seedlands/stdlib/server/compute/world-compute-task';
 import { runWorldComputeTask } from '@seedlands/stdlib/server/compute/world-compute-task';
 import { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
-import { FaceMaterial } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, chunkKey, FaceMaterial, voxelIndex } from '@seedlands/stdlib/world/voxel';
 import { expect, it } from 'vitest';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
-import { modularWorldgenProvider } from '../../../../fixtures/packs/modular-world/modular-world';
+import { MODULAR_WORLD_FLOOR_Y, modularWorldgenProvider } from '../../../../fixtures/packs/modular-world/modular-world';
 import { createWorkerFirstDispatch } from '../../../../../src/app/world/mesh-task-dispatch';
 import { BrowserAuthorityClient } from '../../../../../src/client/authority/browser-authority-client';
 import {
@@ -25,6 +25,7 @@ import {
 import { FakeAuthorityWorker, frequencies } from '../../../../unit/client/fixtures/browser-authority';
 
 const VOXEL = 500;
+const PLAYER_START_Y = MODULAR_WORLD_FLOOR_Y + 1;
 const faceMaterials = [
   FaceMaterial.WoodenDoor,
   FaceMaterial.WoodenDoor,
@@ -129,21 +130,23 @@ const runtime = (prepared: ReturnType<typeof prepare>, epoch: string) =>
     epoch,
     seedText: epoch,
     initialWorldTime: 9,
-    initialPlayerBodyPosition: [10.5, 65, 10.5],
+    initialPlayerBodyPosition: [10.5, PLAYER_START_Y, 10.5],
   });
 
 const acceptFloor = (runtime: Awaited<ReturnType<typeof createBrowserAuthorityRuntime>>) => {
+  const cy = Math.floor(MODULAR_WORLD_FLOOR_Y / CHUNK_SIZE);
   const generated = modularWorldgenProvider.generate({
     seed: runtime.server.seed,
     generatorVersion: runtime.server.generatorVersion,
-    coordinate: { x: 0, y: 2, z: 0 },
+    coordinate: { x: 0, y: cy, z: 0 },
     epoch: 0,
     revision: 0,
   });
+  expect(generated.voxels[voxelIndex(10, MODULAR_WORLD_FLOOR_Y - cy * CHUNK_SIZE, 10)]).toBe(VOXEL);
   return runtime.acceptGeneratedChunk({
-    key: '0,2,0',
+    key: chunkKey(0, cy, 0),
     cx: 0,
-    cy: 2,
+    cy,
     cz: 0,
     chunkRevision: 0,
     generatorVersion: runtime.server.generatorVersion,
@@ -166,7 +169,7 @@ it('propagates isolated per-composition geometry through Authority ready, mesh p
       epoch: 'geometry:mismatched-registry',
       seedText: 'geometry:mismatched-registry',
       initialWorldTime: 9,
-      initialPlayerBodyPosition: [10.5, 65, 10.5],
+      initialPlayerBodyPosition: [10.5, PLAYER_START_Y, 10.5],
       platform: testCorePlatform,
       worldgenProvider: west.worldgenProvider,
       voxelGeometry: eastRegistry,
@@ -269,23 +272,25 @@ it('uses one composition registry for Authority physics, placement occupancy and
     expect(acceptFloor(openRuntime)).toBe(true);
     blockingRuntime.wake(blockingRuntime.sessionTimeMs + 20);
     openRuntime.wake(openRuntime.sessionTimeMs + 20);
-    expect(blockingRuntime.snapshot().player.body.position.y).toBeCloseTo(65, 4);
-    expect(openRuntime.snapshot().player.body.position.y).toBeLessThan(65);
+    expect(blockingRuntime.snapshot().player.body.position.y).toBeCloseTo(PLAYER_START_Y, 4);
+    expect(openRuntime.snapshot().player.body.position.y).toBeLessThan(PLAYER_START_Y);
 
     for (const current of [blockingRuntime, openRuntime])
       current.server.giveItem(current.playerId, {
         itemId: `${current === blockingRuntime ? 'sample:blocking-geometry' : 'sample:open-geometry'}-panel`,
         count: 1,
       });
-    expect(blockingRuntime.server.placeVoxel(blockingRuntime.playerId, [10, 65, 10])).toMatchObject({
+    expect(blockingRuntime.server.placeVoxel(blockingRuntime.playerId, [10, PLAYER_START_Y, 10])).toMatchObject({
       success: false,
       reason: 'player-collision',
     });
-    expect(openRuntime.server.placeVoxel(openRuntime.playerId, [10, 65, 10])).toMatchObject({ success: true });
+    expect(openRuntime.server.placeVoxel(openRuntime.playerId, [10, PLAYER_START_Y, 10])).toMatchObject({
+      success: true,
+    });
 
     const blockingRecoveries = blockingRuntime.snapshot().diagnostics?.recoveryResults.length ?? 0;
     const openRecoveries = openRuntime.snapshot().diagnostics?.recoveryResults.length ?? 0;
-    await blockingRuntime.editWorld('fixture', [{ x: 10, y: 65, z: 10, value: VOXEL }]);
+    await blockingRuntime.editWorld('fixture', [{ x: 10, y: PLAYER_START_Y, z: 10, value: VOXEL }]);
     blockingRuntime.wake(blockingRuntime.sessionTimeMs + 20);
     openRuntime.wake(openRuntime.sessionTimeMs + 20);
     expect(blockingRuntime.snapshot().diagnostics?.recoveryResults.length).toBeGreaterThan(blockingRecoveries);

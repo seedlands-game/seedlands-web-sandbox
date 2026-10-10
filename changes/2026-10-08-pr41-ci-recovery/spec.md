@@ -906,3 +906,11 @@ RED设计：在原AdvancedVisualEffects真实构造函数的low无GPU特效路�
 RED：真实Classic默认provider缺该能力；实际stdlib注册模块freeze剥离声明的端口。GREEN覆盖同identity custom generator/macro拒保证、版本/非法输入、坏结果拒绝、原生成/采样函数保留及composition definitionMap不变；有限默认采样只作回归，全球上界来源是93公式。Root独占standard-worldgen-module.ts、Classic worldgen.ts及两owner测试/spec/新输出，Luna已完成不改源。不添加Sky production消费者，完整持久化高层发现/当前修改合并/同per-chunk owner接线仍分别待完成。
 
 必要定向RED/GREEN、owner类型/范围lint/格式、相关旧worldgen/Classic pack回归与identified build；仅有生产source元数据能力变化，无GPU/input/streaming逻辑变化，后续浏览器由该完成片精确SHA在唯一原线路验证，不能以构建代替Sky。CI408自然终态前不推新source取消它，也不盲目重跑full main。AI25min×120%=30min，07:24UTC checkpoint；传统0.25PD×120%=0.3PD。真实06:10剩80%、约60%停止线，07:10请求主对话实际UI；unknown费用/credits/API占比不换算。
+
+07:04UTC checkpoint94源码阶段：90ed75049ecff9e621caf12cb8317be149042741本地提交、未推。默认source与注册freeze两条RED→GREEN，最终Classic定向6/全29 PASS，stdlib保证＋原V11回归16PASS；production/test类型、范围lint/格式及提交hookPASS。首次稀疏缺冻结blob造成28PASS/1FAIL，精确Git树物化原文件/冻结5字节校验后全29PASS，历史bytes不改。Web geometry6PASS/1FAIL，原407生产模块对照同样FAIL；candidate原字节已恢复，独立fixture95解决floor32与旧起步65失配。94的artifact/原native验证与随后test-only95合用一次最终冻结SHA产物，不重复build；Sky消费者/持久化列发现仍未实现。
+
+### Geometry fixture与真实Modular floor对齐 checkpoint95（预注册）
+
+07:04UTC，原geometry-capability-integration已有效RED：实际floor32，fixture却Y65起步/接受cy2空chunk；原407模块对照重现64.995而非65，排除94回归。本片仅从MODULAR_WORLD_FLOOR_Y/CHUNK_SIZE推导player Y、floor chunk/key、放置/recovery位置，并验证原canonical floor含500，不改生成bytes/identity/世界/collision。原严格4位精度、blocking/open、placement/recovery/mesh/registry断言和20ms wake保持，不改浏览器坐标/门槛。
+
+Root独占该Web fixture/spec/新证据，无新agent；相关Web7例、types/范围lint/格式后独立提交，94production不变。最终identified build与唯一原native仅做现有Worker/保存恢复回归，不宣称空域能力已接到Browser Sky；full main不重复，CI408自然终态前不推取消。AI10min×120%=12min，07:16UTC checkpoint；传统0.1PD×120%=0.12PD；真实06:10剩80%/约60%停止线，07:10额度刷新，unknown费用/credits不换算。
