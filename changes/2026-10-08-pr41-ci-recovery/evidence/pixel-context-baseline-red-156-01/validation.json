@@ -1,0 +1,52 @@
+{
+  "sourceSha": "c012e9e6e2ae27014a4c2f463f215e013bbdfed6",
+  "productionArtifactDigest": "a3a0b9a6007286778dd60aa0137167cf3479b5ebf39114890b179add30768ff3",
+  "status": "FAIL",
+  "durationMs": 74132,
+  "icons": 130,
+  "cases": 260,
+  "sourceURLIdentitiesEqual": 260,
+  "domReferenceDifferent16": 104,
+  "sourceAADifferent16": 1,
+  "equalContextDifferent16": 105,
+  "equivalentURLDifferent16": 1,
+  "all32Zero": true,
+  "observedDOM": {
+    "width": 34,
+    "height": 34,
+    "naturalWidth": 150,
+    "naturalHeight": 150,
+    "imageRendering": "pixelated"
+  },
+  "observedFresh": {
+    "width": 150,
+    "height": 150,
+    "naturalWidth": 150,
+    "naturalHeight": 150
+  },
+  "interpretation": "Legacy same-source baseline fails; prior150/152/154 cannot establish geometry defect. Test contexts differ; matching them is required before candidate adoption.",
+  "coldSky": "NOT_REACHED",
+  "main151": "NOT_STARTED",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-baseline-visual-156-01.log",
+      "bytes": 16055,
+      "sha256": "8501a3e311ef0fdf9a049ec8a2c6884c4a709e9499f751cf2ebdfdbdb457d621"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-baseline-verify-156-01.json",
+      "bytes": 386,
+      "sha256": "e7a841f7af0ef38bcbbc12117205f433357be6a54dc093512735d676e521c174"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-baseline-visual-attachments-156-01.json",
+      "bytes": 308564,
+      "sha256": "d4beb982c0f3b1fc4b79ed5125f494d92e19dabced23f5c9a479f6dde956ced8"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-baseline-visual-result-156-01.json",
+      "bytes": 476936,
+      "sha256": "81ea190a3d71bb7d9a714e4be2c7c15d8be8d85211b8b4005dfe5cdd10696718"
+    }
+  ]
+}
