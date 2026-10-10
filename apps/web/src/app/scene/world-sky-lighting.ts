@@ -80,23 +80,19 @@ export class WorldSkyLighting {
 
   invalidateStale(): void {
     if (this.disposed) return;
-    for (const entry of this.entries.values())
-      if (entry.stamp && entry.stamp !== this.stamp(entry)) {
-        const release = entry.release;
-        entry.release = null;
-        if (release) release();
-        else entry.sink.failDark();
-        entry.stamp = '';
-        entry.dirty = true;
-      }
+    for (const entry of this.entries.values()) this.invalidateEntry(entry);
   }
 
   sample(position: readonly [number, number, number]) {
     if (this.disposed || !position.every(Number.isFinite)) return null;
-    this.invalidateStale();
     const chunk = position.map((value) => floorDiv(Math.floor(value), CHUNK_SIZE)) as [number, number, number];
+    const key = chunkKey(...chunk);
+    const entry = this.entries.get(key);
+    // Point consumers validate their own full column. Frame/commit boundaries
+    // still invalidate every registered sink before the world is rendered.
+    if (entry) this.invalidateEntry(entry);
     return this.cache.sample(
-      chunkKey(...chunk),
+      key,
       ...(position.map((value, axis) => Math.floor(value) - chunk[axis]! * CHUNK_SIZE) as [number, number, number]),
     );
   }
@@ -129,6 +125,16 @@ export class WorldSkyLighting {
       this.observedEpoch = this.authority.runtimeEpoch;
       this.revisionFloor = 0;
     }
+  }
+
+  private invalidateEntry(entry: Entry): void {
+    if (!entry.stamp || entry.stamp === this.stamp(entry)) return;
+    const release = entry.release;
+    entry.release = null;
+    if (release) release();
+    else entry.sink.failDark();
+    entry.stamp = '';
+    entry.dirty = true;
   }
 
   private stamp(entry: Entry): string {

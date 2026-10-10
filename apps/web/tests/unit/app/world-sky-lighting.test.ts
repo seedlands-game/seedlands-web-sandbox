@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Voxel } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicContent } from '../../fixtures/classic/content';
 import { WorldSkyLighting } from '../../../src/app/scene/world-sky-lighting';
 import type { SkyColumnSource } from '../../../src/app/scene/sky-column-source';
 import { requestBrowserSkyChunk } from '../../../src/client/authority/browser-authority-sky-chunk';
+import { SKY_VISIBILITY_MAX_COLUMN_HEIGHT } from '../../../src/app/scene/sky-visibility-volume';
 
 const complete = (revision = 0): Extract<SkyColumnSource, { status: 'complete' }> => ({
   status: 'complete',
@@ -45,6 +46,75 @@ const fixture = (options?: { yieldTask: () => Promise<void> }) => {
 afterEach(() => vi.useRealTimers());
 
 describe('production World sky derived owner', () => {
+  it('bounds repeated point sampling to the requested column independently of other ready columns', async () => {
+    const { light, authority } = fixture();
+    const reads = vi.fn(() => 0);
+    authority.getChunkRevision = reads;
+    authority.inspectColumnSource.mockImplementation(async (cx?: number, cz?: number) => ({
+      ...complete(),
+      cx: cx ?? 0,
+      cz: cz ?? 0,
+    }));
+    for (let cx = 1; cx < 4; cx++)
+      light.register(
+        { chunkKey: `${cx},0,0`, cx, cy: 0, cz: 0 },
+        { failDark: vi.fn(), publish: vi.fn(), dispose: vi.fn() },
+      );
+    await vi.advanceTimersByTimeAsync(64);
+    expect(light.diagnostics.readyChunkKeys).toHaveLength(4);
+    const counts = [];
+    for (let repeat = 0; repeat < 2; repeat++) {
+      reads.mockClear();
+      for (let i = 0; i < 64; i++) expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: true, visibility: 1 });
+      counts.push(reads.mock.calls.length);
+    }
+    console.info('Sky point sample exact query counts:', JSON.stringify({ columns: 4, samples: 64, counts }));
+    light.dispose();
+    const fullColumnReads = (64 * SKY_VISIBILITY_MAX_COLUMN_HEIGHT) / CHUNK_SIZE;
+    expect(counts).toEqual([fullColumnReads, fullColumnReads]);
+  });
+
+  it.each(['revision', 'residency'] as const)(
+    'checks same-world-revision target column %s changes on every sample',
+    async (change) => {
+      const { light, authority, sink } = fixture();
+      await vi.advanceTimersByTimeAsync(16);
+      expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: true, visibility: 1 });
+      const darkCalls = sink.failDark.mock.calls.length;
+      authority.getChunkRevision = (_cx, cy) => (cy === 1 ? (change === 'revision' ? 1 : null) : 0);
+      expect(light.sample([0.5, 0.5, 0.5])).toMatchObject({ ready: false });
+      expect(sink.failDark).toHaveBeenCalledTimes(darkCalls + 1);
+      expect(authority.worldRevision).toBe(0);
+      light.dispose();
+    },
+  );
+
+  it.each(['frame', 'commit', 'epoch'] as const)(
+    'preserves global invalidation of unsampled columns at the existing %s boundary',
+    async (boundary) => {
+      const { light, authority, sink } = fixture();
+      const other = { failDark: vi.fn(), publish: vi.fn(), dispose: vi.fn() };
+      authority.inspectColumnSource.mockImplementation(async (cx?: number, cz?: number) => ({
+        ...complete(),
+        cx: cx ?? 0,
+        cz: cz ?? 0,
+      }));
+      light.register({ chunkKey: '1,0,0', cx: 1, cy: 0, cz: 0 }, other);
+      await vi.advanceTimersByTimeAsync(32);
+      expect(light.diagnostics.readyChunkKeys).toHaveLength(2);
+      const darkCalls = sink.failDark.mock.calls.length;
+      const otherDarkCalls = other.failDark.mock.calls.length;
+      if (boundary === 'epoch') authority.runtimeEpoch = 'world:2';
+      else if (boundary === 'frame') authority.getChunkRevision = () => null;
+      if (boundary === 'commit') light.notifyCommit(1);
+      else light.invalidateStale();
+      expect(sink.failDark).toHaveBeenCalledTimes(darkCalls + 1);
+      expect(other.failDark).toHaveBeenCalledTimes(otherDarkCalls + 1);
+      expect(light.diagnostics.readyChunkKeys).toHaveLength(0);
+      light.dispose();
+    },
+  );
+
   it('rebuilds a column superseded by a save without a world revision change', async () => {
     const { light, sink, authority } = fixture();
     authority.inspectColumnSource.mockResolvedValueOnce({ status: 'unknown', reason: 'superseded' });
