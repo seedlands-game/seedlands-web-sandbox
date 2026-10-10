@@ -1,3 +1,4 @@
+import { createPresentedSurfaceLightingSampler } from './scene/world-surface-lighting';
 import { beginWorldStartMarks } from './world/world-start-marks';
 import * as pc from 'playcanvas';
 import * as sceneBootstrap from './scene/scene-bootstrap';
@@ -306,7 +307,7 @@ export class Game {
       playerId,
       bridge: this.uiBridge,
       session: this.uiSession,
-      sampleBlockLight: (position) => this.visualEffects?.sampleBlockLight(position) ?? 0,
+      sampleSurfaceLighting: createPresentedSurfaceLightingSampler(() => [this.world, this.environment?.lightingFrame]),
       nextHudSequence: () => ++this.hudSequence,
       nextInteractionSequence: () => ++this.interactionSequence,
       getVoxel: (x, y, z) => this.world?.getVoxel(x, y, z) ?? 0,
@@ -524,8 +525,7 @@ export class Game {
   toggleMap = () => runtimeControls.toggleMap(this.uiBridge, this.world, this.camera, this.controller);
 
   private async setWorldTime(hour: number) {
-    if (!this.world || !this.environment) return;
-    this.environment.setTime(await this.world.setWorldTime(hour));
+    return runtimeControls.setWorldPresentationTime(this.world, this.environment, hour);
   }
 
   private disposeRuntime() {

@@ -130,6 +130,13 @@
     "apps/web/tests/unit/app/sky-visibility-volume.test.ts",
     "apps/web/tests/unit/app/world-sky-lighting.test.ts",
     "apps/web/tests/unit/app/playcanvas-sky-visibility.test.ts",
-    "apps/web/tests/unit/worker/authority-column-source.test.ts"
+    "apps/web/tests/unit/worker/authority-column-source.test.ts",
+    "apps/web/tests/unit/app/playcanvas-surface-lighting.test.ts",
+    "apps/web/tests/unit/app/model-consumer-surface-lighting.test.ts",
+    "apps/web/tests/unit/app/world-surface-lighting.test.ts",
+    "apps/web/tests/unit/app/gameplay-entity-presenter.test.ts",
+    "apps/web/tests/unit/app/first-person-viewmodel.test.ts",
+    "apps/web/tests/unit/app/surface-lighting.test.ts",
+    "apps/web/tests/unit/app/surface-lighting-contract.test.ts"
   ]
 }

@@ -1,9 +1,11 @@
+import { createGameplayModelPresentation } from './browser-gameplay-presentation';
 import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { BrowserInventoryPointer } from './browser-inventory-pointer';
 import { useGameplayHeldItem } from './held-item-interaction';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
-import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
+import type { SurfaceLightingSampler } from '../scene/surface-lighting';
+import type { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
 import { BROWSER_MIN_BUILD_Y, BROWSER_MAX_BUILD_Y } from '../world/browser-world-limits';
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
@@ -11,7 +13,7 @@ import { BrowserPointerAttackInput } from './pointer-attack-input';
 import type * as pc from 'playcanvas';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import { voxelNames } from '@seedlands/stdlib/world/voxel';
-import { GameplayEntityPresenter } from './gameplay-entity-presenter';
+import type { GameplayEntityPresenter } from './gameplay-entity-presenter';
 import { projectGameplayUi, type GameplayUiProjection } from '../ui/gameplay-ui-projector';
 import type { UiBridge, UiWorldSession } from '../ui/ui-bridge';
 import type { GameplayPresentationEvent } from '../../client/audio/gameplay-audio-events';
@@ -61,7 +63,7 @@ type Options = {
   executeModeCommand: BrowserModeCommandExecutor;
   onPlayerDamage?: (amount: number) => void;
   onPresentation?: (event: GameplayPresentationEvent) => void;
-  sampleBlockLight?: (position: readonly [number, number, number]) => number;
+  sampleSurfaceLighting?: SurfaceLightingSampler;
 };
 
 export class BrowserGameplay {
@@ -101,13 +103,9 @@ export class BrowserGameplay {
       succeeded: (message) => this.feedback(message, 'success'),
       failed: (message) => this.feedback(message, 'error'),
     });
-    this.presenter = new GameplayEntityPresenter(
-      options.app,
-      (id) => this.itemDefinition(id) ?? null,
-      options.sampleBlockLight,
-      options.authority.voxelGeometry,
-    );
-    this.viewmodel = new FirstPersonViewmodel(options.app, options.camera, undefined, options.authority.voxelGeometry);
+    const models = createGameplayModelPresentation(options, (id) => this.itemDefinition(id) ?? null);
+    this.presenter = models.presenter;
+    this.viewmodel = models.viewmodel;
     this.outline = new VoxelTargetOutline(options.app);
     this.breakOverlay = new VoxelBreakOverlay(options.app);
   }

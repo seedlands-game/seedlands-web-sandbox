@@ -1,3 +1,5 @@
+import { ModelSurfaceLighting } from '../scene/model-surface-lighting';
+import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import * as pc from 'playcanvas';
 import type {
@@ -35,8 +37,6 @@ export type GameplayShadowCaster = Readonly<{
   position: readonly [number, number, number];
 }>;
 
-export type GameplayBlockLightSampler = (position: readonly [number, number, number]) => number;
-
 export class GameplayEntityPresenter {
   private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
@@ -44,12 +44,7 @@ export class GameplayEntityPresenter {
   private readonly previousPositions = new Map<string, [number, number, number]>();
   private readonly health = new Map<string, number>();
   private readonly hurtUntil = new Map<string, number>();
-  private readonly originalMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
-  private readonly damageMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
-  private readonly originalEmissionIntensity = new WeakMap<pc.Entity, number>();
-  private readonly damageEmissionIntensity = new WeakMap<pc.Entity, number>();
-  private readonly damageMaterialResources = new Set<pc.StandardMaterial>();
-  private readonly clonedMaterialResources = new Set<pc.StandardMaterial>();
+  private readonly surfaceLighting: ModelSurfaceLighting;
   private readonly animated = new Map<string, AnimatedEntity>();
   private readonly movingShadowCasters = new Map<string, boolean>();
   private readonly shadowCasterRevisions = new Map<string, number>();
@@ -59,9 +54,14 @@ export class GameplayEntityPresenter {
   constructor(
     private readonly app: pc.Application,
     private readonly resolveItem?: (id: string) => ItemDefinition | null,
-    private readonly sampleBlockLight?: GameplayBlockLightSampler,
+    sampleSurfaceLighting?: SurfaceLightingSampler,
     voxelGeometry?: VoxelGeometryResolver,
   ) {
+    this.surfaceLighting = new ModelSurfaceLighting(
+      app.graphicsDevice,
+      sampleSurfaceLighting,
+      createDamageTintMaterial,
+    );
     this.assetsLease = acquireGameplayModelAssets(app, voxelGeometry);
     this.bindings = getAppearanceAnimationBindings(app);
   }
@@ -86,7 +86,7 @@ export class GameplayEntityPresenter {
         ? JSON.stringify([transport.reference.lifetime, definitionsById.get(transport.definitionId)?.presentationId])
         : undefined;
       if (current.has(id) && this.transportPresentations.get(id) === signature) return;
-      this.releaseDamageMaterials(node);
+      this.surfaceLighting.release(node);
       node.destroy();
       this.presented.delete(id);
       this.transportPresentations.delete(id);
@@ -109,7 +109,7 @@ export class GameplayEntityPresenter {
 
   dispose(): void {
     this.presented.forEach((entity) => {
-      this.releaseDamageMaterials(entity);
+      this.surfaceLighting.release(entity);
       entity.destroy();
     });
     this.presented.clear();
@@ -120,10 +120,7 @@ export class GameplayEntityPresenter {
     this.movingShadowCasters.clear();
     this.shadowCasterRevisions.clear();
     for (const id of this.animated.keys()) this.releaseAnimated(id);
-    this.damageMaterialResources.forEach((material) => material.destroy());
-    this.damageMaterialResources.clear();
-    this.clonedMaterialResources.forEach((material) => material.destroy());
-    this.clonedMaterialResources.clear();
+    this.surfaceLighting.dispose();
     this.assetsLease.release();
     this.presentationTime = 0;
   }
@@ -184,18 +181,7 @@ export class GameplayEntityPresenter {
     node.setLocalScale(scale, scale, scale);
     if (entity.type === 'world-item') node.setEulerAngles(0, time * 24, 0);
     node.setPosition(position[0], position[1] + (entity.type === 'world-item' ? 0.1 : 0), position[2]);
-    const blockLight = Math.max(
-      0,
-      Math.min(1, this.sampleBlockLight?.([position[0], position[1] + 0.7, position[2]]) ?? 0),
-    );
-    this.forEachRender(node, (part) => {
-      const material = this.originalMaterials.get(part);
-      const damageMaterial = this.damageMaterials.get(part);
-      if (material) material.emissiveIntensity = (this.originalEmissionIntensity.get(part) ?? 0) + blockLight * 0.72;
-      if (damageMaterial)
-        damageMaterial.emissiveIntensity = (this.damageEmissionIntensity.get(part) ?? 0) + blockLight * 0.72;
-      if (part.render && material) part.render.material = flash > 0 && damageMaterial ? damageMaterial : material;
-    });
+    this.surfaceLighting.apply(node, [position[0], position[1] + 0.7, position[2]], flash > 0);
     this.previousPositions.set(entity.id, position);
     const moving =
       previous !== undefined && Math.hypot(...position.map((value, axis) => value - previous[axis])) > 0.001;
@@ -231,7 +217,7 @@ export class GameplayEntityPresenter {
         undefined,
         this.resolveItem?.(entity.stack?.itemId ?? ''),
       );
-    this.registerDamageMaterials(node);
+    this.surfaceLighting.register(node, entity.type === 'world-item' ? 'world-item' : 'actor');
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
     const modelTarget = presentationId ?? entity.archetype;
@@ -281,8 +267,18 @@ export class GameplayEntityPresenter {
         lease.release();
         throw new Error(`物种模型缺少可播放动作：${binding.modelId}`);
       }
-      for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
-      this.registerDamageMaterials(lease.entity);
+      for (const child of [...visual.children])
+        if (child !== lease.entity) {
+          this.surfaceLighting.release(child as pc.Entity);
+          (child as pc.Entity).destroy();
+        }
+      try {
+        this.surfaceLighting.register(lease.entity);
+      } catch (error) {
+        this.surfaceLighting.release(lease.entity);
+        lease.release();
+        throw error;
+      }
       state.lease = lease;
       state.controller = lease.playback ? createModelAnimationController(clips, lease.playback) : null;
       this.shadowCasterRevisions.set(entityId, (this.shadowCasterRevisions.get(entityId) ?? 0) + 1);
@@ -299,6 +295,7 @@ export class GameplayEntityPresenter {
         { x: 0.12, y: 0.6, z: 0.12 },
       );
       this.assets.addBox(visual, 'asset-error-dot', 'glow-eye', { x: 0, y: 0.2, z: 0 }, { x: 0.12, y: 0.12, z: 0.12 });
+      this.surfaceLighting.register(visual);
     }
   }
 
@@ -311,54 +308,12 @@ export class GameplayEntityPresenter {
     );
   }
 
-  private registerDamageMaterials(root: pc.Entity): void {
-    this.forEachRender(root, (part) => {
-      if (!(part.render?.material instanceof pc.StandardMaterial) || this.originalMaterials.has(part)) return;
-      const original = part.render.material.clone() as pc.StandardMaterial;
-      part.render.material = original;
-      const damage = createDamageTintMaterial(original);
-      this.originalMaterials.set(part, original);
-      this.damageMaterials.set(part, damage);
-      this.originalEmissionIntensity.set(part, original.emissiveIntensity);
-      this.damageEmissionIntensity.set(part, damage.emissiveIntensity);
-      this.damageMaterialResources.add(damage);
-      this.clonedMaterialResources.add(original);
-    });
-  }
-
-  private releaseDamageMaterials(root: pc.Entity): void {
-    this.forEachRender(root, (part) => {
-      const damage = this.damageMaterials.get(part);
-      const original = this.originalMaterials.get(part);
-      if (damage) {
-        damage.destroy();
-        this.damageMaterialResources.delete(damage);
-      }
-      if (original) {
-        original.destroy();
-        this.clonedMaterialResources.delete(original);
-      }
-      this.damageMaterials.delete(part);
-      this.originalMaterials.delete(part);
-      this.originalEmissionIntensity.delete(part);
-      this.damageEmissionIntensity.delete(part);
-    });
-  }
-
   private releaseAnimated(id: string): void {
     const animated = this.animated.get(id);
     if (!animated) return;
     animated.abort.abort();
     animated.lease?.release();
     this.animated.delete(id);
-  }
-
-  private forEachRender(node: pc.Entity, callback: (part: pc.Entity) => void): void {
-    for (const child of node.children) {
-      const part = child as pc.Entity;
-      if (part.render) callback(part);
-      this.forEachRender(part, callback);
-    }
   }
 
   private get assets() {

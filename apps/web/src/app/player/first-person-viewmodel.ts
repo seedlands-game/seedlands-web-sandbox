@@ -1,3 +1,5 @@
+import { ModelSurfaceLighting } from '../scene/model-surface-lighting';
+import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
@@ -23,6 +25,7 @@ const heldItemScale = Object.freeze({
 });
 
 export class FirstPersonViewmodel {
+  private readonly surfaceLighting: ModelSurfaceLighting;
   private releaseDraft: (() => void) | null = null;
   private readonly root = new pc.Entity('First person viewmodel');
   private readonly handPivot = new pc.Entity('viewmodel hand pivot');
@@ -45,7 +48,9 @@ export class FirstPersonViewmodel {
     private readonly camera: pc.Entity,
     assets?: GameplayModelAssets,
     voxelGeometry?: VoxelGeometryResolver,
+    sampleSurfaceLighting?: SurfaceLightingSampler,
   ) {
+    this.surfaceLighting = new ModelSurfaceLighting(app.graphicsDevice, sampleSurfaceLighting, undefined, 'viewmodel');
     this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app, voxelGeometry);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
@@ -84,6 +89,7 @@ export class FirstPersonViewmodel {
 
   setHeldItem(itemId: string | null, definition?: ItemDefinition | null): void {
     if (itemId === this.heldItem && !this.releaseDraft) return;
+    this.surfaceLighting.release(this.item);
     this.releaseDraft?.();
     this.releaseDraft = null;
     this.heldItem = itemId;
@@ -133,7 +139,15 @@ export class FirstPersonViewmodel {
     });
     this.root.setLocalPosition(layout.position.x, layout.position.y, layout.position.z);
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
-    if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
+    if (this.viewmodelCamera?.camera) {
+      this.viewmodelCamera.camera.fov = fov;
+      if (this.camera.camera) {
+        this.viewmodelCamera.camera.gammaCorrection = this.camera.camera.gammaCorrection;
+        this.viewmodelCamera.camera.toneMapping = this.camera.camera.toneMapping;
+      }
+    }
+    const worldPosition = this.camera.getPosition();
+    this.surfaceLighting.apply(this.root, [worldPosition.x, worldPosition.y, worldPosition.z]);
     const narrowTool = this.heldTool && this.app.graphicsDevice.width < this.app.graphicsDevice.height;
     const itemScale = narrowTool ? heldItemScale.narrowToolMultiplier : 1;
     this.item.setLocalScale(itemScale, itemScale, itemScale);
@@ -152,6 +166,7 @@ export class FirstPersonViewmodel {
   }
 
   dispose(): void {
+    this.surfaceLighting.dispose();
     this.releaseDraft?.();
     this.root.destroy();
     this.viewmodelCamera?.destroy();
@@ -170,6 +185,7 @@ export class FirstPersonViewmodel {
   }
 
   private applyLayer(root: pc.Entity): void {
+    this.surfaceLighting.register(root);
     if (!this.layer) return;
     for (const component of root.findComponents('render')) {
       (component as pc.RenderComponent).layers = [this.layer.id];

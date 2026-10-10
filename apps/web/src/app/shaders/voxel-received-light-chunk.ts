@@ -1,5 +1,5 @@
 /** Linear received light only; surface self-emission remains a separate material channel. */
-export const voxelReceivedLightGlsl = /* glsl */ `
+export const voxelReceivedLightingGlsl = /* glsl */ `
 uniform highp sampler3D texture_blockLight;
 uniform vec3 uBlockLightOrigin;
 uniform float uBlockLightSize;

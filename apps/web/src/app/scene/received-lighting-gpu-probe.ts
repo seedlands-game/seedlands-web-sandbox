@@ -1,3 +1,4 @@
+import { combineSurfaceLighting, createSurfaceLightingSample } from './surface-lighting';
 import * as pc from 'playcanvas';
 import { MATERIAL_LAYER_COUNT } from './voxel-render-pipeline';
 import type { VoxelMaterials } from './voxel-materials';
@@ -11,7 +12,7 @@ import { createChunkSkyTexture, applyChunkSky, invalidateChunkSky } from '../wor
 import { SKY_VISIBILITY_VOLUME_BYTES } from './sky-visibility-volume';
 
 export type ReceivedLightingGpuPixel = Readonly<{
-  category: 'opaque' | 'transparent' | 'crop';
+  category: 'opaque' | 'transparent' | 'crop' | 'actor' | 'world-item' | 'viewmodel';
   name: string;
   rgba: readonly number[];
 }>;
@@ -34,6 +35,7 @@ const cases = [
 export function receivedLightingGpuProbe(
   app: pc.Application,
   materials: VoxelMaterials,
+  includeModels = false,
 ): readonly ReceivedLightingGpuPixel[] {
   const device = app.graphicsDevice;
   if (!(device instanceof pc.WebglGraphicsDevice)) throw new Error('Received-lighting pixels require WebGL2.');
@@ -76,9 +78,29 @@ export function receivedLightingGpuProbe(
   app.scene.layers.pushOpaque(layer);
   app.root.addChild(camera);
   try {
-    for (const category of ['opaque', 'transparent', 'crop'] as const) {
-      const source =
-        category === 'crop' ? materials.cropLightingMaterials?.[0] : materials.categoryMaterials.get(category);
+    const categories: ReceivedLightingGpuPixel['category'][] = ['opaque', 'transparent', 'crop'];
+    if (includeModels) categories.push('actor', 'world-item', 'viewmodel');
+    for (const category of categories) {
+      const model = category === 'actor' || category === 'world-item' || category === 'viewmodel';
+      const source = model
+        ? ((app.root.findComponents('render') as pc.RenderComponent[])
+            .flatMap((render) => render.meshInstances)
+            .map((instance) => instance.material)
+            .find(
+              (material) =>
+                material instanceof pc.StandardMaterial && material.name.startsWith(`received-lighting:${category}:`),
+            ) as pc.StandardMaterial | undefined)
+        : category === 'crop'
+          ? materials.cropLightingMaterials?.[0]
+          : materials.categoryMaterials.get(category as 'opaque' | 'transparent');
+      if (
+        model &&
+        (!source?.getParameter('uSurfaceReceivedLighting') ||
+          source.useLighting ||
+          source.useSkybox ||
+          !source.lightMap)
+      )
+        throw new Error(`Production ${category} has not received unified surface lighting.`);
       if (!source) throw new Error(`Missing production ${category} material.`);
       const material = source.clone();
       for (const [name, parameter] of Object.entries(source.parameters)) {
@@ -102,7 +124,7 @@ export function receivedLightingGpuProbe(
       material.blendType = pc.BLEND_NONE;
       material.cull = pc.CULLFACE_NONE;
       material.useFog = false;
-      if (category === 'crop') {
+      if (model || category === 'crop') {
         material.diffuseMap = cropAlbedo;
         material.opacityMap = cropAlbedo;
       }
@@ -176,6 +198,25 @@ export function receivedLightingGpuProbe(
           instance.setParameter('uBlockLightReady', entry.blockReady ? 1 : 0);
           if (entry.name === 'invalidated-sky') invalidateChunkSky(resource);
           if (entry.name === 'invalidated-block') invalidateChunkBlockLightVolume(resource);
+          if (model) {
+            const invalidSky = entry.name === 'invalidated-sky' || entry.name === 'upper-boundary-blocked';
+            const invalidBlock = entry.name === 'invalidated-block';
+            const channels = combineSurfaceLighting(
+              createSurfaceLightingSample({
+                skyVisibility:
+                  entry.skyReady && !invalidSky
+                    ? entry.sky / 255
+                    : invalidSky && entry.name === 'upper-boundary-blocked'
+                      ? 0
+                      : null,
+                skyRadiance: [0.25, 0.25, 0.25],
+                blockIrradiance:
+                  entry.blockReady && !invalidBlock ? [entry.block / 60, entry.block / 60, entry.block / 60] : null,
+                selfEmission: self ? [0.25, 0.25, 0.25] : [0, 0, 0],
+              }),
+            );
+            material.setParameter('uSurfaceReceivedLighting', new Float32Array(channels.receivedLighting));
+          }
           app.render();
           const previous = device.renderTarget;
           const rgba = new Uint8Array(4);

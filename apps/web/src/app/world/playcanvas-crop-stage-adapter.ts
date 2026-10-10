@@ -2,7 +2,7 @@ import * as pc from 'playcanvas';
 import { CHUNK_SIZE } from '@seedlands/stdlib/world/voxel';
 import type { PackPresentationCatalog } from '../../client/presentation/pack-presentation-loader';
 import { buildCropStageGeometry } from '../../client/presentation/crop-stage-geometry';
-import { voxelReceivedLightGlsl } from '../shaders/voxel-received-light-chunk';
+import { voxelReceivedLightingGlsl } from '../shaders/voxel-received-light-chunk';
 import type { PlayCanvasChunkResource } from './playcanvas-chunk-adapter';
 import type { LinearRgb } from '../scene/surface-lighting';
 import type { CropStageAdapter, CropStageBatch } from './crop-stage-presenter';
@@ -112,7 +112,7 @@ export async function createPlayCanvasCropPresentation(
         material.useSkybox = false;
         material.useMetalness = true;
         material.shaderChunksVersion = '2.8';
-        material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('lightmapPS', voxelReceivedLightGlsl);
+        material.getShaderChunks(pc.SHADERLANGUAGE_GLSL).set('lightmapPS', voxelReceivedLightingGlsl);
         material.update();
       }
     }

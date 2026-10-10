@@ -1024,3 +1024,17 @@ Root独占private blur105脚本/config/raw/window/spec/new证据，不委派、�
 10:03UTC108 source回归：新marker2只允许真实来源证明且obstruction0，不伪装resident；来源有效RED2FAIL/3PASS→15PASS，最终11files82PASS，覆盖真实hostOperation目录等待、旧epoch、原World权限仍拒绝、当前renderer合法只读、client迟到恢复、cached源/commit-floor/revision/residency/释放失效以及NullDevice真实Texture/MeshInstance R8绑定清零。一次失效原release已darken，driver重复清零1FAIL保留，修生产不降断言。actualWeb Svelte0error0warning+tsc/tools、Classic/root test/stdlib生产types、范围lint/CI17PASS。500行501/509/519及protocol509失败保持，原world RPC、block revision loop/fluid-active body与类型/renderer请求移至同职责helper，原行为/门槛不变。既有Native restoredPresentation同一读取加只读sky diagnostics，无额外Authority query/新断言/timeout变化，identified/browser基线尚待执行；shader/unified/GPU readback仍未闭合。最新实际09:11周78%，10:00刷新待答，约60%停止线。
 
 10:06UTC108源完成：追加Native诊断后E2E独立Harness接口缺方法的Classic类型FAIL保持，改引用生产Harness同一字段类型，最终Classic types/接口lint PASS；format/paths/freeze5/diff PASS。生产源不再修改；identified原入口浏览器基线另登记有界阶段，当前NOT_RUN。最新真实10:05周77%/4天17小时，账户总下降含其他任务，约60%停止线。本地工具执行正常、未重启或重跑验证；按下一正常GitHub只读核实连接。
+
+### 剩余模型统一受光117（12:59UTC预注册）
+
+承接生产22034491/远端cdd6e1fb，已有真实夜间PNG显示手持模型偏亮。角色/world-item/viewmodel改用现有SurfaceLightingSample：同World Sky visibility与已就绪当前revision的block volume、同Pack环境frame在线性received通道合成，unknown全received归零，自己的emission/map独立保留。材质仅配置调用方拥有的clone，UI/assets借用资源不修改；独占feature texture与clone按原生命周期释放。手持相机跟随主相机既有gamma/tone mapper，不改质量、曝光政策、输入、超时或断言。不改Authority/Kernel，也不从未驻留数据猜光。
+
+先执行真实旧消费者反例，失败必须显示旧emission混光/缺统一sample行为；纯辅助adapter的RED标为contract，Null设备不算GPU。范围单测覆盖unknown/陈旧revision、自身发光、借用材质及销毁；实际WebGL2固定像素与原唯一visual/native入口按新生产身份验收，原完整矩阵仍未关闭时如实列出。已有33像素/真实场景局部PASS不直接推广所有模型几何。
+
+Root独占World/cache/sampler、三个实际消费者接线与测试、GPUprobe/spec/evidence。可用唯一Luna/medium做独立PlayCanvas材质adapter及其单测，仅两个明确路径，20分钟内交付且不得再委派。Root负责集成，构建/浏览器前全体冻结源码。AI45min×120%=54min，13:53UTC停止本片并基于证据重估；传统0.45PD×120%=0.54PD。credits/API费率与真实周额度分母未知，不换算；最新12:28UTC产品UI周剩76%，约60%全PR停止线。未改长期docs baseline/历史sealed evidence。本片完成不等于PR可合入。
+
+13:06UTC117细化：原sole visual固定画廊新增一件真实world-item，原33像素仍保留；在画廊实际材质已存在后新增三种模型clone的同固定11case像素，合计66。probe必须从真实消费者拥有的已配置材质取源，不能新造adapter冒充接线；对白色控制面/固定uniform的readback仍非全模型几何矩阵。原所有日夜/closeup/连续帧/真实单击和240s/20s不改。相关新单测及此前未登记的模型/纯sample合同追加到现有Classic行为/types与选择保护，不删除已有项。static合同沿真实ModelSurfaceLighting helper核验相同语义，不用虚假marker注释凑过断言。
+
+13:09UTC117检查：相关9files71PASS，正常范围lint发现Game504/BrowserGameplay506/World512有效行，保留FAIL。实际职责收拢至model-surface-lighting、world-surface-lighting与browser-gameplay-presentation，并移除已无消费者的旧数值block-only展示wrapper；Game世界时间同步收拢到已有runtime-controls的同类时钟职责，不抬门槛/压缩格式。新正式Classic types发现此前未收集的transport fixture缺epoch以及Null测试的显式类型适配，修为真实合同并保留原失败，不改变生产协议。
+
+13:14UTC117源码验证：旧消费者修正fixture后的有效RED2FAIL保留，最终9files73PASS；真实Web/Svelte0error0warning+tsc/tools、实际Classic tests types、范围ESLint500上限、格式/路径及原CI/freeze选择17PASS。新增actor受击/unknown/clone释放与当前world恢复闭包测试；Null仍非GPU。code-map更新实际展示owner路径，长期架构/安全政策与历史sealed evidence不改。接下来冻结源、正常提交、identified构建和原visual/native验收，尚不声明66GPU/产品矩阵PASS。

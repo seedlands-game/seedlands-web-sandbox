@@ -28,8 +28,10 @@ describe('浏览器方块光体积', () => {
         blockLightRevision: () => revision,
         voxelSemantics: classicContent.voxelSemantics,
       });
+      expect(cache.sampleKnown([0, 0, 0])).toBeNull();
       cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => {} });
       expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+      expect(cache.sampleKnown([0, 0, 0])).toBe(13);
       expect(cache.sample([0, 0, 0])).toBe(13);
       expect(cache.sample([0, 0, 0])).toBe(13);
       torch = false;
@@ -37,8 +39,10 @@ describe('浏览器方块光体积', () => {
       revision = cause === 'unloaded' ? 'unloaded:2' : 'resident:2';
       if (cause === 'edited') cache.invalidateAround(0, 0, 0);
       expect(cache.snapshot.ready).toBe(false);
+      expect(cache.sampleKnown([0, 0, 0])).toBeNull();
       expect(cache.sample([0, 0, 0])).toBe(0);
       expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
+      expect(cache.sampleKnown([0, 0, 0])).toBe(cause === 'unloaded' ? null : 0);
       expect(cache.sample([0, 0, 0])).toBe(0);
     },
   );
