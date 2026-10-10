@@ -7,6 +7,7 @@ import { EQUIPMENT_RESOURCE_ROUTE_OPTIONS, EQUIPMENT_ROUTE_MAX_X_ERROR } from '.
 import { mineVoxel, type ClassicSnapshot } from './harness';
 import { matchesVoxelAim, mouseCorrectionToPoint, mouseCorrectionToVoxel, voxelAimPoint } from './target-aim';
 import { classicScenario, type Point } from './scenario';
+import { awaitedEquipmentOperationOffset } from './equipment-operation-source-contract';
 
 const BROWSER18_PLAYER: Point = [80.65967559814453, 32.599998474121094, -0.4997326731681824];
 const BROWSER18_VIEW = [-481.16999999999973, -17.689999999999987] as const;
@@ -162,10 +163,17 @@ describe('Classic V2 equipment mining aim', () => {
     );
     for (const consumer of [resourceMining, workbenchMining]) {
       expect(consumer).not.toContain('await aimAtVoxelWithRealMouse(page,');
-      expect(consumer).toContain('await mineVoxel(page,');
       expect(consumer).toContain('aimAtVoxelWithRealMouse');
       expect(consumer.split('mineVoxel(')).toHaveLength(2);
     }
+    expect(
+      awaitedEquipmentOperationOffset(
+        resourceMining,
+        'mine:aim-and-break',
+        'mineVoxel(page, resource.target, aimAtVoxelWithRealMouse)',
+      ),
+    ).toBeGreaterThanOrEqual(0);
+    expect(workbenchMining).toContain('await mineVoxel(page, workbench.target, aimAtVoxelWithRealMouse)');
   });
 
   it('keeps the default mineVoxel aim callback and calls it before the mining button', async () => {
