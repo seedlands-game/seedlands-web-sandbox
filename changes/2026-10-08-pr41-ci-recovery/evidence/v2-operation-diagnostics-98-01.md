@@ -8,4 +8,6 @@
 
 最终实际目标文件equipment-diagnostics-contract、route-progress、equipment-resource-route、equipment-route-pulse-selection、scenario共5files56PASS；根测试类型PASS。原CI时限合同2PASS；已完成的范围生产/测试类型、ESLint、格式、路径与冻结证据5/5校验PASS。最终identified build和浏览器待冻结源码后执行。真实V2诊断、全主旅程/C4/C5及统一lighting、194矩阵仍NOT_RUN或未闭合；当前PR不可合入。
 
+07:48UTC，冻结4ec0dfbe/sourceDigest63aaf0588b484057241be6521f097bfb79ef2c110f51e2ed9c53b8f23685bf81 identified build PASS；原native 1.5m PASS，NON_MAIN，证明96实际目录字段保存/重载均2，详见96证据。该native没有执行V2资源链，新诊断的真实runtime覆盖仍待原完整CI；不冒充主旅程GREEN或性能证据。
+
 Task143独立只读审阅冻结04d98c5c及main fba4486e规则，对96同事务目录版本未发现可确认P0/P1/P2；不是完整PR批准。saveMetadata不存在应用调用的缺目录记录风险作为后续来源查询合同事项，不由假设扩为当前故障。

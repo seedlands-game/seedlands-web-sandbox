@@ -6,6 +6,8 @@ frozen save与replace仍使用原整笔worlds/chunks事务和旧revision/commitS
 
 真实旧普通/frozen函数RED：10FAIL/2PASS，其中后续normalizeRecord失败时首put部分提交确实重现。实现后12PASS；增加null/seed分支后，原seed body提取控制1FAIL/13PASS，末尾目录版本undefined。修复clear/batch/final metadata后14PASS；最终并发、删除、最大整数、空frozen反例共18个owner用例PASS，连同既有Browser persistence/worldgen initialize/冻结game save回归4files46PASS。适配是fake-indexeddb6.2.5固定dev依赖，仅package/lock新增该项，保留registry SHA512校验；这是IndexedDB兼容事务测试，不是实际GPU或浏览器证据。
 
-Web production/test/Classic E2E类型、范围ESLint、格式、路径与五份冻结证据原字节校验PASS；sealed evidence不改。当前identified build与真实Browser待最终冻结源码后执行。原native唯一线路新增只读现有worlds目录版本观察，缺DB时abort upgrade，保存后及同存档reload后验证存在/正值与非回退，原真实输入/模型/存档断言和120000/10000ms不变。没有另开Browser线路；这个正例尚未运行，不提前写PASS。
+Web production/test/Classic E2E类型、范围ESLint、格式、路径与五份冻结证据原字节校验PASS；sealed evidence不改。原native唯一线路新增只读现有worlds目录版本观察，缺DB时abort upgrade，保存后及同存档reload后验证存在/正值与非回退，原真实输入/模型/存档断言和120000/10000ms不变。没有另开Browser线路。
+
+07:48UTC，合98后冻结源码4ec0dfbe19c6317d4177b5edc9722f9c4052b7e3的identified build PASS：sourceDigest63aaf0588b484057241be6521f097bfb79ef2c110f51e2ed9c53b8f23685bf81、lock882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71、artifact0eb0ef568d41483b55b73c56aeca9add2ae53b29ae4a08fc154d6b2d421030fa，289files。默认原native 1.5m PASS，run pr41-directory-v2-native-browser98-01为NON_MAIN/attempts空。实际world seedlands:g11:classic-ordinary-minecart-75保存前/恢复后目录版本均2；恢复pose[9,31,0.5]、rider null、旧reference stale/新reference current、当前epoch和模型恢复均通过。没有低核心故障注入（diagnostic null）。原raw JSON85816B/SHA256 2aa4ecfa210e3729da60cab109de9877ca8b0e0cd499840d802a6f07077b1385；原HTML嵌入ZIP提取与两张实际PNG读取完成，可见灰色空矿车及轨道，仅是这一线路静态表现，不是全部运输或连续帧证据。
 
 本片只提供版本前提；完整列key发现、Memory/Switchable/world epoch失效、Authority dirty/resident合并、旧客户端写入协议与Sky/GPU消费者均未闭合。不能由单个版本字段认定任何高层未加载空间为空。长期code-map按真实worker入口提取更新，其他长期基线不改；PR仍不可合入。最新实际额度07:10周剩79%/4天19小时，约60%停止线保持。

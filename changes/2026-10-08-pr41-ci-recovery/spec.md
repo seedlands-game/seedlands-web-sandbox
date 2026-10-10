@@ -940,3 +940,5 @@ Root独占persistence写入源码/protocol、相关新owner事务测试、packag
 Root独占route-pulse-diagnostics.ts、equipment-journey-support.ts、新operation诊断及其Node合同测试/spec/新证据；Luna143只读冻结96并写私有报告，不改这些路径。AI15min×120%=18min、07:51UTC checkpoint；传统0.15PD×120%=0.18PD。真实07:10剩79%/4天19小时，约60%线；费用/credits/API未知不换算。96浏览器及全主旅程暂NOT_RUN，不提前宣称统一lighting/194/运输或可合入。
 
 07:44UTC范围细化：原scenario源码契约在包装后仍搜索直接await调用，55PASS/1FAIL保留。改用TypeScript语法树验证外层await、准确phase/target、返回原调用的无参数箭头回调，原操作顺序/新鲜tick/ground门禁不改；新增漏await、错操作/标签、丢弃Promise、注释伪调用反例。首次复核误用不存在的equipment-route-progress路径，只执行4files33PASS；apps/web/tsconfig.test.json不存在导致类型命令FAIL，随后使用实际route-progress/equipment-resource-route及根tsconfig.test.json核验，不把不存在项写PASS。
+
+07:48UTC checkpoint96/98：最终5files56PASS、原CI预算2PASS、test/Classic类型、范围ESLint/格式/路径/冻结5份PASS；4ec0dfbe identified build PASS，默认原native1.5m PASS/NON_MAIN，实际保存及重载目录版本均2，原pose/reference/epoch/rider/model/真实输入与timeout不改。Luna143对冻结04d同事务版本未发现确认P0/P1/P2，部分覆盖不是全PR批准。全部运行已terminal；下一步正常feature推送，原全CI的新V2诊断需实际运行，旧CI408 FAIL保留。源码96约26min/98约16min，原预算检查点内；真实周额度仍仅07:10的79%，08:10刷新，不能推算。
