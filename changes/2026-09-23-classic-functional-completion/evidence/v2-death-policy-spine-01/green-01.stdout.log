@@ -1,0 +1,97 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts (10 tests | 1 failed) 23ms
+     × commits more than 128 drops through one series frontier in candidate order 4ms
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts (9 tests | 2 failed) 14ms
+     × rejects a candidate whose actor inventory revision changed before participant preparation 3ms
+     × rejects exhausted spawn allocation before changing the actor 1ms
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-policy-module.test.ts (4 tests | 1 failed) 7ms
+     × strictly validates, detaches and deep-freezes the canonical definition 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-policy-module.test.ts > death inventory policy capability > strictly validates, detaches and deep-freezes the canonical definition
+AssertionError: expected { inventory: 'retain', …(4) } to deeply equal { inventory: 'drop', …(4) }
+
+- Expected
++ Received
+
+  {
+    "actor": "retain",
+    "armor": "retain",
+    "crafting": "retain",
+    "cursor": "retain",
+-   "inventory": "drop",
++   "inventory": "retain",
+  }
+
+ ❯ packages/stdlib/tests/server/death-inventory-policy-module.test.ts:48:44
+     46|     const composition = assembleWorldPacks([artifact(pack)]);
+     47|     const capability = resolveDeathInventoryPolicyCapabilityV1(composi…
+     48|     expect(capability.policyFor('player')).toEqual(retain);
+       |                                            ^
+     49|     expect(capability.definition).not.toBe(input);
+     50|     expect(Object.isFrozen(capability)).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/death-inventory-settlement-series.test.ts > death inventory settlement series > commits more than 128 drops through one series frontier in candidate order
+AssertionError: expected [] to have a length of 144 but got +0
+
+- Expected
++ Received
+
+- 144
++ 0
+
+ ❯ packages/stdlib/tests/server/death-inventory-settlement-series.test.ts:204:19
+    202|     prepared.apply();
+    203|     const drops = entities.query({ type: 'world-item' });
+    204|     expect(drops).toHaveLength(144);
+       |                   ^
+    205|     expect(drops.map(({ stack }) => stack!.itemId)).toEqual(
+    206|       candidates.flatMap((_candidate, index) => Array(36).fill(`sample…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts > death inventory settlement contract > rejects a candidate whose actor inventory revision changed before participant preparation
+AssertionError: expected [Function] to throw error matching /revision.*stale/i but got 'Death inventory settlement actor comp…'
+
+- Expected:
+/revision.*stale/i
+
++ Received:
+"Death inventory settlement actor component source is stale."
+
+ ❯ packages/stdlib/tests/server/equipment-spine-contract.test.ts:319:85
+    317|     actor.replaceInventoryInteraction(actor.inventoryRevision + 1, act…
+    318|     const changed = entities.exportComponentSnapshot();
+    319|     expect(() => prepareDeathInventorySettlementParticipantV1(entities…
+       |                                                                                     ^
+    320|     expect(entities.exportComponentSnapshot()).toEqual(changed);
+    321|     expect(entities.query({ type: 'world-item' })).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts > death inventory settlement contract > rejects exhausted spawn allocation before changing the actor
+TypeError: Death inventory actor reference is invalid.
+ ❯ exactRecord packages/stdlib/src/server/gameplay/death-inventory-settlement.ts:68:29
+     66|
+     67| const exactRecord = (raw: unknown, keys: readonly string[], label: str…
+     68|   if (!isRecord(raw)) throw new TypeError(`${label} is invalid.`);
+       |                             ^
+     69|   const descriptors = Object.getOwnPropertyDescriptors(raw);
+     70|   if (
+ ❯ frozenReference packages/stdlib/src/server/gameplay/death-inventory-settlement.ts:82:15
+ ❯ buildDeathInventorySettlementCandidateV1 packages/stdlib/src/server/gameplay/death-inventory-settlement.ts:238:21
+ ❯ packages/stdlib/tests/server/equipment-spine-contract.test.ts:331:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  3 failed (3)
+      Tests  4 failed | 19 passed (23)
+   Start at  21:38:13
+   Duration  669ms (transform 287ms, setup 0ms, import 394ms, tests 44ms, environment 0ms)
+

@@ -29,7 +29,7 @@ export type PlayerSnapshot = {
   lifecycle: PlayerLifecycle;
   inventory: InventorySlot[];
   selectedSlot: number;
-  hotbarSize: 8;
+  hotbarSize: number;
   attackCooldownSeconds: number;
   hungerAccumulator: number;
   healingAccumulator: number;
@@ -47,7 +47,9 @@ export class PlayerState {
   private readonly state: PlayerComponentAccess;
   readonly maxHealth = 20 as const;
   readonly maxHunger = 20 as const;
-  readonly hotbarSize = 8 as const;
+  get hotbarSize(): number {
+    return this.state.hotbarSize;
+  }
 
   constructor(
     readonly entityId: string,
@@ -190,6 +192,18 @@ export class PlayerState {
     this.lifecycle = 'alive';
     this.breakAction = null;
     this.hungerAccumulator = this.healingAccumulator = this.starvationAccumulator = 0;
+  }
+
+  setSpawnPosition(position: [number, number, number]): boolean {
+    if (
+      position.length !== 3 ||
+      !position.every(Number.isFinite) ||
+      this.lifecycle !== 'alive' ||
+      this.mode !== 'survival'
+    )
+      return false;
+    this.state.spawnPosition = [...position];
+    return true;
   }
 
   private restoreFields(snapshot: Partial<PlayerSnapshot>): void {

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-16",
+  "classification": "canonical-fixture-v2-pre-wood-corridor-route-stalled",
+  "failedAt": "first-wood-batch-common-workbench-corridor-return",
+  "sourceLocation": "apps/web/tests/e2e/classic-support/equipment-journey-support.ts:242",
+  "target": [78.5, -0.5],
+  "error": "Real input route timed out before 78.5,-0.5.",
+  "lastRecordedV2Phase": "resources-placed",
+  "recordedV2Steps": ["resources-placed"],
+  "woodResourceLoopEntered": false,
+  "woodMiningInputSent": false,
+  "equipmentPointerReached": false,
+  "input": {
+    "realKeyboardPulsesObserved": ["KeyS", "Space"],
+    "authorityAcknowledgedInputSequenceAtFailureAttachment": 17784,
+    "authorityPhysicsTickAtFailureAttachment": 24621,
+    "authorityInputReached": true
+  },
+  "trajectory": {
+    "samples": 256,
+    "firstRecordedPosition": [87.18252119286404, 33.625001, -0.5097974215475533],
+    "lastRecordedPosition": [85.832521192864, 32.600001, -0.5109755187512944],
+    "minimumX": 85.832521192864,
+    "netXProgress": -1.35,
+    "tailXStalledAt": 85.832521192864,
+    "clientAtFailureAttachment": [85.83251953125, 32.60000228881836, -0.5109755396842957],
+    "serverAtFailureAttachment": [85.832521192864, 32.600001, -0.5109755187512944],
+    "serverVelocityAtFailureAttachment": [0, 0, 0],
+    "onGroundAtFailureAttachment": true,
+    "collidingAtFailureAttachment": false
+  },
+  "geometry": {
+    "workbench": { "target": [78, 31, -2], "corridorWaypoint": [78.5, -0.5] },
+    "resourceStripZ": 2,
+    "failureFrameShowsFlatCorridor": true,
+    "knownResourceCollisionProven": false
+  },
+  "close03": {
+    "clientOutsideFiniteNeighborhoodAtFailure": true,
+    "serverOnlyLagBranchReached": false,
+    "boundedReadOnlyServerWaitObserved": false
+  },
+  "limits": {
+    "failureInstantCollisionNormalRecorded": false,
+    "blockingVoxelRecorded": false,
+    "pulseByPulseFixtureSnapshotRecorded": false,
+    "rootCauseBeyondRouteStallClaimed": false
+  },
+  "narrowestFollowUp": "Freeze a deterministic fixture diagnostic for this same pre-wood corridor leg that records each real-input pulse direction, matched client/server position, tick/ack and nearby read-only voxel geometry before changing route, timeout or generic walkTo."
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-death-direct-vitals-matrix-04",
+  "pid": 99106,
+  "startedAt": "2026-09-25T15:55:24.306Z",
+  "windowId": "v2-death-direct-vitals-matrix-04",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-direct-vitals-01/matrix-04-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T15:55:25.733Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T15:55:24.307Z",
+      "loadAverage": [
+        4.5751953125,
+        3.88671875,
+        3.91357421875
+      ],
+      "freeMemoryBytes": 103792640,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T15:55:25.732Z",
+      "loadAverage": [
+        4.5751953125,
+        3.88671875,
+        3.91357421875
+      ],
+      "freeMemoryBytes": 492912640,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

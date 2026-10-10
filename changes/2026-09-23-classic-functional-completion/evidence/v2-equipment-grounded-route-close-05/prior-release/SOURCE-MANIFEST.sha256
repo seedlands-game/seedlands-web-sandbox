@@ -1,0 +1,14 @@
+8f34c85c9cb94dc485ac3adfb43b3871bff8dfe3bf831b00b67774d96766dbe4  apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+4c7b2925b8bf6e8e64510716896ca9469fb675c79121a2b520b3fbb12fcef767  apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+9964aeca6cc0b4cbe679cbc1f4f446b78d6ab98b8204dc085eb30585ad1fa381  apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+c1dcb56dfedbc2a0583af1ba0caab7e50d5d219e8156172099e2d764a9e56b7c  apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts
+f4dc4c202bdfcd5ad64f687e4fee8d8e765a0060b81e510ad947dd95617965af  apps/web/tests/e2e/classic-support/scenario.test.ts
+3e6059f28b6f40c6b7e2c6b273b8408122c22f714380ad22b71df8d2350981ae  apps/web/src/client/player-input-stream.ts
+cda2782631378e4cbacbea41eb9a1d62ed3e8f2b41d84fca0874b7c3ca64f686  packages/stdlib/src/runtime/session-protocol.ts
+3776119842306f1d0499c9645d972e49254c1a0d8d22af2d52ef829f6e10b479  packages/stdlib/src/physics/step-body.ts
+8da9deba2e5afb201831aba5eba46bce3b18b181364e6a4d4d98c23a7f73cc77  packages/stdlib/src/physics/body-registry.ts
+6cd7df6451b96f995f1eb412c1a29b209574b9bc013dc0fcab295e0514a58320  playbooks/classic/scenarios/canonical-runtime-v11.json
+cba63047c98c2ef215b0db16c1145d47c8c64c785ae0e7fcc1a3aab0df396473  changes/2026-09-23-classic-functional-completion/spec.md
+3180e75f8c618bd2289fd1b5ffdc7671a5f29849d7b132c537714193b0d185f9  changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+bcb9764b74767e3af6ed81306e659a76a20db84155880493a672010cfac7087b  changes/2026-09-23-classic-functional-completion/equipment-resource-route-evidence.md
+028b80db23d0ed7891da05b62a27a25e4831266d8e164e6061cc89282f12938e  changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md

@@ -1,0 +1,16 @@
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web
+Getting Svelte diagnostics...
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web/src/app/ui/inventory-crafting.svelte:60:13
+Error: Element implicitly has an 'any' type because expression of type 'number | "helmet" | "chestplate" | "leggings" | "boots"' can't be used to index type 'Readonly<Record<"helmet" | "chestplate" | "leggings" | "boots", Readonly<Omit<Readonly<{ slot: number; itemId: string | null; count: number; name: string; edible: boolean; stackLimit?: number | undefined; durability?: Readonly<...> | undefined; }>, "slot"> & { ...; }>>>'.
+  No index signature with a parameter of type 'number' was found on type 'Readonly<Record<"helmet" | "chestplate" | "leggings" | "boots", Readonly<Omit<Readonly<{ slot: number; itemId: string | null; count: number; name: string; edible: boolean; stackLimit?: number | undefined; durability?: Readonly<...> | undefined; }>, "slot"> & { ...; }>>>'. (ts)
+          ? gameplay.station?.slots[slot.slot]
+          : gameplay.equipment[slot.slot];
+  function accepts(slot: InventoryUiSlot): boolean {
+
+====================================
+svelte-check found 1 error and 0 warnings in 1 file
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 typecheck: `svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit`
+Exit status 1

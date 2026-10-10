@@ -2,50 +2,48 @@ import { describe, expect, it } from 'vitest';
 import { definePack, defineNeedsModule, defineNeedsRulesModule } from '@seedlands/stdlib/mod-api';
 import {
   assembleWorldPacks,
-  assembleOverworldPacks,
   createGameplaySystemAuthority,
   createGameplayActorAuthority,
 } from '@seedlands/stdlib/host';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import {
   type GameplaySnapshotV3,
   createGameplaySnapshotMetadata,
 } from '../../../../../../../packages/stdlib/src/server/gameplay/gameplay-snapshot';
-import { GameplayRuntime } from '../../../../fixtures/classic/content';
-import { capturedLegacyCompositionIdentity } from '../../../../fixtures/classic/legacy-composition';
+import { createClassicComposition, GameServer, GameplayRuntime } from '../../../../fixtures/classic/content';
+import { classicKernelMigrationCompositionIdentity } from '../../../../../../../playbooks/classic/src/legacy-composition-identities';
 import { WorldResourceAuthorizer } from '../../../../../../../packages/stdlib/src/server/harness/world-authorization';
+import { MemoryGamePersistence } from '../../../../../../../packages/stdlib/src/server/persistence/memory-game-persistence';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function setup(needs: boolean) {
-  const modules = [
-    ...pack.modules.filter(
-      (module) =>
-        ![
-          'seedlands:needs-module',
-          'seedlands:overworld-needs-rules',
-          'seedlands:feeding-actions-module',
-          'seedlands:overworld-feeding-rules',
-        ].includes(module.descriptor.id),
-    ),
-    ...(needs
-      ? [
-          defineNeedsModule(),
-          defineNeedsRulesModule({
-            moduleId: 'test:needs-rules',
-            profiles: {
-              satiety: {
-                enabledModes: ['survival'],
-                hungerEverySeconds: 2,
-                hungerDelta: -1,
-                heal: { threshold: 16, everySeconds: 10, amount: 1, hungerCost: 1 },
-                starvation: { threshold: 0, everySeconds: 15, damage: 1 },
-              },
-              deficit: { enabledModes: ['survival'], hungerEverySeconds: 5, hungerDelta: 1 },
+  const replacements = needs
+    ? [
+        defineNeedsModule(),
+        defineNeedsRulesModule({
+          moduleId: 'test:needs-rules',
+          profiles: {
+            satiety: {
+              enabledModes: ['survival'],
+              hungerEverySeconds: 2,
+              hungerDelta: -1,
+              heal: { threshold: 16, everySeconds: 10, amount: 1, hungerCost: 1 },
+              starvation: { threshold: 0, everySeconds: 15, damage: 1 },
             },
-          }),
-        ]
-      : []),
-  ];
+            deficit: { enabledModes: ['survival'], hungerEverySeconds: 5, hungerDelta: 1 },
+          },
+        }),
+      ]
+    : [];
+  const modules = classicGameplayDomainModules(
+    [
+      ...(needs ? ['test:needs-rules', 'seedlands:overworld-death-inventory-policy'] : []),
+      'seedlands:mode-module',
+      'seedlands:overworld-combat-rules',
+      'seedlands:inventory-actions-module',
+    ],
+    replacements,
+  );
   const selected = definePack({ id: 'test:needs-playbook', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -155,8 +153,8 @@ describe('registered Needs is the real composed consumer', () => {
       bulk = setup(true).world;
     for (const world of [fine, bulk])
       world.spawnAutonomous(
-        { id: 'settler', type: 'npc', archetype: 'settler', position: [1, 1, 0] },
-        { archetype: 'settler' },
+        { id: 'settler', type: 'creature', archetype: 'zombie', position: [1, 1, 0] },
+        { archetype: 'zombie' },
       );
     for (let step = 0; step < 100; step++) fine.advanceRules(0.05);
     bulk.advanceRules(5);
@@ -174,7 +172,7 @@ describe('registered Needs is the real composed consumer', () => {
     expect(restored.createSnapshot().entityStore).toEqual(first.createSnapshot().entityStore);
     expect(restored.getPlayerState('alice').hunger).toBe(19);
   });
-  it('migrates the legacy shared NPC needs phase into per-actor state before the next tick', () => {
+  it('migrates the legacy shared NPC needs phase into per-actor state before the next tick', async () => {
     const legacy = new GameplayRuntime({
       platform: testCorePlatform,
       getWorldTime: () => 0,
@@ -185,8 +183,8 @@ describe('registered Needs is the real composed consumer', () => {
     });
     legacy.spawnPlayer({ id: 'alice', position: [0, 1, 0] });
     legacy.spawnAutonomous(
-      { id: 'settler', type: 'npc', archetype: 'settler', position: [1, 1, 0] },
-      { archetype: 'settler' },
+      { id: 'settler', type: 'creature', archetype: 'zombie', position: [1, 1, 0] },
+      { archetype: 'zombie' },
     );
     legacy.advanceRules(4.4);
     const saved = legacy.createSnapshot();
@@ -201,28 +199,36 @@ describe('registered Needs is the real composed consumer', () => {
       players: [legacy.getPlayerState('alice')],
       simulation: saved.simulation,
     };
-    const composition = assembleOverworldPacks([
-      {
-        ...pack,
-        integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
-      },
-    ]);
-    const current = new GameplayRuntime({
+    const composition = createClassicComposition();
+    const persistence = new MemoryGamePersistence({
+      clone: testCorePlatform.clone,
+      rawGameplaySnapshot: old,
+    });
+    const current = new GameServer({
+      seedText: 'legacy-needs',
       composition,
+      legacyCompositionIdentity: classicKernelMigrationCompositionIdentity,
       moduleSystemAuthority: createGameplaySystemAuthority(composition),
-      legacyCompositionIdentity: capturedLegacyCompositionIdentity(),
+      moduleActorAuthority: createGameplayActorAuthority(composition.resources, { playerAlias: 'human' }),
+      persistence,
       platform: testCorePlatform,
-      getWorldTime: () => 0,
-      getVoxel: () => 0,
-      prepareVoxelEdit: () => {
-        throw new Error('unexpected edit');
+    });
+    await current.restore();
+    current.advanceGameplayRules(0.6);
+    expect(current.getActorState('settler')).toMatchObject({ hunger: 1 });
+    await current.save();
+    expect(persistence.loadGameplaySnapshot()).toMatchObject({
+      version: 4,
+      entityStore: {
+        actors: expect.arrayContaining([
+          expect.objectContaining({
+            entityId: 'settler',
+            needs: expect.objectContaining({ hunger: 1, hungerAccumulator: 0 }),
+          }),
+        ]),
       },
     });
-    current.restoreSnapshot(old);
-    current.advanceRules(0.6);
-    expect(current.entities.actorNeedsSnapshot('settler').hunger).toBe(1);
-    expect(current.entities.actorNeedsSnapshot('settler').hungerAccumulator).toBeCloseTo(0);
-    expect(current.simulation.snapshot().needsAccumulator).toBe(0);
+    expect(current.simulationSnapshot().needsAccumulator).toBe(0);
   });
   it('preflights all partition deaths and leaves ECS and Combat unchanged on the last drop allocation failure', () => {
     const { world } = setup(true);
@@ -236,8 +242,8 @@ describe('registered Needs is the real composed consumer', () => {
     expect(() => world.spawnPlayer({ id: 'overflow', position: [0, 1, 0] })).toThrow(/membership budget/i);
     expect(world.entities.exportComponentSnapshot()).toEqual(membership);
     world.spawnAutonomous(
-      { id: 'a-npc', type: 'npc', archetype: 'settler', position: [0, 1, 5] },
-      { archetype: 'settler' },
+      { id: 'a-npc', type: 'creature', archetype: 'zombie', position: [0, 1, 5] },
+      { archetype: 'zombie' },
     );
     for (const id of ids) world.giveItem(id, { itemId: 'wood-block', count: 1 });
     armStarvation(world, ids);
@@ -255,10 +261,10 @@ describe('registered Needs is the real composed consumer', () => {
     const { world } = setup(true);
     world.giveItem('alice', { itemId: 'wood-block', count: 3 });
     world.spawnAutonomous(
-      { id: 'stalker', type: 'creature', archetype: 'night-stalker', position: [1, 1, 0] },
-      { archetype: 'night-stalker' },
+      { id: 'stalker', type: 'creature', archetype: 'zombie', position: [1, 1, 0] },
+      { archetype: 'zombie' },
     );
-    const attack = world.simulation.requestActorCombat('stalker', 'alice', 'night-stalker-claw');
+    const attack = world.simulation.requestActorCombat('stalker', 'alice', 'zombie-claw');
     expect(attack.success).toBe(true);
     armStarvation(world, ['alice'], 14.95);
     world.advanceRules(0.05);

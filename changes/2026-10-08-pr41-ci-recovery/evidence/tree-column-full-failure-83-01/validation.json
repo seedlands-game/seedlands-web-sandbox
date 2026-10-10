@@ -1,0 +1,332 @@
+{
+  "schemaVersion": 1,
+  "status": "FAIL",
+  "sourceSha": "2b17241b64dfba61147444d9187881cddc32e942",
+  "artifactDigest": "efd549f30cc12570084c5742f33bbe9de2b3e522582dafe114a68600ffd5a580",
+  "sourceDigest": "bdd1937fd81a604670a72bd0b421e65f6ec1f0148fa318db35aa8bf35848f3a6",
+  "runId": "pr41-tree-column-full-browser83-01",
+  "selection": "CANONICAL_MAIN",
+  "runnerExit": 1,
+  "tests": {
+    "main": "FAIL original900000ms",
+    "visual": "PASS 1.3min",
+    "minecart": "PASS25.8s",
+    "modular": "SKIP default"
+  },
+  "stages": {
+    "C0": {
+      "status": "PASS",
+      "observation": "Production preview loaded the fixed seed with a stamped Classic composition, Authority/logic/persistence/compute Workers, consumed Wasm bytes and an actual WebGL2 context."
+    },
+    "C1": {
+      "status": "PASS",
+      "observation": "Pointer Lock mouse movement changed the route, then held W+Space crossed from Chunk 0 to Chunk 1 and Authority acknowledged it."
+    },
+    "C2": {
+      "status": "PASS",
+      "observation": "Mouse mining produced visible drops; movement picked them up; E opened inventory and real 2x2 pointer interactions produced planks, sticks, a wood sword and a workbench."
+    },
+    "C3": {
+      "status": "PASS",
+      "observation": "Right click placed crafted planks with a consumed mesh commit; inventory food restored health; held real mouse input buffered and completed the wood-sword second combo hit before defeating the fixed creature; a crafted workbench was placed, opened through the station runtime, then dismantled and recovered through real actions."
+    }
+  },
+  "v2Phase": "wood-pickaxe",
+  "frameDiagnostic": {
+    "count": 1200,
+    "p50Ms": 469.19999998807907,
+    "p95Ms": 1206.5,
+    "p99Ms": 2043.300000011921,
+    "maxMs": 3333.5,
+    "longFrameCount": 1198,
+    "lastLongFrameMs": 413.80000001192093
+  },
+  "startupDiagnostic": {
+    "phases": [
+      {
+        "name": "seedlands:world-start:1:save-flush",
+        "startTime": 2150
+      },
+      {
+        "name": "seedlands:world-start:1:save-flush:complete",
+        "startTime": 2195.300000011921
+      },
+      {
+        "name": "seedlands:world-start:1:scene",
+        "startTime": 2196.0999999940395
+      },
+      {
+        "name": "seedlands:world-start:1:scene:complete",
+        "startTime": 2242.9000000059605
+      },
+      {
+        "name": "seedlands:world-start:1:materials",
+        "startTime": 2245.4000000059605
+      },
+      {
+        "name": "seedlands:world-start:1:materials:complete",
+        "startTime": 3367.7000000178814
+      },
+      {
+        "name": "seedlands:world-start:1:media",
+        "startTime": 3431.300000011921
+      },
+      {
+        "name": "seedlands:world-start:1:media:complete",
+        "startTime": 3463.5999999940395
+      },
+      {
+        "name": "seedlands:world-start:1:worker",
+        "startTime": 3463.5999999940395
+      },
+      {
+        "name": "seedlands:world-start:1:worker:complete",
+        "startTime": 6165.5
+      },
+      {
+        "name": "seedlands:world-start:1:first-visible",
+        "startTime": 6261.0999999940395
+      },
+      {
+        "name": "seedlands:world-start:1:first-visible:complete",
+        "startTime": 7176.700000017881
+      }
+    ],
+    "cardDisplay": "none",
+    "alerts": [],
+    "buttons": [
+      {
+        "label": "继续世界 classic-canonical-runtime-v11",
+        "disabled": false
+      },
+      {
+        "label": "推荐起点：林间河岸 森林 · 河水 · 营地",
+        "disabled": false
+      },
+      {
+        "label": "进入世界",
+        "disabled": false
+      },
+      {
+        "label": "木剑动作体验场 木剑已装备 · 两段斜劈 · 玩家受击反馈",
+        "disabled": false
+      },
+      {
+        "label": "设置",
+        "disabled": false
+      },
+      {
+        "label": "操作指南",
+        "disabled": false
+      }
+    ]
+  },
+  "failureMineDiagnostic": {
+    "target": "88,31,2",
+    "feedback": "",
+    "player": {
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Player state for player-1.",
+        "affectedChunks": [],
+        "worldRevision": 168,
+        "observation": {
+          "commandType": "query-player-state",
+          "category": "query",
+          "actorId": "player-1",
+          "sourceType": "local-developer",
+          "durationMs": 0,
+          "success": true,
+          "affectedChunks": [],
+          "worldRevision": 168,
+          "mutationCount": 0,
+          "structuralEventCount": 0
+        },
+        "data": {
+          "player": {
+            "entityId": "player-1",
+            "spawnPosition": [16.5, 18, 16.5],
+            "health": 18,
+            "maxHealth": 20,
+            "hunger": 20,
+            "maxHunger": 20,
+            "lifecycle": "alive",
+            "inventory": [
+              {
+                "itemId": "wood-pickaxe",
+                "count": 1,
+                "instance": {
+                  "durability": 59
+                }
+              },
+              {
+                "itemId": "cobblestone",
+                "count": 1
+              },
+              {
+                "itemId": "stick",
+                "count": 5
+              },
+              null,
+              {
+                "itemId": "wood-sword",
+                "count": 1
+              },
+              null,
+              null,
+              null,
+              {
+                "itemId": "plank",
+                "count": 14
+              },
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null
+            ],
+            "selectedSlot": 0,
+            "hotbarSize": 9,
+            "attackCooldownSeconds": 0,
+            "hungerAccumulator": 0,
+            "healingAccumulator": 0,
+            "starvationAccumulator": 0,
+            "breakAction": {
+              "position": [88, 31, 2],
+              "voxel": 3,
+              "elapsedSeconds": 0.6,
+              "requiredSeconds": 1.2,
+              "origin": {
+                "version": 1,
+                "principalSubject": "seedlands:local-player",
+                "provenance": {
+                  "packId": "seedlands:overworld",
+                  "moduleId": "seedlands:block-actions-module"
+                },
+                "originalActor": {
+                  "entityId": "player-1",
+                  "lifetime": 1
+                }
+              }
+            },
+            "mode": {
+              "version": 1,
+              "value": "survival",
+              "revision": 30
+            },
+            "creativeCatalog": {
+              "version": 1,
+              "hotbar": [
+                "iron-block",
+                "cake",
+                "dead-bush",
+                "wool-block",
+                "red-flower",
+                "red-mushroom",
+                "bricks",
+                "bookshelf",
+                "mossy-cobblestone"
+              ],
+              "selectedSlot": 0,
+              "revision": 42
+            },
+            "flight": {
+              "version": 1,
+              "enabled": false,
+              "revision": 30
+            },
+            "combat": {
+              "active": null,
+              "cooldownRemainingSeconds": 0,
+              "lastResult": {
+                "sequence": 2,
+                "actionId": "action-12",
+                "definitionId": "wood-sword",
+                "targetId": "classic-route-creature",
+                "comboStep": 1,
+                "outcome": "hit",
+                "damage": 7
+              }
+            }
+          }
+        }
+      },
+      "frontier": {
+        "worldId": "seedlands:g11:classic-canonical-runtime-v11",
+        "epoch": "seedlands:classic-canonical-runtime-v11:1:world:0",
+        "worldRevision": 168,
+        "commitSequence": 1023390,
+        "physicsTick": 58414,
+        "fluidWorkSequence": 132,
+        "logicObservationSequence": 14627
+      }
+    },
+    "action": {
+      "ok": true,
+      "data": {
+        "success": true,
+        "message": "Action for player-1.",
+        "affectedChunks": [],
+        "worldRevision": 168,
+        "observation": {
+          "commandType": "query-action",
+          "category": "query",
+          "actorId": "player-1",
+          "sourceType": "local-developer",
+          "durationMs": 0,
+          "success": true,
+          "affectedChunks": [],
+          "worldRevision": 168,
+          "mutationCount": 0,
+          "structuralEventCount": 0
+        },
+        "data": {
+          "action": null
+        }
+      },
+      "frontier": {
+        "worldId": "seedlands:g11:classic-canonical-runtime-v11",
+        "epoch": "seedlands:classic-canonical-runtime-v11:1:world:0",
+        "worldRevision": 168,
+        "commitSequence": 1023390,
+        "physicsTick": 58414,
+        "fluidWorkSequence": 132,
+        "logicObservationSequence": 14627
+      }
+    }
+  },
+  "trace": {
+    "path": "/workspace/pr41-recovery-20261008-root-01/browser83-full-01/test-results/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+    "bytes": 115374030,
+    "sha256": "0cf664d0b6e72a5d7115beaade95590ae82ce58dd49be1649f7f96eae19e5354"
+  },
+  "performanceStatus": "whole-frame/combined AA AB NOT_RUN; current correctness diagnostics ineligible",
+  "remainingWeekly": {
+    "percent": 80,
+    "observedAt": "2026-10-10 04:33 UTC",
+    "stopLinePercent": 60
+  }
+}

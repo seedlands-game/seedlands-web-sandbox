@@ -1,5 +1,4 @@
 import type { CorePlatformPorts } from '../../runtime/platform-ports';
-import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { CHUNK_SIZE, chunkKey, floorDiv } from '../../world/voxel';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
 import { runWorldComputeTask } from '../compute/world-compute-task';
@@ -23,7 +22,7 @@ export async function loadHeadlessEntityChunks(
   state: HeadlessChunkState,
 ): Promise<void> {
   for (const entity of runtime.server.queryEntities()) {
-    const config = bodyConfigFor(bodyKindForEntity(entity));
+    const config = runtime.bodyConfigForEntity(entity);
     const min = [config.localAabb.min.x, config.localAabb.min.y, config.localAabb.min.z] as const;
     const max = [config.localAabb.max.x, config.localAabb.max.y, config.localAabb.max.z] as const;
     const lower = entity.position.map((value, axis) => floorDiv(value + min[axis] - 0.05, CHUNK_SIZE));

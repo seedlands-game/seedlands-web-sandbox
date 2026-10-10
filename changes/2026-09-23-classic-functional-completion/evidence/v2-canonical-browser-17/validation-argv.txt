@@ -1,0 +1,12 @@
+V2-CANONICAL-BROWSER-17
+acceptanceTree=/private/tmp/seedlands-v2-acceptance-cb4941bf
+runId=v2-canonical-browser-17-cb4941bf
+
+canonical-attempt0
+env SEEDLANDS_HARNESS_RUN_ID=v2-canonical-browser-17-cb4941bf node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:classic
+
+artifact-postcheck
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-17-artifact-postcheck SEEDLANDS_RESERVATION_EVIDENCE=/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-17/artifact-postcheck-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:artifact
+
+report-format
+env SEEDLANDS_RESERVATION_RUN=v2-canonical-browser-17-report-format SEEDLANDS_RESERVATION_EVIDENCE=changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-17/report-format-window.json.log node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm exec prettier --check changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-17/result-summary.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-17/diagnosis.json changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-17/trace-readback.json

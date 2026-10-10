@@ -1,0 +1,7 @@
+# 新 owner 保护的收集与类型闭包
+
+原test:classic:headless显式名单没有96 writer、99 Worker/Browser列查询及98诊断合同，原Classic类型名单没有三项新Web unit。根tsconfig.test只包含Kernel/stdlib，因此先前根检查不是这三项新测试的类型证据。
+
+新增CI收集静态断言实际RED1FAIL/2PASS；登记三项unit与E2E诊断合同后3PASS。原全部headless用例、整个E2E类型目录、唯一Chromium、900000ms主旅程/120000msnative及重试、artifact保持。实际Classic类型第一轮FAIL：ES2022无findLast、冻结保存夹具缺seed/generator、预算参数被推断为固定128/2048。改成ES2022既有find、补真实冻结输入身份、给有界预算明确number类型，最终实际Classic类型PASS，相关6files75PASS及范围ESLint PASS。第二轮编译在类型注解补丁前读入旧声明的单项FAIL也保留，第三轮在固定源码重新核验通过。
+
+不是升语言目标、删断言或减少收集；旧CI409的795PASS/1FAIL保持，100挖掘等待测试修复尚未远端验证，Chromium尚运行。最终test:ci-selection17PASS；范围格式/路径及冻结5份原字节校验PASS。整批headless/新真实查询Browser尚未本地跑，不能写PASS。长期CI合同不变，code-map的query归属随99更新；周额度只能依赖主对话实际UI，最新已确认07:10的79%，08:10刷新问题已发送、尚未收到新读数。

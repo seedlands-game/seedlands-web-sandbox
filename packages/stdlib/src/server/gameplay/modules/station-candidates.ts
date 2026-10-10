@@ -28,24 +28,68 @@ export type StationCandidateInput = Readonly<{
   items: ItemDefinitionRegistry;
 }>;
 
+const gridWidth = (grid: readonly unknown[]): 2 | 3 => {
+  if (grid.length === 4) return 2;
+  if (grid.length === 9) return 3;
+  throw new TypeError('Crafting grid must be an exact 2x2 or 3x3 grid.');
+};
+
+const shapedBounds = (pattern: readonly InventorySlot[]) => {
+  if (!Array.isArray(pattern) || pattern.length !== 9)
+    throw new TypeError('Shaped recipe pattern must be an exact 3x3 grid.');
+  const occupied = pattern.flatMap((slot, index) => (slot ? [[index % 3, Math.floor(index / 3)] as const] : []));
+  if (!occupied.length) throw new TypeError('Shaped recipe requires ingredients.');
+  const xs = occupied.map(([x]) => x),
+    ys = occupied.map(([, y]) => y);
+  return {
+    left: Math.min(...xs),
+    top: Math.min(...ys),
+    width: Math.max(...xs) - Math.min(...xs) + 1,
+    height: Math.max(...ys) - Math.min(...ys) + 1,
+  };
+};
+
+export function stationRecipeFitsGrid(recipe: StationRecipe, size: 2 | 3): boolean {
+  if (recipe.kind === 'shapeless') return recipe.inputs.length <= size * size;
+  const bounds = shapedBounds(recipe.pattern);
+  return bounds.width <= size && bounds.height <= size;
+}
+
 export function matchesShapedStationRecipe(
   grid: StationGrid,
   recipe: ShapedStationRecipe,
   items: ItemDefinitionRegistry,
 ): boolean {
   const candidate = validateGrid(grid, items);
+  const width = gridWidth(candidate);
   validateIdentity(recipe.id);
-  if (!Array.isArray(recipe.pattern) || recipe.pattern.length !== 9)
-    throw new TypeError('Shaped station pattern must be an exact 3x3 grid.');
+  const bounds = shapedBounds(recipe.pattern);
   validateOutputs(recipe.outputs, items);
   recipe.pattern.forEach((ingredient) => {
     if (ingredient) items.assertStack(ingredient);
   });
-  return recipe.pattern.every((ingredient, index) => {
-    const slot = candidate[index];
-    if (ingredient === null) return slot === null;
-    return slot !== null && sameItemStackIdentity(slot, ingredient) && slot.count >= ingredient.count;
-  });
+  if (bounds.width > width || bounds.height > width) return false;
+  for (let offsetY = 0; offsetY <= width - bounds.height; offsetY += 1)
+    for (let offsetX = 0; offsetX <= width - bounds.width; offsetX += 1) {
+      const expected: InventorySlot[] = Array.from({ length: candidate.length }, () => null);
+      recipe.pattern.forEach((ingredient, index) => {
+        if (!ingredient) return;
+        const x = (index % 3) - bounds.left + offsetX;
+        const y = Math.floor(index / 3) - bounds.top + offsetY;
+        expected[y * width + x] = ingredient;
+      });
+      if (
+        expected.every((ingredient, index) =>
+          ingredient === null
+            ? candidate[index] === null
+            : candidate[index] !== null &&
+              sameItemStackIdentity(candidate[index]!, ingredient) &&
+              candidate[index]!.count >= ingredient.count,
+        )
+      )
+        return true;
+    }
+  return false;
 }
 
 export function matchesShapelessStationRecipe(
@@ -54,13 +98,14 @@ export function matchesShapelessStationRecipe(
   items: ItemDefinitionRegistry,
 ): boolean {
   const candidate = validateGrid(grid, items);
+  const width = gridWidth(candidate);
   validateIdentity(recipe.id);
   if (!Array.isArray(recipe.inputs) || recipe.inputs.length === 0)
     throw new TypeError('Shapeless station recipe inputs are required.');
   validateOutputs(recipe.outputs, items);
-  const available = totals(candidate);
-  const required = ingredientTotals(recipe.inputs, items);
-  return [...required].every(([itemId, count]) => (available.get(itemId) ?? 0) >= count);
+  recipe.inputs.forEach((input) => items.assertStack(input));
+  if (!stationRecipeFitsGrid(recipe, width)) return false;
+  return matchShapelessSlots(candidate, recipe.inputs) !== null;
 }
 
 export function createStationCraftCandidate(input: StationCandidateInput): StationCraftCandidate {
@@ -77,13 +122,14 @@ export function createStationCraftCandidate(input: StationCandidateInput): Stati
   }
   const grid = validateGrid(input.grid, input.items);
   if (input.recipe.kind === 'shaped') consumeShaped(grid, input.recipe.pattern);
-  else consumeShapeless(grid, input.recipe.inputs, input.items);
+  else consumeShapeless(grid, input.recipe.inputs);
   return { success: true, grid, output: output.snapshot() };
 }
 
 function validateGrid(grid: StationGrid, items: ItemDefinitionRegistry): InventorySlot[] {
-  if (!Array.isArray(grid) || grid.length !== 9) throw new TypeError('Station grid must be an exact 3x3 grid.');
-  return new Inventory(9, grid, items).snapshot();
+  if (!Array.isArray(grid)) throw new TypeError('Crafting grid must be an array.');
+  gridWidth(grid);
+  return new Inventory(grid.length, grid, items).snapshot();
 }
 
 function validateIdentity(id: string): void {
@@ -95,46 +141,66 @@ function validateOutputs(outputs: readonly Readonly<ItemStack>[], items: ItemDef
   outputs.forEach((stack) => items.assertStack(stack));
 }
 
-function totals(grid: StationGrid): Map<string, number> {
-  const result = new Map<string, number>();
-  for (const slot of grid) if (slot) result.set(stackKey(slot), (result.get(stackKey(slot)) ?? 0) + slot.count);
-  return result;
-}
-
-function ingredientTotals(inputs: readonly Readonly<ItemStack>[], items: ItemDefinitionRegistry): Map<string, number> {
-  const result = new Map<string, number>();
-  for (const stack of inputs) {
-    items.assertStack(stack);
-    result.set(stackKey(stack), (result.get(stackKey(stack)) ?? 0) + stack.count);
-  }
-  return result;
-}
-
 function consumeShaped(grid: InventorySlot[], pattern: readonly InventorySlot[]): void {
-  pattern.forEach((ingredient, index) => {
-    if (!ingredient) return;
-    const slot = grid[index]!;
-    grid[index] = slot.count === ingredient.count ? null : { ...slot, count: slot.count - ingredient.count };
-  });
+  const width = gridWidth(grid),
+    bounds = shapedBounds(pattern);
+  for (let offsetY = 0; offsetY <= width - bounds.height; offsetY += 1)
+    for (let offsetX = 0; offsetX <= width - bounds.width; offsetX += 1) {
+      const indices: Array<[number, NonNullable<InventorySlot>]> = [];
+      pattern.forEach((ingredient, index) => {
+        if (!ingredient) return;
+        const x = (index % 3) - bounds.left + offsetX;
+        const y = Math.floor(index / 3) - bounds.top + offsetY;
+        indices.push([y * width + x, ingredient]);
+      });
+      if (
+        !indices.every(
+          ([index, ingredient]) =>
+            grid[index] && sameItemStackIdentity(grid[index]!, ingredient) && grid[index]!.count >= ingredient.count,
+        )
+      )
+        continue;
+      indices.forEach(([index, ingredient]) => {
+        const slot = grid[index]!;
+        grid[index] = slot.count === ingredient.count ? null : { ...slot, count: slot.count - ingredient.count };
+      });
+      return;
+    }
 }
 
-function consumeShapeless(
-  grid: InventorySlot[],
+function matchShapelessSlots(
+  grid: readonly InventorySlot[],
   inputs: readonly Readonly<ItemStack>[],
-  items: ItemDefinitionRegistry,
-): void {
-  const required = ingredientTotals(inputs, items);
-  for (let index = 0; index < grid.length; index += 1) {
-    const slot = grid[index];
-    if (!slot) continue;
-    const remaining = required.get(stackKey(slot)) ?? 0;
-    if (remaining === 0) continue;
-    const consumed = Math.min(slot.count, remaining);
-    required.set(stackKey(slot), remaining - consumed);
-    grid[index] = slot.count === consumed ? null : { ...slot, count: slot.count - consumed };
-  }
+): readonly Readonly<{ slot: number; ingredient: Readonly<ItemStack> }>[] | null {
+  const occupied = grid.flatMap((stack, slot) => (stack ? [{ slot, stack }] : []));
+  if (occupied.length !== inputs.length) return null;
+  const search = (
+    index: number,
+    remaining: readonly Readonly<ItemStack>[],
+    matches: readonly Readonly<{ slot: number; ingredient: Readonly<ItemStack> }>[],
+  ): readonly Readonly<{ slot: number; ingredient: Readonly<ItemStack> }>[] | null => {
+    if (index === occupied.length) return matches;
+    const entry = occupied[index];
+    for (let ingredientIndex = 0; ingredientIndex < remaining.length; ingredientIndex += 1) {
+      const ingredient = remaining[ingredientIndex];
+      if (!sameItemStackIdentity(entry.stack, ingredient) || entry.stack.count < ingredient.count) continue;
+      const result = search(
+        index + 1,
+        [...remaining.slice(0, ingredientIndex), ...remaining.slice(ingredientIndex + 1)],
+        [...matches, { slot: entry.slot, ingredient }],
+      );
+      if (result) return result;
+    }
+    return null;
+  };
+  return search(0, inputs, []);
 }
 
-function stackKey(stack: Readonly<ItemStack>): string {
-  return JSON.stringify([stack.itemId, stack.instance?.durability ?? null]);
+function consumeShapeless(grid: InventorySlot[], inputs: readonly Readonly<ItemStack>[]): void {
+  const matches = matchShapelessSlots(grid, inputs);
+  if (!matches) throw new Error('Shapeless recipe consumption requires a matched grid.');
+  for (const { slot: index, ingredient } of matches) {
+    const stack = grid[index]!;
+    grid[index] = stack.count === ingredient.count ? null : { ...stack, count: stack.count - ingredient.count };
+  }
 }

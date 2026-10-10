@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-24-DEATH-POLICY-SPINE",
+  "status": "READY_FOR_EVIDENCE_COMMIT",
+  "baseline": "a39f7ba6d18b602305372093c43757be83a6125e",
+  "sourceCommit": "364c6517848a0c1d03aed28b051a106820264b2f",
+  "sourceTree": "9fa96419a55037af7fc2d9bc7fda025edd9f346c",
+  "stagedPatchSha256": "1e0c9af735068eb31299ee24e21071092195fc48608f26c04475b479aa781755",
+  "temporaryValidationCommit": "f4bf34026216e774e8ab01db9c46d4f65e3fe178",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 10,
+    "sha256": "274bfe1cca4977f57e95e4199d3ca76ee03dd5bb47068a36ac854eba3da8c7ff"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 18,
+    "directoryTotalFilesIncludingManifest": 19
+  },
+  "previousCheckpoint": {
+    "sourceManifestSha256": "143967944da6c82b7817757986814b2cdd48165132f1053f63cec176d66f4881",
+    "evidenceManifestSha256": "39c4b6311a4ebbfca7d101185df8698c281169bafb31c6bf88d9672701bf2dbb",
+    "deliverySha256": "b2883e437bf8612dcdb8d26ca8b45efbf2f31547c42bcf5e955e223d06824866",
+    "metadataAndRawFilesUnchanged": true
+  },
+  "sharedFileOwnership": {
+    "path": "packages/stdlib/src/server/composition/mod-api.ts",
+    "committedBlobSha256": "530f3fe9a17af8df1be9dbb356e2474e06d43ed3a410c5b594dc2fed1bc0a729",
+    "ownedHunkSnapshot": "../v2-death-policy-spine-01/mod-api-death-exports.ts.log",
+    "ownedHunkSha256": "f56d000a14d09bef28fccc2ae7cdcc2c57b6414ada06c7beb29e08cb9b0f6fcd",
+    "ownedLines": 25,
+    "excludedWorkingTreeChange": "46-line route and transport export hunk"
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git24-death",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true,
+    "trackedCleanAfterValidation": true
+  },
+  "tests": {
+    "window": "849f8020-afe8-423b-a733-5d76f263edce",
+    "status": "PASS",
+    "files": 3,
+    "passed": 25,
+    "maxWorkers": 1,
+    "stdoutSha256": "2bd73407614fb754ecc8fc5105814f70a345a37c284faa9c9eb62181f242e63b",
+    "receiptSha256": "ff887e261d8538155d9c21c91cfbc5d8f86f90768bbb6d545b71b9e5d8b23d3f"
+  },
+  "static": {
+    "stdlibTypes": {
+      "window": "602e545f-6e3b-4000-8977-cacfebadfd56",
+      "status": "PASS",
+      "receiptSha256": "4036ddea26959092813e5a69ae88d510d43b2f4cd957af2ead87d5bb529176ec"
+    },
+    "rootTestTypes": {
+      "window": "0305c1bf-0820-411c-a50b-44ac14b2a19f",
+      "status": "PASS",
+      "receiptSha256": "7e2ec857d91691b39d26012798a6eb416ec416a73cebf02fc45cf824f42c8ca5"
+    },
+    "classicTestTypes": {
+      "window": "cc3de099-4d10-4a6d-b66d-414dcb93ce38",
+      "status": "PASS",
+      "receiptSha256": "07517e15a5df21fc2f028be40d6030b8c7fc977b424f10de76caa32472056bf5"
+    },
+    "stagedEslint": {
+      "window": "db88bfa9-a39a-4a54-90ab-bf361c20c52b",
+      "status": "PASS",
+      "receiptSha256": "b2597ccded5e88d0d755e279a867dabe2c518fa0d266451df078234447e0f3b8"
+    },
+    "editableFormat": {
+      "window": "7199d74f-9422-4b75-bca7-2160af255bed",
+      "status": "PASS",
+      "receiptSha256": "4bd75fae21f4983a3d637e71b6266fb1e95850ac6ed6ea53417ab593e0899418"
+    },
+    "scopedDiff": {
+      "window": "5b0fdd69-b0b2-4062-8180-c87f48ea6715",
+      "status": "PASS",
+      "receiptSha256": "4fd958b2308adc2425d2c8582c035ede3b3130cc12540970d1a69623d50bd52c"
+    },
+    "docsFormat": {
+      "window": "23004d36-e9fd-498b-9c30-2406d976030d",
+      "status": "PASS",
+      "receiptSha256": "12a28b544a5321afbba9f0c3988f839f44cd0a0283f4242e857428e2c0ff2d8c"
+    }
+  },
+  "notImplemented": [
+    "classic-policy-installation",
+    "death-inventory-policy-unavailable-producer-receipt",
+    "combat-death-producer",
+    "needs-death-producer",
+    "vitals-death-producer",
+    "autonomy-death-producer",
+    "npc-intrinsic-drop-wiring",
+    "mixed-needs-and-death-single-series-coordination"
+  ],
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "deploy", "merge"]
+}

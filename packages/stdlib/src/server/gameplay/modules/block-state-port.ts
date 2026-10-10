@@ -7,6 +7,9 @@ import type {
 } from '../../composition/operation-contracts';
 import type { EntityStore } from '../entity-store';
 import type { ItemDefinitionRegistry } from '../item-registry';
+import type { FluidCell } from '../../fluid/fluid-cell';
+import type { CropRuntime } from '../crop-runtime';
+import { CROP_CELL_COMPONENT, validateCropCellProjection } from './crop-interaction-model';
 import {
   BLOCK_ACTOR_COMPONENT,
   BLOCK_VOXEL_COMPONENT,
@@ -23,7 +26,9 @@ export function createBlockStatePort(
     entities: EntityStore;
     items: ItemDefinitionRegistry;
     getVoxel(position: [number, number, number]): number | undefined;
+    getFluidCell?(position: [number, number, number]): FluidCell | null;
     revision(): number;
+    crops?(): CropRuntime;
     prepare(observed: readonly ObservedModState[], execution: RegisteredCommitContext): PreparedRegisteredCommit;
   }>,
 ) {
@@ -59,7 +64,12 @@ export function createBlockStatePort(
   const voxel = (position: readonly [number, number, number]) => {
     const value = options.getVoxel([...position]);
     if (value === undefined) throw new Error('chunk-unavailable');
-    return validateBlockVoxelProjection({ version: 1, position, voxel: value });
+    return validateBlockVoxelProjection({
+      version: 1,
+      position,
+      voxel: value,
+      ...(options.getFluidCell ? { fluid: options.getFluidCell([...position]) } : {}),
+    });
   };
   const world = (partition: number) =>
     validateBlockWorldProjection({
@@ -73,6 +83,17 @@ export function createBlockStatePort(
         })),
     });
   const project = (address: ModStateAddress) => {
+    if (
+      address.componentId === CROP_CELL_COMPONENT &&
+      address.target.kind === 'voxel' &&
+      address.partition === undefined &&
+      options.crops
+    )
+      return validateCropCellProjection({
+        version: 1,
+        position: address.target.position,
+        crop: options.crops().at(address.target.position),
+      });
     if (
       address.componentId === BLOCK_ACTOR_COMPONENT &&
       address.target.kind === 'entity' &&
@@ -134,5 +155,13 @@ export function createBlockStatePort(
       });
     },
   });
-  return Object.freeze({ state, actor, voxel, world, actorIds });
+  return Object.freeze({
+    state,
+    actor,
+    voxel,
+    world,
+    actorIds,
+    crop: (position: readonly [number, number, number]) =>
+      validateCropCellProjection({ version: 1, position, crop: options.crops?.().at(position) ?? null }),
+  });
 }

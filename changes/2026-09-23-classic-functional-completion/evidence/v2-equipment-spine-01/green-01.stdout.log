@@ -1,0 +1,46 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts (7 tests | 2 failed) 11ms
+     × strictly copies equipment pointer slots and rejects unknown or malformed fields 4ms
+     × builds one stable detached drop intent per occupied bag, cursor, crafting, and armor source 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts > equipment pointer and projection contract > strictly copies equipment pointer slots and rejects unknown or malformed fields
+AssertionError: expected [Function] to throw error matching /slot|command/i but got 'Inventory pointer input contains unkn…'
+
+- Expected:
+/slot|command/i
+
++ Received:
+"Inventory pointer input contains unknown fields."
+
+ ❯ packages/stdlib/tests/server/equipment-spine-contract.test.ts:69:9
+     67|           command: { kind: 'click', slot: { kind: 'equipment', slot },…
+     68|         }),
+     69|       ).toThrow(/slot|command/i);
+       |         ^
+     70|   });
+     71|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/equipment-spine-contract.test.ts > death inventory settlement contract > builds one stable detached drop intent per occupied bag, cursor, crafting, and armor source
+TypeError: Cannot assign to read only property 'durability' of object '#<Object>'
+ ❯ packages/stdlib/tests/server/equipment-spine-contract.test.ts:195:78
+    193|     });
+    194|     components.inventory[0]!.count = 1;
+    195|     (components.equipment.armor!.helmet!.instance as { durability: num…
+       |                                                                              ^
+    196|     expect(candidate.dropIntents.map((entry) => entry.source)).toEqual…
+    197|       { kind: 'inventory', slot: 0 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  2 failed | 24 passed (26)
+   Start at  17:21:39
+   Duration  1.31s (transform 664ms, setup 0ms, import 904ms, tests 39ms, environment 0ms)
+

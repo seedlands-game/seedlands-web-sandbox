@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "predecessorSourceEntries": 15,
+  "unchangedPaths": [
+    "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "apps/web/tests/e2e/classic-support/evidence.ts",
+    "apps/web/tests/e2e/classic-support/canonical-reporter.ts",
+    "playwright.config.ts",
+    "scripts/harness/classic.mjs",
+    "scripts/harness/classic-receipt.d.mts",
+    "changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md",
+    "changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md",
+    "docs/code-map.md"
+  ],
+  "changedPaths": [
+    "scripts/harness/classic-receipt.mjs",
+    "scripts/harness/classic-receipt.test.mjs",
+    "apps/web/tests/e2e/classic-support/canonical-reporter.test.ts",
+    "changes/2026-09-23-classic-functional-completion/spec.md",
+    "changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md",
+    "changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-evidence.md"
+  ],
+  "reporterImplementationChanged": false,
+  "runnerChanged": false,
+  "budgetChanged": false,
+  "presenceAndPayloadSeparated": true,
+  "indexEmpty": true
+}

@@ -1,0 +1,15 @@
+V2-ARTIFACT-BUILD-15
+acceptance=/private/tmp/seedlands-v2-acceptance-556c9b76
+source=556c9b76fb4447c49ad7d6f7a76bd7233d0011e6
+tree=45ef275288163c3880bd9ea75d28c62996f3723a
+
+dependency setup, once:
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-15-dependency-setup node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm install --offline --frozen-lockfile --ignore-scripts
+
+production build, once:
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-15-build node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm build
+
+artifact verification, once:
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-15-artifact-verify node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- pnpm harness:artifact
+
+Collection after the two production commands only reads and hashes the receipt, dist files, BUILD14 map, Pack lock, MP3 copies, workspace links, Git identity, processes, port and machine lock. It does not rebuild or re-run the verifier.

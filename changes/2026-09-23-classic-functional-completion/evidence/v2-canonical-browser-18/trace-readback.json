@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "sourceTraceSha256": "93321ab6b0deefa228ed7e84c125a0269a8b88ab23d36c67f7d74298c7fa420e",
+  "console": { "log": 1, "warning": 0, "error": 0 },
+  "pageErrorEvents": 0,
+  "networkResourceSnapshots": 944,
+  "httpStatusAtLeast400": 0,
+  "failureAttachmentFields": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "v2Receipt": {
+    "phase": "resources-placed",
+    "steps": ["resources-placed"],
+    "runtimeEpoch": "seedlands:classic-canonical-runtime-v11:1",
+    "actor": { "entityId": "player-1", "epoch": 1, "lifetime": 1 },
+    "armorSlotsEmpty": true,
+    "cursorEmpty": true,
+    "armorPoints": 0
+  },
+  "aimLoop": {
+    "mouseMoveEvents": 180,
+    "mouseButtonEvents": 0,
+    "lastTargetsFromError": [
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1",
+      "84,31,2",
+      "84,30,1"
+    ]
+  },
+  "failureFrame": {
+    "traceEventType": "screencast-frame",
+    "traceResource": "page@3e8c021d4cd20b7e09a31482f320b94d-1790569289836.jpeg",
+    "timestamp": 244792.352,
+    "sha256": "cd95ffeeeb532b9a540aedfd97e2e28216d856731178f74f4c20630e4a086f30",
+    "interpretation": "The outlined voxel is a farther wood resource rather than the requested first wood target; this supports a fixture aim mismatch, not a mining Authority result."
+  }
+}

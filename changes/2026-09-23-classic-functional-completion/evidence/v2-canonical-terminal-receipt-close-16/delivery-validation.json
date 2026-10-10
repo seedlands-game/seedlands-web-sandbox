@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-TERMINAL-RECEIPT-CLOSE-16",
+  "status": "DETERMINISTIC_STATIC_GREEN_BROWSER24_NOT_RUN",
+  "baselineSha": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f",
+  "inputs": {
+    "browser23": {
+      "status": "FAIL",
+      "sourceManifestSha256": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+      "evidenceManifestSha256": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+      "deliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+      "modified": false
+    },
+    "budgetMap01": {
+      "sourceManifestSha256": "64ce50ef3284e12a92a410600c1dc6b663330fdf0f3954d91adb50cbfc2fbc68",
+      "evidenceManifestSha256": "554fb4aabcce039eb93870b695143f8403edb154a3b314fc793d5fbecf4ead55",
+      "deliverySha256": "828f23d14b54d51f19d5fd66d6454da8322b2210526d73f80713d412e992da61",
+      "modified": false
+    },
+    "close15": {
+      "sourceManifestSha256": "258ac9faf2329f7c5f07565795bb93c769e7e87b55bfc213f6f8edf7775ab138",
+      "evidenceManifestSha256": "f512cfa8907a48689936b5b8c02d1fed99fe588b6a1f3d432d1380a69875dfad",
+      "deliverySha256": "b853e2cec7300f90f01cf43d9d021c0ad0df7bbbe9f9acd406277460d492f944",
+      "predecessorArchive": "predecessor-close15",
+      "predecessorManifestSha256": "f11c19f8edd6dc4bd723757424c8a609d1d5a3f281866dc89ddda415b2d1ba95",
+      "sourceEntriesVerifiedFromArchive": 5
+    }
+  },
+  "implementation": {
+    "attachmentOwnerWritesReceipt": false,
+    "canonicalReceiptWriter": "apps/web/tests/e2e/classic-support/canonical-reporter.ts",
+    "writerCallback": "Playwright Reporter onTestEnd plus onEnd runner outcome",
+    "canonicalIdentity": [
+      "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+      "chromium"
+    ],
+    "attemptKey": ["test", "project", "retry"],
+    "attemptIdentityBoundToSelection": ["file", "test", "project", "testId"],
+    "sameKeyDuplicate": "IDEMPOTENT_IF_BYTE_EQUIVALENT_ELSE_CONFLICT_FAIL",
+    "differentRetriesPreserved": true,
+    "uniqueAttemptGateRejectsRetries": true,
+    "terminalPassRequires": [
+      "testOutcome=passed",
+      "assertionEvidenceStatus=PASS",
+      "no failure attachment",
+      "no attachment parse or identity errors",
+      "runnerOutcome=passed",
+      "processStatus=0",
+      "runId and sourceSha match"
+    ],
+    "nonMainPollutesAttempts": false,
+    "modularSelectionRequiresExactSmokeAndRunMode": true,
+    "staleReceiptRemovedBeforeSpawn": true,
+    "artifactReverifiedBeforeReceiptValidation": true,
+    "onEndOverridesPlaywrightResult": false,
+    "runnerGlobalErrorsAfterOnEndCoveredByOnTestEnd": false,
+    "performanceMeasurementLocationPreserved": "attempts[0].benchmark.measurement"
+  },
+  "close15BudgetPreserved": {
+    "canonicalMainTimeoutMs": 900000,
+    "chromiumProjectTimeoutMs": 60000,
+    "totalFinalizationWallTimePromise": false
+  },
+  "red": {
+    "status": "EXPECTED_FAIL_6_OF_6",
+    "stdoutSha256": "26bc93e4ddbe81b7fe215a778e9823f7bc5f9664e7e69a7a9c38b295445b2b1b",
+    "receiptSha256": "ac40f71997b66f48b434bc3e59fca40c91aa0390ad9f573ddaed7fab286af3ec",
+    "reason": "The extracted append/every-PASS behavior duplicated one Browser23 attempt, trusted local PASS over terminal failure, admitted non-main records, and lacked runner identity/outcome gates."
+  },
+  "green": {
+    "window": "v2-close16-green-final-09",
+    "pureReceiptTests": 7,
+    "reporterTests": 4,
+    "measurementConsumerTests": 3,
+    "totalTests": 14,
+    "status": "PASS",
+    "stdoutSha256": "bb2e0775bf14803061d30c642e505ab4c8950573ef2fcb513dae5f44bae876a2",
+    "receiptSha256": "f09e7cb266a0560f440667f371872011ce3a0bd371a06fc91f5ff68c5d829b01"
+  },
+  "static": {
+    "window": "v2-close16-static-final-04",
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "changedTsMjsEslint": "PASS",
+    "prettier": "PASS",
+    "noNul": "PASS",
+    "stdoutSha256": "04203f4b60407acd6a8aa80dc88bf68af5c67c3c6aaa89dec0e0bf2924e58d2c",
+    "receiptSha256": "b998ccd7e979276574c762cfa38c7337168f89cbb67fcbcaa149824a59aac7c6"
+  },
+  "scope": {
+    "window": "v2-close16-seal-static-02",
+    "status": "PASS",
+    "uniqueWriter": true,
+    "attemptIdentityBoundToSelection": true,
+    "modularRunModeBound": true,
+    "runnerOutcomeRequiredForEverySelection": true,
+    "noNewSuppression": true,
+    "indexEmpty": true,
+    "structureReadbackSha256": "13c833e89e94aa4ae7d098e42628b6e9d0d8f7b54c363ea24d91226132822646",
+    "stdoutSha256": "e01438c36e98b15e05f57deb3534acc23d41468bbb8fd363eab1788dac357240",
+    "receiptSha256": "3c07158bb11e3efb21e1b5009e0c11f05b6652a2b955b6563552cdb9023faf1f"
+  },
+  "finalSelfcheck": {
+    "status": "PASS",
+    "sourceEntriesValidated": 15,
+    "manifestEntriesValidated": 79,
+    "stdoutSha256": "3a5d9f027a1a7cb74661e1c5919c9e560c1adaebc6f819ead6aba6df930b6b6d",
+    "receiptSha256": "956803a2c1bd65444a6a6581d9b515c2f7139f302129ebc07db72d551400cc3f",
+    "predecessorClose15Validated": true,
+    "historicalIdentitiesUnchanged": true,
+    "indexEmpty": true,
+    "machineLockReleasedAfterCheck": true
+  },
+  "retainedIntermediateEvidence": {
+    "pureGreenFirst": "FAIL_5_OF_6_ATTEMPT_KEY_READ_RETRY_INSTEAD_OF_LEGACY_ATTEMPT",
+    "pureGreenSecond": "FAIL_5_OF_6_VALIDATOR_DIAGNOSTIC_ORDER",
+    "eslintFirst": "FAIL_CAUGHT_ERROR_CAUSE_NOT_PRESERVED",
+    "fileAttachmentRed": {
+      "status": "FAIL_1_OF_7_VITEST_TESTS",
+      "stdoutSha256": "6c9decbbc98240ed44ff7cf36969acde0e05f296c9da7c3c6235f113b8880894",
+      "receiptSha256": "c027a3746108907dc63dee3348cc3e9306440ab4258fb3a35c6ebbd68c2da049"
+    },
+    "runModeRed": {
+      "status": "FAIL_4_OF_7_PURE_TESTS_OPTION_DEFAULT",
+      "stdoutSha256": "e79a4d8bda5049fee6f9c10ee8a069c75f08b422a0a46a198e27f56b38040525",
+      "receiptSha256": "1f08fb69c5bb78942e965a9cbbd6293358c135ccc3aae2247e4f39c9f6a55e18"
+    },
+    "ignoreOrSuppressionAdded": false
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 15,
+    "sha256": "5f16faaef7050c993a147f963fd3b202956ef5a373ce0f2153a22013d7e14922"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 79,
+    "sha256": "1fbae8b8ca484192010e1363c375d869dea6bff0118727cbddf71653e691586e",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "manifest-generation.stdout.log",
+      "manifest-generation-window.json.log",
+      "metadata-format.stdout.log",
+      "metadata-format-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "scenarioRouteAimMouseChanged": false,
+    "budgetChangedAfterClose15": false,
+    "traceZipValidationImplemented": false,
+    "browser23OrMapEvidenceChanged": false,
+    "cumulativeBrowserReportChanged": false,
+    "tasksOrExecutionStateChanged": false,
+    "browser24Run": false,
+    "buildOrArtifactRun": false,
+    "gitOrIndexWrite": false,
+    "longTermDocsUpdated": true,
+    "longTermDocsReason": "docs/code-map.md now records the new canonical Reporter and pure receipt validation owner."
+  },
+  "remainingGaps": [
+    "Trace EOCD, central-directory and all-entry CRC validation remains a separate contract.",
+    "Reporter onTestEnd does not claim to cover errors occurring after Reporter onEnd; runner process status remains separate.",
+    "Browser24 and a real terminal receipt are not run in this stage.",
+    "New object reference, death/equipment drop/respawn, 16 armor/194, V3/V4, Cua and human audio remain incomplete."
+  ],
+  "budget": {
+    "aiTargetHours": "1-2",
+    "aiHardLimitHours": 3,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentAiHours": 2.4,
+    "conservative120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "notRun": [
+    "browser24",
+    "build",
+    "artifact",
+    "cua",
+    "devserver",
+    "ci",
+    "git",
+    "index-write",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

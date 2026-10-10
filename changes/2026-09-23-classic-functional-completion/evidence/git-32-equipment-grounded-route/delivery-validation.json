@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-32-EQUIPMENT-GROUNDED-ROUTE",
+  "status": "READY_FOR_PUSH",
+  "baseline": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+  "sourceCommit": "a1ebf10856cc57c1b0d75a33b2f7accc9528ba4e",
+  "sourceTree": "28eb260c9e12a96a0038daf1f5ac0ac3fe5332c6",
+  "stagedPatchSha256": "b2d4d2eaca6f2e7c483089a1e2ff3a2abed3ffc9b89e6089a9b92f6637cc202c",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 6,
+    "sha256": "dc2debc543f8f8188e629e860b13877d34393db6357486c05365783edc8cc42d"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 23,
+    "sha256": "a4445030476124d05a179b96c548761da595b9a30b13bb2354de6c79a8e8dfc4",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "frozenInputs": {
+    "close05": {
+      "sourceManifestSha256": "8351c4d14b34fecdafe75e27dbf9fcdc44262f45c36d1aa33d51c11ad1fa0d4c",
+      "sourceEntries": 13,
+      "validatedEntries": 13,
+      "evidenceManifestSha256": "51e19b37e510a363631239b4ff89b654da2196f661dbc18de6d7655dded498fe",
+      "evidenceEntries": 38,
+      "validatedEvidenceEntries": 38,
+      "deliverySha256": "fe2a914f7404401c1963b759e79063a9e0a99f9a7431e6529fae10923589422e"
+    },
+    "close04": {
+      "sourceManifestSha256": "94a56e6589eb497f5de06b4f9197bd86fbbe4c5636b634a868c05194f61100cc",
+      "evidenceManifestSha256": "09f4ac5446d038d05180632a8cd98a774eb5a6c7c121eaca4383fd6751d8866e",
+      "evidenceEntriesValidated": 47,
+      "deliverySha256": "c58ef48ba9a49044c26e97f10e474db777264c1b2673347e36a4007212558edf",
+      "priorReleaseByteEqual": true,
+      "redWrapperExitTrusted": false,
+      "redVitestFailureRetained": true
+    },
+    "browser16": {
+      "sourceManifestSha256": "0a95a3a3beba42a8498bfc93b4f014bbcb44333ebbc9ef9104aaa9a154b0ccc3",
+      "sourceEntries": 6,
+      "validatedAgainst": "/private/tmp/seedlands-v2-acceptance-65938068",
+      "evidenceManifestSha256": "6bed019c398ed1da459979863c3a58d2c1d3c47deb96def35d983dc1ac38c2aa",
+      "evidenceEntries": 52,
+      "deliverySha256": "c9c1709398f7da248bbebfde8ded09a9927322db41406da72565fa2c8e8cdc1d",
+      "currentReportSha256": "629b009b188497638587d4299e6c1c33cd7788214029191dbca91d537c0f0952",
+      "reportSupersedesOldDiagnosisOnly": true,
+      "packagingSupersedesRejectedCommit": "a402b01623354a5c78e41260354a0fdd7c35394c",
+      "traceParts": 15,
+      "traceMaxPartBytes": 52428800,
+      "traceSha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+      "packagingSupersession": {
+        "rejectedCommit": "a402b01623354a5c78e41260354a0fdd7c35394c",
+        "backupRef": "refs/task-backups/git32-evidence-a402b016",
+        "oldParts": 6,
+        "newParts": 15,
+        "maxPartBytes": 52428800,
+        "fullTraceBytes": 774153112,
+        "fullTraceSha256": "5ce02c71e564d498bb6c5d030c9dbe8d26aab442e1a85fe19f7c87c06e5aab41",
+        "browserRunRepeated": false
+      },
+      "status": "FAIL_AFTER_RESOURCES_PLACED_BEFORE_WOOD_BATCH",
+      "v1Completed": true,
+      "miningInputSent": false,
+      "equipmentPointerReached": false,
+      "c4Reached": false,
+      "c5Reached": false
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git32-equipment-grounded-route",
+    "head": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+    "stagedPaths": 6,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "affectedGroundedRouteClosure": {
+      "window": "3ea6cc66-71db-4a3d-ac53-da1d60740be6",
+      "status": "PASS_5_FILES_40_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "68a52094c0c1efc1af33e1b1b86ce26e574c55b5946f2aa38e3a4f7a3bce5b4a",
+      "receiptSha256": "06642ef85fa309681e55e272d969397b54fd909270de9682b5eae89b019b2322"
+    }
+  },
+  "static": {
+    "classicTestTypes": {
+      "window": "bdac2241-b115-40ad-bd51-21f4aa524378",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "16b377c39d37d7ac97473ccbfca70eeb34009d656feaa1abb7325ea36c2b8fe7"
+    },
+    "rootTestTypes": {
+      "window": "a2d61252-b2f8-4131-8a08-46f865e9a46e",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "15793a8e36d1e5f4e92c1c70dbca6f80b167f80991c22f0bf1627cfd6f328d25"
+    },
+    "stagedEslint": {
+      "window": "c2f7ba08-23e0-4b83-b677-7b772f257f67",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "3e877828fefeacf837ee353adcda188c8193d46fc05095d03a10753391132c47"
+    },
+    "editableFormat": {
+      "window": "28dac09a-4497-446f-b215-8ce42b40db83",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "6586129153985023ee6b259382fcbb7f03e1657cff1780338efb0fac356fcf28"
+    },
+    "scopedDiff": {
+      "window": "abdbaaec-617a-4e4a-80f6-381c5dd45be9",
+      "status": "PASS_6_PATHS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "852461b33a4855320d5bccb73d1c002fb539cbcc0cb6c518b51e935ad5c45518"
+    },
+    "metadataFormat": {
+      "window": "9b9ce4a6-4733-4e08-8af5-fb4ecfb721a6",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "6e69245d3527e4e0e4808deb746adeb3751cdace7483e99ea8c82e2fb4fcc43e"
+    },
+    "metadataFinal": {
+      "window": "78aa3252-ebd0-48cd-a1a5-ed71b4d0f1be",
+      "status": "PASS",
+      "stdoutSha256": "924a8ad220034c938f57ed99628d7a5137f2a6f7aa915330848a23b64eae2540",
+      "receiptSha256": "f38d09a8c7d0a3b677189c5acb23585f2e51203cbb0f41d5984da909a15c4c84"
+    }
+  },
+  "semantics": {
+    "walkOptionsJump": false,
+    "pulseMs": 80,
+    "routeDeadlineMs": 45000,
+    "testPollHz": 60,
+    "releaseCommandPerPulse": true,
+    "releaseMustBeConsumed": true,
+    "groundedObservedAfterReleaseAck": true,
+    "browserWallClockGuaranteed": false
+  },
+  "boundaries": {
+    "productionChanged": false,
+    "browser17Run": false,
+    "browser16StatusChanged": false,
+    "genericWalkChanged": false,
+    "v1Changed": false,
+    "scenarioCoordinatesChanged": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The change only corrects V2 fixture input options and deterministic test coverage; it changes no owner or public protocol boundary."
+  },
+  "pushRecovery": {
+    "initialResult": "GH001_REJECTED_OVERSIZE_BROWSER16_TRACE_PARTS",
+    "remoteUnchangedAt": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+    "amendAuthorizedForUnpublishedEvidenceCommitOnly": true,
+    "codeCommitRewritten": false,
+    "publishedCommitRewritten": false,
+    "validationWindow": "e48785f9-db49-4b04-a245-dbe9acbf16dd",
+    "validationReceiptSha256": "16ba1dcd353f4d9525ec33b4a2292ce748a1aedb1b7001b8c2af7c8310275a91"
+  },
+  "finalSelfcheck": {
+    "window": "2e5a81e5-676f-48c1-8314-8e57d1824540",
+    "status": "PASS",
+    "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "receiptSha256": "fb41fee677d9ae2979880e759ce7196d3bb1e12ab149b80e670ed9fdba16f9a6"
+  },
+  "notRun": ["build", "artifact", "browser17", "cua", "devserver", "ci", "deploy", "merge"]
+}

@@ -38,6 +38,8 @@ type Options = {
   pois: PoiRegistry;
   getVoxel: (x: number, y: number, z: number) => number;
   isPlayerAlive: (id: string) => boolean;
+  dispositionFor?: (archetype: ActorArchetype) => 'passive' | 'neutral' | 'hostile';
+  isVoxelSolid?: (voxel: number) => boolean;
 };
 
 const distance = (left: readonly number[], right: readonly number[]) =>
@@ -156,9 +158,13 @@ export class PerceptionRuntime {
   }
 
   private isThreat(observer: GameplayEntity, candidate: GameplayEntity): boolean {
-    if (observer.archetype === 'night-stalker')
+    if (observer.archetype && this.disposition(observer.archetype) === 'hostile')
       return candidate.type === 'player' && this.options.isPlayerAlive(candidate.id);
-    return candidate.archetype === 'night-stalker';
+    return Boolean(candidate.archetype && this.disposition(candidate.archetype) === 'hostile');
+  }
+
+  private disposition(archetype: ActorArchetype) {
+    return this.options.dispositionFor?.(archetype) ?? (archetype === 'night-stalker' ? 'hostile' : 'passive');
   }
 
   private isFood(observer: GameplayEntity, candidate: GameplayEntity): boolean {
@@ -178,7 +184,7 @@ export class PerceptionRuntime {
       const x = Math.floor(from[0] + (to[0] - from[0]) * ratio);
       const y = Math.floor(from[1] + (to[1] - from[1]) * ratio);
       const z = Math.floor(from[2] + (to[2] - from[2]) * ratio);
-      if (isSolid(this.options.getVoxel(x, y, z))) return false;
+      if ((this.options.isVoxelSolid ?? isSolid)(this.options.getVoxel(x, y, z))) return false;
     }
     return true;
   }

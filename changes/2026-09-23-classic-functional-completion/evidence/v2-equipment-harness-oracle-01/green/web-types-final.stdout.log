@@ -1,0 +1,5 @@
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT39-BROWSER23-RAW-PACKAGING-RECOVERY",
+  "attachmentName": "error-context",
+  "contentType": "text/markdown",
+  "sourcePath": "data/0f82d3a5dec41ddc4b15d4e6299ca1050aea5c2a.md",
+  "oldArchivedPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/attachments/test-0-error-context.md",
+  "currentArchivedPath": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/attachments/test-0-error-context.md.log",
+  "priorCopyPath": "files/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-23/attachments/test-0-error-context.md.log",
+  "sizeBytesBeforeAndAfter": 2800,
+  "sha256BeforeAndAfter": "499ae94ac08d04e70cc7e1775ca03a453b7c1daae16fd5f3b26209652c31a573",
+  "byteComparison": "PASS",
+  "acceptanceRawOrReportChanged": false
+}

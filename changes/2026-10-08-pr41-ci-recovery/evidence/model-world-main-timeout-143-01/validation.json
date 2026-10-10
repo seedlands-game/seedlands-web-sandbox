@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-model-world-batch-browser-143-01",
+  "status": "FAIL",
+  "artifact": {
+    "status": "PASS",
+    "schemaVersion": 1,
+    "sourceSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+    "sourceDigest": "d7883734f06a658606659315a40a493a23a896a76c14c1d4ce755baa71a03e25",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "a3a0b9a6007286778dd60aa0137167cf3479b5ebf39114890b179add30768ff3",
+    "files": 289,
+    "builtAt": "2026-10-10T19:40:22.394Z"
+  },
+  "build": "PASS",
+  "verifyArtifact": "PASS before run",
+  "attempts": 1,
+  "allOptionalObserversAndBenchmark": "DISABLED",
+  "originalInputsTimeoutsPredicatesAssertions": "UNCHANGED",
+  "originalMainTimeoutMs": 900000,
+  "resultDurationMsIncludingCleanup": 928510,
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "Creative": "PASS",
+    "V1": "PASS",
+    "V2": "FAIL total deadline during Stone pickup route90.5,2.5",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "firstError": "Test timeout of900000ms exceeded",
+  "secondaryError": "20sec settle predicate during teardown overlap; no input scheduler defect inferred",
+  "afterHooksStartTime": "2026-10-10T19:55:55.178Z",
+  "afterHooksDurationMs": 28473,
+  "v2StepEndApprox": "2026-10-10T19:56:17.030Z",
+  "lastRoutes": [
+    {
+      "target": [90.5, -0.5],
+      "status": "returned",
+      "elapsedMs": 6676,
+      "remainingMs": 38324,
+      "pulseCount": 6
+    },
+    {
+      "target": [90.5, 2.5],
+      "status": "threw",
+      "elapsedMs": 31527,
+      "remainingMs": 13473,
+      "pulseCount": 8
+    }
+  ],
+  "lastOperations": [
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:approach-route",
+      "target": [90, 31, 2],
+      "elapsedMs": 6676,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:aim-and-break",
+      "target": [90, 31, 2],
+      "elapsedMs": 2561,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:presented-drop-or-pickup",
+      "target": [90, 31, 2],
+      "elapsedMs": 297,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:pickup-route",
+      "target": [90, 31, 2],
+      "elapsedMs": 31528,
+      "outcome": "threw"
+    }
+  ],
+  "routes": 39,
+  "operations": 100,
+  "finalFrameActuallyViewed": "Native first-person wood pickaxe57/60, cobblestone3, sticks5, wood sword andplanks14 on darkStonefloor; neither fullarmor nor fullproductPASS",
+  "interpretation": "Original global deadline first; last route31527ms<45000ms. Cleanup exitsPointerLock, paused finalAuthority not proven predeadline scheduler cause. QuerybudgetPASS is not latency/endpointperformance proof. No repeat.",
+  "performanceEligible": false,
+  "ci421": {
+    "runId": 38080661981,
+    "sourceSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": "RUNNING at19:58",
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38080661981"
+  },
+  "remainingBlockers": [
+    "full main/product matrix",
+    "136 supported-slope Stone contact",
+    "144 horizontal-only rail mesh",
+    "final exactCI/review"
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-build-143-01.log",
+      "bytes": 3771,
+      "sha256": "20857e1c2ef6fc69729faae889bf335d16dc5d8b1c225a4cb03df513af8cee20"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-verify-143-01.json",
+      "bytes": 386,
+      "sha256": "f5beec390c2eb641d85f0b07663f6be0dc37328856d12b0d05f29eca525fad0d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-browser-143-01.log",
+      "bytes": 652987,
+      "sha256": "7c2c01709e7bdc8fde17ec1b99b4b2d4d54c953b65061055cf6fc86bfce90157"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-browser-attachments-143-01.json",
+      "bytes": 257634,
+      "sha256": "cf684a95e301dd8e2a7ea700d44864300144f1e1dea59f859837122953050087"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-browser-result-143-01.json",
+      "bytes": 4370481,
+      "sha256": "900a13c3a73817ddeebbc684580a3d4411fc7118562e87814d303870c99f8c61"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-route-operations-143-01.json",
+      "bytes": 1211850,
+      "sha256": "6883e7e8c44ea055d43bdd2d46a7892a39c19aa5edd83a93634cdb3657129291"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-browser-143-01.prereg.json",
+      "bytes": 439,
+      "sha256": "bb317295ea7ad99d549ca114f82ea501d227d3c5a9e176d607ed1dc22f3fca9a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-final-frame-143-01.jpeg",
+      "bytes": 34219,
+      "sha256": "8440cbff66cf7eb015b7d6c29dca3360bb8ae0e450bb2b66b8ada42401436059"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-final-frame-143-01.source.json",
+      "bytes": 504,
+      "sha256": "34eb4006fc27b0823fb1dc87da771f3991eda98c28b4e20366bf527f62680ac0"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-world-batch-results-143-01/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+      "bytes": 126984555,
+      "sha256": "91d5f8619c9c7573e028e00bd499439a3b7fc9fd2257b0ecff6c06a82bdc8c5b"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-model-world-batch-browser-143-01/classic.json",
+      "bytes": 187527,
+      "sha256": "6a016450c84488ce6361fadc516fe7e19b4421ebe8e8b5c2912826f192675a87"
+    }
+  ]
+}

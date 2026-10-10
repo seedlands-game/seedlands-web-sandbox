@@ -32,6 +32,7 @@ const fixture = () => {
     dirtyChunks: new Set(),
     fluidDirtyChunks: new Set(),
     fluidFeedback: feedback,
+    blockLightCache: { invalidateAround: vi.fn() },
     scheduler: { latestTask: () => ({ cx: 0, cy: 0, cz: 0 }), request, protectVisibleRevision },
     repository: { chunks: new Map() },
     scheduleRemesh,

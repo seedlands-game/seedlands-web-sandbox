@@ -1,0 +1,598 @@
+# V2 Equipment Core Artifact Build 证据
+
+## BUILD17：Restore reference observability
+
+- 已推送 source SHA：`4052dae01d4527bd1747a60358cf59469ab1b3e2`；tree
+  `12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5`。
+- clean detached acceptance tree：`/private/tmp/seedlands-v2-acceptance-4052dae0`。构建前 tracked/index clean、
+  `apps/web/dist` 不存在；离线 frozen 安装下载 0，根、Web 与 Classic 的内部 workspace links 全部指向本树。
+- 唯一 `pnpm build`：runId `v2-artifact-build-17-build`，UTC `2026-09-29T05:19:53.279Z` 至
+  `05:20:46.255Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-17-artifact-verify`，UTC
+  `2026-09-29T05:20:59.035Z` 至 `05:21:16.610Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出 identity 一致：sourceDigest
+`21c84cd108b96deb6187a474bddf9779e027d2095be82a404b27c4815d321671`、lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest
+`da1c156aaf1c4e3b40a12087301466e2b14291a49f4b5d5a1dfed66afe5c032f`、276 项，builtAt
+`2026-09-29T05:20:40.897Z`。receipt SHA-256 为
+`f00fe6ff759dfa8d5f73bea92d83c25ddd0495b67d2e6cd355ed0201ee2f4043`。276 项 receipt/disk map 逐项一致，
+map SHA-256 均为 `766478f46bb2b048317e149a595c5a704c26788dc8a28a49ee43b4a33effccde`；dist 为 277
+个普通文件，0 symlink/missing/extra/mismatch。
+
+BUILD17 与 BUILD16 的 map 实测不同，共 10 个路径：旧/新 authority、bootstrap、chunk-persistence、game chunk
+共 8 项，加 `.vite/manifest.json` 与 `index.html`。这是 GIT42 四个 stdlib Harness 生产源变更进入 production bundle
+后的真实差异；四源文件旧/新 bytes 与 SHA-256 及十项产物旧/新 SHA-256 都保存在本阶段 inspection/diff，不能把
+artifact 变化外推为 Browser 通过。Pack lock public/dist SHA-256 均为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`；MP3 source/public/dist 均为
+2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+GIT42 最终 delivery SHA-256 为 `b74599e40309a5a75fe91232ea15f3927e5270dff9b5b7ba4eaf41a11f353929`；本阶段只引用，
+没有改写原件。BUILD17 acceptance tree/dist 保留给下一次 root 唯一 Browser lease。Browser25 只覆盖旧 source；新
+reference 的 old stale/new current/UI continuation 为 `NOT_RUN`。本阶段未运行 Browser26、Cua、devserver、CI 修复、
+deploy 或 merge；artifact PASS 不等于 Browser 或产品 GREEN。
+
+## BUILD16：Canonical discovery boundary
+
+- 已推送 source SHA：`fdb53c07c0da14c7f523473e4f33060a385f23ff`；tree
+  `ecc7940708bca8ea1d01e8df50337fa536d27d18`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-fdb53c07`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；离线 frozen 安装下载 0 个包，根与 package 级 `@seedlands/*` workspace links 全部指向本树。
+- 唯一 `pnpm build`：runId `v2-artifact-build-16-build`，UTC `2026-09-28T23:18:54.983Z` 至
+  `23:19:34.526Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-16-artifact-verify`，UTC
+  `2026-09-28T23:20:07.580Z` 至 `23:20:12.962Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出的 identity 一致：
+
+```text
+sourceSha=fdb53c07c0da14c7f523473e4f33060a385f23ff
+sourceDigest=80ec89b82c297f451902bd5661b56c31ef6d1be76774bd93a3fcd11c10d0c574
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4
+files=276
+builtAt=2026-09-28T23:19:29.712Z
+```
+
+artifact receipt SHA-256 为 `5af78cfc542d641f4e6bf5cd0e503a616db2c146db4d8f53b187af2a1eb86702`。
+receipt map 与磁盘 map 均为 276 项且 SHA-256 均为
+`d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；磁盘另含 receipt，共 277 个普通
+文件，missing/extra/mismatch/symlink 均为空。该 map 与 BUILD15 逐字节相同，说明 GIT40 的 test-only discovery
+边界未改变 production artifact；不能外推为 Browser 或产品 GREEN。
+
+Pack lock 的 source/dist SHA-256 均为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。MP3 source/public/dist 均为
+`2976045` bytes、SHA-256 `3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`；
+Pack lock 中该路径恰好一项，`contentType=audio/mpeg`、size/digest 匹配。
+
+一次只读 inspection 因 task-owned 脚本错误读取不存在的 `digest` 字段而 exit 1；其输出显示其它 map/文件检查均已
+通过，原件保留。改为实际 schema 的 `sha256` 后同一只读 inspection PASS；未重跑 build 或 verifier。Browser24 仍为
+`FAIL_BEFORE_TEST_DISCOVERY`、Chromium attempt 0，Browser23 仍为 `FAIL/TRACE_INCOMPLETE`；BUILD16 不证明
+Browser25、Cua、人类听觉、CI、部署或产品 GREEN。
+
+阶段：V2-ARTIFACT-BUILD-01
+状态：production build 与 artifact verification 通过；未运行 Browser、Cua 或 CI。
+
+## 源码与隔离
+
+- 已推送 source SHA：`50a1e6ec72583ad4f5feef057a692709da577b19`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-50a1e6ec`。
+- 构建前 HEAD 匹配，tracked diff/index 为空，`apps/web/dist` 不存在。
+- 根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到 acceptance tree 自身；只复用主工作树的第三方
+  `.pnpm` store，`.pnpm-task-run-state-v1` 是 acceptance tree 内真实目录。
+
+## 唯一构建与复验
+
+唯一 production build：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c \n+  'pnpm build 2>&1 | tee .../evidence/v2-artifact-build-01/build.stdout.log'
+```
+
+窗口 `v2-artifact-build-01` 从 `2026-09-25T12:03:56.658Z` 到 `12:04:19.684Z`，
+`PASS/exit 0`。Pack build、Rust artifact、SSG、Web typecheck 与 Vite production build 均成功；Svelte
+为 `0 errors / 0 warnings`。本树没有第二次 build。
+
+对同一树和同一 dist 的唯一 artifact 复验：
+
+```sh
+node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c \n+  'pnpm harness:artifact 2>&1 | tee .../evidence/v2-artifact-build-01/artifact-verify.stdout.log'
+```
+
+窗口 `v2-artifact-verify-01` 从 `2026-09-25T12:04:27.860Z` 到 `12:04:29.723Z`，
+`PASS/exit 0`。build 与复验输出的 identity 完全一致：
+
+```text
+sourceSha=50a1e6ec72583ad4f5feef057a692709da577b19
+sourceDigest=147101872e3de0ce5f4a793bef4fe334a91c1dd9aecbf27ebcc961ef708b1131
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=94d72b2fd976fe58f5a0e9a09870853c6e9e2358dc4fc2026a7b39b344c507f6
+files=276
+builtAt=2026-09-25T12:04:18.160Z
+```
+
+磁盘 `apps/web/dist` 共 277 个文件，其中 276 个是 artifact map 条目，另一个是 receipt 自身。
+`harness-artifact.json` SHA-256 为
+`924b33af48a6919c7ba6ec1fe8d3772e7182daa2369923ebbdad8dd363b1ed15`；dist `packs.lock.json` SHA-256
+为 `fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332`。
+
+## 媒体与后验
+
+源与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 `2976045` bytes、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`；Pack lock 条目记录
+`contentType=audio/mpeg`。构建后 acceptance tree tracked diff/index 仍为空，端口 4273 无监听且无本树残留进程。
+该 tree/dist 按要求保留，不清理九棵 V1 acceptance tree。
+
+本证据只证明 `50a1e6ec...` 的 production artifact 可重复验证，不证明共享 death RED、equipment UI、combat
+armor、V4 restore、Browser/Cua、人类听觉、性能、CI/review 或完整 194 项矩阵。
+
+## BUILD02：Equipment Web UI + combat + death spine
+
+- 已推送 source SHA：`1bbe3a60d55ffa5d05e405377624fbbd942e6327`；tree
+  `4d70cef0e00c8617290159e1aa83a685126b1fc4`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-1bbe3a60`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方
+  `.pnpm` store 复用，task-state 位于该 tree。
+- 唯一 `pnpm build`：window `8894f626-5da4-4e7e-8844-a188b3d6d58f`，UTC
+  `2026-09-25T14:29:55.261Z` 至 `14:30:19.167Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、
+  Web/Svelte types 与 Vite production build 均成功；Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `0c7ede3b-213b-4238-902a-d6781392dbd1`，UTC
+  `2026-09-25T14:30:29.214Z` 至 `14:30:31.121Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出的 identity 完全相同：
+
+```text
+sourceSha=1bbe3a60d55ffa5d05e405377624fbbd942e6327
+sourceDigest=021861359f16eb748ddc8dfd4bcde9a4d4738ecd3f8a1b98079d11024b3be2e5
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=7e0d5f80a2751b914ff16f24af6d967dbc300b31b7f11db532c9c947596c0a78
+files=276
+builtAt=2026-09-25T14:30:17.636Z
+```
+
+磁盘 `apps/web/dist` 共 277 个普通文件，其中 276 个是 receipt map 条目，另一个是 receipt 本身；生成的
+`artifact-map.sha256.log` 与 `dist-files.sha256.log` 逐字节一致，missing/extra 均为空。
+`harness-artifact.json` SHA-256 为
+`aa4f6d8056335413523964fd1d2d4630c5261fb7ee4477c879a54ad0c145281a`，dist `packs.lock.json` SHA-256
+为 `fd4054012073c1252f7f8a63d9d9d09ac968620c6859cff9ca78aaebda3d2332`。
+
+源与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 `2976045` bytes、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`；Pack lock 同时包含该路径、digest
+与 `audio/mpeg`。构建后 acceptance tree tracked diff/index 为空，端口 4273 无监听，提升权限的只读
+进程检查为 `ACCEPTANCE_PROCESSES_0`。该 tree/dist 按要求保留，旧 V2 tree 与九棵 V1 tree 均不清理。
+
+BUILD02 artifact 包含已提交 equipment UI、registered armor 与公共 death policy/source/series spine；仍未包含
+Classic death policy 安装、`death-inventory-policy-unavailable` producer reason、Combat/Vitals/Needs/Autonomy
+death producer 或 NPC intrinsic drops。未运行 Browser、Cua、CI、deploy 或 merge，构建通过不能替代真实装备旅程。
+
+## BUILD03：Classic Death + Registered Needs
+
+- 已推送 source SHA：`b2b07417ec01870c4ce20befdf29f433f26fc88d`；tree
+  `4b96f69d6cadb83e60b0eae23e9f37eea7bc7482`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-b2b07417`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 是该 tree 内真实目录。
+- 唯一 `pnpm build`：window `a5f25826-0c9d-4e28-8f38-2fc752f54145`，UTC
+  `2026-09-25T19:00:26.903Z` 至 `19:00:50.814Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte
+  types 与 Vite production build 均成功；Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `5bca9179-2047-42ae-ab5e-f54d2b5c4154`，UTC
+  `2026-09-25T19:01:05.466Z` 至 `19:01:07.392Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出的 identity 完全相同：
+
+```text
+sourceSha=b2b07417ec01870c4ce20befdf29f433f26fc88d
+sourceDigest=4e0e1af0636cdd3fa064201ba0701421f9fa292bfb52e19b68a963ead0471445
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=fee7cf82c0746cb1b7bedab9d7c4fe1c901f57f2a281ebc2a217cf40fa773a60
+files=276
+builtAt=2026-09-25T19:00:49.242Z
+```
+
+磁盘 `apps/web/dist` 共 277 个普通文件，其中 276 个是 receipt map 条目，另一个是 receipt 自身。首次离线 map
+脚本误按“SHA+路径”整行排序，导致 276 项顺序不同并由 `cmp` 拒绝；没有修改 dist，也没有重跑 build/verify。保留
+该 attempt-01 map/摘要后，最终改为先按路径排序再计算 SHA，`artifact-map.sha256.log` 与
+`dist-files.sha256.log` 逐字节一致，SHA-256 均为
+`650d7b11ba5ad48944687a14c925235cd57430c5e730426ba1f753e90e7d6c2e`。
+
+`harness-artifact.json` SHA-256 为
+`c2f14ef757be3721a6ae1371142e2c60284e652cb5511c17e8ca05c5c4f7d889`；dist `packs.lock.json` SHA-256 为
+`d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。生成 Pack
+manifest 确认唯一 `seedlands:overworld-death-inventory-policy` 提供 `seedlands:death-inventory-policy`，定义包含
+player retain 与 creature/npc despawn 策略。
+
+构建后 acceptance tree tracked diff/index 仍为空，端口 4273 无监听且本树残留进程为 0。该 tree/dist 按要求
+保留，旧两棵 V2 与九棵 V1 acceptance tree 均未清理。BUILD03 包含 GIT26/GIT27 的 Combat、direct Vitals、
+registered Needs、Classic death policy 与精确 V4 predecessor；未运行 Browser、Cua、CI、deploy 或 merge，不能据此
+宣称真实装备/死亡 UI/save、完整 194 矩阵或完整 V2 GREEN。
+
+## BUILD04：Equipment Harness Oracle + Canonical Fixture
+
+- 已推送 source SHA：`00009bf26c821d115264d224899dafde0d6cc163`；tree
+  `e263d29f14a607103c3a80a40a9b7bed4997c58d`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-00009bf2`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `af3d2a23-1348-4faa-b79d-682b2dd82173`，UTC
+  `2026-09-25T22:06:18.935Z` 至 `22:06:41.432Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte
+  types 与 Vite production build 均成功；Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `41a1a689-602f-4bea-813d-49ec3010bf5c`，UTC
+  `2026-09-25T22:06:50.722Z` 至 `22:06:52.671Z`，`PASS/exit 0`；没有第二次 build 或 artifact verify。
+
+两次输出的 identity 完全相同：
+
+```text
+sourceSha=00009bf26c821d115264d224899dafde0d6cc163
+sourceDigest=315820d63fc0ca323380ca45b6a537cb541842a41e396f3bfe94b0507d062dff
+lockDigest=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+artifactDigest=fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2
+files=276
+builtAt=2026-09-25T22:06:39.842Z
+```
+
+`harness-artifact.json` 的 276 项 file map 与按相对路径排序的磁盘 map 逐字节一致；dist 共 277 个普通文件，
+另一个是 receipt 自身。receipt SHA-256 为 `fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d`，
+`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。首次后验只读探测
+误猜 `dist/packs/resources/...` 路径及顶层 `.resources[]`，因此失败；该探测未改 artifact，随后按 receipt 路径和实际
+`.packs[].resources[]` 读取成功，且未重跑 build/verify。
+
+构建后 acceptance tree tracked diff/index 为空，端口 4273 无监听且本树残留进程为 0。该 tree/dist 按要求保留，
+BUILD03、BUILD02、BUILD01 与九棵 V1 acceptance tree 均未清理。BUILD04 包含 equipment oracle 与 canonical fixture，
+但未运行 Browser、Cua、CI、deploy 或 merge；不能据此宣称真实 equipment journey、death/durability-1/drop/respawn、
+16 件护甲、194 项矩阵或完整 V2 GREEN。
+
+## BUILD05：Door Exit Face Fixture
+
+- 已推送 source SHA：`0a0a63188805f0a7d96221a841e2b6292fa97205`；tree
+  `ab92a25e22c025d65a4948e469ededf29a6e4c71`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-0a0a6318`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `12d64223-ca76-490c-9b7c-057ce47de71c`，UTC
+  `2026-09-26T00:16:42.589Z` 至 `00:17:05.396Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `76f7a9d0-b0ac-4844-947d-ba058156922d`，UTC
+  `2026-09-26T00:17:18.562Z` 至 `00:17:20.638Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c86e64716b9bd29f79bcf7897437342f97766faaa110907fd12046f9e0f64bc2`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`，276 项，builtAt
+`2026-09-26T00:17:03.654Z`。ExitFace 仅修改测试/fixture，因此 artifact digest 与 BUILD04 相同；source identity 已换代。
+
+receipt SHA-256 为 `869ad08581fec7c293523c51ae997041674ab0fba95bb5b9d99164ba434cc8e1`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731`；dist 共 277
+个普通文件。首次磁盘 map 命令误用 zsh 特殊变量 `path`，覆盖 `PATH` 并使 `/usr/bin/shasum` 查找失败，得到空文件；
+该结果原样保留为 `dist-files-attempt-01.sha256.log`，随后改用 `entry` 与绝对 `/usr/bin/shasum` 正确采集，未改 artifact、
+未重跑 build/verify。
+
+`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。构建后 tree
+tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD05、4 棵旧 V2 与九棵 V1 tree/dist 全部保留。
+
+BUILD05 未运行 Browser14、Cua、devserver、CI、deploy 或 merge。它不改变 Browser13 的失败事实，也不能证明门出口
+face 的真实 Browser 路径、V2 equipment journey、death/durability-1/drop/respawn、16 件护甲、194 项矩阵或完整 V2
+GREEN。
+
+## BUILD06：Door Readiness Snapshot Fixture
+
+- 已推送 source SHA：`25adda5becbcab339a8364bbd23ac86ace3d8d8e`；tree
+  `0acd81acafa1f60f477925483102f115699fa5f4`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-25adda5b`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `b367f88c-ac5a-4cec-8eb6-04c056a46e3e`，UTC
+  `2026-09-26T01:43:26.696Z` 至 `01:43:50.017Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `5ca07110-d217-4e4c-acb7-0122c824e9b1`，UTC
+  `2026-09-26T01:44:10.341Z` 至 `01:44:12.538Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`74752aed3e6df9973b3e70e26fe2cb1d1566c56b469e1da9a404777452c1e3a4`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2`，276 项，builtAt
+`2026-09-26T01:43:48.170Z`。Readiness 仅修改测试/fixture，因此 artifact digest 与 BUILD04/05 相同；source
+identity 已换代。
+
+receipt SHA-256 为 `e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106fee45d`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731`；dist 共 277
+个普通文件。`packs.lock.json` SHA-256 为 `d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7`。
+源与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD06、5 棵旧 V2 与九棵 V1 tree/dist
+全部保留。BUILD06 未运行 Browser15、Cua、devserver、CI、deploy 或 merge；不能据此宣称 readiness 的真实 Browser
+路径、lower exit-face、V2 equipment journey 或产品 GREEN。
+
+## BUILD07：Equipment Resource Route Fixture
+
+- 已推送 source SHA：`659380680628520f6b662b66129a594f5001b612`；tree
+  `b7996a7004e7bc9894a051cfedc161b34cbf443b`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-65938068`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `478f5a8d-44c6-4e26-81d2-96c16fb6621e`，UTC
+  `2026-09-26T03:52:53.579Z` 至 `03:53:21.227Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `cc1d251c-cdc8-4dce-b8a9-fd5c67f3bf64`，UTC
+  `2026-09-26T03:53:41.857Z` 至 `03:53:44.266Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c79b1bf7019ef3b4d5ca44b3dad0ca19e3280eaf57fd6bd9cc97ebbe5af0345c`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-26T03:53:19.146Z`。BUILD07 与 BUILD06 的 map 只有三个文件不同：`overworld.mjs` 仅是 esbuild 输入路径
+注释从主工作树绝对路径变为 tree-local 相对路径，`host-admissions.json` 与 `packs.lock.json` 是该 entry digest 的派生更新；
+不据此声称玩法生产行为变化。
+
+receipt SHA-256 为 `b55c1d89e3eb10c0014af086f6b09a49a2b4cc1bdf98793f65fcdab844af20ca`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；dist 共 277
+个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD07、六棵旧 V2 与九棵 V1 tree/dist
+全部保留。BUILD07 未运行 Browser16、Cua、devserver、CI、deploy 或 merge；不能据此宣称资源安全走廊的真实 Browser
+动态可达、采矿拾取、equipment pointer/C4/C5 或产品 GREEN。
+
+## BUILD08：Equipment Grounded Route Fixture
+
+- 已推送 source SHA：`cb4941bfd1801422802463bc7bbc41dd7d8e9484`；tree
+  `0ce6d40c340f153007a8d8bc24742f635222fb29`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-cb4941bf`。构建前 tracked diff/index 为空、
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖复用，
+  `.pnpm-task-run-state-v1` 位于该 tree。
+- 唯一 `pnpm build`：window `474a008d-198f-4afe-919f-9453f0fedf4d`，UTC
+  `2026-09-26T06:28:40.589Z` 至 `06:29:11.253Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `1e288854-3221-474f-a698-825df43a2f3f`，UTC
+  `2026-09-26T06:29:31.972Z` 至 `06:29:34.942Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`ec6301aec3c1de8f61579c1e305626a675f76be10fb40aaf2b1b350efc1c9a17`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-26T06:29:08.702Z`。BUILD08 与 BUILD07 的 276 项 artifact map 完全相同，符合本片只改测试/fixture/docs 的
+范围；不据此声称 Browser 动态行为通过。
+
+receipt SHA-256 为 `a02e67c6c2694bfbb188d81ae8d74b554f6604c773389d952a4c5e40c222f682`。276 项 receipt map 与磁盘 map
+逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；dist 共 277
+个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；新 BUILD08、七棵旧 V2 与九棵 V1 tree/dist
+全部保留。BUILD08 未运行 Browser17、Cua、devserver、CI、deploy 或 merge；不能据此宣称 grounded route 的真实
+Browser 墙钟、采矿拾取、equipment pointer/C4/C5 或产品 GREEN。
+
+## BUILD09：Equipment Arrival Drift Fixture
+
+- 已推送 source SHA：`4de6383e431df6f1b08fb6297e1b9c7ab95143a6`；tree
+  `04fa698407463b167125ba86b5403d3f57a767e7`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-4de6383e`。构建前 tracked diff/index 为空；
+  根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖离线复用，task state 位于该 tree。
+- 唯一 `pnpm build`：window `v2-artifact-build-09-build`，UTC `2026-09-28T04:06:31.024Z` 至
+  `04:06:56.683Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-09-artifact-verify`，UTC
+  `2026-09-28T04:07:17.308Z` 至 `04:07:20.313Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`900774ae3ae028f06767b75c73ac5243473f3f8ad63a034232b41dea27459c30`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T04:06:54.023Z`。BUILD09 与 BUILD08 的 276 项 artifact map 完全相同，符合本片仅改 canonical
+fixture/tests/docs 的范围；不据此声称 Browser 动态行为通过。
+
+receipt SHA-256 为 `a0200fe0eb3b182c50f22535c104e753a0045c0a9c96f86e3d04e5cb52c875fd`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；BUILD09 tree/dist 保留。恢复开始前历史
+V1/V2 acceptance trees 已不在 `/private/tmp`，非本任务删除，不能继续声称旧树仍保留。BUILD09 未运行 Browser18、
+Cua、devserver、CI、deploy 或 merge；不能据此宣称 arrival drift 的真实 Browser 闭环、采矿拾取、equipment
+pointer/C4/C5 或产品 GREEN。
+
+## BUILD10：Equipment Mining Aim Fixture
+
+- 已推送 source SHA：`f282da95833c5ff568b8b7a4caac7d7a7513514f`；tree
+  `ad93a8e1afdbb461a32f7c87ab4b860fd44a2074`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-f282da95`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根、stdlib、Web 与 Classic 的 `@seedlands/*` 均解析到该 tree 自身，第三方依赖通过
+  `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，0 下载。两个重负载窗口的
+  `XDG_STATE_HOME` 均定向到该 tree 内 `.pnpm-task-run-state-v1`，但实际没有产生持久 task-state 目录，按事实记录为
+  `taskStatePersisted=false`。
+- 唯一 `pnpm build`：window `v2-artifact-build-10-build`，UTC `2026-09-28T05:46:41.956Z` 至
+  `05:47:07.933Z`，`PASS/exit 0`；Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功，
+  Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-10-artifact-verify`，UTC
+  `2026-09-28T05:47:14.881Z` 至 `05:47:18.065Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`c8463ed87574e1ff1ad4d1c06beb4649fc518ee6815e071a289aec1187c0e865`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T05:47:05.058Z`。BUILD10 与 BUILD09 的 276 项 artifact map 实测完全相同；GIT34 只改 canonical
+fixture、测试、spec/contract/evidence，不改变 production artifact 字节，但 source identity 已推进，不能用旧 receipt
+替代本次构建。
+
+receipt SHA-256 为 `fd010be92fce57ffebb254b0eb2b653a385922d22234856d85317074e39d79e0`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件且无 symlink。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 条目一致。
+
+构建后 tree tracked/index clean，4273 无监听且本树残留进程为 0；BUILD09 与 BUILD10 tree/dist 均保留，
+`refs/task-backups/git32-evidence-a402b016` 保留。更早 acceptance trees 在本阶段开始前已缺失，非本阶段删除。
+Browser18 仍为 FAIL：完整 V1 与 V2 `resources-placed` 通过，首 wood aim 后未发 left mouse mining input，后续
+mining/pointer/C4/C5/save 未到。BUILD10 未运行 Browser19、Cua、devserver、CI、deploy 或 merge；CLOSE08/GIT34
+static 与本次 artifact GREEN 均不等于 Browser 产品 GREEN。
+
+## BUILD11：Equipment Pickup Refresh Fixture
+
+- 已推送 source SHA：`73e8d4da504e3d21290fc82208b7e2516521515a`；tree
+  `345682c2280824a294b5531b3a6654a71764c9cc`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-73e8d4da`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根、stdlib、Web、Classic 与其他 `@seedlands/*` workspace 包均解析到该 tree 自身。第三方
+  依赖通过 `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，0 下载；
+  `XDG_STATE_HOME` 指向该 tree 内 `.pnpm-task-run-state-v1`，但未产生持久目录。
+- 唯一 `pnpm build`：window `v2-artifact-build-11-build`，UTC `2026-09-28T08:07:48.966Z` 至
+  `08:08:16.802Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功，
+  Svelte 为 0 errors / 0 warnings。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-11-artifact-verify`，UTC
+  `2026-09-28T08:08:24.024Z` 至 `08:08:27.822Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`773a32909250c868ab5757a0366282562bbae296db71ce509e48bb77a40448d1`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T08:08:13.435Z`。BUILD11 与 BUILD10 的 276 项 artifact map 实测完全相同；GIT35 只改 canonical
+fixture、tests、spec/contract/evidence，因此 production artifact 字节保持，但 source identity 已推进，不能复用旧 receipt。
+
+receipt SHA-256 为 `af9a738e68d28cf09f21c956fde8bd2e54697838e38efa70548482ff83c8955e`。276 项 receipt map 与
+独立磁盘 map 逐项一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件、0 symlink，missing/extra/mismatch 均为空。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源、public 与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+构建后 acceptance tree tracked/index clean，4273 无监听且本树残留进程为 0；BUILD09、BUILD10 与 BUILD11
+tree/dist 及 `refs/task-backups/git32-evidence-a402b016` 均保留。Browser19 仍为 FAIL：wood/stone 真实通过，首 iron
+leftdown/voxel clear/drop 通过，但 inventory pickup 仍 `NOT PROVEN`，后续 V2/pointer/C4/C5/save 均未到达。BUILD11
+未运行 Browser20、Cua、devserver、CI、deploy 或 merge；artifact PASS 不等于 Browser 产品 GREEN。
+
+## BUILD12：Route Aim Bounded Fixture
+
+- 已推送 source SHA：`908d0d82881e3e8c7dff7ee27cf3a4785013f37a`；tree
+  `eb8a5d9a3cc423378f243e93804a6284f64539e6`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-908d0d82`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根与 `apps/web` 的 `@seedlands/*` workspace links 均解析到该 tree 自身。第三方依赖通过
+  `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，0 下载；`XDG_STATE_HOME` 指向本 tree
+  的 `.pnpm-task-run-state-v1`，但没有产生持久 task-state 目录。
+- 唯一 `pnpm build`：window `v2-artifact-build-12-build`，UTC `2026-09-28T09:54:47.245Z` 至
+  `09:55:16.719Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-12-artifact-verify`，UTC
+  `2026-09-28T09:55:52.061Z` 至 `09:55:55.886Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`e22c3a5bec65a09deeb271f8aabc30b07044b74e7a2649c56dccc88b93949312`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T09:55:13.206Z`。BUILD12 与 BUILD11 的 276 项 artifact map 实测完全相同；GIT36 仅改 canonical
+fixture、tests、spec/contract/evidence，所以 production artifact 字节保持，但 source identity 已推进，不能复用旧 receipt。
+
+receipt SHA-256 为 `982d9156954c395c6bc93913f824562b2cda849330e1e66464095b74595e1a38`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件、0 symlink，missing/extra/mismatch 均为 0。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源、public 与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+构建后 acceptance tree tracked/index clean，4273 无监听，本树残留进程为 0，机器锁已释放。BUILD09/10/11/12
+tree/dist 与 `refs/task-backups/git32-evidence-a402b016` 均保留。Browser20 仍为 FAIL，V2 未到达；Browser19 首
+iron inventory pickup 仍 `NOT_PROVEN`。BUILD12 未运行 Browser21、Cua、devserver、CI、deploy 或 merge；artifact
+PASS 不等于 Browser 产品 GREEN。
+
+## BUILD13：Arrival During Aim Fixture
+
+- 已推送 source SHA：`8ae9e3545c40cca83798afea0aa52ef156e4e3d3`；tree
+  `f91590626a01d1a6b2d771e27fdb74b5d022d47b`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-8ae9e354`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根与 `apps/web` 的 `@seedlands/*` workspace links 均解析到该 tree 自身。第三方依赖通过
+  `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，0 下载；`XDG_STATE_HOME` 指向本 tree
+  的 `.pnpm-task-run-state-v1`，但没有产生持久 task-state 目录。
+- 唯一 `pnpm build`：window `v2-artifact-build-13-build`，UTC `2026-09-28T12:34:02.636Z` 至
+  `12:34:32.034Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-13-artifact-verify`，UTC
+  `2026-09-28T12:34:37.437Z` 至 `12:34:41.546Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee`，lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`，artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T12:34:28.272Z`。BUILD13 与 BUILD12 的 276 项 artifact map 实测完全相同；GIT37 只改 canonical
+fixture、tests、spec/contract/evidence 与 type-only code map，所以 production artifact 字节保持，但 source identity 已
+推进，不能复用旧 receipt。
+
+receipt SHA-256 为 `2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件、0 symlink，missing/extra/mismatch 均为 0。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源、public 与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+构建后 acceptance tree tracked/index clean，4273 无监听，本树残留进程为 0，机器锁已释放。BUILD09/10/11/12/13
+tree/dist 与 `refs/task-backups/git32-evidence-a402b016` 均保留。Browser21 保持 FAIL：完整 V1、资源放置和首 wood
+真实入包通过，后续 V2/pointer/C4/C5/save 未到达；Browser19 首 iron inventory pickup 仍 `NOT_PROVEN`。BUILD13
+未运行 Browser22、Cua、devserver、CI watch、deploy 或 merge；artifact PASS 不等于 Browser 产品 GREEN。
+
+## BUILD14：Post-Drift Direction Fixture
+
+- 已推送 source SHA：`0eafd4273bc1f5a23e7d147ded37801436074015`；tree
+  `a1cbf676594be93a86c77afcbb59dacc1611899e`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-0eafd427`。构建前 tracked diff/index 为空且
+  `apps/web/dist` 不存在；根与 `apps/web` 的 `@seedlands/*` workspace links 均解析到该 tree 自身。第三方依赖通过
+  `pnpm install --offline --frozen-lockfile --ignore-scripts` 从本机 store 复用，下载 0；`XDG_STATE_HOME` 指向本 tree 的
+  `.pnpm-task-run-state-v1`，但未产生持久 task-state 目录。
+- 唯一 `pnpm build`：window `v2-artifact-build-14-build`，UTC `2026-09-28T15:33:54.324Z` 至
+  `15:34:24.875Z`，`PASS/exit 0`。Pack build、Rust artifact、SSG、Web/Svelte types 与 Vite production build 均成功。
+- 同一 dist 的唯一 `pnpm harness:artifact`：window `v2-artifact-build-14-artifact-verify`，UTC
+  `2026-09-28T15:34:49.935Z` 至 `15:34:54.492Z`，`PASS/exit 0`。没有第二次 build 或 artifact verify。
+
+两次输出 identity 一致：sourceDigest
+`4a280a632e0273b0d77d8637c78f542e8d4e0519280bd784d7a33c7d08accaa8`、lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`，276 项，builtAt
+`2026-09-28T15:34:20.824Z`。BUILD14 与 BUILD13 的 276 项 artifact map 实测完全相同；GIT38 只改 canonical fixture、
+tests 与 change-local evidence/state，因此 production artifact 字节保持，但 source identity 已推进，不能复用旧 receipt。
+
+receipt SHA-256 为 `73e3eaa9a0bc431d431f0c1a24ae2f60b1e15fcad0e421b6c8dd3b5d505fec7c`。276 项 receipt map 与
+独立磁盘 map 逐字节一致，SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；
+dist 共 277 个普通文件、0 symlink，missing/extra/mismatch 均为 0。`packs.lock.json` SHA-256 为
+`f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。源、public 与 dist 的
+`playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+构建后 acceptance tree tracked/index clean，4273 无监听，本树残留进程为 0，机器锁已释放。BUILD09/10/11/12/13/14
+tree/dist 与 `refs/task-backups/git32-evidence-a402b016` 均保留。Browser22 仍正式 FAIL：C0-C3、完整 V1、resources 和
+三格 wood 独立入包通过，wood pickaxe 起后续 V2/C4/C5/save 未到达；Browser19 首 iron inventory pickup 仍
+`NOT_PROVEN`。BUILD14 未运行 Browser23、Cua、devserver、CI watch、deploy 或 merge；artifact PASS 不等于 Browser
+产品 GREEN。
+
+## BUILD15：Canonical Budget And Terminal Receipt
+
+- 已推送 source SHA：`556c9b76fb4447c49ad7d6f7a76bd7233d0011e6`；tree
+  `45ef275288163c3880bd9ea75d28c62996f3723a`。
+- clean detached worktree：`/private/tmp/seedlands-v2-acceptance-556c9b76`。构建前 tracked/index clean 且没有
+  `apps/web/dist/harness-artifact.json`；根、Web 与 Classic 的 `@seedlands/*` workspace links 均解析到该 tree 内。依赖使用
+  `pnpm install --offline --frozen-lockfile --ignore-scripts`，下载 0。
+- 唯一 `pnpm build`：runId `v2-artifact-build-15-build`，UTC `2026-09-28T21:53:25.462Z` 至
+  `21:53:58.940Z`，`PASS/exit 0`。
+- 同一 dist 的唯一 `pnpm harness:artifact`：runId `v2-artifact-build-15-artifact-verify`，UTC
+  `2026-09-28T21:54:36.320Z` 至 `21:54:41.468Z`，`PASS/exit 0`。没有第二次 build 或 verifier。
+
+两次输出 identity 一致：sourceDigest
+`a4bdd67ba41aa5e59c3650f5fcbcb0ffd7e37737f666a941fd79c6e379ddb136`、lockDigest
+`44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169`、artifactDigest
+`f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4`、276 项，builtAt
+`2026-09-28T21:53:54.075Z`。receipt SHA-256 为
+`f9a31b847ac71bdbdbf2aa7614039a0b5872d0f44e4b0aab9f1848d04a9045cf`。276 项 receipt/disk map 逐项一致，
+map SHA-256 均为 `d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6`；dist 为 277
+个普通文件，0 symlink/missing/extra/mismatch。BUILD15 与 BUILD14 map 完全相同：GIT39 只改变 Playwright/Harness
+证据 owner、测试预算、terminal receipt 验证和 change-local 文档，因此 production artifact bytes 不变，但 source identity 与
+receipt 已推进，不能复用 BUILD14 receipt。
+
+Pack lock source/dist SHA-256 均为 `f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f`。
+源、public 与 dist 的 `playbooks/classic/assets/audio/to-far-shores.mp3` 均为 2,976,045 bytes、`audio/mpeg`、SHA-256
+`3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9`，Pack lock 唯一条目一致。
+
+BUILD15 不改变 Browser23 结论：其 canonical attempt 仍因 720 秒总 timeout 正式 FAIL，原 trace 仍缺 EOCD/中央目录。
+本阶段未运行 BUILD15 之外的测试、Browser24、其他 Browser、Cua、devserver、CI 修复、deploy 或 merge；artifact PASS
+不等于产品或 Browser GREEN。

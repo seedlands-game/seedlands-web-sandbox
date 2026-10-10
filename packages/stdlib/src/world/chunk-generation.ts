@@ -1,5 +1,6 @@
 import { macroAt, type MacroContext } from './macro-world';
-import { CHUNK_SIZE, GENERATOR_VERSION, baseVoxel, chunkKey, voxelIndex } from './voxel';
+import { CHUNK_SIZE, GENERATOR_VERSION, baseVoxel, chunkKey, hash2, voxelIndex } from './voxel';
+import { createTreeColumnSampler, isTreeOriginContext } from './tree-generation';
 
 export type WorldChange = [number, number, number, number];
 
@@ -28,8 +29,27 @@ export function makeChunk(
   for (let z = 0; z < CHUNK_SIZE; z += 1)
     for (let x = 0; x < CHUNK_SIZE; x += 1) {
       const context = queryMacro(ox + x, oz + z);
+      let treeColumn: ReturnType<typeof createTreeColumnSampler> | undefined;
+      const sampleTreeColumn = (y: number) => {
+        treeColumn ??= createTreeColumnSampler(ox + x, oz + z, generatorVersion, (tx, tz) => {
+          const origin = queryMacro(tx, tz);
+          return isTreeOriginContext(origin, hash2(seed ^ 0x44af, tx, tz), generatorVersion)
+            ? origin.terrainHeight
+            : null;
+        });
+        return treeColumn(y);
+      };
       for (let y = 0; y < CHUNK_SIZE; y += 1)
-        data[voxelIndex(x, y, z)] = baseVoxel(seed, ox + x, oy + y, oz + z, context, queryMacro, generatorVersion);
+        data[voxelIndex(x, y, z)] = baseVoxel(
+          seed,
+          ox + x,
+          oy + y,
+          oz + z,
+          context,
+          queryMacro,
+          generatorVersion,
+          sampleTreeColumn,
+        );
     }
   for (const [x, y, z, value] of changes) {
     if (Math.floor(x / CHUNK_SIZE) === cx && Math.floor(y / CHUNK_SIZE) === cy && Math.floor(z / CHUNK_SIZE) === cz) {

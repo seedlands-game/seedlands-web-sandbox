@@ -1,0 +1,148 @@
+Checking formatting...
+All matched files use Prettier code style!
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/v1-slice.ts: OK
+apps/web/tests/e2e/classic-support/door-collision-oracle.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK
+apps/web/dist/harness-artifact.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/SOURCE-MANIFEST.sha256: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/artifact-postcheck-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/artifact-postcheck.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/canonical-error-context.md.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/classic-runtime-failure.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/classic.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/closed-door-correction-timeline.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/command.txt: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/delivery-format-01-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/delivery-format-01.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/delivery-format-write-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/delivery-format-write.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/diagnosis.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-34.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-38.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-42.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-45.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/drop-49.png: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/failure-frame.jpeg: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/final-selfcheck-01-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/final-selfcheck-01.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/harness-artifact.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-write-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final-write.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-final.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-01-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-03-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-03.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-write-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format-write.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/metadata-format.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/network-summary.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/performance-window.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/playwright-last-run.json.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/postconditions.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/preexisting-window-files.txt: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/result-summary.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/runner.stdout.log: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-aa: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ab: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ac: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ad: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-50m/canonical-trace.zip.part-ae: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-parts.sha256: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-readback.json: OK
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/trace-reassembly.sha256: OK
+{
+  "status": "PASS",
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "sourceManifest": {
+    "entries": 10,
+    "sha256": "0419909a5bf74910cce09b540a7ffd7040d7a960eb1ea2782d19e680cfdd9591"
+  },
+  "evidenceManifest": {
+    "entries": 48,
+    "sha256": "d77403b9bccf928df5438e2fe2f27380719d26205ca578298a8fd57b3f66ca6c"
+  },
+  "window": {
+    "id": "1588d767-4a07-4954-a08c-ed9c87c11bec",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T08:21:02.164Z",
+    "endedAt": "2026-09-28T08:23:49.493Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "56904ed65baded71a724ba937406f013f6ce9548e0106e02ef29e5b20715c1ad"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "FAIL_AT_CLOSED_DOOR_PROBE_BEFORE_INPUT",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v1-closed-door-route-aim-budget-exhausted",
+    "sourceLocation": "apps/web/tests/e2e/classic-support/v1-slice.ts:205",
+    "error": "Expected horizontal route correction to be less than 1 mouse unit; received 72.86287224169372.",
+    "doorPair": [
+      93,
+      94
+    ],
+    "routeApproach": [
+      69.4925,
+      0.5
+    ],
+    "routeTarget": [
+      71.4925,
+      0.5
+    ],
+    "correctionAttempts": 12,
+    "correctionMouseMoves": 12,
+    "pointerLockBoundaryResetObserved": true,
+    "closedDoorProbeKeyWInputSent": false,
+    "diagnosisSha256": "14a528331597f4ada7dc5e7fd7de73d49c030c3c5789066e4daea1d4ca066d6a",
+    "timelineSha256": "c2324a1c7ee53f44623bcddc2537d1fbfca17393b1ac84b5a2414bd1a82741c8"
+  },
+  "trace": {
+    "sizeBytes": 227988314,
+    "parts": 5,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "4fcb6d98862f1893770f4bb7a3dce6e269ca1b4908ef79899e9326da30794285",
+    "partsManifestSha256": "b366b71bdd486ac1ea7f22ff7e85bd8eaefd7842dbe6a0cb05cc37c1ff25560d",
+    "reassemblyValidated": true,
+    "filesAtLeast100MB": 0
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-20-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-28T08:31:42.343Z",
+    "endedAt": "2026-09-28T08:31:46.062Z",
+    "files": 276,
+    "stdoutSha256": "5c95c67082a8bc6dcba47e147e33f61b7c92c3b3f65790307710dfe2b3a2ecc8",
+    "receiptSha256": "3f356658ff53892e70b7e42ee85d47c1e27210044d3d35fa821195ee483f64e4"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "build11TreePreserved": true,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016",
+    "benchmarkLockOwnedByCurrentSelfcheck": true
+  }
+}

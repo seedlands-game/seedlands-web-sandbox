@@ -2,13 +2,78 @@ import { describe, expect, it, vi } from 'vitest';
 import { FakeAuthorityWorker, frequencies, ready } from './fixtures/browser-authority';
 import { testWorldgenProvider } from './fixtures/worldgen-provider';
 import { BrowserAuthorityClient } from '../../../src/client/authority/browser-authority-client';
+import { readInputDecisionDiagnostics } from '../../../src/client/authority/input-decision-diagnostics';
 import type { AuthorityResponse } from '../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import { overworldVoxelSemantics } from '../../../../../playbooks/classic/src/blocks';
+import { LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN } from '../../../src/client/persistence/legacy-gameplay-provenance-error';
 
 describe('BrowserAuthorityClient', () => {
+  it('snapshot年龄仅在接受的同epoch版本上更新，缺失时间清除估算', async () => {
+    const worker = new FakeAuthorityWorker();
+    const client = new BrowserAuthorityClient(worker, 'world:1');
+    const now = vi.spyOn(performance, 'now').mockReturnValue(1_500);
+    try {
+      const starting = client.start({
+        seedText: 'clock',
+        openMode: 'continue',
+        legacySnapshots: [],
+        initialWorldTime: 9,
+        frequencies,
+      });
+      worker.emit({ kind: 'authority-ready', protocolVersion: 1, epoch: 'world:1', ready: ready() });
+      await starting;
+      expect(client.inputPhysicsTick).toBe(0);
+      const current = { ...ready().snapshot, physicsTick: 100, commitSequence: 100 };
+      const publish = (snapshot: typeof current, time?: number) =>
+        worker.emit({
+          kind: 'authority-snapshot',
+          protocolVersion: 1,
+          epoch: 'world:1',
+          snapshot,
+          capturedAtTimeOriginMs: time,
+        });
+      publish(current, performance.timeOrigin + 1_000);
+      expect(client.inputPhysicsTick).toBe(130);
+      expect(client.physicsTick).toBe(100);
+      publish(current, performance.timeOrigin + 1_500);
+      publish({ ...current, physicsTick: 99 }, performance.timeOrigin + 1_500);
+      publish({ ...current, epoch: 'old', physicsTick: 900 }, performance.timeOrigin + 1_500);
+      expect(client.inputPhysicsTick).toBe(130);
+      now.mockReturnValue(1_700);
+      expect(client.inputPhysicsTick).toBe(142);
+      publish({ ...current, physicsTick: 101, commitSequence: 101 });
+      expect(client.inputPhysicsTick).toBe(101);
+      publish({ ...current, physicsTick: 102, commitSequence: 102, paused: true }, performance.timeOrigin + 1_000);
+      expect(client.inputPhysicsTick).toBe(102);
+    } finally {
+      now.mockRestore();
+      client.dispose();
+    }
+  });
+
+  it('preserves a legacy provenance code from Worker fatal through startup rejection', async () => {
+    const worker = new FakeAuthorityWorker();
+    const fatal = vi.fn();
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onFatal: fatal });
+    const starting = client.start({
+      seedText: 'legacy',
+      openMode: 'continue',
+      legacySnapshots: [],
+      initialWorldTime: 9,
+      frequencies,
+    });
+    const message = `${LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN}: missing source`;
+
+    worker.emit({ kind: 'authority-fatal', protocolVersion: 1, epoch: 'world:1', error: message });
+
+    await expect(starting).rejects.toThrow(message);
+    expect(fatal).toHaveBeenCalledWith(expect.objectContaining({ message }));
+  });
+
   it('把迟到/非法输入与重同步要求显式反馈预测层', () => {
     const worker = new FakeAuthorityWorker();
     const decisions = vi.fn();
-    new BrowserAuthorityClient(worker, 'world:1', { onInputDecision: decisions });
+    const client = new BrowserAuthorityClient(worker, 'world:1', { onInputDecision: decisions });
     worker.emit({
       kind: 'input-decision',
       protocolVersion: 1,
@@ -35,6 +100,18 @@ describe('BrowserAuthorityClient', () => {
     });
     expect(decisions).toHaveBeenCalledWith({ sequence: 4, decision: 'late', requiresResync: true });
     expect(decisions).toHaveBeenCalledTimes(1);
+    expect(readInputDecisionDiagnostics(client)).toMatchObject({
+      totalReceipts: 1,
+      resyncReceipts: 1,
+      lastSequence: 4,
+      byDecision: { late: 1 },
+    });
+    const readback = readInputDecisionDiagnostics(client)!;
+    expect(Object.isFrozen(readback)).toBe(true);
+    expect(Object.isFrozen(readback.byDecision)).toBe(true);
+    const other = new BrowserAuthorityClient(new FakeAuthorityWorker(), 'world:2');
+    expect(readInputDecisionDiagnostics(other)).toMatchObject({ totalReceipts: 0, byDecision: {} });
+    expect(readInputDecisionDiagnostics(client)?.totalReceipts).toBe(1);
   });
 
   it('把新世界出生点生成握手交给通用计算池', async () => {
@@ -72,6 +149,7 @@ describe('BrowserAuthorityClient', () => {
       generatorVersion: 3,
       provider: testWorldgenProvider,
       starterEcology: null,
+      voxelSemantics: overworldVoxelSemantics,
     } as const;
     worker.emit(needed);
     worker.emit(needed);
@@ -81,6 +159,7 @@ describe('BrowserAuthorityClient', () => {
         generatorVersion: 3,
         provider: testWorldgenProvider,
         starterEcology: null,
+        voxelSemantics: overworldVoxelSemantics,
       }),
     );
     expect(bootstrap).toHaveBeenCalledTimes(1);

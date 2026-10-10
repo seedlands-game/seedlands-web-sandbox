@@ -1,5 +1,16 @@
 import { faceMaterialFor, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
-import { modelBoxesForVoxel, type LocalBox } from '@seedlands/stdlib/world/voxel-model';
+import {
+  forEachVoxelGeometryFace,
+  voxelModelFaceUvs,
+  type VoxelModelFace,
+} from '@seedlands/stdlib/world/voxel-model-mesh';
+import {
+  crossedPlantMaterialForVoxel,
+  hasVoxelModelGeometry,
+  modelBoxesForVoxel,
+  type LocalBox,
+  type VoxelGeometryResolver,
+} from '@seedlands/stdlib/world/voxel-model';
 
 export type ItemMeshGroup = Readonly<{
   material: FaceMaterialId;
@@ -7,7 +18,7 @@ export type ItemMeshGroup = Readonly<{
   normals: number[];
   uvs: number[];
   indices: number[];
-  /** Number of source boxes for a model, or source faces for a full voxel. */
+  /** Number of source geometry primitives for a model, or source faces for a full voxel. */
   boxCount: number;
 }>;
 
@@ -54,6 +65,15 @@ function appendFace(group: MutableGroup, box: LocalBox, dimension: number, back:
   group.indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
 }
 
+function appendGeometryFace(group: MutableGroup, face: VoxelModelFace): void {
+  const start = group.positions.length / 3;
+  group.positions.push(...face.positions);
+  group.normals.push(...face.normal, ...face.normal, ...face.normal, ...face.normal);
+  const uvs = voxelModelFaceUvs(face);
+  group.uvs.push(...uvs.map(Math.fround));
+  group.indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
+}
+
 function groupFor(groups: Map<FaceMaterialId, MutableGroup>, material: FaceMaterialId): MutableGroup {
   let group = groups.get(material);
   if (!group) {
@@ -67,9 +87,20 @@ function groupFor(groups: Map<FaceMaterialId, MutableGroup>, material: FaceMater
  * Compiles item geometry from the authoritative voxel representation. It remains CPU-only so
  * PlayCanvas mesh allocation, cache ownership, and GPU lifetime stay at the application edge.
  */
-export function itemMeshDefinition(voxel: number): ItemMeshDefinition {
+export function itemMeshDefinition(
+  voxel: number,
+  faceMaterials?: readonly [
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+    FaceMaterialId,
+  ],
+  geometry?: VoxelGeometryResolver,
+): ItemMeshDefinition {
   const groups = new Map<FaceMaterialId, MutableGroup>();
-  const modelBoxes = modelBoxesForVoxel(voxel);
+  const modelBoxes = modelBoxesForVoxel(voxel, geometry);
   if (modelBoxes.length) {
     for (const box of modelBoxes) {
       const group = groupFor(groups, box.material);
@@ -77,11 +108,17 @@ export function itemMeshDefinition(voxel: number): ItemMeshDefinition {
       for (let dimension = 0; dimension < 3; dimension += 1)
         for (const back of [true, false]) appendFace(group, box, dimension, back);
     }
+  } else if (hasVoxelModelGeometry(voxel)) {
+    const material = crossedPlantMaterialForVoxel(voxel);
+    if (material === undefined) throw new RangeError(`物品体素缺少交叉模型材质：${voxel}`);
+    const group = groupFor(groups, material);
+    group.boxCount = 2;
+    forEachVoxelGeometryFace(voxel, [0, 0, 0], (face) => appendGeometryFace(group, face), geometry);
   } else {
     const box: LocalBox = { min: [0, 0, 0], max: [1, 1, 1] };
     for (let dimension = 0; dimension < 3; dimension += 1)
       for (const back of [true, false]) {
-        const material = faceMaterialFor(voxel, dimension, !back);
+        const material = faceMaterials?.[dimension * 2 + Number(!back)] ?? faceMaterialFor(voxel, dimension, !back);
         if (material === undefined) throw new RangeError(`物品体素没有面材质：${voxel}`);
         const group = groupFor(groups, material);
         group.boxCount += 1;

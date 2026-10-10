@@ -24,8 +24,13 @@ export function assertMutationCoordinate(value: number): void {
     throw new RangeError(`Mutation coordinate must be an int32, received ${String(value)}.`);
 }
 
-export function assertVoxelValue(value: number): void {
-  if (!Number.isInteger(value) || value < Voxel.Air || value > MAX_VOXEL_ID)
+export function assertVoxelValue(value: number, isRegistered?: (value: number) => boolean): void {
+  if (
+    !Number.isInteger(value) ||
+    value < Voxel.Air ||
+    value > 65_535 ||
+    (isRegistered ? !isRegistered(value) : value > MAX_VOXEL_ID)
+  )
     throw new RangeError(`Mutation voxel must be a registered voxel id, received ${String(value)}.`);
 }
 
@@ -34,13 +39,58 @@ export function assertWorldMutationBatch(
     edits?: readonly VoxelEdit[];
     buffers?: readonly WorldMutationBuffer[];
   }>,
+  isRegistered?: (value: number) => boolean,
 ): void {
   const validate = (x: number, y: number, z: number, value: number) => {
     [x, y, z].forEach(assertMutationCoordinate);
-    assertVoxelValue(value);
+    assertVoxelValue(value, isRegistered);
   };
   batch.edits?.forEach(({ x, y, z, value }) => validate(x, y, z, value));
-  batch.buffers?.forEach((buffer) => buffer.forEach(validate));
+  batch.buffers?.forEach((buffer) =>
+    buffer.hasUniqueCoordinates ? assertUniqueMutationBufferCoordinates(buffer, validate) : buffer.forEach(validate),
+  );
+}
+
+export function assertUniqueMutationBufferCoordinates(
+  buffer: WorldMutationBuffer,
+  visit: (x: number, y: number, z: number, value: number) => void = () => undefined,
+): void {
+  if (!buffer.hasUniqueCoordinates) return;
+  const runsByChunk = new Map<string, MutationChunkRun[]>();
+  let covered = 0;
+  for (const run of buffer.chunkRuns) {
+    if (run.start !== covered || !Number.isSafeInteger(run.end) || run.end <= run.start || run.end > buffer.count)
+      throw new TypeError('Unique mutation buffer Chunk runs are invalid.');
+    covered = run.end;
+    const key = `${run.cx},${run.cy},${run.cz}`;
+    const runs = runsByChunk.get(key) ?? [];
+    runs.push(run);
+    runsByChunk.set(key, runs);
+  }
+  if (covered !== buffer.count) throw new TypeError('Unique mutation buffer Chunk runs do not cover its payload.');
+  const seen = new Uint32Array(CHUNK_SIZE ** 3);
+  let generation = 0;
+  for (const runs of runsByChunk.values()) {
+    generation += 1;
+    for (const run of runs)
+      buffer.forEachRange(run.start, run.end, (x, y, z, value) => {
+        if (
+          floorDiv(x, CHUNK_SIZE) !== run.cx ||
+          floorDiv(y, CHUNK_SIZE) !== run.cy ||
+          floorDiv(z, CHUNK_SIZE) !== run.cz
+        )
+          throw new TypeError('Unique mutation buffer coordinate does not match its Chunk run.');
+        const index =
+          x -
+          run.cx * CHUNK_SIZE +
+          (z - run.cz * CHUNK_SIZE) * CHUNK_SIZE +
+          (y - run.cy * CHUNK_SIZE) * CHUNK_SIZE ** 2;
+        if (seen[index] === generation)
+          throw new TypeError(`Unique mutation buffer contains duplicate coordinates: ${x},${y},${z}`);
+        seen[index] = generation;
+        visit(x, y, z, value);
+      });
+  }
 }
 
 export class WorldMutationBuffer {

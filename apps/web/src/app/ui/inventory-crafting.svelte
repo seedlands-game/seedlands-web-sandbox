@@ -3,28 +3,33 @@
   import { SvelteMap } from 'svelte/reactivity';
   import GameButton from './primitives/game-button.svelte';
   import GameOverlay from './primitives/game-overlay.svelte';
-  import GameTextField from './primitives/game-text-field.svelte';
+  import PersonalCrafting from './personal-crafting.svelte';
   import ItemIcon from './primitives/item-icon.svelte';
   import InventorySlot from './primitives/inventory-slot.svelte';
+  import EquipmentPanel from './equipment-panel.svelte';
   import StationPanel from './station-panel.svelte';
   import CreativeCatalog from './creative-catalog.svelte';
-  import { InventoryPointerGestures, inventorySlotKey, type InventoryUiSlot } from './inventory-pointer-gestures';
+  import {
+    InventoryPointerGestures,
+    inventoryGestureContextIdentity,
+    inventorySlotKey,
+    parseInventoryUiSlotAddress,
+    type InventoryUiBulkSlot,
+    type InventoryUiSlot,
+  } from './inventory-pointer-gestures';
   import type { ShellState, UiActionPort, ActorMode } from './ui-contracts';
 
   let { gameplay, actions }: { gameplay: ShellState['gameplay']; actions: UiActionPort } = $props();
-  let filter = $state('');
+  const hotbarSize = $derived(gameplay.hotbarSize ?? 8);
   let hovered = $state<InventoryUiSlot | null>(null);
   let foodSlot = $state<number | null>(null);
-  let dragSlots = $state<readonly InventoryUiSlot[]>([]);
+  let dragSlots = $state<readonly InventoryUiBulkSlot[]>([]);
   let dragButton = $state<0 | 2>(0);
   let pointer = $state({ x: 0, y: 0 });
   let closing = $state(false);
   const cursor = $derived(gameplay.cursor ?? null);
   const usesInventoryPointer = $derived(gameplay.mode === 'survival' || Boolean(gameplay.station));
   const food = $derived(foodSlot === null ? null : gameplay.inventory[foodSlot]);
-  const visibleRecipes = $derived(
-    gameplay.recipes.filter((recipe) => recipe.name.toLowerCase().includes(filter.trim().toLowerCase())),
-  );
   const gestures = new InventoryPointerGestures(
     () => Boolean(gameplay.cursor?.itemId),
     async (command) => {
@@ -39,9 +44,19 @@
       dragButton = button;
     },
   );
-  const itemAt = (slot: InventoryUiSlot) =>
-    slot.kind === 'inventory' ? gameplay.inventory[slot.slot] : gameplay.station?.slots[slot.slot];
-  function accepts(slot: InventoryUiSlot): boolean {
+  function itemAt(slot: InventoryUiSlot) {
+    switch (slot.kind) {
+      case 'inventory':
+        return gameplay.inventory[slot.slot];
+      case 'crafting':
+        return gameplay.personalCrafting.slots[slot.slot];
+      case 'station':
+        return gameplay.station?.slots[slot.slot];
+      case 'equipment':
+        return gameplay.equipment[slot.slot];
+    }
+  }
+  function accepts(slot: InventoryUiBulkSlot): boolean {
     if (!cursor) return false;
     const limit = cursor.stackLimit ?? 1;
     const item = itemAt(slot);
@@ -74,14 +89,19 @@
     cursor
       ? cursor.count -
           [...previews].reduce((sum, [key, count]) => {
-            const slot = parseSlot(key)!;
+            const slot = parseInventoryUiSlotAddress(key)!;
             return sum + count - (itemAt(slot)?.count ?? 0);
           }, 0)
       : 0,
   );
 
   const contextIdentity = $derived(
-    `${gameplay.inventoryOpen}:${gameplay.mode}:${gameplay.inventoryIdentity ?? ''}:${gameplay.station?.id ?? ''}`,
+    inventoryGestureContextIdentity({
+      inventoryOpen: gameplay.inventoryOpen,
+      mode: gameplay.mode,
+      inventoryIdentity: gameplay.inventoryIdentity,
+      stationId: gameplay.station?.id,
+    }),
   );
   $effect(() => {
     // Normal inventory updates must not cancel an in-progress gesture.
@@ -90,14 +110,8 @@
     hovered = null;
     foodSlot = null;
   });
-  function parseSlot(value: string | undefined): InventoryUiSlot | null {
-    const [kind, index] = (value ?? '').split(':');
-    return (kind === 'inventory' || kind === 'station') && /^\d+$/.test(index ?? '')
-      ? { kind, slot: Number(index) }
-      : null;
-  }
   function slotUnderPointer(event: PointerEvent): InventoryUiSlot | null {
-    return parseSlot(
+    return parseInventoryUiSlotAddress(
       document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-inventory-address]')?.dataset
         .inventoryAddress,
     );
@@ -158,7 +172,14 @@
       event.preventDefault();
       event.stopPropagation();
       void close();
-    } else if (!input && hovered && !cursor && !dragSlots.length && /^Digit[1-8]$/.test(event.code)) {
+    } else if (
+      !input &&
+      hovered &&
+      !cursor &&
+      !dragSlots.length &&
+      /^Digit[1-9]$/.test(event.code) &&
+      Number(event.code[5]) <= hotbarSize
+    ) {
       event.preventDefault();
       event.stopPropagation();
       gestures.command({ kind: 'hotbar', slot: { ...hovered }, hotbarSlot: Number(event.code[5]) - 1 });
@@ -192,7 +213,12 @@
   label={gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成')}
   open={gameplay.inventoryOpen}
 >
-  <div class="inventory-dialog" class:holding={Boolean(cursor)} aria-busy={closing}>
+  <div
+    class="inventory-dialog"
+    class:holding={Boolean(cursor)}
+    aria-busy={closing}
+    style:--inventory-columns={hotbarSize}
+  >
     <header>
       <div>
         <small id="actor-mode-status" role="status">{gameplay.mode === 'creative' ? '创造模式' : '生存模式'}</small>
@@ -214,26 +240,42 @@
     {#if gameplay.mode === 'creative' && !gameplay.station}
       <CreativeCatalog {gameplay} {actions} />
     {:else}
-      <div class="survival-layout" class:with-recipes={!gameplay.station}>
+      <div class="survival-layout">
         <main class="inventory-main">
-          {#if gameplay.station}
-            <StationPanel
-              station={gameplay.station}
-              {cursor}
-              {previews}
+          <div class="inventory-workspace">
+            <EquipmentPanel
+              equipment={gameplay.equipment}
               onpress={press}
               onenter={enter}
-              onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-              oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              onactivate={(address) => gestures.command({ kind: 'click', slot: address, button: 0 })}
             />
-          {:else}<div class="bag-intro">
-              <h3>随身物品</h3>
-              <span>整理材料，准备下一次探索</span>
-            </div>{/if}
+            {#if gameplay.station}
+              <StationPanel
+                station={gameplay.station}
+                {cursor}
+                {previews}
+                onpress={press}
+                onenter={enter}
+                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              />
+            {:else}
+              <PersonalCrafting
+                slots={gameplay.personalCrafting.slots}
+                recipes={gameplay.personalCrafting.recipes}
+                {cursor}
+                {previews}
+                onpress={press}
+                onenter={enter}
+                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+              />
+            {/if}
+          </div>
           <div role="grid" aria-label="背包槽位" class="bag-slots">
             <h3>背包</h3>
             <div class="slot-grid">
-              {#each gameplay.inventory.slice(8) as item (item.slot)}
+              {#each gameplay.inventory.slice(hotbarSize) as item (item.slot)}
                 <InventorySlot
                   {item}
                   address={{ kind: 'inventory', slot: item.slot }}
@@ -245,9 +287,9 @@
                 />
               {/each}
             </div>
-            <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–8 交换</span></h3>
+            <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–{hotbarSize} 交换</span></h3>
             <div class="slot-grid hotbar-grid">
-              {#each gameplay.inventory.slice(0, 8) as item (item.slot)}
+              {#each gameplay.inventory.slice(0, hotbarSize) as item (item.slot)}
                 <InventorySlot
                   {item}
                   address={{ kind: 'inventory', slot: item.slot }}
@@ -281,24 +323,6 @@
               >{/if}
           </div>
         </main>
-        {#if !gameplay.station}
-          <aside class="personal-recipes" aria-label="合成配方">
-            <h3>快捷合成</h3>
-            <GameTextField id="recipe-filter" label="筛选配方" bind:value={filter} placeholder="搜索配方" />
-            <div role="list" aria-label="合成配方">
-              {#each visibleRecipes as recipe (recipe.id)}
-                <div role="listitem" class:available={recipe.craftable}>
-                  <strong>{recipe.name}</strong><small>{recipe.requirements} → {recipe.result}</small>
-                  <GameButton
-                    label={`${recipe.craftable ? '合成' : '缺少材料'} ${recipe.name}`}
-                    disabled={!recipe.craftable || Boolean(cursor)}
-                    onclick={() => actions.craftRecipe(recipe.id)}>{recipe.craftable ? '合成' : '缺材料'}</GameButton
-                  >
-                </div>
-              {:else}<p>没有符合条件的配方。</p>{/each}
-            </div>
-          </aside>
-        {/if}
       </div>
       <footer class="inventory-help">
         <span><b>左键</b> 整组拿放 / 拖拽均分</span><span><b>右键</b> 拆半 / 拖拽单放</span><span
@@ -328,7 +352,7 @@
     padding: 18px 22px;
   }
   :global(#ui #inventory-crafting .inventory-dialog:has(.station-panel)) {
-    width: min(650px, calc(100vw - 32px));
+    width: min(860px, calc(100vw - 32px));
   }
   header {
     display: flex;
@@ -361,22 +385,14 @@
     display: grid;
     gap: 22px;
   }
-  .survival-layout.with-recipes {
-    grid-template-columns: minmax(0, 1fr) 200px;
-  }
   .inventory-main {
     min-width: 0;
   }
-  .bag-intro {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #79633f60;
-    padding-bottom: 12px;
-  }
-  .bag-intro span {
-    font-size: 10px;
-    color: #a49f8e;
+  .inventory-workspace {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.42fr) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
   }
   h3 {
     margin: 0;
@@ -390,7 +406,7 @@
   }
   .slot-grid {
     display: grid;
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--inventory-columns, 8), minmax(0, 1fr));
     gap: 5px;
   }
   .bag-slots > .hotbar-label {
@@ -416,41 +432,6 @@
     min-height: 25px;
     padding: 3px 10px;
     font-size: 10px;
-  }
-  .personal-recipes {
-    border-left: 1px solid #79633f60;
-    padding-left: 18px;
-  }
-  .personal-recipes h3 {
-    margin-bottom: 12px;
-  }
-  .personal-recipes :global(input) {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .personal-recipes [role='list'] {
-    max-height: 267px;
-    overflow: auto;
-    margin-top: 10px;
-  }
-  .personal-recipes [role='listitem'] {
-    padding: 9px 0;
-    border-bottom: 1px solid #ffffff10;
-    display: grid;
-    gap: 6px;
-  }
-  .personal-recipes strong {
-    font-size: 12px;
-  }
-  .personal-recipes small {
-    font-size: 10px;
-    color: #a9a794;
-  }
-  .personal-recipes :global(.game-button) {
-    width: 100%;
-    padding: 4px;
-    min-height: 25px;
-    font-size: 11px;
   }
   .inventory-help {
     margin-top: 10px;
@@ -493,15 +474,8 @@
     text-shadow: 1px 2px 0 #000;
   }
   @media (max-width: 720px) {
-    .survival-layout.with-recipes {
+    .inventory-workspace {
       grid-template-columns: 1fr;
-    }
-    .personal-recipes {
-      border: 0;
-      padding: 0;
-    }
-    .personal-recipes [role='list'] {
-      max-height: 120px;
     }
   }
 </style>

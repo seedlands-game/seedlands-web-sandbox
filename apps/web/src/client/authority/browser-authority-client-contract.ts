@@ -3,11 +3,12 @@ import type { FluidAuthoritySnapshot } from '@seedlands/stdlib/server/fluid/flui
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { LogicObservation } from '@seedlands/stdlib/server/logic/logic-protocol';
 import type { SequenceDecision } from '@seedlands/stdlib/runtime/session-protocol';
+import type { BrowserAuthorityResponse } from './pointer-attack-protocol';
+import type { AuthorityActionResult } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type {
   AuthorityGameplayView,
   AuthorityMeshPayload,
   AuthorityReady,
-  AuthorityResponse,
 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { SerializedChunkSnapshot } from '../persistence/browser-chunk-persistence';
 import type { AuthorityTransportFaults } from './authority-transport';
@@ -20,6 +21,8 @@ import type {
 } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type { BehaviorUpdateRequest } from '@seedlands/stdlib/runtime/behavior-control-protocol';
+import type { MediaPlaybackProjectionV1 } from '@seedlands/stdlib/mod-api';
+import type { MediaPlaybackCommittedBatchV1 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 export type BoundCharacterControlPort = Readonly<{
   binding: ControlBinding;
@@ -45,15 +48,18 @@ export type BoundCharacterControlPort = Readonly<{
 }>;
 
 export type AuthorityWorkerPort = {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null;
+  onmessage: ((event: MessageEvent<BrowserAuthorityResponse>) => void) | null;
   onerror: ((event: ErrorEvent) => void) | null;
   postMessage(message: unknown, transfer?: Transferable[]): void;
   terminate(): void;
 };
 
 export type AuthorityClientOptions = Readonly<{
+  observationNow?: () => number;
   onSnapshot?: (snapshot: AuthoritySnapshot) => void;
   onGameplay?: (view: AuthorityGameplayView) => void;
+  onMediaProjection?: (projection: readonly MediaPlaybackProjectionV1[]) => void;
+  onMediaFacts?: (batch: MediaPlaybackCommittedBatchV1) => void;
   onCommit?: (commit: WorldCommitResult) => void;
   onFluidWork?: (snapshot: FluidAuthoritySnapshot) => void;
   onLogicObservation?: (observation: LogicObservation) => void;
@@ -61,6 +67,7 @@ export type AuthorityClientOptions = Readonly<{
   onUnknownChunk?: (key: string) => void;
   onAuthorityChunkNeeded?: (key: string) => void;
   onInputDecision?: (decision: { sequence: number; decision: SequenceDecision; requiresResync: boolean }) => void;
+  onPointerAttackResult?: (result: AuthorityActionResult['result']) => void;
   onFatal?: (error: Error) => void;
   onWorldEpochChanged?: (epoch: string, ready: AuthorityReady) => void;
   requestTimeoutMs?: number;
@@ -95,3 +102,9 @@ export type AuthorityCachedPreparation = {
   fluid?: Uint8Array;
   overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
 };
+
+export type AuthorityCanonicalResult = Readonly<{
+  canonical?: ArrayBuffer;
+  generatorVersion?: number;
+  provider?: import('@seedlands/kernel/spatial').KernelWorldgenProviderIdentity;
+}>;

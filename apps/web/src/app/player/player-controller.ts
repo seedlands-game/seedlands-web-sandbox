@@ -1,12 +1,9 @@
 import * as pc from 'playcanvas';
+import { captureHeldPointerAim } from './held-pointer-aim';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { releasePointerLock } from './pointer-lock';
 import { traceVoxelTarget, type VoxelTarget } from '../../client/presentation/voxel-target';
-import {
-  DRY_WATER_IMMERSION,
-  sampleWaterImmersion,
-  type WaterImmersionSnapshot,
-} from '@seedlands/stdlib/world/water-immersion';
+import { DRY_WATER_IMMERSION, type WaterImmersionSnapshot } from '@seedlands/stdlib/world/water-immersion';
 import type { PlayerControllerOptions } from './player-controller-types';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import { LocalPlayerPrediction } from '../../client/local-player-prediction';
@@ -17,22 +14,44 @@ import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/autho
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
 import { playerDamageCameraOffset } from '../../client/presentation/player-damage-feedback';
-import { performSecondaryInteraction } from './secondary-interaction';
+import { performPlayerSecondaryInteraction } from './secondary-interaction';
+import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
+import { createFluidAwareTargetPredicate } from './fluid-source-target';
+import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
+import { recordNativeRelease, readNativeInput } from './native-movement-input';
+import { samplePlayerWaterImmersion } from './player-water-immersion';
+import { HeldPointerAttackCadence } from './held-pointer-attack';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export class PlayerController {
+  get nativeMovementInput() {
+    return readNativeInput(this, this.options.authority.epoch);
+  }
   readonly velocity = new pc.Vec3();
   private yaw = 0;
   private pitch = -16;
   private grounded = false;
   private readonly keys = new Set<string>();
+  // prettier-ignore
   private attempts = 0;
   private spectator = false;
   private miningHeld = false;
-  private activeMiningTarget: string | null = null;
-  private attackCooldownSeconds = 0;
+  private readonly mining = new PlayerMiningState();
   private attackBlocking = false;
+  private readonly heldAttack = new HeldPointerAttackCadence(() => {
+    if (
+      !this.miningHeld ||
+      this.interactionBlocked ||
+      !this.options.getWorld() ||
+      !this.mining.matchesMode(this.options.isCreativeMode) ||
+      document.pointerLockElement !== this.options.canvas
+    ) {
+      this.stopMining();
+      return;
+    }
+    this.captureHeldAttack(Math.min(3, this.traceTarget()?.distance ?? 3));
+  });
   private publishedAimTarget: VoxelTarget | null = null;
   private immersion: WaterImmersionSnapshot = DRY_WATER_IMMERSION;
   private readonly prediction: LocalPlayerPrediction;
@@ -114,8 +133,11 @@ export class PlayerController {
     if (!world) return null;
     const position = this.options.camera.getPosition();
     const direction = this.options.camera.forward;
-    return traceVoxelTarget([position.x, position.y, position.z], [direction.x, direction.y, direction.z], (x, y, z) =>
-      world.getVoxel(x, y, z),
+    return traceVoxelTarget(
+      [position.x, position.y, position.z],
+      [direction.x, direction.y, direction.z],
+      (x, y, z) => world.getVoxel(x, y, z),
+      createFluidAwareTargetPredicate(world, this.options.canTargetFluidSource),
     );
   }
 
@@ -155,24 +177,32 @@ export class PlayerController {
         this.shiftWorldTime(event.code === 'BracketLeft' ? -1 : 1);
         return;
       }
-      this.keys.add(event.code);
-      if (/^Digit[1-8]$/.test(event.code)) {
+      if (updatePlayerMovementKeys(this.keys, event.code, true)) this.captureKeyboardInput();
+      if (/^Digit[1-9]$/.test(event.code)) {
         this.options.onSelectHotbarSlot(Number(event.code[5]) - 1);
         if (this.miningHeld) this.cancelActiveMining();
       }
     };
     window.onkeyup = (event) => {
       this.debugTimeKeys.handleKeyUp(event.code);
-      this.keys.delete(event.code);
+      if (updatePlayerMovementKeys(this.keys, event.code, false))
+        recordNativeRelease(this, event.code, this.captureKeyboardInput());
     };
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
-      if (!this.interactionBlocked) void canvas.requestPointerLock();
+      if (!this.interactionBlocked && document.pointerLockElement !== canvas) void canvas.requestPointerLock();
     };
     document.onmousemove = (event) => {
       if (document.pointerLockElement === canvas) {
-        this.yaw -= event.movementX * 0.13;
-        this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * 0.13));
+        const sensitivity = this.options.mouseSensitivity?.value ?? 0.13;
+        this.yaw -= event.movementX * sensitivity;
+        this.pitch = Math.max(-88, Math.min(88, this.pitch - event.movementY * sensitivity));
+        this.options.camera.setEulerAngles(this.pitch, this.yaw, 0);
+        if (this.miningHeld && this.options.onHeldAttackTarget) {
+          if (this.interactionBlocked) this.stopMining();
+          else this.captureHeldAttack();
+        }
+        this.publishAimTarget(this.aimTarget);
       }
     };
     document.onpointerlockchange = () => {
@@ -181,7 +211,10 @@ export class PlayerController {
     window.onblur = () => this.releaseInput();
     document.onvisibilitychange = this.handleVisibilityChange;
     document.onmousedown = (event) => {
-      if (this.interactionBlocked) return;
+      if (this.interactionBlocked) {
+        this.stopMining();
+        return;
+      }
       if (document.pointerLockElement !== canvas) {
         if (event.target !== canvas || event.button !== 2) return;
         void canvas.requestPointerLock();
@@ -223,45 +256,19 @@ export class PlayerController {
     }
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
-    const cameraPosition = camera.getPosition();
-    const playerBounds = bodyConfigFor('player').localAabb;
-    const feetY = cameraPosition.y - PLAYER_FEET_OFFSET;
-    this.immersion = sampleWaterImmersion({
-      cameraPosition: [cameraPosition.x, cameraPosition.y, cameraPosition.z],
-      bodyBounds: {
-        min: [cameraPosition.x + playerBounds.min.x, feetY + playerBounds.min.y, cameraPosition.z + playerBounds.min.z],
-        max: [cameraPosition.x + playerBounds.max.x, feetY + playerBounds.max.y, cameraPosition.z + playerBounds.max.z],
-      },
-      previousCameraSubmerged: this.immersion.cameraSubmerged,
-      getVoxel: (x, y, z) => world.getVoxel(x, y, z),
-      getFluidLevel: (x, y, z) => world.getFluidCell(x, y, z)?.level ?? null,
-    });
+    this.immersion = samplePlayerWaterImmersion(camera, world, this.immersion.cameraSubmerged);
     const span = this.options.telemetry.beginSpan('player', 'PlayerMovement');
     if (!this.spectator) {
-      const forward = new pc.Vec3().copy(camera.forward);
-      forward.y = 0;
-      forward.normalize();
-      const right = new pc.Vec3().copy(camera.right);
-      right.y = 0;
-      right.normalize();
       const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
       if (snapshot) {
         const collisionWorld = this.collisionWorld(world);
         const prediction = this.prediction.advance({
           elapsedSeconds: dt,
           snapshot,
+          inputPhysicsTick: this.options.authority.inputPhysicsTick?.(),
           world: collisionWorld,
           issuedAtMs: performance.now(),
-          forward: { x: forward.x, z: forward.z },
-          right: { x: right.x, z: right.z },
-          keys: {
-            forward: this.keys.has('KeyW'),
-            back: this.keys.has('KeyS'),
-            left: this.keys.has('KeyA'),
-            right: this.keys.has('KeyD'),
-            jump: this.keys.has('Space'),
-            crouch: this.keys.has('ShiftLeft'),
-          },
+          ...samplePlayerMovementInput(camera, this.keys),
         });
         prediction.commands.forEach((command) => this.options.authority.sendInput(command));
         this.grounded = this.prediction.grounded;
@@ -270,13 +277,12 @@ export class PlayerController {
         camera.setPosition(presented.position.x, presented.position.y + PLAYER_FEET_OFFSET, presented.position.z);
       }
     }
-    // 输入重复跟随真实时间；预测用的截断 dt 不能拖慢权威连招窗口。
-    this.attackCooldownSeconds = Math.max(0, this.attackCooldownSeconds - elapsedSeconds);
     const target = this.aimTarget;
     this.publishAimTarget(target);
     if (this.miningHeld) {
       if (this.interactionBlocked) this.stopMining();
-      else this.continueMining(target);
+      else if (!this.mining.matchesMode(this.options.isCreativeMode)) this.stopMining();
+      else this.continueMining(target, elapsedSeconds);
     }
     const damageOffset = this.damageFeedback;
     camera.setEulerAngles(this.pitch + damageOffset.pitch, this.yaw + damageOffset.yaw, damageOffset.roll);
@@ -297,6 +303,26 @@ export class PlayerController {
     this.velocity.z = 0;
     this.stopMining();
     releasePointerLock();
+  }
+
+  private captureKeyboardInput() {
+    if (this.spectator) return null;
+    if (this.interactionBlocked) {
+      this.sendNeutralInput();
+      return null;
+    }
+    const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
+    if (!snapshot) return null;
+    const camera = this.options.camera;
+    camera.setEulerAngles(this.pitch, this.yaw, 0);
+    const command = this.prediction.captureInput({
+      snapshot,
+      inputPhysicsTick: this.options.authority.inputPhysicsTick?.(),
+      issuedAtMs: performance.now(),
+      ...samplePlayerMovementInput(camera, this.keys),
+    });
+    if (command) this.options.authority.sendInput(command);
+    return command;
   }
 
   applyAuthoritySnapshot(snapshot: AuthoritySnapshot): void {
@@ -426,44 +452,45 @@ export class PlayerController {
 
   private sendNeutralInput(): void {
     const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
-    if (snapshot) this.options.authority.sendInput(this.prediction.interrupt(snapshot, performance.now()));
+    if (snapshot)
+      this.options.authority.sendInput(
+        this.prediction.interrupt(snapshot, performance.now(), this.options.authority.inputPhysicsTick?.()),
+      );
   }
 
   private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {
-    return new VoxelCollisionWorld({
-      getChunkRevision: (key) => {
-        const [cx, cy, cz] = key.split(',').map(Number);
-        return world.getChunkRevision(cx!, cy!, cz!);
+    return new VoxelCollisionWorld(
+      {
+        getChunkRevision: (key) => {
+          const [cx, cy, cz] = key.split(',').map(Number);
+          return world.getChunkRevision(cx!, cy!, cz!);
+        },
+        getLoadedVoxel: (x, y, z) => {
+          const cx = floorDiv(x, CHUNK_SIZE);
+          const cy = floorDiv(y, CHUNK_SIZE);
+          const cz = floorDiv(z, CHUNK_SIZE);
+          const revision = world.getChunkRevision(cx, cy, cz);
+          if (revision === null) return null;
+          const fluid = world.getFluidCell(x, y, z);
+          return {
+            voxel: world.getVoxel(x, y, z),
+            chunkKey: chunkKey(cx, cy, cz),
+            revision,
+            ...(fluid ? { fluid: { level: fluid.level } } : {}),
+          };
+        },
       },
-      getLoadedVoxel: (x, y, z) => {
-        const cx = floorDiv(x, CHUNK_SIZE);
-        const cy = floorDiv(y, CHUNK_SIZE);
-        const cz = floorDiv(z, CHUNK_SIZE);
-        const revision = world.getChunkRevision(cx, cy, cz);
-        if (revision === null) return null;
-        const fluid = world.getFluidCell(x, y, z);
-        return {
-          voxel: world.getVoxel(x, y, z),
-          chunkKey: chunkKey(cx, cy, cz),
-          revision,
-          ...(fluid ? { fluid: { level: fluid.level } } : {}),
-        };
-      },
-    });
+      () => undefined,
+      world.authority.voxelSemantics,
+      world.authority.voxelGeometry,
+    );
   }
 
   private interact(place: boolean, bypassTarget = false) {
     this.attempts += 1;
     const target = this.aimTarget;
     if (place) {
-      performSecondaryInteraction({
-        target,
-        bypassTarget,
-        useTarget: this.options.onUseTarget,
-        useHeldItem: this.options.onUseHeldItem,
-        place: this.options.onPlace,
-        feedback: this.options.onFeedback,
-      });
+      void performPlayerSecondaryInteraction(this.options, target, bypassTarget);
       return;
     }
     if (!target) this.options.onFeedback('距离过远', 'error');
@@ -471,70 +498,45 @@ export class PlayerController {
 
   private startMining() {
     this.attempts += 1;
+    if (this.miningHeld) this.stopMining();
     this.miningHeld = true;
-    this.attackCooldownSeconds = 0;
-    this.continueMining(this.aimTarget);
+    this.mining.start(this.options.isCreativeMode?.() ? 'creative' : 'survival');
+    this.heldAttack.start();
+    this.continueMining(this.aimTarget, 0, true);
   }
 
-  private continueMining(target: VoxelTarget | null) {
-    const position = this.options.camera.getPosition();
-    const direction = this.options.camera.forward;
-    if (this.attackCooldownSeconds === 0) {
-      this.attackCooldownSeconds = 0.2;
-      const obstacle = this.traceTarget();
-      this.attackBlocking = this.options.onAttackTarget(
-        [position.x, position.y, position.z],
-        [direction.x, direction.y, direction.z],
-        Math.min(3, obstacle?.distance ?? 3),
-      );
-      if (this.attackBlocking) {
-        this.cancelActiveMining();
-        return;
-      }
-    }
-    if (this.attackBlocking) return;
+  private continueMining(target: VoxelTarget | null, elapsedSeconds: number, initial = false) {
+    this.heldAttack.attempt();
+    if (!this.miningHeld || this.attackBlocking) return;
     const targetKey = target?.position.join(',') ?? null;
     if (!target || !targetKey) {
       this.cancelActiveMining();
       return;
     }
-    if (targetKey === this.activeMiningTarget) return;
+    if (!this.mining.shouldBegin(targetKey, elapsedSeconds, initial)) return;
     this.cancelActiveMining();
-    this.options.onBeginBreak(target.position);
-    this.activeMiningTarget = targetKey;
+    const request = this.options.onBeginBreak(target.position);
+    this.mining.recordBegin(targetKey, request);
   }
 
   private cancelActiveMining() {
-    if (!this.activeMiningTarget) return;
-    this.options.onCancelBreak();
-    this.activeMiningTarget = null;
+    if (this.mining.cancelActive()) this.options.onCancelBreak();
   }
 
   private stopMining() {
     this.miningHeld = false;
-    this.cancelActiveMining();
+    this.heldAttack.stop();
+    this.options.onStopHeldAttack?.();
+    if (this.mining.stop()) this.options.onCancelBreak();
+  }
+
+  private captureHeldAttack(maxDistance = 3) {
+    this.attackBlocking = captureHeldPointerAim(this.options, this.pitch, this.yaw, maxDistance);
+    if (this.attackBlocking) this.cancelActiveMining();
   }
 
   private publishAimTarget(target: VoxelTarget | null) {
-    const previous = this.publishedAimTarget;
-    const adjacentEqual =
-      previous?.adjacent === target?.adjacent ||
-      Boolean(
-        previous?.adjacent &&
-        target?.adjacent &&
-        previous.adjacent.every((value, index) => value === target.adjacent![index]),
-      );
-    const equal =
-      previous === target ||
-      Boolean(
-        previous &&
-        target &&
-        previous.voxel === target.voxel &&
-        previous.inRange === target.inRange &&
-        previous.position.every((value, index) => value === target.position[index]) &&
-        adjacentEqual,
-      );
-    if (equal) return;
+    if (sameVoxelTarget(this.publishedAimTarget, target)) return;
     this.publishedAimTarget = target;
     this.options.onAimTarget?.(target);
   }

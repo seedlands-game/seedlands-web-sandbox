@@ -30,6 +30,8 @@ export type PredictionAuthorityState = Readonly<{
 export type LocalPredictionAdvance = Readonly<{
   elapsedSeconds: number;
   snapshot: PredictionAuthorityState;
+  /** Estimated scheduling tick only; never replaces the authority state for physics. */
+  inputPhysicsTick?: number;
   world: RevisionedPredictionWorld;
   issuedAtMs: number;
   forward: Readonly<{ x: number; z: number }>;
@@ -92,6 +94,24 @@ export class LocalPlayerPrediction {
     return { ...this.resetCountsValue };
   }
 
+  /** Preserve input edges between render frames without advancing local physics. */
+  captureInput(request: Omit<LocalPredictionAdvance, 'elapsedSeconds' | 'world'>): InputCommand | null {
+    this.synchronizeMovement(request.snapshot);
+    const command = this.inputStream.sample({
+      physicsTick: request.inputPhysicsTick ?? request.snapshot.physicsTick,
+      issuedAtMs: request.issuedAtMs,
+      forward: request.forward,
+      right: request.right,
+      keys: request.keys,
+    });
+    return (
+      command && {
+        ...command,
+        ...(request.snapshot.player.movement ? { movementRevision: request.snapshot.player.movement.revision } : {}),
+      }
+    );
+  }
+
   advance(request: LocalPredictionAdvance): Readonly<{ commands: InputCommand[]; body: BodyState }> {
     if (!Number.isFinite(request.elapsedSeconds) || request.elapsedSeconds < 0)
       throw new RangeError('Prediction elapsed seconds must be non-negative and finite.');
@@ -103,7 +123,7 @@ export class LocalPlayerPrediction {
     while (this.accumulator + Number.EPSILON >= stepSeconds) {
       this.accumulator -= stepSeconds;
       const sample = this.inputStream.sample({
-        physicsTick: request.snapshot.physicsTick,
+        physicsTick: request.inputPhysicsTick ?? request.snapshot.physicsTick,
         issuedAtMs: request.issuedAtMs,
         forward: request.forward,
         right: request.right,
@@ -214,13 +234,17 @@ export class LocalPlayerPrediction {
     return candidate;
   }
 
-  interrupt(snapshot: PredictionAuthorityState, issuedAtMs: number): InputCommand {
+  interrupt(
+    snapshot: PredictionAuthorityState,
+    issuedAtMs: number,
+    inputPhysicsTick = snapshot.physicsTick,
+  ): InputCommand {
     this.recordReset('input-interrupted');
     this.prediction.clear('input-interrupted');
     this.accumulator = 0;
     this.offsetValue = cloneVector(ZERO);
     return {
-      ...this.inputStream.release(snapshot.physicsTick, issuedAtMs),
+      ...this.inputStream.release(inputPhysicsTick, issuedAtMs),
       ...(snapshot.player.movement ? { movementRevision: snapshot.player.movement.revision } : {}),
     };
   }

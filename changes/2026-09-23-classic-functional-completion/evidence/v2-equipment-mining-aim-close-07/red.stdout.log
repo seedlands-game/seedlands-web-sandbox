@@ -1,0 +1,18 @@
+12:37:53 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts [ apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts ]
+Error: Invalid regular expression: /aimAtVoxelWithRealMouse(/g: Unterminated group
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  12:37:53
+   Duration  93ms (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

@@ -2,10 +2,197 @@ import { afterEach, expect, it, vi } from 'vitest';
 import * as pc from 'playcanvas';
 import { PlayerController } from '../../../src/app/player/player-controller';
 import { applyAuthorityInputDecision } from '../../../src/app/player/game-player-controller';
+import { FaceMaterial } from '../../../../../packages/stdlib/src/world/voxel';
+import { createVoxelGeometryRegistryV1 } from '../../../../../packages/stdlib/src/world/voxel-geometry';
+import type { World } from '../../../src/app/world/world-runtime';
+import { ready } from '../client/fixtures/browser-authority';
+import { InputCommandBuffer, type InputCommand } from '@seedlands/stdlib/runtime/session-protocol';
+import { routeInputSettled } from '../../e2e/classic-support/route-progress';
+import { stepBody, bodyConfigFor } from '@seedlands/stdlib/physics';
 
 afterEach(() => vi.unstubAllGlobals());
 
+function installKeyboard(inputPhysicsTick?: () => number) {
+  const windowStub = {
+    onkeydown: null as null | ((event: object) => void),
+    onkeyup: null as null | ((event: object) => void),
+  };
+  vi.stubGlobal('window', windowStub);
+  vi.stubGlobal('document', {});
+  vi.stubGlobal('HTMLInputElement', class {});
+  vi.stubGlobal('HTMLTextAreaElement', class {});
+  let blocked = false;
+  const initial = ready().snapshot;
+  const snapshot = { ...initial, player: { ...initial.player } };
+  const commands: InputCommand[] = [];
+  const canvas = {};
+  const controller = new PlayerController({
+    camera: new pc.Entity(),
+    canvas,
+    physicsHz: 60,
+    authority: {
+      get epoch() {
+        return snapshot.epoch;
+      },
+      snapshot: () => snapshot,
+      inputPhysicsTick,
+      sendInput: (command: InputCommand) => commands.push(command),
+    },
+    getEnvironment: () => null,
+    getWorld: () => null,
+    isPaused: () => false,
+    isUiBlockingInput: () => blocked,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  const keyDown = (code: string) => windowStub.onkeydown!({ code, target: {}, preventDefault: vi.fn() });
+  const keyUp = (code: string) => windowStub.onkeyup!({ code });
+  return {
+    controller,
+    canvas,
+    snapshot,
+    commands,
+    keyDown,
+    keyUp,
+    block: () => {
+      blocked = true;
+    },
+  };
+}
+
+it('两帧之间的100ms真实键盘脉冲仍经正式输入队列持续移动并松开，不制造预测步', () => {
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard();
+  const input = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  const startTick = snapshot.physicsTick;
+  keyDown('KeyS');
+  expect(commands).toHaveLength(1);
+  expect(input.push(commands[0]!)).toBe('accepted');
+  for (let tick = startTick + 2; tick < startTick + 8; tick++) {
+    expect(input.consumeForTick(tick).state.moveZ).toBe(1);
+  }
+  snapshot.physicsTick = startTick + 6;
+  keyUp('KeyS');
+  expect(commands).toHaveLength(2);
+  expect(input.push(commands[1]!)).toBe('accepted');
+  expect(input.consumeForTick(startTick + 8).state.moveZ).toBe(0);
+  expect(controller.predictedPhysicsState).toBeNull();
+  expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+});
+
+it('较早空闲ACK与零速度不能证明后来原生keyup已消费', () => {
+  const { snapshot, commands, keyDown, keyUp } = installKeyboard();
+  keyDown('KeyS');
+  keyUp('KeyS');
+  const beforeInputSequence = snapshot.acknowledgedInputSequence;
+  keyDown('KeyW');
+  keyUp('KeyW');
+  const buffer = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  for (const command of commands) expect(buffer.push(command)).toBe('accepted');
+  const earlierIdle = buffer.consumeForTick(commands[1]!.targetPhysicsTick);
+  expect(earlierIdle.state.moveZ).toBe(0);
+  expect(buffer.acknowledgedSequence).toBeGreaterThan(beforeInputSequence);
+  const observation = {
+    player: [0, 0, 0] as const,
+    serverPlayerPosition: [0, 0, 0] as const,
+    serverPlayerVelocity: [0, 0, 0] as const,
+    authority: { acknowledgedInputSequence: buffer.acknowledgedSequence },
+  };
+  const stillPending = buffer.consumeForTick(commands[2]!.targetPhysicsTick);
+  const moved = stepBody({
+    state: { position: { x: 0, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 } },
+    config: bodyConfigFor('player'),
+    world: {
+      querySolids: () => [{ id: 'floor', aabb: { min: { x: -100, y: -1, z: -100 }, max: { x: 100, y: 0, z: 100 } } }],
+    },
+    dt: 1 / 60,
+    input: {
+      wish: { x: stillPending.state.moveX, z: stillPending.state.moveZ },
+      jumpPressed: false,
+      verticalIntent: 0,
+    },
+  }).state;
+  expect(moved.position.z).toBeLessThan(0);
+  expect(routeInputSettled(observation, commands[3]!.sequence)).toBe(false);
+});
+
+it('只读原生release记录绑定实际keyup发出的command，而非frame或keydown', () => {
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard();
+  keyDown('KeyW');
+  expect(controller.nativeMovementInput.release).toBeNull();
+  keyUp('KeyW');
+  expect(controller.nativeMovementInput).toEqual({
+    epoch: commands[1]!.epoch,
+    release: { code: 'KeyW', sequence: commands[1]!.sequence, neutral: true },
+  });
+  Reflect.set(controller.nativeMovementInput.release!, 'sequence', -1);
+  expect(controller.nativeMovementInput.release!.sequence).toBe(commands[1]!.sequence);
+  keyDown('KeyW');
+  keyDown('Space');
+  keyUp('KeyW');
+  expect(controller.nativeMovementInput.release!.neutral).toBe(false);
+  keyUp('Space');
+  expect(controller.nativeMovementInput.release!.neutral).toBe(true);
+  snapshot.epoch = 'new-session';
+  expect(controller.nativeMovementInput).toEqual({ epoch: 'new-session', release: null });
+});
+
+it('旧snapshot期间真实keydown/up与失焦neutral都采用同一投递时钟', () => {
+  let schedulingTick = 130;
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard(() => schedulingTick);
+  snapshot.physicsTick = 100;
+  const input = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  input.consumeForTick(130);
+  keyDown('KeyS');
+  expect(commands[0]!.targetPhysicsTick).toBe(132);
+  expect(input.push(commands[0]!)).toBe('accepted');
+  schedulingTick = 136;
+  keyUp('KeyS');
+  expect(commands[1]!.targetPhysicsTick).toBe(138);
+  expect(input.push(commands[1]!)).toBe('accepted');
+  schedulingTick = 140;
+  controller.releaseInput();
+  expect(commands[2]!.targetPhysicsTick).toBe(142);
+  expect(input.push(commands[2]!)).toBe('accepted');
+  expect(snapshot.physicsTick).toBe(100);
+  expect(controller.predictedPhysicsState).toBeNull();
+});
+
+it('键盘边沿保留jump和movement identity，重复按下与UI阻挡不新增运动', () => {
+  const { snapshot, commands, keyDown, keyUp, block } = installKeyboard();
+  snapshot.player.movement = { revision: 'creative:1:true:1', flightSpeed: 8 };
+  keyDown('Space');
+  keyDown('Space');
+  expect(commands).toHaveLength(1);
+  expect(commands[0]).toMatchObject({
+    movementRevision: 'creative:1:true:1',
+    edges: { jumpPressed: true },
+    state: { jumpHeld: true },
+  });
+  block();
+  keyDown('KeyW');
+  expect(commands).toHaveLength(1);
+  keyUp('Space');
+  expect(commands).toHaveLength(2);
+  expect(commands[1]).toMatchObject({
+    sequence: 1,
+    edges: { jumpPressed: false },
+    state: { moveX: 0, moveZ: 0, jumpHeld: false, verticalIntent: 0 },
+  });
+});
+
+const collisionGeometry = (collision: boolean) =>
+  createVoxelGeometryRegistryV1([
+    {
+      version: 1,
+      voxel: 500,
+      boxes: [{ min: [0.4, 0, 0], max: [0.6, 1, 1], material: FaceMaterial.WoodenDoor }],
+      collision: collision ? [{ min: [0.4, 0, 0], max: [0.6, 1, 1] }] : [],
+      occludesFullFace: false,
+    },
+  ]);
+
 it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且界面阻挡立即停止', () => {
+  let now = 0;
+  const monotonicClock = vi.spyOn(performance, 'now').mockImplementation(() => now);
   const canvas = {};
   const documentStub = {
     pointerLockElement: canvas,
@@ -20,7 +207,12 @@ it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且�
     camera: new pc.Entity(),
     physicsHz: 60,
     authority: { epoch: 'test', snapshot: () => null },
-    getWorld: () => ({ getVoxel: () => 0, getFluidCell: () => null }),
+    getWorld: () => ({
+      authority: { voxelSemantics: { get: () => undefined }, voxelGeometry: undefined },
+      getChunkRevision: () => 1,
+      getVoxel: () => 0,
+      getFluidCell: () => null,
+    }),
     telemetry: {
       beginSpan: vi.fn(),
       endSpan: vi.fn(),
@@ -33,17 +225,24 @@ it('低帧率下攻击重复使用真实经过时间，长帧不补发积压且�
   controller.install();
   documentStub.onmousedown?.({ button: 0 });
   expect(attack).toHaveBeenCalledTimes(1);
+  now = 190;
   controller.update(0.05, 0.19);
   expect(attack).toHaveBeenCalledTimes(1);
+  now = 250;
   controller.update(0.05, 0.06);
   expect(attack).toHaveBeenCalledTimes(2);
+  now = 2_250;
   controller.update(0.05, 2);
   expect(attack).toHaveBeenCalledTimes(3);
   blocked = true;
+  now = 2_500;
   controller.update(0.05, 0.25);
   blocked = false;
+  now = 2_750;
   controller.update(0.05, 0.25);
   expect(attack).toHaveBeenCalledTimes(3);
+  controller.dispose(false);
+  monotonicClock.mockRestore();
 });
 
 it('只在Authority明确作废输入队列时重同步预测', () => {
@@ -55,6 +254,98 @@ it('只在Authority明确作废输入队列时重同步预测', () => {
 
   applyAuthorityInputDecision(controller, { requiresResync: true });
   expect(resynchronizeInput).toHaveBeenCalledOnce();
+});
+
+it('碰撞查询每次使用当前world geometry，恢复替换后不保留旧registry', () => {
+  let geometry = collisionGeometry(false);
+  const world = {
+    authority: {
+      voxelSemantics: { get: () => undefined },
+      get voxelGeometry() {
+        return geometry;
+      },
+    },
+    getChunkRevision: () => 1,
+    getVoxel: () => 500,
+    getFluidCell: () => null,
+  } as unknown as World;
+  const controller = new PlayerController({
+    camera: new pc.Entity(),
+    canvas: {},
+    physicsHz: 60,
+    authority: { epoch: 'world:1', snapshot: () => null },
+    getWorld: () => world,
+    getEnvironment: () => null,
+    isUiBlockingInput: () => false,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  const snapshot = ready().snapshot;
+  controller.applyAuthoritySnapshot(snapshot);
+
+  expect(controller.isColliding).toBe(false);
+  geometry = collisionGeometry(true);
+  expect(controller.isColliding).toBe(true);
+});
+
+it('鼠标灵敏度即时改变真实 Pointer Lock 转向幅度', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousemove: null as null | ((event: { movementX: number; movementY: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const mouseSensitivity = { value: 0.25 };
+  const controller = new PlayerController({
+    canvas,
+    camera: new pc.Entity(),
+    physicsHz: 60,
+    mouseSensitivity,
+    getWorld: () => null,
+    isUiBlockingInput: () => false,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  documentStub.onmousemove?.({ movementX: 4, movementY: 2 });
+  expect(controller.viewAngles).toEqual([-1, -16.5]);
+});
+
+it('未按住鼠标时真实 Pointer Lock 转向立即更新射线与目标卡，不依赖渲染或制造预测步', () => {
+  const canvas = {};
+  const documentStub = {
+    pointerLockElement: canvas,
+    onmousemove: null as null | ((event: { movementX: number; movementY: number }) => void),
+  };
+  vi.stubGlobal('window', {});
+  vi.stubGlobal('document', documentStub);
+  const camera = new pc.Entity();
+  camera.setPosition(0.5, 1.5, 0.5);
+  const publish = vi.fn();
+  const world = {
+    authority: { voxelSemantics: { get: (voxel: number) => ({ targetable: voxel !== 0 }) } },
+    getVoxel: (x: number, y: number, z: number) => (x === 2 && y === 1 && z === 0 ? 1 : 0),
+    getFluidCell: () => null,
+  };
+  const controller = new PlayerController({
+    canvas,
+    camera,
+    physicsHz: 60,
+    authority: { epoch: 'pointer-aim', snapshot: () => null },
+    getWorld: () => world,
+    isUiBlockingInput: () => false,
+    canTargetFluidSource: () => false,
+    onAimTarget: publish,
+  } as unknown as ConstructorParameters<typeof PlayerController>[0]);
+  controller.install();
+  try {
+    expect(controller.aimTarget).toBeNull();
+    documentStub.onmousemove!({ movementX: 90 / 0.13, movementY: -16 / 0.13 });
+    expect(controller.viewAngles).toEqual([-90, 0]);
+    expect(controller.aimTarget?.position).toEqual([2, 1, 0]);
+    expect(publish).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ position: [2, 1, 0] }));
+    expect(controller.predictedPhysicsState).toBeNull();
+    expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+  } finally {
+    controller.dispose(false);
+  }
 });
 
 it('昼夜时钟暂停仍能操作，游戏暂停和界面阻挡才阻止世界交互', () => {
@@ -219,4 +510,20 @@ it('窗口失焦通过生产控制器立即发送递增序号的全零输入', (
       edges: { jumpPressed: false },
     }),
   );
+});
+
+it('真实mousemove即时更新yaw，随后keyboard捕获相同方向，不等待render update', () => {
+  const { controller, canvas, commands, keyDown } = installKeyboard();
+  const mouseDocument = document as unknown as {
+    pointerLockElement: object;
+    onmousemove: (event: { movementX: number; movementY: number }) => void;
+  };
+  mouseDocument.pointerLockElement = canvas;
+  mouseDocument.onmousemove({ movementX: -80, movementY: 0 });
+  expect(controller.viewAngles).toEqual([10.4, -16]);
+  keyDown('KeyW');
+  expect(commands).toHaveLength(1);
+  expect(commands[0]!.state.moveX).toBeCloseTo(-Math.sin((10.4 * Math.PI) / 180), 6);
+  expect(commands[0]!.state.moveZ).toBeCloseTo(-Math.cos((10.4 * Math.PI) / 180), 6);
+  expect(controller.predictedPhysicsState).toBeNull();
 });

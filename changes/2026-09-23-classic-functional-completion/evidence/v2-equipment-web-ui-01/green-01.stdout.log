@@ -1,0 +1,78 @@
+9:33:09 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/app/gameplay-ui-projection.test.ts (4 tests | 4 failed) 4ms
+     × partitions canonical state into HUD, interaction and shell snapshots 2ms
+     × does not expose mutable canonical inventory references 0ms
+     × reuses unchanged retained partitions for channel coalescing 0ms
+     × replaces only the retained shell partition when committed armor changes 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/gameplay-ui-projection.test.ts > gameplay retained UI projection > partitions canonical state into HUD, interaction and shell snapshots
+TypeError: Cannot read properties of undefined (reading 'helmet')
+ ❯ apps/web/src/app/ui/gameplay-ui-projector.ts:167:23
+    165|     Object.fromEntries(
+    166|       ARMOR_SLOTS.map((slot) => {
+    167|         const stack = armor[slot];
+       |                       ^
+    168|         if (!stack)
+    169|           return [
+ ❯ projectEquipment apps/web/src/app/ui/gameplay-ui-projector.ts:166:19
+ ❯ projectGameplayUi apps/web/src/app/ui/gameplay-ui-projector.ts:214:21
+ ❯ apps/web/tests/unit/app/gameplay-ui-projection.test.ts:43:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/gameplay-ui-projection.test.ts > gameplay retained UI projection > does not expose mutable canonical inventory references
+TypeError: Cannot read properties of undefined (reading 'helmet')
+ ❯ apps/web/src/app/ui/gameplay-ui-projector.ts:167:23
+    165|     Object.fromEntries(
+    166|       ARMOR_SLOTS.map((slot) => {
+    167|         const stack = armor[slot];
+       |                       ^
+    168|         if (!stack)
+    169|           return [
+ ❯ projectEquipment apps/web/src/app/ui/gameplay-ui-projector.ts:166:19
+ ❯ projectGameplayUi apps/web/src/app/ui/gameplay-ui-projector.ts:214:21
+ ❯ apps/web/tests/unit/app/gameplay-ui-projection.test.ts:109:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/gameplay-ui-projection.test.ts > gameplay retained UI projection > reuses unchanged retained partitions for channel coalescing
+TypeError: Cannot read properties of undefined (reading 'helmet')
+ ❯ apps/web/src/app/ui/gameplay-ui-projector.ts:167:23
+    165|     Object.fromEntries(
+    166|       ARMOR_SLOTS.map((slot) => {
+    167|         const stack = armor[slot];
+       |                       ^
+    168|         if (!stack)
+    169|           return [
+ ❯ projectEquipment apps/web/src/app/ui/gameplay-ui-projector.ts:166:19
+ ❯ projectGameplayUi apps/web/src/app/ui/gameplay-ui-projector.ts:214:21
+ ❯ apps/web/tests/unit/app/gameplay-ui-projection.test.ts:121:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/gameplay-ui-projection.test.ts > gameplay retained UI projection > replaces only the retained shell partition when committed armor changes
+TypeError: Cannot read properties of undefined (reading 'helmet')
+ ❯ apps/web/src/app/ui/gameplay-ui-projector.ts:167:23
+    165|     Object.fromEntries(
+    166|       ARMOR_SLOTS.map((slot) => {
+    167|         const stack = armor[slot];
+       |                       ^
+    168|         if (!stack)
+    169|           return [
+ ❯ projectEquipment apps/web/src/app/ui/gameplay-ui-projector.ts:166:19
+ ❯ projectGameplayUi apps/web/src/app/ui/gameplay-ui-projector.ts:214:21
+ ❯ apps/web/tests/unit/app/gameplay-ui-projection.test.ts:131:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 4 passed (5)
+      Tests  4 failed | 24 passed (28)
+   Start at  21:33:09
+   Duration  2.13s (transform 1.22s, setup 0ms, import 1.74s, tests 22ms, environment 0ms)
+

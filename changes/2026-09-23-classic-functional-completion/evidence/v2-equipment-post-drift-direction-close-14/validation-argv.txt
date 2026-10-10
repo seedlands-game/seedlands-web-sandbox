@@ -1,0 +1,25 @@
+V2-EQUIPMENT-POST-DRIFT-DIRECTION-CLOSE-14
+baseline=658e059d5f769f7506620264cefbacd211554d89
+
+red
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts --maxWorkers=1
+
+green-final
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts --maxWorkers=1
+
+affected-final
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts apps/web/tests/e2e/classic-support/door-exit-face.test.ts apps/web/tests/e2e/classic-support/door-readiness.test.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts --maxWorkers=1
+
+classic-types-final
+pnpm typecheck:classic
+
+root-types-final
+pnpm exec tsc -p tsconfig.test.json --noEmit
+
+eslint-final
+pnpm exec eslint apps/web/tests/e2e/classic-support/equipment-resource-route.ts apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts
+
+format-final
+pnpm exec prettier --check apps/web/tests/e2e/classic-support/equipment-resource-route.ts apps/web/tests/e2e/classic-support/equipment-post-drift-direction.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/post-drift-direction-contract.md
+
+All formal commands ran under scripts/benchmark-window.mjs with the default machine lock. Vitest used maxWorkers=1.

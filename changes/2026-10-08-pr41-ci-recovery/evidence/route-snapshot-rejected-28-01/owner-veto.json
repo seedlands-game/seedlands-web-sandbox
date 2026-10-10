@@ -1,0 +1,312 @@
+{
+  "sourceSha": "8255157424f8f7f776b8c4224092744e9392385b",
+  "samples": [
+    {
+      "callId": "call@61",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@63",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@65",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@67",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@69",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@71",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@73",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@75",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@77",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@79",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@81",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@83",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@85",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 743
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    },
+    {
+      "callId": "call@87",
+      "owner": {
+        "player": [0.5, 32.60000228881836, 0.5],
+        "serverPlayerPosition": [0.5, 32.600001, 0.5],
+        "serverPlayerVelocity": [0, 0, 0],
+        "viewAngles": [-90, -16],
+        "onGround": true,
+        "colliding": false,
+        "authority": {
+          "acknowledgedInputSequence": 755
+        },
+        "worldRevision": 6,
+        "runtime": "authority-worker",
+        "generatorVersion": 11
+      }
+    }
+  ],
+  "changes": [
+    {
+      "calls": ["call@61", "call@63"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@63", "call@65"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@65", "call@67"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@67", "call@69"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@69", "call@71"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@71", "call@73"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@73", "call@75"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@75", "call@77"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@77", "call@79"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@79", "call@81"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@81", "call@83"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@83", "call@85"],
+      "changed": {}
+    },
+    {
+      "calls": ["call@85", "call@87"],
+      "changed": {
+        "authority": [
+          {
+            "acknowledgedInputSequence": 743
+          },
+          {
+            "acknowledgedInputSequence": 755
+          }
+        ]
+      }
+    }
+  ],
+  "window": {
+    "startTime": 63199.121,
+    "endTime": 64237.141,
+    "driverInputCalls": [],
+    "clock": "Playwright 0-trace monotonic milliseconds"
+  }
+}

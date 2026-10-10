@@ -45,7 +45,14 @@ const fixture = async (entry: string, manifestOverride: Record<string, unknown> 
         version: '1.0.0',
         manifest: { path: './manifest.json', sha256: sha256(manifest) },
         entry: { path: './entry.mjs', sha256: sha256(entry) },
-        resources: [{ path: './texture.bin', sha256: sha256(resource) }],
+        resources: [
+          {
+            path: './texture.bin',
+            sha256: sha256(resource),
+            size: Buffer.byteLength(resource),
+            contentType: 'application/octet-stream',
+          },
+        ],
       },
     ],
   });
@@ -83,6 +90,30 @@ describe('Pack artifact integrity adapter', () => {
       packs: [{ id: 'example:pack', version: '1.0.0', moduleCount: 0 }],
     });
     expect(await readFile(marker, 'utf8')).toBe('yes');
+  });
+
+  it.each([
+    ['missing metadata', ({ path, sha256 }: Record<string, unknown>) => ({ path, sha256 }), 'metadata'],
+    ['wrong size', (resource: Record<string, unknown>) => ({ ...resource, size: 1 }), 'size mismatch'],
+    [
+      'wrong content type',
+      (resource: Record<string, unknown>) => ({ ...resource, contentType: 'text/plain' }),
+      'metadata',
+    ],
+  ])('rejects resource lock %s before executing the ESM Pack', async (_case, mutate, diagnostic) => {
+    const source = `process.getBuiltinModule('node:fs').writeFileSync(process.env.PACK_INTEGRITY_MARKER, 'bad');\nexport const pack = { modules: [] };\n`;
+    const value = await fixture(source);
+    const lock = JSON.parse(await readFile(value.lockPath, 'utf8')) as {
+      packs: { resources: Record<string, unknown>[] }[];
+    };
+    lock.packs[0]!.resources[0] = mutate(lock.packs[0]!.resources[0]!);
+    await writeFile(value.lockPath, JSON.stringify(lock));
+
+    await expect(runAdapter(value.lockPath, value.marker)).rejects.toMatchObject({
+      code: 1,
+      stderr: expect.stringContaining(diagnostic),
+    });
+    await expect(readFile(value.marker, 'utf8')).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('fails a tampered entry before import side effects', async () => {
@@ -191,7 +222,14 @@ describe('Pack artifact integrity adapter', () => {
             version: '1.0.0',
             manifest: { path: './second.json', sha256: sha256(secondManifest) },
             entry: { path: './second.mjs', sha256: sha256(secondEntry) },
-            resources: [{ path: './second.bin', sha256: sha256('original') }],
+            resources: [
+              {
+                path: './second.bin',
+                sha256: sha256('original'),
+                size: Buffer.byteLength('original'),
+                contentType: 'application/octet-stream',
+              },
+            ],
           },
         ],
       }),

@@ -2,6 +2,16 @@ pub const HALO_SIZE: usize = 36;
 pub const HALO_CELLS: usize = HALO_SIZE * HALO_SIZE * HALO_SIZE;
 pub const MASK_BYTES: usize = 6_144;
 pub const RECORD_BYTES: usize = 16;
+pub const SEMANTICS_RECORD_BYTES: usize = 8;
+pub const SEMANTICS_MAX_RECORDS: usize = 4_096;
+pub const SEMANTICS_MAX_BYTES: usize = SEMANTICS_MAX_RECORDS * SEMANTICS_RECORD_BYTES;
+const SEMANTICS_DEFINED: u8 = 1;
+const SEMANTICS_RENDERABLE: u8 = 2;
+const SEMANTICS_OCCLUDES: u8 = 4;
+const SEMANTICS_MODEL: u8 = 8;
+const SEMANTICS_WATER: u8 = 16;
+const SEMANTICS_GLASS: u8 = 32;
+const SEMANTICS_ICE: u8 = 64;
 pub const MAX_DESCRIPTOR_RECORDS: usize = 3 * 33 * 32 * 32 + 32 * 32 * 32;
 pub const MAX_DESCRIPTOR_BYTES: usize = MAX_DESCRIPTOR_RECORDS * RECORD_BYTES;
 
@@ -23,37 +33,47 @@ fn sample_fluid(fluid: &[u8], x: i32, y: i32, z: i32) -> u32 {
     fluid[halo_index(x, y, z)] as u32
 }
 
-fn greedy(id: u32) -> bool {
-    id != 0 && id != 10
+fn semantics_record<'a>(lookup: &'a [u8], id: u32) -> Option<&'a [u8]> {
+    let offset = id as usize * SEMANTICS_RECORD_BYTES;
+    let record = lookup.get(offset..offset + SEMANTICS_RECORD_BYTES)?;
+    (record[0] & SEMANTICS_DEFINED != 0).then_some(record)
 }
 
-fn occludes(id: u32) -> bool {
-    id != 0 && id != 8 && id != 10
+fn flag(lookup: &[u8], id: u32, value: u8) -> bool {
+    semantics_record(lookup, id).is_some_and(|record| record[0] & value != 0)
 }
 
-fn visible(source: u32, target: u32) -> bool {
-    if !greedy(source) {
+fn greedy(lookup: &[u8], id: u32) -> bool {
+    flag(lookup, id, SEMANTICS_RENDERABLE) && !flag(lookup, id, SEMANTICS_MODEL)
+}
+
+fn occludes(lookup: &[u8], id: u32) -> bool {
+    flag(lookup, id, SEMANTICS_OCCLUDES)
+}
+
+fn visible(lookup: &[u8], source: u32, target: u32) -> bool {
+    if !greedy(lookup, source) {
         return false;
     }
-    if source == 8 {
-        target == 0 || (target != 8 && !occludes(target))
+    if (flag(lookup, source, SEMANTICS_GLASS) && flag(lookup, target, SEMANTICS_GLASS))
+        || (flag(lookup, source, SEMANTICS_ICE) && flag(lookup, target, SEMANTICS_ICE))
+    {
+        return false;
+    }
+    if flag(lookup, source, SEMANTICS_WATER) {
+        target == 0 || (target != 0 && !flag(lookup, target, SEMANTICS_WATER) && !occludes(lookup, target))
     } else {
-        target == 0 || target == 8 || !occludes(target)
+        target == 0
+            || flag(lookup, target, SEMANTICS_WATER)
+            || flag(lookup, target, SEMANTICS_ICE)
+            || !occludes(lookup, target)
     }
 }
 
-fn material(id: u32, axis: i32, positive: bool) -> u32 {
-    if id == 1 {
-        return if axis == 1 {
-            if positive { 1 } else { 3 }
-        } else {
-            2
-        };
-    }
-    if id == 4 {
-        return if axis == 1 { 7 } else { 6 };
-    }
+fn legacy_material(id: u32, axis: i32, positive: bool) -> u32 {
     match id {
+        1 => if axis == 1 { if positive { 1 } else { 3 } } else { 2 },
+        4 => if axis == 1 { 7 } else { 6 },
         2 => 3,
         3 => 4,
         5 => 8,
@@ -67,8 +87,88 @@ fn material(id: u32, axis: i32, positive: bool) -> u32 {
         13 => 16,
         14 => 17,
         15 => 18,
+        16 => 19,
+        17 => 20,
+        18 => 21,
+        19 => 22,
+        20 => 23,
+        21 => 24,
+        22 => 25,
+        23 => 26,
+        24 => 27,
+        25 => 28,
+        26 => 29,
+        27 => 30,
+        28 => 31,
+        29 => 32,
+        30 => 33,
+        31 => 34,
+        32 => 35,
+        33 => 36,
+        34 => 37,
+        35 => 38,
+        36 => 39,
+        37 => 40,
+        38 => 41,
+        39 => 42,
+        40 => 43,
+        41 => 44,
+        42 => 45,
+        43 => 46,
+        44 => 47,
+        45 => 48,
+        46 => 49,
+        47 => 50,
+        48 => 51,
+        49 => 52,
+        50 => 53,
+        51 => 54,
+        52 => 55,
+        53 => 56,
+        54 => 57,
+        55 => 58,
+        56 => 59,
+        57 => 60,
+        58 => 61,
+        59 => 62,
+        60 => 63,
+        61 => 64,
+        62 => 65,
+        63 => 66,
+        64 => 67,
+        65 => 68,
+        66 => 69,
+        67 => 70,
+        68 => 71,
+        69 => 72,
+        70 => 73,
+        71 => 74,
+        72 => 75,
+        73 => 76,
+        74 => 78,
+        75 => 79,
+        76 => 80,
+        77 => 81,
+        78 => 82,
+        79 => 83,
+        80 => 84,
+        81 => 85,
+        82 => 86,
+        83 => 87,
+        84 => 88,
+        85 => 89,
+        86 => 90,
+        87 => 91,
+        88 => 92,
         _ => 255,
     }
+}
+
+fn lookup_material(lookup: &[u8], id: u32, axis: i32, positive: bool) -> Option<u32> {
+    let record = semantics_record(lookup, id)?;
+    let face = axis as usize * 2 + usize::from(positive);
+    let material = record[1 + face];
+    (material != 0 && material != 255).then_some(material as u32)
 }
 
 fn water_height_code(halo: &[u16], fluid: &[u8], x: i32, y: i32, z: i32) -> u32 {
@@ -76,10 +176,22 @@ fn water_height_code(halo: &[u16], fluid: &[u8], x: i32, y: i32, z: i32) -> u32 
         return 9;
     }
     let level = (sample_fluid(fluid, x, y, z) & 15).clamp(1, 8);
-    if level >= 7 { 8 } else { level }
+    if level >= 7 {
+        8
+    } else {
+        level
+    }
 }
 
-fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> u32 {
+fn packed_ao(
+    halo: &[u16],
+    lookup: &[u8],
+    bx: i32,
+    by: i32,
+    bz: i32,
+    axis: i32,
+    back: bool,
+) -> u32 {
     let normal = if back { -1 } else { 1 };
     let mut packed = 0;
     for corner in 0..4 {
@@ -130,12 +242,14 @@ fn packed_ao(halo: &[u16], bx: i32, by: i32, bz: i32, axis: i32, back: bool) -> 
         } else {
             oz
         };
-        let occupied_u = occludes(sample(halo, ux, uy, uz));
-        let occupied_v = occludes(sample(halo, vx, vy, vz));
+        let occupied_u = occludes(lookup, sample(halo, ux, uy, uz));
+        let occupied_v = occludes(lookup, sample(halo, vx, vy, vz));
         let level = if occupied_u && occupied_v {
             3
         } else {
-            u32::from(occupied_u) + u32::from(occupied_v) + u32::from(occludes(sample(halo, cx, cy, cz)))
+            u32::from(occupied_u)
+                + u32::from(occupied_v)
+                + u32::from(occludes(lookup, sample(halo, cx, cy, cz)))
         };
         packed |= level << (corner * 2);
     }
@@ -202,13 +316,14 @@ fn write_quad(
     output[offset + 12..offset + RECORD_BYTES].fill(0);
 }
 
-fn write_lantern(output: &mut [u8], count: i32, x: i32, y: i32, z: i32) {
+fn write_model(output: &mut [u8], count: i32, x: i32, y: i32, z: i32, voxel: u32) {
     let offset = count as usize * RECORD_BYTES;
     output[offset] = 1;
     output[offset + 1] = x as u8;
     output[offset + 2] = y as u8;
     output[offset + 3] = z as u8;
-    output[offset + 4..offset + RECORD_BYTES].fill(0);
+    output[offset + 4] = voxel as u8;
+    output[offset + 5..offset + RECORD_BYTES].fill(0);
 }
 
 fn coordinates(axis: i32, slice: i32, i: i32, j: i32) -> (i32, i32, i32) {
@@ -221,7 +336,14 @@ fn coordinates(axis: i32, slice: i32, i: i32, j: i32) -> (i32, i32, i32) {
     }
 }
 
-fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8], write: bool) -> usize {
+fn descriptor_pass(
+    halo: &[u16],
+    fluid: &[u8],
+    lookup: &[u8],
+    mask: &mut [u8],
+    output: &mut [u8],
+    write: bool,
+) -> usize {
     let mut count = 0;
     for axis in 0..3 {
         for slice in -1..32 {
@@ -243,8 +365,12 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         0
                     };
                     let stepped = axis != 1 && a == 8 && b == 8 && ah != bh;
-                    let forward = if stepped { ah > bh } else { visible(a, b) };
-                    let back = if stepped { bh > ah } else { !forward && visible(b, a) };
+                    let forward = if stepped { ah > bh } else { visible(lookup, a, b) };
+                    let back = if stepped {
+                        bh > ah
+                    } else {
+                        !forward && visible(lookup, b, a)
+                    };
                     if !forward && !back {
                         clear_mask(mask, m);
                     } else {
@@ -257,11 +383,15 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         let ao = if id == 8 {
                             0
                         } else {
-                            packed_ao(halo, bx, by, bz, axis, back)
+                            packed_ao(halo, lookup, bx, by, bz, axis, back)
                         };
                         let high = if id == 8 {
                             if stepped {
-                                if ah > bh { ah } else { bh }
+                                if ah > bh {
+                                    ah
+                                } else {
+                                    bh
+                                }
                             } else if back {
                                 bh
                             } else {
@@ -271,11 +401,20 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                             0
                         };
                         let low = if stepped {
-                            if ah < bh { ah } else { bh }
+                            if ah < bh {
+                                ah
+                            } else {
+                                bh
+                            }
                         } else {
                             0
                         };
-                        write_mask(mask, m, material(id, axis, !back), back, ao, high, low);
+                        let Some(material) = lookup_material(lookup, id, axis, !back) else {
+                            clear_mask(mask, m);
+                            m += 1;
+                            continue;
+                        };
+                        write_mask(mask, m, material, back, ao, high, low);
                     }
                     m += 1;
                 }
@@ -295,14 +434,23 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         let high = mask[offset + 4] as u32;
                         let low = mask[offset + 5] as u32;
                         let mut width = 1;
-                        while i + width < 32 && same_mask(mask, m + width, mat, back, ao, high, low) {
+                        while i + width < 32 && same_mask(mask, m + width, mat, back, ao, high, low)
+                        {
                             width += 1;
                         }
                         let mut height = 1;
                         let mut keep = true;
                         while j + height < 32 && keep {
                             for column in 0..width {
-                                if !same_mask(mask, m + column + height * 32, mat, back, ao, high, low) {
+                                if !same_mask(
+                                    mask,
+                                    m + column + height * 32,
+                                    mat,
+                                    back,
+                                    ao,
+                                    high,
+                                    low,
+                                ) {
                                     keep = false;
                                 }
                             }
@@ -313,7 +461,8 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
                         let (px, py, pz) = coordinates(axis, slice + 1, i, j);
                         if write {
                             write_quad(
-                                output, count, mat, axis, back, px, py, pz, width, height, ao, high, low,
+                                output, count, mat, axis, back, px, py, pz, width, height, ao,
+                                high, low,
                             );
                         }
                         for row in 0..height {
@@ -332,9 +481,10 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
     for y in 0..32 {
         for z in 0..32 {
             for x in 0..32 {
-                if sample(halo, x, y, z) == 10 {
+                let voxel = sample(halo, x, y, z);
+                if flag(lookup, voxel, SEMANTICS_MODEL) {
                     if write {
-                        write_lantern(output, count, x, y, z);
+                        write_model(output, count, x, y, z, voxel);
                     }
                     count += 1;
                 }
@@ -344,35 +494,85 @@ fn descriptor_pass(halo: &[u16], fluid: &[u8], mask: &mut [u8], output: &mut [u8
     count as usize
 }
 
+pub fn mesh_describe_with_lookup(
+    halo: &[u16],
+    fluid: &[u8],
+    lookup: &[u8],
+    mask: &mut [u8],
+    output: &mut [u8],
+) -> Result<usize, MeshError> {
+    if halo.len() != HALO_CELLS
+        || fluid.len() != HALO_CELLS
+        || lookup.is_empty()
+        || lookup.len() > SEMANTICS_MAX_BYTES
+        || lookup.len() % SEMANTICS_RECORD_BYTES != 0
+        || mask.len() < MASK_BYTES
+    {
+        return Err(MeshError::InvalidInput);
+    }
+    if halo.iter().any(|&id| semantics_record(lookup, id as u32).is_none()) {
+        return Err(MeshError::InvalidInput);
+    }
+    if output.len() >= MAX_DESCRIPTOR_BYTES {
+        return Ok(descriptor_pass(halo, fluid, lookup, mask, output, true) * RECORD_BYTES);
+    }
+    let count = descriptor_pass(halo, fluid, lookup, mask, output, false);
+    if count > output.len() / RECORD_BYTES {
+        return Err(MeshError::Capacity);
+    }
+    Ok(descriptor_pass(halo, fluid, lookup, mask, output, true) * RECORD_BYTES)
+}
+
+fn classic_lookup() -> [u8; 89 * SEMANTICS_RECORD_BYTES] {
+    let mut lookup = [0u8; 89 * SEMANTICS_RECORD_BYTES];
+    for id in 0..89u32 {
+        let offset = id as usize * SEMANTICS_RECORD_BYTES;
+        let model = (31..=35).contains(&id)
+            || matches!(id, 10 | 39..=41 | 49..=58 | 59 | 61 | 62);
+        let water = id == 8;
+        let glass = id == 18;
+        let ice = id == 46;
+        let occludes = id != 0
+            && !matches!(id, 8 | 18 | 27 | 29 | 31..=35 | 46)
+            && !model;
+        lookup[offset] = SEMANTICS_DEFINED
+            | if id != 0 { SEMANTICS_RENDERABLE } else { 0 }
+            | if occludes { SEMANTICS_OCCLUDES } else { 0 }
+            | if model { SEMANTICS_MODEL } else { 0 }
+            | if water { SEMANTICS_WATER } else { 0 }
+            | if glass { SEMANTICS_GLASS } else { 0 }
+            | if ice { SEMANTICS_ICE } else { 0 };
+        for axis in 0..3 {
+            for positive in [false, true] {
+                lookup[offset + 1 + axis * 2 + usize::from(positive)] =
+                    legacy_material(id, axis as i32, positive) as u8;
+            }
+        }
+    }
+    lookup
+}
+
 pub fn mesh_describe(
     halo: &[u16],
     fluid: &[u8],
     mask: &mut [u8],
     output: &mut [u8],
 ) -> Result<usize, MeshError> {
-    if halo.len() != HALO_CELLS || fluid.len() != HALO_CELLS || mask.len() < MASK_BYTES {
-        return Err(MeshError::InvalidInput);
-    }
-    if output.len() >= MAX_DESCRIPTOR_BYTES {
-        return Ok(descriptor_pass(halo, fluid, mask, output, true) * RECORD_BYTES);
-    }
-    let count = descriptor_pass(halo, fluid, mask, output, false);
-    if count > output.len() / RECORD_BYTES {
-        return Err(MeshError::Capacity);
-    }
-    Ok(descriptor_pass(halo, fluid, mask, output, true) * RECORD_BYTES)
+    let lookup = classic_lookup();
+    mesh_describe_with_lookup(halo, fluid, &lookup, mask, output)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::material;
+    use super::legacy_material;
 
     #[test]
     fn progression_voxels_keep_their_frozen_material_ids() {
-        assert_eq!(material(11, 0, true), 14);
-        assert_eq!(material(12, 1, false), 15);
-        assert_eq!(material(13, 2, true), 16);
-        assert_eq!(material(14, 0, false), 17);
-        assert_eq!(material(15, 1, true), 18);
+        assert_eq!(legacy_material(11, 0, true), 14);
+        assert_eq!(legacy_material(12, 1, false), 15);
+        assert_eq!(legacy_material(13, 2, true), 16);
+        assert_eq!(legacy_material(14, 0, false), 17);
+        assert_eq!(legacy_material(15, 1, true), 18);
+        assert_eq!(legacy_material(16, 2, false), 19);
     }
 }

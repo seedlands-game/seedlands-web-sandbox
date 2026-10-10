@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-14",
+  "classification": "canonical-fixture-non-atomic-post-traverse-readiness-resample",
+  "failedAt": "v1-door-post-traverse-second-readiness-snapshot",
+  "source": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 298,
+    "walkFile": "apps/web/tests/e2e/classic-support/harness.ts",
+    "walkLine": 302
+  },
+  "failureSnapshot": {
+    "player": [71.60638427734375, 32.60000228881836, 0.5013126730918884],
+    "serverPlayerPosition": [71.60638694230313, 32.600001, 0.5013126463361098],
+    "viewAngles": [-90.25999999999998, -34.46000000000001],
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 14,
+    "worldRevision": 143,
+    "physicsTick": 12669,
+    "acknowledgedInputSequence": 5893,
+    "commitSequence": 54940
+  },
+  "observability": {
+    "walkReturnedReadySnapshot": true,
+    "secondSnapshotCombinedReadiness": false,
+    "secondSnapshotIndividualFalseField": "NOT_RECORDED",
+    "failureAttachmentLaterCombinedReadiness": true,
+    "doorAuthorityObservationPositionSource": "snapshot.serverPlayerPosition",
+    "doorAuthorityObservationReadinessSource": "snapshot.onGround-and-colliding-client-fields",
+    "authoritySpecificReadinessObserved": false
+  },
+  "exitBoundary": {
+    "axis": "x",
+    "boundary": 71,
+    "clientPosition": 71.60638427734375,
+    "serverPosition": 71.60638694230313,
+    "clientOutsideCompleteVoxel": true,
+    "serverOutsideCompleteVoxel": true
+  },
+  "lowerExitFaceAimReached": false,
+  "lowerReopenClickSent": false,
+  "summary": "The tightened real-input walk completed with its returned snapshot satisfying grounded and non-colliding. The fixture immediately sampled again and asserted the same client readiness booleans through doorAuthorityObservation; that second non-atomic sample was false, while the later failure attachment was true/non-colliding again. Both client and server positions had already crossed the complete voxel exit boundary.",
+  "productBoundary": "No independent Authority grounded/colliding fields were observed: doorAuthorityObservation only sources position from serverPlayerPosition. This is a fixture observation-timing failure before lower exit-face aim or interaction, not an Authority door rejection or a V2 equipment result. Root must freeze any follow-up."
+}

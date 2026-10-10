@@ -1,0 +1,1446 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER21-ARRIVAL-DURING-AIM-MAP-01",
+  "source": {
+    "browser21Timeline": "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/return-route-aim-timeline.json",
+    "browser21TimelineSha256": "9f424f6aaac3d499d54415e266e5380812e330bbbb77723a257f6de93a3ed6d3",
+    "traceValuesRecorded": true,
+    "conditionValuesDerivedWithFrozenHelpers": true
+  },
+  "constants": {
+    "target": [80.5, -0.5],
+    "direction": "KeyS",
+    "tolerance": 0.06,
+    "corridorTolerance": 0.08,
+    "finiteX": 0.45,
+    "outerRouteBudgetMs": 45000,
+    "outerWaitBudgetMs": 20000,
+    "pulseMs": 80,
+    "jump": false,
+    "mouseStep": 80,
+    "mouseSensitivityDegrees": 0.13
+  },
+  "baselines": [
+    {
+      "id": "pw:api@6696",
+      "sourceRole": "followEquipmentRoute initial observe / outer baseline",
+      "startTimeMs": 287645.578,
+      "endTimeMs": 287653.996,
+      "player": [80.5007095336914, 32.599998474121094, 2.444796085357666],
+      "serverPlayerPosition": [80.50070902152164, 32.6, 2.4447960558592863],
+      "viewAngles": [-900.6799999999987, -20.159999999999993],
+      "physicsTick": 18220,
+      "acknowledgedInputSequence": 11443,
+      "onGround": true,
+      "colliding": false,
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.00070953369140625,
+          "zDelta": 2.944796085357666,
+          "distance": 2.9447961708369386,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.0007090215216436491,
+          "zDelta": 2.9447960558592863,
+          "distance": 2.944796141215199,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": false,
+        "strict": false,
+        "classifier": null
+      }
+    },
+    {
+      "id": "pw:api@6697",
+      "sourceRole": "walkTo initial current",
+      "startTimeMs": 287659.512,
+      "endTimeMs": 287672.132,
+      "player": [80.5007095336914, 32.599998474121094, 2.444796085357666],
+      "serverPlayerPosition": [80.50070902152164, 32.6, 2.4447960558592863],
+      "viewAngles": [-900.6799999999987, -20.159999999999993],
+      "physicsTick": 18221,
+      "acknowledgedInputSequence": 11444,
+      "onGround": true,
+      "colliding": false,
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.00070953369140625,
+          "zDelta": 2.944796085357666,
+          "distance": 2.9447961708369386,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.0007090215216436491,
+          "zDelta": 2.9447960558592863,
+          "distance": 2.944796141215199,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      }
+    },
+    {
+      "id": "pw:api@6753",
+      "sourceRole": "walkTo current after seventh KeyS pulse / before failing correction",
+      "startTimeMs": 288750.089,
+      "endTimeMs": 288758.512,
+      "player": [80.50038146972656, 32.599998474121094, -0.4135367274284363],
+      "serverPlayerPosition": [80.50077447174287, 32.6, -0.19409252460450183],
+      "viewAngles": [-899.8999999999987, -20.159999999999993],
+      "physicsTick": 18286,
+      "acknowledgedInputSequence": 11509,
+      "onGround": true,
+      "colliding": false,
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": 0.08646327257156372,
+          "distance": 0.08646411407593792,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.0007744717428721515,
+          "zDelta": 0.3059074753954982,
+          "distance": 0.305908455766309,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      }
+    }
+  ],
+  "observations": [
+    {
+      "id": "pw:api@6755",
+      "callId": "call@12379",
+      "sourceRole": "correctMouseToRoute first observation; earliest client-reached",
+      "startTimeMs": 288766.258,
+      "endTimeMs": 288775.057,
+      "player": [80.50038146972656, 32.599998474121094, -0.47464773058891296],
+      "serverPlayerPosition": [80.50064357211583, 32.6, -0.2635369690489463],
+      "viewAngles": [-899.8999999999987, -20.159999999999993],
+      "physicsTick": 18287,
+      "acknowledgedInputSequence": 11510,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 180.8620512716386,
+      "rawDx": -5.861932858748822,
+      "clampedDx": -5.861932858748822,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6757",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": 0.025352269411087036,
+          "distance": 0.025355139191978876,
+          "radialReached": true,
+          "corridorReached": false,
+          "reached": true,
+          "finiteNeighborhood": true
+        },
+        "server": {
+          "xDelta": 0.0006435721158339902,
+          "zDelta": 0.2364630309510537,
+          "distance": 0.23646390674186887,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": null
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": 0.025352269411087036,
+          "distance": 0.025355139191978876,
+          "radialReached": true,
+          "corridorReached": false,
+          "reached": true,
+          "finiteNeighborhood": true
+        },
+        "server": {
+          "xDelta": 0.0006435721158339902,
+          "zDelta": 0.2364630309510537,
+          "distance": 0.23646390674186887,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": null
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "BASELINE_NOT_CLASSIFIED_AGAINST_ITSELF"
+    },
+    {
+      "id": "pw:api@6759",
+      "callId": "call@12389",
+      "sourceRole": "first observation after old implementation sent one mouse move",
+      "startTimeMs": 288828.112,
+      "endTimeMs": 288836.862,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.4746477374655492],
+      "viewAngles": [-899.1199999999988, -20.159999999999993],
+      "physicsTick": 18290,
+      "acknowledgedInputSequence": 11513,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -1375.7498875306246,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6761",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": 0.025352262534450776,
+          "distance": 0.025355136878622665,
+          "radialReached": true,
+          "corridorReached": false,
+          "reached": true,
+          "finiteNeighborhood": true
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": 0.025352262534450776,
+          "distance": 0.025355136878622665,
+          "radialReached": true,
+          "corridorReached": false,
+          "reached": true,
+          "finiteNeighborhood": true
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6763",
+      "callId": "call@12399",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 288894.871,
+      "endTimeMs": 288903.508,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-888.7199999999988, -20.159999999999993],
+      "physicsTick": 18294,
+      "acknowledgedInputSequence": 11517,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -1295.7498875306258,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6765",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6767",
+      "callId": "call@12409",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 288961.935,
+      "endTimeMs": 288971.119,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-878.3199999999988, -20.159999999999993],
+      "physicsTick": 18298,
+      "acknowledgedInputSequence": 11521,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -1215.749887530627,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6769",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6771",
+      "callId": "call@12419",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289028.042,
+      "endTimeMs": 289037.145,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-867.9199999999988, -20.159999999999993],
+      "physicsTick": 18302,
+      "acknowledgedInputSequence": 11525,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -1135.7498875306262,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6773",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6775",
+      "callId": "call@12429",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289094.735,
+      "endTimeMs": 289106.378,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-857.5199999999988, -20.159999999999993],
+      "physicsTick": 18306,
+      "acknowledgedInputSequence": 11529,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -1055.7498875306255,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6777",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6779",
+      "callId": "call@12439",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289161.708,
+      "endTimeMs": 289170.963,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-847.1199999999989, -20.159999999999993],
+      "physicsTick": 18311,
+      "acknowledgedInputSequence": 11534,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -975.7498875306264,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6781",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6783",
+      "callId": "call@12449",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289228.257,
+      "endTimeMs": 289237.006,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-836.7199999999989, -20.159999999999993],
+      "physicsTick": 18314,
+      "acknowledgedInputSequence": 11537,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -895.7498875306276,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6785",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6787",
+      "callId": "call@12459",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289294.877,
+      "endTimeMs": 289303.484,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-826.3199999999989, -20.159999999999993],
+      "physicsTick": 18318,
+      "acknowledgedInputSequence": 11541,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -815.7498875306268,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6789",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6791",
+      "callId": "call@12469",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289361.197,
+      "endTimeMs": 289369.86,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-815.9199999999989, -20.159999999999993],
+      "physicsTick": 18322,
+      "acknowledgedInputSequence": 11545,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -735.7498875306261,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6793",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6795",
+      "callId": "call@12479",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 289428.588,
+      "endTimeMs": 289437.516,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-805.519999999999, -20.159999999999993],
+      "physicsTick": 18327,
+      "acknowledgedInputSequence": 11550,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -655.7498875306272,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6806",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6808",
+      "callId": "call@12509",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 291134.095,
+      "endTimeMs": 291143.26,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-795.119999999999, -20.159999999999993],
+      "physicsTick": 18337,
+      "acknowledgedInputSequence": 11563,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -575.7498875306283,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6810",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6812",
+      "callId": "call@12519",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 291194.688,
+      "endTimeMs": 291207.347,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-784.719999999999, -20.159999999999993],
+      "physicsTick": 18340,
+      "acknowledgedInputSequence": 11566,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -495.7498875306275,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6814",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6816",
+      "callId": "call@12529",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 291271.881,
+      "endTimeMs": 291280.776,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-774.319999999999, -20.159999999999993],
+      "physicsTick": 18344,
+      "acknowledgedInputSequence": 11569,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -415.74988753062684,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6818",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6820",
+      "callId": "call@12539",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 291345.659,
+      "endTimeMs": 291354.494,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-763.919999999999, -20.159999999999993],
+      "physicsTick": 18349,
+      "acknowledgedInputSequence": 11574,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -335.7498875306279,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6822",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6824",
+      "callId": "call@12549",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 291411.74,
+      "endTimeMs": 291420.43,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-753.5199999999991, -20.159999999999993],
+      "physicsTick": 18352,
+      "acknowledgedInputSequence": 11577,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -255.74988753062894,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6835",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6837",
+      "callId": "call@12579",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 293130.283,
+      "endTimeMs": 293142.604,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-743.1199999999991, -20.159999999999993],
+      "physicsTick": 18363,
+      "acknowledgedInputSequence": 11589,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -175.74988753062826,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6839",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6841",
+      "callId": "call@12589",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 293212.651,
+      "endTimeMs": 293221.467,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-732.7199999999991, -20.159999999999993],
+      "physicsTick": 18368,
+      "acknowledgedInputSequence": 11594,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -95.74988753062756,
+      "clampedDx": -80,
+      "moveSentAfterObservation": true,
+      "moveStepId": "pw:api@6843",
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    },
+    {
+      "id": "pw:api@6845",
+      "callId": "call@12599",
+      "sourceRole": "later old-implementation correction observation",
+      "startTimeMs": 293278.04,
+      "endTimeMs": 293286.554,
+      "player": [80.50038146972656, 32.599998474121094, -0.5802028179168701],
+      "serverPlayerPosition": [80.50038177286176, 32.6, -0.5802028360950938],
+      "viewAngles": [-722.3199999999991, -20.159999999999993],
+      "physicsTick": 18372,
+      "acknowledgedInputSequence": 11598,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": 359.7274853789826,
+      "rawDx": -15.749887530628607,
+      "clampedDx": -15.749887530628607,
+      "moveSentAfterObservation": false,
+      "moveStepId": null,
+      "conditionsVsOuterBaseline": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "conditionsVsWalkCurrent": {
+        "client": {
+          "xDelta": 0.0003814697265625,
+          "zDelta": -0.08020281791687012,
+          "distance": 0.0802037251064993,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "server": {
+          "xDelta": 0.00038177286175766767,
+          "zDelta": -0.08020283609509382,
+          "distance": 0.08020374472687955,
+          "radialReached": false,
+          "corridorReached": false,
+          "reached": false,
+          "finiteNeighborhood": false
+        },
+        "ready": true,
+        "fresh": true,
+        "strict": false,
+        "classifier": "drift"
+      },
+      "classifierIfFirstReachedWereWaitBaseline": "drift"
+    }
+  ],
+  "branchProof": {
+    "firstClientReachedId": "pw:api@6755",
+    "firstClientReachedDistance": 0.025355139191978876,
+    "serverAtFirstClientReachedDistance": 0.23646390674186887,
+    "firstClientReachedOuterStrict": false,
+    "firstOuterBranch": "client reached + finite; strict false because server late; enter existing bounded waitForProgress",
+    "traceElapsedFromOuterBaselineMs": 1120.679999999993,
+    "remainingOuterBudgetMsApprox": 43879.32000000001,
+    "dateNowSerialized": false,
+    "firstActualLaterDriftId": "pw:api@6759",
+    "firstActualLaterDriftClassifierVsTerminal": "drift",
+    "nextDirectionFromDriftClientX": "KeyS",
+    "nextTarget": [80.5, -0.5],
+    "counterfactualSuccessClaimed": false
+  },
+  "classificationNote": "conditionsVsOuterBaseline.classifier is the mechanical classifyEquipmentRouteWait result if that sample were passed as a wait sample. It is not evidence that the outer controller actually received the observation. Only pw:api@6759 is additionally evaluated against pw:api@6755 as the proposed wait baseline."
+}

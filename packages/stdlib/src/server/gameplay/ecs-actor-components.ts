@@ -1,8 +1,10 @@
-import type { Inventory, InventoryAccess } from './inventory';
+import type { Inventory, InventoryAccess, InventorySlot } from './inventory';
+import type { ArmorSlot } from './modules/armor-policy';
 import type { ItemId } from './item-registry';
 import type { BreakAction, PlayerSnapshot } from './player-state';
 import type { InventoryCursorV1 } from './modules/inventory-pointer-contract';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
+import type { SpeciesStateV1 } from './species-state';
 
 export type ActorMode = 'survival' | 'creative';
 export type ActorModeComponentV1 = Readonly<{ version: 1; value: ActorMode; revision: number }>;
@@ -40,12 +42,16 @@ export type ActorComponentAccess = {
   readonly inventory: InventoryAccess;
   readonly inventoryRevision: number;
   readonly inventoryCursor: InventoryCursorV1;
+  readonly armor: Readonly<Record<ArmorSlot, InventorySlot>>;
+  replaceArmor: (armor: Readonly<Record<ArmorSlot, InventorySlot>>) => void;
   readonly controlSource: ActorControlSource;
   readonly controlRevision: number;
   readonly mode: ActorMode;
   readonly modeRevision: number;
   readonly creativeCatalog: CreativeCatalogComponentV1;
   readonly flight: ActorFlightComponentV1;
+  readonly species: SpeciesStateV1 | null;
+  replaceSpecies: (state: SpeciesStateV1 | null) => void;
   selectSlot: (slot: number) => boolean;
   replaceModeComponents: (facets: ActorModeSnapshotFacets) => void;
   replaceInventoryInteraction: (revision: number, cursor: InventoryCursorV1) => void;
@@ -75,7 +81,11 @@ export const createActorComponents = () => ({
     revision: [] as number[],
     cursor: [] as (InventoryCursorV1 | undefined)[],
   },
-  equipment: { selectedSlot: [] as number[], hotbarSize: [] as number[] },
+  equipment: {
+    selectedSlot: [] as number[],
+    hotbarSize: [] as number[],
+    armor: [] as (Record<ArmorSlot, InventorySlot> | undefined)[],
+  },
   control: { source: [] as (ActorControlSource | undefined)[], revision: [] as number[] },
   behavior: { value: [] as (CharacterComponentStateV1 | undefined)[] },
   life: { lifecycle: [] as PlayerSnapshot['lifecycle'][] },
@@ -86,6 +96,7 @@ export const createActorComponents = () => ({
     revision: [] as number[],
   },
   flight: { enabled: [] as boolean[], revision: [] as number[] },
+  species: { value: [] as (SpeciesStateV1 | undefined)[] },
   player: {
     spawnX: [] as number[],
     spawnY: [] as number[],
@@ -101,7 +112,7 @@ export type ActorComponentSnapshot = Readonly<{
   /** Added after the original V4 snapshot; omitted snapshots migrate to zero and an empty cursor. */
   inventoryRevision?: number;
   inventoryCursor?: InventoryCursorV1;
-  equipment: Readonly<{ selectedSlot: number; hotbarSize: number }>;
+  equipment: Readonly<{ selectedSlot: number; hotbarSize: number; armor?: Readonly<Record<ArmorSlot, InventorySlot>> }>;
   lifecycle: PlayerSnapshot['lifecycle'];
   controlSource: ActorControlSource;
   /** Added with behavior control; omitted snapshots migrate to revision zero. */
@@ -111,6 +122,7 @@ export type ActorComponentSnapshot = Readonly<{
   mode?: ActorModeComponentV1;
   creativeCatalog?: CreativeCatalogComponentV1;
   flight?: ActorFlightComponentV1;
+  species?: SpeciesStateV1;
   player?: Readonly<{
     spawnPosition: [number, number, number];
     breakAction: BreakAction | null;

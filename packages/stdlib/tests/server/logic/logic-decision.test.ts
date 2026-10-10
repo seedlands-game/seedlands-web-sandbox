@@ -55,7 +55,7 @@ const observation = (
   windows: TerrainWindow[] = [terrain()],
   worldTime = 12,
 ): LogicObservation => ({
-  protocolVersion: 1,
+  protocolVersion: 2,
   epoch: 'world-1',
   observationSequence: 3,
   physicsTick: 120,
@@ -70,6 +70,30 @@ const observation = (
 });
 
 describe('Game Logic Worker 的纯意图计算', () => {
+  it('观察已配置身体而不授予旧Actor导航控制，缺失或无效边界失败关闭', () => {
+    const carrier = entity({
+      bodyKind: null,
+      bodyAabb: { min: { x: -0.8, y: 0, z: -0.3 }, max: { x: 0.8, y: 0.7, z: 0.3 } },
+    });
+    expect(decideLogicIntents(observation([{ state: actor(), identityRevision: 1 }], [carrier])).intents).toEqual([]);
+    expect(() => decideLogicIntents(observation([], [entity({ bodyKind: null })]))).toThrow('Logic entity');
+    expect(() =>
+      decideLogicIntents(
+        observation(
+          [],
+          [
+            {
+              ...carrier,
+              bodyAabb: {
+                min: { x: 0, y: 0, z: 0 },
+                max: { x: 0, y: 1, z: 1 },
+              },
+            },
+          ],
+        ),
+      ),
+    ).toThrow('Logic entity');
+  });
   it('按物理频率换算相同的 200ms 意图有效期', () => {
     const input = observation([], []);
     expect(decideLogicIntents(input, 30).expiresAtPhysicsTick).toBe(126);
@@ -91,7 +115,7 @@ describe('Game Logic Worker 的纯意图计算', () => {
 
     const batch = decideLogicIntents(observation([{ state: hungry, identityRevision: 1 }], [grazer, berry]));
 
-    expect(batch).toMatchObject({ protocolVersion: 1, epoch: 'world-1', observationSequence: 3 });
+    expect(batch).toMatchObject({ protocolVersion: 2, epoch: 'world-1', observationSequence: 3 });
     expect(batch.expiresAtPhysicsTick).toBeGreaterThan(120);
     expect(batch.intents).toEqual([
       expect.objectContaining({
@@ -147,6 +171,29 @@ describe('Game Logic Worker 的纯意图计算', () => {
       wish: { x: 1, z: 0 },
       action: { type: 'move-to', target: [6.5, 1, 2.5] },
     });
+  });
+
+  it('按 profile 派生 disposition 让新增敌对物种索敌、被动物种避敌', () => {
+    const player = entity({ id: 'player', bodyKind: 'player', position: [4, 1, 2.5] });
+    const zombie = entity({ id: 'zombie', bodyKind: 'zombie', position: [2.5, 1, 2.5], health: 20 });
+    const cow = entity({ id: 'cow', bodyKind: 'cow', position: [6, 1, 2.5], health: 10 });
+    const zombieState = actor({ entityId: 'zombie', archetype: 'zombie', disposition: 'hostile' });
+    const cowState = actor({ entityId: 'cow', archetype: 'cow', disposition: 'passive' });
+    const night = decideLogicIntents(
+      observation(
+        [
+          { state: zombieState, identityRevision: 1 },
+          { state: cowState, identityRevision: 1 },
+        ],
+        [zombie, cow, player],
+        undefined,
+        22,
+      ),
+    );
+    expect(night.intents.find((intent) => intent.entityId === 'zombie')).toMatchObject({
+      action: { type: 'attack', targetId: 'player' },
+    });
+    expect(night.intents.find((intent) => intent.entityId === 'cow')).toMatchObject({ action: { type: 'move-to' } });
   });
 
   it('保留 Authority 记录的受击逃跑状态，并生成远离攻击者的意图', () => {

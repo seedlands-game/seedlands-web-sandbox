@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "0eafd4273bc1f5a23e7d147ded37801436074015",
+  "sourceTree": "a1cbf676594be93a86c77afcbb59dacc1611899e",
+  "sourceDigest": "4a280a632e0273b0d77d8637c78f542e8d4e0519280bd784d7a33c7d08accaa8",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "builtAt": "2026-09-28T15:34:20.824Z",
+  "receiptSha256": "73e3eaa9a0bc431d431f0c1a24ae2f60b1e15fcad0e421b6c8dd3b5d505fec7c",
+  "artifactFiles": 276,
+  "diskFilesIncludingReceipt": 277,
+  "symlinks": 0,
+  "missing": 0,
+  "extra": 0,
+  "mismatched": 0,
+  "mapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "postcheck": {
+    "runId": "v2-canonical-browser-23-artifact-postcheck",
+    "status": "PASS",
+    "exitCode": 0,
+    "startedAt": "2026-09-28T15:59:23.964Z",
+    "endedAt": "2026-09-28T15:59:28.591Z",
+    "stdoutSha256": "8bb16261f1d7c1d97bb300852f77ee65648fe8c465d52622c321ec427f8db4c6",
+    "windowSha256": "06ba4181b8667df11021c66a106e3d8b633a388ea4a8da57d54e90f86d3f844f",
+    "rerun": false
+  }
+}

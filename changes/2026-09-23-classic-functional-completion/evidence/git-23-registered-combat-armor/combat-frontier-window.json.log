@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git23-combat-frontier",
+  "pid": 26847,
+  "startedAt": "2026-09-25T13:06:53.514Z",
+  "windowId": "git23-combat-frontier",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/git-23-registered-combat-armor/combat-frontier-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T13:06:55.588Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T13:06:53.515Z",
+      "loadAverage": [
+        2.7919921875,
+        3.2353515625,
+        3.21337890625
+      ],
+      "freeMemoryBytes": 119832576,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T13:06:55.587Z",
+      "loadAverage": [
+        2.7919921875,
+        3.2353515625,
+        3.21337890625
+      ],
+      "freeMemoryBytes": 471793664,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

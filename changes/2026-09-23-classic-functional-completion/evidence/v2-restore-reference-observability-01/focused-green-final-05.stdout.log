@@ -1,0 +1,14 @@
+10:51:29 AM [vite-plugin-svelte] no Svelte config found at /private/tmp/seedlands-v2-restore-reference-01 - using default configuration.
+
+ RUN  v4.1.11 /private/tmp/seedlands-v2-restore-reference-01
+
+ ✓ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts (11 tests) 1768ms
+     ✓ resolves detached references across a non-Classic restore without mutating state  874ms
+     ✓ validates and authorizes before resolving or observing existence  447ms
+     ✓ captures a request before queued execution  443ms
+
+ Test Files  1 passed (1)
+      Tests  11 passed (11)
+   Start at  10:51:29
+   Duration  3.25s (transform 1.05s, setup 0ms, import 1.41s, tests 1.77s, environment 0ms)
+

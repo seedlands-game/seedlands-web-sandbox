@@ -4,8 +4,22 @@ import { DEFAULT_AUDIO_SETTINGS, sanitizeAudioSettings, SoundBudget } from '../.
 import type { AudioSettings, SfxKey } from '../../client/audio/audio-types';
 import { AudioMixer } from './audio-mixer';
 import { MusicPlayer } from './music-player';
+import type {
+  MediaPlaybackFactV1,
+  MediaPlaybackProjectionV1,
+  MediaResourceReferenceV1,
+} from '@seedlands/stdlib/mod-api';
+import type { SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
+import { WorldMediaAudioAdapter } from './world-media-audio-adapter';
+import { WorldMediaRuntime } from './world-media-runtime';
 
 const STORAGE_KEY = 'seedlands.audio.v1';
+const MAX_PENDING_MEDIA_FACT_BATCHES = 64;
+type MediaResources = Readonly<{
+  validate(reference: MediaResourceReferenceV1): void;
+  resolve(reference: MediaResourceReferenceV1): Promise<{ bytes: ArrayBuffer; release(): void }>;
+  abort?(): void;
+}>;
 
 export class GlobalAudio {
   private mixer: AudioMixer | null = null;
@@ -19,8 +33,16 @@ export class GlobalAudio {
   private unlocked = false;
   private readonly recentSounds: { key: SfxKey; sequence: number }[] = [];
   private playedCount = 0;
-  private importEpoch = 0;
   private error = '';
+  private mediaError = '';
+  private media: WorldMediaRuntime | null = null;
+  private mediaWorld: Readonly<{
+    epoch: SessionEpoch;
+    resources: MediaResources;
+    onError(message: string): void;
+  }> | null = null;
+  private mediaProjections: readonly MediaPlaybackProjectionV1[] = Object.freeze([]);
+  private mediaFacts: readonly (readonly MediaPlaybackFactV1[])[] = Object.freeze([]);
   private readonly subscribers = new Set<() => void>();
 
   constructor() {
@@ -45,7 +67,7 @@ export class GlobalAudio {
       ...this.mixer?.snapshot(),
       settings: { ...this.settings },
       unlocked: this.unlocked,
-      error: this.error,
+      error: this.mediaError || this.error,
       voices: this.voices.size,
       playedCount: this.playedCount,
       recentSounds: this.recentSounds.map((sound) => ({ ...sound })),
@@ -53,9 +75,9 @@ export class GlobalAudio {
       dropped: this.budget.droppedCount,
       session: this.worldSession,
       sharedContext: this.player?.sharedContext ?? false,
-      referenceName: this.player?.referenceName ?? '',
       cue: this.player?.cue ?? '',
       underwaterFilterHz: this.mixer?.underwaterFilter?.frequency.value ?? 18_000,
+      worldMedia: this.media?.snapshot() ?? null,
     };
   }
 
@@ -66,6 +88,8 @@ export class GlobalAudio {
       this.mixer.apply(this.settings);
       this.unlocked = await this.mixer.unlock();
       this.error = '';
+      this.ensureMediaWorld();
+      if (this.unlocked) await this.media?.resumeFromGesture();
     } catch {
       this.error = '音频暂不可用，你仍可继续游戏。';
     }
@@ -99,10 +123,65 @@ export class GlobalAudio {
   }
 
   endWorld() {
+    this.media?.dispose();
+    this.media = null;
+    this.mediaWorld = null;
+    this.mediaProjections = Object.freeze([]);
+    this.mediaFacts = Object.freeze([]);
+    this.mediaError = '';
     this.player?.stop(true);
     for (const id of this.voices.keys()) this.retire(id);
     this.worldSession = 'menu';
     this.budget.beginSession(this.worldSession);
+  }
+
+  beginMediaWorld(epoch: SessionEpoch, resources: MediaResources, onError: (message: string) => void): void {
+    this.media?.dispose();
+    this.media = null;
+    this.mediaError = '';
+    this.mediaWorld = Object.freeze({ epoch, resources, onError });
+    this.mediaProjections = Object.freeze([]);
+    this.mediaFacts = Object.freeze([]);
+    if (!this.mixer) {
+      this.error ||= '音频暂不可用，你仍可继续游戏。';
+      onError(this.error);
+      this.publish();
+      return;
+    }
+    this.ensureMediaWorld();
+    this.publish();
+  }
+
+  installMediaProjections(projections: readonly MediaPlaybackProjectionV1[]): void {
+    this.mediaProjections = projections;
+    this.media?.installProjections(projections);
+    this.publish();
+  }
+
+  consumeMediaFacts(facts: readonly MediaPlaybackFactV1[]): void {
+    if (!this.media) {
+      if (this.mediaFacts.length >= MAX_PENDING_MEDIA_FACT_BATCHES) {
+        this.mediaError = '唱片事件暂存容量已满，请重新进入世界。';
+        this.mediaWorld?.onError(this.mediaError);
+        this.publish();
+        return;
+      }
+      this.mediaFacts = Object.freeze([...this.mediaFacts, facts]);
+      return;
+    }
+    void this.media?.consumeFacts(facts).then(() => {
+      if (this.media?.snapshot().error === null) this.mediaError = '';
+      this.publish();
+    });
+  }
+
+  resumeMediaFromGesture(): void {
+    void this.media?.resumeFromGesture().then(() => this.publish());
+  }
+
+  setWorldMediaPaused(paused: boolean): void {
+    this.media?.setPaused(paused);
+    this.publish();
   }
 
   play(
@@ -154,30 +233,6 @@ export class GlobalAudio {
     return true;
   }
 
-  async importReference(file: File) {
-    const epoch = ++this.importEpoch;
-    const session = this.worldSession;
-    await this.unlock();
-    if (!this.player || epoch !== this.importEpoch) return;
-    try {
-      const applied = await this.player.importReference(file);
-      if (!applied || epoch !== this.importEpoch) return;
-      this.error = '';
-      if (session === this.worldSession) this.player.start('meadow', 1);
-    } catch (error) {
-      if (epoch !== this.importEpoch) return;
-      this.error = error instanceof Error ? error.message : '无法读取参考曲。';
-    }
-    this.publish();
-  }
-
-  removeReference() {
-    ++this.importEpoch;
-    this.player?.removeReference();
-    this.error = '';
-    this.publish();
-  }
-
   private retire(id: number) {
     const voice = this.voices.get(id);
     if (voice) {
@@ -188,6 +243,20 @@ export class GlobalAudio {
     }
     this.voices.delete(id);
     this.budget.release(id);
+  }
+
+  private ensureMediaWorld(): void {
+    if (this.media || !this.mixer || !this.mediaWorld) return;
+    const world = this.mediaWorld;
+    this.media = new WorldMediaRuntime(world.epoch, world.resources, new WorldMediaAudioAdapter(this.mixer), () => {
+      this.mediaError = '唱片播放失败，请检查资源或浏览器音频权限。';
+      world.onError(this.mediaError);
+      this.publish();
+    });
+    this.media.installProjections(this.mediaProjections);
+    const pending = this.mediaFacts;
+    this.mediaFacts = Object.freeze([]);
+    for (const facts of pending) void this.media.consumeFacts(facts);
   }
 
   private publish() {

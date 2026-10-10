@@ -1,0 +1,414 @@
+import type { Page } from '@playwright/test';
+import { describe, expect, it, vi } from 'vitest';
+import { walkTo, type ClassicSnapshot } from './harness';
+import { lockPointer } from './mouse-input';
+import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
+import type { Point, RoutePoint } from './scenario';
+import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
+import { assessClosedDoorProbe, createClosedDoorProbePlan } from './door-collision-oracle';
+
+const SENSITIVITY = 0.13;
+
+it('settles the closed-door approach before probe input even when the initial body is at contact', async () => {
+  const config = bodyConfigFor('player');
+  const plan = createClosedDoorProbePlan({
+    door: [70, 31, 0],
+    collision: { min: [0.8125, 0, 0], max: [1, 1, 1] },
+    playerPosition: [67, 32.6, 0.5],
+    playerHalfWidth: 0.32,
+  });
+  const world: PhysicsWorld = {
+    querySolids: () => [
+      { id: 'floor', aabb: { min: { x: 60, y: 30, z: -2 }, max: { x: 80, y: 31, z: 2 } } },
+      { id: 'door', aabb: { min: { x: 70.8125, y: 31, z: 0 }, max: { x: 71, y: 33, z: 1 } } },
+    ],
+  };
+  let body: BodyState = {
+    position: { x: plan.contact, y: 31, z: 0.5 },
+    velocity: { x: 0, y: 0, z: 0 },
+  };
+  let yaw = -90,
+    tick = 1,
+    ack = 1,
+    presses = 0,
+    pointerLocked = false;
+  let mouseX = 5000;
+  let heldAt = 0;
+  const observe = (): ClassicSnapshot => ({
+    ...routeSnapshot([body.position.x, body.position.y + 1.6, body.position.z], yaw, tick, ack),
+    serverPlayerVelocity: [body.velocity.x, body.velocity.y, body.velocity.z],
+  });
+  const page = {
+    evaluate: async (callback: (...args: unknown[]) => unknown) =>
+      String(callback).includes('pointerLockElement') ? pointerLocked : observe(),
+    keyboard: {
+      down: async (key: string) => {
+        expect(key).toBe('KeyW');
+        heldAt = Date.now();
+        presses++;
+      },
+      up: async (key: string) => {
+        expect(key).toBe('KeyW');
+        const delay = Date.now() - heldAt;
+        expect(delay).toBeLessThanOrEqual(80);
+        const heldTicks = Math.ceil((delay * 60) / 1000);
+        for (let i = 0; i < 180; i++) {
+          const radians = (yaw * Math.PI) / 180;
+          const stepped = stepBody({
+            state: body,
+            config,
+            world,
+            dt: 1 / 60,
+            input: {
+              wish: i < heldTicks ? { x: -Math.sin(radians), z: -Math.cos(radians) } : { x: 0, z: 0 },
+              jumpPressed: false,
+              verticalIntent: 0,
+            },
+          });
+          body = stepped.state;
+          tick++;
+          if (i >= heldTicks && Math.abs(body.velocity.x) < 1e-6 && Math.abs(body.velocity.z) < 1e-6) break;
+        }
+        ack++;
+      },
+    },
+    locator: () => ({
+      isVisible: async () => false,
+      boundingBox: async () => ({ x: 0, y: 0, width: 10_000, height: 540 }),
+      click: async () => {
+        pointerLocked = true;
+      },
+    }),
+    mouse: {
+      move: async (x: number) => {
+        yaw -= (x - mouseX) * SENSITIVITY;
+        mouseX = x;
+      },
+    },
+    waitForFunction: async () => undefined,
+  } as unknown as Page;
+  await lockPointer(page);
+  const crossed = await walkTo(page, plan.approach, { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80 });
+  expect(crossed.player[0]).toBeCloseTo(plan.contact, 6);
+  expect(presses).toBe(0);
+  const options = { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80, arrival: 'point' as const };
+  vi.useFakeTimers();
+  let reached: ClassicSnapshot;
+  try {
+    const pending = walkTo(page, plan.approach, options);
+    await vi.runAllTimersAsync();
+    reached = await pending;
+  } finally {
+    vi.useRealTimers();
+  }
+  expect(presses).toBeGreaterThan(0);
+  expect(Math.hypot(reached.player[0] - plan.approach[0], reached.player[2] - plan.approach[1])).toBeLessThan(0.06);
+  expect(
+    assessClosedDoorProbe(
+      plan,
+      {
+        position: reached.serverPlayerPosition,
+        acknowledgedInputSequence: reached.authority.acknowledgedInputSequence,
+        physicsTick: reached.authority.physicsTick,
+        onGround: reached.onGround,
+        colliding: reached.colliding,
+      },
+      [],
+    ),
+  ).toEqual({ status: 'pending', reason: 'no-observations' });
+});
+
+type RouteObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
+
+const observation = (player: Point, yaw: number): RouteObservation => ({ player, viewAngles: [yaw, -26.79] });
+
+const BROWSER20_OBSERVATIONS: readonly RouteObservation[] = [
+  observation([69.55583739362123, 32.6, 0.5851294206764114], 41.17000000000004),
+  observation([69.39230994509148, 32.6, 0.38707929317700357], 30.77000000000004),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], 20.37000000000004),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], 9.97000000000004),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -0.42999999999996064),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -10.829999999999961),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -21.22999999999996),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -31.62999999999996),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -42.02999999999996),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -52.42999999999996),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -62.829999999999956),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -73.22999999999996),
+  observation([69.39230994509148, 32.6, 0.38617787241326273], -83.62999999999997),
+];
+
+const routeSnapshot = (player: Point, yaw: number, tick: number, ack: number): ClassicSnapshot =>
+  ({
+    player,
+    serverPlayerPosition: player,
+    viewAngles: [yaw, -20],
+    onGround: true,
+    colliding: false,
+    interactionAttempts: 1,
+    // Synthetic post-release protocol observation; not native browser evidence.
+    nativeMovementInput: { epoch: 'route-fixture', release: { code: 'KeyS', sequence: ack, neutral: true } },
+    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
+  }) as unknown as ClassicSnapshot;
+
+function nonResponsiveRoutePage(refreshAfterCorrection: boolean, yaw = -89.74) {
+  const target: RoutePoint = [1, 0];
+  const initial = routeSnapshot([0, 32.6, 0], yaw, 1, 1);
+  const reached = routeSnapshot([1, 32.6, 0], yaw, 2, 2);
+  const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false, pointerLocked: false };
+  const page = {
+    evaluate: async (callback: (...args: unknown[]) => unknown) => {
+      const source = String(callback);
+      if (source.includes('pointerLockElement')) return calls.pointerLocked;
+      if (source.includes('snapshot()')) {
+        calls.reads += 1;
+        return calls.pressed ? reached : initial;
+      }
+      return undefined;
+    },
+    keyboard: {
+      press: async (chord: string, options?: { delay?: number }): Promise<void> => {
+        const keys = chord.split('+');
+        for (const key of keys) await page.keyboard.down(key);
+        await new Promise<void>((resolve) => setTimeout(resolve, options?.delay ?? 0));
+        for (const key of keys.reverse()) await page.keyboard.up(key);
+      },
+      down: async () => {
+        calls.down += 1;
+        calls.pressed = true;
+      },
+      up: async () => {
+        calls.up += 1;
+      },
+    },
+    locator: (selector: string) => ({
+      isVisible: async () => false,
+      boundingBox: async () => (selector === '#game' ? { x: 0, y: 0, width: 10_000, height: 540 } : null),
+      click: async () => {
+        calls.pointerLocked = true;
+      },
+    }),
+    mouse: {
+      move: async () => {
+        calls.moves += 1;
+      },
+    },
+    waitForFunction: async () => undefined,
+  } as unknown as Page;
+  return { calls, initial, page, target, options: refreshAfterCorrection ? { refreshAfterCorrection: true } : {} };
+}
+
+describe('Classic shared route aim bounded contract', () => {
+  it('releases both held chord keys and preserves the native input failure when cleanup also fails', async () => {
+    const { page, target } = nonResponsiveRoutePage(false, -90);
+    const failure = new Error('Native input interrupted');
+    const held = new Set<string>();
+    const releases: string[] = [];
+    page.keyboard.down = async (key) => {
+      held.add(key);
+      throw failure;
+    };
+    page.keyboard.up = async (key) => {
+      held.delete(key);
+      releases.push(key);
+      throw new Error('Cleanup response interrupted');
+    };
+
+    await expect(walkTo(page, target, { jump: true, pulseMs: 80 })).rejects.toBe(failure);
+    expect(held.size).toBe(0);
+    expect(releases.sort()).toEqual(['KeyW', 'Space']);
+  });
+
+  it('does not silently accept the exact Browser20 13-observation prefix', async () => {
+    let read = 0;
+    const moves: Array<readonly [number, number]> = [];
+
+    await expect(
+      correctMouseToRoute({
+        target: [71.4925, 0.5],
+        direction: 'KeyW',
+        observe: async () => BROWSER20_OBSERVATIONS[read++] ?? null,
+        move: async (dx, dy) => {
+          moves.push([dx, dy]);
+        },
+      }),
+    ).rejects.toThrow('route aim observation remained unavailable');
+
+    expect(read).toBe(19);
+    expect(moves).toHaveLength(13);
+    expect(moves.slice(0, 12)).toEqual(Array.from({ length: 12 }, () => [80, 0]));
+    expect(moves[12]?.[0]).toBeCloseTo(72.86287224169372, 9);
+  });
+
+  it.each([
+    { name: 'W +X +180 wrap', direction: 'KeyW' as const, target: [1, 0] as RoutePoint, yaw: 90 },
+    { name: 'W -X -180 wrap', direction: 'KeyW' as const, target: [-1, 0] as RoutePoint, yaw: -90 },
+    { name: 'W +Z +180 wrap', direction: 'KeyW' as const, target: [0, 1] as RoutePoint, yaw: 0 },
+    { name: 'W -Z +180 wrap', direction: 'KeyW' as const, target: [0, -1] as RoutePoint, yaw: 180 },
+    { name: 'S +X -180 wrap', direction: 'KeyS' as const, target: [1, 0] as RoutePoint, yaw: -90 },
+    { name: 'S -X +180 wrap', direction: 'KeyS' as const, target: [-1, 0] as RoutePoint, yaw: 90 },
+    { name: 'S +Z +180 wrap', direction: 'KeyS' as const, target: [0, 1] as RoutePoint, yaw: 180 },
+    { name: 'S -Z -180 wrap', direction: 'KeyS' as const, target: [0, -1] as RoutePoint, yaw: 0 },
+  ])('covers the fixed-pose full yaw domain for $name', async ({ direction, target, yaw: initialYaw }) => {
+    let yaw = initialYaw;
+    let reads = 0;
+    let moves = 0;
+
+    const result = await correctMouseToRoute({
+      target,
+      direction,
+      observe: async () => {
+        reads += 1;
+        return observation([0, 32.6, 0], yaw);
+      },
+      move: async (dx) => {
+        moves += 1;
+        yaw -= dx * SENSITIVITY;
+      },
+    });
+
+    expect(moves).toBe(18);
+    expect(reads).toBe(19);
+    expect(result.kind).toBe('angle-aligned');
+    expect(Math.abs(horizontalMouseCorrectionToRoute([0, 32.6, 0], yaw, target, direction))).toBeLessThan(1);
+  });
+
+  it('recovers after a transient null within the shared observation bound', async () => {
+    let yaw = -79.6;
+    let reads = 0;
+    let moves = 0;
+
+    const result = await correctMouseToRoute({
+      target: [1, 0],
+      direction: 'KeyW',
+      observe: async () => {
+        reads += 1;
+        return reads === 1 ? null : observation([0, 32.6, 0], yaw);
+      },
+      move: async (dx) => {
+        moves += 1;
+        yaw -= dx * SENSITIVITY;
+      },
+    });
+
+    expect({ reads, moves }).toEqual({ reads: 3, moves: 1 });
+    expect(result.kind).toBe('angle-aligned');
+  });
+
+  it('fails unavailable after 19 persistent null observations without moving', async () => {
+    let reads = 0;
+    let moves = 0;
+    await expect(
+      correctMouseToRoute({
+        target: [1, 0],
+        direction: 'KeyW',
+        observe: async () => {
+          reads += 1;
+          return null;
+        },
+        move: async () => {
+          moves += 1;
+        },
+      }),
+    ).rejects.toThrow('route aim observation remained unavailable');
+    expect({ reads, moves }).toEqual({ reads: 19, moves: 0 });
+  });
+
+  it('fails exhaustion after 18 no-response moves and the final observation', async () => {
+    let reads = 0;
+    let moves = 0;
+    await expect(
+      correctMouseToRoute({
+        target: [1, 0],
+        direction: 'KeyW',
+        observe: async () => {
+          reads += 1;
+          return observation([0, 32.6, 0], 90);
+        },
+        move: async () => {
+          moves += 1;
+        },
+      }),
+    ).rejects.toThrow('route aim did not converge');
+    expect({ reads, moves }).toEqual({ reads: 19, moves: 18 });
+  });
+
+  it.each([
+    {
+      name: 'non-finite target',
+      target: [Number.NaN, 0] as RoutePoint,
+      current: observation([0, 32.6, 0], 0),
+      message: 'route aim target is invalid',
+    },
+    {
+      name: 'non-finite player',
+      target: [1, 0] as RoutePoint,
+      current: observation([Number.POSITIVE_INFINITY, 32.6, 0], 0),
+      message: 'route aim observation is invalid',
+    },
+    {
+      name: 'non-finite yaw',
+      target: [1, 0] as RoutePoint,
+      current: observation([0, 32.6, 0], Number.NaN),
+      message: 'route aim observation is invalid',
+    },
+  ])('fails closed for $name without mutating source input', async ({ target, current, message }) => {
+    const targetBefore = [...target];
+    const currentBefore = structuredClone(current);
+    let moves = 0;
+
+    await expect(
+      correctMouseToRoute({
+        target,
+        direction: 'KeyW',
+        observe: async () => current,
+        move: async () => {
+          moves += 1;
+        },
+      }),
+    ).rejects.toThrow(message);
+
+    expect(target).toEqual(targetBefore);
+    expect(current).toEqual(currentBefore);
+    expect(moves).toBe(0);
+  });
+
+  it('rejects an exact zero route vector but accepts an aligned finite near-zero vector', async () => {
+    const player: Point = [1, 32.6, 2];
+    await expect(
+      correctMouseToRoute({
+        target: [1, 2],
+        direction: 'KeyW',
+        observe: async () => observation(player, 0),
+        move: async () => undefined,
+      }),
+    ).rejects.toThrow('route aim direction is undefined');
+
+    let moves = 0;
+    const aligned = observation(player, -90);
+    await expect(
+      correctMouseToRoute({
+        target: [1 + Number.EPSILON, 2],
+        direction: 'KeyW',
+        observe: async () => aligned,
+        move: async () => {
+          moves += 1;
+        },
+      }),
+    ).resolves.toEqual({ kind: 'angle-aligned', observation: aligned });
+    expect(moves).toBe(0);
+  });
+
+  it.each([
+    { name: 'default', refreshAfterCorrection: false },
+    { name: 'Close10 refresh', refreshAfterCorrection: true },
+  ])('propagates helper exhaustion before $name walk input', async ({ refreshAfterCorrection }) => {
+    const { calls, page, target, options } = nonResponsiveRoutePage(refreshAfterCorrection);
+    await lockPointer(page);
+
+    await expect(walkTo(page, target, { key: 'KeyW', timeout: 45_000, pulseMs: 0, ...options })).rejects.toThrow(
+      'route aim did not converge',
+    );
+    expect(calls).toMatchObject({ down: 0, up: 0, moves: 18 });
+  });
+});

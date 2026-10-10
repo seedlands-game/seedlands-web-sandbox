@@ -1,0 +1,64 @@
+10:55:32 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (12 tests | 3 failed) 7ms
+     × rejects an unbounded 'KeyW' crossing beyond the finite arrival neighborhood 3ms
+     × rejects an unbounded 'KeyS' crossing beyond the finite arrival neighborhood 0ms
+     × corrects an overshot walk with the opposite key inside one shared deadline 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rejects an unbounded 'KeyW' crossing beyond the finite arrival neighborhood
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rejects an unbounded 'KeyS' crossing beyond the finite arrival neighborhood
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:87:91
+     85|       ),
+     86|     ).toBe(true);
+     87|     expect(matchesEquipmentRouteArrival(baseline, current, firstWoodAp…
+       |                                                                                           ^
+     88|   });
+     89|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > corrects an overshot walk with the opposite key inside one shared deadline
+AssertionError: expected [ { direction: 'KeyW', …(1) } ] to deeply equal [ { direction: 'KeyW', …(1) }, …(1) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "direction": "KeyW",
+      "timeout": 45000,
+    },
+-   {
+-     "direction": "KeyS",
+-     "timeout": 44000,
+-   },
+  ]
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:138:19
+    136|     });
+    137|
+    138|     expect(walks).toEqual([
+       |                   ^
+    139|       { direction: 'KeyW', timeout: 45000 },
+    140|       { direction: 'KeyS', timeout: 44000 },
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 9 passed (12)
+   Start at  10:55:32
+   Duration  139ms (transform 37ms, setup 0ms, import 47ms, tests 7ms, environment 0ms)
+

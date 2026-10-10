@@ -1,4 +1,7 @@
-import type { ModItemAmount, ModItemDefinition, ModRecipeDefinition } from './contracts';
+import type { ActorProfileInput } from '../gameplay/actor-profile';
+import { isActorArchetype } from '../gameplay/ecs-entity-owner';
+import type { ModItemAmount, ModItemDefinition, ModRecipeDefinition, ModVoxelDefinition } from './contracts';
+import { createVoxelSemanticsRegistry } from '../../world/voxel-semantics';
 
 const NAMESPACE_ID = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
 const assertId = (id: string, kind: string) => {
@@ -18,9 +21,13 @@ const freezeItemAmount = (amount: ModItemAmount, label: string): ModItemAmount =
 export function createContentRegistration() {
   const items = new Map<string, ModItemDefinition>();
   const recipes = new Map<string, ModRecipeDefinition>();
+  const voxels = new Map<string, ModVoxelDefinition>();
+  const actorProfiles = new Map<string, ActorProfileInput>();
   return {
     items,
     recipes,
+    voxels,
+    actorProfiles,
     facade(assertRegistrationOpen: () => void) {
       return {
         registerItem(definition: ModItemDefinition): void {
@@ -66,6 +73,20 @@ export function createContentRegistration() {
           )
             throw new TypeError(`Invalid or duplicate recipe storage ID: ${storageId}`);
           recipes.set(definition.id, Object.freeze({ ...definition, inputs, outputs }));
+        },
+        registerVoxel(definition: ModVoxelDefinition): void {
+          assertRegistrationOpen();
+          if (voxels.has(definition.id)) throw new TypeError(`Duplicate voxel definition: ${definition.id}`);
+          // Validate the full candidate set so ID/storage collisions cannot be
+          // hidden until a later composition consumer asks for semantics.
+          createVoxelSemanticsRegistry([...voxels.values(), definition]);
+          voxels.set(definition.id, definition);
+        },
+        registerActorProfile(definition: ActorProfileInput): void {
+          assertRegistrationOpen();
+          if (!isActorArchetype(definition.archetype) || actorProfiles.has(definition.archetype))
+            throw new TypeError(`Duplicate or invalid actor profile: ${String(definition.archetype)}`);
+          actorProfiles.set(definition.archetype, definition);
         },
       };
     },

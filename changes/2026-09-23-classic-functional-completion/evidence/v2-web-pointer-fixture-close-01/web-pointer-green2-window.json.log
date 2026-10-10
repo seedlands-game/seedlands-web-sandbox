@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-web-pointer-fixture-green2",
+  "pid": 96926,
+  "startedAt": "2026-09-25T12:38:31.599Z",
+  "windowId": "v2-web-pointer-fixture-green2",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-web-pointer-fixture-close-01/web-pointer-green2-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T12:38:33.247Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:38:31.600Z",
+      "loadAverage": [
+        5.40869140625,
+        4.3837890625,
+        3.79296875
+      ],
+      "freeMemoryBytes": 790167552,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:38:33.246Z",
+      "loadAverage": [
+        5.77587890625,
+        4.4765625,
+        3.8291015625
+      ],
+      "freeMemoryBytes": 831062016,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

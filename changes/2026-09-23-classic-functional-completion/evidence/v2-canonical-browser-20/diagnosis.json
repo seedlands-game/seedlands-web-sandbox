@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-20",
+  "classification": "canonical-fixture-v1-closed-door-route-aim-budget-exhausted",
+  "failedAt": "v1-closed-door-probe-before-input",
+  "owner": {
+    "consumer": "apps/web/tests/e2e/classic-support/v1-slice.ts:expectClosedDoorBlocks",
+    "correctionHelper": "apps/web/tests/e2e/classic-support/target-aim.ts:correctMouseToRoute",
+    "mouseDriver": "apps/web/tests/e2e/classic-support/mouse-input.ts:moveMouseBy",
+    "productionFailureClaimed": false,
+    "close10PickupRefreshReached": false
+  },
+  "error": {
+    "message": "Expected horizontal route correction to be less than 1 mouse unit; received 72.86287224169372.",
+    "source": "apps/web/tests/e2e/classic-support/v1-slice.ts:205",
+    "playwrightExitCode": 1
+  },
+  "reachedBeforeFailure": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "v1WaterPlaceAndCollect": "REACHED_BEFORE_FAILURE",
+    "v1DoorPlaced": true,
+    "v1DoorPair": [93, 94],
+    "v1DoorDescriptorAndMeshChecks": "PASS_BEFORE_FAILURE",
+    "v1ClosedDoorProbeInput": "NOT_SENT",
+    "v1DoorToggleTraverseJukeboxMedia": "NOT_REACHED",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "closedDoorCorrection": {
+    "approach": [69.4925, 0.5],
+    "routeTarget": [71.4925, 0.5],
+    "planInitialObservation": {
+      "position": [67.32670621695529, 32.6, 0.6780099244880817],
+      "viewAngles": [-86.74999999999997, -26.79],
+      "physicsTick": 12255,
+      "acknowledgedInputSequence": 5483,
+      "onGround": true,
+      "colliding": false
+    },
+    "approachFinalInput": {
+      "key": "KeyW",
+      "downAtMs": 112161.643,
+      "upAtMs": 112244.99
+    },
+    "approachReturnSnapshot": {
+      "player": [69.45709228515625, 32.599998474121094, 0.4731168746948242],
+      "serverPlayerPosition": [69.5975040602879, 32.6, 0.626796087343078],
+      "viewAngles": [41.17000000000004, -26.79],
+      "physicsTick": 12529,
+      "acknowledgedInputSequence": 5765,
+      "onGround": true,
+      "colliding": false
+    },
+    "maximumAttempts": 12,
+    "observedAttempts": 12,
+    "mouseMoves": 12,
+    "mouseStepLimit": 80,
+    "firstObservation": {
+      "position": [69.55583739362123, 32.6, 0.5851294206764114],
+      "viewAngles": [41.17000000000004, -26.79],
+      "physicsTick": 12530,
+      "acknowledgedInputSequence": 5766,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -87.48308318071645,
+      "rawMouseDx": 989.6391013901268,
+      "clampedMouseDx": 80
+    },
+    "lastLoopObservation": {
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "viewAngles": [-73.22999999999996, -26.79],
+      "physicsTick": 12569,
+      "acknowledgedInputSequence": 5806,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "rawMouseDx": 152.86287224169376,
+      "clampedMouseDx": 80
+    },
+    "assertionObservation": {
+      "position": [69.39230994509148, 32.6, 0.38617787241326273],
+      "viewAngles": [-83.62999999999997, -26.79],
+      "physicsTick": 12572,
+      "acknowledgedInputSequence": 5809,
+      "onGround": true,
+      "colliding": false,
+      "targetYaw": -93.10217339142015,
+      "remainingMouseDx": 72.86287224169372
+    },
+    "pointerLockBoundaryResetObserved": true,
+    "closedDoorKeyWProbeSent": false,
+    "conclusion": "The helper exhausted its fixed 12-observation loop while each clamped +80 mouse move changed yaw by about -10.4 degrees. It returned after the twelfth move without a final convergence observation, and the next Authority snapshot still required 72.862872 mouse units. The trace proves a V1 fixture correction-budget/exit-boundary failure, not a production collision failure or input stagnation."
+  },
+  "failureAttachment": {
+    "currentSource": "afterEach snapshot after pointer lock exit",
+    "usedAsFailurePreconditionSnapshot": false,
+    "player": [69.3923110961914, 32.599998474121094, 0.3861778676509857],
+    "serverPlayerPosition": [69.39230994509148, 32.6, 0.38617787241326273],
+    "viewAngles": [-83.62999999999997, -26.79],
+    "physicsTick": 12573,
+    "acknowledgedInputSequence": 5810,
+    "interactionAttempts": 13,
+    "worldRevision": 142,
+    "restoreEvidence": "NOT_RECORDED",
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "limits": {
+    "afterEachSnapshotUsedAsFullTimeline": false,
+    "ackAloneUsedAsActionProof": false,
+    "stepTitleUsedAsV1PassProof": false,
+    "v2OrClose10ClaimedReached": false,
+    "performanceMeasured": false,
+    "humanAudibleAudioRun": false,
+    "cuaRun": false
+  }
+}

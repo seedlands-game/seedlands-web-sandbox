@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "00763c83-7648-4b89-bd83-23a043778360",
+  "pid": 81624,
+  "startedAt": "2026-09-25T05:38:18.961Z",
+  "windowId": "00763c83-7648-4b89-bd83-23a043778360",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v1-real-mouse-aim-close-01/prettier-closure-check-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T05:38:19.396Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T05:38:18.963Z",
+      "loadAverage": [
+        3.97021484375,
+        4.087890625,
+        3.5908203125
+      ],
+      "freeMemoryBytes": 887504896,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T05:38:19.394Z",
+      "loadAverage": [
+        3.97021484375,
+        4.087890625,
+        3.5908203125
+      ],
+      "freeMemoryBytes": 887586816,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

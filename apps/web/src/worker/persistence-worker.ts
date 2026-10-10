@@ -1,21 +1,22 @@
 import {
-  createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
   validateStoredFluid,
 } from '@seedlands/stdlib/world/chunk-snapshot-codec';
-import { GENERATOR_VERSION, LEGACY_GENERATOR_VERSION, Voxel, MAX_VOXEL_ID } from '@seedlands/stdlib/world/voxel';
-import { selectWorldGeneratorVersion } from '@seedlands/stdlib/runtime/world-version-policy';
+import { isSupportedGeneratorVersion, Voxel } from '@seedlands/stdlib/world/voxel';
 import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
 import { persistChunkSnapshots } from './persistence-save';
+import { seedPersistenceCorpus } from './persistence-seed-corpus';
+import { inspectPersistenceColumnDirectory } from './persistence-column-directory';
 import { browserCorePlatform } from '../platform/core-platform';
 import type {
-  PersistenceCorpusSummary as CorpusSummary,
   PersistenceInitTask as InitTask,
   PersistenceLatestWorldTask as LatestWorldTask,
+  PersistenceListWorldsTask as ListWorldsTask,
+  PersistenceDeleteWorldTask as DeleteWorldTask,
   PersistenceLoadBatchTask as LoadBatchTask,
   PersistenceLoadTask as LoadTask,
   PersistenceSaveFrozenTask as SaveFrozenTask,
@@ -30,13 +31,16 @@ import type {
   PersistenceWorldRecord as WorldRecord,
 } from './persistence-worker-protocol';
 import { describePersistenceMailboxEncoding, type PersistenceWorkerEncoding } from './persistence-worker-timing';
-import { assertWorldgenProviderIdentity, worldgenProviderIdentityKey } from '@seedlands/kernel/spatial';
+import { worldgenProviderIdentityKey, type KernelWorldgenProvider } from '@seedlands/kernel/spatial';
 import {
   openPersistenceDatabase as openDatabase,
   persistenceTransactionDone as transactionDone,
   requestPersistenceResult as requestResult,
 } from './persistence-indexeddb';
-import { createPersistenceWorldgenCache, persistenceWorldgenProviders } from './persistence-worldgen-cache';
+import { createPersistenceWorldgenCache } from './persistence-worldgen-cache';
+import { deleteStoredWorld, listStoredWorlds } from './persistence-world-directory';
+import { loadBrowserPackWorldgenProvider } from './pack-worldgen-provider';
+import { preparePersistenceWorldgen } from './persistence-worldgen-initialize';
 
 let config: WorkerConfig | null = null;
 let databasePromise: Promise<IDBDatabase> | null = null;
@@ -47,7 +51,11 @@ type ActivePersistenceWorkerTask = {
   encoding?: PersistenceWorkerEncoding;
 };
 let activeTask: ActivePersistenceWorkerTask | undefined;
-const proceduralBaseCache = createPersistenceWorldgenCache(() => config, persistenceWorldgenProviders);
+let worldgenProvider: KernelWorldgenProvider | null = null;
+const proceduralBaseCache = createPersistenceWorldgenCache(
+  () => config,
+  () => worldgenProvider,
+);
 
 const recordEncoding = (task: ActivePersistenceWorkerTask, startedAtMs: number, completedAtMs: number) => {
   task.encoding = {
@@ -97,68 +105,31 @@ const normalizeRecord = (value: unknown): StoredChunkRecord => {
 
 const initialize = async (task: InitTask) => {
   proceduralBaseCache.clear();
+  const loadedProvider = await loadBrowserPackWorldgenProvider();
   databasePromise = openDatabase(task.databaseName);
   const opened = await databasePromise;
   const transaction = opened.transaction('worlds', 'readwrite');
   const done = transactionDone(transaction);
   const store = transaction.objectStore('worlds');
   const records = (await requestResult(store.getAll())) as WorldRecord[];
-  const supportedRecords = records.filter((record) => {
-    if (
-      record.generatorVersion !== GENERATOR_VERSION &&
-      record.generatorVersion !== 3 &&
-      record.generatorVersion !== LEGACY_GENERATOR_VERSION
-    )
-      return false;
-    const storedProvider = (record as Partial<WorldRecord>).provider;
-    if (!storedProvider) return false;
-    try {
-      assertWorldgenProviderIdentity(task.provider, storedProvider, record.generatorVersion);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  const generatorVersion = selectWorldGeneratorVersion(
-    supportedRecords,
-    task.seedText,
-    GENERATOR_VERSION,
-    task.openMode,
-  );
-  if (generatorVersion !== GENERATOR_VERSION && generatorVersion !== 3 && generatorVersion !== LEGACY_GENERATOR_VERSION)
-    throw new Error(`Stored world uses unsupported generator version ${generatorVersion}.`);
-  const provider = persistenceWorldgenProviders.resolve(task.provider, generatorVersion);
-  const worldId = `seedlands:g${generatorVersion}:${task.seedText}`;
-  config = {
-    databaseName: task.databaseName,
-    worldId,
-    seedText: task.seedText,
-    generatorVersion,
-    provider: provider.identity,
-  };
-  const existing = records.find((record) => record.worldId === worldId);
-  if (task.openMode === 'continue-legacy' && generatorVersion === GENERATOR_VERSION)
-    throw new Error('这个 Seed 没有可继续的旧版世界。');
-  if (existing && (existing.seedText !== task.seedText || existing.generatorVersion !== generatorVersion))
-    throw new Error('Stored world metadata is incompatible with the requested seed or generator.');
-  if (existing) {
-    const storedProvider = (existing as Partial<WorldRecord>).provider;
-    if (!storedProvider) throw new Error('Stored world has no world-generation provider identity.');
-    assertWorldgenProviderIdentity(provider.identity, storedProvider, generatorVersion);
-  }
+  const prepared = preparePersistenceWorldgen(task, records, loadedProvider);
+  config = prepared.config;
+  const { provider, existing } = prepared;
   if (!existing)
     store.put({
-      worldId,
+      worldId: config.worldId,
       seedText: task.seedText,
-      generatorVersion,
+      generatorVersion: config.generatorVersion,
       provider: provider.identity,
       player: null,
+      chunkDirectoryRevision: 0,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
   await done;
+  worldgenProvider = provider;
   return {
-    worldId,
-    generatorVersion,
+    worldId: config.worldId,
+    generatorVersion: config.generatorVersion,
     provider: provider.identity,
     player: existing?.player ?? null,
     gameplaySnapshot: existing?.gameplaySnapshot ?? null,
@@ -190,7 +161,8 @@ const decodeLoadResult = (task: PersistenceLoadCoordinate, value: unknown) => {
     proceduralVoxels,
   });
   const fluid = validateStoredFluid(record);
-  if (!voxels.every((voxel) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID))
+  const allowed = new Set(config.voxelStorageIds);
+  if (!voxels.every((voxel) => voxel >= Voxel.Air && allowed.has(voxel)))
     throw new Error('Stored Chunk contains a voxel outside the current schema.');
   return {
     status: 'found' as const,
@@ -264,7 +236,7 @@ const saveMetadata = async (task: SaveMetadataTask) => {
     worldId: config.worldId,
     seedText: config.seedText,
     generatorVersion: config.generatorVersion,
-    provider: config.provider,
+    provider: existing?.provider ?? config.provider,
     player: task.player,
     updatedAt: Date.now(),
   } satisfies WorldRecord);
@@ -339,17 +311,20 @@ const latestWorld = async (task: LatestWorldTask) => {
     const worlds = (await requestResult(transaction.objectStore('worlds').getAll())) as WorldRecord[];
     await done;
     const latest = worlds
-      .filter(
-        (world) =>
-          world.generatorVersion === GENERATOR_VERSION ||
-          world.generatorVersion === 3 ||
-          world.generatorVersion === LEGACY_GENERATOR_VERSION,
-      )
+      .filter((world) => isSupportedGeneratorVersion(world.generatorVersion))
       .sort((left, right) => right.updatedAt - left.updatedAt)[0];
     return latest ? { seedText: latest.seedText } : null;
   } finally {
     opened.close();
   }
+};
+
+const listWorlds = async (task: ListWorldsTask) => {
+  return listStoredWorlds(task.databaseName);
+};
+
+const deleteWorld = async (task: DeleteWorldTask) => {
+  return deleteStoredWorld(task.databaseName, task.worldId);
 };
 
 const stats = async () => {
@@ -370,94 +345,14 @@ const stats = async () => {
   return { storedChunkCount: count };
 };
 
-const worldChunkRange = (worldId: string) =>
-  IDBKeyRange.bound(
-    [worldId, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
-    [worldId, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
-  );
-
-const corpusVoxels = (index: number, count: number) => {
-  const procedural = proceduralChunk(index, 0, 0);
-  const voxels = procedural.slice();
-  if (count <= 8 || index < Math.ceil(count * 0.5)) {
-    const edits = 1 + (index % 64);
-    for (let edit = 0; edit < edits; edit += 1) voxels[(edit * 499 + index * 37) % voxels.length] = Voxel.Wood;
-  } else if (index < Math.ceil(count * 0.875)) {
-    for (let voxelIndex = 0; voxelIndex < voxels.length; voxelIndex += 1)
-      voxels[voxelIndex] = (Math.floor(voxelIndex / 1_024) + index) % 8;
-  } else {
-    for (let voxelIndex = 0; voxelIndex < voxels.length; voxelIndex += 1)
-      voxels[voxelIndex] = (Math.imul(voxelIndex + 1, index + 17) >>> 3) % 9;
-  }
-  return { procedural, voxels };
-};
-
-const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
+const seedCorpus = async (task: SeedCorpusTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  if (!Number.isInteger(task.chunkCount) || task.chunkCount < 1 || task.chunkCount > 1_024)
-    throw new Error('Chunk corpus size must be between 1 and 1,024.');
-  const opened = await database();
-  const clearTransaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-  const clearDone = transactionDone(clearTransaction);
-  clearTransaction.objectStore('chunks').delete(worldChunkRange(config.worldId));
-  await clearDone;
-
-  const summary: CorpusSummary = {
-    storedChunkCount: task.chunkCount,
-    rawBytes: task.chunkCount * 32 ** 3 * Uint16Array.BYTES_PER_ELEMENT,
-    legacyJsonBytes: 0,
-    recordBytes: 0,
-    payloadBytes: 0,
-    metadataBytes: 0,
-    codecs: {},
-  };
-  const encoder = new TextEncoder();
-  const batchSize = 32;
-  for (let start = 0; start < task.chunkCount; start += batchSize) {
-    const records: StoredChunkRecord[] = [];
-    for (let index = start; index < Math.min(start + batchSize, task.chunkCount); index += 1) {
-      const { procedural, voxels } = corpusVoxels(index, task.chunkCount);
-      const record = createStoredChunkRecord({
-        worldId: config.worldId,
-        seedText: config.seedText,
-        cx: index,
-        cy: 0,
-        cz: 0,
-        revision: 1,
-        formatVersion: 1,
-        voxelSchemaVersion: 1,
-        generatorVersion: config.generatorVersion,
-        voxels,
-        proceduralVoxels: procedural,
-      });
-      const recordBytes = storedChunkRecordBytes(record, browserCorePlatform.utf8);
-      summary.recordBytes += recordBytes;
-      summary.payloadBytes += record.payload.byteLength;
-      summary.metadataBytes += recordBytes - record.payload.byteLength;
-      summary.legacyJsonBytes += encoder.encode(JSON.stringify([...voxels])).byteLength;
-      summary.codecs[record.codec] = (summary.codecs[record.codec] ?? 0) + 1;
-      records.push(record);
-    }
-    const transaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-    const done = transactionDone(transaction);
-    const store = transaction.objectStore('chunks');
-    records.forEach((record) => store.put(record));
-    await done;
-  }
-
-  const metadataTransaction = opened.transaction('worlds', 'readwrite');
-  const metadataDone = transactionDone(metadataTransaction);
-  metadataTransaction.objectStore('worlds').put({
-    worldId: config.worldId,
-    seedText: config.seedText,
-    generatorVersion: config.generatorVersion,
-    provider: config.provider,
-    player: null,
-    corpusSummary: summary,
-    updatedAt: Date.now(),
-  } satisfies WorldRecord);
-  await metadataDone;
-  return summary;
+  return seedPersistenceCorpus({
+    database: await database(),
+    config,
+    chunkCount: task.chunkCount,
+    proceduralChunk,
+  });
 };
 
 const handle = async (
@@ -468,8 +363,14 @@ const handle = async (
   active?: ActivePersistenceWorkerTask,
 ): Promise<unknown> => {
   if (task.kind === 'latest-world') return latestWorld(task);
+  if (task.kind === 'list-worlds') return listWorlds(task);
+  if (task.kind === 'delete-world') return deleteWorld(task);
   if (task.kind === 'init') return initialize(task);
   if (task.kind === 'load') return load(task);
+  if (task.kind === 'column-directory') {
+    if (!config) throw new Error('Persistence worker is not initialized.');
+    return inspectPersistenceColumnDirectory(await database(), config, task.cx, task.cz);
+  }
   if (task.kind === 'load-batch') return loadBatch(task, queueWaitMs, receivedAtEpochMs, mailboxEncodings);
   if (task.kind === 'save') return save(task, active!);
   if (task.kind === 'save-frozen' || task.kind === 'replace-frozen') return saveFrozen(task, active!);

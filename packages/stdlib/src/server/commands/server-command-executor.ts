@@ -137,7 +137,12 @@ export class ServerCommandExecutor {
     switch (command.type) {
       case 'set-block': {
         assertIntegerPosition(command.position);
-        assertVoxelValue(command.voxel);
+        assertVoxelValue(
+          command.voxel,
+          this.server.hasGameplayComposition
+            ? (voxel) => this.server.voxelSemantics.get(voxel) !== undefined
+            : undefined,
+        );
         const mutationBuffer = WorldMutationBuffer.forUniqueCoordinates({
           sourceId: `command:set-block:${source.actorId}`,
           priority: 0,

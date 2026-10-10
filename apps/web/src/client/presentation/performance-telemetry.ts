@@ -28,7 +28,12 @@ export type PerformanceSpan = {
   attributes?: Readonly<Record<string, string | number>>;
 };
 
-export type TraceMark = { name: string; lane: string; timestampMs: number };
+export type TraceMark = {
+  name: string;
+  lane: string;
+  timestampMs: number;
+  attributes?: Readonly<Record<string, string | number>>;
+};
 export type PerformanceTrace = {
   traceId: string;
   category: string;
@@ -227,10 +232,15 @@ export class PerformanceTelemetry {
     return traceId;
   }
 
-  markTrace(traceId: string, name: string, lane: string) {
+  markTrace(traceId: string, name: string, lane: string, attributes?: Readonly<Record<string, string | number>>) {
     const trace = this.traces.get(traceId);
     if (!trace) return;
-    trace.marks.push({ name, lane, timestampMs: this.options.now() });
+    trace.marks.push({
+      name,
+      lane,
+      timestampMs: this.options.now(),
+      ...(attributes ? { attributes: Object.freeze({ ...attributes }) } : {}),
+    });
   }
 
   completeTrace(traceId: string, name: string, lane: string): PerformanceTrace | null {
@@ -352,7 +362,7 @@ export class PerformanceTelemetry {
         dur: 0,
         pid: 'seedlands-client',
         tid: mark.lane,
-        args: { traceId: trace.traceId, traceName: trace.name },
+        args: { ...mark.attributes, traceId: trace.traceId, traceName: trace.name },
       })),
     );
     return { traceEvents: [...spans, ...traces, ...marks] };

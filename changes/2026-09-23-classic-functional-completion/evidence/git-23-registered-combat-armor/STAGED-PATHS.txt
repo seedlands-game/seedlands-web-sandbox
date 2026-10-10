@@ -1,0 +1,5 @@
+changes/2026-09-23-classic-functional-completion/equipment-combat-evidence.md
+changes/2026-09-23-classic-functional-completion/evidence/git-23-registered-combat-armor
+changes/2026-09-23-classic-functional-completion/evidence/v2-registered-combat-armor-01
+changes/2026-09-23-classic-functional-completion/execution-state.md
+changes/2026-09-23-classic-functional-completion/tasks.md

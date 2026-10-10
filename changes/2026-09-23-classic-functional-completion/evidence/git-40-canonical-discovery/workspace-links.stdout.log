@@ -1,0 +1,7 @@
+node_modules/@seedlands/kernel -> /private/tmp/seedlands-git40-canonical-discovery/packages/kernel
+node_modules/@seedlands/stdlib -> /private/tmp/seedlands-git40-canonical-discovery/packages/stdlib
+node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-git40-canonical-discovery/playbooks/classic
+apps/web/node_modules/@seedlands/kernel -> /private/tmp/seedlands-git40-canonical-discovery/packages/kernel
+apps/web/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-git40-canonical-discovery/packages/stdlib
+apps/web/node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-git40-canonical-discovery/playbooks/classic
+playbooks/classic/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-git40-canonical-discovery/packages/stdlib

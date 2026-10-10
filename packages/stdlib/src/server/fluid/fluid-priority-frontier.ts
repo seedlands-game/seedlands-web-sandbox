@@ -16,6 +16,15 @@ export class FluidPriorityFrontier {
     return this.queued.has(positionKey(position));
   }
 
+  clone(): FluidPriorityFrontier {
+    const copy = new FluidPriorityFrontier();
+    copy.ordinary.push(...this.ordinary.map((position) => [...position] as FluidPosition));
+    copy.interactive.push(...this.interactive.map((position) => [...position] as FluidPosition));
+    this.queued.forEach((key) => copy.queued.add(key));
+    this.interactiveQueued.forEach((key) => copy.interactiveQueued.add(key));
+    return copy;
+  }
+
   enqueue(position: FluidPosition, priority: FluidActivationPriority): void {
     const key = positionKey(position);
     if (this.queued.has(key)) {

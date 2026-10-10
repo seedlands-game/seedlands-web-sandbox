@@ -1,0 +1,14 @@
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (1.218875ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.137291ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.131834ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.316208ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.168958ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.074584ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44.326875

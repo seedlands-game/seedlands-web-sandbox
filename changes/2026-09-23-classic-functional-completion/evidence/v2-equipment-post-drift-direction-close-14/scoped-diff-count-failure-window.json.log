@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-equipment-post-drift-direction-close-14-scoped-diff-final",
+  "pid": 3544,
+  "startedAt": "2026-09-28T14:29:00.482Z",
+  "windowId": "v2-equipment-post-drift-direction-close-14-scoped-diff-final",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-post-drift-direction-close-14/scoped-diff-final-window.json.log",
+  "waitedMs": 2,
+  "endedAt": "2026-09-28T14:29:01.184Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T14:29:00.484Z",
+      "loadAverage": [
+        2.63623046875,
+        2.9375,
+        2.88916015625
+      ],
+      "freeMemoryBytes": 4619812864,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T14:29:01.182Z",
+      "loadAverage": [
+        2.5849609375,
+        2.921875,
+        2.8837890625
+      ],
+      "freeMemoryBytes": 4583473152,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-cloud-unused-geometry-measure-35-02",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/unused-geometry-measure-35-02-reservation.json",
+  "measurementPath": "/workspace/pr41-recovery-20261008-root-01/unused-geometry-measure-35-02.json",
+  "format": "local",
+  "runId": "unused-geometry-measure-35-02",
+  "owner": "web-runtime",
+  "scenario": "classic-unused-geometry-mesh-full-prep-mesh-pack"
+}

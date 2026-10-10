@@ -1,0 +1,40 @@
+{
+  "sourceSha": "48ffa300b3aab97c38fb58936759f856da7c14b7",
+  "status": "FAIL",
+  "durationMs": 80513,
+  "icons": 130,
+  "cases": 260,
+  "sourceURLMatches": 260,
+  "domReferenceDifferent16": 104,
+  "sourceAADifferent16": 1,
+  "equalContextDifferent16": 105,
+  "equivalentResourceDifferent16": 1,
+  "all32Zero": true,
+  "domSize": [34, 34],
+  "freshSize": [34, 34],
+  "bothImageRendering": "pixelated",
+  "hypothesis": "Matching concrete dimensions/style did not remove old AA defect",
+  "main151": "NOT_STARTED",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-context-visual-158-01.log",
+      "bytes": 16052,
+      "sha256": "327a03bc9ce35ca6ab2a6b1853bb7e01a6555355147205ad97803a557535c63e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-context-verify-158-01.json",
+      "bytes": 386,
+      "sha256": "24ff630f1ce4eaefb6739231aa2aa89f32a6aa842c0b065247b4df092213324d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-context-visual-attachments-158-01.json",
+      "bytes": 319224,
+      "sha256": "0add1a9b6f61978276d2fcfc6a6e04d50e78ad6335d336cbb15c36b0bd56ed65"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-context-visual-result-158-01.json",
+      "bytes": 477141,
+      "sha256": "44258ab5efc5adab8f2706fec5a5fc9480952a139174003c97789172559fb333"
+    }
+  ]
+}

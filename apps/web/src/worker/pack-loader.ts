@@ -1,7 +1,12 @@
 import type { PackManifest, ModModule } from '@seedlands/stdlib/mod-api';
-import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api';
+import type {
+  ProductExtensionAdmission,
+  ProductPackAdmission,
+  VerifiedPackArtifact,
+} from '@seedlands/stdlib/server/composition/host-api';
 
 type FileLock = Readonly<{ path: string; sha256: string }>;
+type ResourceLock = FileLock & Readonly<{ size: number; contentType: string }>;
 const object = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 const fileLock = (value: unknown): FileLock => {
@@ -15,6 +20,19 @@ const fileLock = (value: unknown): FileLock => {
   )
     throw new TypeError('Invalid Pack file lock.');
   return { path: value.path, sha256: value.sha256.toLowerCase() };
+};
+const resourceLock = (value: unknown): ResourceLock => {
+  const file = fileLock(value);
+  if (
+    !object(value) ||
+    !exactKeys(value, ['path', 'sha256', 'size', 'contentType']) ||
+    !Number.isSafeInteger(value.size) ||
+    (value.size as number) <= 0 ||
+    typeof value.contentType !== 'string' ||
+    !/^[a-z0-9][a-z0-9!#$&^_.+-]*\/[a-z0-9][a-z0-9!#$&^_.+-]*$/i.test(value.contentType)
+  )
+    throw new TypeError('Invalid Pack resource lock.');
+  return { ...file, size: value.size as number, contentType: value.contentType };
 };
 const hash = async (bytes: Uint8Array<ArrayBuffer>) =>
   [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
@@ -61,16 +79,16 @@ const exactKeys = (value: Record<string, unknown>, keys: readonly string[]) =>
 const operations = new Set(['read', 'execute', 'write', 'control', 'export', 'restore']);
 
 /** Reads host-owned extension grants independently of Pack-authored permission requests. */
-export async function loadBrowserHostAdmissions(url: URL): Promise<readonly ProductExtensionAdmission[]> {
+export async function loadBrowserHostAdmissions(
+  url: URL,
+): Promise<Readonly<{ playbook: ProductPackAdmission; extensions: readonly ProductExtensionAdmission[] }>> {
   if (url.origin !== location.origin) throw new TypeError('Pack host admission must use the product origin.');
   const source: unknown = JSON.parse(decode(await read(url, 262_144)));
-  if (!object(source) || !exactKeys(source, ['schemaVersion', 'extensions']) || source.schemaVersion !== 1)
+  if (!object(source) || !exactKeys(source, ['schemaVersion', 'playbook', 'extensions']) || source.schemaVersion !== 1)
     throw new TypeError('Pack host admission schema is invalid.');
   if (!Array.isArray(source.extensions) || source.extensions.length > 15)
     throw new TypeError('Pack host admission extension list is invalid.');
-  const seen = new Set<string>();
-  const admissions: ProductExtensionAdmission[] = [];
-  for (const entry of source.extensions) {
+  const parseAdmission = (entry: unknown, label: string): ProductPackAdmission => {
     if (
       !object(entry) ||
       !exactKeys(entry, ['id', 'version', 'integrity', 'permissions']) ||
@@ -84,10 +102,9 @@ export async function loadBrowserHostAdmissions(url: URL): Promise<readonly Prod
       !Array.isArray(entry.integrity.resources) ||
       entry.integrity.resources.length > 128 ||
       !Array.isArray(entry.permissions) ||
-      entry.permissions.length > 128 ||
-      seen.has(entry.id)
+      entry.permissions.length > 128
     )
-      throw new TypeError('Pack host admission entry is invalid.');
+      throw new TypeError(`Pack host admission ${label} is invalid.`);
     const resources = entry.integrity.resources.map((resource) => {
       if (
         !object(resource) ||
@@ -95,11 +112,11 @@ export async function loadBrowserHostAdmissions(url: URL): Promise<readonly Prod
         !artifactPath(resource.path) ||
         !digest(resource.digest)
       )
-        throw new TypeError('Pack host admission resource is invalid.');
+        throw new TypeError(`Pack host admission ${label} resource is invalid.`);
       return Object.freeze({ path: resource.path, digest: resource.digest.toLowerCase() });
     });
     if (new Set(resources.map((resource) => resource.path)).size !== resources.length)
-      throw new TypeError('Pack host admission resource is duplicated.');
+      throw new TypeError(`Pack host admission ${label} resource is duplicated.`);
     const permissions = entry.permissions.map((permission) => {
       if (
         !object(permission) ||
@@ -111,30 +128,36 @@ export async function loadBrowserHostAdmissions(url: URL): Promise<readonly Prod
         !permission.operations.every((operation) => typeof operation === 'string' && operations.has(operation)) ||
         new Set(permission.operations).size !== permission.operations.length
       )
-        throw new TypeError('Pack host admission permission is invalid.');
+        throw new TypeError(`Pack host admission ${label} permission is invalid.`);
       return Object.freeze({
         resource: permission.resource,
         operations: Object.freeze([
           ...permission.operations,
-        ]) as ProductExtensionAdmission['permissions'][number]['operations'],
+        ]) as ProductPackAdmission['permissions'][number]['operations'],
       });
     });
-    seen.add(entry.id);
-    admissions.push(
-      Object.freeze({
-        id: entry.id,
-        version: entry.version,
-        integrity: Object.freeze({
-          algorithm: 'sha256' as const,
-          manifestDigest: entry.integrity.manifestDigest.toLowerCase(),
-          entryDigest: entry.integrity.entryDigest.toLowerCase(),
-          resources: Object.freeze(resources),
-        }),
-        permissions: Object.freeze(permissions),
+    return Object.freeze({
+      id: entry.id,
+      version: entry.version,
+      integrity: Object.freeze({
+        algorithm: 'sha256' as const,
+        manifestDigest: entry.integrity.manifestDigest.toLowerCase(),
+        entryDigest: entry.integrity.entryDigest.toLowerCase(),
+        resources: Object.freeze(resources),
       }),
-    );
+      permissions: Object.freeze(permissions),
+    });
+  };
+  const playbook = parseAdmission(source.playbook, 'playbook');
+  const seen = new Set<string>([playbook.id]);
+  const admissions: ProductExtensionAdmission[] = [];
+  for (const entry of source.extensions) {
+    const admission = parseAdmission(entry, 'extension');
+    if (seen.has(admission.id)) throw new TypeError('Pack host admission entry is duplicated.');
+    seen.add(admission.id);
+    admissions.push(admission);
   }
-  return Object.freeze(admissions);
+  return Object.freeze({ playbook, extensions: Object.freeze(admissions) });
 }
 
 /** Loads the locally built, closed ESM artifacts; all locked bytes are checked before any module import. */
@@ -150,6 +173,7 @@ const sameIntegrity = (
 
 export async function loadBrowserPackArtifacts(
   lockUrl: URL,
+  approvedPlaybook: ProductPackAdmission,
   approvedExtensions: readonly ProductExtensionAdmission[],
 ): Promise<readonly VerifiedPackArtifact[]> {
   if (lockUrl.origin !== location.origin) throw new TypeError('Pack lock must use the product origin.');
@@ -183,7 +207,7 @@ export async function loadBrowserPackArtifacts(
       !Array.isArray(manifest.modules)
     )
       throw new TypeError('Pack manifest and lock disagree.');
-    const resourceLocks = raw.resources.map(fileLock);
+    const resourceLocks = raw.resources.map(resourceLock);
     const expected = manifest.resources ?? [];
     if (
       !Array.isArray(expected) ||
@@ -192,7 +216,10 @@ export async function loadBrowserPackArtifacts(
     )
       throw new TypeError('Pack resource lock does not match manifest.');
     const bytes = await verified(entryFile);
-    for (const file of resourceLocks) await verified(file);
+    for (const file of resourceLocks) {
+      const resource = await verified(file);
+      if (resource.byteLength !== file.size) throw new TypeError(`Pack resource size mismatch: ${file.path}`);
+    }
     staged.push({
       manifest: manifest as PackManifest,
       bytes,
@@ -206,6 +233,13 @@ export async function loadBrowserPackArtifacts(
   }
   const artifacts: VerifiedPackArtifact[] = [];
   for (const entry of staged) {
+    if (
+      entry.manifest.kind === 'playbook' &&
+      (approvedPlaybook.id !== entry.manifest.id ||
+        approvedPlaybook.version !== entry.manifest.version ||
+        !sameIntegrity(entry.integrity, approvedPlaybook.integrity))
+    )
+      throw new TypeError(`Pack Playbook is not host-approved: ${entry.manifest.id}.`);
     if (
       entry.manifest.kind === 'extension' &&
       !approvedExtensions.some(
@@ -245,11 +279,20 @@ export async function loadBrowserPackArtifacts(
 export async function loadBrowserProductAssembly(packDirectory: URL): Promise<
   Readonly<{
     artifacts: readonly VerifiedPackArtifact[];
+    approvedPlaybook: ProductPackAdmission;
     approvedExtensions: readonly ProductExtensionAdmission[];
   }>
 > {
   if (packDirectory.origin !== location.origin) throw new TypeError('Pack directory must use the product origin.');
-  const approvedExtensions = await loadBrowserHostAdmissions(new URL('host-admissions.json', packDirectory));
-  const artifacts = await loadBrowserPackArtifacts(new URL('packs.lock.json', packDirectory), approvedExtensions);
-  return Object.freeze({ artifacts, approvedExtensions });
+  const admissions = await loadBrowserHostAdmissions(new URL('host-admissions.json', packDirectory));
+  const artifacts = await loadBrowserPackArtifacts(
+    new URL('packs.lock.json', packDirectory),
+    admissions.playbook,
+    admissions.extensions,
+  );
+  return Object.freeze({
+    artifacts,
+    approvedPlaybook: admissions.playbook,
+    approvedExtensions: admissions.extensions,
+  });
 }

@@ -1,0 +1,361 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+index eaf425d5..e2a5a10c 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+@@ -257,7 +257,7 @@ async function mineResources(page: Page, resources: readonly V2EquipmentResource
+     const approach = await walkEquipmentRoute(page, resource.approach);
+     if (!isEquipmentMiningReady(approach, resource.target))
+       throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
+-    await mineVoxel(page, resource.target);
++    await mineVoxel(page, resource.target, aimAtVoxelWithRealMouse);
+     await expectPresentedDropOrPickup(page, resource.dropItemId, before);
+     await walkEquipmentRoute(page, equipmentResourcePickup(resource));
+     await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
+@@ -434,7 +434,7 @@ export async function reclaimEquipmentWorkbench(page: Page): Promise<void> {
+   const miningApproach = await walkEquipmentRoute(page, equipmentWorkbenchMiningApproach(workbench));
+   if (!isEquipmentMiningReady(miningApproach, workbench.target))
+     throw new Error(`Equipment workbench approach is outside mining range for ${workbench.target.join(',')}.`);
+-  await mineVoxel(page, workbench.target);
++  await mineVoxel(page, workbench.target, aimAtVoxelWithRealMouse);
+   await expectPresentedDropOrPickup(page, 'workbench', before);
+   await walkEquipmentRoute(page, equipmentResourcePickup(workbench));
+   await expect.poll(async () => itemCount(await playerState(page), 'workbench')).toBeGreaterThan(before);
+diff --git a/apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts b/apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts
+new file mode 100644
+index 00000000..4512ca9e
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts
+@@ -0,0 +1,222 @@
++import { readFileSync } from 'node:fs';
++import type { Page } from '@playwright/test';
++import { describe, expect, it, vi } from 'vitest';
++import { Voxel } from '@seedlands/stdlib/world/voxel';
++import { traceVoxelTarget, type VoxelTarget } from '../../../src/client/presentation/voxel-target';
++import { EQUIPMENT_RESOURCE_ROUTE_OPTIONS, EQUIPMENT_ROUTE_MAX_X_ERROR } from './equipment-resource-route';
++import { mineVoxel, type ClassicSnapshot } from './harness';
++import { matchesVoxelAim, mouseCorrectionToPoint, mouseCorrectionToVoxel, voxelAimPoint } from './target-aim';
++import { classicScenario, type Point } from './scenario';
++
++const BROWSER18_PLAYER: Point = [80.65967559814453, 32.599998474121094, -0.4997326731681824];
++const BROWSER18_VIEW = [-481.16999999999973, -17.689999999999987] as const;
++const MOUSE_SENSITIVITY = 0.13;
++
++const directionForView = ([yaw, pitch]: readonly [number, number]): [number, number, number] => {
++  const yawRadians = (yaw * Math.PI) / 180;
++  const pitchRadians = (pitch * Math.PI) / 180;
++  const horizontal = Math.cos(pitchRadians);
++  return [-Math.sin(yawRadians) * horizontal, Math.sin(pitchRadians), -Math.cos(yawRadians) * horizontal];
++};
++
++const applyCorrection = (
++  view: readonly [number, number],
++  correction: Readonly<{ dx: number; dy: number }>,
++): readonly [number, number] => [
++  view[0] - correction.dx * MOUSE_SENSITIVITY,
++  view[1] - correction.dy * MOUSE_SENSITIVITY,
++];
++
++const fixtureVoxels = new Map([
++  ...classicScenario.v2Equipment.resourceStrip.map(({ target, voxel }) => [target.join(','), voxel] as const),
++  [classicScenario.v2Equipment.workbench.target.join(','), Voxel.Workbench] as const,
++]);
++
++const observedTarget = (player: Point, view: readonly [number, number]): VoxelTarget | null =>
++  traceVoxelTarget([...player], directionForView(view), (x, y, z) => {
++    const explicit = fixtureVoxels.get([x, y, z].join(','));
++    if (explicit !== undefined) return explicit;
++    const { from, to, voxel } = classicScenario.initialState.floor;
++    return x >= from[0] && x <= to[0] && y >= from[1] && y <= to[1] && z >= from[2] && z <= to[2] ? voxel : Voxel.Air;
++  });
++
++const legacyPitchOnly = (
++  view: readonly [number, number],
++  observed: VoxelTarget | null,
++  target: Point,
++): readonly [number, number] => {
++  if (!observed) return applyCorrection(view, mouseCorrectionToVoxel(BROWSER18_PLAYER, view, target));
++  const moveDown =
++    observed.position[1] > target[1] || (observed.position[1] === target[1] && observed.position[0] > target[0]);
++  return applyCorrection(view, { dx: 0, dy: moveDown ? 6 : -6 });
++};
++
++const converge = (player: Point, initialView: readonly [number, number], target: Point) => {
++  let view = initialView;
++  for (let attempt = 1; attempt <= 180; attempt += 1) {
++    const observed = observedTarget(player, view);
++    if (matchesVoxelAim(observed, target)) return { attempt, observed, view };
++    view = applyCorrection(view, mouseCorrectionToPoint(player, view, voxelAimPoint(target)));
++  }
++  return { attempt: 180, observed: observedTarget(player, view), view };
++};
++
++const miningSnapshot = (interactionAttempts: number): ClassicSnapshot =>
++  ({
++    player: BROWSER18_PLAYER,
++    serverPlayerPosition: BROWSER18_PLAYER,
++    viewAngles: BROWSER18_VIEW,
++    onGround: true,
++    colliding: false,
++    interactionAttempts,
++    authority: { physicsTick: 10, acknowledgedInputSequence: 5, commitSequence: 2 },
++  }) as ClassicSnapshot;
++
++function createMiningPage(target: Point, options: Readonly<{ failOnLegacyAim?: boolean }> = {}) {
++  const calls = { down: 0, up: 0, legacyAimReads: 0, interactionAttempts: 7 };
++  const order: string[] = [];
++  const page = {
++    evaluate: async (callback: (...args: unknown[]) => unknown) => {
++      const source = String(callback);
++      if (source.includes('pointerLockElement')) {
++        order.push('pointer-lock');
++        return true;
++      }
++      if (source.includes('getVoxelAt')) return 0;
++      if (source.includes('target-card')) {
++        order.push('legacy-aim');
++        calls.legacyAimReads += 1;
++        if (options.failOnLegacyAim) throw new Error('legacy aim callback must not run');
++        return target.join(',');
++      }
++      if (source.includes('snapshot()')) {
++        order.push('snapshot');
++        return miningSnapshot(calls.interactionAttempts);
++      }
++      throw new Error(`Unexpected evaluate callback: ${source}`);
++    },
++    mouse: {
++      down: async () => {
++        order.push('mouse-down');
++        calls.down += 1;
++        calls.interactionAttempts += 1;
++      },
++      up: async () => {
++        order.push('mouse-up');
++        calls.up += 1;
++      },
++    },
++  } as unknown as Page;
++  return { calls, order, page };
++}
++
++describe('Classic V2 equipment mining aim', () => {
++  it('reproduces Browser-18 pitch-only oscillation and converges with one full correction budget', () => {
++    const target = classicScenario.v2Equipment.resourceStrip[0]!.target;
++    let legacyView: readonly [number, number] = BROWSER18_VIEW;
++    for (let attempt = 0; attempt < 180; attempt += 1)
++      legacyView = legacyPitchOnly(legacyView, observedTarget(BROWSER18_PLAYER, legacyView), target);
++    expect(matchesVoxelAim(observedTarget(BROWSER18_PLAYER, legacyView), target)).toBe(false);
++
++    const corrected = converge(BROWSER18_PLAYER, BROWSER18_VIEW, target);
++    expect(corrected.attempt).toBeLessThanOrEqual(180);
++    expect(corrected.observed).toMatchObject({ position: target, inRange: true });
++    expect(matchesVoxelAim(observedTarget(BROWSER18_PLAYER, corrected.view), target)).toBe(true);
++  });
++
++  it.each(
++    classicScenario.v2Equipment.resourceStrip.flatMap((resource) =>
++      [-1, 1].map((side) => ({
++        name: `${resource.itemId}:${resource.target[0]}:${side}`,
++        target: resource.target,
++        player: [
++          resource.approach[0] + side * (EQUIPMENT_ROUTE_MAX_X_ERROR - 0.001),
++          32.6,
++          resource.approach[1] + side * (EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance - 0.001),
++        ] as Point,
++      })),
++    ),
++  )('keeps $name visible from the finite route boundary', ({ player, target }) => {
++    const corrected = converge(player, BROWSER18_VIEW, target);
++    expect(corrected.attempt).toBeLessThanOrEqual(180);
++    expect(corrected.observed).toMatchObject({ position: target, inRange: true });
++  });
++
++  it('keeps the reclaimed workbench visible from its mining approach', () => {
++    const workbench = classicScenario.v2Equipment.workbench;
++    const player: Point = [workbench.target[0] + 0.5, 32.6, workbench.approach[1] + 1];
++    const corrected = converge(player, BROWSER18_VIEW, workbench.target);
++    expect(corrected.attempt).toBeLessThanOrEqual(180);
++    expect(corrected.observed).toMatchObject({ position: workbench.target, inRange: true });
++  });
++
++  it('requires both V2 mining consumers to inject full aim into mineVoxel instead of pre-aiming separately', () => {
++    const source = readFileSync(new URL('./equipment-journey-support.ts', import.meta.url), 'utf8');
++    const resourceMining = source.slice(
++      source.indexOf('async function mineResources'),
++      source.indexOf('async function openWorkbench'),
++    );
++    const workbenchMining = source.slice(
++      source.indexOf('export async function reclaimEquipmentWorkbench'),
++      source.indexOf('export async function exerciseEquipmentPointer'),
++    );
++    for (const consumer of [resourceMining, workbenchMining]) {
++      expect(consumer).not.toContain('await aimAtVoxelWithRealMouse(page,');
++      expect(consumer).toContain('await mineVoxel(page,');
++      expect(consumer).toContain('aimAtVoxelWithRealMouse');
++      expect(consumer.split('mineVoxel(')).toHaveLength(2);
++    }
++  });
++
++  it('keeps the default mineVoxel aim callback and calls it before the mining button', async () => {
++    const target = classicScenario.v2Equipment.resourceStrip[0]!.target;
++    const { calls, order, page } = createMiningPage(target);
++    await mineVoxel(page, target);
++    expect(calls).toMatchObject({ legacyAimReads: 1, down: 1, up: 1 });
++    expect(order.slice(0, 4)).toEqual(['snapshot', 'pointer-lock', 'legacy-aim', 'snapshot']);
++    expect(order.indexOf('mouse-down')).toBeGreaterThan(order.indexOf('legacy-aim'));
++  });
++
++  it('uses one injected full-aim callback and does not fall back to the legacy guard', async () => {
++    const target = classicScenario.v2Equipment.resourceStrip[0]!.target;
++    const { calls, order, page } = createMiningPage(target, { failOnLegacyAim: true });
++    const fullAim = vi.fn(async () => {
++      order.push('full-aim');
++    });
++    await mineVoxel(page, target, fullAim);
++    expect(fullAim).toHaveBeenCalledOnce();
++    expect(fullAim).toHaveBeenCalledWith(page, target);
++    expect(calls).toMatchObject({ legacyAimReads: 0, down: 1, up: 1 });
++    expect(order.slice(0, 4)).toEqual(['snapshot', 'pointer-lock', 'full-aim', 'snapshot']);
++    expect(order.indexOf('mouse-down')).toBeGreaterThan(order.indexOf('full-aim'));
++  });
++
++  it('stops before left mouse down when the injected full-aim callback rejects', async () => {
++    const target = classicScenario.v2Equipment.resourceStrip[0]!.target;
++    const { calls, order, page } = createMiningPage(target, { failOnLegacyAim: true });
++    const fullAim = vi.fn(async () => {
++      order.push('full-aim');
++      throw new Error('full aim rejected');
++    });
++    await expect(mineVoxel(page, target, fullAim)).rejects.toThrow('full aim rejected');
++    expect(fullAim).toHaveBeenCalledOnce();
++    expect(calls).toMatchObject({ legacyAimReads: 0, down: 0, up: 0 });
++    expect(order).toEqual(['snapshot', 'pointer-lock', 'full-aim']);
++  });
++
++  it('keeps the correction mechanism content-neutral', () => {
++    const target: Point = [3, 7, -4];
++    const player: Point = [0.5, 8.6, -1.5];
++    let view: readonly [number, number] = [35, -5];
++    const point = voxelAimPoint(target);
++    let observed: VoxelTarget | null = null;
++    for (let attempt = 0; attempt < 180; attempt += 1) {
++      observed = traceVoxelTarget([...player], directionForView(view), (x, y, z) =>
++        x === target[0] && y === target[1] && z === target[2] ? Voxel.Stone : Voxel.Air,
++      );
++      if (matchesVoxelAim(observed, target)) break;
++      view = applyCorrection(view, mouseCorrectionToPoint(player, view, point));
++    }
++    expect(matchesVoxelAim(observed, target)).toBe(true);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/harness.ts b/apps/web/tests/e2e/classic-support/harness.ts
+index ab7958ad..c863f68f 100644
+--- a/apps/web/tests/e2e/classic-support/harness.ts
++++ b/apps/web/tests/e2e/classic-support/harness.ts
+@@ -335,7 +335,11 @@ export async function adjustPitchToTarget(page: Page, target: Point): Promise<vo
+   throw new Error(`Real mouse input could not aim at ${target.join(',')}; last targets=${JSON.stringify(history)}.`);
+ }
+ 
+-export async function mineVoxel(page: Page, target: Point): Promise<void> {
++export async function mineVoxel(
++  page: Page,
++  target: Point,
++  aim: (page: Page, target: Point) => Promise<unknown> = adjustPitchToTarget,
++): Promise<void> {
+   let current = await snapshot(page);
+   if (!current) throw new Error('Classic snapshot is unavailable before mining.');
+   const distance = voxelInteractionDistance(current.player, target);
+@@ -352,7 +356,7 @@ export async function mineVoxel(page: Page, target: Point): Promise<void> {
+       throw new Error(`Mining target ${target.join(',')} remains out of range.`);
+   }
+   await ensurePointerLock(page);
+-  await adjustPitchToTarget(page, target);
++  await aim(page, target);
+   const attemptsBefore = (await snapshot(page))?.interactionAttempts ?? 0;
+   await page.mouse.down({ button: 'left' });
+   try {
+diff --git a/changes/2026-09-23-classic-functional-completion/equipment-mining-aim-contract.md b/changes/2026-09-23-classic-functional-completion/equipment-mining-aim-contract.md
+new file mode 100644
+index 00000000..bc13adb8
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/equipment-mining-aim-contract.md
+@@ -0,0 +1,58 @@
++# V2 装备采矿瞄准合同
++
++阶段：`V2-EQUIPMENT-MINING-AIM-CLOSE-07 / V2-EQUIPMENT-MINING-AIM-CLOSE-08`
++
++状态：Close-07 被本节 supersede；Close-08 fixture/deterministic/static GREEN。Browser-18 保持 FAIL，
++Browser-19 未授权。
++
++## Close-08 单一 callback 修订
++
++- Close-07 的“pre-aim 后旧 guard 首轮返回”只由固定 pose 的纯模型和源码邻接断言支持，不能排除两次 readback 间
++  漂移、Pointer Lock 恢复或旧 guard 再获 180 次预算，因此不作为最终单预算证据。
++- `mineVoxel` 仅扩展一个可选 `aim` callback，默认值为 `adjustPitchToTarget`。它在既有 range guard 与
++  `ensurePointerLock` 后被 `await` 一次，然后才读取 interactionAttempts 和发送 left mouse down；reject 时 mouse down
++  必须为 0，且不得调用默认 aim fallback。
++- V2 的 resource 与 workbench 两个 consumer 将 `aimAtVoxelWithRealMouse` 作为第三参传给 `mineVoxel`，不再提前调用。
++  这使 V2 只有 full aim 的一个 180 次预算；其他调用省略第三参并保持旧 pitch aim 语义。
++- 确定性模型必须包含 scenario floor 和全部 resource/workbench voxel，并逐字复现旧 helper：valid wrong voxel 仅
++  `dy=±6`，null/invalid observation 使用 `mouseCorrectionToVoxel` 完整修正。Browser-18 pose 是失败时记录的起点重放，
++  不能表述为 180 个实际 target 全序列；raw 只记录最后 12 项。
++
++## Owner 与最小接线
++
++- owner 仅为 canonical V2 equipment fixture consumer。生产 `traceVoxelTarget`、通用 `aimAtVoxelWithRealMouse`、
++  `mineVoxel`、Pointer Lock、Authority mining、drop/pickup 与 route owner 均保持不变。
++- `mineResources` 的 10 个固定 resource 和 `reclaimEquipmentWorkbench` 的最终 workbench 回收，在既有
++  `isEquipmentMiningReady` 成功后调用 `mineVoxel(page, target, aimAtVoxelWithRealMouse)`。不得复制、包装重试或旁路
++  `mineVoxel` 内的输入、提交、掉落与失败反馈。
++- pre-aim 复用 target-card 与 `aimedVoxelTarget()` 的同轮 exact target 双读回，并使用
++  `mouseCorrectionToPoint(voxelAimPoint(target))` 完整修正 yaw/pitch。不得只按 observed cell 高度调整 pitch。
++
++## 单一预算与失败
++
++- 唯一 correction budget 是注入 callback 的既有 180 次循环。callback reject 立即抛错，不发送 left mouse down，
++  不得启动默认 aim fallback、第二条路线或第二份 correction budget。
++- 默认调用仍选择 `adjustPitchToTarget`；V2 调用只选择 full aim。测试必须直接执行 `mineVoxel` 并证明 default、
++  injected-success、injected-reject 三条 dispatch，而不是用固定 pose 再次读 target 冒充真实 guard。
++- stale/null observation 仍由既有 helper 在同一预算内处理；不得放宽 exact target、5m server reach、
++  `isEquipmentMiningReady`、interactionAttempts、voxel 清空或 drop/pickup 断言。
++
++## 布局、保存与替代配置
++
++- 覆盖 Browser-18 失败姿态、10 个 resource approach 的 `±0.45m/<0.08m` 有限到达域关键边界，以及最终
++  workbench mining approach。生产 `traceVoxelTarget` 必须证明目标在现有邻居布局中可见且完整 correction 在
++  ≤180 次收敛；旧 pitch-only control 对 Browser-18 姿态稳定失败。
++- 本片不改变存档 schema、runtime/actor epoch、inventory/equipment revision 或 restore。失败发生在首次 mining input
++  前时世界、背包、equipment/cursor 继续由既有 owner 保持；Browser 的 save/restore 仍需未来唯一 attempt 观察。
++- 非 Classic 反例：helper 接收任意整数 voxel target 与调用方提供的真实 voxel reader，不识别 wood、iron、workbench
++  或 Classic voxel ID；测试用 synthetic targetable voxel 证明同一 correction 机制可替换内容。
++
++## 验收边界与预算
++
++- RED 必须真实复现 Browser-18 pose 下旧 pitch-only valid-wrong-voxel 分支无法命中 `[80,31,2]`，并在 consumer
++  尚未 pre-aim 时使 source contract 失败。
++- GREEN 覆盖新 aim 回归、resource route/drift/grounded/scenario 相关测试、Classic/root test types、仅变更 TS
++  ESLint、可编辑文件 Prettier 与 scoped diff；Vitest `maxWorkers=1`，全部命令使用默认 machine lock。
++- 本阶段 fixture/deterministic/static GREEN 不等于 Browser-19、采矿/拾取或装备产品 GREEN。
++- 传统工作量 0.25-0.5 PD；AI 活跃预计 1-2 小时，硬上限 3 小时。credits、API 等价费用、费率、额度与占比
++  unknown。长期 docs 不更新，因为 owner、公共协议和生产架构均未变化。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index 43dcdb2a..7a502282 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -205,6 +205,16 @@ crossing 时显式返回 drift；client 仍到位而仅 server 迟到时继续
+ 为 baseline，对同一 waypoint 重算 `KeyW/KeyS` 并恢复真实 walk。所有 wait/correction 继续共享原 45 秒 deadline，单次
+ wait 上限 20 秒，`.06/.08/±.45`、80ms、grounded `jump=false`、路线与 scenario 坐标不变。stale、ack 回退、未 ready
+ 样本不能触发 arrival 或 drift；不得捕获 timeout 后盲重试、用 server 选方向或扩容差/预算。
++Browser-18 唯一 canonical attempt 已让完整 V1、workbench 与 10 格资源放置真实通过，并记录
++`phase=resources-placed`；随后第一格 wood `[80,31,2]` 在 `mineVoxel` 的旧 `adjustPitchToTarget` 中失败。完整失败 step
++记录 180 次真实 mouse move、0 次 mouse button，错误保留的最后 12 个 target 在 `[84,31,2]` 与 `[84,30,1]`
++间振荡；左键采矿尚未发送，不能归因为 Authority mining、掉落或拾取。Close-08 只在 V2 equipment consumer 内，
++对 10 个 resource 与最终 workbench 回收，把既有 `aimAtVoxelWithRealMouse` 作为 `mineVoxel` 的单一可选 aim
++callback。`mineVoxel` 默认 callback 仍为旧 `adjustPitchToTarget`，保持所有原调用语义；V2 callback 继续以
++target-card 与 `aimedVoxelTarget()` 同轮双读回，并使用原 180 次完整 yaw/pitch 总预算。callback 在既有 range guard
++和 `ensurePointerLock` 后、left mouse down 前只调用一次；reject 立即停止且不得 fallback 到旧 aim。不得复制
++`mineVoxel` 的输入/掉落流程、修改通用 aim/target trace、增加路线或 timeout。确定性 control 必须包含真实 scenario
++floor；旧 helper 的 null observation 分支必须实际调用 `mouseCorrectionToVoxel`，不得人为保持 view 不变。
+ 
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命

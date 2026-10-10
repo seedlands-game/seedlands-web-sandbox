@@ -1,0 +1,5 @@
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts
+apps/web/tests/e2e/classic-support/harness.ts
+apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+apps/web/tests/e2e/classic-support/target-aim.ts
+changes/2026-09-23-classic-functional-completion/spec.md

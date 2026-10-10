@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER22-WORKBENCH-ROUTE-MAP-01",
+  "status": "MAP_ONLY_NO_IMPLEMENTATION",
+  "baselineSha": "658e059d5f769f7506620264cefbacd211554d89",
+  "build13SourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+  "build13TreeSha": "f91590626a01d1a6b2d771e27fdb74b5d022d47b",
+  "browser22Input": {
+    "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+    "evidenceManifestSha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+    "deliverySha256": "4cca1534c53cefdcec329b3d161911870dbf2b00fbc48ee4126dc5a8762cebf4",
+    "status": "FAIL"
+  },
+  "browser22PackagingSupersession": {
+    "kind": "FILENAME_ONLY_BYTE_PRESERVING_RENAME",
+    "currentSourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+    "currentEvidenceManifestSha256": "e6f4499fbaab8bc3a4f42b481600d8a933876a69d12031136732cabac7639713",
+    "currentDeliverySha256": "f27cc496a8bccad88702351d5865e80bd5ba3c9d57ee14c58ed65214ff126c83",
+    "priorMetadataDirectory": "../git-38-post-drift-direction/prior-packaging/browser22",
+    "mappingPath": "../git-38-post-drift-direction/prior-packaging/raw-path-mapping.json",
+    "rawBytesChanged": false,
+    "mapConclusionChanged": false
+  },
+  "sourceManifest": {
+    "entries": 11,
+    "sha256": "40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11",
+    "validatedAgainstBuild13AcceptanceTree": true,
+    "mainClose13DirtyUsedAsSource": false
+  },
+  "evidenceManifest": {
+    "entries": 21,
+    "sha256": "97b404a102bbbb8521ee1074d3fa45f8cfc1e1d28bd019324a62906f32f3d59d",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "format-final.stdout.log",
+      "format-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "packagingSupersession": {
+    "kind": "BROWSER22_REFERENCE_PACKAGING_ONLY",
+    "priorApprovedEvidenceManifestSha256": "c627fc471c55eee7c7cfc3d367610bb0b3f72bd64e0815d487c57c5cd85a4b4c",
+    "priorApprovedDeliverySha256": "ba13b9c41eea62b534524c50a1e4b23603262bf7a25c32617487fa163c1b7579",
+    "priorMetadataDirectory": "../git-38-post-drift-direction/prior-packaging/map01",
+    "mapConclusionChanged": false,
+    "implementationChanged": false,
+    "testsRunForSupersession": false
+  },
+  "result": {
+    "failedTarget": [78.5, 0.5],
+    "outerIterations": 3,
+    "innerWalksReturned": 2,
+    "innerWalksRejected": 1,
+    "snapshotCalls": 144,
+    "mouseMoves": 111,
+    "keySPulses": 8,
+    "pointerUnlocks": 22,
+    "independent1500msCooldowns": 22,
+    "cooldownWallMs": 33086.562,
+    "cooldownWallPercent": 72.387,
+    "strictDualProjectionSamples": 0,
+    "firstValidatedOuterDrift": "pw:api@8885",
+    "secondValidatedOuterDrift": "pw:api@9112",
+    "close13RealRecoveryBranchReachable": false,
+    "selectedCandidate": "one-shot opposite movement direction after existing outer classifier validates drift",
+    "candidateImplemented": false,
+    "counterfactualBrowserSuccessClaimed": false
+  },
+  "redDesign": {
+    "browser22RecordedSequence": "@8674 -> @8880 -> @8883 -> @8885 -> @8887 and @8885 -> @9107 -> @9110 -> @9112",
+    "realControllerAndClassifierRequired": true,
+    "realAimHelperRequiredForAngleComparison": true,
+    "fakePageModelBoundaryMustBeDeclared": true,
+    "arrivalNullErrorMustNotArmHint": true,
+    "executed": false
+  },
+  "format": {
+    "initialStatus": "FAIL_THREE_NEW_FILES",
+    "initialStdoutSha256": "ac34603530796c0d8759e53f976c5b9f7fff3751ef38cc71dfd7b3e1ea2dcd59",
+    "initialReceiptSha256": "63e6f19d3151e8f2d5327472338f433b0480479ef0278576ee7b7c70782056dc",
+    "writeStdoutSha256": "515ccc1c5f38887b7dcc3064f4da149304ef450db888da76b968dfb8257c0607",
+    "writeReceiptSha256": "9109f238a7344ac98c445e6c7df44628ac11ddcc8abd9f0b1e873f0c3c78fda3",
+    "secondWriteStdoutSha256": "592f1ed6399c899d1fcbaefc73d9f71c9f2e8b02b754db192fbead2b1c31b53b",
+    "secondWriteReceiptSha256": "56a9f997cb2e96ecd27e5a68bda6d3fcc258340bbda3cee15f6b5375095bd3bc",
+    "finalStatus": "PASS",
+    "finalStdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "finalReceiptSha256": "63591b70f2b697cbb029e6b3154198d9a1109df0a5295026526ca1887acefccb",
+    "ignoreOrSuppressionAdded": false
+  },
+  "selfcheck": {
+    "firstAttempt": "FAIL_MANIFEST_RELATIVE_PATH_CWD",
+    "firstAttemptStdoutSha256": "eb65b3c8c1dc2f603e6eece04e2903474e0dafb7ed73111cb42d51d7ec015ddc",
+    "firstAttemptReceiptSha256": "ce5d12b0410f56779349b89e1a6f9eceafd14659b3ddb34da07ab0c188f7081e",
+    "secondAttempt": "FAIL_ASSERTED_LOCK_ABSENT_INSIDE_BENCHMARK_WINDOW",
+    "secondAttemptStdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "secondAttemptReceiptSha256": "cdee392d1240bf797b164f6e231baf1ca5dd476469ecfef73ab38e647c0ef395",
+    "mutationFromFailures": false,
+    "finalStatus": "PASS",
+    "finalStdoutSha256": "267fc71723ca3d36d22eb9f340a3db30b0d9fb7e425f0bdbaed4765b3ae04e1d",
+    "finalReceiptSha256": "6cd43886ade184cd1dea54afabd44991a44819d93b19407970fba741e8c1296a",
+    "machineLockReleasedAfterFinalCheck": true
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "testsRun": false,
+    "typesRun": false,
+    "buildRun": false,
+    "browserRun": false,
+    "gitOrIndexWrite": false,
+    "close13DirtyModified": false,
+    "browser22EvidenceModified": false,
+    "cumulativeBrowserReportModified": false,
+    "tasksOrExecutionStateModified": false
+  },
+  "estimate": {
+    "implementationAiHours": "1-2",
+    "implementationHardCapHours": 3,
+    "traditionalPd": "0.25-0.5",
+    "conservative120PercentAiHours": 2.4,
+    "conservative120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "notRun": ["implementation", "test", "typecheck", "build", "browser23", "git", "push", "cua", "ci", "deploy", "merge"]
+}

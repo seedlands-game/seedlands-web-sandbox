@@ -1,0 +1,12 @@
+node_modules/@seedlands/kernel -> /private/tmp/seedlands-v2-acceptance-4052dae0/packages/kernel
+node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-4052dae0/packages/stdlib
+node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-v2-acceptance-4052dae0/playbooks/classic
+apps/web/node_modules/@seedlands/kernel -> /private/tmp/seedlands-v2-acceptance-4052dae0/packages/kernel
+apps/web/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-4052dae0/packages/stdlib
+apps/web/node_modules/@seedlands/playbook-classic -> /private/tmp/seedlands-v2-acceptance-4052dae0/playbooks/classic
+playbooks/classic/node_modules/@seedlands/stdlib -> /private/tmp/seedlands-v2-acceptance-4052dae0/packages/stdlib
+HEAD=4052dae01d4527bd1747a60358cf59469ab1b3e2
+TREE=12ed2ba3e8be11ccf5ba79aba684b03ca7c82cd5
+LOCK=44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169
+DIST=ABSENT
+TASK_STATE=ABSENT

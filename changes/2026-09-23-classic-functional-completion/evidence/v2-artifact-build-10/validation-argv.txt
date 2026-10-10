@@ -1,0 +1,12 @@
+Acceptance tree: /private/tmp/seedlands-v2-acceptance-f282da95
+Source SHA: f282da95833c5ff568b8b7a4caac7d7a7513514f
+Source tree: ad93a8e1afdbb461a32f7c87ab4b860fd44a2074
+Dependency setup: pnpm install --offline --frozen-lockfile --ignore-scripts
+Task state environment: XDG_STATE_HOME=/private/tmp/seedlands-v2-acceptance-f282da95/.pnpm-task-run-state-v1
+Task state persisted after run: false
+
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-10-dependency-setup SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/dependency-setup.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm install --offline --frozen-lockfile --ignore-scripts 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/dependency-setup.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-10-build SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/build.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm build 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/build.stdout.log'
+SEEDLANDS_RESERVATION_RUN=v2-artifact-build-10-artifact-verify SEEDLANDS_RESERVATION_EVIDENCE=<main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/artifact-verify.window.json.log XDG_STATE_HOME=<tree>/.pnpm-task-run-state-v1 node scripts/benchmark-window.mjs --wait-timeout-ms 600000 -- /bin/bash -o pipefail -c 'pnpm harness:artifact 2>&1 | tee <main>/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-10/artifact-verify.stdout.log'
+
+Post-build collection copied the generated receipt, independently hashed the same 276 dist files, compared receipt and disk maps byte-for-byte and against BUILD09, and read tree/index, workspace package links, task-state persistence, port 4273, residual processes, packs.lock, and MP3 bytes/MIME/SHA without running build or artifact again.

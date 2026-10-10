@@ -1,13 +1,15 @@
+import type { AuthorityPhysicsFrame, AuthorityPhysicsUpdate } from './authority-physics-frame';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
-import type { BodyState, Contact } from '../../physics';
+import type { EcsActorArchetype, EcsEntityType } from '../gameplay/ecs-entity-owner';
+import type { BodyConfig, BodyState, Contact } from '../../physics';
 import type { CostSampleWindow } from '../../runtime/bounded-cost-samples';
 import type { FluidAuthorityDiagnostics } from '../fluid/fluid-transaction';
 import type { AuthorityResidencyDiagnostics } from './authority-residency-runtime';
 
 export type AuthorityEntity = Readonly<{
   id: string;
-  type: 'player' | 'world-item' | 'creature' | 'npc';
-  archetype?: 'grazer' | 'night-stalker' | 'settler';
+  type: Exclude<EcsEntityType, 'station'>;
+  archetype?: EcsActorArchetype;
   position: [number, number, number];
   physicsVelocity?: [number, number, number];
 }>;
@@ -33,6 +35,8 @@ export type AuthorityServerPort = {
   createEntityReference?: (id: string) => EntityLifetimeReference | null;
   resolveEntityReference?: (reference: EntityLifetimeReference) => boolean;
   queryEntities: () => AuthorityEntity[];
+  mountedSeatConstraints?: () => readonly import('../gameplay/modules/transport-motion-model').MountedSeatConstraintV1[];
+  commitPhysicsFrame?: (frame: AuthorityPhysicsFrame) => readonly AuthorityPhysicsUpdate[] | null;
   updateEntity: (
     id: string,
     update: { position: [number, number, number]; physicsVelocity: [number, number, number] },
@@ -68,6 +72,8 @@ export type AuthorityBodySnapshot = Readonly<{
   archetype?: AuthorityEntity['archetype'];
   body: BodyState;
   movement?: AuthorityMovementSnapshot;
+  /** Derived current configuration for passive carriers; old snapshot readers may ignore it. */
+  bodyAabb?: BodyConfig['localAabb'];
   grounded: boolean;
   contacts: readonly Contact[];
 }>;

@@ -1,0 +1,13 @@
+# V2 原操作诊断边界
+
+控制源04d98c5c，CI408在407774d3两次耗尽原900000ms总时限，均停于V2资源流程，C4没有执行。堆栈中断位置不能证明原局部predicate永久不满足；新诊断只为取得逐操作及既有route pulse的可观察事实，不提前归因输入、GPU或玩法。
+
+在Node端复用原walkTo已经取得的观察，每route最多512条pulse，超过明确标记truncated。原操作只执行一次，原返回值和错误对象保留；原callback顺序、鼠标/键盘输入、80/300ms脉冲选择、45000ms route/20000ms settle/900000ms总时限与断言保持。不新增浏览器query或帧等待。正式BENCHMARK=1旁路observer/log/Date.now采样；所有新日志diagnosticOnly=true、eligible=false，不可作性能采用证据。
+
+新增5个诊断合同测试通过。原scenario静态契约在包装后55PASS/1FAIL保留；以语法树检查准确外层await及返回原操作的箭头函数，并保留原顺序/新鲜tick/ground断言。新增反例拒绝漏await、错操作/标签、丢弃Promise和注释伪调用。一次命令误用不存在路径仅执行4files33PASS，另一次类型路径不存在FAIL均保留，不能计算为完整验收。
+
+最终实际目标文件equipment-diagnostics-contract、route-progress、equipment-resource-route、equipment-route-pulse-selection、scenario共5files56PASS；根测试类型PASS。原CI时限合同2PASS；已完成的范围生产/测试类型、ESLint、格式、路径与冻结证据5/5校验PASS。最终identified build和浏览器待冻结源码后执行。真实V2诊断、全主旅程/C4/C5及统一lighting、194矩阵仍NOT_RUN或未闭合；当前PR不可合入。
+
+07:48UTC，冻结4ec0dfbe/sourceDigest63aaf0588b484057241be6521f097bfb79ef2c110f51e2ed9c53b8f23685bf81 identified build PASS；原native 1.5m PASS，NON_MAIN，证明96实际目录字段保存/重载均2，详见96证据。该native没有执行V2资源链，新诊断的真实runtime覆盖仍待原完整CI；不冒充主旅程GREEN或性能证据。
+
+Task143独立只读审阅冻结04d98c5c及main fba4486e规则，对96同事务目录版本未发现可确认P0/P1/P2；不是完整PR批准。saveMetadata不存在应用调用的缺目录记录风险作为后续来源查询合同事项，不由假设扩为当前故障。

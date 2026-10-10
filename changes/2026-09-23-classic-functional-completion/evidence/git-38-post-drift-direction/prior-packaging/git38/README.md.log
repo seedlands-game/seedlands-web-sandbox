@@ -1,0 +1,24 @@
+# GIT-38 Post-Drift Direction
+
+阶段：`GIT-38-POST-DRIFT-DIRECTION`。该名称不指历史且已作废的 gameplay-mechanics 批次。
+
+baseline 为 `658e059d5f769f7506620264cefbacd211554d89`。精确五路径 binary patch SHA-256 为
+`e864ea671ef5eb7a3382bd8eb9380fdd15aec449f8e699fba33ea9456df5931c`，detached staged tree 为
+`/private/tmp/seedlands-git38-post-drift-direction`，write-tree 为
+`48b06d948edeec3f1bfe17855e2105d6b47449ec`。代码提交为
+`550adf8a352cd1c24aff5b2f3885b8b970c69bd7`。
+
+隔离树执行 `pnpm install --offline --frozen-lockfile --ignore-scripts`，无下载；root 与 Web 的 `@seedlands/*`
+workspace links 均解析到该树内部。随后在单一默认 benchmark-window 中串行通过 `14 files / 145 tests`、Classic/root
+test types、3 TS ESLint、五路径标准 Prettier、staged diff 与精确 5 路径 scope；Vitest `maxWorkers=1`。代码提交自然
+hooks 的 Prettier、ESLint、`ls-lint` 均通过。
+
+最初只用 `git diff` 生成 patch 时遗漏两个 untracked 新文件，该三路径 patch 原样保留为
+`tracked-only-incomplete.patch`，未用于门禁或提交。随后从 detached staged index 重建五路径最终 patch。第一次依赖准备
+脚本把 zsh 特殊变量 `path` 当普通变量，导致 `shasum`/`awk`/`find` 未找到；tree 和 staged index 未损坏，该事实记录于
+`dependency-prep-initial-failure.txt`。修正变量名后离线安装和全部 gate 通过。
+
+第二笔 evidence/state 包含 Browser22 冻结 raw/report、MAP01、Close14（含 rejected Close13 原件）、原 Close13 raw、
+本文件夹和 tasks/execution-state 窄更新。rejected Close13 只作追溯，不代表采用；Browser22 保持 FAIL，三格 wood 独立
+入包 PASS，后续 V2 未到；Browser19 首 iron inventory pickup 仍 `NOT_PROVEN`。BUILD14、Browser23、Cua、CI、部署与
+合并未运行。长期 docs 不新增，因为本片只改变 V2 fixture 内部状态，无新 owner、公共 API 或目录职责。

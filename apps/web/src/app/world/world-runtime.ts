@@ -1,10 +1,10 @@
+import { createWorldSurfaceLightingSampler, type WorldSurfaceLightingSampler } from '../scene/world-surface-lighting';
+import { WorldSkyLighting } from '../scene/world-sky-lighting';
 import { BROWSER_VERTICAL_CHUNKS } from './browser-world-limits';
 import * as pc from 'playcanvas';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, chunkKey, floorDiv, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type { WorldChange } from '@seedlands/stdlib/world/storage';
 import type { WorldCommitResult, WorldEditBatch } from '@seedlands/stdlib/server/game-server-types';
-import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
-import type { KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import { resolveFillCommand, type FillCommand } from '@seedlands/stdlib/server/commands/fill-command';
 import type { PerformanceProfile } from '../../client/presentation/performance-profile';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
@@ -21,11 +21,18 @@ import {
 import type { QualityProfile } from '../scene/quality-profile';
 import { FluidFeedbackTracker, type FluidFeedbackTarget } from '../gameplay/fluid-feedback-tracker';
 import { WaterMeshTransitionTracker } from '../scene/water-mesh-transition';
+import { ChunkBlockLightCache, loadedBlockLightRevision } from '../scene/block-light-volume';
+import { BlockLightRebuildPump } from '../scene/block-light-rebuild-pump';
 import {
   acceptStreamingCanonical,
   prepareStreamingNeighborhood,
   StreamingAdmissionRetry,
 } from './streaming-admission-retry';
+import type { WorldAuthorityPort } from './world-authority-port';
+import { getRenderedMaterialMeshFromChunks } from './rendered-material-mesh';
+import { WorldCropPresentation, type CropPresentationBindings } from './world-crop-presentation';
+export type { RenderedMaterialMeshSummary } from './rendered-material-mesh';
+export type { WorldAuthorityPort } from './world-authority-port';
 
 export { waitForInitialWorldReady } from './initial-world-ready';
 
@@ -39,52 +46,10 @@ type WorldTelemetry = {
   triangles: number;
   drawCalls: number;
   meshBytes: number;
+  blockLightBricks: number;
+  blockLightAllocatedBytes: number;
+  blockLightRebuildCount: number;
 };
-
-export type WorldAuthorityPort = Readonly<{
-  seedText: string;
-  seed: number;
-  generatorVersion: number;
-  worldgenProvider: KernelWorldgenProviderIdentity;
-  mutationCount: number;
-  worldRevision: number;
-  worldTime: number;
-  physicsTick: number;
-  commitSequence: number;
-  gameplay: AuthorityGameplayView;
-  ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void>;
-  releasePreparation(cx: number, cy: number, cz: number): void;
-  releaseChunkNeighborhood(cx: number, cy: number, cz: number): void;
-  prepareWorkerInput(
-    cx: number,
-    cy: number,
-    cz: number,
-  ): {
-    chunkRevision: number;
-    generatorVersion: number;
-    provider?: KernelWorldgenProviderIdentity;
-    canonical?: Uint16Array;
-    fluid?: Uint8Array;
-    overlays: Array<{ cx: number; cy: number; cz: number; voxels: Uint16Array; fluid?: Uint8Array }>;
-  };
-  acceptWorkerCanonical(
-    task: PendingMeshTask,
-    result: Readonly<{
-      canonical?: ArrayBuffer;
-      generatorVersion?: number;
-      provider?: KernelWorldgenProviderIdentity;
-    }>,
-  ): boolean | Promise<boolean>;
-  getVoxel(x: number, y: number, z: number): number;
-  getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null;
-  getChunkRevision(cx: number, cy: number, cz: number): number | null;
-  setFluidActiveChunks(keys: readonly string[]): void;
-  editWorld(
-    actorId: string,
-    edits: readonly { x: number; y: number; z: number; value: number }[],
-  ): Promise<WorldCommitResult>;
-  setWorldTime(hours: number): Promise<{ worldTime: number }>;
-}>;
 
 export class World {
   private readonly scheduler: MeshTaskScheduler;
@@ -97,12 +62,21 @@ export class World {
   private latestCommitMutationCount = 0;
   private latestCommitMeshChunkCount = 0;
   private scenarioSequence = 0;
+  get cropPresentationSnapshot() {
+    return this.crops?.snapshot ?? Object.freeze([]);
+  }
+
   private scenarioId = 'default';
   private readonly fluidFeedback = new FluidFeedbackTracker();
   private readonly waterTransitions = new WaterMeshTransitionTracker();
   private readonly streamingAdmissionRetry = new StreamingAdmissionRetry();
+  private readonly blockLightCache: ChunkBlockLightCache;
+  private readonly blockLightRebuildPump: BlockLightRebuildPump;
+  private readonly skyLighting: WorldSkyLighting;
+  readonly sampleSurfaceLighting: WorldSurfaceLightingSampler;
   private lastCenter = '';
   private disposed = false;
+  private readonly crops: WorldCropPresentation | null;
 
   constructor(
     readonly authority: WorldAuthorityPort,
@@ -115,7 +89,26 @@ export class World {
     variant: StreamingVariant,
     onStaleVisibleCommit: () => void = () => undefined,
     waterLayerId?: number,
+    cropPresentation?: CropPresentationBindings,
   ) {
+    this.crops = cropPresentation
+      ? new WorldCropPresentation(
+          cropPresentation,
+          (key) => this.repository.chunks.get(key)?.resource,
+          () => this.repository.chunks.keys(),
+        )
+      : null;
+    this.blockLightCache = new ChunkBlockLightCache({
+      getVoxelIfLoaded: (x, y, z) => this.getVoxelIfLoaded(x, y, z),
+      ...(authority.getLoadedVoxelRegion
+        ? { getVoxelRegion: (origin, size) => authority.getLoadedVoxelRegion!(origin, size) }
+        : {}),
+      blockLightRevision: (origin, size) => this.blockLightRevision(origin, size),
+      voxelSemantics: authority.voxelSemantics,
+    });
+    this.blockLightRebuildPump = new BlockLightRebuildPump(this.blockLightCache);
+    this.skyLighting = new WorldSkyLighting(authority);
+    this.sampleSurfaceLighting = createWorldSurfaceLightingSampler(this.skyLighting, this.blockLightCache);
     const source: MeshTaskSource = {
       get seed() {
         return authority.seed;
@@ -151,12 +144,20 @@ export class World {
         telemetryRecorder,
         waterLayerId,
         this.waterTransitions,
+        undefined,
+        {
+          skyAttached: (task, sink) => this.skyLighting.register(task, sink),
+          attached: (task, sink) => {
+            return this.blockLightCache.register(task.chunkKey, task.cx, task.cy, task.cz, sink);
+          },
+        },
       ),
       isCurrent: (task) => this.scheduler.isCurrent(task),
       profile,
       now: () => performance.now(),
       summarize: summarizeMeshParts,
       onVisible: (task, { transitionPending }) => {
+        this.crops?.bindLight(task.chunkKey);
         if (!transitionPending || task.visibilityBarrierRevision === undefined) this.scheduler.completeVisible(task);
         if (!transitionPending)
           this.fluidFeedback.completeVisible(
@@ -232,12 +233,16 @@ export class World {
   get telemetry(): WorldTelemetry {
     const chunks = [...this.repository.chunks.values()];
     const meshBytes = chunks.reduce((sum, chunk) => sum + chunk.meshBytes, 0);
+    const blockLight = this.blockLightCache.snapshot;
     this.telemetryRecorder.gauge('loaded_chunks', chunks.length);
     this.telemetryRecorder.gauge('visible_chunks', chunks.length);
     this.telemetryRecorder.gauge('generation_queue_depth', this.scheduler.generationQueueSize);
     this.telemetryRecorder.gauge('meshing_queue_depth', this.scheduler.meshingQueueSize);
     this.telemetryRecorder.gauge('upload_queue_depth', this.repository.queueSize);
     this.telemetryRecorder.gauge('mesh_cpu_bytes', meshBytes);
+    this.telemetryRecorder.gauge('block_light_bricks', blockLight.brickCount);
+    this.telemetryRecorder.gauge('block_light_allocated_bytes', blockLight.allocatedBytes);
+    this.telemetryRecorder.gauge('block_light_rebuild_count', blockLight.rebuildCount);
     return {
       loadedChunks: chunks.length,
       renderedChunks: chunks.filter((chunk) => chunk.triangles > 0).length,
@@ -248,6 +253,9 @@ export class World {
       triangles: chunks.reduce((sum, chunk) => sum + chunk.triangles, 0),
       drawCalls: chunks.reduce((sum, chunk) => sum + chunk.drawCalls, 0),
       meshBytes,
+      blockLightBricks: blockLight.brickCount,
+      blockLightAllocatedBytes: blockLight.allocatedBytes,
+      blockLightRebuildCount: blockLight.rebuildCount,
     };
   }
 
@@ -276,17 +284,29 @@ export class World {
   get fluidFeedbackSummary() {
     return this.fluidFeedback.summary();
   }
-
   get waterTransitionSnapshot() {
     return this.waterTransitions.snapshot();
   }
-
-  waitForInitialVisibleChunk() {
-    return this.repository.waitForFirstVisible();
+  get blockLightSnapshot() {
+    return this.blockLightCache.snapshot;
   }
+
+  getSkyVisibilityDiagnostics() {
+    return this.skyLighting.diagnostics;
+  }
+
+  getBlockLightDiagnostics() {
+    return this.blockLightCache.diagnostics;
+  }
+
+  waitForInitialVisibleChunk = () => this.repository.waitForFirstVisible();
 
   getRenderedChunkRevision(cx: number, cy: number, cz: number): number | null {
     return this.repository.chunks.get(chunkKey(cx, cy, cz))?.task.chunkRevision ?? null;
+  }
+
+  getRenderedMaterialMesh(cx: number, cy: number, cz: number, material: FaceMaterialId) {
+    return getRenderedMaterialMeshFromChunks(this.repository.chunks, cx, cy, cz, material);
   }
 
   beginFluidFeedbackSample(target?: Omit<FluidFeedbackTarget, 'chunkRevisions'>) {
@@ -320,6 +340,9 @@ export class World {
     this.scenarioId = `${name}-${++this.scenarioSequence}`;
     this.scheduler.beginScenario();
     this.repository.clear();
+    this.crops?.reset();
+    this.skyLighting?.clear();
+    this.blockLightCache.clear();
     this.fluidFeedback.reset();
     this.waterTransitions.reset();
     this.lastCenter = '';
@@ -348,9 +371,14 @@ export class World {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.skyLighting?.dispose();
+    this.blockLightRebuildPump.dispose();
     if (this.remeshTimer !== null) window.clearTimeout(this.remeshTimer);
     this.scheduler.dispose();
     this.repository.dispose();
+    this.crops?.dispose();
+    this.skyLighting?.clear();
+    this.blockLightCache.clear();
     this.dirtyChunks.clear();
     this.fluidDirtyChunks.clear();
     this.remeshTimer = null;
@@ -358,6 +386,19 @@ export class World {
 
   getVoxel(x: number, y: number, z: number) {
     return this.authority.getVoxel(x, y, z);
+  }
+
+  /** A block-light volume must fail closed while its collision mirror is unavailable. */
+  getVoxelIfLoaded(x: number, y: number, z: number): number | undefined {
+    const cx = floorDiv(x, CHUNK_SIZE);
+    const cy = floorDiv(y, CHUNK_SIZE);
+    const cz = floorDiv(z, CHUNK_SIZE);
+    return this.authority.getChunkRevision(cx, cy, cz) === null ? undefined : this.authority.getVoxel(x, y, z);
+  }
+
+  /** Includes residency as well as revisions, because a baseline may arrive without a world edit. */
+  blockLightRevision(origin: readonly [number, number, number], size: number): string {
+    return loadedBlockLightRevision(this.authority, origin, size);
   }
 
   getFluidCell(x: number, y: number, z: number) {
@@ -426,6 +467,7 @@ export class World {
   }
 
   consumeServerCommit(result: WorldCommitResult) {
+    if (result.committed) this.skyLighting?.notifyCommit(result.worldRevision);
     const change = result.structuralChange;
     if (!change) return;
     const fluidPriority = change.actorId === 'fluid-v2';
@@ -435,17 +477,22 @@ export class World {
     this.latestCommitMeshChunkCount = change.meshChunks.length;
     let hasPresentationWork = false;
     const revisions = new Map(change.chunkRevisions.map(({ key, revision }) => [key, revision] as const));
+    for (const key of new Set([...change.meshChunks, ...revisions.keys()])) {
+      const [cx, cy, cz] = key.split(',').map(Number);
+      this.blockLightCache.invalidateAround(cx!, cy!, cz!);
+    }
     const authorityKeys = new Set(revisions.keys());
     const presentationKeys = [...change.meshChunks].sort(
       (left, right) => Number(authorityKeys.has(right)) - Number(authorityKeys.has(left)),
     );
     presentationKeys.forEach((key) => {
       const pending = this.scheduler.latestTask(key);
-      if (pending) {
+      if (pending || this.scheduler.requestedKeys.has(key)) {
         hasPresentationWork = true;
         const revision = revisions.get(key);
         if (fluidPriority && revision !== undefined) this.scheduler.protectVisibleRevision(key, revision);
-        this.scheduler.request(pending.cx, pending.cy, pending.cz, {
+        const [cx, cy, cz] = pending ? [pending.cx, pending.cy, pending.cz] : key.split(',').map(Number);
+        this.scheduler.request(cx!, cy!, cz!, {
           forceRemesh: true,
           priority: fluidPriority ? 'interactive-fluid' : 'interactive',
         });
@@ -461,8 +508,13 @@ export class World {
     this.scheduleRemesh(fluidPriority ? 0 : 48);
   }
 
-  drainCommits() {
+  drainCommits(cameraPosition?: readonly [number, number, number]) {
+    this.skyLighting?.invalidateStale();
+    this.blockLightCache.invalidateStale();
     this.repository.drain();
+    this.crops?.update(this.scenarioId, this.authority.gameplay.cropStages ?? []);
+    if (cameraPosition) this.blockLightRebuildPump.request(cameraPosition);
+    this.skyLighting?.request(cameraPosition);
   }
 
   private request(cx: number, cy: number, cz: number, options: boolean | MeshRequestOptions = false) {

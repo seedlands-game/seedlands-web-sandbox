@@ -56,3 +56,42 @@ it('全透明模型明确拒绝取景，不能将 NaN 写入相机或场景', ()
   expect(translate).not.toHaveBeenCalled();
   expect([camera.getPosition().x, camera.getPosition().y, camera.getPosition().z].every(Number.isFinite)).toBe(true);
 });
+
+it('新增物品图标使用已注册像素或已派生的静态 PNG', () => {
+  setAppearanceImages(createEmptyAppearanceProject());
+  for (const id of [
+    'stick',
+    'charcoal',
+    'cobblestone',
+    'glass',
+    'gold-ore',
+    'diamond-ore',
+    'iron-block',
+    'gold-block',
+    'diamond-block',
+    'gold-ingot',
+    'diamond',
+    'gold-pickaxe',
+    'diamond-pickaxe',
+    'stone-axe',
+    'iron-axe',
+    'gold-axe',
+    'diamond-axe',
+    'stone-sword',
+    'iron-sword',
+    'gold-sword',
+    'diamond-sword',
+    'wood-shovel',
+    'stone-shovel',
+    'iron-shovel',
+    'gold-shovel',
+    'diamond-shovel',
+    'wood-hoe',
+    'stone-hoe',
+    'iron-hoe',
+    'gold-hoe',
+    'diamond-hoe',
+  ]) {
+    expect(itemIconUrl(id, '/')).toMatch(/^(data:image\/svg\+xml,|\/assets\/item-thumbnails\/[^/]+\.png$)/);
+  }
+});

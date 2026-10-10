@@ -1,23 +1,23 @@
-import { createMovementInputGuard, projectMovementBodies } from './actor-movement-projection';
+import { projectAuthoritySessionSnapshot } from './authority-session-snapshot';
+import { createMovementInputGuard } from './actor-movement-projection';
 import type { EntityLifetimeReference } from '../gameplay/entity-store';
 import { clearAuthorityHorizontalVelocity } from './authority-input-neutralization';
 import {
   bodyWorldAabb,
-  probeBodyContacts,
   recoverBody,
   selectReachableBodyTarget,
-  separateBodies,
   stepBody,
   type BodyConfig,
   type BodyState,
+  type PhysicsWorld,
 } from '../../physics';
+import { colliderMatches } from '../../physics/geometry';
 import { WORLD_ITEM_INTERACTION } from '../../physics/body-registry';
 import { ActiveMonotonicClock } from '../../runtime/active-monotonic-clock';
 import { BoundedCostSamples } from '../../runtime/bounded-cost-samples';
 import { MultiRateScheduler } from '../../runtime/multi-rate-scheduler';
 import { InputCommandBuffer, type InputCommand, type SequenceDecision } from '../../runtime/session-protocol';
 import type * as SessionContract from './authority-session-types';
-import { VoxelCollisionWorld } from './voxel-collision-world';
 import { bodyActiveChunkKeys } from './authority-physics-active-chunks';
 import { bodyStateForAuthorityEntity } from './creative-physics';
 import {
@@ -27,11 +27,16 @@ import {
   acceptBoundPhysicsIntents,
   isAuthorityPlayerBindingCurrent,
 } from './authority-physics-input';
-import type { AuthorityKernelState } from './authority-kernel-state';
+import { assertAuthorityWorldClockRate, type AuthorityKernelState } from './authority-kernel-state';
 import { settleAuthorityPickups } from './authority-pickup-settlement';
 import { assertAdvanceCapacity, MAX_AUTHORITY_RECOVERIES_PER_STEP } from './authority-advance-capacity';
 import { commitAuthorityPhysicsEntities } from './authority-physics-entity-commit';
 import type { AuthoritySessionOptions } from './authority-session-options';
+import { createAuthorityCollisionWorld } from './authority-runtime-geometry';
+import type { VoxelCollisionWorld } from './voxel-collision-world';
+import { separateAuthorityCharacters } from './authority-character-separation';
+import { currentMountedSeats, mountedAuthorityBody, heldAuthorityTransportBody } from './authority-mounted-body';
+import { createAuthorityTransportCollisionWorlds } from './authority-transport-collision-world';
 
 export type * from './authority-session-types';
 
@@ -39,14 +44,10 @@ type BodySnapshot = SessionContract.AuthorityBodySnapshot;
 const MAX_RECOVERY_QUEUE = 512;
 const MAX_RECOVERY_RESULTS = 32;
 const MAX_RECOVERY_DISTANCE = 8;
-const CHARACTER_SEPARATION_DISTANCE = 0.1;
 const MAX_PICKUP_TARGET_CANDIDATES = 8;
 const MAX_TRACKED_PICKUP_CURSORS = 512;
 const PICKUP_CURSOR_WRAP = 0x80000000;
 const RECOVERY_PRIORITY = { 'external-geometry-change': 0, initialization: 1, 'legacy-restore': 2 } as const;
-
-const isCharacter = (entity: SessionContract.AuthorityEntity): boolean =>
-  entity.type === 'player' || entity.type === 'creature' || entity.type === 'npc';
 
 export class AuthoritySession {
   private readonly clock: ActiveMonotonicClock;
@@ -70,7 +71,7 @@ export class AuthoritySession {
     if (restoredPaused) this.options.execution.assertCanCommit();
     if (!state.scheduler) state.worldClockRate = options.worldHoursPerSecond ?? state.worldClockRate;
     state.paused = false;
-    this.assertWorldClockRate(this.state.worldClockRate);
+    assertAuthorityWorldClockRate(this.state.worldClockRate);
     this.clock = new ActiveMonotonicClock(options.startTimeMs, {
       activeTimeMs: state.activeTimeMs,
       paused: false,
@@ -82,7 +83,7 @@ export class AuthoritySession {
     );
     this.input = new InputCommandBuffer(options.epoch, 'player-input');
     this.playerReference = options.server.createEntityReference?.(options.playerId) ?? null;
-    this.collisionWorld = new VoxelCollisionWorld(options.voxelSource, options.requestUnknownChunk);
+    this.collisionWorld = createAuthorityCollisionWorld(options);
     this.refreshBodies();
     for (const id of this.bodies.keys()) this.requestBodyRecovery(id, 'initialization', 2);
     if (restoredPaused) this.options.execution.commit();
@@ -251,7 +252,7 @@ export class AuthoritySession {
   }
 
   setWorldClockRate(rate: number): number {
-    this.assertWorldClockRate(rate);
+    assertAuthorityWorldClockRate(rate);
     if (rate === this.state.worldClockRate) return rate;
     this.options.execution.assertCanCommit();
     this.state.worldClockRate = rate;
@@ -281,6 +282,7 @@ export class AuthoritySession {
     if (!this.playerBindingCurrent) this.input.clear();
     const input = this.input.consumeForTick(this.state.physicsTick);
     const entities = this.options.server.queryEntities().sort((left, right) => left.id.localeCompare(right.id));
+    const mounted = currentMountedSeats(this.options.server);
     const pickupTargets = [...(this.options.server.queryPickupTargets?.() ?? [])].sort((left, right) =>
       left.id.localeCompare(right.id),
     );
@@ -292,11 +294,26 @@ export class AuthoritySession {
     const seen = new Set<string>();
     const worldItemIds = new Set<string>();
     const nextBodies = new Map<string, BodySnapshot>();
-    const configs = new Map<string, BodyConfig>();
+    const configs = new Map(entities.map((entity) => [entity.id, this.options.bodyConfigFor(entity)]));
+    const worlds = createAuthorityTransportCollisionWorlds(
+      this.collisionWorld,
+      entities,
+      (entity) => configs.get(entity.id)!,
+      [...mounted.values()],
+    );
     for (const entity of entities) {
       seen.add(entity.id);
-      const config = this.options.bodyConfigFor(entity);
-      configs.set(entity.id, config);
+      const config = configs.get(entity.id)!;
+      if (entity.type === 'transport') {
+        nextBodies.set(entity.id, heldAuthorityTransportBody(entity));
+        continue;
+      }
+      const seat = mounted.get(entity.id);
+      if (seat) {
+        nextBodies.set(entity.id, mountedAuthorityBody(entity, seat));
+        continue;
+      }
+      const world = worlds.forEntity(entity.id);
       const physicsInput = selectAuthorityPhysicsInput(
         entity,
         this.options.playerId,
@@ -325,7 +342,7 @@ export class AuthoritySession {
           ? selectReachableBodyTarget({
               state: initialState,
               config,
-              world: this.collisionWorld,
+              world,
               targets: physicsTargets,
               maxDistance: WORLD_ITEM_INTERACTION.attractionRadius,
               maxCandidates: MAX_PICKUP_TARGET_CANDIDATES,
@@ -355,7 +372,7 @@ export class AuthoritySession {
               },
             }
           : authorizedPhysicsInput,
-        world: this.collisionWorld,
+        world,
         dt,
       });
       nextBodies.set(entity.id, {
@@ -368,26 +385,23 @@ export class AuthoritySession {
       });
     }
 
-    const characters = entities.filter(isCharacter);
-    for (let leftIndex = 0; leftIndex < characters.length; leftIndex += 1)
-      for (let rightIndex = leftIndex + 1; rightIndex < characters.length; rightIndex += 1) {
-        const leftEntity = characters[leftIndex];
-        const rightEntity = characters[rightIndex];
-        const left = nextBodies.get(leftEntity.id)!;
-        const right = nextBodies.get(rightEntity.id)!;
-        const separation = separateBodies({
-          left: left.body,
-          leftConfig: configs.get(left.id)!,
-          right: right.body,
-          rightConfig: configs.get(right.id)!,
-          world: this.collisionWorld,
-          maxDistance: CHARACTER_SEPARATION_DISTANCE,
-        });
-        nextBodies.set(left.id, this.afterSeparation(left, separation.left, configs.get(left.id)!));
-        nextBodies.set(right.id, this.afterSeparation(right, separation.right, configs.get(right.id)!));
-      }
+    separateAuthorityCharacters(
+      entities.filter((entity) => !mounted.has(entity.id)),
+      nextBodies,
+      configs,
+      worlds.all,
+    );
 
-    commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies);
+    commitAuthorityPhysicsEntities(this.options.server, entities, nextBodies, this.bodies, {
+      epoch: this.options.epoch,
+      physicsTick: this.state.physicsTick,
+      seconds: dt,
+      playerReference: this.playerBindingCurrent ? this.playerReference : null,
+      playerWish: { x: input.state.moveX, z: input.state.moveZ },
+      acknowledgedSequence: input.acknowledgedSequence,
+      world: this.collisionWorld,
+      bodyConfigs: configs,
+    });
     settleAuthorityPickups(
       {
         server: this.options.server,
@@ -405,18 +419,14 @@ export class AuthoritySession {
     if (this.options.execution.commitSequence === before) this.options.execution.commit();
   }
 
-  private afterSeparation(snapshot: BodySnapshot, body: BodyState, config: BodyConfig): BodySnapshot {
-    if (snapshot.body === body) return snapshot;
-    const probe = probeBodyContacts({ state: body, config, world: this.collisionWorld });
-    return { ...snapshot, body, grounded: probe.grounded, contacts: probe.contacts };
-  }
-
   private processRecoveryQueue(): void {
+    const mounted = currentMountedSeats(this.options.server);
     const requests = [...this.recoveryQueue]
       .sort(([left], [right]) => left.localeCompare(right))
       .slice(0, MAX_AUTHORITY_RECOVERIES_PER_STEP);
     for (const [entityId, request] of requests) {
       this.recoveryQueue.delete(entityId);
+      if (mounted.has(entityId)) continue;
       const entity = this.options.server.getEntity(entityId);
       if (!entity) {
         this.recordRecovery({
@@ -430,7 +440,13 @@ export class AuthoritySession {
       }
       const state = bodyStateForAuthorityEntity(entity);
       const config = this.options.bodyConfigFor(entity);
-      if (!this.overlapsStatic(state, config)) {
+      const world = createAuthorityTransportCollisionWorlds(
+        this.collisionWorld,
+        this.options.server.queryEntities(),
+        this.options.bodyConfigFor,
+        [...mounted.values()],
+      ).forEntity(entityId);
+      if (!this.overlapsStatic(state, config, world)) {
         this.recordRecovery({
           entityId,
           reason: request.reason,
@@ -440,7 +456,7 @@ export class AuthoritySession {
         });
         continue;
       }
-      const result = recoverBody({ state, config, world: this.collisionWorld, maxDistance: request.maxDistance });
+      const result = recoverBody({ state, config, world, maxDistance: request.maxDistance });
       if (result.recovered)
         this.options.server.updateEntity(entityId, {
           position: [result.state.position.x, result.state.position.y, result.state.position.z],
@@ -456,12 +472,14 @@ export class AuthoritySession {
     }
   }
 
-  private overlapsStatic(state: BodyState, config: BodyConfig): boolean {
+  private overlapsStatic(state: BodyState, config: BodyConfig, world: PhysicsWorld): boolean {
     const bounds = bodyWorldAabb(state, config);
-    return this.collisionWorld
+    return world
       .querySolids(bounds)
       .some(
         (collider) =>
+          !collider.sensor &&
+          colliderMatches(config, collider) &&
           Math.min(bounds.max.x, collider.aabb.max.x) - Math.max(bounds.min.x, collider.aabb.min.x) > 1e-6 &&
           Math.min(bounds.max.y, collider.aabb.max.y) - Math.max(bounds.min.y, collider.aabb.min.y) > 1e-6 &&
           Math.min(bounds.max.z, collider.aabb.max.z) - Math.max(bounds.min.z, collider.aabb.min.z) > 1e-6,
@@ -493,38 +511,20 @@ export class AuthoritySession {
     if (clearAuthorityHorizontalVelocity(this.options.server, this.options.playerId)) this.refreshBodies();
   }
 
-  private assertWorldClockRate(rate: number): void {
-    if (!Number.isFinite(rate) || rate < 0 || rate > 24)
-      throw new RangeError('World clock rate must be finite and within 0..24 hours per second.');
-  }
-
   private readonly movementInput = createMovementInputGuard(
     () => this.options.server.getActorModeState?.(this.options.playerId),
     () => this.input.clear(),
   );
   private snapshot(): SessionContract.AuthoritySnapshot {
-    return {
-      kind: 'snapshot',
-      protocolVersion: 1,
-      epoch: this.options.epoch,
-      physicsTick: this.state.physicsTick,
-      commitSequence: this.options.execution.commitSequence,
-      acknowledgedInputSequence: this.input.acknowledgedSequence,
-      inputResyncRequired: this.input.requiresResync,
-      activeTimeMs: this.state.activeTimeMs,
-      integratedPhysicsTimeMs: this.state.integratedPhysicsTimeMs,
-      physicsDebtMs: this.state.physicsDebtMs,
-      ...projectMovementBodies(this.options, this.bodies),
-      chunkRevisions: this.collisionWorld.revisionVector(),
-      worldRevision: this.options.server.worldRevision,
-      worldMutationCount: this.options.server.mutationCount,
-      worldTime: this.options.server.worldTime,
+    return projectAuthoritySessionSnapshot({
+      options: this.options,
+      state: this.state,
+      input: this.input,
+      bodies: this.bodies,
+      collisionWorld: this.collisionWorld,
       paused: this.clock.paused,
-      diagnostics: {
-        recoveryResults: this.recoveryResults.map((result) => ({ ...result })),
-        physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
-        ...(this.options.server.fluidDiagnostics ? { fluid: { ...this.options.server.fluidDiagnostics } } : {}),
-      },
-    };
+      recoveryResults: this.recoveryResults,
+      physicsCost: this.options.measureNow ? this.physicsCost.snapshot() : null,
+    });
   }
 }

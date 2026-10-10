@@ -1,5 +1,7 @@
 import type { AuthorityMeshPayload } from '../protocol/authority-worker-protocol';
 import type { GameServer } from '../game-server';
+import { createVoxelGeometryRegistryV1, type VoxelGeometryDefinitionV1 } from '../../world/voxel-geometry';
+import { validateVoxelGeometrySemantics } from '../../world/mesh-semantics';
 
 export async function prepareAuthorityMeshPayload(
   server: GameServer,
@@ -7,7 +9,11 @@ export async function prepareAuthorityMeshPayload(
   cx: number,
   cy: number,
   cz: number,
+  voxelGeometry?: readonly VoxelGeometryDefinitionV1[],
 ): Promise<AuthorityMeshPayload> {
+  const geometryRegistry = voxelGeometry ? createVoxelGeometryRegistryV1(voxelGeometry) : undefined;
+  if (geometryRegistry) validateVoxelGeometrySemantics(server.voxelSemantics, geometryRegistry);
+  const geometry = geometryRegistry?.list();
   const startedAt = now();
   server.retainMeshChunk(cx, cy, cz);
   const releasePreparation = server.retainMeshPreparationNeighborhood(cx, cy, cz);
@@ -25,6 +31,8 @@ export async function prepareAuthorityMeshPayload(
       cz,
       chunkRevision: prepared.chunkRevision,
       generatorVersion: server.generatorVersion,
+      voxelSemantics: server.voxelSemantics.list(),
+      ...(geometry ? { voxelGeometry: geometry } : {}),
       ...(server.worldgenProvider ? { provider: server.worldgenProvider } : {}),
       preparationDiagnostics: {
         authorityPrepareMs: now() - startedAt,

@@ -6,8 +6,8 @@ import {
   createGameplaySystemAuthority,
 } from '@seedlands/stdlib/host';
 import { GameplayRuntime } from '../../../../fixtures/classic/content';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 function setup(
   withActions = true,
@@ -17,14 +17,15 @@ function setup(
     getVoxel?(position: [number, number, number]): number | undefined;
   } = {},
 ) {
-  const modules = [
-    ...pack.modules.filter(
-      (module) =>
-        withActions ||
-        !['seedlands:inventory-actions-module', 'seedlands:behavior-registry-module'].includes(module.descriptor.id),
-    ),
-    ...extra,
-  ];
+  const modules = classicGameplayDomainModules(
+    [
+      ...(withActions ? ['seedlands:inventory-actions-module'] : ['seedlands:inventory-module']),
+      'seedlands:overworld-combat-rules',
+      'seedlands:mode-module',
+      ...extra.map((module) => module.descriptor.id),
+    ],
+    extra,
+  );
   const root = definePack({ id: 'test:inventory-actions', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -58,7 +59,7 @@ function setup(
     },
   });
   world.spawnPlayer({ id: 'alice', position: [0, 0, 0] });
-  world.spawn({ id: 'bob', type: 'npc', archetype: 'settler', position: [0, 0, 1], health: 20, maxHealth: 20 });
+  world.spawn({ id: 'bob', type: 'creature', archetype: 'zombie', position: [0, 0, 1], health: 20, maxHealth: 20 });
   return { world, authority };
 }
 describe('actual registered Inventory action consumers', () => {
@@ -169,7 +170,7 @@ describe('actual registered Inventory action consumers', () => {
     const noncombatant = world.spawn({
       id: 'noncombatant',
       type: 'creature',
-      archetype: 'grazer',
+      archetype: 'pig',
       position: [0, 0, -1],
     });
     if (noncombatant.health === undefined) throw new Error('Expected a profiled noncombatant.');

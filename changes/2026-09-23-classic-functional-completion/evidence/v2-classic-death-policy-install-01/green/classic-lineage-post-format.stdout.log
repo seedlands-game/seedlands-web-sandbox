@@ -1,0 +1,20 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/playbook-classic| playbooks/classic/tests/legacy-composition-lineage.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/playbook-classic| playbooks/classic/tests/legacy-composition-lineage.test.ts [ playbooks/classic/tests/legacy-composition-lineage.test.ts ]
+SyntaxError: Unexpected token 'e', "error: Can"... is not valid JSON
+ ❯ playbooks/classic/src/pre-death-v4-composition-identity.ts:7:58
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  01:16:58
+   Duration  571ms (transform 412ms, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+

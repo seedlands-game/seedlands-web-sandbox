@@ -1,10 +1,15 @@
+import { ModelSurfaceLighting } from '../scene/model-surface-lighting';
+import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import * as pc from 'playcanvas';
-import type { GameplayEntityView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type {
+  AuthorityGameplayView,
+  GameplayEntityView,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
 import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
-import { addBuiltinActorModel } from './builtin-actor-models';
-import { getAppearanceAnimationBindings, getAppearanceModelBlob } from './appearance-runtime';
+import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
+import { getAppearanceAnimationBindings, getAppearanceModelBlob, getPackActorPresentation } from './appearance-runtime';
 import { acquireGameplayModelAssets, type GameplayModelAssetsLease } from './gameplay-model-assets';
 import { addGlbModel, type GlbModelLease } from './glb-model-resource';
 import {
@@ -13,8 +18,11 @@ import {
   type ModelAnimationController,
 } from './model-animation';
 import { createDamageTintMaterial } from './damage-tint-material';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 const PRESENTATION_SETTLE_DISTANCE = 0.001;
+type TransportStateV2 = NonNullable<AuthorityGameplayView['transports']>[number];
+type TransportDefinitionV1 = NonNullable<AuthorityGameplayView['transportDefinitions']>[number];
 
 type AnimatedEntity = {
   abort: AbortController;
@@ -32,12 +40,11 @@ export type GameplayShadowCaster = Readonly<{
 export class GameplayEntityPresenter {
   private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
+  private readonly transportPresentations = new Map<string, string>();
   private readonly previousPositions = new Map<string, [number, number, number]>();
   private readonly health = new Map<string, number>();
   private readonly hurtUntil = new Map<string, number>();
-  private readonly originalMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
-  private readonly damageMaterials = new WeakMap<pc.Entity, pc.StandardMaterial>();
-  private readonly damageMaterialResources = new Set<pc.StandardMaterial>();
+  private readonly surfaceLighting: ModelSurfaceLighting;
   private readonly animated = new Map<string, AnimatedEntity>();
   private readonly movingShadowCasters = new Map<string, boolean>();
   private readonly shadowCasterRevisions = new Map<string, number>();
@@ -47,19 +54,42 @@ export class GameplayEntityPresenter {
   constructor(
     private readonly app: pc.Application,
     private readonly resolveItem?: (id: string) => ItemDefinition | null,
+    sampleSurfaceLighting?: SurfaceLightingSampler,
+    voxelGeometry?: VoxelGeometryResolver,
   ) {
-    this.assetsLease = acquireGameplayModelAssets(app);
+    this.surfaceLighting = new ModelSurfaceLighting(
+      app.graphicsDevice,
+      sampleSurfaceLighting,
+      createDamageTintMaterial,
+    );
+    this.assetsLease = acquireGameplayModelAssets(app, voxelGeometry);
     this.bindings = getAppearanceAnimationBindings(app);
   }
 
-  reconcile(entities: readonly GameplayEntityView[], renderDeltaSeconds = 0): void {
+  reconcile(
+    entities: readonly GameplayEntityView[],
+    renderDeltaSeconds = 0,
+    transports: readonly TransportStateV2[] = [],
+    definitions: readonly TransportDefinitionV1[] = [],
+  ): void {
     const dt = Number.isFinite(renderDeltaSeconds) ? Math.max(0, Math.min(0.1, renderDeltaSeconds)) : 0;
     this.presentationTime += dt;
-    const current = new Set(entities.map((entity) => entity.id));
+    const definitionsById = new Map(definitions.map((definition) => [definition.id, definition]));
+    const transportsById = new Map(transports.map((transport) => [transport.reference.entityId, transport]));
+    const accepted = entities.filter(
+      (entity) => entity.type !== 'transport' || definitionsById.has(transportsById.get(entity.id)?.definitionId ?? ''),
+    );
+    const current = new Set(accepted.map((entity) => entity.id));
     this.presented.forEach((node, id) => {
-      if (current.has(id)) return;
+      const transport = transportsById.get(id);
+      const signature = transport
+        ? JSON.stringify([transport.reference.lifetime, definitionsById.get(transport.definitionId)?.presentationId])
+        : undefined;
+      if (current.has(id) && this.transportPresentations.get(id) === signature) return;
+      this.surfaceLighting.release(node);
       node.destroy();
       this.presented.delete(id);
+      this.transportPresentations.delete(id);
       this.previousPositions.delete(id);
       this.health.delete(id);
       this.hurtUntil.delete(id);
@@ -67,23 +97,30 @@ export class GameplayEntityPresenter {
       this.shadowCasterRevisions.delete(id);
       this.releaseAnimated(id);
     });
-    entities.forEach((entity) => {
-      if (this.updateEntity(entity, this.presentationTime, dt))
+    accepted.forEach((entity) => {
+      const transport = entity.type === 'transport' ? transportsById.get(entity.id) : undefined;
+      const presentationId = transport ? definitionsById.get(transport.definitionId)?.presentationId : undefined;
+      if (transport)
+        this.transportPresentations.set(entity.id, JSON.stringify([transport.reference.lifetime, presentationId]));
+      if (this.updateEntity(entity, this.presentationTime, dt, transport, presentationId))
         this.shadowCasterRevisions.set(entity.id, (this.shadowCasterRevisions.get(entity.id) ?? 0) + 1);
     });
   }
 
   dispose(): void {
-    this.presented.forEach((entity) => entity.destroy());
+    this.presented.forEach((entity) => {
+      this.surfaceLighting.release(entity);
+      entity.destroy();
+    });
     this.presented.clear();
+    this.transportPresentations.clear();
     this.previousPositions.clear();
     this.health.clear();
     this.hurtUntil.clear();
     this.movingShadowCasters.clear();
     this.shadowCasterRevisions.clear();
     for (const id of this.animated.keys()) this.releaseAnimated(id);
-    this.damageMaterialResources.forEach((material) => material.destroy());
-    this.damageMaterialResources.clear();
+    this.surfaceLighting.dispose();
     this.assetsLease.release();
     this.presentationTime = 0;
   }
@@ -91,6 +128,9 @@ export class GameplayEntityPresenter {
   presentedPosition(id: string): [number, number, number] | null {
     const position = this.presented.get(id)?.getPosition();
     return position ? [position.x, position.y, position.z] : null;
+  }
+  presentedModelReady(id: string): boolean {
+    return this.animated.get(id)?.lease !== null && this.animated.get(id)?.lease !== undefined;
   }
 
   get shadowCasters(): readonly GameplayShadowCaster[] {
@@ -100,9 +140,15 @@ export class GameplayEntityPresenter {
     });
   }
 
-  private updateEntity(entity: GameplayEntityView, time: number, dt: number): boolean {
+  private updateEntity(
+    entity: GameplayEntityView,
+    time: number,
+    dt: number,
+    transport?: TransportStateV2,
+    presentationId?: string,
+  ): boolean {
     const existing = this.presented.get(entity.id);
-    const node = existing ?? this.create(entity);
+    const node = existing ?? this.create(entity, presentationId);
     const beforePosition = node.getPosition().clone();
     const beforeRotation = node.getEulerAngles().clone();
     const beforeScale = node.getLocalScale().clone();
@@ -119,7 +165,8 @@ export class GameplayEntityPresenter {
     )
       position = [...entity.position];
     const pose = movementPose(previous, position, time);
-    if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
+    if (transport) node.setEulerAngles(0, (transport.pose.yaw * 180) / Math.PI, 0);
+    else if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
     const oldHealth = this.health.get(entity.id);
     if (entity.health !== undefined) {
       if (oldHealth !== undefined && entity.health < oldHealth) {
@@ -133,16 +180,8 @@ export class GameplayEntityPresenter {
     const scale = 1 + flash * 0.05;
     node.setLocalScale(scale, scale, scale);
     if (entity.type === 'world-item') node.setEulerAngles(0, time * 24, 0);
-    node.setPosition(position[0], position[1] + (entity.type === 'world-item' ? 0.1 : pose.bob), position[2]);
-    for (const side of ['left', 'right'] as const)
-      node.findByName(`arm-${side}-pivot`)?.setLocalEulerAngles(pose.stride * (side === 'left' ? 1 : -1), 0, 0);
-    this.forEachRender(node, (part) => {
-      const material = this.originalMaterials.get(part);
-      const damageMaterial = this.damageMaterials.get(part);
-      if (part.render && material) part.render.material = flash > 0 && damageMaterial ? damageMaterial : material;
-      if (/leg-|front-|back-/.test(part.name))
-        part.setLocalEulerAngles(pose.stride * (part.name.includes('left') ? 1 : -1), 0, 0);
-    });
+    node.setPosition(position[0], position[1] + (entity.type === 'world-item' ? 0.1 : 0), position[2]);
+    this.surfaceLighting.apply(node, [position[0], position[1] + 0.7, position[2]], flash > 0);
     this.previousPositions.set(entity.id, position);
     const moving =
       previous !== undefined && Math.hypot(...position.map((value, axis) => value - previous[axis])) > 0.001;
@@ -164,11 +203,11 @@ export class GameplayEntityPresenter {
     );
   }
 
-  private create(entity: GameplayEntityView): pc.Entity {
+  private create(entity: GameplayEntityView, presentationId?: string): pc.Entity {
     const node = new pc.Entity(`gameplay:${entity.id}`);
     const visual = new pc.Entity(`${node.name}:visual`);
     // movementPose's yaw defines local -Z as forward. Keep authored facial layout independent of that shared contract.
-    if (entity.type !== 'world-item') visual.setLocalEulerAngles(0, 180, 0);
+    if (entity.type !== 'world-item' && entity.type !== 'transport') visual.setLocalEulerAngles(0, 180, 0);
     node.addChild(visual);
     if (entity.type === 'world-item')
       this.assets.addItem(
@@ -178,14 +217,11 @@ export class GameplayEntityPresenter {
         undefined,
         this.resolveItem?.(entity.stack?.itemId ?? ''),
       );
-    else if (entity.archetype === 'grazer') addBuiltinActorModel(this.assets, visual, 'grazer');
-    else if (entity.archetype === 'night-stalker') addBuiltinActorModel(this.assets, visual, 'stalker');
-    else if (entity.archetype === 'settler') addBuiltinActorModel(this.assets, visual, 'settler');
-    else this.assets.addBox(visual, 'fallback-body', 'charcoal', { x: 0, y: 0.75, z: 0 }, { x: 0.7, y: 1.1, z: 0.7 });
-    this.registerDamageMaterials(node);
+    this.surfaceLighting.register(node, entity.type === 'world-item' ? 'world-item' : 'actor');
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
-    if (entity.archetype) {
+    const modelTarget = presentationId ?? entity.archetype;
+    if (modelTarget) {
       const animated: AnimatedEntity = {
         abort: new AbortController(),
         lease: null,
@@ -193,39 +229,73 @@ export class GameplayEntityPresenter {
         hurtSequence: 0,
       };
       this.animated.set(entity.id, animated);
-      void this.attachAnimatedModel(entity.id, entity.archetype, visual, animated);
+      void this.attachAnimatedModel(entity.id, modelTarget, visual, animated);
     }
     return node;
   }
 
   private async attachAnimatedModel(
     entityId: string,
-    target: NonNullable<GameplayEntityView['archetype']>,
+    target: string,
     visual: pc.Entity,
     state: AnimatedEntity,
   ): Promise<void> {
     try {
-      const binding = this.bindings[target];
-      if (!binding || state.abort.signal.aborted) return;
-      const blob = getAppearanceModelBlob(this.app, binding.modelId);
-      if (!blob) return;
-      const lease = await addGlbModel(this.app, visual, binding.modelId, state.abort.signal, blob, 'feet');
+      const builtin = classicCreatureDefinition(target);
+      const pack = getPackActorPresentation(this.app, target);
+      const override = (this.bindings as Partial<Record<string, AppearanceAnimationBinding>>)[target];
+      const binding = override ?? builtin ?? (pack ? { modelId: `pack:${target}`, clips: {} } : undefined);
+      if (state.abort.signal.aborted) return;
+      if (!binding) throw new Error(`未登记物种模型：${target}`);
+      const blob = override ? getAppearanceModelBlob(this.app, binding.modelId) : undefined;
+      if (override && !blob) throw new Error(`外观模型快照缺失：${binding.modelId}`);
+      const lease = await addGlbModel(
+        this.app,
+        visual,
+        binding.modelId,
+        state.abort.signal,
+        blob,
+        override ? 'feet' : 'authored',
+        pack?.url,
+      );
       if (state.abort.signal.aborted || this.animated.get(entityId) !== state) {
         lease.release();
         return;
       }
       const clips = this.availableClips(binding, lease.animationClips);
-      if (!lease.playback || !Object.keys(clips).length) {
+      if ((!lease.playback || !Object.keys(clips).length) && !pack) {
         lease.release();
-        return;
+        throw new Error(`物种模型缺少可播放动作：${binding.modelId}`);
       }
-      for (const child of [...visual.children]) if (child !== lease.entity) (child as pc.Entity).destroy();
-      this.registerDamageMaterials(lease.entity);
+      for (const child of [...visual.children])
+        if (child !== lease.entity) {
+          this.surfaceLighting.release(child as pc.Entity);
+          (child as pc.Entity).destroy();
+        }
+      try {
+        this.surfaceLighting.register(lease.entity);
+      } catch (error) {
+        this.surfaceLighting.release(lease.entity);
+        lease.release();
+        throw error;
+      }
       state.lease = lease;
-      state.controller = createModelAnimationController(clips, lease.playback);
+      state.controller = lease.playback ? createModelAnimationController(clips, lease.playback) : null;
       this.shadowCasterRevisions.set(entityId, (this.shadowCasterRevisions.get(entityId) ?? 0) + 1);
-    } catch {
-      // A missing or newly replaced local model keeps the existing built-in actor presentation.
+    } catch (error) {
+      if (state.abort.signal.aborted || this.animated.get(entityId) !== state) return;
+      const message = `生物外观加载失败（${target}）：${error instanceof Error ? error.message : String(error)}`;
+      console.error(message);
+      this.app.fire('seedlands:asset-error', message);
+      this.assets.addBox(
+        visual,
+        `asset-error:${target}`,
+        'glow-eye',
+        { x: 0, y: 0.65, z: 0 },
+        { x: 0.12, y: 0.6, z: 0.12 },
+      );
+      this.assets.addBox(visual, 'asset-error-dot', 'glow-eye', { x: 0, y: 0.2, z: 0 }, { x: 0.12, y: 0.12, z: 0.12 });
+      this.surfaceLighting.register(visual);
     }
   }
 
@@ -238,31 +308,12 @@ export class GameplayEntityPresenter {
     );
   }
 
-  private registerDamageMaterials(root: pc.Entity): void {
-    this.forEachRender(root, (part) => {
-      if (!(part.render?.material instanceof pc.StandardMaterial) || this.originalMaterials.has(part)) return;
-      const original = part.render.material;
-      const damage = createDamageTintMaterial(original);
-      this.originalMaterials.set(part, original);
-      this.damageMaterials.set(part, damage);
-      this.damageMaterialResources.add(damage);
-    });
-  }
-
   private releaseAnimated(id: string): void {
     const animated = this.animated.get(id);
     if (!animated) return;
     animated.abort.abort();
     animated.lease?.release();
     this.animated.delete(id);
-  }
-
-  private forEachRender(node: pc.Entity, callback: (part: pc.Entity) => void): void {
-    for (const child of node.children) {
-      const part = child as pc.Entity;
-      if (part.render) callback(part);
-      this.forEachRender(part, callback);
-    }
   }
 
   private get assets() {

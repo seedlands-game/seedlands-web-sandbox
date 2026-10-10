@@ -1,0 +1,16 @@
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/artifact-map-compare.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/artifact-map-vs-build07.diff.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/artifact-map.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/artifact-verify.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/artifact-verify.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/build.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/build.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/dependency-setup.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/dependency-setup.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/dist-files.sha256.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/harness-artifact.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/metadata-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/metadata-format.window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-08/validation-argv.txt: OK

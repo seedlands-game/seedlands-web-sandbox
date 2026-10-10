@@ -1,0 +1,114 @@
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/evidence.ts: OK
+apps/web/tests/e2e/classic-support/canonical-reporter.ts: OK
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts: OK
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+scripts/harness/classic-receipt.mjs: OK
+scripts/harness/classic-receipt.d.mts: OK
+scripts/harness/classic-receipt.test.mjs: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md: OK
+changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md: OK
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-evidence.md: OK
+docs/code-map.md: OK
+./SOURCE-MANIFEST.sha256: OK
+./classic-types-window.json.log: OK
+./classic-types.stdout.log: OK
+./eslint-failure-window.json.log: OK
+./eslint-failure.stdout.log: OK
+./eslint-window.json.log: OK
+./eslint.stdout.log: OK
+./format-final-02-window.json.log: OK
+./format-final-02.stdout.log: OK
+./format-final-window.json.log: OK
+./format-final.stdout.log: OK
+./format-fix-window.json.log: OK
+./format-fix.stdout.log: OK
+./format-implementation-window.json.log: OK
+./format-implementation.stdout.log: OK
+./green-final-02-window.json.log: OK
+./green-final-02.stdout.log: OK
+./green-final-03-window.json.log: OK
+./green-final-03.stdout.log: OK
+./green-final-04-window.json.log: OK
+./green-final-04.stdout.log: OK
+./green-final-05-window.json.log: OK
+./green-final-05.stdout.log: OK
+./green-final-06-window.json.log: OK
+./green-final-06.stdout.log: OK
+./green-final-07-window.json.log: OK
+./green-final-07.stdout.log: OK
+./green-final-08-window.json.log: OK
+./green-final-08.stdout.log: OK
+./green-final-09-window.json.log: OK
+./green-final-09.stdout.log: OK
+./green-final-window.json.log: OK
+./green-final.stdout.log: OK
+./green-receipt-failure-02-window.json.log: OK
+./green-receipt-failure-02.stdout.log: OK
+./green-receipt-failure-window.json.log: OK
+./green-receipt-failure.stdout.log: OK
+./green-receipt-window.json.log: OK
+./green-receipt.stdout.log: OK
+./green-reporter-window.json.log: OK
+./green-reporter.stdout.log: OK
+./measurement-consumer-window.json.log: OK
+./measurement-consumer.stdout.log: OK
+./predecessor-close15/PREDECESSOR.sha256: OK
+./predecessor-close15/README.md: OK
+./predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts: OK
+./predecessor-close15/files/changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md: OK
+./predecessor-close15/files/changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md: OK
+./predecessor-close15/files/changes/2026-09-23-classic-functional-completion/spec.md: OK
+./predecessor-close15/files/playwright.config.ts: OK
+./predecessor-close15/identity/SOURCE-MANIFEST.sha256: OK
+./red-window.json.log: OK
+./red.stdout.log: OK
+./root-types-window.json.log: OK
+./root-types.stdout.log: OK
+./scope-final-window.json.log: OK
+./scope-final.stdout.log: OK
+./scope-format-window.json.log: OK
+./scope-format.stdout.log: OK
+./seal-static-02-window.json.log: OK
+./seal-static-02.stdout.log: OK
+./seal-static-window.json.log: OK
+./seal-static.stdout.log: OK
+./static-final-02-window.json.log: OK
+./static-final-02.stdout.log: OK
+./static-final-03-window.json.log: OK
+./static-final-03.stdout.log: OK
+./static-final-04-window.json.log: OK
+./static-final-04.stdout.log: OK
+./static-final-window.json.log: OK
+./static-final.stdout.log: OK
+./structure-final-window.json.log: OK
+./terminal-receipt-structure-check.mjs: OK
+./terminal-receipt-structure-final.json.log: OK
+./terminal-receipt-structure-readback.json.log: OK
+./types-eslint-final-window.json.log: OK
+./types-eslint-final.stdout.log: OK
+./types-final-window.json.log: OK
+./types-final.stdout.log: OK
+identity/SOURCE-MANIFEST.sha256: OK
+identity/MANIFEST.sha256: OK
+identity/delivery-validation.json: OK
+files/apps/web/tests/e2e/classic-runtime.spec.ts: OK
+files/playwright.config.ts: OK
+files/changes/2026-09-23-classic-functional-completion/spec.md: OK
+files/changes/2026-09-23-classic-functional-completion/canonical-budget-contract.md: OK
+files/changes/2026-09-23-classic-functional-completion/canonical-budget-evidence.md: OK
+Checking formatting...
+All matched files use Prettier code style!
+SOURCE15=PASS
+MANIFEST79=PASS
+DELIVERY=PASS
+PREDECESSOR_CLOSE15=PASS
+BROWSER23_MAP_CLOSE15_IDENTITIES=PASS
+FINAL_GREEN=PASS
+FINAL_STATIC=PASS
+FORMAT=PASS
+INDEX_EMPTY=PASS
+HEAD=PASS

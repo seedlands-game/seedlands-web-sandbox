@@ -24,6 +24,12 @@ import {
   type VoxelGameplayDefinition,
   type VoxelGameplayRegistry,
 } from './voxel-gameplay';
+import {
+  createVoxelSemanticsRegistry,
+  type VoxelSemanticsDefinition,
+  type VoxelSemanticsRegistry,
+} from '../../world/voxel-semantics';
+import type { TransportDefinitionRegistryV1 } from './modules/transport-model';
 
 export type GameplayContent = Readonly<{
   items: ItemDefinitionRegistry;
@@ -33,6 +39,8 @@ export type GameplayContent = Readonly<{
   meleeDefinitions: readonly MeleeDefinition[];
   actorProfiles: ActorProfileRegistry;
   voxelGameplay: VoxelGameplayRegistry;
+  voxelSemantics: VoxelSemanticsRegistry;
+  transportDefinitions?: TransportDefinitionRegistryV1;
 }>;
 
 export type GameplayContentInput = Readonly<{
@@ -45,6 +53,7 @@ export type GameplayContentInput = Readonly<{
   defaultPlayerMeleeDefinitionId?: string;
   starterEcology?: StarterEcologyConfigurationInput;
   voxelGameplayDefinitions?: readonly VoxelGameplayDefinition[];
+  voxelSemanticsDefinitions?: readonly VoxelSemanticsDefinition[];
 }>;
 
 export function createGameplayContent(input: GameplayContentInput): GameplayContent {
@@ -75,6 +84,7 @@ export function createGameplayContent(input: GameplayContentInput): GameplayCont
     meleeDefinitions: melee.list(),
     actorProfiles,
     voxelGameplay: createVoxelGameplayRegistry(input.voxelGameplayDefinitions),
+    voxelSemantics: createVoxelSemanticsRegistry(input.voxelSemanticsDefinitions ?? []),
     ...(input.stations ? { stations: createStationContent(input.stations, items) } : {}),
   });
 }
@@ -86,6 +96,7 @@ export const defaultGameplayContent: GameplayContent = Object.freeze({
   meleeDefinitions: listMeleeDefinitions(),
   actorProfiles: createActorProfileRegistry([], defaultItemDefinitionRegistry, listMeleeDefinitions()),
   voxelGameplay: createVoxelGameplayRegistry(),
+  voxelSemantics: createVoxelSemanticsRegistry(),
 });
 
 /** Uncomposed compatibility content is intentionally empty; products must select a Playbook. */
@@ -98,6 +109,7 @@ export const createFirstPartyGameplayContent = (
     meleeDefinitions,
     actorProfiles: [],
     voxelGameplayDefinitions: [],
+    voxelSemanticsDefinitions: [],
   });
 
 export function resolveGameplayContent(
@@ -138,6 +150,8 @@ export function resolveGameplayContent(
     meleeDefinitions: melee.list(),
     actorProfiles,
     voxelGameplay: resolved.voxelGameplay,
+    voxelSemantics: resolved.voxelSemantics,
     ...(resolved.stations ? { stations: resolved.stations } : {}),
+    ...(resolved.transportDefinitions ? { transportDefinitions: resolved.transportDefinitions } : {}),
   });
 }

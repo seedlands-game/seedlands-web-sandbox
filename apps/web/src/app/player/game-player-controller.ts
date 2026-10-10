@@ -6,7 +6,11 @@ import type { WorldEnvironment } from '../scene/world-environment';
 import type { World } from '../world/world-runtime';
 import type { BrowserGameplay } from '../gameplay/browser-gameplay';
 import { PlayerController } from './player-controller';
-import type { AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { performTransportTargetInteraction } from '../gameplay/transport-target-interaction';
+import type {
+  AuthorityActionResult,
+  AuthorityReady,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
 type Options = Readonly<{
   camera: pc.Entity;
@@ -16,6 +20,7 @@ type Options = Readonly<{
   getWorld: () => World | null;
   getEnvironment: () => WorldEnvironment | null;
   isPaused: () => boolean;
+  mouseSensitivity?: Readonly<{ value: number }>;
   uiBridge: UiBridge;
   getGameplay: () => BrowserGameplay | null;
   getUiSession: () => UiWorldSession | null;
@@ -44,8 +49,22 @@ export function applyAuthorityInputDecision(
   if (decision.requiresResync) controller?.resynchronizeInput();
 }
 
+export function createAuthorityPlayerCallbacks(
+  controller: () => PlayerController | null,
+  gameplay: () => BrowserGameplay | null,
+) {
+  return {
+    onPointerAttackResult: (result: AuthorityActionResult['result']) => gameplay()?.consumeAttackResult(result),
+    onInputDecision: (decision: Readonly<{ requiresResync: boolean }>) =>
+      applyAuthorityInputDecision(controller(), decision),
+    onPlayerDeath: () => controller()?.releaseInput(),
+  };
+}
+
 export function createGamePlayerController(options: Options): PlayerController {
   const gameplay = () => options.getGameplay();
+  const feedback = (message: string, tone: 'info' | 'success' | 'error') =>
+    options.getUiSession()?.publishFeedback(options.nextInteractionSequence(), { message, tone, durationMs: 900 });
   return new PlayerController({
     camera: options.camera,
     canvas: options.canvas,
@@ -53,6 +72,7 @@ export function createGamePlayerController(options: Options): PlayerController {
     getWorld: options.getWorld,
     getEnvironment: options.getEnvironment,
     isPaused: options.isPaused,
+    mouseSensitivity: options.mouseSensitivity,
     onToggleMap: options.actions.toggleMap,
     onToggleDebug: options.actions.toggleDebug,
     onToggleCollisionDebug: options.actions.toggleCollisionDebug,
@@ -63,11 +83,31 @@ export function createGamePlayerController(options: Options): PlayerController {
     onSelectHotbarSlot: options.actions.selectHotbarSlot,
     onAttackTarget: (origin, direction, maxDistance) =>
       gameplay()?.attackTarget(origin, direction, maxDistance) ?? false,
+    onHeldAttackTarget: (origin, direction, maxDistance) =>
+      gameplay()?.heldAttackTarget(origin, direction, maxDistance) ?? false,
+    onStopHeldAttack: () => gameplay()?.stopHeldAttack(),
+    canTargetFluidSource: () => gameplay()?.canTargetFluidSource() ?? false,
+    isCreativeMode: () => options.authority.gameplay.player.mode?.value === 'creative',
     onAimTarget: (target) => gameplay()?.setAimTarget(target),
     onBeginBreak: (position) => gameplay()?.beginBreak(position),
     onCancelBreak: () => gameplay()?.cancelBreak(),
     onPlace: (position) => gameplay()?.place(position),
-    onUseTarget: (position) => gameplay()?.useTarget(position) ?? false,
+    onUseTarget: (target, intent) => gameplay()?.useTarget(target, intent) ?? Promise.resolve('fallback'),
+    onUseEntityTarget: (origin, direction, maxDistance, intent) =>
+      performTransportTargetInteraction({
+        gameplay: options.authority.gameplay,
+        origin,
+        direction,
+        maxDistance,
+        intent,
+        perform: (action) => options.authority.performAction(action),
+        refresh: () => gameplay()?.refresh(),
+        succeeded: () => {
+          options.queueSave();
+          feedback(intent === 'alternate' ? '已下车' : '已上车', 'success');
+        },
+        failed: (reason) => feedback(`无法交互 · ${reason}`, 'error'),
+      }),
     onUseHeldItem: () => gameplay()?.useHeldItem() ?? false,
     isUiBlockingInput: () =>
       Boolean(
@@ -78,13 +118,13 @@ export function createGamePlayerController(options: Options): PlayerController {
       options.actions.closeMap();
       options.actions.closeCommandShell();
     },
-    onFeedback: (message, tone) =>
-      options.getUiSession()?.publishFeedback(options.nextInteractionSequence(), { message, tone, durationMs: 900 }),
+    onFeedback: feedback,
     onQueueSave: options.queueSave,
     onFlushSave: options.flushSave,
     authority: {
       epoch: options.authority.epoch,
       snapshot: () => options.authority.snapshot,
+      inputPhysicsTick: () => options.authority.inputPhysicsTick,
       sendInput: (command) => options.authority.sendInput(command),
       setPlayerPosition: (position) => options.authority.setPlayerPosition(position),
     },

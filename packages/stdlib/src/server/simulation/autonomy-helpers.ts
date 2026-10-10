@@ -106,6 +106,7 @@ export function registerAutonomyActor(
   const actor: ActorState = {
     entityId,
     archetype: input.archetype,
+    ...(profile.disposition ? { disposition: profile.disposition } : {}),
     hunger,
     behavior: profile.initialBehavior ?? 'idle',
     targetEntityId: null,

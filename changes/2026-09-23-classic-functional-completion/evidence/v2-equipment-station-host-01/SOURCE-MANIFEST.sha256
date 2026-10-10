@@ -1,0 +1,5 @@
+1aeccc239031efc2297c2afed546bed58c8b6c25274da88e5a106f9cc46f88b5  packages/stdlib/src/server/gameplay/modules/registered-station-runtime.ts
+ca6556a4e337706de3ad2a76bec38edad4a99c83fde8b396e61043ed23bf5b5f  packages/stdlib/tests/server/registered-station-equipment-host.test.ts
+7d50462dfda509bf2c55a14fd3cd44e414341daeda151a48d16071dd26de9dda  changes/2026-09-23-classic-functional-completion/equipment-station-host-contract.md
+657ab10225e2fe5c3d0414a693b481bc7c800d6e3aeb85261d34ea53260aaa64  changes/2026-09-23-classic-functional-completion/equipment-station-host-evidence.md
+5e7ca52b9165fe94749c55ce90b583fc8e4633f803a373503d433ecb98a7b268  changes/2026-09-23-classic-functional-completion/execution-state.md

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "09ec9943-0c4c-4284-beae-f06e209c5acc",
+  "pid": 64504,
+  "startedAt": "2026-09-25T13:44:17.227Z",
+  "windowId": "09ec9943-0c4c-4284-beae-f06e209c5acc",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-policy-spine-01/format-write-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T13:44:17.674Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T13:44:17.228Z",
+      "loadAverage": [
+        3.7197265625,
+        3.34423828125,
+        3.2890625
+      ],
+      "freeMemoryBytes": 440336384,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T13:44:17.673Z",
+      "loadAverage": [
+        3.74169921875,
+        3.35498046875,
+        3.29296875
+      ],
+      "freeMemoryBytes": 437813248,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

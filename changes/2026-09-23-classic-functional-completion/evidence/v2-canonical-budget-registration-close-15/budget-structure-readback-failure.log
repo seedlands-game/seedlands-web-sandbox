@@ -1,0 +1,12 @@
+file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/budget-structure-check.mjs:15
+  throw new Error(message);
+        ^
+
+Error: Preserved config mismatch: {"testMatch":["apps/web/tests/e2e/classic-runtime.spec.ts"],"fullyParallel":false,"workers":1,"retriesExpression":"proce.env.CI ? 1 : 0","failOnFlakyTests":true,"actionTimeoutMs":10000,"navigationTimeoutMs":30000,"trace":"retain-on-failure","webServerTimeoutMs":30000}.
+    at fail (file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/budget-structure-check.mjs:15:9)
+    at file:///Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-budget-registration-close-15/budget-structure-check.mjs:139:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v24.21.0

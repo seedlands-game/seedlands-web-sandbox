@@ -1,0 +1,840 @@
+diff --git a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+index e90399e8..b476cee0 100644
+--- a/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
++++ b/apps/web/tests/e2e/classic-support/equipment-journey-support.ts
+@@ -15,6 +15,15 @@ import {
+ } from './harness';
+ import { itemCount } from './journey';
+ import { classicScenario, type V2EquipmentResource } from './scenario';
++import {
++  equipmentResourcePickup,
++  followEquipmentRoute,
++  equipmentWorkbenchCorridor,
++  equipmentWorkbenchMiningApproach,
++  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++  isEquipmentMiningReady,
++  matchesEquipmentRouteArrival,
++} from './equipment-resource-route';
+ 
+ export type EquipmentStepEvidence = Readonly<{ step: string; snapshot: HarnessEquipmentSnapshot }>;
+ export type V2EquipmentJourneyEvidence = Readonly<{
+@@ -181,6 +190,22 @@ async function switchToSurvival(page: Page): Promise<void> {
+   await closeInventory(page);
+ }
+ 
++async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
++  return followEquipmentRoute(target, {
++    now: Date.now,
++    observe: () => snapshot(page),
++    walk: (key, timeout) => walkTo(page, target, { key, jump: true, timeout, ...EQUIPMENT_RESOURCE_ROUTE_OPTIONS }),
++    waitForArrival: (baseline, key, timeout) =>
++      waitForSnapshot(page, (current) => matchesEquipmentRouteArrival(baseline, current, target, key), timeout),
++  });
++}
++
++async function walkToEquipmentWorkbench(page: Page) {
++  const { workbench } = classicScenario.v2Equipment;
++  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(workbench.approach));
++  return walkEquipmentRoute(page, workbench.approach);
++}
++
+ async function placeWorkbench(page: Page): Promise<void> {
+   const { workbench } = classicScenario.v2Equipment;
+   const panel = await inventory(page);
+@@ -188,15 +213,16 @@ async function placeWorkbench(page: Page): Promise<void> {
+   await expect(panel.locator('[data-slot="0"]')).toHaveAttribute('data-item', 'workbench');
+   await closeInventory(page);
+   await page.keyboard.press('Digit1');
+-  await walkTo(page, workbench.approach, { jump: true });
++  await walkToEquipmentWorkbench(page);
+   await aimAtVoxelWithRealMouse(page, workbench.support, workbench.target);
+   await clickCanvasCenter(page, 'right');
+   await expect.poll(() => voxelAt(page, workbench.target)).toBe(11);
+ }
+ 
+ async function placeResourceStrip(page: Page): Promise<void> {
++  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
+   for (const resource of classicScenario.v2Equipment.resourceStrip) {
+-    await walkTo(page, resource.approach, { jump: true });
++    await walkEquipmentRoute(page, resource.approach);
+     await selectCreativeItem(page, resource.itemId);
+     await aimAtVoxelWithRealMouse(page, resource.support, resource.target);
+     await clickCanvasCenter(page, 'right');
+@@ -213,19 +239,23 @@ async function placeResourceStrip(page: Page): Promise<void> {
+ }
+ 
+ async function mineResources(page: Page, resources: readonly V2EquipmentResource[]): Promise<void> {
++  await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
+   for (const resource of resources) {
+     const before = itemCount(await playerState(page), resource.dropItemId);
+-    await walkTo(page, resource.approach, { jump: true });
++    const approach = await walkEquipmentRoute(page, resource.approach);
++    if (!isEquipmentMiningReady(approach, resource.target))
++      throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
+     await mineVoxel(page, resource.target);
+     await expectPresentedDropOrPickup(page, resource.dropItemId, before);
+-    await walkTo(page, [resource.target[0] + 0.5, resource.target[2] + 0.5], { jump: true });
++    await walkEquipmentRoute(page, equipmentResourcePickup(resource));
+     await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
++    await walkEquipmentRoute(page, resource.approach);
+   }
+ }
+ 
+ async function openWorkbench(page: Page): Promise<Locator> {
+   const workbench = classicScenario.v2Equipment.workbench;
+-  await walkTo(page, workbench.approach, { jump: true });
++  await walkToEquipmentWorkbench(page);
+   await aimAtVoxelWithRealMouse(page, workbench.target);
+   await clickCanvasCenter(page, 'right');
+   const panel = page.getByRole('dialog', { name: '工作台' });
+@@ -388,10 +418,13 @@ export async function prepareCraftedIronArmor(
+ export async function reclaimEquipmentWorkbench(page: Page): Promise<void> {
+   const { workbench } = classicScenario.v2Equipment;
+   const before = itemCount(await playerState(page), 'workbench');
+-  await walkTo(page, workbench.approach, { jump: true });
++  await walkToEquipmentWorkbench(page);
++  const miningApproach = await walkEquipmentRoute(page, equipmentWorkbenchMiningApproach(workbench));
++  if (!isEquipmentMiningReady(miningApproach, workbench.target))
++    throw new Error(`Equipment workbench approach is outside mining range for ${workbench.target.join(',')}.`);
+   await mineVoxel(page, workbench.target);
+   await expectPresentedDropOrPickup(page, 'workbench', before);
+-  await walkTo(page, [workbench.target[0] + 0.5, workbench.target[2] + 0.5], { jump: true });
++  await walkEquipmentRoute(page, equipmentResourcePickup(workbench));
+   await expect.poll(async () => itemCount(await playerState(page), 'workbench')).toBeGreaterThan(before);
+   await expect.poll(() => voxelAt(page, workbench.target)).toBe(0);
+ }
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+new file mode 100644
+index 00000000..deb93d51
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts
+@@ -0,0 +1,398 @@
++import { describe, expect, it } from 'vitest';
++import { bodyConfigFor } from '@seedlands/stdlib/physics/body-registry';
++import { reachedRouteTarget } from './route-progress';
++import {
++  equipmentResourcePickup,
++  equipmentRouteNeighborhoodClearsVoxels,
++  equipmentRouteDirection,
++  equipmentRouteSegmentClearsVoxels,
++  equipmentWorkbenchCorridor,
++  equipmentWorkbenchMiningApproach,
++  EQUIPMENT_RESOURCE_ROUTE_OPTIONS,
++  EQUIPMENT_ROUTE_MAX_X_ERROR,
++  followEquipmentRoute,
++  isEquipmentMiningReady,
++  matchesEquipmentRouteArrival,
++} from './equipment-resource-route';
++import { classicScenario, type Point, type RoutePoint } from './scenario';
++
++const browser15EastEnd: Point = [98.5, 32.6, -0.5];
++const firstWoodApproach: RoutePoint = [80.5, -0.5];
++const playerBody = bodyConfigFor('player').localAabb;
++const playerHalfWidth = Math.max(-playerBody.min.x, playerBody.max.x, -playerBody.min.z, playerBody.max.z);
++const routeSnapshot = (position: Point, physicsTick: number, ack: number, serverPosition = position) => ({
++  player: position,
++  serverPlayerPosition: serverPosition,
++  onGround: true,
++  colliding: false,
++  authority: { physicsTick, acknowledgedInputSequence: ack },
++});
++const obstacle = (placement: Readonly<{ target: Point }>) => ({ position: placement.target });
++
++describe('Classic V2 equipment resource route', () => {
++  it('does not let the default eastbound crossing rule accept an east-to-west transition', () => {
++    expect(
++      reachedRouteTarget(
++        browser15EastEnd,
++        firstWoodApproach,
++        'KeyW',
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++      ),
++    ).toBe(true);
++
++    const direction = equipmentRouteDirection(browser15EastEnd, firstWoodApproach);
++    expect(direction).toBe('KeyS');
++    expect(
++      reachedRouteTarget(
++        browser15EastEnd,
++        firstWoodApproach,
++        direction,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++      ),
++    ).toBe(false);
++    expect(
++      equipmentRouteSegmentClearsVoxels(
++        [83.60385119512642, 1.4372953280896212],
++        [77.2, 2.5],
++        classicScenario.v2Equipment.resourceStrip.map(obstacle),
++        playerHalfWidth,
++      ),
++    ).toBe(false);
++  });
++
++  it.each([
++    { from: [78.5, 32.6, -0.5] as Point, target: [80.5, -0.5] as RoutePoint, expected: 'KeyW' },
++    { from: browser15EastEnd, target: firstWoodApproach, expected: 'KeyS' },
++  ])('chooses $expected for $from -> $target', ({ from, target, expected }) => {
++    expect(equipmentRouteDirection(from, target)).toBe(expected);
++  });
++
++  it.each([
++    { direction: 'KeyW' as const, position: [82.5, 32.6, -0.5] as Point },
++    { direction: 'KeyS' as const, position: [78.5, 32.6, -0.5] as Point },
++  ])('rejects an unbounded $direction crossing beyond the finite arrival neighborhood', ({ direction, position }) => {
++    const baseline = routeSnapshot([direction === 'KeyW' ? 79 : 82, 32.6, -0.5], 100, 50);
++    const current = routeSnapshot(position, 101, 50);
++    expect(
++      reachedRouteTarget(
++        current.player,
++        firstWoodApproach,
++        direction,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++      ),
++    ).toBe(true);
++    expect(matchesEquipmentRouteArrival(baseline, current, firstWoodApproach, direction)).toBe(false);
++  });
++
++  it.each([
++    { side: 'west', clientX: 80.441, serverX: 80.45, direction: 'KeyW' as const },
++    { side: 'east', clientX: 80.559, serverX: 80.55, direction: 'KeyS' as const },
++  ])('keeps both $side arrival projections fresh and inside mining range', ({ clientX, serverX, direction }) => {
++    const target = classicScenario.v2Equipment.resourceStrip[0]!.target;
++    const approach = classicScenario.v2Equipment.resourceStrip[0]!.approach;
++    const baseline = routeSnapshot([direction === 'KeyW' ? 79 : 82, 32.6, -0.5], 100, 50);
++    const current = routeSnapshot([clientX, 32.6, -0.5], 101, 50, [serverX, 32.600001, -0.5]);
++    expect(matchesEquipmentRouteArrival(baseline, current, approach, direction)).toBe(true);
++    expect(isEquipmentMiningReady(current, target)).toBe(true);
++  });
++
++  it('keeps both projected route-domain edges in mining range for all ten resources', () => {
++    for (const resource of classicScenario.v2Equipment.resourceStrip) {
++      for (const direction of ['KeyW', 'KeyS'] as const) {
++        const sign = direction === 'KeyW' ? 1 : -1;
++        const baseline = routeSnapshot([resource.approach[0] - sign * 2, 32.6, resource.approach[1]], 100, 50);
++        const current = routeSnapshot(
++          [
++            resource.approach[0] + sign * (EQUIPMENT_ROUTE_MAX_X_ERROR - 0.001),
++            32.6,
++            resource.approach[1] + sign * 0.079,
++          ],
++          101,
++          50,
++          [resource.approach[0] + sign * 0.05, 32.600001, resource.approach[1] + sign * 0.07],
++        );
++        expect(matchesEquipmentRouteArrival(baseline, current, resource.approach, direction)).toBe(true);
++        expect(isEquipmentMiningReady(current, resource.target)).toBe(true);
++      }
++    }
++  });
++
++  it('corrects an overshot walk with the opposite key inside one shared deadline', async () => {
++    let now = 1000;
++    const walks: Array<{ direction: string; timeout: number }> = [];
++    const initial = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const overshot = routeSnapshot([82.5, 32.6, -0.5], 101, 51);
++    const corrected = routeSnapshot([80.5, 32.6, -0.5], 102, 51);
++    const result = await followEquipmentRoute(firstWoodApproach, {
++      now: () => now,
++      observe: async () => initial,
++      walk: async (direction, timeout) => {
++        walks.push({ direction, timeout });
++        now += 1000;
++        return walks.length === 1 ? overshot : corrected;
++      },
++      waitForArrival: async () => {
++        throw new Error('Overshot positions must be corrected with real input instead of stationary waiting.');
++      },
++    });
++
++    expect(walks).toEqual([
++      { direction: 'KeyW', timeout: 45000 },
++      { direction: 'KeyS', timeout: 44000 },
++    ]);
++    expect(result).toBe(corrected);
++  });
++
++  it('caps a server-projection wait by both 20 seconds and the shared route deadline', async () => {
++    let now = 1000;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const serverLag = routeSnapshot([80.5, 32.6, -0.5], 101, 51, [80.1, 32.6, -0.5]);
++    const matched = routeSnapshot([80.5, 32.6, -0.5], 102, 51);
++    const waits: number[] = [];
++    const result = await followEquipmentRoute(firstWoodApproach, {
++      now: () => now,
++      observe: async () => baseline,
++      walk: async () => {
++        now += 30000;
++        return serverLag;
++      },
++      waitForArrival: async (_currentBaseline, _direction, timeout) => {
++        waits.push(timeout);
++        return matched;
++      },
++    });
++
++    expect(waits).toEqual([15000]);
++    expect(result).toBe(matched);
++  });
++
++  it.each([{ serverX: 79 }, { serverX: 82.5 }])(
++    'waits for server x=$serverX without issuing a zero-input walk after the client arrives',
++    async ({ serverX }) => {
++      let now = 1000;
++      const walks: Array<{ direction: string; timeout: number }> = [];
++      const waits: Array<{ direction: string; timeout: number }> = [];
++      const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++      const serverOutside = routeSnapshot([80.5, 32.6, -0.5], 101, 51, [serverX, 32.6, -0.5]);
++      const matched = routeSnapshot([80.55, 32.6, -0.5], 102, 51);
++      let current = baseline;
++      const result = await followEquipmentRoute(firstWoodApproach, {
++        now: () => now,
++        observe: async () => baseline,
++        walk: async (direction, timeout) => {
++          walks.push({ direction, timeout });
++          now += 1000;
++          if (
++            reachedRouteTarget(
++              current.player,
++              firstWoodApproach,
++              direction,
++              EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++              EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++            )
++          )
++            return current;
++          current = serverOutside;
++          return current;
++        },
++        waitForArrival: async (_currentBaseline, direction, timeout) => {
++          waits.push({ direction, timeout });
++          current = matched;
++          return current;
++        },
++      });
++
++      expect(walks).toEqual([{ direction: 'KeyW', timeout: 45000 }]);
++      expect(waits).toEqual([{ direction: 'KeyW', timeout: 20000 }]);
++      expect(result).toBe(matched);
++    },
++  );
++
++  it('fails when the bounded wait does not bring the server projection into the finite neighborhood', async () => {
++    let now = 1000;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const serverOutside = routeSnapshot([80.5, 32.6, -0.5], 101, 51, [79, 32.6, -0.5]);
++    let walks = 0;
++    let waits = 0;
++    await expect(
++      followEquipmentRoute(firstWoodApproach, {
++        now: () => now,
++        observe: async () => baseline,
++        walk: async () => {
++          walks += 1;
++          now += 1000;
++          return serverOutside;
++        },
++        waitForArrival: async () => {
++          waits += 1;
++          return { ...serverOutside, authority: { ...serverOutside.authority, physicsTick: 102 } };
++        },
++      }),
++    ).rejects.toThrow('Equipment route wait returned a non-matching snapshot.');
++    expect(walks).toBe(1);
++    expect(waits).toBe(1);
++  });
++
++  it('charges a server-only projection wait to the same route deadline', async () => {
++    let now = 1000;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const serverOutside = routeSnapshot([80.5, 32.6, -0.5], 101, 51, [79, 32.6, -0.5]);
++    const matched = routeSnapshot([80.5, 32.6, -0.5], 102, 51);
++    const waits: number[] = [];
++    await expect(
++      followEquipmentRoute(firstWoodApproach, {
++        now: () => now,
++        observe: async () => baseline,
++        walk: async () => {
++          now += 30000;
++          return serverOutside;
++        },
++        waitForArrival: async (_currentBaseline, _direction, timeout) => {
++          waits.push(timeout);
++          now += timeout;
++          return matched;
++        },
++      }),
++    ).rejects.toThrow('Equipment route timed out');
++    expect(waits).toEqual([15000]);
++  });
++
++  it('keeps walking when the client is finite but has not crossed in the active direction', async () => {
++    let now = 1000;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const beforeCrossing = routeSnapshot([80.2, 32.6, -0.5], 101, 51);
++    const matched = routeSnapshot([80.5, 32.6, -0.5], 102, 52);
++    const walks: string[] = [];
++    const result = await followEquipmentRoute(firstWoodApproach, {
++      now: () => now,
++      observe: async () => baseline,
++      walk: async (direction) => {
++        walks.push(direction);
++        now += 1000;
++        return walks.length === 1 ? beforeCrossing : matched;
++      },
++      waitForArrival: async () => {
++        throw new Error('A client that has not crossed must continue through the real walk driver.');
++      },
++    });
++
++    expect(walks).toEqual(['KeyW', 'KeyW']);
++    expect(result).toBe(matched);
++  });
++
++  it('rejects a matching result returned after the shared route deadline', async () => {
++    let now = 1000;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const matched = routeSnapshot([80.5, 32.6, -0.5], 101, 51);
++    await expect(
++      followEquipmentRoute(firstWoodApproach, {
++        now: () => now,
++        observe: async () => baseline,
++        walk: async () => {
++          now += 45_001;
++          return matched;
++        },
++        waitForArrival: async () => matched,
++      }),
++    ).rejects.toThrow('Equipment route timed out');
++  });
++
++  it('rejects stale, unready, one-sided, and out-of-range arrival snapshots', () => {
++    const resource = classicScenario.v2Equipment.resourceStrip[0]!;
++    const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
++    const ready = routeSnapshot([80.5, 32.6, -0.5], 101, 50);
++    expect(
++      matchesEquipmentRouteArrival(
++        baseline,
++        { ...ready, authority: { ...ready.authority, physicsTick: 100 } },
++        resource.approach,
++        'KeyW',
++      ),
++    ).toBe(false);
++    expect(matchesEquipmentRouteArrival(baseline, { ...ready, onGround: false }, resource.approach, 'KeyW')).toBe(
++      false,
++    );
++    expect(
++      matchesEquipmentRouteArrival(
++        baseline,
++        { ...ready, serverPlayerPosition: [79, 32.6, -0.5] },
++        resource.approach,
++        'KeyW',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        baseline,
++        { ...ready, serverPlayerPosition: [82.5, 32.6, -0.5] },
++        resource.approach,
++        'KeyW',
++      ),
++    ).toBe(false);
++    expect(
++      matchesEquipmentRouteArrival(
++        baseline,
++        { ...ready, authority: { ...ready.authority, acknowledgedInputSequence: 49 } },
++        resource.approach,
++        'KeyW',
++      ),
++    ).toBe(false);
++    expect(isEquipmentMiningReady({ ...ready, player: [75, 32.6, -0.5] }, resource.target)).toBe(false);
++  });
++
++  it('keeps every batch, pickup retreat, and workbench transition on the safe corridor', () => {
++    const resources = classicScenario.v2Equipment.resourceStrip;
++    const workbench = classicScenario.v2Equipment.workbench;
++    const workbenchCorridor = equipmentWorkbenchCorridor(workbench.approach);
++    const obstacles = [obstacle(workbench), ...resources.map(obstacle)];
++    const groups = [
++      resources.filter(({ itemId }) => itemId === 'wood-block'),
++      resources.filter(({ itemId }) => itemId === 'stone-block'),
++      resources.filter(({ itemId }) => itemId === 'iron-block'),
++    ];
++
++    for (const group of groups) {
++      expect(
++        equipmentRouteNeighborhoodClearsVoxels(workbench.approach, workbenchCorridor, obstacles, playerHalfWidth),
++      ).toBe(true);
++      let current = workbenchCorridor;
++      const cleared = new Set<string>();
++      for (const resource of group) {
++        expect(equipmentRouteNeighborhoodClearsVoxels(current, resource.approach, obstacles, playerHalfWidth)).toBe(
++          true,
++        );
++        cleared.add(resource.target.join(','));
++        const remaining = obstacles.filter(({ position }) => !cleared.has(position.join(',')));
++        const pickup = equipmentResourcePickup(resource);
++        expect(equipmentRouteNeighborhoodClearsVoxels(resource.approach, pickup, remaining, playerHalfWidth)).toBe(
++          true,
++        );
++        expect(equipmentRouteNeighborhoodClearsVoxels(pickup, resource.approach, remaining, playerHalfWidth)).toBe(
++          true,
++        );
++        current = resource.approach;
++      }
++      expect(equipmentRouteNeighborhoodClearsVoxels(current, workbenchCorridor, obstacles, playerHalfWidth)).toBe(true);
++      expect(
++        equipmentRouteNeighborhoodClearsVoxels(workbenchCorridor, workbench.approach, obstacles, playerHalfWidth),
++      ).toBe(true);
++    }
++
++    const workbenchMiningApproach = equipmentWorkbenchMiningApproach(workbench);
++    expect(
++      equipmentRouteNeighborhoodClearsVoxels(workbench.approach, workbenchMiningApproach, obstacles, playerHalfWidth),
++    ).toBe(true);
++    const workbenchSnapshot = routeSnapshot([workbenchMiningApproach[0], 32.6, workbenchMiningApproach[1]], 101, 50);
++    expect(isEquipmentMiningReady(workbenchSnapshot, workbench.target)).toBe(true);
++    expect(
++      equipmentRouteNeighborhoodClearsVoxels(
++        workbenchMiningApproach,
++        equipmentResourcePickup(workbench),
++        resources.map(obstacle),
++        playerHalfWidth,
++      ),
++    ).toBe(true);
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/equipment-resource-route.ts b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+new file mode 100644
+index 00000000..d2326d55
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/equipment-resource-route.ts
+@@ -0,0 +1,181 @@
++import { reachedRouteTarget, type RouteDirection } from './route-progress';
++import { voxelInteractionDistance } from './target-aim';
++import type { Point, RoutePoint } from './scenario';
++
++export const EQUIPMENT_RESOURCE_ROUTE_OPTIONS = Object.freeze({
++  tolerance: 0.06,
++  corridorTolerance: 0.08,
++  pulseMs: 80,
++});
++export const EQUIPMENT_ROUTE_TIMEOUT_MS = 45_000;
++// Matches mineVoxel's existing approach tolerance, contains one 80ms pulse (max 0.36m),
++// and leaves 0.73m before the next resource's player-expanded AABB.
++export const EQUIPMENT_ROUTE_MAX_X_ERROR = 0.45;
++
++export type EquipmentRouteSnapshot = Readonly<{
++  player: Point;
++  serverPlayerPosition: Point;
++  onGround: boolean;
++  colliding: boolean;
++  authority: Readonly<{ physicsTick: number; acknowledgedInputSequence: number }>;
++}>;
++
++export type EquipmentRouteObstacle = Readonly<{ position: Point }>;
++export type EquipmentRouteDriver = Readonly<{
++  now(): number;
++  observe(): Promise<EquipmentRouteSnapshot | null>;
++  walk(direction: RouteDirection, timeoutMs: number): Promise<EquipmentRouteSnapshot>;
++  waitForArrival(
++    baseline: EquipmentRouteSnapshot,
++    direction: RouteDirection,
++    timeoutMs: number,
++  ): Promise<EquipmentRouteSnapshot>;
++}>;
++
++export const equipmentRouteDirection = (position: Point, target: RoutePoint): RouteDirection =>
++  position[0] <= target[0] ? 'KeyW' : 'KeyS';
++
++export const equipmentWorkbenchCorridor = (workbenchApproach: RoutePoint): RoutePoint => [workbenchApproach[0], -0.5];
++
++export const equipmentResourcePickup = (placement: Readonly<{ target: Point }>): RoutePoint => [
++  placement.target[0] + 0.5,
++  placement.target[2] + 0.5,
++];
++
++export const equipmentWorkbenchMiningApproach = (
++  workbench: Readonly<{ target: Point; approach: RoutePoint }>,
++): RoutePoint => [workbench.target[0] + 0.5, workbench.approach[1] + 1];
++
++export const isInsideEquipmentRouteNeighborhood = (position: Point, target: RoutePoint): boolean =>
++  Math.abs(position[0] - target[0]) <= EQUIPMENT_ROUTE_MAX_X_ERROR &&
++  Math.abs(position[2] - target[1]) < EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance;
++
++export function matchesEquipmentRouteArrival(
++  baseline: EquipmentRouteSnapshot,
++  current: EquipmentRouteSnapshot,
++  target: RoutePoint,
++  direction: RouteDirection,
++): boolean {
++  return (
++    current.onGround &&
++    !current.colliding &&
++    current.authority.physicsTick > baseline.authority.physicsTick &&
++    current.authority.acknowledgedInputSequence >= baseline.authority.acknowledgedInputSequence &&
++    isInsideEquipmentRouteNeighborhood(current.player, target) &&
++    isInsideEquipmentRouteNeighborhood(current.serverPlayerPosition, target) &&
++    reachedRouteTarget(
++      current.player,
++      target,
++      direction,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++    ) &&
++    reachedRouteTarget(
++      current.serverPlayerPosition,
++      target,
++      direction,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++      EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++    )
++  );
++}
++
++export async function followEquipmentRoute(
++  target: RoutePoint,
++  driver: EquipmentRouteDriver,
++): Promise<EquipmentRouteSnapshot> {
++  const deadline = driver.now() + EQUIPMENT_ROUTE_TIMEOUT_MS;
++  let baseline = await driver.observe();
++  if (!baseline) throw new Error('Classic snapshot is unavailable before the equipment route.');
++  while (driver.now() < deadline) {
++    const direction = equipmentRouteDirection(baseline.player, target);
++    const remainingBeforeWalk = deadline - driver.now();
++    if (remainingBeforeWalk <= 0) break;
++    const walked = await driver.walk(direction, remainingBeforeWalk);
++    if (driver.now() >= deadline) break;
++    if (matchesEquipmentRouteArrival(baseline, walked, target, direction)) return walked;
++    if (
++      isInsideEquipmentRouteNeighborhood(walked.player, target) &&
++      reachedRouteTarget(
++        walked.player,
++        target,
++        direction,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
++        EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++      )
++    ) {
++      const remaining = Math.min(20_000, deadline - driver.now());
++      if (remaining <= 0) break;
++      const matched = await driver.waitForArrival(baseline, direction, remaining);
++      if (driver.now() >= deadline) break;
++      if (!matchesEquipmentRouteArrival(baseline, matched, target, direction))
++        throw new Error('Equipment route wait returned a non-matching snapshot.');
++      return matched;
++    }
++    baseline = walked;
++  }
++  throw new Error(`Equipment route timed out before ${target.join(',')}.`);
++}
++
++export const isEquipmentMiningReady = (snapshot: EquipmentRouteSnapshot, target: Point): boolean =>
++  snapshot.onGround &&
++  !snapshot.colliding &&
++  [snapshot.player, snapshot.serverPlayerPosition].every((position) => {
++    const distance = voxelInteractionDistance(position, target);
++    return distance >= 2.5 && distance <= 4.5;
++  });
++
++export function equipmentRouteSegmentClearsVoxels(
++  from: RoutePoint,
++  to: RoutePoint,
++  obstacles: readonly EquipmentRouteObstacle[],
++  playerHalfWidth: number,
++): boolean {
++  if (!Number.isFinite(playerHalfWidth) || playerHalfWidth <= 0) return false;
++  return obstacles.every(({ position }) => {
++    const minimum: RoutePoint = [position[0] - playerHalfWidth, position[2] - playerHalfWidth];
++    const maximum: RoutePoint = [position[0] + 1 + playerHalfWidth, position[2] + 1 + playerHalfWidth];
++    let entry = 0;
++    let exit = 1;
++    for (const axis of [0, 1] as const) {
++      const delta = to[axis] - from[axis];
++      if (delta === 0) {
++        if (from[axis] < minimum[axis] || from[axis] > maximum[axis]) return true;
++        continue;
++      }
++      const first = (minimum[axis] - from[axis]) / delta;
++      const second = (maximum[axis] - from[axis]) / delta;
++      entry = Math.max(entry, Math.min(first, second));
++      exit = Math.min(exit, Math.max(first, second));
++      if (entry > exit) return true;
++    }
++    return entry > exit || exit < 0 || entry > 1;
++  });
++}
++
++export function equipmentRouteNeighborhoodClearsVoxels(
++  from: RoutePoint,
++  to: RoutePoint,
++  obstacles: readonly EquipmentRouteObstacle[],
++  playerHalfWidth: number,
++): boolean {
++  if (!Number.isFinite(playerHalfWidth) || playerHalfWidth <= 0) return false;
++  const minimum: RoutePoint = [
++    Math.min(from[0], to[0]) - EQUIPMENT_ROUTE_MAX_X_ERROR,
++    Math.min(from[1], to[1]) - EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++  ];
++  const maximum: RoutePoint = [
++    Math.max(from[0], to[0]) + EQUIPMENT_ROUTE_MAX_X_ERROR,
++    Math.max(from[1], to[1]) + EQUIPMENT_RESOURCE_ROUTE_OPTIONS.corridorTolerance,
++  ];
++  return obstacles.every(({ position }) => {
++    const obstacleMinimum: RoutePoint = [position[0] - playerHalfWidth, position[2] - playerHalfWidth];
++    const obstacleMaximum: RoutePoint = [position[0] + 1 + playerHalfWidth, position[2] + 1 + playerHalfWidth];
++    return (
++      maximum[0] < obstacleMinimum[0] ||
++      minimum[0] > obstacleMaximum[0] ||
++      maximum[1] < obstacleMinimum[1] ||
++      minimum[1] > obstacleMaximum[1]
++    );
++  });
++}
+diff --git a/apps/web/tests/e2e/classic-support/scenario.test.ts b/apps/web/tests/e2e/classic-support/scenario.test.ts
+index 77010c03..90f627d4 100644
+--- a/apps/web/tests/e2e/classic-support/scenario.test.ts
++++ b/apps/web/tests/e2e/classic-support/scenario.test.ts
+@@ -175,9 +175,10 @@ describe('Classic canonical scenario contract', () => {
+     const helperSource = readFileSync(new URL('./v1-slice.ts', import.meta.url), 'utf8');
+     const equipmentSource = readFileSync(new URL('./equipment-journey.ts', import.meta.url), 'utf8');
+     const equipmentSupportSource = readFileSync(new URL('./equipment-journey-support.ts', import.meta.url), 'utf8');
++    const equipmentRouteSource = readFileSync(new URL('./equipment-resource-route.ts', import.meta.url), 'utf8');
+     const baselineOffset = specSource.indexOf('const baseline = await waitForSnapshot');
+     expect(baselineOffset).toBeGreaterThan(0);
+-    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}\n${equipmentSource}\n${equipmentSupportSource}`;
++    const productJourney = `${specSource.slice(baselineOffset)}\n${helperSource}\n${equipmentSource}\n${equipmentSupportSource}\n${equipmentRouteSource}`;
+     for (const forbidden of [
+       '.fillWorld(',
+       '.setVoxelAt(',
+@@ -203,7 +204,7 @@ describe('Classic canonical scenario contract', () => {
+       supportSource.indexOf('async function placeResourceStrip'),
+       supportSource.indexOf('async function mineResources'),
+     );
+-    const walk = placement.indexOf('await walkTo(page, resource.approach, { jump: true })');
++    const walk = placement.indexOf('await walkEquipmentRoute(page, resource.approach)');
+     const select = placement.indexOf('await selectCreativeItem(page, resource.itemId)');
+     const placed = placement.indexOf('await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel)');
+     const survival = placement.indexOf('await switchToSurvival(page)');
+diff --git a/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md b/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+new file mode 100644
+index 00000000..4637d4d4
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/equipment-resource-route-contract.md
+@@ -0,0 +1,75 @@
++# V2 装备资源安全走廊合同
++
++阶段：`V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-02 / V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-03`
++
++状态：fixture、确定性与静态验证完成；Browser-15 保持 FAIL，Browser-16 未授权。
++
++## Close-03 真实 driver 语义
++
++- `walkTo` 的 while 条件只读取 client player 与 `reachedRouteTarget`。client 已位于 target 时，不论传入 `KeyW`
++  或 `KeyS` 都会零输入返回；server projection 不是移动控制 owner，不能用于选择按键。
++- 每个微段方向只由最新 client position 决定。client 在有限邻域外，或在邻域内但尚未满足当前方向 crossing 时，
++  wrapper 才继续调用真实 `walkTo`；client overshoot 仍按 client 位置反向纠正。
++- client 已在 `±0.45m/<0.08m` 邻域且完成 crossing，而仅 server 位于邻域外时，wrapper 只调用既有
++  `waitForSnapshot`。等待仍要求最终同一 snapshot 满足双方有限域、双方方向 crossing、fresh tick、ack 不倒退及 client
++  grounded/non-colliding；server 未追平不能成功。
++- server-only wait 使用 `min(20s, remaining)` 且计入原 45 秒总 deadline。wait 返回不匹配或在 deadline 耗尽后返回
++  均稳定失败；不重置预算、不 fallback、不把 server 投影伪装成可直接驱动的位置。
++- Close-02 的有限邻域、完整包络几何、路线、资源、坐标和通用 helper 边界保持；CLOSE-02 历史测试只代表当时 stub
++  覆盖，其“server-only 再 walk”预期由本节 supersede。
++
++## Close-02 有限域收口
++
++- Close-01 的 `matchesEquipmentRouteArrival` 仍只调用 `reachedRouteTarget`。该函数对 `KeyW` 允许任意
++  `x>=target`、对 `KeyS` 允许任意 `x<=target`，因此即使 z 在 corridor 内，也会错误接受远越过 waypoint 的 client
++  或 server projection。
++- client 与 server 必须各自位于 waypoint x 的 `±0.45m` 有限邻域，z 继续严格位于 `<0.08m` corridor。
++  `0.45m` 对齐既有 `mineVoxel` approach tolerance；在 player 最大速度 4.5m/s 与 80ms pulse 下单脉冲位移不超过
++  `0.36m`，同时距下一 resource 的 player-expanded AABB 尚有 `2-0.45-0.32-0.5=0.73m` 净空。
++- 若 `walkTo` 返回有限域外，wrapper 必须对同一个 waypoint 依据新 snapshot 重算方向并再次发真实键盘输入，不能
++  静止等待位置自行改变。所有纠正 leg 共用原 45 秒 deadline；readiness poll 取 `min(20s, remaining)`，不得重置
++  总预算或引入第二路线/random fallback；`walk` 或 poll 在 deadline 后才返回的匹配 snapshot 也必须拒绝。
++- 几何证明覆盖有限邻域的整个保守包络，不只枚举理想端点；client/server 各自远越界、正反向、Browser-15 斜线、
++  三批 10-resource、pickup 退回与 workbench 往返均为独立反例/正例。
++- Close-01 的 SOURCE/MANIFEST/delivery/合同/证据原字节复制至
++  `evidence/v2-equipment-resource-route-close-02/prior-release/` 并经 `cmp` 验证；旧 raw/manifests 不改写。
++
++## Browser-15 RED
++
++- 唯一窗口 `129ac7e8-effb-44a0-a011-3a8f56076510` 已完成完整 V1 test step 和 V2 的
++  `resources-placed` evidence。首个 wood target `[80,31,2]` 尚未执行采矿。
++- resource strip 放置结束时玩家位于东端 approach。`mineResources` 对西端首个 wood approach 仍使用默认 `KeyW`；
++  对当前 `reachedRouteTarget`，只要 x 位于 target 东侧且 z 已在 corridor 内就会被视为已越过，故会在远处提前返回。
++- `mineVoxel` 随后从超距位置推导 `[77.2,2.5]` 并选择 `KeyS`。该直线经过尚未采集的资源带；trace 中 player x
++  从约 `83.60` 到 `81.32` 后不再减少、z 继续漂移，最终耗尽 15 秒 helper route budget。没有 voxel aim、
++  left mouse down 或 Authority mining action。
++
++## 可验证行为
++
++1. V2 专用路线只复用现有 `walkTo` 与真实键鼠。每个 leg 在调用前从当前只读 snapshot 比较 x：当前 x 小于等于
++   waypoint x 使用 `KeyW`，当前 x 大于 waypoint x 使用 `KeyS`；不得随机 fallback。
++2. 固定 corridor 是所有 resource 声明 approach 共有的 z=`-0.5`。workbench corridor waypoint 为
++   `[workbench.approach.x,-0.5]`。从 workbench 进入资源带和从资源带返回 workbench 均先走这些固定 waypoint。
++3. 每个 batch 的 resource 顺序保持 scenario 声明顺序。每个 resource 先沿外侧 corridor 到其声明 approach；采矿
++   与 pickup 后，必须沿已清空的该格回到相同 approach，才可横移到下一资源或 workbench。不得斜穿未采资源。
++4. 每个 leg 统一使用 `tolerance=0.06`、`corridorTolerance=0.08`、`pulseMs=80` 和现有默认 45 秒 timeout。
++   `walkTo` 前 snapshot 是 freshness baseline；返回值或既有 `waitForSnapshot` 返回的同一 snapshot 必须满足 client
++   grounded/non-colliding、physics tick 严格前进、ack 不倒退，且 client player 与同轮 serverPlayerPosition 都满足
++   `reachedRouteTarget`。
++5. 调用原 `mineVoxel` 前，同一 matched snapshot 的 client/server 到 target center 距离都必须位于现有
++   `2.5..4.5` 范围。不得删除 `mineVoxel` 自身补位防护；安全路线应使其不触发。原 voxel Air、drop/pickup 与
++   inventory 增量验证保持。
++6. 纯测试使用真实 10-resource layout 与 player half-width `0.32`：Browser-15 的旧斜线会撞未采资源；corridor、
++   当前 approach 到清空后 pickup、pickup 退回 approach，以及 workbench 往返均不与剩余资源或 workbench 相交。
++   覆盖三个 batch 起点、10 个资源顺序、东西双向及到达域边缘的双投影 mining distance。
++
++## 范围、预算与停止线
++
++- 只修改 `equipment-journey-support.ts`，新增同职责 `equipment-resource-route.ts/.test.ts`，必要时只更新
++  `scenario.test.ts` 的 source-policy；`equipment-journey.ts` 仅在真实必要时接线。
++- `harness.ts`、`route-progress.ts`、aim/target-aim、mouse、V1、scenario JSON 和 production 全部只读。资源数量、
++  target/support、workbench 坐标、720 秒 canonical、45/15/8/20 秒与 180 aim 预算均不变。
++- 本阶段预计 AI 活跃 2-4 小时，上限 6 小时；传统工作量约 0.5-1 PD。credits、API 等价费用、费率、额度分母
++  与占比 unknown。
++- 不改变长期 owner、公开协议或架构，长期 docs baseline 不更新。确定性/static GREEN 仅证明 fixture 路线合同，
++  不证明动态 Browser 可达；Browser-16 必须由 root 另行授权。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index b6986717..0ae8f0d6 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -157,6 +157,33 @@ ack 只需不倒退。成功后的 readiness 与双位置证据只能读取这
+ 投影，不是两 owner 原子事务或独立 Authority readiness。不得增加 timeout、路线、aim 预算、Browser attempt，或修改
+ `walkTo`/Harness runtime/生产 observability；lower exit-face、V1 Media、V2、C0-C5 顺序与断言保持。
+ 
++Browser-15 唯一 canonical attempt（窗口 `129ac7e8-effb-44a0-a011-3a8f56076510`）已让完整 V1 test step
++真实返回，并通过 10 格 V2 resource strip 放置；随后首个原木采集前，`mineResources` 从 strip 东端以默认 `KeyW`
++走向西端 `resource.approach`，被 `reachedRouteTarget` 的方向性越界规则提前接受。`mineVoxel` 因仍离 target 太远而
++推导西侧 `[77.2,2.5]` 补位，直线路径经过已放置资源；真实 `KeyS` 脉冲把 player x 推到约 `81.32` 后沿资源
++侧面漂移并耗尽既有 15 秒 route budget，尚未进入 aim 或 left mouse down。V2 resource route 子片必须只在 V2
++fixture consumer 内使用固定外侧 corridor（现有 approach z=`-0.5`）和按当前 snapshot x 方向选择的 `KeyW/KeyS`：
++每个资源先从 corridor 到声明 approach，采矿前同轮 client/server 均须到达窄 `.06/.08` 域、client grounded 且
++non-colliding、physics tick 前进、ack 不倒退，且双方到 target center 的距离都在既有 `2.5..4.5`；采矿/拾取后
++沿已清空格退回同一 approach 再横移。workbench 往返也经同一 corridor waypoint。不得改 scenario 坐标、通用
++`walkTo`/`mineVoxel`、路线/aim 算法或任何 timeout；V1、V2 pointer、C0-C5 与 restore 顺序不变。
++
++V2 resource route Close-02 进一步拒绝 `reachedRouteTarget` 穿越方向上的无界 acceptance：client 与
++`serverPlayerPosition` 都必须位于 waypoint x 的 `±0.45m` 有限邻域，且 z 继续满足 `<0.08m` corridor。`0.45m`
++与既有 `mineVoxel` approach tolerance 一致，覆盖 80ms pulse 在 player 最大 4.5m/s 下的 0.36m 位移，并在 2m
++resource 间距与 player half-width `0.32m` 下为下一 resource 的扩张 AABB 留出 0.73m。若一次 `walkTo` 越过有限域，
++V2 wrapper 必须在同一固定 waypoint 上根据新 snapshot 重算 `KeyW/KeyS` 并继续真实输入纠正；所有微段和最多
++20 秒的 readiness poll 共用原 45 秒 deadline。测试必须覆盖 client/server 各自远越界、Browser-15 斜线和整个有限
++邻域的膨胀 AABB 安全，不能只验证理想端点。路线、scenario、通用算法与预算保持。
++
++V2 resource route Close-03 修正 Close-02 对真实 driver 的过宽假设：`walkTo` 的循环与按键只由 client player 的
++`reachedRouteTarget` 驱动，不能用 server projection 选择方向或假定再次调用 `walkTo` 会推动 server。方向始终由最新
++client position 决定；client 仍在有限域外，或虽在有限域内但尚未完成当前方向 crossing 时，才对同一 waypoint 继续
++真实 `walkTo`。client 已在有限域且完成 crossing、仅 server 尚未进入有限域时，必须在同一 45 秒总 deadline 内经
++既有只读 `waitForSnapshot` 等待双方严格 arrival 合同，单次等待最多 `min(20s, remaining)`；未追平或耗尽 deadline
++稳定失败，不发送无效纠偏输入、不 fallback。Close-02 的双方有限域、fresh tick、ack 不倒退、client readiness、完整
++邻域 AABB、路线与预算均保持。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

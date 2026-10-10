@@ -1,0 +1,442 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-combined-main-cpu-browser-145-01",
+  "sourceSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+  "status": "FAIL functional diagnostic; profile COMPLETE",
+  "diagnosticOnly": true,
+  "performanceEligible": false,
+  "artifact": {
+    "status": "PASS",
+    "schemaVersion": 1,
+    "sourceSha": "21c0739e36394e0573ca588e3164d319d3325ea6",
+    "sourceDigest": "d7883734f06a658606659315a40a493a23a896a76c14c1d4ce755baa71a03e25",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "a3a0b9a6007286778dd60aa0137167cf3479b5ebf39114890b179add30768ff3",
+    "files": 289,
+    "builtAt": "2026-10-10T19:40:22.394Z"
+  },
+  "build": "REUSED verified143 artifact; no rebuild",
+  "mainCpuSamplingIntervalUs": 10000,
+  "otherOptionalObserversAndBenchmark": "ALL_DISABLED",
+  "originalInputsTimeoutsPredicatesAssertions": "UNCHANGED",
+  "attempts": 1,
+  "originalMainTimeoutMs": 900000,
+  "resultDurationMsIncludingCleanup": 923801,
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "Creative": "PASS",
+    "V1": "PASS",
+    "V2": "FAIL original global deadline before stone approach86.5,-.5 completes",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "samples": 70034,
+  "countsMeaning": "Observed leaf node sample counts only; not exclusive CPU duration. No nested totals.",
+  "clockAlignment": "Not established by this aggregate parser. No per-event causal attribution.",
+  "topLeafNodes": [
+    {
+      "nodeId": 6,
+      "observedSamples": 29373,
+      "callFrame": {
+        "functionName": "(idle)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 2,
+      "observedSamples": 17769,
+      "callFrame": {
+        "functionName": "(program)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 374,
+      "observedSamples": 1891,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 29,
+        "columnNumber": 31132
+      }
+    },
+    {
+      "nodeId": 21,
+      "observedSamples": 1456,
+      "callFrame": {
+        "functionName": "(garbage collector)",
+        "scriptId": "0",
+        "url": "",
+        "lineNumber": -1,
+        "columnNumber": -1
+      }
+    },
+    {
+      "nodeId": 389,
+      "observedSamples": 735,
+      "callFrame": {
+        "functionName": "lh",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 37212
+      }
+    },
+    {
+      "nodeId": 13,
+      "observedSamples": 582,
+      "callFrame": {
+        "functionName": "polygon",
+        "scriptId": "13",
+        "url": "http://127.0.0.1:4273/assets/glb-model-resource-BVrVO4WT.js",
+        "lineNumber": 0,
+        "columnNumber": 693
+      }
+    },
+    {
+      "nodeId": 366,
+      "observedSamples": 500,
+      "callFrame": {
+        "functionName": "finalize",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-B-B2_Pg5.js",
+        "lineNumber": 412,
+        "columnNumber": 1749
+      }
+    },
+    {
+      "nodeId": 558,
+      "observedSamples": 491,
+      "callFrame": {
+        "functionName": "Sv",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 52,
+        "columnNumber": 121862
+      }
+    },
+    {
+      "nodeId": 506,
+      "observedSamples": 471,
+      "callFrame": {
+        "functionName": "um",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 143850
+      }
+    },
+    {
+      "nodeId": 508,
+      "observedSamples": 453,
+      "callFrame": {
+        "functionName": "getVoxel",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 145102
+      }
+    },
+    {
+      "nodeId": 507,
+      "observedSamples": 400,
+      "callFrame": {
+        "functionName": "om",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 142347
+      }
+    },
+    {
+      "nodeId": 563,
+      "observedSamples": 392,
+      "callFrame": {
+        "functionName": "cl",
+        "scriptId": "13",
+        "url": "http://127.0.0.1:4273/assets/glb-model-resource-BVrVO4WT.js",
+        "lineNumber": 0,
+        "columnNumber": 36921
+      }
+    },
+    {
+      "nodeId": 571,
+      "observedSamples": 366,
+      "callFrame": {
+        "functionName": "readableChunk",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 29,
+        "columnNumber": 21916
+      }
+    },
+    {
+      "nodeId": 1229,
+      "observedSamples": 332,
+      "callFrame": {
+        "functionName": "",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 143714
+      }
+    },
+    {
+      "nodeId": 343,
+      "observedSamples": 326,
+      "callFrame": {
+        "functionName": "updateCanvasSize",
+        "scriptId": "14",
+        "url": "http://127.0.0.1:4273/assets/vendor-playcanvas-B-B2_Pg5.js",
+        "lineNumber": 11663,
+        "columnNumber": 12430
+      }
+    },
+    {
+      "nodeId": 477,
+      "observedSamples": 252,
+      "callFrame": {
+        "functionName": "uu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 1,
+        "columnNumber": 37269
+      }
+    },
+    {
+      "nodeId": 476,
+      "observedSamples": 252,
+      "callFrame": {
+        "functionName": "gu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 1,
+        "columnNumber": 39455
+      }
+    },
+    {
+      "nodeId": 479,
+      "observedSamples": 194,
+      "callFrame": {
+        "functionName": "pu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 1,
+        "columnNumber": 39037
+      }
+    },
+    {
+      "nodeId": 497,
+      "observedSamples": 162,
+      "callFrame": {
+        "functionName": "lh",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 37212
+      }
+    },
+    {
+      "nodeId": 526,
+      "observedSamples": 156,
+      "callFrame": {
+        "functionName": "hu",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 1,
+        "columnNumber": 38206
+      }
+    },
+    {
+      "nodeId": 564,
+      "observedSamples": 156,
+      "callFrame": {
+        "functionName": "e.port1.onmessage",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 143763
+      }
+    },
+    {
+      "nodeId": 393,
+      "observedSamples": 151,
+      "callFrame": {
+        "functionName": "Ts",
+        "scriptId": "13",
+        "url": "http://127.0.0.1:4273/assets/glb-model-resource-BVrVO4WT.js",
+        "lineNumber": 5,
+        "columnNumber": 10591
+      }
+    },
+    {
+      "nodeId": 481,
+      "observedSamples": 139,
+      "callFrame": {
+        "functionName": "Wo",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 15,
+        "columnNumber": 186023
+      }
+    },
+    {
+      "nodeId": 404,
+      "observedSamples": 127,
+      "callFrame": {
+        "functionName": "Sv",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 52,
+        "columnNumber": 121862
+      }
+    },
+    {
+      "nodeId": 499,
+      "observedSamples": 125,
+      "callFrame": {
+        "functionName": "J",
+        "scriptId": "12",
+        "url": "http://127.0.0.1:4273/assets/bootstrap-sfEw0Vhd.js",
+        "lineNumber": 49,
+        "columnNumber": 50
+      }
+    }
+  ],
+  "actualOwnerProof": {
+    "anonymous374": "BrowserAuthorityClient Worker.onmessage→receiveWall.measure→receive(event.data),1891leaf",
+    "lh389": "gameplay-ui-projector retained slice JSON.stringify equality viaonGameplay/refresh,735leaf",
+    "um506/om507/getVoxel508": "cancellable Sky proof task/generator/reader,471/400/453leaf respectively; distinct leaf counts not ancestor sum",
+    "leafOnlyTotals": {
+      "stamp": 198,
+      "readableChunk": 840
+    },
+    "bundleSha256": "afb957d0f5cb6caee465f5a0f8842eaa2c753e348a77bc03f735415c90f8038b"
+  },
+  "interpretation": "idle29373/program17769 dominate observed leaf categories; these do not identify GPU/device work. No confirmed remaining JS endpoint bottleneck. No causal DOM/trace clock bridge or performance A/B. Old139 differs in flags/duration/phase; no cross-run latency gain claim.",
+  "lastOperations": [
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:return-route",
+      "target": [84, 31, 2],
+      "elapsedMs": 9597,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:inventory-before",
+      "target": [86, 31, 2],
+      "elapsedMs": 24,
+      "outcome": "returned"
+    },
+    {
+      "diagnosticOnly": true,
+      "eligible": false,
+      "phase": "mine:approach-route",
+      "target": [86, 31, 2],
+      "elapsedMs": 4744,
+      "outcome": "threw"
+    }
+  ],
+  "lastRoutes": [
+    {
+      "target": [78.5, -0.5],
+      "status": "returned",
+      "elapsedMs": 9277,
+      "remainingMs": 35723,
+      "pulseCount": 6
+    },
+    {
+      "target": [86.5, -0.5],
+      "status": "threw",
+      "elapsedMs": 4743,
+      "remainingMs": 40257,
+      "pulseCount": 3
+    }
+  ],
+  "routes": 32,
+  "operations": 83,
+  "ci421": {
+    "runId": 38080661981,
+    "status": "FAIL",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": "1FAIL1SKIP2PASS33.5min; main both original900000ms; first craftArmor/placeOneEach pointer, retry totaldeadline; visual1.5min/native33.2secPASS",
+    "preview": "SKIPPED",
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38080661981"
+  },
+  "remainingBlockers": [
+    "original complete main andremainingmatrix",
+    "136 Stone-supported slope contact",
+    "144 horizontal-only rail mesh",
+    "final exactCI/review"
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-browser-145-01.log",
+      "bytes": 517553,
+      "sha256": "5e660fa2400439fea9890c9250af2c7228c4c82a66efc5bd76e6b6b792b9acff"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-browser-attachments-145-01.json",
+      "bytes": 4863108,
+      "sha256": "8e3db13d9db6d74c1644430e9e59718359daf610fe269c1f58a4b6a67a7f3302"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-summary-145-01.json",
+      "bytes": 20500,
+      "sha256": "74ab8d1f81601230f0de374003db6fed1bed3d0f6b1c7410b553999cebaf544e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-owner-proof-145-01.json",
+      "bytes": 14621,
+      "sha256": "1fcdd120aea548bb1812d0abd28fb153b972fde47c24c534959bdab199da85a4"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-route-operations-145-01.json",
+      "bytes": 949519,
+      "sha256": "ceca758f66cf357e4f6cfaab60a4aaec34a40325c7bc823694fa700945323c26"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-verify-145-01.json",
+      "bytes": 386,
+      "sha256": "f5beec390c2eb641d85f0b07663f6be0dc37328856d12b0d05f29eca525fad0d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-browser-145-01.prereg.json",
+      "bytes": 530,
+      "sha256": "73cf8ae099ad75733b56ab4310833f53f3e5ec9479a202f070b890d48f41dc20"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci421-chromium-raw-145-01.log",
+      "bytes": 2241696,
+      "sha256": "7b450ef4b2b029a82b272cb2af06d18dd4017fe4b0e3792c1d6635883c6746e8"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci421-route-operations-145-01.json",
+      "bytes": 4164497,
+      "sha256": "c81ad67851a3988fa433c89c515652792fb1d95b12656e6587d122bdbabf706f"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/combined-main-cpu-results-145-01/classic-runtime-Classic-生产旅程以真实输入完成-C0-C5，并复用同一运行时性能场景-chromium/trace.zip",
+      "bytes": 105435500,
+      "sha256": "09e7b3f06d46aea3d429d46711f5672e38e128bd3080b241e52782cb2344f366"
+    },
+    {
+      "path": "/workspace/seedlands-web-sandbox/harness/results/pr41-combined-main-cpu-browser-145-01/classic.json",
+      "bytes": 178601,
+      "sha256": "5aca86e671cdc6b4dfa184b38920c4d8212c30a90b6c91d3a26b95b9b316fc61"
+    }
+  ]
+}

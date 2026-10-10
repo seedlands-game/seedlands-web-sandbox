@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "scope": "Point Sky sampling checks its own complete dependency column, global frame/commit invalidation unchanged",
+  "sourceParentSha": "53d29c1fae1c4aa77e165abe5b6214fb1f8dccf0",
+  "sourceState": "140 working tree candidate, no identified B browser artifact yet",
+  "primaryMetric": "Exact getChunkRevision call count for64 point samples with4 ready columns",
+  "control": {
+    "sameCorpus": "four ready air columns, one selected position, two repeats64 samples each",
+    "lookupCounts": [4096, 4096],
+    "timing": "NOT_COLLECTED, deterministic operation count only",
+    "red": "1FAIL32PASS after five new fixture count mistakes corrected"
+  },
+  "candidate": {
+    "lookupCountsVerifiedByExactAssertion": [1024, 1024],
+    "deltaPercent": 75,
+    "criterion": "exactly16 full dependency revision reads per sample; independent of other registered columns",
+    "BPassedConsole": "Reporter omitted passing console output even with silent=false; exact array assertion establishes both values, no fabricated stdout",
+    "claimBoundary": "Only operation count with this corpus and full freshness semantics; no input latency/GPU/endpoint performance benefit claimed"
+  },
+  "correctness": {
+    "ownerSuite": {
+      "passed": 33,
+      "files": 1,
+      "note": "33 passed before final assertion strengthened to exact values; final primary test then1PASS32SKIP. Unique tests not counted twice."
+    },
+    "consumerRegression": {
+      "passed": 59,
+      "files": 8
+    },
+    "uniquePassedTests": 92,
+    "sameRevisionTargetFreshness": "PASS revision/residency immediate failDark",
+    "globalUnsampledFreshness": "PASS frame/commit/epoch original global boundaries",
+    "existingAsyncSourceGuards": "PASS original source superseded/unknown/save/nonresident roof/release/epoch publication protections",
+    "review": "Root bounded diff review: Sky cache sample reads one entry only; GameFrameLoop drains global invalidation synchronously before render. No time memoization or authority change."
+  },
+  "checks": {
+    "webTypes": "PASS svelte0errors0warnings and tsc",
+    "classicTypes": "PASS including modified unit test",
+    "lint": "PASS",
+    "fullClassic": "NOT_RUN on140; prior1371081 is background only, exact post-push CI separate",
+    "newBuild": "NOT_RUN",
+    "newBrowser": "NOT_RUN",
+    "performanceEndpoint": "NOT_RUN"
+  },
+  "originalFailuresRetained": {
+    "wrongRootVitestConfig": "NoTestsFound, NOT_RUN; corrected actual apps/web config once",
+    "fixtureAuthorCounts": "5 new assertions assumed registration failDark count1 but cache register adds one; corrected baseline+1, not production failures",
+    "trueBudgetRed": "A/A4096 vs1024, preserved before production edit"
+  },
+  "unresolved": [
+    "C0-C5/V2 current CI419 failed",
+    "136 supported slope Stone contact",
+    "remaining product and performance matrix"
+  ],
+  "budget": {
+    "actualUiUtc": "2026-10-10T17:54:00Z",
+    "remainingPercent": 74,
+    "stopPercent": 60,
+    "freshUiRequestedUtc": "2026-10-10T18:52:00Z",
+    "freshUi": "PENDING",
+    "cloudUiAccess": false
+  },
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-red-140-01.log",
+      "bytes": 367,
+      "sha256": "51497ff4ae2ca69ee151f5ac16980a68efb104a691a988a1582d9eaf1682671c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-red-140-02.log",
+      "bytes": 4098,
+      "sha256": "848d154c6e27c6b1466c44d0819a39277db8bb0cafbdd723661a9582ee8668c3"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-red-140-03.log",
+      "bytes": 1529,
+      "sha256": "5aca6234301811caa94a2a12a148869fa016f60531a6bade8ae59be1cf0272f7"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-green-140-01.log",
+      "bytes": 341,
+      "sha256": "a9b6935c2f550db8cac0e3dff0cf013567abb43e722d81d6ae259865a52b761c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-exact-b-140-01.log",
+      "bytes": 353,
+      "sha256": "cde210f5731fa508bb117ed3b57dafc0e9f92f04f47e8a1fe83001ef2f39d652"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-exact-b-140-02.log",
+      "bytes": 352,
+      "sha256": "1cc11d1d27f8f5fa3bf9a5e115f4a32d6c4f27dd633ad4d5e522ac6cb03e0a11"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-consumers-140-01.log",
+      "bytes": 344,
+      "sha256": "27818af8cf83fc8caa4ee40e8514398e7e3740638223c7cdbb755e8852f23d6e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-web-types-140-01.log",
+      "bytes": 265,
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-classic-types-140-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-sample-lint-140-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

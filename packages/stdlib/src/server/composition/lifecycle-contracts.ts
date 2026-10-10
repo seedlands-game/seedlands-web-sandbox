@@ -8,7 +8,11 @@ type ModSystemBase = Readonly<{
   after?: readonly string[];
 }>;
 export type ModSystemDefinition = ModSystemBase &
-  Readonly<{ cadence?: 'interval'; intervalSeconds: number } | { cadence: 'every-advance'; intervalSeconds?: never }>;
+  Readonly<
+    | { cadence?: 'interval'; intervalSeconds: number }
+    | { cadence: 'every-advance'; intervalSeconds?: never }
+    | { cadence: 'manual'; intervalSeconds?: never }
+  >;
 export type LifecycleRegistrations = Readonly<{
   lifecycles: readonly ModuleOwned<ModLifecycleDefinition>[];
   systems: readonly ModuleOwned<ModSystemDefinition>[];

@@ -1,0 +1,13 @@
+6ad5b209c6d46ea412e2071fa22649f753c634a6ca47a2470898510cc046af92  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/SOURCE-MANIFEST.sha256
+fc201b51909de0a290ef9f6bea8b5a5e2cd839746efb009fb2af665ec096f9c7  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-map-compare.stdout.log
+9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-map.sha256.log
+79cc3e1f459e08cf51f6a0b3a8c4b4209af0e05da4aab11d35573834da771079  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-verify.stdout.log
+6a38e0f34a332eeacd8484c23fb6ef2574686b2a04f781e4725c6113ce44f7d0  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/artifact-verify.window.json.log
+35a5a8ed7a7c7f7ccb504cd2f663a69f50ed856c16135da5f40d9d763582cd88  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/build.stdout.log
+4837a4b56fe63a0edacef7ee4188c29a61b5136fdf936b88825edc8cd1fc348d  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/build.window.json.log
+9a78dca8ded37d3e49db705c66489b557229121d4c94056a78eba530b6d4f731  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/dist-files.sha256.log
+e41cdee53b0242e00a347ab6a6ee74d40ea661d96a45b84742c94a6106fee45d  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/harness-artifact.json.log
+c892bfe7562062fc08d20aaa78f52de0a1d4b5a400ec08c59d99acd9142dddb9  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/metadata-format.stdout.log
+bb79dca22d58f01d3169ca9773cb685f1399e61ef67069456700e1b30af478e5  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/metadata-format.window.json.log
+c8e23f6dbc31f009a26bce7f96e5bde2b112bd303bcce861615764b7d764c98c  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/postconditions.stdout.log
+54ed238e97e202e1c2e8268156783244fc6ac3cb21c8c1e7d0f372f5728edf55  changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-06/validation-argv.txt

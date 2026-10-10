@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "b517b0a4-fe23-4326-8b7c-b9d67a596312",
+  "pid": 21387,
+  "startedAt": "2026-09-25T16:14:47.304Z",
+  "windowId": "b517b0a4-fe23-4326-8b7c-b9d67a596312",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-death-mixed-series-01/eslint-full-replacement.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T16:14:48.318Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T16:14:47.305Z",
+      "loadAverage": [
+        3.2578125,
+        3.4189453125,
+        3.5888671875
+      ],
+      "freeMemoryBytes": 866959360,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T16:14:48.314Z",
+      "loadAverage": [
+        3.2578125,
+        3.4189453125,
+        3.5888671875
+      ],
+      "freeMemoryBytes": 845414400,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

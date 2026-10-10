@@ -1,0 +1,69 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts (4 tests | 4 failed) 19ms
+     × commits one survivor and one player death with all four containers in one schedule transaction 14ms
+     × retains all containers while committing the same registered starvation death 1ms
+     × rejects a missing composed policy before any survivor or death write 1ms
+     × rejects player despawn policy without orphaning GameplayRuntime membership 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > commits one survivor and one player death with all four containers in one schedule transaction
+TypeError: Cannot add property starvationAccumulator, object is not extensible
+ ❯ setup packages/stdlib/tests/server/registered-needs-death.test.ts:124:9
+    122|   dying.health = 1;
+    123|   dying.hunger = 0;
+    124|   dying.starvationAccumulator = 0;
+       |         ^
+    125|   return world;
+    126| }
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:136:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > retains all containers while committing the same registered starvation death
+TypeError: Cannot add property starvationAccumulator, object is not extensible
+ ❯ setup packages/stdlib/tests/server/registered-needs-death.test.ts:124:9
+    122|   dying.health = 1;
+    123|   dying.hunger = 0;
+    124|   dying.starvationAccumulator = 0;
+       |         ^
+    125|   return world;
+    126| }
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:162:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > rejects a missing composed policy before any survivor or death write
+TypeError: Cannot add property starvationAccumulator, object is not extensible
+ ❯ setup packages/stdlib/tests/server/registered-needs-death.test.ts:124:9
+    122|   dying.health = 1;
+    123|   dying.hunger = 0;
+    124|   dying.starvationAccumulator = 0;
+       |         ^
+    125|   return world;
+    126| }
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:179:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-needs-death.test.ts > registered Needs death inventory policy > rejects player despawn policy without orphaning GameplayRuntime membership
+TypeError: Cannot add property starvationAccumulator, object is not extensible
+ ❯ setup packages/stdlib/tests/server/registered-needs-death.test.ts:124:9
+    122|   dying.health = 1;
+    123|   dying.hunger = 0;
+    124|   dying.starvationAccumulator = 0;
+       |         ^
+    125|   return world;
+    126| }
+ ❯ packages/stdlib/tests/server/registered-needs-death.test.ts:188:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed (4)
+   Start at  01:01:01
+   Duration  924ms (transform 681ms, setup 0ms, import 820ms, tests 19ms, environment 0ms)
+

@@ -1,6 +1,7 @@
 import type { AutonomyRuntime } from '../simulation/autonomy-runtime';
 import type { GameplayContent } from './gameplay-content';
 import type { PlayerState } from './player-state';
+import type { RegisteredCombatRuntime } from './modules/registered-combat-runtime';
 
 export function requestProfiledPlayerCombat(
   playerId: string,
@@ -23,3 +24,22 @@ export function requestProfiledPlayerCombat(
     ...(resolved?.actionId === result.actionId && resolved.outcome === 'hit' ? { damage: resolved.damage } : {}),
   };
 }
+
+export const createPlayerCombatRequest =
+  (
+    options: Readonly<{
+      player(id: string): PlayerState;
+      content: GameplayContent;
+      simulation: AutonomyRuntime;
+      registered: RegisteredCombatRuntime | null;
+      changed(): void;
+    }>,
+  ) =>
+  (playerId: string, targetId: string) => {
+    const player = options.player(playerId);
+    if (player.lifecycle !== 'alive') return { success: false as const, reason: 'player-dead' };
+    return (
+      options.registered?.request(playerId, targetId) ??
+      requestProfiledPlayerCombat(playerId, targetId, player, options.content, options.simulation, options.changed)
+    );
+  };

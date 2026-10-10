@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT38-BROWSER22-RAW-PACKAGING-RECOVERY",
+  "status": "PACKAGING_ONLY",
+  "rawFiles": [
+    {
+      "path": "../v2-canonical-browser-22/workbench-route-analysis.json.log",
+      "sha256": "8914babc67319028805618e9d7b412ea79208c2a08075b28e2db1a8d06dfb6d0",
+      "jsonParse": "PASS"
+    },
+    {
+      "path": "../v2-canonical-browser-22/workbench-route-calls.json.log",
+      "sha256": "19be23dc41569aec1c64ace90b1bf58cdc0c27e6a846c7e0942b12ad5eaea06c",
+      "jsonParse": "PASS"
+    },
+    {
+      "path": "../v2-canonical-browser-22/workbench-route-snapshots.json.log",
+      "sha256": "42d36740e5a56d815ba3c02eeb6e336cc64857ed4fc35811ffddd7ba12784003",
+      "jsonParse": "PASS"
+    },
+    {
+      "path": "../v2-canonical-browser-22/workbench-route-summary.json.log",
+      "sha256": "83029cbc0511cb3b8a5c1ff7c26933e67184d3fb07399a668a1b5ddc39989a79",
+      "jsonParse": "PASS"
+    }
+  ],
+  "priorPackagingManifest": {
+    "entries": 14,
+    "sha256": "ce152c85ecc48b9b9068d587dae1c405b0fa1f77e617d1f568371b3f55e2ec11"
+  },
+  "browser22": {
+    "sourceEntries": 15,
+    "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+    "evidenceEntries": 50,
+    "evidenceManifestSha256": "e6f4499fbaab8bc3a4f42b481600d8a933876a69d12031136732cabac7639713",
+    "deliverySha256": "f27cc496a8bccad88702351d5865e80bd5ba3c9d57ee14c58ed65214ff126c83"
+  },
+  "map01": {
+    "sourceEntries": 11,
+    "sourceManifestSha256": "40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11",
+    "evidenceEntries": 21,
+    "evidenceManifestSha256": "97b404a102bbbb8521ee1074d3fa45f8cfc1e1d28bd019324a62906f32f3d59d",
+    "deliverySha256": "5fa638e5a2f8628da91371b1bb7bfc36d092589b250037560d6667eb1457c729"
+  },
+  "browser22Trace": {
+    "sizeBytes": 667031083,
+    "parts": 13,
+    "maximumPartBytes": 52428800,
+    "sha256": "9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19"
+  },
+  "behaviorChanged": false,
+  "behaviorGatesRerun": false
+}

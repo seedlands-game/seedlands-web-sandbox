@@ -1,0 +1,45 @@
+{
+  "codeHead": "4d9da2ca27458e070d1be3db2efe03f93009ba8f",
+  "matrixCodeHead": "8004ff7df97a4cf4bf6406397c123c692098e831",
+  "artifact": {
+    "sourceSha": "4d9da2ca27458e070d1be3db2efe03f93009ba8f",
+    "sourceDigest": "9c2904b141e35c0f70efe552da040215ed5aa3137365f31378d5d4a0e7d51264",
+    "artifactDigest": "3ca34e8440da570aee38d55a2a2d7c9005ae08dd0d012acc9176a8a7e040e2d2",
+    "files": 274,
+    "builtAt": "2026-09-22T15:15:55.357Z"
+  },
+  "matrixArtifact": {
+    "sourceSha": "8004ff7df97a4cf4bf6406397c123c692098e831",
+    "sourceDigest": "d55e1a571510e174cb24cd3a9e9cd08338998402f3d78bd1fc2b5b1fd7730cd7",
+    "artifactDigest": "3ed693609186c69ce56760252ce5964b1c3dd45f46d7beb8175f549607cc01d7"
+  },
+  "matrix": {
+    "forest": "exact-head-forest.png",
+    "survivalInventory": "exact-head-survival-inventory.png",
+    "catalogAll": "exact-head-catalog-all.png",
+    "catalogSingle": "exact-head-catalog-single.png",
+    "catalogEmpty": "exact-head-catalog-empty.png",
+    "structureGallery": "exact-head-structure.png",
+    "video": {
+      "path": "exact-head-matrix.webm",
+      "codec": "vp8",
+      "width": 1280,
+      "height": 720,
+      "durationSeconds": 244.6,
+      "sizeBytes": 1845727
+    }
+  },
+  "finalTargetReadback": {
+    "screenshot": "exact-final-hidden-target.png",
+    "class": "sr-only",
+    "target": "-4,10,-7",
+    "voxel": "32",
+    "text": "目标方块 高草"
+  },
+  "pageErrors": [],
+  "consoleMessages": [],
+  "notes": [
+    "The full matrix is bound to code head 8004ff7; the only later production-code change 4d9da2c preserves the hidden target readback and is covered by exact-final-hidden-target.png plus source-bound startup/error readback.",
+    "exact-head-broken.png and exact-head-mining-card.png are retained failed input diagnostics, not pass evidence."
+  ]
+}

@@ -26,9 +26,14 @@ it.each(['shaped', 'shapeless'] as const)('matches %s ingredients by complete in
     reason: 'recipe-mismatch',
   });
   if (kind === 'shapeless') {
-    const result = createStationCraftCandidate({ grid, output: [null], recipe, items });
-    expect(result).toEqual({ success: true, grid: [tool(2), ...Array<null>(8).fill(null)], output: [tool(8)] });
-    expect(grid[1]).toEqual(tool(8));
+    expect(createStationCraftCandidate({ grid, output: [null], recipe, items })).toEqual({
+      success: false,
+      reason: 'recipe-mismatch',
+    });
+    const exactGrid = [tool(8), ...Array<null>(8).fill(null)];
+    const result = createStationCraftCandidate({ grid: exactGrid, output: [null], recipe, items });
+    expect(result).toEqual({ success: true, grid: Array<null>(9).fill(null), output: [tool(8)] });
+    expect(exactGrid[0]).toEqual(tool(8));
   }
 });
 

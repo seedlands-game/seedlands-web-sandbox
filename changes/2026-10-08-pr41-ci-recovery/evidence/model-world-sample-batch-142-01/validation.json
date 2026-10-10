@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "runId": "model-world-sample-batch-142-01",
+  "status": "PASS bounded query contract only",
+  "sourceParent": "f01a69fa655468a64ed41a3fdbf6e11483f907b2",
+  "candidate": "working tree before commit142",
+  "scope": "one synchronous model apply; no cross-call/frame cache",
+  "primary": {
+    "materials": 4,
+    "applies": 64,
+    "repeats": 2,
+    "controlAA": {
+      "sky": [256, 256],
+      "block": [256, 256]
+    },
+    "candidateB": {
+      "sky": [64, 64],
+      "block": [64, 64]
+    },
+    "queryReductionPercent": 75,
+    "measurement": "exact counter assertions; passing reporter suppresses candidate console",
+    "latencyOrGpuClaim": false
+  },
+  "tests": {
+    "candidateFinal": "2files18PASS",
+    "regressions": "7files95PASS",
+    "uniqueTotal": "9files113PASS",
+    "webTypes": "PASS Svelte0errors0warnings and TypeScript",
+    "classicTypes": "PASS includes modified tests",
+    "lint": "PASS five changed TS",
+    "fullClassic": "NOT_RUN on142",
+    "fullStdlib": "NOT_RUN on142",
+    "build": "NOT_RUN on142",
+    "browser": "NOT_RUN on142"
+  },
+  "negativeEvidence": [
+    "old production with new contract:2FAIL4PASS; A/A queries256 each",
+    "green02:1FAIL15PASS from author fixture binding omitted position; corrected fixture, retained log",
+    "receiverRED:1FAIL9SKIP; candidate detached legacy method lost this; fixed method receiver; final18PASS"
+  ],
+  "compatibility": [
+    "old opaque surface sampler calls/order retained",
+    "legacy world method receiver retained",
+    "current frame/world and unknown update every apply including zero dt",
+    "per-material self emission, damage clones and borrowed sources retained",
+    "empty material no reads; malformed/sparse batch fails closed"
+  ],
+  "fixtureLimit": "Actual StandardMaterials with NullGraphicsDevice/mock app; ASSERT FAILED current application diagnostics retained; no WebGL/performance claim",
+  "ci420": {
+    "sourceSha": "f01a69fa655468a64ed41a3fdbf6e11483f907b2",
+    "runId": 38077752561,
+    "status": "FAIL",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": "1FAIL1SKIP2PASS33.3min; both main attempts original900000ms inV2; visual1.6min/native34.9secPASS",
+    "preview": "SKIPPED",
+    "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38077752561"
+  },
+  "budget": {
+    "actualUiUtc": "2026-10-10T18:56:00Z",
+    "remainingPercent": 74,
+    "stopPercent": 60,
+    "cloudUiAccess": false
+  },
+  "remainingBlockers": [
+    "original complete main journey",
+    "136 supported-slope contact",
+    "remaining full product acceptance and final exact CI/review"
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-red-142-01.log",
+      "bytes": 3397,
+      "sha256": "27fb476512c80e90d69e617c3cec8b45403b112667e641a0ff42c26a2fe9e75e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-green-142-02.log",
+      "bytes": 1571,
+      "sha256": "417204dea17bed6b079873e707b607f3cf312175c8013ef15c869603bc275926"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-receiver-red-142-01.log",
+      "bytes": 1542,
+      "sha256": "4593ddb124737ed69139cbc1e79fcc06974763385c3dac8ee6667d90907a4a67"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-green-142-05.log",
+      "bytes": 341,
+      "sha256": "21b770398fea60c855fc24cab7ac5aec7d7f3249cabc7b7eee2884d9934ca331"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-regressions-142-01.log",
+      "bytes": 344,
+      "sha256": "9dd09779daf16b708ab6d46b7907be616c10a525d9ad1d7b0be193cff111dc04"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-web-types-142-02.log",
+      "bytes": 265,
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-classic-types-142-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/model-light-batch-lint-142-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci420-chromium-raw-142-01.log",
+      "bytes": 1723242,
+      "sha256": "99b00a299099fc8ea6fbd34e85fed48ca955fd2185eea85ecbd355ce8187b1b7"
+    }
+  ]
+}

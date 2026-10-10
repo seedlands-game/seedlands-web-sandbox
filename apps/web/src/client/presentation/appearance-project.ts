@@ -1,10 +1,16 @@
-import { builtinAssets } from './asset-catalog';
+import { builtinAssets, builtinItemBindings } from './asset-catalog';
 import { legacyItemAssets } from './legacy-item-assets';
 import type { Asset, ImageTexture, MaterialAsset, NativeAsset } from './asset-types';
 import { validateNativeAssets } from './asset-package';
 import { requireClassicItemDefinition } from './classic-item-registry';
 
-export const appearanceAnimationTargets = ['grazer', 'night-stalker', 'settler'] as const;
+import { classicCreatureKinds } from './classic-creature-definitions';
+import { FaceMaterial } from '@seedlands/stdlib/world/voxel';
+import { terrainMaterial } from './terrain-assets';
+
+export const appearanceAnimationTargets = classicCreatureKinds;
+const retiredTargets = new Set(['grazer', 'night-stalker', 'settler']);
+const retiredActorModels = new Set(['grazer', 'stalker', 'settler'].map((kind) => `seedlands:model/actor/${kind}`));
 export const modelAnimationRoles = ['idle', 'move', 'attack', 'hurt'] as const;
 export type AppearanceAnimationTarget = (typeof appearanceAnimationTargets)[number];
 export type ModelAnimationRole = (typeof modelAnimationRoles)[number];
@@ -22,6 +28,7 @@ export type AppearanceProject = {
 };
 
 const MAX_PROJECT_ASSETS = 128;
+export const MAX_APPEARANCE_THUMBNAILS = builtinItemBindings.length;
 const MAX_RESOLVED_ASSETS = builtinAssets.length + MAX_PROJECT_ASSETS;
 const MAX_DATA_URL_BYTES = 2 * 1024 * 1024;
 const id = (value: unknown, label = '资产标识'): string => {
@@ -113,6 +120,18 @@ function mergeAssets(overrides: readonly Asset[]): Asset[] {
     if (original && original.type !== asset.type) throw new Error('内置资产覆盖必须保持资产类型');
     byId.set(asset.id, asset);
   }
+  const inheritLegacyTorchAsset = (kind: 'textureId' | 'id') => {
+    const handle = terrainMaterial(FaceMaterial.Torch);
+    const flame = terrainMaterial(FaceMaterial.TorchFlame);
+    if (!handle || !flame) return;
+    const handleId = kind === 'textureId' ? handle.textureId : handle.id;
+    const flameId = kind === 'textureId' ? flame.textureId : flame.id;
+    if (overrides.some((asset) => asset.id === flameId)) return;
+    const legacy = overrides.find((asset) => asset.id === handleId);
+    if (legacy) byId.set(flameId, { ...legacy, id: flameId });
+  };
+  inheritLegacyTorchAsset('textureId');
+  inheritLegacyTorchAsset('id');
   // Old texture-only overrides retain their original grip, depth and 16px density.
   // Explicit model or new detail-texture overrides always win; never rewrite the project.
   for (const legacy of legacyItemAssets) {
@@ -209,6 +228,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
   const materialBindings: Record<string, Record<string, string>> = {};
   const byId = new Map(merged.map((asset) => [asset.id, asset]));
   for (const [modelId, binding] of Object.entries(bindings)) {
+    if (retiredActorModels.has(modelId)) continue;
     const model = byId.get(id(modelId, '模型标识'));
     if (!model || !('materialIds' in model.payload)) throw new Error('材质绑定模型不存在或不支持材质槽');
     if (
@@ -231,6 +251,7 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
     project.animationBindings === undefined ? {} : object(project.animationBindings, '动画绑定');
   const animationBindings: Partial<Record<AppearanceAnimationTarget, AppearanceAnimationBinding>> = {};
   for (const [target, value] of Object.entries(rawAnimationBindings)) {
+    if (retiredTargets.has(target)) continue;
     if (!appearanceAnimationTargets.includes(target as AppearanceAnimationTarget)) throw new Error('动画绑定目标无效');
     const binding = object(value, '动画绑定');
     exactKeys(binding, ['modelId', 'clips'], '动画绑定');
@@ -248,8 +269,9 @@ export function validateAppearanceProject(value: unknown): AppearanceProject {
 
   const rawThumbnails = object(project.thumbnails, '缩略图');
   const thumbnails: Record<string, string> = {};
-  if (Object.keys(rawThumbnails).length > MAX_PROJECT_ASSETS) throw new Error('缩略图数量超限');
+  if (Object.keys(rawThumbnails).length > MAX_APPEARANCE_THUMBNAILS) throw new Error('缩略图数量超限');
   for (const [assetId, thumbnail] of Object.entries(rawThumbnails)) {
+    if (retiredActorModels.has(assetId)) continue;
     if (!byId.has(id(assetId))) throw new Error('缩略图引用不存在的资产');
     thumbnails[assetId] = dataUrl(thumbnail, '缩略图');
   }

@@ -32,6 +32,29 @@ describe('voxel coordinates and registry', () => {
         for (let z = -12; z <= 12; z += 3) expect(baseVoxel(seed, x, y, z)).not.toBe(Voxel.Lantern);
   });
 
+  it('保留白羊毛 ID 并为其余十五色追加唯一体素与面材质', () => {
+    const woolVoxels = [
+      Voxel.Wool,
+      Voxel.OrangeWool,
+      Voxel.MagentaWool,
+      Voxel.LightBlueWool,
+      Voxel.YellowWool,
+      Voxel.LimeWool,
+      Voxel.PinkWool,
+      Voxel.GrayWool,
+      Voxel.LightGrayWool,
+      Voxel.CyanWool,
+      Voxel.PurpleWool,
+      Voxel.BlueWool,
+      Voxel.BrownWool,
+      Voxel.GreenWool,
+      Voxel.RedWool,
+      Voxel.BlackWool,
+    ];
+    expect(woolVoxels).toEqual([60, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88]);
+    expect(new Set(woolVoxels.map((voxel) => faceMaterialFor(voxel, 0, true))).size).toBe(16);
+  });
+
   it.each([-65, -33, -32, -1, 0, 1, 31, 32, 65])('round-trips world coordinate %i through its chunk', (coordinate) => {
     const chunk = floorDiv(coordinate, CHUNK_SIZE);
     const local = mod(coordinate, CHUNK_SIZE);

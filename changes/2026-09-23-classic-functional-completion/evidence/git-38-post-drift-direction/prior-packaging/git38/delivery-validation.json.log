@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-38-POST-DRIFT-DIRECTION",
+  "status": "EVIDENCE_FROZEN",
+  "baseline": "658e059d5f769f7506620264cefbacd211554d89",
+  "codeCommit": "550adf8a352cd1c24aff5b2f3885b8b970c69bd7",
+  "sourceTree": "48b06d948edeec3f1bfe17855e2105d6b47449ec",
+  "stagedPatchSha256": "e864ea671ef5eb7a3382bd8eb9380fdd15aec449f8e699fba33ea9456df5931c",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 5,
+    "sha256": "3f532357c0e96135151b8a6f32e855528478fd8e693b1b9f0e330f10ba7ab454"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "48a716d8bac93a6f5bb7264134c17ee522aaf29d856f18fc9e134fa84f9b1e7f",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "frozenInputs": {
+    "browser22": {
+      "sourceManifestSha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+      "evidenceManifestSha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+      "deliverySha256": "4cca1534c53cefdcec329b3d161911870dbf2b00fbc48ee4126dc5a8762cebf4",
+      "status": "FAIL_AFTER_THREE_WOOD_PICKUPS"
+    },
+    "map01": {
+      "sourceManifestSha256": "40190d99bdf880e3d0678e8c6d2efb6477e1754dce57fbd2f509e3e233983c11",
+      "evidenceManifestSha256": "c627fc471c55eee7c7cfc3d367610bb0b3f72bd64e0815d487c57c5cd85a4b4c",
+      "deliverySha256": "ba13b9c41eea62b534524c50a1e4b23603262bf7a25c32617487fa163c1b7579"
+    },
+    "close14": {
+      "sourceManifestSha256": "ad414351a8ba3085e89b3192516e13dc85817b946c656e8de6890db6ee500192",
+      "evidenceManifestSha256": "94f987a3ce5a7027abda699511964a8e79d6e490a6c9d11a9abaa81fb0f2e112",
+      "deliverySha256": "5f5b3549c0bc7d56ce5f6c5ceeb007ab2b6a74490e9175ef1e664620cf68cbcd"
+    },
+    "rejectedClose13": {
+      "status": "UNAPPROVED_REJECTED_REAL_DRIVER_DEADLINE_UNREACHABLE",
+      "snapshotManifestSha256": "953279a278b5038d8bba9f8dee000bf666791d4be765d6af03268be1d2ecf1e7",
+      "archivedFiles": 20,
+      "originalRawPreserved": true
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git38-post-drift-direction",
+    "head": "658e059d5f769f7506620264cefbacd211554d89",
+    "tree": "48b06d948edeec3f1bfe17855e2105d6b47449ec",
+    "stagedPaths": 5,
+    "patchSha256": "e864ea671ef5eb7a3382bd8eb9380fdd15aec449f8e699fba33ea9456df5931c",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReusedOffline": true,
+    "dependencySetup": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "dependencySetupExitCode": 0,
+    "dependencySetupStdoutSha256": "f7333b6bb5012bc3e59bf3bcbe57166bddd4e330ec2a9b6be27c99498196c572",
+    "dependencySetupReceiptSha256": "b09a360abc86a708285c3ea241a880013b3913397ec7567b4f7d4033e2171c32"
+  },
+  "stagedGate": {
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "ccb2a18ffd0d0d5cf57a9509c23d8ee4ea99692b645a2a05c22185cfcdf52532",
+    "receiptSha256": "44c84c208184fb1cbfb2b1be7296a15fab673d16b1ad409c5ce2875d6dbca555",
+    "affected": "PASS_14_FILES_145_TESTS",
+    "maxWorkers": 1,
+    "classicTypes": "PASS",
+    "rootTypes": "PASS",
+    "eslint": "PASS_3_TS",
+    "format": "PASS_5_PATHS_NORMAL_PRETTIER",
+    "scopedDiff": "PASS_5_PATHS",
+    "newInlineSuppressions": 0
+  },
+  "behavior": {
+    "oneShotOppositeDirectionAfterValidatedDrift": true,
+    "hintConsumedAtLoopEntry": true,
+    "directionConsistentAcrossWalkStrictAndWait": true,
+    "ordinaryLoopUsesExistingXRule": true,
+    "driverRejectionIdentityPreserved": true,
+    "close13CatchRemoved": true,
+    "productionChanged": false,
+    "budgetToleranceCoordinatesChanged": false
+  },
+  "browserFacts": {
+    "browser22": "FAIL_AFTER_C0_C3_FULL_V1_RESOURCES_AND_THREE_WOOD_PICKUPS",
+    "browser22LaterV2": "NOT_REACHED",
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN",
+    "build14": "NOT_RUN",
+    "browser23": "NOT_RUN"
+  },
+  "diagnostics": [
+    "The initial patch was generated with git diff and omitted two untracked new files. That incomplete patch is retained and was not used for validation or commit.",
+    "The first dependency preparation helper used zsh reserved variable path, so shasum, awk and find were not found. The staged tree was intact; the attempt is recorded and was not treated as validation."
+  ],
+  "finalSelfcheck": {
+    "status": "PASS",
+    "stdoutSha256": "82568c52f38c51625a6dd56d2345539403b3bc1a541112749064c503ea3e6dca",
+    "receiptSha256": "be042b9e82b32ec0fcf62b1260de8e3689eeecbabbf6cc25c17727bec730630f"
+  },
+  "boundaries": {
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The change only adjusts V2 fixture-local route direction state; no owner, public API, or directory responsibility changed.",
+    "backupRefPushed": false
+  },
+  "notRun": ["build14", "browser23", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

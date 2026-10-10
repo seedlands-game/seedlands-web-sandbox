@@ -1,3 +1,13 @@
+import type {
+  EcsEntityType,
+  EcsEntityQuery,
+  EcsOwnedEntity,
+  EcsPosition,
+  EntityLifetimeReference,
+  EntityLifetimeSnapshot,
+  PreparedActorSpatialReplacement,
+} from './ecs-entity-types';
+import { DEFAULT_PLAYER_INVENTORY_LAYOUT, type PlayerInventoryLayout } from './inventory-layout';
 import {
   addComponent,
   addEntity,
@@ -12,7 +22,7 @@ import {
   type EntityId,
   type World,
 } from 'bitecs';
-import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry, type ItemStack } from './item-registry';
+import { defaultItemDefinitionRegistry, type ItemDefinitionRegistry } from './item-registry';
 import { createActorComponents } from './ecs-actor-components';
 import {
   initializeActorComponents,
@@ -37,45 +47,22 @@ import {
   type StationComponentV1,
   type StationStateCodec,
 } from './ecs-station-state';
-import { clearComponentSlot } from './ecs-component-storage';
+import { defaultSpeciesState } from './species-state';
+import { EcsTransportStateOwner, type TransportSpawnState, type TransportStateCodec } from './ecs-transport-state';
+import type { TransportComponentV1, TransportStateV2 } from './modules/transport-model';
 import {
   createEntityComponents,
   ecsEntityType,
   ecsEntityTypeComponent,
   projectEcsEntity,
+  writeEcsPosition,
+  writePreparedSpatial,
+  clearEcsEntityColumns,
   type EntityComponents,
 } from './ecs-entity-components';
+export { LEGACY_ACTOR_ARCHETYPES, isActorArchetype, type EcsActorArchetype } from './actor-archetype';
 
-export type EcsEntityType = 'player' | 'world-item' | 'creature' | 'npc' | 'station';
-export type EcsActorArchetype = 'grazer' | 'night-stalker' | 'settler';
-export type EcsEntityLifecycle = 'active' | 'despawned';
-export type EcsPosition = [number, number, number];
-
-export type EcsOwnedEntity = {
-  id: string;
-  type: EcsEntityType;
-  kind: EcsEntityType;
-  lifecycle: EcsEntityLifecycle;
-  position: EcsPosition;
-  physicsVelocity?: EcsPosition;
-  stack?: ItemStack;
-  health?: number;
-  maxHealth?: number;
-  archetype?: EcsActorArchetype;
-  persistent?: boolean;
-};
-
-export type EcsEntityQuery = Readonly<{ type?: EcsEntityType }>;
-export type EntityLifetimeReference = Readonly<{
-  entityId: string;
-  epoch: number;
-  lifetime: number;
-}>;
-export type EntityLifetimeSnapshot = Readonly<{ entityId: string; lifetime: number }>;
-export type PreparedActorSpatialReplacement = Readonly<{
-  position?: EcsPosition;
-  physicsVelocity?: EcsPosition;
-}>;
+export type * from './ecs-entity-types';
 
 /** Per-world bitECS owner; recyclable EIDs and component storage stay private. */
 export class EcsEntityOwner {
@@ -83,6 +70,7 @@ export class EcsEntityOwner {
   private readonly components: EntityComponents;
   private readonly actors = createActorComponents();
   private readonly stations: EcsStationStateOwner;
+  private readonly transports: EcsTransportStateOwner;
   private readonly ids = new Map<string, EntityId>();
   private readonly issued = new Set<string>();
   private readonly usedLifetimes = new Set<number>();
@@ -94,26 +82,41 @@ export class EcsEntityOwner {
     private readonly worldEpoch = 1,
     private readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
     stationCodec?: StationStateCodec,
+    private readonly playerLayout: PlayerInventoryLayout = DEFAULT_PLAYER_INVENTORY_LAYOUT,
+    transportCodec?: TransportStateCodec,
   ) {
     if (!Number.isSafeInteger(worldEpoch) || worldEpoch <= 0)
       throw new RangeError('Entity world epoch must be a positive safe integer.');
+    if (transportCodec && transportCodec.items !== items)
+      throw new TypeError('Entity owner and transport codec item registries must match.');
     this.world = createWorld();
     this.components = createEntityComponents();
     this.stations = new EcsStationStateOwner(this.world, stationCodec, items);
+    this.transports = new EcsTransportStateOwner(this.world, transportCodec, {
+      epoch: worldEpoch,
+      get: (id) => this.get(id),
+      require: (id) => this.require(id),
+      resolve: (reference) => this.resolveReference(reference),
+      reference: (id) => this.createReference(id),
+      query: () => this.queryAll({ type: 'transport' }),
+    });
     registerComponents(this.world, [
       ...Object.values(this.components),
       ...Object.values(this.actors),
       ...this.stations.componentValues(),
+      this.transports.component,
     ]);
   }
 
   create(entity: EcsOwnedEntity): EcsOwnedEntity {
     if (entity.type === 'station') throw new TypeError('Station creation requires a station codec and component.');
+    if (entity.type === 'transport') throw new TypeError('Transport creation requires a configured component.');
     return this.createWithLifetime(entity);
   }
 
   createRestored(entity: EcsOwnedEntity, lifetime: number): EcsOwnedEntity {
     if (entity.type === 'station') throw new TypeError('Station restore requires a station codec and component.');
+    if (entity.type === 'transport') throw new TypeError('Transport restore requires a configured component.');
     if (!Number.isSafeInteger(lifetime) || lifetime <= 0 || this.usedLifetimes.has(lifetime))
       throw new TypeError(`Entity lifetime is invalid or duplicated: ${entity.id}`);
     return this.createWithLifetime(entity, lifetime);
@@ -129,21 +132,50 @@ export class EcsEntityOwner {
     return this.createWithLifetime(entity, lifetime, this.stations.prepare(entity.type, entity.id, snapshot));
   }
 
+  createTransport(entity: EcsOwnedEntity, state: TransportSpawnState): EcsOwnedEntity {
+    return this.createWithLifetime(entity, undefined, undefined, this.transports.prepare(entity.id, state));
+  }
+
+  createRestoredTransport(entity: EcsOwnedEntity, lifetime: number, snapshot: TransportComponentV1): EcsOwnedEntity {
+    if (!Number.isSafeInteger(lifetime) || lifetime <= 0 || this.usedLifetimes.has(lifetime))
+      throw new TypeError(`Entity lifetime is invalid or duplicated: ${entity.id}`);
+    return this.createWithLifetime(entity, lifetime, undefined, this.transports.prepareRestored(entity.id, snapshot));
+  }
+
+  transportComponentSnapshot(id: string): TransportComponentV1 {
+    return this.transports.snapshot(id);
+  }
+
+  transportState(reference: EntityLifetimeReference): TransportStateV2 | null {
+    return this.transports.project(reference);
+  }
+
+  validateTransportRelations(): void {
+    this.transports.validateRelations();
+  }
+
   /** Installs a world item that the EntityStore prepared and freshness-checked. */
   createPreparedWorldItem = (entity: EcsOwnedEntity): EcsOwnedEntity => this.installEntity(entity);
 
   /** Installs a station that the EntityStore prepared and freshness-checked. */
   createPreparedStation = (entity: EcsOwnedEntity, prepared: PreparedStationComponentSnapshot): EcsOwnedEntity =>
     this.installEntity(entity, undefined, prepared);
+  createPreparedTransport = (entity: EcsOwnedEntity, state: TransportComponentV1): EcsOwnedEntity =>
+    this.installEntity(entity, undefined, undefined, state);
 
   private createWithLifetime(
     entity: EcsOwnedEntity,
     restoredLifetime?: number,
     station?: PreparedStationComponentSnapshot,
+    transport?: TransportComponentV1,
   ): EcsOwnedEntity {
     this.assertAvailable();
     if ((entity.type === 'station') !== (station !== undefined))
       throw new TypeError('Station entity and component ownership do not match.');
+    if ((entity.type === 'transport') !== (transport !== undefined))
+      throw new TypeError('Transport entity and component ownership do not match.');
+    if (transport && this.queryAll({ type: 'transport' }).length >= 4096)
+      throw new RangeError('Transport entity capacity is exhausted.');
     if (entity.type === 'station') {
       this.stations.assertPosition(entity.position);
       if (this.stationAt(entity.position)) throw new Error('Station position is already occupied.');
@@ -155,13 +187,14 @@ export class EcsEntityOwner {
       throw new RangeError('Entity lifetime sequence is exhausted.');
     if (this.orderSequence >= Number.MAX_SAFE_INTEGER) throw new RangeError('Entity order sequence is exhausted.');
 
-    return this.installEntity(entity, restoredLifetime, station);
+    return this.installEntity(entity, restoredLifetime, station, transport);
   }
 
   private installEntity(
     entity: EcsOwnedEntity,
     restoredLifetime?: number,
     station?: PreparedStationComponentSnapshot,
+    transport?: TransportComponentV1,
   ): EcsOwnedEntity {
     // bitECS defers query removals; flush before allocation so a recycled EID
     // cannot retain membership from its previous lifetime.
@@ -184,8 +217,8 @@ export class EcsEntityOwner {
     components.identity.lifetime[eid] = lifetime;
     components.identity.order[eid] = ++this.orderSequence;
     components.lifecycle.active[eid] = 1;
-    this.writePosition(components.transform, eid, entity.position);
-    if (entity.physicsVelocity) this.writePosition(components.velocity, eid, entity.physicsVelocity);
+    writeEcsPosition(components.transform, eid, entity.position);
+    if (entity.physicsVelocity) writeEcsPosition(components.velocity, eid, entity.physicsVelocity);
     if (entity.health !== undefined && entity.maxHealth !== undefined) {
       components.health.current[eid] = entity.health;
       components.health.maximum[eid] = entity.maxHealth;
@@ -199,8 +232,11 @@ export class EcsEntityOwner {
       components.actorMetadata.archetype[eid] = entity.archetype;
       components.actorMetadata.persistent[eid] = entity.persistent ?? true;
     }
-    initializeActorComponents(this.world, this.actors, eid, entity, this.items);
+    initializeActorComponents(this.world, this.actors, eid, entity, this.items, this.playerLayout);
     if (station) this.stations.initialize(eid, station);
+    if (transport) {
+      this.transports.initialize(eid, transport);
+    }
     this.ids.set(entity.id, eid);
     this.issued.add(entity.id);
     return this.project(eid);
@@ -237,7 +273,7 @@ export class EcsEntityOwner {
   setPosition(id: string, position: EcsPosition): void {
     const eid = this.require(id);
     if (this.typeOf(eid) === 'station') throw new TypeError('Station positions are immutable for one entity lifetime.');
-    this.writePosition(this.components.transform, eid, position);
+    writeEcsPosition(this.components.transform, eid, position);
   }
 
   setVelocity(id: string, velocity: EcsPosition): void {
@@ -245,7 +281,7 @@ export class EcsEntityOwner {
     if (this.typeOf(eid) === 'station') throw new TypeError('Station entities do not own velocity.');
     if (!hasComponent(this.world, eid, this.components.velocity))
       addComponent(this.world, eid, this.components.velocity);
-    this.writePosition(this.components.velocity, eid, velocity);
+    writeEcsPosition(this.components.velocity, eid, velocity);
   }
 
   setHealth(id: string, health: number): void {
@@ -315,7 +351,19 @@ export class EcsEntityOwner {
     const eid = this.require(id);
     const entity = this.project(eid);
     if (!isActorEntityType(entity.type)) throw new TypeError(`Entity does not have actor components: ${id}`);
-    return prepareActorComponentSnapshot(snapshot, entity.type === 'player', this.items);
+    if (
+      snapshot.inventory.length !== this.actors.inventory.value[eid]?.capacity ||
+      snapshot.equipment.hotbarSize !== this.actors.equipment.hotbarSize[eid]
+    )
+      throw new TypeError('Actor mutation cannot change inventory layout.');
+    return prepareActorComponentSnapshot(
+      snapshot.species || !entity.archetype
+        ? snapshot
+        : { ...snapshot, species: defaultSpeciesState(entity.archetype) ?? undefined },
+      entity.type === 'player',
+      this.items,
+      this.playerLayout,
+    );
   }
 
   installPreparedActorReplacement(
@@ -325,12 +373,7 @@ export class EcsEntityOwner {
     spatial: PreparedActorSpatialReplacement = {},
   ): void {
     const eid = this.require(id);
-    if (spatial.position) this.writePosition(this.components.transform, eid, spatial.position);
-    if (spatial.physicsVelocity) {
-      if (!hasComponent(this.world, eid, this.components.velocity))
-        addComponent(this.world, eid, this.components.velocity);
-      this.writePosition(this.components.velocity, eid, spatial.physicsVelocity);
-    }
+    writePreparedSpatial(this.world, this.components, eid, spatial);
     this.components.health.current[eid] = health;
     installPreparedActorComponentSnapshot(this.actors, eid, prepared, true);
   }
@@ -341,7 +384,16 @@ export class EcsEntityOwner {
     if (!isActorEntityType(entity.type)) throw new TypeError('Entity cannot restore actor components.');
     if ((entity.health === 0) !== (snapshot.lifecycle === 'dead'))
       throw new TypeError('Actor lifecycle does not match entity health.');
-    restoreActorComponentSnapshot(this.actors, eid, snapshot, entity.type === 'player', this.items);
+    restoreActorComponentSnapshot(
+      this.actors,
+      eid,
+      snapshot.species || !entity.archetype
+        ? snapshot
+        : { ...snapshot, species: defaultSpeciesState(entity.archetype) ?? undefined },
+      entity.type === 'player',
+      this.items,
+      this.playerLayout,
+    );
   }
 
   stationSnapshot(id: string): StationComponentV1 {
@@ -354,6 +406,18 @@ export class EcsEntityOwner {
     const eid = this.require(id);
     if (this.project(eid).type !== 'station') throw new TypeError(`Entity does not have a station component: ${id}`);
     return this.stations.prepare('station', id, snapshot);
+  }
+
+  prepareTransportComponentSnapshot = (id: string, raw: unknown): TransportComponentV1 =>
+    this.transports.prepareReplacement(id, raw);
+  installPreparedTransportReplacement(
+    id: string,
+    state: TransportComponentV1,
+    spatial: PreparedActorSpatialReplacement = {},
+  ): void {
+    const eid = this.require(id);
+    writePreparedSpatial(this.world, this.components, eid, spatial);
+    this.transports.replace(eid, state);
   }
 
   installPreparedStationReplacement(id: string, prepared: PreparedStationComponentSnapshot): void {
@@ -418,6 +482,12 @@ export class EcsEntityOwner {
       throw new RangeError('Entity lifetime or order capacity is exhausted.');
   }
 
+  validateCreateIdentities(count: number, ids: readonly string[]): void {
+    this.validateCreateCapacity(count);
+    for (const id of ids)
+      if (this.get(id) || this.isIssued(id)) throw new Error(`Entity identity is unavailable: ${id}`);
+  }
+
   identitySnapshots(): EntityLifetimeSnapshot[] {
     return this.queryAll().map((entity) => {
       const reference = this.createReference(entity.id)!;
@@ -475,38 +545,11 @@ export class EcsEntityOwner {
     return id !== undefined && this.ids.get(id) === eid;
   }
 
-  private writePosition(
-    component: EntityComponents['transform'] | EntityComponents['velocity'],
-    eid: EntityId,
-    position: EcsPosition,
-  ): void {
-    component.x[eid] = position[0];
-    component.y[eid] = position[1];
-    component.z[eid] = position[2];
-  }
-
   private clearSlot(eid: EntityId): void {
     clearActorComponents(this.actors, eid);
     this.stations.clear(eid);
-    clearComponentSlot(eid, [
-      this.components.identity.id,
-      this.components.identity.lifetime,
-      this.components.identity.order,
-      this.components.lifecycle.active,
-      this.components.transform.x,
-      this.components.transform.y,
-      this.components.transform.z,
-      this.components.velocity.x,
-      this.components.velocity.y,
-      this.components.velocity.z,
-      this.components.health.current,
-      this.components.health.maximum,
-      this.components.itemStack.itemId,
-      this.components.itemStack.count,
-      this.components.itemStack.durability,
-      this.components.actorMetadata.archetype,
-      this.components.actorMetadata.persistent,
-    ]);
+    this.transports.clear(eid);
+    clearEcsEntityColumns(eid, this.components);
   }
 
   private assertAvailable = (): void => {

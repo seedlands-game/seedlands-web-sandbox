@@ -1,4 +1,4 @@
-import { isSolid } from '@seedlands/stdlib/world/voxel';
+import { isTargetable } from '@seedlands/stdlib/world/voxel';
 
 type Point = [number, number, number];
 export type VoxelTarget = {
@@ -14,6 +14,7 @@ export function traceVoxelTarget(
   origin: Point,
   direction: Point,
   getVoxel: (x: number, y: number, z: number) => number,
+  targetable: (voxel: number, x: number, y: number, z: number) => boolean = isTargetable,
 ): VoxelTarget | null {
   const length = Math.hypot(...direction);
   if (!length || ![...origin, ...direction].every(Number.isFinite)) return null;
@@ -26,7 +27,7 @@ export function traceVoxelTarget(
   let adjacent: Point | null = null;
   while (distance <= 7) {
     const voxel = getVoxel(...cell);
-    if (isSolid(voxel)) {
+    if (targetable(voxel, cell[0], cell[1], cell[2])) {
       const centerDistance = Math.hypot(...cell.map((v, axis) => v + 0.5 - origin[axis]));
       return { position: [...cell], adjacent, voxel, distance, inRange: centerDistance <= 5 };
     }

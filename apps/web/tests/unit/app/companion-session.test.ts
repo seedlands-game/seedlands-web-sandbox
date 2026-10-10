@@ -8,6 +8,14 @@ import {
 } from '@seedlands/stdlib/runtime/character-control-protocol';
 import type { WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
 import type { BoundCharacterControlPort } from '../../../src/client/authority/browser-authority-client-contract';
+import {
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN,
+  LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE,
+} from '../../../src/client/persistence/legacy-gameplay-provenance-error';
+import {
+  captureApplicationCheckpoint,
+  encodeApplicationCheckpoint,
+} from '../../../src/client/persistence/application-checkpoint';
 const frontier = {
   worldId: 'w',
   epoch: 'e',
@@ -41,6 +49,74 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('companion UI session lifecycle', () => {
+  it('reports unknown legacy provenance and keeps the active world unchanged', async () => {
+    vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn(), removeItem: vi.fn() });
+    const identity = vi.fn(async () => ({ ok: true as const, frontier, data: { worldId: 'current-world' } }));
+    const checkpoint = vi.fn(async (request: { kind: string }) =>
+      request.kind === 'restore'
+        ? {
+            ok: false as const,
+            error: {
+              kind: 'validation' as const,
+              code: 'WORLD_RPC_INVALID',
+              message: `${LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN}: missing source`,
+            },
+          }
+        : { ok: false as const, error: { kind: 'validation' as const, code: 'UNEXPECTED', message: 'unexpected' } },
+    );
+    const clock = vi.fn(async () => ({ ok: true as const, frontier, data: { paused: false, snapshot: {} } }));
+    const world = { identity, checkpoint, clock };
+    const session = new CompanionSession(
+      () => ({
+        world: world as never,
+        character: vi.fn(),
+        bindCharacter: async () => Promise.reject(new Error('not connected')),
+      }),
+      () => false,
+    );
+    const legacyWorld = {
+      version: 1,
+      commitSequence: 0,
+      seedText: 'legacy',
+      generatorVersion: 4,
+      worldRevision: 0,
+      physicsSchema: { version: 1, bodyRegistryVersion: 1 },
+      fluidSchema: { version: 1, encoding: 'chunk-level-source-byte' },
+      gameplay: {
+        version: 3,
+        revision: 0,
+        gameplayTime: 0,
+        worldTime: 9,
+        entitySequence: 0,
+        entities: [],
+        players: [],
+        simulation: {},
+        coordinateSchema: { version: 1, units: 'voxel', entityOrigin: 'body-feet-center' },
+        physicsSchema: { version: 1, bodyRegistryVersion: 1 },
+      },
+      chunks: [],
+    };
+    const captured = await captureApplicationCheckpoint(
+      {
+        ...world,
+        checkpoint: async () => ({
+          ok: true as const,
+          frontier,
+          data: { snapshot: legacyWorld as never, byteLength: 1 },
+        }),
+      } as never,
+      null,
+      null,
+    );
+
+    await session.importCheckpoint(new File([encodeApplicationCheckpoint(captured)], 'legacy-v3.json'));
+
+    expect(checkpoint).toHaveBeenCalledOnce();
+    expect(session.get().error).toBe(LEGACY_GAMEPLAY_PROVENANCE_UNKNOWN_MESSAGE);
+    expect(await identity()).toEqual({ ok: true, frontier, data: { worldId: 'current-world' } });
+    session.stop();
+  });
+
   it('creates three default residents with distinct identity prompts and no fixed execution rule', async () => {
     const profiles: CharacterState['profile'][] = [];
     const characterRequest = vi.fn(

@@ -1,0 +1,30 @@
+GIT-37-ARRIVAL-DURING-AIM
+baseline=24dc3a1daca6e629ca273ea07aeae50eb4be868a
+validationTree=/private/tmp/seedlands-git37-arrival-during-aim
+codeCommit=99b895067324ae930fd5dbd6bb227c578c499c8d
+sourceTree=fd5cd21572509cf7b57536947bf3d88d23c7ad5a
+stagedPaths=9
+stagedPatchSha256=8d55c757e842d65ce710f3e4af83f5e404516bcc9388fa578b63017a1116f4b5
+
+dependency-setup
+pnpm install --offline --frozen-lockfile --ignore-scripts
+
+affected
+pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts apps/web/tests/e2e/classic-support/equipment-grounded-route.test.ts apps/web/tests/e2e/classic-support/route-progress.test.ts apps/web/tests/e2e/classic-support/target-aim.test.ts apps/web/tests/e2e/classic-support/door-collision-oracle.test.ts apps/web/tests/e2e/classic-support/door-exit-face.test.ts apps/web/tests/e2e/classic-support/door-readiness.test.ts apps/web/tests/e2e/classic-support/equipment-mining-aim.test.ts apps/web/tests/e2e/classic-support/scenario.test.ts --maxWorkers=1
+
+classic-types
+pnpm typecheck:classic
+
+root-types
+pnpm exec tsc -p tsconfig.test.json --noEmit
+
+eslint
+pnpm exec eslint apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/harness-snapshot.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+
+format
+pnpm exec prettier --check apps/web/tests/e2e/classic-support/target-aim.ts apps/web/tests/e2e/classic-support/harness.ts apps/web/tests/e2e/classic-support/harness-snapshot.ts apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts apps/web/tests/e2e/classic-support/route-aim-contract.test.ts changes/2026-09-23-classic-functional-completion/spec.md changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md docs/code-map.md
+
+scoped-diff
+git diff --cached --check -- <the exact nine paths in code-staged.paths>
+
+All validation commands after dependency setup ran serially inside one default benchmark-window reservation. Vitest used maxWorkers=1. The detached tree installed dependencies offline with the frozen lockfile; root and apps/web @seedlands workspace links resolved inside the detached tree.

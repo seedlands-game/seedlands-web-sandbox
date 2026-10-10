@@ -2,6 +2,11 @@ import { FURNACE_WORLD_COMPONENT } from './furnace-world-model';
 import { STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT } from './station-action-model';
 import { FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT } from './feeding-model';
 import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } from './block-action-model';
+import { CROP_CELL_COMPONENT } from './crop-interaction-model';
+import { NAVIGATION_COMPONENT } from './navigation-interaction-model';
+import { TRANSPORT_MOTION_COMPONENT } from './transport-motion-module';
+import { TRANSPORT_DEPLOYMENT_COMPONENT } from './transport-interaction-config';
+import { TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT } from './transport-relation-interaction';
 import type { WorldComposition } from '../../composition/contracts';
 import type { ModuleActorAuthority } from '../../composition/gameplay-actor-authority';
 import { createRegisteredOperationRuntime } from '../../composition/registered-operations';
@@ -21,6 +26,8 @@ import { NEEDS_COMPONENT } from './needs-model';
 import { MODE_COMPONENT } from './mode-module';
 import { RULESET_COMPONENT } from './ruleset-module';
 import { FORAGE_WORLD_COMPONENT } from './forage-model';
+import { STRUCTURE_ACTOR_COMPONENT, STRUCTURE_VOXEL_COMPONENT } from './structure-actions-module';
+import { MEDIA_PLAYBACK_COMPONENT } from './media-playback-module';
 
 const GAMEPLAY_OPERATION_FLUSH_LIMIT = 64;
 
@@ -55,6 +62,12 @@ export class GameplayModuleRuntime {
       feeding?: RegisteredStatePort;
       forage?: RegisteredStatePort;
       stations?: RegisteredStatePort;
+      structures?: RegisteredStatePort;
+      media?: RegisteredStatePort;
+      navigation?: () => RegisteredStatePort;
+      transport?: RegisteredStatePort;
+      transportRelations?: RegisteredStatePort;
+      transportMotion?: RegisteredStatePort;
     }>,
   ) {}
 
@@ -79,6 +92,14 @@ export class GameplayModuleRuntime {
     const { composition } = this.options;
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
+      if (
+        [TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT].includes(component) &&
+        this.options.transportRelations
+      )
+        return this.options.transportRelations;
+      if (component === TRANSPORT_MOTION_COMPONENT && this.options.transportMotion) return this.options.transportMotion;
+      if (component === TRANSPORT_DEPLOYMENT_COMPONENT && this.options.transport) return this.options.transport;
+      if (component === NAVIGATION_COMPONENT && this.options.navigation) return this.options.navigation();
       if (component === 'seedlands:inventory') return this.options.inventory;
       if (
         (component === INVENTORY_ACTOR_COMPONENT || component === INVENTORY_ITEM_COMPONENT) &&
@@ -88,13 +109,21 @@ export class GameplayModuleRuntime {
       if ((component === COMBAT_ACTOR_COMPONENT || component === COMBAT_WORLD_COMPONENT) && this.options.combat)
         return this.options.combat;
       if (
-        [BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT].includes(component) &&
+        [BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT, CROP_CELL_COMPONENT].includes(
+          component,
+        ) &&
         this.options.blocks
       )
         return this.options.blocks;
       if ([FEEDING_ACTOR_COMPONENT, FEEDING_ITEM_COMPONENT].includes(component) && this.options.feeding)
         return this.options.feeding;
       if (component === FORAGE_WORLD_COMPONENT && this.options.forage) return this.options.forage;
+      if (component === MEDIA_PLAYBACK_COMPONENT && this.options.media) return this.options.media;
+      if (
+        (component === STRUCTURE_ACTOR_COMPONENT || component === STRUCTURE_VOXEL_COMPONENT) &&
+        this.options.structures
+      )
+        return this.options.structures;
       if (
         [STATION_ACTOR_COMPONENT, STATION_INSTANCE_COMPONENT, FURNACE_WORLD_COMPONENT].includes(component) &&
         this.options.stations

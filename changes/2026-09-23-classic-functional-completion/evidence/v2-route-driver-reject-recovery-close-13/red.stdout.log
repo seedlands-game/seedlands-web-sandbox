@@ -1,0 +1,114 @@
+9:18:37 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts (31 tests | 9 failed) 9ms
+     ✓ does not let the default eastbound crossing rule accept an east-to-west transition 1ms
+     ✓ chooses 'KeyW' for [ 78.5, 32.6, -0.5 ] -> [ 80.5, -0.5 ] 0ms
+     ✓ chooses 'KeyS' for [ 98.5, 32.6, -0.5 ] -> [ 80.5, -0.5 ] 0ms
+     ✓ rejects an unbounded 'KeyW' crossing beyond the finite arrival neighborhood 0ms
+     ✓ rejects an unbounded 'KeyS' crossing beyond the finite arrival neighborhood 0ms
+     ✓ keeps both 'west' arrival projections fresh and inside mining range 0ms
+     ✓ keeps both 'east' arrival projections fresh and inside mining range 0ms
+     ✓ keeps both projected route-domain edges in mining range for all ten resources 0ms
+     ✓ corrects an overshot walk with the opposite key inside one shared deadline 0ms
+     ✓ caps a server-projection wait by both 20 seconds and the shared route deadline 0ms
+     ✓ waits for server x=79 without issuing a zero-input walk after the client arrives 0ms
+     ✓ waits for server x=82.5 without issuing a zero-input walk after the client arrives 0ms
+     ✓ fails when the bounded wait does not bring the server projection into the finite neighborhood 1ms
+     ✓ charges a server-only projection wait to the same route deadline 0ms
+     ✓ keeps walking when the client is finite but has not crossed in the active direction 0ms
+     ✓ rejects a matching result returned after the shared route deadline 0ms
+     × returns the same strict snapshot after the current driver times out 1ms
+     × continues the same waypoint from a fresh drift snapshot within the shared deadline 0ms
+     × rethrows the original timeout for a null recovery observation 1ms
+     × rethrows the original timeout for a stale recovery observation 0ms
+     × rethrows the original timeout for a ungrounded recovery observation 0ms
+     × rethrows the original timeout for a colliding recovery observation 0ms
+     × rethrows the original timeout for a ack-regressed recovery observation 0ms
+     × rethrows the original timeout for a client-only recovery observation 0ms
+     ✓ rethrows the original timeout when the shared deadline expires before-observe 0ms
+     × rethrows the original timeout when the shared deadline expires after-observe 0ms
+     ✓ does not recover an unrelated driver rejection 0ms
+     ✓ does not recover an unrelated driver rejection 0ms
+     ✓ does not recover an unrelated driver rejection 0ms
+     ✓ rejects stale, unready, one-sided, and out-of-range arrival snapshots 0ms
+     ✓ keeps every batch, pickup retreat, and workbench transition on the safe corridor 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > returns the same strict snapshot after the current driver times out
+Error: Real input route timed out before 80.5,-0.5.
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:307:21
+    305|     const baseline = routeSnapshot([79, 32.6, -0.5], 100, 50);
+    306|     const matched = routeSnapshot([80.5, 32.6, -0.5], 101, 51);
+    307|     const timeout = new Error('Real input route timed out before 80.5,…
+       |                     ^
+    308|     let observations = 0;
+    309|     let walks = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > continues the same waypoint from a fresh drift snapshot within the shared deadline
+Error: Real input route timed out before 80.5,-0.5.
+ ❯ Object.walk apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:344:39
+    342|       walk: async (direction, timeout) => {
+    343|         walks.push({ direction, timeout });
+    344|         if (walks.length === 1) throw new Error('Real input route time…
+       |                                       ^
+    345|         return matched;
+    346|       },
+ ❯ followEquipmentRoute apps/web/tests/e2e/classic-support/equipment-resource-route.ts:131:33
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:334:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a null recovery observation
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a stale recovery observation
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a ungrounded recovery observation
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a colliding recovery observation
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a ack-regressed recovery observation
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout for a client-only recovery observation
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:380:26
+    378|
+    379|     await expect(pending).rejects.toBe(timeout);
+    380|     expect(observations).toBe(2);
+       |                          ^
+    381|   });
+    382|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts > Classic V2 equipment resource route > rethrows the original timeout when the shared deadline expires after-observe
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts:407:28
+    405|
+    406|       await expect(pending).rejects.toBe(timeout);
+    407|       expect(observations).toBe(phase === 'before-observe' ? 1 : 2);
+       |                            ^
+    408|     },
+    409|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  9 failed | 22 passed (31)
+   Start at  21:18:37
+   Duration  150ms (transform 44ms, setup 0ms, import 55ms, tests 9ms, environment 0ms)
+

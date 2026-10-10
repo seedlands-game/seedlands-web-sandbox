@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-RESTORE-REFERENCE-OBSERVABILITY-01",
+  "status": "FOCUSED_DETERMINISTIC_STATIC_GREEN_BROWSER_NOT_RUN",
+  "identity": {
+    "committedHead": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "committedTree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a",
+    "validationTree": "/private/tmp/seedlands-v2-restore-reference-01",
+    "validationTreeKind": "task-owned APFS clone of committed baseline with only slice allowlist bytes overlaid"
+  },
+  "interface": {
+    "request": {
+      "kind": "entity-reference",
+      "reference": ["entityId", "epoch", "lifetime"]
+    },
+    "result": {
+      "kind": "entity-reference",
+      "reference": ["entityId", "epoch", "lifetime"],
+      "status": ["current", "stale"]
+    },
+    "protocolVersion": 1,
+    "authorization": {
+      "resource": "world.entity",
+      "operation": "read",
+      "target": "reference.entityId",
+      "beforeResolve": true
+    },
+    "ownerResolution": "AuthorityServerPort.resolveEntityReference",
+    "genericAcrossPlaybooks": true,
+    "classicIdsHardcoded": false,
+    "writeCapabilityAdded": false
+  },
+  "validation": {
+    "outerExactKeys": ["kind", "reference"],
+    "referenceExactKeys": ["entityId", "epoch", "lifetime"],
+    "entityId": "trimmed non-empty string with maximum length 256",
+    "epochAndLifetime": "safe integers from 1 through Number.MAX_SAFE_INTEGER",
+    "plainDataPropertiesRequired": true,
+    "requestCapturedBeforeQueueExecution": true,
+    "responseReferenceDetached": true
+  },
+  "semantics": {
+    "current": "the current Authority owner resolves the complete reference",
+    "stale": "the current Authority owner does not resolve the complete reference, including wrong epoch, wrong lifetime or missing entity",
+    "malformed": "WORLD_REQUEST_INVALID validation failure without resolver call",
+    "unauthorized": "WORLD_PERMISSION_DENIED permission failure without resolver call",
+    "failedRestore": "pre-restore reference remains current",
+    "successfulRestore": "pre-restore reference becomes stale and a newly created reference is current",
+    "epochComparisonUsedAsProof": false,
+    "jsObjectIdentityClaimed": false,
+    "retainedAccessClaimedByThisSlice": false
+  },
+  "consumer": {
+    "owner": "existing Classic equipment restore journey",
+    "inspectPort": "window.__seedlandsHarness.world.inspect",
+    "order": ["inspect old as stale", "inspect new as current", "existing UI helmet detach/reequip"],
+    "failClosedBeforeUi": [
+      "old reported current",
+      "new reported stale",
+      "reference mismatch",
+      "permission failure",
+      "validation failure",
+      "transport failure"
+    ],
+    "evidencePath": "restoreEvidence.after.referenceStatus",
+    "evidenceShape": {
+      "old": "entity-reference result with stale status",
+      "current": "entity-reference result with current status"
+    },
+    "existingV2EquipmentShapePreserved": true
+  },
+  "tdd": {
+    "trustedRed": {
+      "runId": "v2-restore-reference-observability-red-02",
+      "status": "FAIL_EXPECTED_GAP",
+      "failed": 10,
+      "passed": 1,
+      "skipped": 17,
+      "reason": "old implementation lacked the entity-reference variant and consumer inspection/fail-closed behavior"
+    },
+    "focusedGreen": {
+      "runId": "v2-restore-reference-focused-green-final-05",
+      "status": "PASS",
+      "files": 1,
+      "passed": 11
+    },
+    "affectedExisting": {
+      "runId": "v2-restore-reference-affected-tests-sealed",
+      "status": "PASS",
+      "files": 2,
+      "passed": 16,
+      "skipped": 1
+    },
+    "existingBaselineFailure": {
+      "runId": "v2-restore-reference-existing-action-owner-diag-01",
+      "status": "FAIL_PREEXISTING_UNTOUCHED",
+      "test": "authorizes action ids against their actual actor owner",
+      "observed": "getActorAction('foreign') returned null",
+      "sliceModifiedTestOrBehavior": false
+    },
+    "discardedAsHeadlessRed": {
+      "runId": "v2-restore-reference-observability-red-01",
+      "reason": "incorrect non-Classic seed had no safe dry spawn; consumer failures remain raw but this run is not the trusted Headless RED"
+    }
+  },
+  "static": {
+    "stdlibProductionTypes": {
+      "runId": "v2-restore-reference-stdlib-types-green-03",
+      "status": "PASS"
+    },
+    "webProductionTypes": {
+      "runId": "v2-restore-reference-web-types-final-03",
+      "status": "PASS",
+      "svelteErrors": 0,
+      "svelteWarnings": 0
+    },
+    "rootTestTypes": {
+      "runId": "v2-restore-reference-root-test-types-final-03",
+      "status": "PASS"
+    },
+    "classicTestTypes": {
+      "runId": "v2-restore-reference-classic-types-final-05",
+      "status": "PASS"
+    },
+    "eslint": {
+      "runId": "v2-restore-reference-eslint-final-03",
+      "status": "PASS",
+      "suppressionsAdded": false
+    },
+    "prettier": {
+      "runId": "v2-restore-reference-format-final-04",
+      "status": "PASS",
+      "ignoreAdded": false
+    }
+  },
+  "scope": {
+    "trackedModifiedBySlice": [
+      "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "apps/web/tests/e2e/classic-support/equipment-journey.ts",
+      "changes/2026-09-23-classic-functional-completion/spec.md",
+      "docs/harness-contracts.md",
+      "packages/stdlib/src/server/harness/authority-world-harness.ts",
+      "packages/stdlib/src/server/harness/world-harness-contract.ts",
+      "packages/stdlib/src/server/harness/world-harness-operations.ts",
+      "packages/stdlib/src/server/harness/world-harness-validation.ts"
+    ],
+    "untrackedSourceOrChangeFilesBySlice": [
+      "apps/web/tests/e2e/classic-support/equipment-restore-reference.test.ts",
+      "changes/2026-09-23-classic-functional-completion/restore-reference-observability-contract.md",
+      "changes/2026-09-23-classic-functional-completion/restore-reference-observability-evidence.md"
+    ],
+    "evidenceDirectory": "changes/2026-09-23-classic-functional-completion/evidence/v2-restore-reference-observability-01",
+    "oldSessionAndBrowserAdapterTestsRestoredToHead": true,
+    "otherWorkerDirtyUsedAsCapability": false,
+    "indexWritten": false
+  },
+  "budget": {
+    "aiBaselineHours": 2,
+    "aiRecommended120PercentHours": 2.4,
+    "aiHardLimitHours": 3,
+    "traditionalPdRange": "0.25-0.5",
+    "traditionalPdRecommended120Percent": 0.6,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "kernelModified": false,
+    "entityStoreOrRestoreSemanticsModified": false,
+    "protocolVersionChanged": false,
+    "secondHarnessOrFallbackAdded": false,
+    "fixtureScenarioRunnerReceiptCiModified": false,
+    "deathWorldItemsArmorCatalogV3V4Implemented": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browser26Run": false,
+    "cuaRun": false,
+    "devServerRun": false,
+    "ciRun": false,
+    "gitIndexCommitPushPrRun": false,
+    "productGreenClaimed": false
+  },
+  "nextPrerequisites": [
+    "root reviews the source diff and evidence identities",
+    "a clean commit containing only the authorized slice is created by the delivery owner",
+    "a production artifact is built from that committed source",
+    "root acquires the unique Browser lease and runs the existing canonical route",
+    "the restore receipt independently reads old stale, new current and the subsequent formal UI continuation"
+  ]
+}

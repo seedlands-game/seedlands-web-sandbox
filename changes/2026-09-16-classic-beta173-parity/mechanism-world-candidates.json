@@ -1,0 +1,653 @@
+{
+  "schemaVersion": 1,
+  "profileId": "classic-b173-singleplayer-v16",
+  "scope": "仅 M02-M13 的静态候选合同",
+  "reference": {
+    "reconstructedCommit": "740c583901e1ff1150e9ef37e37dab5bc0e4f807",
+    "sourceLevel": "重构源码候选，不是字节码 oracle"
+  },
+  "caseCount": 42,
+  "cases": [
+    {
+      "caseId": "M02-01",
+      "behavior": "世界创建参数、seed 文本/数字转化、随机源",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定世界名、long seed、空 world 或指定 level.dat；触发 create/load",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "GuiCreateWorld 先取随机 long；非空 seed 文本若可解析为非 0 long 则直接使用该数，若是 0 则保留随机值，若解析失败则使用 Java String.hashCode 的有符号 int 再扩成 long。固定文本 classic-b173-acceptance-v1 的候选 long 为 1817698218；WorldInfo 保存该 long randomSeed。",
+      "sourceLocations": ["GuiCreateWorld.java#L65-L90", "WorldInfo.java#L22-L44", "World.java#L94-L194"],
+      "positiveControl": "固定文本 classic-b173-acceptance-v1 应落到 1817698218；数字文本 123 应落到 long 123；均读回 WorldInfo randomSeed。",
+      "negativeControl": "不可把非数字文本当 0；重复点击 create 不能创建两个世界；空文本和数字 0 不得硬编码为 0 seed。",
+      "saveResumeDependency": "世界信息/生成器 RNG state",
+      "unconfirmed": ["空串/数字 0 的非确定性随机 long 不能只靠固定单次值验收；源方法与官方 jar 等价未证"]
+    },
+    {
+      "caseId": "M02-02",
+      "behavior": "generatorVersion 与原版噪声/随机调用次序兼容",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定世界名、long seed、空 world 或指定 level.dat；触发 create/load",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "WorldChunkManager 以 seed*9871、*39811、*543321 初始化三组 octave generator；地形填充以 world seed 和 chunk 坐标重新设定随机源。",
+      "sourceLocations": ["WorldChunkManager.java#L18-L20", "ChunkProviderGenerate.java#L315-L318"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "世界信息/生成器 RNG state",
+      "unconfirmed": ["完整噪声调用次序与 Seedlands generatorVersion 映射"]
+    },
+    {
+      "caseId": "M02-03",
+      "behavior": "创世/出生/世界时间初态与旧档迁移/拒绝",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定世界名、long seed、空 world 或指定 level.dat；触发 create/load",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "WorldInfo NBT 持久化 RandomSeed、SpawnX/Y/Z、Time、rain/thunder 字段；缺失 key 的迁移行为为 GAP。",
+      "sourceLocations": ["WorldInfo.java#L22-L35", "L90-L102"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "世界信息/生成器 RNG state",
+      "unconfirmed": ["旧存档拒绝/迁移轨迹"]
+    },
+    {
+      "caseId": "M03-01",
+      "behavior": "地形密度、噪声层、区块/高度截断",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、生成顺序与 RNG snapshot；触发 provide/populate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "候选区块格为 16×128×16，provideChunk 依次调用 generateTerrain 与 replaceBlocksForBiome。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L43-L112", "L193-L201"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT 与地形 trace",
+      "unconfirmed": ["黄金密度/噪声数组"]
+    },
+    {
+      "caseId": "M03-02",
+      "behavior": "洞穴雕刻、连通/液体填充",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、生成顺序与 RNG snapshot；触发 provide/populate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "MapGenCaves 在 provideChunk 中于 terrain/surface 生成后执行。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L20", "L193-L201"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT 与地形 trace",
+      "unconfirmed": ["洞穴液体/连通黄金轨迹"]
+    },
+    {
+      "caseId": "M03-03",
+      "behavior": "矿脉种类、深度、密度、生成次序",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、生成顺序与 RNG snapshot；触发 provide/populate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "每个填充 chunk 依次尝试黏土 10@Y0..127(size32)、泥土 20@Y0..127(size32)、沙砾 10@Y0..127(size32)、煤 20@Y0..127(size16)、铁 20@Y0..63(size8)、金 2@Y0..31(size8)、红石 8@Y0..15(size7)、钻石 1@Y0..15(size7)、青金石 1@Y=nextInt(16)+nextInt(16)(size6，非均匀 0..30)；这些是生成器调用/尝试次数，不是最终方块数量。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L347-L407"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT 与地形 trace",
+      "unconfirmed": ["逐尝试坐标/RNG 调用序与矿脉覆盖后的最终方块分布"]
+    },
+    {
+      "caseId": "M03-04",
+      "behavior": "基岩、表土、沙/砂岩/黏土/海床分层",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、生成顺序与 RNG snapshot；触发 provide/populate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "表层替换自上而下扫描；基岩使用 random nextInt(5)，沙层可续接为砂岩。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L113-L189"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT 与地形 trace",
+      "unconfirmed": ["黏土/海床完整分布"]
+    },
+    {
+      "caseId": "M04-01",
+      "behavior": "群系采样、温湿度/降水边界",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、biome/土壤/净空与 RNG；触发 ChunkProviderGenerate.populate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Biome manager 使用三条带 seed 的 NoiseGeneratorOctaves2 流计算温度、降水和群系噪声。",
+      "sourceLocations": ["WorldChunkManager.java#L18-L20"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT",
+      "unconfirmed": ["边界坐标夹具"]
+    },
+    {
+      "caseId": "M04-02",
+      "behavior": "树种、树冠、树苗长树及空间冲突",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、biome/土壤/净空与 RNG；触发 decorate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "WorldGenTrees 先检查高度、净空和草/土支撑；这些前置条件失败时返回 false 且尚未写世界。前置通过后会逐次写土、叶和木，但未核验底层 setBlock 失败的回滚。",
+      "sourceLocations": ["WorldGenTrees.java#L6-L76"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT",
+      "unconfirmed": ["全部树种变体/RNG"]
+    },
+    {
+      "caseId": "M04-03",
+      "behavior": "花/草/蘑菇/甘蔗/仙人掌自然分布",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、biome/土壤/净空与 RNG；触发 decorate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "该版本没有 biome.decorate 调用；ChunkProviderGenerate.populate 在地牢/矿物后直接内联装饰。树木尝试数由 mobSpawnerNoise、nextDouble 和 biome 加减：forest/rainforest/taiga +base+5、seasonalForest +base+2、desert/tundra/plains -20（另有 1/10 额外尝试）。黄花尝试 forest2/seasonalForest4/taiga2/plains3；高草 forest2/rainforest10/seasonalForest2/taiga1/plains10；枯灌木 desert2；红花 1/2、棕蘑菇 1/4、红蘑菇 1/8；甘蔗 10；南瓜 1/32；仙人掌 desert10；水泉 50、熔岩泉 20。所有数量是生成器尝试而非最终落块。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L310-L318", "L410-L585", "BiomeGenBase.java#L70-L72"],
+      "positiveControl": "固定 rainforest/forest/desert 三个 biome 与 RNG，断言各类生成器调用尝试次数和先后次序；实际放置数单独断言。",
+      "negativeControl": "不得调用不存在的 biome.decorate，也不得把尝试次数当成最终放置数；切换 desert/rainforest 时，枯灌木/仙人掌与高草尝试矩阵须变化。",
+      "saveResumeDependency": "chunk NBT",
+      "unconfirmed": ["完整 RNG 调用序、每个生成器内部放置与全部群系/地表最终分布"]
+    },
+    {
+      "caseId": "M04-04",
+      "behavior": "积雪/冰面生成与地形组合",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk 坐标、biome/土壤/净空与 RNG；触发 decorate",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "每个活跃 chunk 的雪/冰候选受 nextInt(16)==0、雪地群系和 block light<10 限制；雪还要求降雨/固体支撑，冰要求静水 metadata 0。",
+      "sourceLocations": ["World.java#L1931-L1948"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk NBT",
+      "unconfirmed": ["地形组合黄金样本"]
+    },
+    {
+      "caseId": "M05-01",
+      "behavior": "地牢房间、刷怪笼和箱子位置/频率",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk、周边方块/亮度/玩家距离；触发生成或 spawner tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "每个填充 chunk 进行 8 次地牢尝试；房间半径 2..3、高度 3，且要求 1..5 个开放门洞位置。",
+      "sourceLocations": ["ChunkProviderGenerate.java#L340-L344", "WorldGenDungeons.java#L15-L58"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/TileEntity NBT",
+      "unconfirmed": ["精确箱子槽位/RNG 次序"]
+    },
+    {
+      "caseId": "M05-02",
+      "behavior": "刷怪笼类型/触发/产怪、战利品表",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 seed、chunk、周边方块/亮度/玩家距离；触发生成或 spawner tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "地牢笼种类由 nextInt(4) 决定：Skeleton 1/4、Zombie 1/2、Spider 1/4；最多尝试放 2 个箱子，每箱最多 3 次位置尝试，建箱后执行 8 次 loot roll。nextInt(11) 的 0..10 对应鞍、铁锭 1..4、面包、小麦 1..4、火药 1..4、线 1..4、空桶、金苹果(另过 1/100)、红石 1..4(另过 1/2)、两唱片之一(另过 1/10)、可可豆染料 meta3；未过附加门槛则为 null。笼仅在 16 格内有玩家时推进：初始 delay=20，到 0 后最多尝试 4 只；同类实体在笼 AABB 向外扩 8/4/8 后数量达 6 即重置；成功生成或达到局部上限后 delay=200+nextInt(600)，NBT 保存 EntityId/Delay。",
+      "sourceLocations": ["WorldGenDungeons.java#L53-L145", "TileEntityMobSpawner.java#L4-L102"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/TileEntity NBT",
+      "unconfirmed": ["逐次 RNG/实体位置 trace、房间/箱子实际落点及与官方客户端方法级等价"]
+    },
+    {
+      "caseId": "M05-03",
+      "behavior": "主世界新建出生点搜索与显式重选",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 world seed/RNG、初始 (0,64,0)、候选坐标的 first-uncovered block 与主世界 provider；至少一处砂面保证搜索终止",
+        "trigger": "创建 World 触发 getInitialSpawnLocation；单独固定显式 setSpawnLocation 调用与读回"
+      },
+      "candidateExpected": "新 World 从 (x=0,y=64,z=0) 搜索；getFirstUncoveredBlock 从 y=63 开始，沿连续非空气的 y+1 上行后返回当前 block ID。主世界 WorldProvider.canCoordinateBeSpawn 只在该返回值为 sand ID12 时为 true，不是抽象的安全/可站立谓词。失败时 x/z 各加两次 nextInt(64) 之差，直至命中；随后 WorldInfo 保存 SpawnX/Y/Z。显式 setSpawnLocation 则只在当前 SpawnY<=0 时改为 64，并在该返回值为 air ID0 时以两次 nextInt(8) 之差重试 x/z，最终只写 SpawnX/Z。",
+      "sourceLocations": [
+        "World.java#L192-L205",
+        "L215-L250",
+        "WorldProvider.java#L37-L40",
+        "WorldInfo.java#L23-L26",
+        "L90-L93"
+      ],
+      "positiveControl": "初始候选坐标的 getFirstUncoveredBlock 返回砂 ID12 时，getInitialSpawnLocation 保持 x/z=0、y=64 并读回 WorldInfo。",
+      "negativeControl": "初始候选为非砂时不得立即接受；固定 RNG 与下一砂面坐标后必须沿 nextInt(64) 差值搜索，不得用一般 solid-block 判定替代。",
+      "saveResumeDependency": "WorldInfo NBT/readback",
+      "unconfirmed": ["固定 seed/RNG 下完整搜索轨迹、无砂世界的终止策略与官方客户端方法级等价"]
+    },
+    {
+      "caseId": "M06-01",
+      "behavior": "区块加载/卸载、邻域激活与 tick 资格",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定保存过的 3×3 chunks、玩家坐标和加载半径；触发 boundary/load/unload",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Chunk 承载 blocks、data、skylight、blocklight、height map、entities 和 tile entities；world tick 调用 unload100OldestChunks。",
+      "sourceLocations": ["Chunk.java#L10-L38", "World.java#L1761-L1763"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/entity/tile NBT",
+      "unconfirmed": ["加载/卸载次序"]
+    },
+    {
+      "caseId": "M06-02",
+      "behavior": "可视距离、雾和远处世界出现顺序",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定保存过的 3×3 chunks、玩家坐标和加载半径；触发 boundary/load/unload",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "render distance 是客户端设置；雾与远处出现顺序在此没有确定性 server-state expected。",
+      "sourceLocations": ["GameSettings.java#L12-L26", "L117-L130", "RenderGlobal.java#L186-L223", "L386-L400"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/entity/tile NBT",
+      "unconfirmed": ["GAP：固定 viewport/frame 参照"]
+    },
+    {
+      "caseId": "M06-03",
+      "behavior": "未加载边界移动/流体/实体行为",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定保存过的 3×3 chunks、玩家坐标和加载半径；触发 boundary/load/unload",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "World 的变更、raycast、碰撞路径会查询 chunk 是否存在/提供；没有单一通用的未加载边界规则。",
+      "sourceLocations": ["World.java#L367", "L959-L976"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/entity/tile NBT",
+      "unconfirmed": ["逐操作边缘轨迹"]
+    },
+    {
+      "caseId": "M07-01",
+      "behavior": "非整格 AABB、选择/破坏射线与遮挡",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 block metadata、AABB、ray start/end；触发 raycast 或 move tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Block.collisionRayTrace 使用方块 bounds；World 从查询单元格收集 block collision boxes。",
+      "sourceLocations": ["Block.java#L273-L295", "L375-L414", "World.java#L959-L976"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "无",
+      "unconfirmed": ["面并列决胜/起点在方块内"]
+    },
+    {
+      "caseId": "M07-02",
+      "behavior": "楼梯、半砖、门、床、牌、轨碰撞/朝向",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 block metadata、AABB、ray start/end；触发 raycast 或 move tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Stairs 以 metadata 相关的两个 collision box 组合；door/bed/rail 各有独立 metadata 逻辑。",
+      "sourceLocations": ["BlockStairs.java#L38-L77", "BlockDoor.java", "BlockBed.java", "BlockRail.java"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "无",
+      "unconfirmed": ["全部朝向夹具"]
+    },
+    {
+      "caseId": "M07-03",
+      "behavior": "透明、透光、液体、树叶与面剔除规则",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 block metadata、AABB、ray start/end；触发 raycast 或 move tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Leaves 的 opacity 随 graphicsLevel 切换；liquid 非 opaque/非 normal，且仅在请求时以 source 参与碰撞。",
+      "sourceLocations": ["BlockLeaves.java#L177-L182", "BlockFluid.java#L45-L82"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "无",
+      "unconfirmed": ["render mode 视觉标准"]
+    },
+    {
+      "caseId": "M08-01",
+      "behavior": "每材质/工具挖掘速度与采掘等级",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定工具/耐久、方块、输入 ticks、RNG；触发挖掘",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "hardness<0 时 blockStrength 为 0；不可采掘时为 1/(hardness*100)，否则为玩家相对强度/(hardness*30)。",
+      "sourceLocations": ["Block.java#L327-L337"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "inventory/drop entities",
+      "unconfirmed": ["工具采掘矩阵"]
+    },
+    {
+      "caseId": "M08-02",
+      "behavior": "掉落 ID/数量/概率、剪刀/特殊掉落",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定工具/耐久、方块、输入 ticks、RNG；触发挖掘",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "PlayerControllerSP.sendBlockRemoved 先记录旧 ID/meta 并调用父类移除；手持物的 onDestroyBlock 即使不能采掘也被调用，只有实际移除成功且 canHarvestBlock 为 true 才调用 block.harvestBlock。普通树叶 quantityDropped 以 nextInt(20)==0 产生 1 棵树苗；手持剪刀采掘时 BlockLeaves.harvestBlock 改为掉树叶块（metadata &3）。",
+      "sourceLocations": ["PlayerControllerSP.java#L26-L38", "BlockOre.java#L9-L22", "BlockLeaves.java#L154-L168"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "inventory/drop entities",
+      "unconfirmed": ["全部方块工具采掘矩阵与掉落 RNG/实体轨迹"]
+    },
+    {
+      "caseId": "M08-03",
+      "behavior": "耐久耗损、坏掉、错误工具与方块硬度",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定工具/耐久、方块、输入 ticks、RNG；触发挖掘",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "EnumToolMaterial 的 WOOD/STONE/IRON/EMERALD(钻石)/GOLD 最大使用次数依次为 59/131/250/1561/32。ItemTool 基类命中实体调用 damageItem(2)，破坏方块调用 damageItem(1)；ItemStack 只在累计 itemDamage > getMaxDamage 时减 1 堆叠并把损伤清零。其他子类、无效操作与真实挖掘完成的耗损仍须分开核对。",
+      "sourceLocations": ["EnumToolMaterial.java#L3-L35", "ItemTool.java#L29-L37", "ItemStack.java#L124-L141"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "inventory/drop entities",
+      "unconfirmed": ["GAP：完整操作矩阵"]
+    },
+    {
+      "caseId": "M08-04",
+      "behavior": "鼠标按住、准星、裂纹/破坏反馈节奏",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定工具/耐久、方块、输入 ticks、RNG；触发挖掘",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "同一目标的 sendBlockRemoving 调用才累积 curBlockDamage；field_1069_h 从 0 起每次调用加一，旧值 %4==0 时播放挖掘声（不是每四个固定伤害增量）。累计达到 1 时移除方块、清进度并设 blockHitWait=5；切换目标时清进度/声计数且本次不增加伤害。渲染层用 prev/current 插值显示裂纹。",
+      "sourceLocations": ["PlayerControllerSP.java#L61-L105"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "inventory/drop entities",
+      "unconfirmed": ["裂纹视觉时序/frame 映射"]
+    },
+    {
+      "caseId": "M09-01",
+      "behavior": "放置合法性、相邻更新与面/朝向",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 click face、邻格、ItemStack；触发 use",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "ItemBlock.onItemUse 点击雪层时改用原格/side=0；其他面先偏移目标坐标。空栈、y=127 且将放置固体、或 canBlockBePlacedAt=false 时返回 false 且不写世界/扣物。放置谓词通过后，setBlockAndMetadataWithNotify 成功才执行 onBlockPlaced/onBlockPlacedBy、声音和 stackSize--；即便 world set 返回 false，此路径仍返回 true 但不扣物。",
+      "sourceLocations": ["ItemBlock.java#L12-L58", "World.java#L2096-L2113", "L461-L475"],
+      "positiveControl": "固定雪层与普通点击面各一例，断言目标格、metadata、邻居更新、声音与单件消耗。",
+      "negativeControl": "空栈、顶层固体和 canBlockBePlacedAt=false 均不得写世界或扣物；world set 返回 false 的受控故障分支须与普通谓词失败分开。",
+      "saveResumeDependency": "world/inventory",
+      "unconfirmed": ["邻居通知次序"]
+    },
+    {
+      "caseId": "M09-02",
+      "behavior": "门/床/画/牌独立占位前置与失败返回",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 click face、邻格、ItemStack；触发 use",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "ItemDoor 仅接受上表面并经 canPlaceBlockAt，随后设置上下两格并扣 1；ItemBed 仅接受上表面且两格为空、下方两格为 normal cube，随后设置两格并扣 1；ItemSign 拒绝底面/非固体支撑，经 canPlaceBlockAt 后设置立式/墙面牌并扣 1；ItemPainting 拒绝上下表面，侧面 onValidSurface 失败时仍返回 true，但不生成实体/扣物。门/床/牌通过前置后没有检查每次 world set 返回值，不能宣称写入异常时有通用原子回滚。",
+      "sourceLocations": [
+        "ItemDoor.java#L12-L69",
+        "ItemBed.java#L8-L40",
+        "ItemSign.java#L9-L51",
+        "ItemPainting.java#L8-L37"
+      ],
+      "positiveControl": "四种物件分别固定合法面/支撑，断言上下格或实体、metadata/朝向、物品消耗。",
+      "negativeControl": "分别反转点击面或支撑/空间；画的无效表面返回 true 但不得生成或扣物；不要把 world set 失败当成已证回滚。",
+      "saveResumeDependency": "world/inventory",
+      "unconfirmed": ["逐坐标通知次序和底层 world set 故障时的真实部分写入/恢复轨迹"]
+    },
+    {
+      "caseId": "M09-03",
+      "behavior": "使用键对方块/物品的优先级与失败反馈",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 click face、邻格、ItemStack；触发 use",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "PlayerController.sendPlaceBlock 先以命中 block 的 blockActivated 返回值裁决；若 true 即返回且不调用手持 ItemStack.useItem，若 false 则仅在 stack 非空时尝试 item use。右键空气中的通用使用由 Minecraft.clickMouse 的另一分支处理，不属于 PlayerControllerSP 的优先级实现。",
+      "sourceLocations": ["PlayerController.java#L75-L81"],
+      "positiveControl": "固定可激活箱子并手持可使用物：blockActivated=true 时只发生方块交互，不发生物品使用。",
+      "negativeControl": "blockActivated=false 且无手持 stack 时返回 false；非空 stack 才可继续 item use。",
+      "saveResumeDependency": "world/inventory",
+      "unconfirmed": ["无操作 block/item 优先级夹具"]
+    },
+    {
+      "caseId": "M10-01",
+      "behavior": "水源/流动级别、坡度、更新次序",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 5×5×5 blocks、metadata、scheduled ticks；触发 fluid tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "fluid metadata >=8 时有效 decay 归一为 0；流动水的 scheduled tick delay 候选为 5。",
+      "sourceLocations": ["BlockFluid.java#L23-L43", "BlockFlowing.java#L21-L116"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/tick queue",
+      "unconfirmed": ["四方向并列/更新次序"]
+    },
+    {
+      "caseId": "M10-02",
+      "behavior": "熔岩流速/冷却、水-熔岩组合产物",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 5×5×5 blocks、metadata、scheduled ticks；触发 fluid tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "lava 的 scheduled tick delay 候选为 30；lava source decay 0 遇水为 obsidian，decay 1..4 为 cobblestone。",
+      "sourceLocations": ["BlockFluid.java#L187-L193", "L244-L281", "BlockFlowing.java#L21-L86"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/tick queue",
+      "unconfirmed": ["精确冷却/次序夹具"]
+    },
+    {
+      "caseId": "M10-03",
+      "behavior": "液体碰撞/浮力/窒息/燃烧与桶取放",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 5×5×5 blocks、metadata、scheduled ticks；触发 fluid tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "fluid collision box 为 null；source 碰撞检查要求 metadata 0 且调用方启用；Entity/ItemBucket 分别拥有移动/桶路径。",
+      "sourceLocations": ["BlockFluid.java#L64-L90", "Entity.java", "ItemBucket.java"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/tick queue",
+      "unconfirmed": ["溺水/燃烧/浮力轨迹"]
+    },
+    {
+      "caseId": "M10-04",
+      "behavior": "加载边界和复杂洞穴里的传播/终止",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 5×5×5 blocks、metadata、scheduled ticks；触发 fluid tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "BlockFlowing.updateTick 先尝试向下流入 y-1；仅在不能向下且当前衰减允许侧流时，按 x-、x+、z-、z+ 的固定顺序调用 flowIntoBlock。源强度/最优方向另受同方法前半段计算限制。",
+      "sourceLocations": ["BlockFlowing.java#L21-L127"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "chunk/tick queue",
+      "unconfirmed": ["未加载 chunk 终止"]
+    },
+    {
+      "caseId": "M11-01",
+      "behavior": "天空光初值、遮挡与高度图更新",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定光源/遮挡/cross-chunk/时间；触发 place/remove/tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "sky/block light 范围为 0..15；chunk 的高度/光更新会调度 sky lighting 区域。",
+      "sourceLocations": ["Chunk.java#L149-L225", "World.java#L999-L1015"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "light arrays",
+      "unconfirmed": ["heightmap 边缘轨迹"]
+    },
+    {
+      "caseId": "M11-02",
+      "behavior": "方块光传播/衰减、相邻/跨区块增量重算",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定光源/遮挡/cross-chunk/时间；触发 place/remove/tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "MetadataChunkBlock 仅处理体积<=32768、邻近 chunk 存在且非空的区域，y 裁到 0..127。当前块 opacity=Block.lightOpacity[id]，0 改作 1；若 opacity>=15 且本地光源=0，则新光=0，否则新光=max(本地天空可见/方块发光值, max(六邻居旧光)-opacity, 0)。值改变时写 owner light array 并通知邻居。World.scheduleLightingUpdate 对同类型最近最多 5 个队列区域尝试合并/覆盖，队列超过 1000000 时清空；不可把所有方块都视为每格固定衰减 1。",
+      "sourceLocations": ["MetadataChunkBlock.java#L22-L145", "World.java#L1686-L1728"],
+      "positiveControl": "固定透明空气、半透材料、完全遮挡和跨 chunk 边界，分别断言 0->1 opacity、六邻居最大值及本地光源的 owner light array。",
+      "negativeControl": "移除光源后不得留旧亮度；opacity>1 不得仍按每格 1 衰减；不存在的邻区不应被当成已加载更新。",
+      "saveResumeDependency": "light arrays",
+      "unconfirmed": ["具体 block opacity 表、跨区块调度 trace 与光/方块事件交错"]
+    },
+    {
+      "caseId": "M11-03",
+      "behavior": "破坏/放置/流体/火后光照更新顺序",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定光源/遮挡/cross-chunk/时间；触发 place/remove/tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "World.updatingLighting 从队尾 LIFO 取任务；局部计数从 500 开始，每轮先 -- 再在 <=0 时返回，因此一次调用最多实际处理 499 个条目，第 500 个留在队列；嵌套调用达到 lightingUpdatesCounter>=50 时直接返回 false。不能写成每 tick 固定处理 500 项。",
+      "sourceLocations": ["World.java#L1657-L1684"],
+      "positiveControl": "预置恰好 499 与 500 个 lighting update，分别读回队列是否空和返回值；检查 LIFO 最后入队先处理。",
+      "negativeControl": "500 项不能被误判为一次调用全部处理；超过嵌套计数门槛不能继续递归处理。",
+      "saveResumeDependency": "light arrays",
+      "unconfirmed": ["与 block/fire/liquid update 的交错"]
+    },
+    {
+      "caseId": "M11-04",
+      "behavior": "昼夜太阳/月亮、天色/雾色变化",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定光源/遮挡/cross-chunk/时间；触发 place/remove/tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "celestial angle 使用 world time modulo 24000；skylight subtraction 由 cosine angle 推导。",
+      "sourceLocations": ["WorldProvider.java#L42-L60", "World.java#L999-L1015"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "light arrays",
+      "unconfirmed": ["moon/sky/fog 像素"]
+    },
+    {
+      "caseId": "M11-05",
+      "behavior": "原版亮度曲线与材质最终感知对照",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定光源/遮挡/cross-chunk/时间；触发 place/remove/tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "主世界 WorldProvider 生成 16 级 brightness table：令 d=1-level/15，ambient=0.05，则 brightness=(1-d)/(3d+1)*0.95+0.05（float 计算）；这只固定光级到亮度的源码候选，不证明原创纹理/着色/显示设备的感知等效。",
+      "sourceLocations": ["WorldProvider.java#L13-L25", "World.java", "EntityRenderer.java"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "light arrays",
+      "unconfirmed": ["人工视觉量表"]
+    },
+    {
+      "caseId": "M12-01",
+      "behavior": "火扩散、点燃/熄灭、降雨与可燃材质",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定可燃邻居、雨、fire age/TNT fuse/RNG；触发 tick/explode",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "fire update 在扩散/熄灭前检查自身及四个水平邻居的雨暴露、age metadata 和邻居 encouragement。",
+      "sourceLocations": ["BlockFire.java#L55-L130"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "world/entities",
+      "unconfirmed": ["全部 flammability 值/RNG 轨迹"]
+    },
+    {
+      "caseId": "M12-02",
+      "behavior": "TNT 引信/链爆、爆炸射线/方块损毁",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定可燃邻居、雨、fire age/TNT fuse/RNG；触发 tick/explode",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "primed TNT 初始 fuse 为 80，逐 tick 递减；Explosion 使用采样 ray，随后分 block/entity 阶段处理。",
+      "sourceLocations": ["EntityTNTPrimed.java#L10-L49", "Explosion.java"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "world/entities",
+      "unconfirmed": ["链式 fuse/完整 ray trace"]
+    },
+    {
+      "caseId": "M12-03",
+      "behavior": "爆炸实体伤害、击退、掉落、音画反馈",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定可燃邻居、雨、fire age/TNT fuse/RNG；触发 tick/explode",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "Explosion 将 doExplosionA 的 block/ray/entity 影响与 doExplosionB 的最终 block/sound/particle 工作分离。",
+      "sourceLocations": ["Explosion.java#L29-L108", "L126-L165"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "world/entities",
+      "unconfirmed": ["damage/knockback/drop 黄金轨迹"]
+    },
+    {
+      "caseId": "M13-01",
+      "behavior": "晴雨雪状态/时长/区域落点",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 weather timers、time、biome/top block/RNG；触发 weather tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "World.updateWeather 在非无天空世界推进已保存的 rain/thunder timer：timer>0 则减 1、减到 0 时翻转状态；timer<=0 时按当前状态重设。rain-on 为 nextInt(12000)+12000，rain-off 为 nextInt(168000)+12000；thunder-on 为 nextInt(12000)+3600，thunder-off 为 nextInt(168000)+12000。雨/雷强度各每次 ±0.01，钳制到 0..1。",
+      "sourceLocations": ["World.java#L1792-L1859"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "WorldInfo",
+      "unconfirmed": ["初始 timer/RNG 轨迹"]
+    },
+    {
+      "caseId": "M13-02",
+      "behavior": "闪电寻址、雷击伤害/火/猪变异",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 weather timers、time、biome/top block/RNG；触发 weather tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "lightning 候选要求 nextInt(100000)==0、raining/thundering 以及顶部固体位置满足 canBlockBeRainedOn。",
+      "sourceLocations": ["World.java#L1920-L1929", "EntityLightningBolt.java"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "WorldInfo",
+      "unconfirmed": ["pig/fire/entity 影响"]
+    },
+    {
+      "caseId": "M13-03",
+      "behavior": "雨雪对火、作物、视觉与音效的影响",
+      "sourceLevel": "RECONSTRUCTED_SOURCE_CANDIDATE",
+      "fixture": {
+        "initialState": "固定 weather timers、time、biome/top block/RNG；触发 weather tick",
+        "trigger": "执行该 case 的单一入口；记录 seed/RNG、tick sequence 与 owner state"
+      },
+      "candidateExpected": "rain exposure 要求 rain、sky visibility 和 top-block 关系；snow/ice/fire 各有独立后果路径。",
+      "sourceLocations": ["World.java#L2445-L2470", "BlockFire.java#L55-L130"],
+      "positiveControl": "满足前置时，仅断言 candidateExpected 写出的字段/常量或分支。",
+      "negativeControl": "反转一个前置（空间/metadata/工具/遮挡/雨/加载状态等）后，不得出现正例结果。",
+      "saveResumeDependency": "WorldInfo",
+      "unconfirmed": ["crop/audio/visual 结果"]
+    }
+  ]
+}

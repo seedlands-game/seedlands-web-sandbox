@@ -1,0 +1,11 @@
+step_id	role	baseline	active_key	tick	ack	client_x	client_z	server_x	server_z	grounded	colliding	client_reached	server_reached	freshness	actual_or_inferred_outcome
+pw:api@8674	outer-baseline	self	KeyS	20342	13641	78.55076599121094	-0.49871936440467834	78.55076243809718	-0.4987193627433512	true	false	false	false	BASELINE	walk-iteration-1-start inferred-from-source-order
+pw:api@8880	walk-return	pw:api@8674	KeyS	20546	13854	78.50784301757812	0.5390361547470093	78.49858066153473	0.6640361514406132	true	false	true	false	FRESH	outer-strict-false-and-wait-entry inferred-from-source-order
+pw:api@8883	outer-wait-poll-1	pw:api@8880	KeyS	20546	13854	78.50784301757812	0.4834806025028229	78.49858066153473	0.6640361514406132	true	false	true	false	STALE_EQUAL_TICK_ACK	classifier-null mechanically-derived
+pw:api@8885	outer-wait-poll-2	pw:api@8880	KeyS	20549	13857	78.50784301757812	0.4140361547470093	78.50784246465534	0.48348059588505765	true	false	false	true	FRESH	classifier-drift and next-baseline inferred-from-source-and-next-call
+pw:api@8887	walk-iteration-2-initial	pw:api@8885	KeyS	20550	13858	78.50784301757812	0.4001472592353821	78.50784246465534	0.44181392921839097	true	false	false	true	FRESH	route-terminal-false; aim-continues inferred-from-next-mouse
+pw:api@9107	walk-return	pw:api@8885	KeyS	20763	14081	78.51006317138672	0.5390361547470093	78.49146797116592	0.7057028181072799	true	false	true	false	FRESH	outer-strict-false-and-wait-entry inferred-from-source-order
+pw:api@9110	outer-wait-poll-1	pw:api@9107	KeyS	20765	14083	78.51006317138672	0.4834806025028229	78.50386311264111	0.6084805958850577	true	false	true	false	FRESH	classifier-null mechanically-derived
+pw:api@9112	outer-wait-poll-2	pw:api@9107	KeyS	20766	14084	78.51006317138672	0.4140361547470093	78.51006068337871	0.5390361514406132	true	false	false	true	FRESH	classifier-drift and next-baseline inferred-from-source-and-next-call
+pw:api@9114	walk-iteration-3-initial	pw:api@9112	KeyS	20768	14086	78.51006317138672	0.4001472592353821	78.51006068337871	0.44181392921839097	true	false	false	true	FRESH	route-terminal-false; aim-continues inferred-from-next-mouse
+pw:api@9386	last-snapshot-await	pw:api@9112	KeyS	21036	14370	78.58699035644531	0.14358022809028625	78.58699081891291	0.14358022550786598	true	false	false	false	FRESH	would-classify-drift-but-not-returned; deadline-throw-at-wrapper

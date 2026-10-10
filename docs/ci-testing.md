@@ -2,6 +2,12 @@
 
 CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查，不能证明没有缺陷。运行入口以根 `package.json` 为准。
 
+2026-10-08 PR41 修复：CI 固定 Node22.23.3，满足 pnpm11.25 的 Node>=22.13 要求。`format:check` 先校验五个明确冻结的历史证据文件 SHA-256 原字节，再检查其余文件格式；四个精确路径有 Prettier 例外，另一个 manifest 绑定的 `strict-manifest.mjs` 有精确 ESLint 例外。完整检出缺失、修改或符号链接替换均失败。稀疏检出只接受 Git 明确标记 skip-worktree 的精确 HEAD blob，不重写历史 manifest 或证据。当前真实浏览器验收状态见 `changes/2026-10-08-pr41-ci-recovery/spec.md`，静态修复不代表产品旅程已通过。
+
+## 2026-09-20 Classic 初版恢复
+
+2026-09-20 已恢复产品施工与验收入口；其后续实现现由 `changes/2026-09-23-classic-functional-completion/spec.md` 继续。新增命令仍以 `package.json` 为准。仓库已存在唯一 `apps/web/tests/e2e/classic-runtime.spec.ts`、根 `pnpm build`/`pnpm harness:artifact`/`pnpm harness:classic` 和对应 artifact/Classic runner，不再把这些入口描述为“尚不存在”或仍冻结；是否执行及结果仍须以当次 source、artifact 和 receipt 为准。通用 `harness/contracts.json`、`plan.mjs`、`run.mjs` 与 `verify:*` selector/runner 尚未落盘，下文相应章节仍是延期设计。复用 #36 的 artifact 与唯一 Classic 线路，使用单 worker/headless/静音；运行结果绑定产物摘要，不是性能测量，也不代表 Beta 全量内容已完成。下述 09-16 冻结只描述历史基线；Kernel/stdlib 与静态检查持续执行。CI 实际运行状态以当前 workflow 与证据为准；浏览器只消费同次 build 的完整 dist 并校验身份，不重新构建。`tsconfig.classic-tests.json` 检查当前恢复的用例和浏览器配置，远端保护仍保持现状。
+
 ## 2026-09-16 架构冻结阶段
 
 本阶段 `Static verification` 检查代码格式、路径、Lint、生产源码与工具类型、公开包边界的静态规则，以及 Kernel/stdlib 两包确定性行为测试。Classic、Web/Agent 行为、跨层集成、生产构建、Chromium E2E 和性能测量均不执行；不以跳过项冒充 PASS。测试选择只能在这两个行为 owner 内缩小，不能跳过静态架构边界。
@@ -10,7 +16,7 @@ CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查
 
 GitHub `main` 的 `Protect main` ruleset 现行仅要求 `Static verification`；本阶段 CI 不产生 `Production build` 和 `Chromium regression`，不得用空运行的同名 job 制造绿灯。required check 通过只代表当前架构冻结阶段的静态边界和 Kernel/stdlib 确定性测试通过，不代表生产构建、Classic/Chromium 或产品验收通过。其他 PR 审核与 review thread 规则仍独立生效。后续恢复产品验收须重新审核 SDD、命令、证据和保护规则。
 
-以下章节保留原完整 Harness 设计，供后续 Draft PR 恢复时审查；其中 `harness:*`、`verify:affected`、`verify:all` 命令及路径不是本阶段的可执行入口。原设计的字段详见 [Harness 合同](harness-contracts.md)。
+以下章节同时包含已落盘的 artifact/Classic 入口和尚未实现的通用 selector/runner 设计。可执行命令只以当前 `package.json` 为准；仅有源码入口不等于本轮已执行或已通过。字段详见 [Harness 合同](harness-contracts.md)。
 
 ## 延期设计：三个 required check
 
@@ -54,7 +60,7 @@ Web 的 engineering/architecture 合同会启动独立的编译器或全源 Lint
 
 ## 延期设计：唯一 Classic 线路
 
-全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
+全仓长期维护一个 Playwright spec：`apps/web/tests/e2e/classic-runtime.spec.ts`。`playwright.config.ts` 保留仓库根 `rootDir` 以生成稳定的根相对 Reporter identity，同时由唯一 Chromium project 把收集目录限制在 `apps/web/tests/e2e` 并只匹配该文件；根 package scripts、CI 和 Evidence Skill 不直接列历史 spec，也不增加第二个 `playwright test` 调用。唯一启动实现使用生产 `dist` 的 preview、严格端口、一个 browser context 与版本化 Classic scenario。
 
 build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` 记录 source、lock 与每个产物文件的摘要；Chromium job 下载该 artifact 到相同路径，`pnpm harness:classic` 在启动前后调用 `verifyArtifact`。重新构建、缺 receipt、source/lock 不一致或任一字节变化都失败。
 
@@ -68,7 +74,11 @@ build job 只执行一次 `pnpm build`。`apps/web/dist/harness-artifact.json` �
 
 浏览器重试一次只用于取得 trace，`failOnFlakyTests` 使重试通过仍然失败。超时是资源上限，不是性能阈值。FPS、CPU/GPU/RSS 或“更快”结论必须进入独占性能窗口，以 A/A 和交错 A/B 取证；hosted runner 时长只能用于诊断。
 
+Chromium job 的资源上限为45分钟：原Classic主旅程900秒与视觉场景240秒各至多两次，runner上限38分钟，另留setup、失败附件、上传与清理裕量。Modular 90秒场景与Classic旅程互斥。`scripts/ci-browser-time-budget.test.mjs` 核对实际workflow/config/spec的既有时限、唯一runner、一次诊断重试和flaky拒绝，并防止job资源预算再次短于完整runner加5分钟报告裕量；不修改动作/poll或产品验收条件。
+
 ## 延期设计：失败与证据保留
+
+当前唯一Chromium入口的完整证据分为同run/attempt的两份artifact：`classic-<run>-<attempt>`保存`harness/results/`与`test-results/`，`classic-report-<run>-<attempt>`保存完整`playwright-report/`。两者均在原always条件下保留7天，未裁剪任何trace、video、HTML或附件。CI65原聚合包570695923bytes超过连接器单包536870912bytes下载上限，因此拆分HTML与原始trace；新布局的实际尺寸和可下载性仍需后续CI验证，不能只凭分包代码宣称成功。原结果/trace包无文件继续报错，独立HTML缺目录告警，保持原聚合上传允许某目录未生成的行为。
 
 - scope、static、build、Chromium 各自保留精确失败；下游不得在上游失败时以 skipped 冒充成功。
 - Harness 结果写入 `harness/results/<runId>/result.json`，记录 stage、plan、steps、artifact 与 Classic receipt；失败步骤同样保留。

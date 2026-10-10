@@ -1,32 +1,36 @@
+import type { AuthorityCanonicalResult } from './browser-authority-client-contract';
+import { createBrowserSkySourcePort } from './browser-authority-column-source';
 // prettier-ignore
 import type { CommandResult, CommandSource, ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
 import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import type { FluidCandidate } from '@seedlands/stdlib/server/fluid/fluid-transaction';
 import type { WorldCommitResult } from '@seedlands/stdlib/server/game-server-types';
 import type { VoxelEdit } from '@seedlands/stdlib/server/world-mutation';
+import { createVoxelSemanticsRegistry } from '@seedlands/stdlib/world/voxel-semantics';
 import { PROTOCOL_VERSION, type InputCommand, type SessionEpoch } from '@seedlands/stdlib/runtime/session-protocol';
-import type {
-  AuthorityAction,
-  AuthorityActionResult,
-  AuthorityGameplayView,
-  AuthorityPlayerPositionResult,
-  AuthorityReady,
-  AuthorityRequest,
-  AuthorityResponse,
-  AuthoritySessionControlResult,
-} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+// prettier-ignore
+import type { AuthorityAction, AuthorityActionResult, AuthorityGameplayView, AuthorityPlayerPositionResult, AuthorityReady } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import type { LogicIntentBatch } from '@seedlands/stdlib/server/logic/logic-protocol';
-import type {
-  WorldHarnessPort,
-  WorldHarnessResult,
-  WorldPrepareRequest,
-} from '@seedlands/stdlib/server/harness/world-harness-contract';
-import type {
-  CharacterControlRequest,
-  CharacterControlResult,
-  ControlBinding,
-} from '@seedlands/stdlib/runtime/character-control-protocol';
+// prettier-ignore
+import type { WorldHarnessPort, WorldHarnessResult } from '@seedlands/stdlib/server/harness/world-harness-contract';
+// prettier-ignore
+import type { CharacterControlRequest, CharacterControlResult, ControlBinding } from '@seedlands/stdlib/runtime/character-control-protocol';
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
+import { AuthorityReceiveWallObserver as ReceiveWallObserver } from './authority-receive-wall-observer';
+import { BrowserInputSchedulingClock } from './input-scheduling-tick';
+import { deliverInputDecision } from './input-decision-diagnostics';
+import { BrowserAuthorityRequestSender } from './browser-authority-request-sender';
+import {
+  acceptPointerAttackReceipt,
+  consumePointerAttackReceipt,
+  sendPointerAttackInput,
+} from './browser-pointer-attack-client';
+import type {
+  BrowserAuthorityRequest,
+  BrowserAuthorityResponse,
+  PointerAttackDirection,
+} from './pointer-attack-protocol';
+import { controlAuthoritySession } from './browser-authority-session-control';
 import { ClientRequestRegistry } from '../client-request-registry';
 import { ClientReadyWait } from '../client-ready-wait';
 import { authorityInputTransitBudgetMs, createAuthorityTransport } from './authority-transport';
@@ -34,32 +38,37 @@ import { AuthorityBootstrapCoordinator } from './authority-bootstrap-client';
 import type { VisibilityTask } from './authority-prepared-mesh-visibility';
 import { BrowserAuthorityChunkClient } from './browser-authority-chunk-client';
 import { createBoundCharacterControlPort } from './browser-character-control-port';
-import type {
-  AuthorityClientOptions,
-  BoundCharacterControlPort,
-  AuthoritySaveResult,
-  AuthorityStartOptions,
-} from './browser-authority-client-contract';
+// prettier-ignore
+import type { AuthorityClientOptions, BoundCharacterControlPort, AuthoritySaveResult, AuthorityStartOptions } from './browser-authority-client-contract';
+// prettier-ignore
+import { BrowserAuthorityDirectLogic, clientFailure, type DirectLogicDiagnostics } from './browser-authority-direct-logic';
+import { createBrowserAuthorityWorldRequests } from './browser-authority-world-port';
+import { BrowserMediaFrontier } from './browser-media-frontier';
 import {
-  BrowserAuthorityDirectLogic,
-  clientFailure,
-  type DirectLogicDiagnostics,
-} from './browser-authority-direct-logic';
-import { createBrowserAuthorityWorldPort } from './browser-authority-world-port';
+  validateInitialAuthorityReadyGeometry,
+  validateRestoredAuthorityReadyGeometry,
+  voxelGeometryForAuthorityReady,
+} from './browser-authority-geometry';
 export type AuthorityWorkerPort = import('./browser-authority-client-contract').AuthorityWorkerPort;
 
 export class BrowserAuthorityClient {
+  private readonly skySource = createBrowserSkySourcePort(
+    (payload) => this.request(payload),
+    () => this.runtimeEpoch,
+  );
+  readonly inspectColumnSource = this.skySource.inspectColumnSource;
+  readonly readSkyColumnChunk = this.skySource.readSkyColumnChunk;
   readonly mode = 'local' as const;
   readonly world: WorldHarnessPort;
   readonly estimatedInputTransitMs: number;
-  private requestSequence = 0;
-  private readonly transactionSequences = new Map<string, number>();
+  private readonly requestSender: BrowserAuthorityRequestSender;
   private readonly requests: ClientRequestRegistry;
   private snapshotGate: AuthoritySnapshotGate;
   private readonly bootstrap: AuthorityBootstrapCoordinator;
   private readonly chunks: BrowserAuthorityChunkClient;
   private readyValue: AuthorityReady | null = null;
   private snapshotValue: AuthoritySnapshot | null = null;
+  private readonly inputClock = new BrowserInputSchedulingClock();
   private gameplayValue: AuthorityGameplayView | null = null;
   private readonly readyWait: ClientReadyWait<AuthorityReady>;
   private disposed = false;
@@ -69,6 +78,8 @@ export class BrowserAuthorityClient {
   private lastInputDecisionSequence = -1;
   private runtimeEpochValue: string;
   private readonly directLogic: BrowserAuthorityDirectLogic;
+  private readonly media: BrowserMediaFrontier;
+  private readonly receiveWall: ReceiveWallObserver;
 
   constructor(
     private readonly worker: AuthorityWorkerPort,
@@ -76,15 +87,27 @@ export class BrowserAuthorityClient {
     private readonly options: AuthorityClientOptions = {},
   ) {
     this.runtimeEpochValue = epoch;
+    this.receiveWall = new ReceiveWallObserver(options.observationNow, () => !this.disposed && this.runtimeEpoch);
+    this.media = new BrowserMediaFrontier(epoch, options.onMediaProjection, options.onMediaFacts);
     this.directLogic = new BrowserAuthorityDirectLogic(worker, epoch);
     this.estimatedInputTransitMs = authorityInputTransitBudgetMs(options.transportFaults ?? { harnessEnabled: false });
     this.requests = new ClientRequestRegistry(options.requestTimeoutMs);
+    this.requestSender = new BrowserAuthorityRequestSender({
+      epoch,
+      requests: this.requests,
+      blocked: () =>
+        this.disposed
+          ? new Error('Authority client is disposed.')
+          : this.failureValue && clientFailure(this.failureValue),
+      post: (message, transfer) => this.post(message, transfer),
+    });
     this.chunks = new BrowserAuthorityChunkClient(
       epoch,
       this.requests,
       (payload, transfer) => this.request(payload, transfer),
       (message, transfer) => this.post(message, transfer),
       options,
+      () => this.voxelGeometry?.list(),
     );
     this.readyWait = new ClientReadyWait(options.requestTimeoutMs);
     this.snapshotGate = new AuthoritySnapshotGate(epoch);
@@ -93,17 +116,12 @@ export class BrowserAuthorityClient {
       (request, transfer) => this.post(request, transfer),
       (error) => this.failAll(error),
     );
-    this.world = createBrowserAuthorityWorldPort(
-      (method, ...args) => this.worldRequest(method, ...args),
-      async (request) => {
-        await this.prepareWorldRequest(request);
-        const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
-        for (const [cx, cy, cz] of chunks)
-          if (!(await this.chunks.refreshCollisionBaseline(cx, cy, cz)))
-            throw new Error(`Authority collision baseline is unavailable: ${cx},${cy},${cz}.`);
-      },
+    this.world = createBrowserAuthorityWorldRequests(
+      (payload) => this.request(payload),
+      (cx, cy, cz) => this.ensureChunkNeighborhood(cx, cy, cz),
+      (cx, cy, cz) => this.chunks.refreshCollisionBaseline(cx, cy, cz),
     );
-    worker.onmessage = (event) => this.receive(event.data);
+    worker.onmessage = (event) => this.receiveWall.measure(() => this.receive(event.data));
     worker.onerror = (event) => this.failAll(new Error(event.message || 'Authority Worker failed.'));
   }
 
@@ -145,16 +163,16 @@ export class BrowserAuthorityClient {
     return ready;
   }
 
-  get readyState(): AuthorityReady | null {
-    return this.readyValue;
-  }
-
-  get isReady(): boolean {
-    return Boolean(this.readyValue) && !this.disposed && !this.failureValue;
-  }
-
-  get snapshot(): AuthoritySnapshot | null {
-    return this.snapshotValue;
+  // prettier-ignore
+  get readyState(): AuthorityReady | null { return this.readyValue; }
+  // prettier-ignore
+  get isReady(): boolean { return Boolean(this.readyValue) && !this.disposed && !this.failureValue; }
+  // prettier-ignore
+  get snapshot(): AuthoritySnapshot | null { return this.snapshotValue; }
+  // prettier-ignore
+  get runtimeEpoch(): string { return this.runtimeEpochValue; }
+  get receiveWallSnapshot() {
+    return this.receiveWall.snapshot();
   }
 
   get gameplay(): AuthorityGameplayView {
@@ -162,17 +180,20 @@ export class BrowserAuthorityClient {
     return this.gameplayValue;
   }
 
-  get seed(): number {
-    return this.requireReady().seed;
+  // prettier-ignore
+  get seed(): number { return this.requireReady().seed; }
+  // prettier-ignore
+  get seedText(): string { return this.requireReady().seedText; }
+
+  // prettier-ignore
+  get generatorVersion(): number { return this.requireReady().generatorVersion; }
+
+  get voxelSemantics() {
+    return createVoxelSemanticsRegistry(this.requireReady().voxelSemantics ?? []);
   }
 
-  get seedText(): string {
-    return this.requireReady().seedText;
-  }
-
-  get generatorVersion(): number {
-    return this.requireReady().generatorVersion;
-  }
+  // prettier-ignore
+  get voxelGeometry() { return voxelGeometryForAuthorityReady(this.readyValue); }
 
   get worldgenProvider(): NonNullable<AuthorityReady['worldgenProvider']> {
     const provider = this.requireReady().worldgenProvider;
@@ -180,25 +201,21 @@ export class BrowserAuthorityClient {
     return provider;
   }
 
-  get worldTime(): number {
-    return this.snapshotValue?.worldTime ?? this.requireReady().worldTime;
+  // prettier-ignore
+  get worldTime(): number { return this.snapshotValue?.worldTime ?? this.requireReady().worldTime; }
+  // prettier-ignore
+  get worldRevision(): number { return this.snapshotValue?.worldRevision ?? 0; }
+  // prettier-ignore
+  get mutationCount(): number { return this.snapshotValue?.worldMutationCount ?? 0; }
+  // prettier-ignore
+  get physicsTick(): number { return this.snapshotValue?.physicsTick ?? 0; }
+
+  get inputPhysicsTick(): number {
+    return this.inputClock.tick(this.readyValue?.frequencies.physicsHz ?? 60);
   }
 
-  get worldRevision(): number {
-    return this.snapshotValue?.worldRevision ?? 0;
-  }
-
-  get mutationCount(): number {
-    return this.snapshotValue?.worldMutationCount ?? 0;
-  }
-
-  get physicsTick(): number {
-    return this.snapshotValue?.physicsTick ?? 0;
-  }
-
-  get commitSequence(): number {
-    return this.snapshotValue?.commitSequence ?? 0;
-  }
+  // prettier-ignore
+  get commitSequence(): number { return this.snapshotValue?.commitSequence ?? 0; }
 
   get storageBytes(): number {
     return this.storageBytesValue;
@@ -225,7 +242,7 @@ export class BrowserAuthorityClient {
   }
 
   ensureChunkNeighborhood(cx: number, cy: number, cz: number): Promise<void> {
-    return this.chunks.ensure(cx, cy, cz, ++this.requestSequence);
+    return this.chunks.ensure(cx, cy, cz, this.requestSender.nextRequestId());
   }
 
   releaseChunkNeighborhood(cx: number, cy: number, cz: number): void {
@@ -240,19 +257,16 @@ export class BrowserAuthorityClient {
     return this.chunks.prepareWorkerInput(cx, cy, cz);
   }
 
-  async acceptWorkerCanonical(
-    task: VisibilityTask,
-    result: Readonly<{
-      canonical?: ArrayBuffer;
-      generatorVersion?: number;
-      provider?: import('@seedlands/kernel/spatial').KernelWorldgenProviderIdentity;
-    }>,
-  ): Promise<boolean> {
+  async acceptWorkerCanonical(task: VisibilityTask, result: AuthorityCanonicalResult): Promise<boolean> {
     return this.chunks.acceptCanonical(task, result);
   }
 
   getVoxel(x: number, y: number, z: number): number {
     return this.chunks.getVoxel(x, y, z);
+  }
+
+  getLoadedVoxelRegion(origin: readonly [number, number, number], size: number) {
+    return this.chunks.getLoadedVoxelRegion(origin, size);
   }
 
   getFluidCell(x: number, y: number, z: number): { level: number; source: boolean } | null {
@@ -264,12 +278,7 @@ export class BrowserAuthorityClient {
   }
 
   setFluidActiveChunks(keys: readonly string[]): void {
-    this.post({
-      kind: 'set-fluid-active-chunks',
-      protocolVersion: PROTOCOL_VERSION,
-      epoch: this.epoch,
-      keys,
-    });
+    this.chunks.setFluidActiveChunks(keys);
   }
 
   async editWorld(actorId: string, edits: readonly VoxelEdit[]): Promise<WorldCommitResult> {
@@ -288,6 +297,10 @@ export class BrowserAuthorityClient {
 
   performAction(action: AuthorityAction): Promise<AuthorityActionResult> {
     return this.request({ kind: 'gameplay-action', action }, [], 'gameplay-action') as Promise<AuthorityActionResult>;
+  }
+
+  sendPointerAttack(direction: PointerAttackDirection | null): void {
+    sendPointerAttackInput(this, this.epoch, this.runtimeEpochValue, direction, (message) => this.post(message));
   }
 
   character(request: CharacterControlRequest): Promise<WorldHarnessResult<CharacterControlResult>> {
@@ -360,36 +373,10 @@ export class BrowserAuthorityClient {
     transfer: Transferable[] = [],
     transactionStream?: string,
   ): Promise<unknown> {
-    if (this.disposed) return Promise.reject(new Error('Authority client is disposed.'));
-    if (this.failureValue) return Promise.reject(clientFailure(this.failureValue));
-    const requestId = ++this.requestSequence;
-    const promise = this.requests.create(requestId);
-    const transaction = transactionStream
-      ? {
-          issuer: `browser:${this.epoch}`,
-          stream: transactionStream,
-          sequence: (this.transactionSequences.get(transactionStream) ?? -1) + 1,
-        }
-      : undefined;
-    if (transaction) this.transactionSequences.set(transactionStream!, transaction.sequence);
-    try {
-      this.post(
-        {
-          ...payload,
-          protocolVersion: PROTOCOL_VERSION,
-          epoch: this.epoch,
-          requestId,
-          ...(transaction ? { transaction } : {}),
-        } as AuthorityRequest,
-        transfer,
-      );
-    } catch (error) {
-      this.requests.reject(requestId, error instanceof Error ? error : new Error(String(error)));
-    }
-    return promise;
+    return this.requestSender.send(payload, transfer, transactionStream);
   }
 
-  private post(message: AuthorityRequest, transfer: Transferable[] = []): void {
+  private post(message: BrowserAuthorityRequest, transfer: Transferable[] = []): void {
     if (this.disposed || this.failureValue) return;
     this.worker.postMessage(
       message.kind === 'start-authority' ? message : { ...message, runtimeEpoch: this.runtimeEpochValue },
@@ -397,7 +384,23 @@ export class BrowserAuthorityClient {
     );
   }
 
-  private receive(message: AuthorityResponse | DirectLogicDiagnostics): void {
+  private receive(message: BrowserAuthorityResponse | DirectLogicDiagnostics): void {
+    if (message.kind === 'pointer-attack-result') {
+      if (
+        this.disposed ||
+        this.failureValue ||
+        !acceptPointerAttackReceipt(this, message, this.epoch, this.runtimeEpochValue)
+      )
+        return;
+      consumePointerAttackReceipt(message, {
+        media: this.media,
+        update: (view, media) => this.updateGameplay(view, media),
+        publish: (commits) => this.chunks.publish(commits),
+        result: (result) => this.options.onPointerAttackResult?.(result),
+        fail: (error) => this.failAll(error),
+      });
+      return;
+    }
     if (this.directLogic.receive(message, this.runtimeEpochValue, this.disposed)) return;
     if (
       this.disposed ||
@@ -409,14 +412,23 @@ export class BrowserAuthorityClient {
     switch (message.kind) {
       case 'authority-ready': {
         if (!this.readyWait.pending) return;
-        const readySnapshotRejection = this.snapshotGate.accept(message.ready.snapshot);
+        const acceptedReady = validateInitialAuthorityReadyGeometry(message.ready, (error) => this.failAll(error));
+        if (!acceptedReady) return;
+        const media = this.media.tryClone(acceptedReady.gameplay.media);
+        if (!media.ok) return this.failAll(media.error);
+        const readySnapshotRejection = this.snapshotGate.accept(acceptedReady.snapshot);
         if (readySnapshotRejection === 'wrong-epoch')
           return this.failAll(new Error('Authority ready snapshot epoch does not match the active session.'));
-        this.readyValue = message.ready;
-        if (!readySnapshotRejection) this.snapshotValue = message.ready.snapshot;
-        this.chunks.initialize(message.ready.snapshot.worldRevision);
-        this.updateGameplay(message.ready.gameplay);
-        this.readyWait.resolve(message.ready);
+        this.media.replaceEpoch(acceptedReady.snapshot.epoch, media.value, false);
+        Object.assign(this, { runtimeEpochValue: acceptedReady.snapshot.epoch, readyValue: acceptedReady });
+        if (!readySnapshotRejection) {
+          this.snapshotValue = acceptedReady.snapshot;
+          this.inputClock.accept(acceptedReady.snapshot);
+        }
+        this.chunks.initialize(acceptedReady.snapshot.worldRevision);
+        this.updateGameplay(acceptedReady.gameplay);
+        this.media.publishCurrent();
+        this.readyWait.resolve(acceptedReady);
         break;
       }
       case 'authority-bootstrap-needed':
@@ -426,24 +438,30 @@ export class BrowserAuthorityClient {
         this.options.onAuthorityChunkNeeded?.(message.key);
         break;
       case 'authority-snapshot':
-        this.acceptSnapshot(message.snapshot, message.gameplay, message.commits);
+        this.acceptSnapshot(message.snapshot, message.gameplay, message.commits, message.capturedAtTimeOriginMs);
         break;
       case 'authority-commits':
         return this.chunks.publish(message.commits);
+      case 'authority-media-facts':
+        this.media.acceptFactsSafely(this.runtimeEpochValue, message.batch);
+        return;
       case 'input-decision':
         if (message.sequence <= this.lastInputDecisionSequence) return;
         this.lastInputDecisionSequence = message.sequence;
-        this.options.onInputDecision?.({
-          sequence: message.sequence,
-          decision: message.decision,
-          requiresResync: message.requiresResync,
-        });
+        deliverInputDecision(this, message, this.options.onInputDecision);
         break;
       case 'authority-response': {
         if (!this.requests.has(message.requestId)) return;
         if (!message.ok) this.requests.reject(message.requestId, new Error(message.error));
         else {
-          if (message.gameplay) this.updateGameplay(message.gameplay);
+          if (message.gameplay) {
+            const media = this.media.tryClone(message.gameplay.media);
+            if (!media.ok) {
+              this.requests.reject(message.requestId, media.error);
+              return;
+            }
+            this.updateGameplay(message.gameplay, media.value);
+          }
           this.chunks.publish(message.commits);
           this.requests.resolve(message.requestId, message.result);
         }
@@ -463,15 +481,34 @@ export class BrowserAuthorityClient {
       case 'world-harness-response':
         if (!this.requests.has(message.requestId)) return;
         if (message.ready) {
+          const acceptedReady = validateRestoredAuthorityReadyGeometry(
+            message.ready,
+            message.requestId,
+            (requestId, error) => this.requests.reject(requestId, error),
+          );
+          if (!acceptedReady) return;
+          const media = this.media.tryClone(acceptedReady.gameplay.media);
+          if (!media.ok) {
+            this.requests.reject(message.requestId, media.error);
+            return;
+          }
+          const nextRuntimeEpoch = message.runtimeEpoch ?? acceptedReady.snapshot.epoch;
+          if (nextRuntimeEpoch !== acceptedReady.snapshot.epoch) {
+            this.requests.reject(
+              message.requestId,
+              new Error('Authority restored runtime epoch does not match snapshot.'),
+            );
+            return;
+          }
           this.storageBytesMeasured = false;
-          this.runtimeEpochValue = message.runtimeEpoch ?? message.ready.snapshot.epoch;
+          this.runtimeEpochValue = nextRuntimeEpoch;
           this.snapshotGate = new AuthoritySnapshotGate(this.runtimeEpochValue);
           this.chunks.clear();
-          this.readyValue = message.ready;
-          this.snapshotValue = null;
-          this.gameplayValue = null;
-          this.acceptSnapshot(message.ready.snapshot, message.ready.gameplay);
-          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, message.ready);
+          Object.assign(this, { readyValue: acceptedReady, snapshotValue: null, gameplayValue: null });
+          this.media.replaceEpoch(this.runtimeEpochValue, media.value, false);
+          this.acceptSnapshot(acceptedReady.snapshot, acceptedReady.gameplay);
+          this.options.onWorldEpochChanged?.(this.runtimeEpochValue, acceptedReady);
+          this.media.publishCurrent();
         }
         this.requests.resolve(message.requestId, message.result);
         break;
@@ -481,21 +518,27 @@ export class BrowserAuthorityClient {
     }
   }
 
-  private updateGameplay(view: AuthorityGameplayView): void {
-    if (this.gameplayValue && view.gameplayRevision <= this.gameplayValue.gameplayRevision) return;
-    this.gameplayValue = view;
-    this.options.onGameplay?.(view);
+  private updateGameplay(view: AuthorityGameplayView, media = this.media.clone(view.media)): void {
+    if (this.gameplayValue && view.gameplayRevision < this.gameplayValue.gameplayRevision) return;
+    const mediaChanged = this.media.acceptProjections(this.runtimeEpochValue, media);
+    if (this.gameplayValue && view.gameplayRevision === this.gameplayValue.gameplayRevision) {
+      if (mediaChanged) this.gameplayValue = Object.freeze({ ...this.gameplayValue, media: this.media.current });
+      return;
+    }
+    const accepted = Object.freeze({ ...view, media: this.media.current });
+    this.gameplayValue = accepted;
+    this.options.onGameplay?.(accepted);
   }
 
-  private acceptSnapshot(
-    snapshot: AuthoritySnapshot,
-    gameplay?: AuthorityGameplayView,
-    commits?: readonly WorldCommitResult[],
-  ): void {
+  // prettier-ignore
+  private acceptSnapshot(snapshot: AuthoritySnapshot, gameplay?: AuthorityGameplayView, commits?: readonly WorldCommitResult[], capturedAtTimeOriginMs?: number): void {
+    const media = gameplay ? this.media.tryClone(gameplay.media) : undefined;
+    if (media && !media.ok) return;
     this.chunks.publish(commits);
-    if (gameplay) this.updateGameplay(gameplay);
     if (this.snapshotGate.accept(snapshot)) return;
+    if (gameplay && media?.ok) this.updateGameplay(gameplay, media.value);
     this.snapshotValue = snapshot;
+    this.inputClock.accept(snapshot, capturedAtTimeOriginMs);
     this.chunks.synchronize(snapshot);
     this.options.onSnapshot?.(snapshot);
   }
@@ -505,34 +548,13 @@ export class BrowserAuthorityClient {
     return this.readyValue;
   }
 
-  private worldRequest<Method extends keyof WorldHarnessPort>(
-    method: Method,
-    ...args: unknown[]
-  ): ReturnType<WorldHarnessPort[Method]> {
-    return this.request({ kind: 'world-harness-rpc', method, args }) as ReturnType<WorldHarnessPort[Method]>;
-  }
-
-  private async prepareWorldRequest(request: WorldPrepareRequest): Promise<void> {
-    const chunks = request.kind === 'chunk' ? [request.chunk] : request.chunks;
-    for (const [cx, cy, cz] of chunks) await this.ensureChunkNeighborhood(cx, cy, cz);
-  }
-
-  private async controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {
-    try {
-      const result = (await this.request(
-        { kind: paused ? 'pause-authority' : 'resume-authority' },
-        [],
-        'session-control',
-      )) as Partial<AuthoritySessionControlResult>;
-      if (result.paused !== paused || !result.snapshot || result.snapshot.paused !== paused)
-        throw new Error('Authority session control acknowledgement is invalid.');
-      this.acceptSnapshot(result.snapshot);
-      return { paused };
-    } catch (error) {
-      const failure = error instanceof Error ? error : new Error(String(error));
-      this.failAll(failure);
-      throw failure;
-    }
+  private controlSession<Paused extends boolean>(paused: Paused): Promise<{ paused: Paused }> {
+    return controlAuthoritySession(
+      paused,
+      () => this.request({ kind: paused ? 'pause-authority' : 'resume-authority' }, [], 'session-control'),
+      (snapshot) => this.acceptSnapshot(snapshot),
+      (error) => this.failAll(error),
+    );
   }
 
   private failAll(error: Error): void {

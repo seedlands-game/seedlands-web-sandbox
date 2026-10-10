@@ -1,6 +1,12 @@
 import type { ChunkSnapshot } from '@seedlands/stdlib/server/persistence/chunk-persistence';
 import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 
+export const cloneBrowserChunkSnapshot = (snapshot: ChunkSnapshot): ChunkSnapshot => ({
+  ...snapshot,
+  voxels: snapshot.voxels.slice(),
+  ...(snapshot.fluid ? { fluid: snapshot.fluid.slice() } : {}),
+});
+
 type LoadResult =
   | { status: 'missing' }
   | {

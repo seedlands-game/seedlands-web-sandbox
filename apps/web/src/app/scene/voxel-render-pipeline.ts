@@ -1,8 +1,9 @@
 import { FaceMaterial, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
 import type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 export type { RenderCategory } from '@seedlands/stdlib/world/mesh';
 
-export const MATERIAL_LAYER_COUNT = 18;
+export const MATERIAL_LAYER_COUNT = Math.max(...Object.values(FaceMaterial));
 
 export const FINAL_RENDER_PIPELINE = {
   drawUnit: 'chunk-render-category',
@@ -17,10 +18,7 @@ export type RenderPipelineSnapshot = Omit<typeof FINAL_RENDER_PIPELINE, 'backend
 };
 
 export function renderCategoryForFaceMaterial(material: FaceMaterialId): RenderCategory {
-  if (material === FaceMaterial.Leaves) return 'cutout';
-  if (material === FaceMaterial.Water) return 'transparent';
-  if (material === FaceMaterial.LanternGlow) return 'emissive';
-  return 'opaque';
+  return renderCategoryForMaterial(material);
 }
 
 export const shaderInventory = [

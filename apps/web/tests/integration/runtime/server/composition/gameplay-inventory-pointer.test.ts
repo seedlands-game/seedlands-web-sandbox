@@ -23,19 +23,32 @@ function setup() {
   const composition = assembleOverworldPacks([
     {
       ...pack,
-      integrity: { algorithm: 'sha256', manifestDigest: 'a'.repeat(64), entryDigest: 'b'.repeat(64), resources: [] },
+      integrity: {
+        algorithm: 'sha256',
+        manifestDigest: 'a'.repeat(64),
+        entryDigest: 'b'.repeat(64),
+        resources: (pack.manifest.resources ?? []).map((path) => ({ path, digest: 'c'.repeat(64) })),
+      },
     },
   ]);
   const actorAuthority = createGameplayActorAuthority(composition.resources, { playerAlias: 'human' });
+  const readCell = ([x, y, z]: readonly [number, number, number]) => ({
+    voxel: x === 2 && y === 0 && z === 0 ? 11 : 0,
+    fluid: 0,
+  });
   const world = new GameplayRuntime({
     composition,
     moduleActorAuthority: actorAuthority,
     moduleSystemAuthority: createGameplaySystemAuthority(composition),
     platform: testCorePlatform,
-    getVoxel: ([x, y, z]) => (x === 2 && y === 0 && z === 0 ? 11 : 0),
+    getVoxel: (position) => readCell(position).voxel,
+    getLoadedCell: readCell,
     getWorldTime: () => 9,
     prepareVoxelEdit: () => {
       throw new Error('unexpected voxel edit');
+    },
+    prepareVoxelEdits: () => {
+      throw new Error('unexpected voxel edit batch');
     },
   });
   world.spawnPlayer({ id: 'alice', position: [0.5, 0, 0.5] });
@@ -99,7 +112,8 @@ describe('registered inventory pointer owner', () => {
 
   it('crafts a real station result into an origin-free cursor and closes it into the bag', () => {
     const { world, pointer } = setup();
-    world.giveItem('alice', { itemId: 'plank', count: 5 });
+    world.giveItem('alice', { itemId: 'plank', count: 3 });
+    world.giveItem('alice', { itemId: 'stick', count: 2 });
     expect(pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 })).toMatchObject({
       success: true,
     });
@@ -108,8 +122,17 @@ describe('registered inventory pointer owner', () => {
         {
           kind: 'distribute',
           button: 2,
-          targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+          targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
         },
+        true,
+      ),
+    ).toMatchObject({ success: true });
+    expect(pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 })).toMatchObject({
+      success: true,
+    });
+    expect(
+      pointer(
+        { kind: 'distribute', button: 2, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
         true,
       ),
     ).toMatchObject({ success: true });
@@ -126,6 +149,47 @@ describe('registered inventory pointer owner', () => {
       instance: { durability: 60 },
     });
     expect(workbench(world).grid.every((slot) => slot === null)).toBe(true);
+  });
+
+  it('uses the actor-owned 2x2 grid for personal crafting and restores it from a snapshot', () => {
+    const { world, pointer } = setup();
+    world.giveItem('alice', { itemId: 'wood-block', count: 2 });
+    expect(pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 })).toMatchObject({
+      success: true,
+    });
+    expect(pointer({ kind: 'click', slot: { kind: 'crafting', slot: 3 }, button: 2 })).toMatchObject({
+      success: true,
+    });
+    expect(world.getInventoryPointerView('alice')).toMatchObject({
+      cursor: {
+        stack: { itemId: 'wood-block', count: 1 },
+        craftingGrid: [null, null, null, { itemId: 'wood-block', count: 1 }],
+      },
+      matchedCraftingRecipeIds: ['planks'],
+    });
+
+    const restored = setup();
+    restored.world.restoreSnapshot(world.createSnapshot());
+    expect(restored.world.getInventoryPointerView('alice')).toMatchObject({
+      cursor: {
+        stack: { itemId: 'wood-block', count: 1 },
+        craftingGrid: [null, null, null, { itemId: 'wood-block', count: 1 }],
+      },
+      matchedCraftingRecipeIds: ['planks'],
+    });
+
+    expect(restored.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 })).toMatchObject({
+      success: true,
+    });
+    expect(restored.pointer({ kind: 'craft', batch: false })).toMatchObject({
+      success: true,
+      value: { crafted: 1 },
+    });
+    expect(restored.world.getInventoryPointerView('alice').cursor).toMatchObject({
+      stack: { itemId: 'plank', count: 4 },
+      origin: null,
+      craftingGrid: [null, null, null, null],
+    });
   });
 
   it('quick-moves to a station, takes from it without shared aliases, and batch crafts to the bag', () => {
@@ -146,15 +210,23 @@ describe('registered inventory pointer owner', () => {
     expect(workbench(first.world).grid[0]).toEqual({ itemId: 'plank', count: 2 });
 
     const batch = setup();
-    batch.world.giveItem('alice', { itemId: 'plank', count: 10 });
+    batch.world.giveItem('alice', { itemId: 'plank', count: 6 });
+    batch.world.giveItem('alice', { itemId: 'stick', count: 4 });
     batch.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     expect(
       batch.pointer(
         {
           kind: 'distribute',
           button: 0,
-          targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+          targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
         },
+        true,
+      ),
+    ).toMatchObject({ success: true });
+    batch.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 });
+    expect(
+      batch.pointer(
+        { kind: 'distribute', button: 0, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
         true,
       ),
     ).toMatchObject({ success: true });
@@ -174,14 +246,20 @@ describe('registered inventory pointer owner', () => {
       )[0]!;
 
     const emptyCursor = setup();
-    emptyCursor.world.giveItem('alice', { itemId: 'plank', count: 5 });
+    emptyCursor.world.giveItem('alice', { itemId: 'plank', count: 3 });
+    emptyCursor.world.giveItem('alice', { itemId: 'stick', count: 2 });
     emptyCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     emptyCursor.pointer(
       {
         kind: 'distribute',
         button: 2,
-        targets: [0, 1, 2, 4, 7].map((slot) => ({ kind: 'station' as const, slot })),
+        targets: [0, 1, 2].map((slot) => ({ kind: 'station' as const, slot })),
       },
+      true,
+    );
+    emptyCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 1 }, button: 0 });
+    emptyCursor.pointer(
+      { kind: 'distribute', button: 2, targets: [4, 7].map((slot) => ({ kind: 'station' as const, slot })) },
       true,
     );
     expect(emptyCursor.world.giveItem('alice', { itemId: 'wood-block', count: 24 * 64 })).toMatchObject({
@@ -189,7 +267,7 @@ describe('registered inventory pointer owner', () => {
     });
     expect(projected(emptyCursor)).toMatchObject({
       matchedRecipeIds: ['wood-pickaxe'],
-      craftableRecipeIds: [],
+      craftableRecipeIds: ['wood-pickaxe'],
     });
     expect(emptyCursor.pointer({ kind: 'craft', batch: false }, true)).toMatchObject({ success: true });
     expect(emptyCursor.world.getInventoryPointerView('alice').cursor.stack).toMatchObject({
@@ -211,7 +289,7 @@ describe('registered inventory pointer owner', () => {
     compatibleCursor.world.giveItem('alice', { itemId: 'chest', count: 1 });
     compatibleCursor.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 0 });
     compatibleCursor.world.giveItem('alice', { itemId: 'wood-block', count: 24 * 64 });
-    expect(projected(compatibleCursor)).toMatchObject({ matchedRecipeIds: ['chest'], craftableRecipeIds: [] });
+    expect(projected(compatibleCursor)).toMatchObject({ matchedRecipeIds: ['chest'], craftableRecipeIds: ['chest'] });
     expect(compatibleCursor.pointer({ kind: 'craft', batch: false }, true)).toMatchObject({ success: true });
     expect(compatibleCursor.world.getInventoryPointerView('alice').cursor.stack).toEqual({ itemId: 'chest', count: 2 });
   });
@@ -220,10 +298,14 @@ describe('registered inventory pointer owner', () => {
     const first = setup();
     first.world.giveItem('alice', { itemId: 'plank', count: 9 });
     first.pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 2 });
+    first.pointer({ kind: 'click', slot: { kind: 'crafting', slot: 0 }, button: 2 });
     const saved = first.world.createSnapshot();
     const restored = setup();
     restored.world.restoreSnapshot(saved);
-    expect(restored.world.getInventoryPointerView('alice').cursor.stack).toEqual({ itemId: 'plank', count: 5 });
+    expect(restored.world.getInventoryPointerView('alice').cursor).toMatchObject({
+      stack: { itemId: 'plank', count: 4 },
+      craftingGrid: [{ itemId: 'plank', count: 1 }, null, null, null],
+    });
 
     expect(restored.world.applyDamage('test', 'alice', 20, 'test')).toEqual({ success: true });
     expect(restored.world.getInventoryPointerView('alice').cursor.stack).toBeNull();
@@ -275,6 +357,7 @@ describe('registered inventory pointer owner', () => {
     const restored = setup();
     expect(restored.world.restoreSnapshot(legacy)).toEqual({ version: 4, worldTime: 9 });
     expect(restored.world.getInventoryPointerView('alice')).toMatchObject({ revision: 0, cursor: { stack: null } });
+    expect(restored.world.getInventoryPointerView('alice').cursor.craftingGrid).toEqual([null, null, null, null]);
 
     const invalid = restored.world.createSnapshot();
     const invalidActor = invalid.entityStore.actors.find((entry) => entry.entityId === 'alice')! as {
@@ -289,12 +372,23 @@ describe('registered inventory pointer owner', () => {
     const before = restored.world.createSnapshot();
     expect(() => restored.world.restoreSnapshot(invalid)).toThrow(/cursor/i);
     expect(restored.world.createSnapshot()).toEqual(before);
+
+    invalidActor.inventoryCursor = {
+      version: 1,
+      revision: 1,
+      stack: null,
+      origin: null,
+      craftingGrid: null,
+    };
+    expect(() => restored.world.restoreSnapshot(invalid)).toThrow(/crafting grid|cursor/i);
+    expect(restored.world.createSnapshot()).toEqual(before);
   });
 
   it('settles the cursor through the registered mode transition and rejects another bound actor', () => {
     const { world, pointer, actorAuthority } = setup();
     world.giveItem('alice', { itemId: 'plank', count: 9 });
     pointer({ kind: 'click', slot: { kind: 'inventory', slot: 0 }, button: 2 });
+    pointer({ kind: 'click', slot: { kind: 'crafting', slot: 0 }, button: 2 });
     const binding = actorAuthority.forActor('alice', 'player')!;
     const modes = world.bindModuleOperations(binding.authorizer, {
       moduleId: 'seedlands:mode-module',
@@ -309,6 +403,7 @@ describe('registered inventory pointer owner', () => {
       }),
     ).toMatchObject({ ok: true });
     expect(world.getInventoryPointerView('alice').cursor.stack).toBeNull();
+    expect(world.getInventoryPointerView('alice').cursor.craftingGrid).toEqual([null, null, null, null]);
     expect(
       world
         .getInventory('alice')

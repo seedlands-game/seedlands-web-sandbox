@@ -22,6 +22,26 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     recipes: server.listRecipes(),
     inventory,
     craftableRecipeIds: server.listCraftableRecipes(playerId).map((recipe) => recipe.id),
+    progress: server.progress.snapshot(playerId),
+    difficulty: server.gameplayDifficulty,
+    armorPoints: server.getPlayerArmorPoints(playerId),
+    media: server.mediaProjections(),
+    navigation: server.navigationItems.held(playerId),
+    ...(server.gameplayContent.transportDefinitions
+      ? {
+          transports: server.transportProjections(),
+          transportDefinitions: server.gameplayContent.transportDefinitions.list(),
+        }
+      : {}),
+    cropStages: Object.freeze(
+      server.crops.list().map(({ position, stage }) =>
+        Object.freeze({
+          position,
+          stage,
+          ...(server.crops.presentationId === undefined ? {} : { presentationId: server.crops.presentationId }),
+        }),
+      ),
+    ),
     metrics: server.gameplayMetrics(),
   };
 }

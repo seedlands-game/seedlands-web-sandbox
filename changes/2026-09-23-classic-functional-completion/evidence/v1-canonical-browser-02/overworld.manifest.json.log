@@ -1,0 +1,922 @@
+{
+  "schemaVersion": 1,
+  "id": "seedlands:overworld",
+  "version": "1.0.0",
+  "kind": "playbook",
+  "entry": "overworld.mjs",
+  "modules": [
+    {
+      "id": "seedlands:overworld-worldgen",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:worldgen-provider",
+          "version": "1.0.0",
+          "definitionIdentity": "{\"id\":\"seedlands:classic-worldgen\",\"implementationVersion\":\"11.0.0\",\"configurationIdentity\":\"seedlands:classic-terrain-g2-g11\",\"supportedGeneratorVersions\":[2,3,4,5,6,7,8,9,10,11],\"artifactIdentity\":\"seedlands:overworld@1.0.0\"}"
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-content",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:crafting-match",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:gameplay-snapshot-migration",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-voxel-geometry",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:voxel-geometry",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-structures",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-geometry",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:structure-definitions",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-structure-actions",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:structure-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-geometry",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:structure-actions",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.structure",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.structure",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-media",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:media-playback",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.media-playback",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.media-playback",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:recipe-crafting-module",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:crafting-match",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    {
+      "id": "seedlands:ruleset-module",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:world-ruleset",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:inventory-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:inventory",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:player-inventory-layout",
+          "version": "1.0.0",
+          "definitionIdentity": "{\"capacity\":36,\"hotbarSize\":9}"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:inventory-actions-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:inventory",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:inventory-actions",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.inventory",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.inventory-item",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:behavior-registry-module",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:behavior-registry",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.inventory",
+          "operations": [
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.inventory-item",
+          "operations": [
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.combat",
+          "operations": [
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.structure",
+          "operations": [
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:station-actions-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:station-actions",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.station",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "id": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "id": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.station",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.station-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.furnace-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:forage-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:forage",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.forage-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:block-actions-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:station-actions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:media-playback",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:block-actions",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "id": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "id": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.station",
+          "operations": [
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.media-playback",
+          "operations": [
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.block-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:fluid-container-handler",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:block-actions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:fluid-container-interaction",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-item-interactions",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:item-interactions",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.block-voxel",
+          "operations": [
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-block-rules",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:block-actions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:recipes",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:actor-profiles",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:melee-definitions",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:station-content",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:content-crafting",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:voxel-semantics",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:block-rules",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.block-actor",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.block-voxel",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:mode-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:items",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:actor-modes",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.mode",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:combat-module",
+      "version": "1.0.0",
+      "provides": [
+        {
+          "id": "seedlands:combat",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "id": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.combat-clock",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-combat-rules",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:combat",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:world-ruleset",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.combat",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:needs-module",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:world-ruleset",
+          "version": "1.0.0"
+        }
+      ],
+      "provides": [
+        {
+          "id": "seedlands:needs",
+          "version": "1.0.0"
+        }
+      ],
+      "resources": [
+        {
+          "id": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.needs",
+          "operations": [
+            "read",
+            "write",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "seedlands:overworld-needs-rules",
+      "version": "1.0.0",
+      "requires": [
+        {
+          "id": "seedlands:world-ruleset",
+          "version": "1.0.0"
+        },
+        {
+          "id": "seedlands:needs",
+          "version": "1.0.0"
+        }
+      ],
+      "permissions": [
+        {
+          "resource": "seedlands.needs",
+          "operations": [
+            "read",
+            "execute"
+          ]
+        },
+        {
+          "resource": "seedlands.ruleset",
+          "operations": [
+            "read"
+          ]
+        }
+      ]
+    }
+  ],
+  "resources": [
+    "playbooks/classic/presentation.json",
+    "playbooks/classic/assets/audio/to-far-shores.mp3"
+  ],
+  "presentation": {
+    "path": "playbooks/classic/presentation.json"
+  }
+}

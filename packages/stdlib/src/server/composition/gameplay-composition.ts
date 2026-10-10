@@ -8,6 +8,15 @@ import { gameplayContentFromComposition } from '../gameplay/modules/content-capa
 import { BLOCK_RULES_CAPABILITY } from '../gameplay/modules/block-action-model';
 import type { BlockRulesCapabilityV1 } from '../gameplay/modules/block-rules-module';
 import { createVoxelGameplayRegistry } from '../gameplay/voxel-gameplay';
+import {
+  TRANSPORT_INTERACTION_CAPABILITY,
+  type FrozenTransportInteractionConfig,
+} from '../gameplay/modules/transport-interaction-config';
+import {
+  defineGameplaySnapshotPredecessorsV1,
+  GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+  type GameplaySnapshotMigration,
+} from '../gameplay/gameplay-snapshot-migration';
 
 const contentByComposition = new WeakMap<WorldComposition, GameplayContent>();
 
@@ -21,6 +30,13 @@ export const gameplayContentForComposition = (composition: WorldComposition): Ga
   const content = Object.freeze({
     ...base,
     voxelGameplay: createVoxelGameplayRegistry(blockRules?.definitions),
+    ...(composition.definitionMap.capabilities.some(({ id }) => id === TRANSPORT_INTERACTION_CAPABILITY)
+      ? {
+          transportDefinitions: composition.capability<FrozenTransportInteractionConfig>(
+            TRANSPORT_INTERACTION_CAPABILITY,
+          ).definitions,
+        }
+      : {}),
   });
   contentByComposition.set(composition, content);
   return content;
@@ -39,6 +55,10 @@ export const OVERWORLD_PRODUCT_PERMISSIONS: readonly ModulePermission[] = Object
   { resource: 'seedlands.block-actor', operations: ['read', 'execute'] },
   { resource: 'seedlands.block-voxel', operations: ['read', 'execute'] },
   { resource: 'seedlands.block-clock', operations: ['read', 'execute'] },
+  { resource: 'seedlands.structure', operations: ['read', 'execute'] },
+  { resource: 'seedlands.media-playback', operations: ['read', 'write', 'execute'] },
+  { resource: 'seedlands.navigation-item', operations: ['read', 'write', 'execute'] },
+  { resource: 'seedlands.transport', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.ruleset', operations: ['read'] },
   { resource: 'seedlands.needs', operations: ['read', 'write', 'execute'] },
   { resource: 'seedlands.combat', operations: ['read', 'execute'] },
@@ -66,10 +86,28 @@ export function resolveGameplayComposition(
 ) {
   if (input.composition && (input.content || input.meleeDefinitions))
     throw new TypeError('Composition owns gameplay content; parallel content inputs are forbidden.');
+  const snapshotMigration = input.composition?.definitionMap.capabilities.some(
+    ({ id }) => id === GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY,
+  )
+    ? input.composition.capability<GameplaySnapshotMigration>(GAMEPLAY_SNAPSHOT_MIGRATION_CAPABILITY)
+    : null;
+  const predecessors = defineGameplaySnapshotPredecessorsV1(snapshotMigration?.predecessors);
+  const guard = input.composition
+    ? createCompositionCheckpointGuard(input.composition, input.legacyCompositionIdentity, predecessors)
+    : null;
+  const migration = snapshotMigration
+    ? Object.freeze({
+        predecessors,
+        migrate(raw: unknown, context: Parameters<GameplaySnapshotMigration['migrate']>[1]) {
+          if (raw && typeof raw === 'object' && 'version' in raw && [1, 2, 3].includes(raw.version as number))
+            guard!.validateMigrationSource(raw);
+          return snapshotMigration.migrate(raw, context);
+        },
+      })
+    : null;
   return {
-    guard: input.composition
-      ? createCompositionCheckpointGuard(input.composition, input.legacyCompositionIdentity)
-      : null,
+    guard,
+    snapshotMigration: migration,
     content: input.composition
       ? gameplayContentForComposition(input.composition)
       : resolveGameplayContent(input.content, input.meleeDefinitions),

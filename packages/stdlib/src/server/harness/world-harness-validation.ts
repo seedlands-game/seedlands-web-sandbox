@@ -1,8 +1,11 @@
+import { LOGIC_PROTOCOL_VERSION } from '../logic/logic-protocol';
 import { CHUNK_SIZE, chunkKey, Voxel, MAX_VOXEL_ID } from '../../world/voxel';
 import { GAME_SAVE_SCHEMA_VERSION, type FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
+import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
 import {
   WORLD_HARNESS_MAX_CHECKPOINT_BYTES,
   type WorldFrontier,
+  type WorldInspectRequest,
   type WorldLogicRequest,
 } from './world-harness-contract';
 
@@ -24,7 +27,7 @@ export const checkpointBytes = (snapshot: FrozenGameSaveSnapshot): number => {
   return chunkBytes + metadata.length * 3;
 };
 
-export function validatePortableCheckpoint(value: unknown): FrozenGameSaveSnapshot {
+export function validatePortableCheckpoint(value: unknown, semantics?: VoxelSemanticsResolver): FrozenGameSaveSnapshot {
   if (!value || typeof value !== 'object') throw new TypeError('Checkpoint must be an object.');
   const snapshot = value as Partial<FrozenGameSaveSnapshot>;
   if (snapshot.version !== GAME_SAVE_SCHEMA_VERSION) throw new TypeError('Unsupported checkpoint version.');
@@ -53,7 +56,10 @@ export function validatePortableCheckpoint(value: unknown): FrozenGameSaveSnapsh
       chunk.revision < 0 ||
       !(chunk.voxels instanceof Uint16Array) ||
       chunk.voxels.length !== CHUNK_SIZE ** 3 ||
-      !chunk.voxels.every((voxel: number) => voxel >= Voxel.Air && voxel <= MAX_VOXEL_ID) ||
+      !chunk.voxels.every(
+        (voxel: number) =>
+          voxel >= Voxel.Air && (semantics ? semantics.get(voxel) !== undefined : voxel <= MAX_VOXEL_ID),
+      ) ||
       (chunk.fluid !== undefined && (!(chunk.fluid instanceof Uint8Array) || chunk.fluid.length !== CHUNK_SIZE ** 3))
     )
       throw new TypeError(`Checkpoint chunk is invalid: ${String(chunk?.key)}`);
@@ -88,6 +94,66 @@ const record = (value: unknown): Record<string, unknown> | null =>
   value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null;
 const safeSequence = (value: unknown) => Number.isSafeInteger(value) && (value as number) >= 0;
 
+const exactDataRecord = (value: unknown, keys: readonly string[], label: string): Record<string, unknown> => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(label + ' is invalid.');
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) throw new TypeError(label + ' is invalid.');
+  const descriptors = Object.getOwnPropertyDescriptors(value);
+  const actual = Reflect.ownKeys(descriptors);
+  if (
+    actual.length !== keys.length ||
+    actual.some((key) => typeof key !== 'string' || !keys.includes(key)) ||
+    keys.some((key) => {
+      const descriptor = descriptors[key];
+      return !descriptor || !descriptor.enumerable || !('value' in descriptor);
+    })
+  )
+    throw new TypeError(label + ' is invalid.');
+  return Object.fromEntries(keys.map((key) => [key, descriptors[key]!.value]));
+};
+
+export function validateWorldInspectRequest(value: unknown): WorldInspectRequest {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    throw new TypeError('World inspect request is invalid.');
+  const kind = Object.getOwnPropertyDescriptor(value, 'kind');
+  if (!kind || !kind.enumerable || !('value' in kind)) throw new TypeError('World inspect request is invalid.');
+  if (kind.value === 'column-source') {
+    const request = exactDataRecord(value, ['kind', 'column'], 'Column source inspect request');
+    if (!Array.isArray(request.column) || request.column.length !== 2 || !request.column.every(Number.isSafeInteger))
+      throw new TypeError('Column coordinates must contain two safe integers.');
+    return Object.freeze({
+      kind: 'column-source',
+      column: Object.freeze([request.column[0], request.column[1]]) as readonly [number, number],
+    });
+  }
+  if (kind.value !== 'entity-reference') return value as WorldInspectRequest;
+  const request = exactDataRecord(value, ['kind', 'reference'], 'Entity reference inspect request');
+  const reference = exactDataRecord(
+    request.reference,
+    ['entityId', 'epoch', 'lifetime'],
+    'Entity reference inspect reference',
+  );
+  if (
+    typeof reference.entityId !== 'string' ||
+    !reference.entityId.trim() ||
+    reference.entityId !== reference.entityId.trim() ||
+    reference.entityId.length > 256 ||
+    !Number.isSafeInteger(reference.epoch) ||
+    (reference.epoch as number) <= 0 ||
+    !Number.isSafeInteger(reference.lifetime) ||
+    (reference.lifetime as number) <= 0
+  )
+    throw new TypeError('Entity reference inspect reference is invalid.');
+  return Object.freeze({
+    kind: 'entity-reference',
+    reference: Object.freeze({
+      entityId: reference.entityId,
+      epoch: reference.epoch as number,
+      lifetime: reference.lifetime as number,
+    }),
+  });
+}
+
 export function validateWorldLogicRequest(value: unknown): asserts value is WorldLogicRequest {
   const request = record(value);
   if (!request || !['mode', 'observe', 'submit'].includes(String(request.kind)))
@@ -101,7 +167,7 @@ export function validateWorldLogicRequest(value: unknown): asserts value is Worl
   const batch = record(request.batch);
   if (
     !batch ||
-    batch.protocolVersion !== 1 ||
+    batch.protocolVersion !== LOGIC_PROTOCOL_VERSION ||
     typeof batch.epoch !== 'string' ||
     !safeSequence(batch.observationSequence) ||
     !safeSequence(batch.expiresAtPhysicsTick) ||

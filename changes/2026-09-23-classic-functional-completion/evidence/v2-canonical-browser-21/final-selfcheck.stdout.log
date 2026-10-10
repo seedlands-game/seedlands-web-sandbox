@@ -1,0 +1,66 @@
+playwright.config.ts: OK
+scripts/harness/classic.mjs: OK
+apps/web/tests/e2e/classic-runtime.spec.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/v1-slice.ts: OK
+apps/web/tests/e2e/classic-support/door-collision-oracle.ts: OK
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/mouse-input.ts: OK
+apps/web/tests/e2e/classic-support/equipment-resource-route.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey-support.ts: OK
+apps/web/tests/e2e/classic-support/equipment-journey.ts: OK
+apps/web/tests/e2e/classic-support/scenario.ts: OK
+playbooks/classic/scenarios/canonical-runtime-v11.json: OK
+apps/web/dist/harness-artifact.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/artifact-postcheck-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/artifact-postcheck.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/canonical-error-context.md.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/classic-runtime-failure.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/classic.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/command.txt: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/diagnosis.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/drop-34.png: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/drop-38.png: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/drop-42.png: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/drop-45.png: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/drop-49.png: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/failure-frame.jpeg: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/harness-artifact.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-write-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format-write.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/metadata-format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/network-summary.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/performance-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/playwright-last-run.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/postconditions.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/result-summary.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/return-route-aim-timeline.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/runner.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-aa: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ab: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ac: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ad: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ae: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-af: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ag: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ah: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-ai: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-50m/canonical-trace.zip.part-aj: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-parts.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-readback.json: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-21/trace-reassembly.sha256: OK
+Checking formatting...
+All matched files use Prettier code style!
+sourceManifestEntries=14
+evidenceManifestEntries=43
+traceParts=10
+traceReassembly=PASS
+artifactPostcheck=PASS
+acceptanceTreeClean=PASS
+metadataFormat=PASS

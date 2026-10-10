@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-27-CLASSIC-DEATH-AND-NEEDS",
+  "status": "READY_FOR_PUSH",
+  "baseline": "5fcdc1dffe3b4a7fbcf5e43c91ae45189ed10708",
+  "sourceCommit": "c3ba7ea9fa83522ee1927791efa2add719980797",
+  "sourceTree": "6ed1dc8505f8a40fa17b2dba299d8bd1061db30d",
+  "stagedPatchSha256": "60e7b7f0d04cff25539db1c1aea95f9858f825cc04c4bc18f6b514a5c400872f",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 17,
+    "sha256": "54bb78a9e06d16579778242d701ab964db8e1810779cb892da20b25bb4743f12"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 40,
+    "sha256": "0268337611fbb3035f943efb1ba9d1b4a89161d50c9c4c5ef43bd513b3b57ca0",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "frozenSlices": {
+    "registeredNeeds": {
+      "sourceManifestSha256": "5df2e073c0dffc57d9d2d303efde6d9b6d8b85b545dab0089ec7fd762e9ca83d",
+      "evidenceManifestSha256": "dc733d734807777782e38c4727987f0b1cdad7df68b935b785b8e085858f5faf",
+      "deliverySha256": "afc09a762ac7ff807061e136ae22820d01c84b0b2a85f220a3b82d65bd9afff2",
+      "sourceEntries": 6,
+      "evidenceEntries": 52
+    },
+    "registeredNeedsFixture": {
+      "sourceManifestSha256": "37359d1a71d516362e9a73b2a920ffd15c98724b2d5b8a18c7702c778547b111",
+      "evidenceManifestSha256": "5f73de5fc2b71662a32687ef4d38756d02695f78978653e3eb94aef8ff61fc38",
+      "sourceEntries": 3,
+      "evidenceEntries": 14
+    },
+    "classicDeathPolicy": {
+      "sourceManifestSha256": "8ea222c160d8cb13ad261eff76d3c06ef84943ae27ed00b7688cbc9fbed35e70",
+      "evidenceManifestSha256": "6b49dbc31d1a5335832e883577299d54c88beef913d1998906c3367b41a70cb7",
+      "reviewedDeliverySha256": "2a00a8fec3815833fea99c1365aca33688f83570a83213b1b373bc8a75802be5",
+      "integratedDeliverySha256": "e5dc3920b86aad8a3071027f0c88223830a6f4db498f735800814b24c0a1d928",
+      "deliveryIdentityNote": "Prettier-only normalization; SOURCE, MANIFEST, and raw evidence bytes are unchanged.",
+      "sourceEntries": 14,
+      "evidenceEntries": 109,
+      "predecessorCanonicalSha256": "e799b930b686da9a8bd34d9052e4179e8624013bcbc774da81ff672ed6cd724a"
+    }
+  },
+  "supersededMutableMetadata": [
+    "changes/2026-09-23-classic-functional-completion/tasks.md",
+    "changes/2026-09-23-classic-functional-completion/execution-state.md"
+  ],
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git27-death",
+    "head": "5fcdc1dffe3b4a7fbcf5e43c91ae45189ed10708",
+    "stagedPaths": 17,
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyDependenciesReused": true,
+    "taskStateInsideTree": true
+  },
+  "tests": {
+    "registeredNeedsDeath": {
+      "window": "8c8daa46-c507-48b1-9272-6fccf2c0b163",
+      "status": "PASS_1_FILE_12_TESTS",
+      "stdoutSha256": "8290ba165da71784f3c34e5e825b547cf6b8e6bf9b20da19155e7ee9f35e1fc4",
+      "receiptSha256": "726317e1292b622b438d44428b09b950fdbbd038d6233302b077ed2ca61d2a0d"
+    },
+    "publicMixed": {
+      "window": "c75b9b6a-e5c8-453c-9483-82266514bc73",
+      "status": "PASS_1_FILE_13_TESTS",
+      "stdoutSha256": "fc5d07c1edd3c6b3ccda549033b265ff42b13f3ad7fdff6ac01c4b76b6036a83",
+      "receiptSha256": "67eef531230caa26431a7e9ec5f1c9ac7cb6a61643065707ef9c3b01074c2e4a"
+    },
+    "existingRegisteredNeeds": {
+      "window": "eb43f032-42ad-4124-8af4-3dad3aa89067",
+      "status": "PASS_1_FILE_10_TESTS",
+      "stdoutSha256": "1946da13bd62fe4e67a1474cefc0b0887c9c5363b5f7c1a0f6c488e7f0cc4cfe",
+      "receiptSha256": "00dab123ac9c6182ad868e091486ad7bbaf40f8f4d04575eda82b445b2304535"
+    },
+    "classicLineage": {
+      "window": "cd497808-8e4e-4b6d-8675-413d25b1cb86",
+      "status": "PASS_1_FILE_4_TESTS",
+      "stdoutSha256": "fb6b755c8cfce1632a3ab1a82873e9ff5a853bf2ea70568106a2b80642b98c27",
+      "receiptSha256": "17fec9fc013106fe86b6de71d81c0544cf3f513d8f9d02bc2a3074bbf142ccfc"
+    },
+    "classicDeathAggregate": {
+      "window": "bc8aee75-6ba9-4230-b4aa-3114f20ffd85",
+      "status": "PASS_3_FILES_18_TESTS",
+      "stdoutSha256": "401cc7a6533506b5055a57b0a01141164a975ec889668181e23d4dd5a821da41",
+      "receiptSha256": "7ee3aed57facdf248e79138367a6f306059a6e960778a91529dae817c679b340"
+    },
+    "registeredCombatDeath": {
+      "window": "2dabf690-602c-4cc1-b7ad-1a0aa2eb466e",
+      "status": "PASS_1_FILE_11_TESTS",
+      "stdoutSha256": "494e38745a1052225503098ec707b4dcc282f0758d3748c5483ebd285a2e3b88",
+      "receiptSha256": "9304ec8ac3da89a8c5a03d6a4d63a3962d823dc2383542b4f14d2dacd5ab92bc"
+    },
+    "directVitalsDeath": {
+      "window": "ba92f1b7-beaa-4d16-9363-d8f715c63079",
+      "status": "PASS_1_FILE_11_TESTS",
+      "stdoutSha256": "30c74c29a283476b9f838ab6c57ddf69d264dc4a52ff0de856bffa940499062b",
+      "receiptSha256": "d03b7623b5519774e27252694d28bda2c82e63bd9dd1108345791a407d480c58"
+    }
+  },
+  "static": {
+    "stdlibTypes": { "window": "54241792-9b77-4ba0-8eb6-1427f1bec0b2", "status": "PASS" },
+    "classicProductionTypes": { "window": "b508ca14-e011-4b48-b9a2-ef36487bddc4", "status": "PASS" },
+    "rootTestTypes": { "window": "d6a79e33-c459-4e1c-b0b3-5f2d8815aad1", "status": "PASS" },
+    "classicTestTypes": { "window": "b3211c7b-c8af-4b8a-b1e9-b9ee21224d5b", "status": "PASS" },
+    "stagedEslint": { "window": "25475a9c-d2c0-4c18-b30e-ed03f72582f3", "status": "PASS" },
+    "editableFormat": { "window": "e9d4ddb7-21f6-4211-983d-07399f766e12", "status": "PASS" },
+    "scopedDiff": { "window": "73d643d0-376e-483b-9276-c016022fbd08", "status": "PASS_17_PATHS" }
+  },
+  "policyBoundaries": {
+    "classicPlayerActor": "retain",
+    "classicCreatureNpcActor": "despawn",
+    "needsPlayerDespawn": "needs-player-despawn-policy-unsupported",
+    "nonPlayerNeedsHealthLifecycle": "readonly"
+  },
+  "artifactState": {
+    "latestBuildSourceSha": "1bbe3a60d55ffa5d05e405377624fbbd942e6327",
+    "includesThisCommit": false
+  },
+  "excludedWorkingTreeChangesPreserved": [
+    "packages/stdlib/src/server/composition/mod-api.ts transport exports",
+    "Lighting",
+    "transport/climb/stateful block",
+    "README/package/CI",
+    "browser reports",
+    "unrelated changes directories"
+  ],
+  "notRun": ["build", "artifact", "browser", "cua", "devserver", "ci", "deploy", "merge"]
+}

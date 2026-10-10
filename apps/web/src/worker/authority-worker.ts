@@ -1,30 +1,29 @@
+import { handleAuthorityRendererSource } from './authority-renderer-source';
 /// <reference lib="webworker" />
 
 import { browserWorldOwnerPolicy } from './authority-worker-world-policy';
+import { AuthorityPointerAttackController } from './authority-pointer-attack-controller';
+import type { BrowserAuthorityRequest, BrowserAuthorityResponse } from '../client/authority/pointer-attack-protocol';
 import { loadBrowserProductAssembly } from './pack-loader';
-import type { ProductExtensionAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api';
+import type { ProductExtensionAdmission, ProductPackAdmission, VerifiedPackArtifact } from '@seedlands/stdlib/server/composition/host-api'; // prettier-ignore
 
 import { BrowserChunkPersistence, type SerializedChunkSnapshot } from '../client/persistence/browser-chunk-persistence';
 import type { AuthorityRuntime } from '@seedlands/stdlib/server/authority/authority-runtime';
 import { PROTOCOL_VERSION } from '@seedlands/stdlib/runtime/session-protocol';
-import type { AuthorityRequest, AuthorityResponse } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type { AuthorityRequest } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { commitFluidCandidateAndPublish } from './authority-commit-publisher';
 import { browserCorePlatform } from '../platform/core-platform';
 import { MemoryGamePersistence } from '@seedlands/stdlib/server/persistence/memory-game-persistence';
 import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
-import {
-  AuthorityWorldHarness,
-  type AuthorityWorldOwner,
-} from '@seedlands/stdlib/server/harness/authority-world-harness';
-import {
-  WorldResourceAuthorizer,
-  developmentWorldAuthorizationPolicy,
-} from '@seedlands/stdlib/server/harness/world-authorization';
-import { dispatchWorldHarnessRpc } from '@seedlands/stdlib/server/harness/world-harness-jsonl';
+import { AuthorityWorldHarness, type AuthorityWorldOwner } from '@seedlands/stdlib/server/harness/authority-world-harness'; // prettier-ignore
+import { WorldResourceAuthorizer, developmentWorldAuthorizationPolicy } from '@seedlands/stdlib/server/harness/world-authorization'; // prettier-ignore
+import { handleBrowserWorldRpc } from './authority-world-rpc';
 import { BrowserAuthorityIngress, rejectStaleAuthorityMessage } from './authority-worker-ingress';
 import { SwitchableAuthorityPersistence } from './authority-worker-persistence';
 import { AuthorityWorkerBootstrap } from './authority-worker-bootstrap';
 import { postAuthorityFailure, postAuthoritySuccess, transactAuthorityRequest } from './authority-worker-response';
+import { AuthorityTickPublisher } from './authority-tick-publisher';
+import { postAuthorityFatal } from './authority-worker-fatal';
 import { BrowserCharacterAuthority } from './authority-worker-character-control';
 import { BrowserAuthorityDeterministicAdvance } from './authority-worker-deterministic-advance';
 import { AuthorityWorkerDirectLogicOwner } from './authority-worker-direct-logic-owner';
@@ -35,6 +34,7 @@ import { createBrowserAuthorityRuntime, prepareBrowserAuthorityWorldgen } from '
 const scope = self as DedicatedWorkerGlobalScope;
 let runtime: AuthorityRuntime | null = null;
 let packArtifacts: readonly VerifiedPackArtifact[] = [];
+let approvedPlaybook: ProductPackAdmission | null = null;
 let approvedExtensions: readonly ProductExtensionAdmission[] = [];
 let developerPolicy: ReturnType<typeof developmentWorldAuthorizationPolicy> | undefined;
 let persistence: BrowserChunkPersistence | null = null;
@@ -47,12 +47,17 @@ let epoch = '',
 let fluidEpoch = 1;
 let ingress: BrowserAuthorityIngress | null = null;
 let characterAuthority: BrowserCharacterAuthority | null = null;
-let lastSnapshotPublishedAt = Number.NEGATIVE_INFINITY,
-  lastGameplayPublishedAt = Number.NEGATIVE_INFINITY;
+const tickPublisher = new AuthorityTickPublisher();
 let tickQueued = false;
 let deterministicAdvance: BrowserAuthorityDeterministicAdvance | null = null;
 
-const post = (message: AuthorityResponse, transfer: Transferable[] = []) => scope.postMessage(message, transfer);
+const post = (message: BrowserAuthorityResponse, transfer: Transferable[] = []) => scope.postMessage(message, transfer);
+const pointerAttack = new AuthorityPointerAttackController({
+  runtime: () => runtime,
+  authorize: (action) => ingress!.action(action),
+  context: () => ({ epoch, runtimeEpoch }),
+  post,
+});
 const errorText = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 const transact = async (
@@ -82,23 +87,12 @@ const tick = () => {
   if (!runtime || !worldHarness || tickQueued) return;
   tickQueued = true;
   void worldHarness
-    .hostOperation(() => {
+    .hostOperation(async () => {
       if (!runtime) return;
       const now = performance.now();
       const snapshot = runtime.wake(now);
-      if (now - lastSnapshotPublishedAt < 1000 / 60) return;
-      const publishGameplay = now - lastGameplayPublishedAt >= 50;
-      const commits = runtime.takeCommits();
-      post({
-        kind: 'authority-snapshot',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch,
-        snapshot,
-        ...(publishGameplay ? { gameplay: runtime.view() } : {}),
-        ...(commits.length ? { commits } : {}),
-      });
-      lastSnapshotPublishedAt = now;
-      if (publishGameplay) lastGameplayPublishedAt = now;
+      await pointerAttack.service(now);
+      tickPublisher.publish(runtime, snapshot, now, epoch, runtimeEpoch, post);
     })
     .catch((failure) =>
       post({ kind: 'authority-fatal', protocolVersion: PROTOCOL_VERSION, epoch, error: errorText(failure) }),
@@ -114,7 +108,12 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   const nextRestoreSequence = worldRestoreSequence + 1;
   const nextRuntimeEpoch = `${epoch}:runtime:${nextRestoreSequence}`;
   const nextFluidEpoch = fluidEpoch + 1;
-  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  const prepared = prepareBrowserAuthorityWorldgen(
+    packArtifacts,
+    approvedPlaybook!,
+    approvedExtensions,
+    developerPolicy,
+  );
   const candidate = await createBrowserAuthorityRuntime(prepared, {
     epoch: nextRuntimeEpoch,
     seedText: snapshot.seedText,
@@ -124,7 +123,14 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
     frequencies: runtime?.frequencies ?? { physicsHz: 60, gameplayHz: 20, fluidHz: 30 },
     fluidEpoch: nextFluidEpoch,
     findInitialWorldBootstrap: (seed, generatorVersion) =>
-      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
+      bootstrap.request(
+        epoch,
+        seed,
+        generatorVersion,
+        prepared.worldgenProvider.identity,
+        prepared.starterEcology,
+        prepared.voxelSemantics,
+      ),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
@@ -140,6 +146,7 @@ const restoreWorld = async (snapshot: FrozenGameSaveSnapshot) => {
   candidate.commitHostActivation();
   candidate.pause(candidate.sessionTimeMs);
   candidate.clearPlayerInput();
+  pointerAttack.suspend(true);
   runtime?.server.disposeGameplay();
   runtime = candidate;
   ingress = new BrowserAuthorityIngress(candidate.playerId, candidate.server.gameplayResources);
@@ -159,6 +166,7 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   if (runtime || persistence) throw new Error('Authority Worker already owns a running session.');
   const productPacks = await loadBrowserProductAssembly(new URL(`${import.meta.env.BASE_URL}packs/`, location.origin));
   packArtifacts = productPacks.artifacts;
+  approvedPlaybook = productPacks.approvedPlaybook;
   approvedExtensions = productPacks.approvedExtensions;
   epoch = message.epoch;
   runtimeEpoch = epoch;
@@ -166,11 +174,17 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
   developerPolicy = message.developerWorldHarness
     ? developmentWorldAuthorizationPolicy('browser-developer')
     : undefined;
-  const prepared = prepareBrowserAuthorityWorldgen(packArtifacts, approvedExtensions, developerPolicy);
+  const prepared = prepareBrowserAuthorityWorldgen(
+    packArtifacts,
+    approvedPlaybook,
+    approvedExtensions,
+    developerPolicy,
+  );
   persistence = await BrowserChunkPersistence.open(message.seedText, {
     legacySnapshots: message.legacySnapshots as readonly SerializedChunkSnapshot[],
     openMode: message.openMode,
     provider: prepared.worldgenProvider.identity,
+    voxelSemantics: prepared.voxelSemantics,
   });
   runtime = await createBrowserAuthorityRuntime(prepared, {
     epoch,
@@ -181,7 +195,14 @@ const start = async (message: Extract<AuthorityRequest, { kind: 'start-authority
     frequencies: message.frequencies,
     fluidEpoch,
     findInitialWorldBootstrap: (seed, generatorVersion) =>
-      bootstrap.request(epoch, seed, generatorVersion, prepared.worldgenProvider.identity, prepared.starterEcology),
+      bootstrap.request(
+        epoch,
+        seed,
+        generatorVersion,
+        prepared.worldgenProvider.identity,
+        prepared.starterEcology,
+        prepared.voxelSemantics,
+      ),
     onFluidWork: (snapshot) => post({ kind: 'fluid-work', protocolVersion: PROTOCOL_VERSION, epoch, snapshot }),
     onLogicObservation: publishLogicObservation,
     onUnknownChunk: (key) => post({ kind: 'authority-chunk-needed', protocolVersion: PROTOCOL_VERSION, epoch, key }),
@@ -248,6 +269,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
       await transact(message, () => {
         const now = performance.now();
         current.pause(now);
+        pointerAttack.suspend(true);
         return { result: { paused: true, snapshot: current.wake(now) } };
       });
       break;
@@ -255,6 +277,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
       await transact(message, () => {
         const now = performance.now();
         current.resume(now);
+        pointerAttack.suspend(false);
         return { result: { paused: false, snapshot: current.wake(now) } };
       });
       break;
@@ -331,9 +354,9 @@ const handleCurrent = async (message: AuthorityRequest) => {
       });
       break;
     case 'gameplay-action': {
-      ingress!.action(message.action);
+      const action = ingress!.action(message.action);
       await transact(message, async () => {
-        const result = await current.performAction(message.action);
+        const result = await current.performAction(action);
         return { result, gameplay: result.gameplay, commits: [...result.commits] };
       });
       break;
@@ -408,7 +431,7 @@ const handleCurrent = async (message: AuthorityRequest) => {
   }
 };
 
-const handle = async (message: AuthorityRequest | DirectLogicAttachRequest) => {
+const handle = async (message: BrowserAuthorityRequest | DirectLogicAttachRequest) => {
   if (message?.kind === 'attach-direct-logic') {
     if (runtime) throw new Error('Direct Logic port must attach before Authority start.');
     directLogic.attach(message);
@@ -421,40 +444,34 @@ const handle = async (message: AuthorityRequest | DirectLogicAttachRequest) => {
     return;
   }
   if (!runtime || message.epoch !== epoch) throw new Error('Authority session is unavailable or stale.');
+  if (message.kind === 'request-column-source' || message.kind === 'request-sky-source') {
+    if (!worldHarness) throw new Error('World Harness is unavailable.');
+    await handleAuthorityRendererSource(
+      message,
+      worldHarness,
+      () => ({ runtime: runtime!, epoch: runtimeEpoch, persistence: persistence! }),
+      epoch,
+      post,
+    );
+    return;
+  }
   if (message.kind === 'world-harness-rpc') {
     if (!worldHarness) throw new Error('World Harness is unavailable.');
-    if (message.runtimeEpoch !== runtimeEpoch) {
-      fail(message.requestId, new Error('WORLD_EPOCH_STALE: World request was submitted for a stale runtime epoch.'));
-      return;
-    }
-    const result = await dispatchWorldHarnessRpc(worldHarness, {
-      protocolVersion: 1,
-      requestId: message.requestId,
-      method: message.method,
-      args: message.args,
-    });
-    post({
-      kind: 'world-harness-response',
-      protocolVersion: PROTOCOL_VERSION,
-      epoch,
-      requestId: message.requestId,
-      result: result.result,
-      ...(message.method === 'checkpoint' &&
-      result.result.ok &&
-      result.result.data &&
-      typeof result.result.data === 'object' &&
-      'restored' in result.result.data
-        ? { ready: runtime!.ready(), runtimeEpoch }
-        : {}),
-    });
+    await handleBrowserWorldRpc(message, worldHarness, () => ({ epoch, runtimeEpoch, runtime: runtime! }), post, fail);
     return;
   }
   if (message.kind === 'dispose-authority') {
+    pointerAttack.stop();
     disposeBrowserAuthorityWorker({ interval, persistence, bootstrap, directLogic, characterAuthority, runtime });
     scope.close();
     return;
   }
   if (!worldHarness) throw new Error('World Harness is unavailable.');
+  if (message.kind === 'pointer-attack-input') {
+    if (message.runtimeEpoch !== runtimeEpoch) return;
+    await worldHarness.hostOperation(() => pointerAttack.accept(message, performance.now()));
+    return;
+  }
   const dispatchCurrent = async () => {
     if (message.runtimeEpoch !== runtimeEpoch) {
       if ('requestId' in message && typeof message.requestId === 'number')
@@ -478,16 +495,10 @@ const handle = async (message: AuthorityRequest | DirectLogicAttachRequest) => {
   } else await worldHarness.hostOperation(dispatchCurrent);
 };
 
-scope.onmessage = (event: MessageEvent<AuthorityRequest | DirectLogicAttachRequest>) => {
+scope.onmessage = (event: MessageEvent<BrowserAuthorityRequest | DirectLogicAttachRequest>) => {
   const requestId = 'requestId' in event.data ? event.data.requestId : undefined;
   void handle(event.data).catch((error) => {
     if (typeof requestId === 'number') fail(requestId, error);
-    else
-      post({
-        kind: 'authority-fatal',
-        protocolVersion: PROTOCOL_VERSION,
-        epoch: event.data.epoch,
-        error: errorText(error),
-      });
+    else postAuthorityFatal(post, event.data.epoch, error);
   });
 };

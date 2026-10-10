@@ -38,9 +38,8 @@
   <button type="button" disabled={importing} onclick={() => input.click()}
     >{importing ? '正在导入…' : '导入静态 GLB'}</button
   >
-  <a
-    href={publicAssetUrl(import.meta.env.BASE_URL, 'models/voxel-settler-animated.glb')}
-    download="seedlands-voxel-settler-animated.glb">下载骨骼动画样例</a
+  <a href={publicAssetUrl(import.meta.env.BASE_URL, 'models/classic/pig.glb')} download="seedlands-classic-pig.glb"
+    >下载 Classic 关节动画样例</a
   >
   <input
     bind:this={input}

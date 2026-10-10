@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-05",
+  "status": "TEST_EVIDENCE_CLOSURE_GREEN",
+  "baseline": "ba5ea55627da8f87caa700ecd43df525aaee6f61",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 13,
+    "sha256": "8351c4d14b34fecdafe75e27dbf9fcdc44262f45c36d1aa33d51c11ad1fa0d4c",
+    "validatedEntries": 13
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 38,
+    "sha256": "51e19b37e510a363631239b4ff89b654da2196f661dbc18de6d7655dded498fe",
+    "validatedEntries": 38,
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "delivery-format.stdout.log",
+      "delivery-format-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "priorRelease": {
+    "stage": "V2-EQUIPMENT-GROUNDED-ROUTE-CLOSE-04",
+    "byteEqual": true,
+    "sourceManifestSha256": "94a56e6589eb497f5de06b4f9197bd86fbbe4c5636b634a868c05194f61100cc",
+    "evidenceManifestSha256": "09f4ac5446d038d05180632a8cd98a774eb5a6c7c121eaca4383fd6751d8866e",
+    "deliverySha256": "c58ef48ba9a49044c26e97f10e474db777264c1b2673347e36a4007212558edf",
+    "contractSha256": "3180e75f8c618bd2289fd1b5ffdc7671a5f29849d7b132c537714193b0d185f9",
+    "evidenceSha256": "bcb9764b74767e3af6ed81306e659a76a20db84155880493a672010cfac7087b",
+    "testSha256": "c1dcb56dfedbc2a0583af1ba0caab7e50d5d219e8156172099e2d764a9e56b7c"
+  },
+  "approvedImplementation": {
+    "changedInThisClosure": false,
+    "supportSha256": "8f34c85c9cb94dc485ac3adfb43b3871bff8dfe3bf831b00b67774d96766dbe4",
+    "routeSha256": "4c7b2925b8bf6e8e64510716896ca9469fb675c79121a2b520b3fbb12fcef767"
+  },
+  "modelContract": {
+    "inputStream": "PlayerInputStream",
+    "authorityBuffer": "InputCommandBuffer",
+    "physics": "stepBody",
+    "pollHz": 60,
+    "pulseMs": 80,
+    "pulseCompletionLimitMs": 20000,
+    "routeSuccessDeadlineMs": 45000,
+    "longestLegMeters": 19.9630739258,
+    "releaseCommandPerPulse": true,
+    "releaseMustBeConsumed": true,
+    "groundedMustBeObservedAfterReleaseAck": true,
+    "issuedSequenceUsedAsAck": false,
+    "bufferResetUsed": false,
+    "manualGroundedMutationUsed": false,
+    "orderedSequenceAssertion": "pressed < neutral < next pressed",
+    "jumpControlMissesDeadline": true,
+    "groundConfigurationMeetsDeadline": true,
+    "geometryLegsRetained": 52
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-grounded-route-close-05-red",
+      "status": "EXPECTED_FAIL",
+      "exitCode": 1,
+      "passed": 1,
+      "failed": 1,
+      "reason": "The Close-04 ground simulation issued no neutral command.",
+      "stdoutSha256": "3dd5d857417cdf816eafb58d604d7e2f0c486528f66ab2fd00c6b334d37697ab",
+      "receiptSha256": "146380ebccc53c89246dd61488064cd1c5ce578c42955dd3e13bae1f04c01bc1"
+    },
+    "intermediateFailures": [
+      {
+        "window": "v2-equipment-grounded-route-close-05-green",
+        "exitCode": 1,
+        "reason": "A pending release acknowledgement was incorrectly paired with the next pressed sequence.",
+        "stdoutSha256": "5f46f45a3c267db9babbe7920b153e7556358c4a11f9558ad93fdbe2aab222e9",
+        "receiptSha256": "12cd92c4c6c3d9c451ff98bd074698d707bbb0604f300c9f0d7c967fbad39450"
+      },
+      {
+        "window": "v2-equipment-grounded-route-close-05-green-03",
+        "exitCode": 1,
+        "reason": "The last pulse started before the route deadline but stopped before its release was consumed.",
+        "stdoutSha256": "891a621ad12812fc6aaa8b3522bc8b78fba98afde71d7b793700a891939f6e0a",
+        "receiptSha256": "357c06e3a4e1a9cc95e700d25192f2c8d1fd8e07fc2fb361f8723f2f8feef8e9"
+      }
+    ],
+    "green": {
+      "window": "v2-equipment-grounded-route-close-05-green-final",
+      "status": "PASS",
+      "files": 1,
+      "tests": 2,
+      "stdoutSha256": "ed1259c36e6cd82c02380db9e820cde6f3610d48fb4e30712f4893322fed7d3c",
+      "receiptSha256": "4a4867737a0027441c5f8e11d63904f67571230481d3c77392323eb6b2941296"
+    },
+    "affected": {
+      "window": "v2-equipment-grounded-route-close-05-affected",
+      "status": "PASS",
+      "files": 5,
+      "tests": 40,
+      "maxWorkers": 1,
+      "stdoutSha256": "f486a723522ae6e737892f2532d7ab961fd2e5c1e2a71f53c761c33fc2750309",
+      "receiptSha256": "f20047d050f54a26a8aa9d0b4356346cea761e9dccfc427da7f720070bde583f"
+    },
+    "classicTypes": {
+      "window": "v2-equipment-grounded-route-close-05-classic-types",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "5c92bf2de929a854c66c9f500c341a22d547479857d7c3f05f6ba4fccf2fd188"
+    },
+    "rootTypes": {
+      "window": "v2-equipment-grounded-route-close-05-root-types",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "cb37bba5a84ba50fd1758a2d75d89a319ad350f6723c7da533bcf2575c0749a7"
+    },
+    "eslint": {
+      "window": "v2-equipment-grounded-route-close-05-eslint",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "483bc68cd4fd84b9fe63022aa3f324dbab62fffc1a2074c3162951623e5e3ec7"
+    },
+    "static": {
+      "window": "v2-equipment-grounded-route-close-05-final-static",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "1172f167774f04f0961e59fa95877f9d6a01298df6e65c24f2ffe24349f4884e"
+    }
+  },
+  "boundaries": {
+    "testOnlyClosure": true,
+    "browserValidated": false,
+    "browser16StillFail": true,
+    "browser17Authorized": false,
+    "productionChanged": false,
+    "fixtureImplementationChanged": false,
+    "geometryTestRetained": true,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This closure corrects only a deterministic test scheduler and changes no owner, public protocol, or architecture boundary."
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}

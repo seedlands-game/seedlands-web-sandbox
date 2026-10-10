@@ -1,25 +1,16 @@
 import type { ArtifactIntegrityReceipt, ModulePermission, VerifiedPackArtifact, WorldComposition } from './contracts';
 import { assembleWorldPacks } from './assembly';
-import { OVERWORLD_PRODUCT_PERMISSIONS } from './gameplay-composition';
 
-export const ALTERNATIVE_PRODUCT_PERMISSIONS: readonly ModulePermission[] = Object.freeze([
-  { resource: 'seedlands.inventory', operations: ['read', 'write', 'execute'] },
-  { resource: 'seedlands.inventory-item', operations: ['read', 'execute'] },
-  { resource: 'seedlands.block-actor', operations: ['read', 'execute'] },
-  { resource: 'seedlands.block-voxel', operations: ['read', 'execute'] },
-  { resource: 'seedlands.block-clock', operations: ['read', 'execute'] },
-  { resource: 'seedlands.ruleset', operations: ['read'] },
-  { resource: 'seedlands.mode', operations: ['read', 'write', 'execute'] },
-]);
-
-export type ProductExtensionAdmission = Readonly<{
+export type ProductPackAdmission = Readonly<{
   id: string;
   version: string;
   integrity: ArtifactIntegrityReceipt;
   permissions: readonly ModulePermission[];
 }>;
+export type ProductExtensionAdmission = ProductPackAdmission;
 
 export type AssembleProductPackOptions = Readonly<{
+  approvedPlaybook?: ProductPackAdmission;
   approvedExtensions?: readonly ProductExtensionAdmission[];
 }>;
 
@@ -33,13 +24,6 @@ const integrityKey = (integrity: ArtifactIntegrityReceipt): string =>
       .sort((left, right) => left.path.localeCompare(right.path)),
   });
 
-const productPermissions = (playbookId: string): readonly ModulePermission[] => {
-  if (playbookId === 'seedlands:overworld') return OVERWORLD_PRODUCT_PERMISSIONS;
-  if (playbookId === 'seedlands:click-conversion' || playbookId === 'seedlands:builder')
-    return ALTERNATIVE_PRODUCT_PERMISSIONS;
-  throw new TypeError('Product Playbook has not been approved by the host.');
-};
-
 /** Exact local product examples, with host grants independent of their permission requests. */
 export function assembleProductPacks(
   artifacts: readonly VerifiedPackArtifact[],
@@ -47,9 +31,17 @@ export function assembleProductPacks(
 ): WorldComposition {
   const playbooks = artifacts.filter((artifact) => artifact.manifest.kind === 'playbook');
   if (playbooks.length !== 1) throw new TypeError('Product requires one locked Playbook.');
-  const playbookId = playbooks[0].manifest.id;
+  const playbook = playbooks[0];
+  const admission = options.approvedPlaybook;
+  if (
+    !admission ||
+    admission.id !== playbook.manifest.id ||
+    admission.version !== playbook.manifest.version ||
+    integrityKey(admission.integrity) !== integrityKey(playbook.integrity)
+  )
+    throw new TypeError(`Product Playbook has not been exactly approved by the host: ${playbook.manifest.id}`);
   const approvedPermissions: Record<string, readonly ModulePermission[]> = {
-    [playbookId]: productPermissions(playbookId),
+    [playbook.manifest.id]: admission.permissions,
   };
   const admissions = new Map<string, ProductExtensionAdmission>();
   for (const admission of options.approvedExtensions ?? []) {

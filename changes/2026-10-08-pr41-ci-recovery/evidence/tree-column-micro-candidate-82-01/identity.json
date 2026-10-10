@@ -1,0 +1,21 @@
+{
+  "sourceSha": "778811f67328087463c02019de80d943a5c53078",
+  "adaptation": "only local import paths resolve to frozen control files; all other dependencies unchanged current tree",
+  "files": [
+    {
+      "sourcePath": "/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel.ts",
+      "originalSha256": "69fe0295bc7e5d43c39505fed07d359e0b143fbfc2fe079cce7fd5bef5dcf04b",
+      "adaptedControlSha256": "548c82598ff19b5400c1e6b1d70ad983f9762091b2871e1f1fd59ea79df12063"
+    },
+    {
+      "sourcePath": "/workspace/seedlands-web-sandbox/packages/stdlib/src/world/chunk-generation.ts",
+      "originalSha256": "f68107bedef87c974c7f9371fbf0d8701ad3bbeaf1ce2b3f545a6b6c87ee4710",
+      "adaptedControlSha256": "80c196d7513bea1b0eed989e0397ee8a2d344eb900c355aeff96d819f897ae80"
+    },
+    {
+      "sourcePath": "/workspace/seedlands-web-sandbox/packages/stdlib/src/world/tree-generation.ts",
+      "originalSha256": "68c4efc9315d174b2efe143173b7f9eab872e5fe5b804cce760c2df39d113417",
+      "adaptedControlSha256": "9b0ce91120bb6b38c67a834babf40cd2a8a4064aadf0cccbc2cd609c7ca2f792"
+    }
+  ]
+}

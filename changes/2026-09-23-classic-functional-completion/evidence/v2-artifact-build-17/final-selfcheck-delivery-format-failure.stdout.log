@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "manifest": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-17/SOURCE-MANIFEST.sha256",
+  "root": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox",
+  "expectedCount": 4,
+  "lineCount": 4,
+  "validEntryCount": 4,
+  "verifiedCount": 4,
+  "errors": []
+}
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "manifest": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-17/MANIFEST.sha256",
+  "root": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-artifact-build-17",
+  "expectedCount": 17,
+  "lineCount": 17,
+  "validEntryCount": 17,
+  "verifiedCount": 17,
+  "errors": []
+}
+Checking formatting...

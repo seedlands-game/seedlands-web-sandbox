@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git40-staged-gate",
+  "pid": 69806,
+  "startedAt": "2026-09-28T22:43:04.750Z",
+  "windowId": "git40-staged-gate",
+  "evidencePath": "/private/tmp/seedlands-git40-staged-gate.window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T22:43:04.788Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T22:43:04.751Z",
+      "loadAverage": [
+        2.32470703125,
+        2.89111328125,
+        2.900390625
+      ],
+      "freeMemoryBytes": 416874496,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T22:43:04.786Z",
+      "loadAverage": [
+        2.32470703125,
+        2.89111328125,
+        2.900390625
+      ],
+      "freeMemoryBytes": 409665536,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-36-ROUTE-AIM-BOUNDED",
+  "status": "EVIDENCE_FROZEN",
+  "baseline": "266f82cbcef5770d51b6d907723cb84f952d35a9",
+  "codeCommit": "38c3f5e55a2e6609650cded507b90b54bff893a5",
+  "sourceTree": "aac28b80430c29d11f8c5eb30999aed71e24c77c",
+  "stagedPatchSha256": "2ffd10c7fd133374d6b1e54f531eb37f402b20885cc00fff6dae13ed128406a2",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 4,
+    "sha256": "6f52bf44b7423986cf5e56e01f44eec945e6f7da9672a45fea2738961c23cd94"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 13,
+    "sha256": "a54f99a90e1258ef82a12cc4ba29cb098cb5c673b9ff2c7eeefcffbe74bfbe0e",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "evidence-format.stdout.log",
+      "evidence-format.window.json.log",
+      "metadata-final.stdout.log",
+      "metadata-final.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "frozenInputs": {
+    "browser20": {
+      "sourceManifestSha256": "0419909a5bf74910cce09b540a7ffd7040d7a960eb1ea2782d19e680cfdd9591",
+      "evidenceManifestSha256": "d77403b9bccf928df5438e2fe2f27380719d26205ca578298a8fd57b3f66ca6c",
+      "deliverySha256": "59431a5bbf81a5720592076120caac1a6bd5db71f4a2bdeb830cb05d9ded7621",
+      "status": "FAIL_AT_V1_CLOSED_DOOR_PRE_PROBE",
+      "v2Reached": false
+    },
+    "map01": {
+      "sourceManifestSha256": "5848879ef25500c0c786ada0d86d84e91c17c06f3ed8b96912e341ac6061525a",
+      "evidenceManifestSha256": "7f788fe22817bb678067f9731a986fc3bb56ed144f651756440f5f70ff0e49b4",
+      "deliverySha256": "852f5fac254fd209235eec0813613d241ba1226b45da560aed72cd13be9a2d45"
+    },
+    "close11": {
+      "sourceManifestSha256": "13c8c634c91c984a8405ef3308b51a31805636c7c91e7b581d227bb398cc7c37",
+      "evidenceManifestSha256": "8d571e7bd17e0da885d1eb9df1935340510e1b86fa198d2f95fee91f35b35369",
+      "deliverySha256": "5a98bf4294e3f12c553bd2ad7512f5a4178a698c0e94ca9941522300a0f6d5d1"
+    }
+  },
+  "validationTree": {
+    "path": "/private/tmp/seedlands-git36-route-aim-bounded",
+    "head": "266f82cbcef5770d51b6d907723cb84f952d35a9",
+    "stagedPaths": 4,
+    "patchSha256": "2ffd10c7fd133374d6b1e54f531eb37f402b20885cc00fff6dae13ed128406a2",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReusedOffline": true,
+    "dependencySetup": "pnpm install --offline --frozen-lockfile --ignore-scripts"
+  },
+  "stagedGate": {
+    "window": "git-36-route-aim-bounded-staged-gate",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "34a6f75479473402f392502eef2eab2949eb275c270ac130a8b22847a68a7466",
+    "receiptSha256": "d9b7087566a5b8d4c2e0a906f10811d4afc378c12ddb7117e73627f53f9f21d0",
+    "affected": {
+      "status": "PASS_12_FILES_131_TESTS",
+      "maxWorkers": 1,
+      "stdoutSha256": "d67ee7b4a1f0d7fe930d38ee8258e798d40d3f8f504450244c4efe4d73f72383"
+    },
+    "classicTypes": {
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "rootTypes": {
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "eslint": {
+      "status": "PASS_2_TS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "format": {
+      "status": "PASS_4_PATHS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "scopedDiff": {
+      "status": "PASS_4_PATHS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "behavior": {
+    "sharedHelperBehaviorChanged": true,
+    "oldBehavior": "12 moves then silent return",
+    "newBehavior": "at most 18 moves and 19 observations; success only on observed abs(dx)<1; bounded invalid/null/zero/exhaustion failures",
+    "walkToChanged": false,
+    "close10Changed": false,
+    "productionChanged": false
+  },
+  "browserFacts": {
+    "browser20": "FAIL_AFTER_C0_C3_AT_V1_CLOSED_DOOR_PRE_PROBE",
+    "browser20V2": "NOT_REACHED",
+    "browser19FirstIronInventoryPickup": "NOT_PROVEN",
+    "build12": "NOT_RUN",
+    "browser21": "NOT_RUN"
+  },
+  "evidenceDiagnostics": [
+    "The first evidence commit hook failed because three approved immutable MAP01 files do not match current Prettier output. Their frozen bytes were preserved. The natural hook was rerun with an exact, temporary, unstaged .prettierignore bridge for only those paths; the bridge was removed immediately after the commit and was not committed."
+  ],
+  "boundaries": {
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This delivery changes a canonical fixture helper and change-local contract/evidence only; architecture ownership and public product protocols remain unchanged.",
+    "backupRefPushed": false
+  },
+  "notRun": ["build12", "browser21", "cua", "devserver", "ci-watch", "deploy", "merge"]
+}

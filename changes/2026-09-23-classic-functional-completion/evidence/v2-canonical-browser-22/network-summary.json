@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "source": "0-trace.network and 0-trace.trace from canonical trace.zip",
+  "resourceSnapshots": 1065,
+  "httpStatusAtLeast400": 0,
+  "pageErrorEventsInTrace": 0,
+  "consoleEvents": 1,
+  "failureAttachmentPageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+  "failureAttachmentFailedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+}

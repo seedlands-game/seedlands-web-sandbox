@@ -1,5 +1,69 @@
 const COAL_ORE_SALT: u32 = 0x434f_414c;
 const IRON_ORE_SALT: u32 = 0x4952_4f4e;
+const GOLD_ORE_SALT: u32 = 0x474f_4c44;
+const DIAMOND_ORE_SALT: u32 = 0x4449_414d;
+const CAVE_SALT: u32 = 0x4341_5645;
+const VEGETATION_SALT: u32 = 0x0056_4547;
+const DUNGEON_SALT: u32 = 0x4455_4e47;
+const GEOLOGY_SALT: u32 = 0x4745_4f39;
+const REDSTONE_SALT: u32 = 0x5245_4453;
+
+#[inline(always)]
+fn hash2(seed: u32, x: i32, z: i32) -> f64 {
+    let mut h = seed ^ (x as u32).wrapping_mul(374_761_393) ^ (z as u32).wrapping_mul(668_265_263);
+    h = (h ^ (h >> 13)).wrapping_mul(1_274_126_177);
+    ((h ^ (h >> 16)) as f64) / 4_294_967_296.0
+}
+
+#[inline(always)]
+fn dungeon_voxel(seed: u32, x: i32, y: i64, z: i32, version: u32) -> Option<u32> {
+    if version < 8 {
+        return None;
+    }
+    let rx = x.div_euclid(64);
+    let rz = z.div_euclid(64);
+    let mut h = seed
+        ^ DUNGEON_SALT
+        ^ (rx as u32).wrapping_mul(0x9e37_79b1)
+        ^ (rz as u32).wrapping_mul(0x85eb_ca77);
+    h = (h ^ (h >> 16)).wrapping_mul(0x7feb_352d);
+    h = (h ^ (h >> 15)) as u32;
+    if h % 7 != 0 {
+        return None;
+    }
+    let cx = rx * 64 + 16 + ((h >> 4) % 32) as i32;
+    let cz = rz * 64 + 16 + ((h >> 10) % 32) as i32;
+    let cy = 5 + ((h >> 16) % 18) as i64;
+    let radius_x = 3 + (h & 1) as i32;
+    let radius_z = 3 + ((h >> 1) & 1) as i32;
+    let dx = (x - cx).abs();
+    let dy = (y - cy).abs();
+    let dz = (z - cz).abs();
+    if dx > radius_x || dz > radius_z || dy > 2 {
+        return None;
+    }
+    let entrance = y == cy
+        && match (h >> 2) & 3 {
+            0 => z == cz - radius_z && dx == 0,
+            1 => z == cz + radius_z && dx == 0,
+            2 => x == cx - radius_x && dz == 0,
+            _ => x == cx + radius_x && dz == 0,
+        };
+    if entrance {
+        return Some(0);
+    }
+    if x == cx && y == cy - 1 && z == cz {
+        return Some(37);
+    }
+    if y == cy - 1 && dx == radius_x - 1 && dz == radius_z - 1 {
+        return Some(38);
+    }
+    Some(if dx == radius_x || dz == radius_z || dy == 2 {
+        17
+    } else {
+        0
+    })
+}
 
 // Frozen unsigned 32-bit mix shared byte-for-byte with game-core/ore-generation.ts.
 // Coordinates are 2x2x2 group coordinates, represented with two's-complement u32 lanes.
@@ -15,8 +79,34 @@ fn ore_hash(seed: u32, group_x: i32, group_y: i32, group_z: i32, salt: u32) -> u
     hash ^ (hash >> 16)
 }
 
+// Deterministic cave carving shared byte-for-byte with world/cave-generation.ts.
 #[inline(always)]
-fn ore_voxel(seed: u32, x: i32, y: i64, z: i32, height: i64, base: u32, generator_version: u32) -> u32 {
+fn cave_air(seed: u32, x: i32, y: i64, z: i32, height: i64, generator_version: u32) -> bool {
+    if generator_version < 6 || y < 0 {
+        return false;
+    }
+    let depth = height - y;
+    if depth < 4 {
+        return false;
+    }
+    let gx = x.div_euclid(2);
+    let gy = (y.div_euclid(2)) as i32;
+    let gz = z.div_euclid(2);
+    let primary = ore_hash(seed, gx, gy, gz, CAVE_SALT) % 1000;
+    let secondary = ore_hash(seed ^ 0x5bd1_e995, gx, gy, gz, CAVE_SALT) % 1000;
+    primary < 96 && secondary < 420
+}
+
+#[inline(always)]
+fn ore_voxel(
+    seed: u32,
+    x: i32,
+    y: i64,
+    z: i32,
+    height: i64,
+    base: u32,
+    generator_version: u32,
+) -> u32 {
     if generator_version < 4 || base != 3 {
         return base;
     }
@@ -24,11 +114,80 @@ fn ore_voxel(seed: u32, x: i32, y: i64, z: i32, height: i64, base: u32, generato
     let group_y = (y.div_euclid(2)) as i32;
     let group_z = z.div_euclid(2);
     let depth = height - y;
+    if generator_version >= 5 && y >= 0 {
+        if y < 16
+            && depth >= 12
+            && ore_hash(seed, group_x, group_y, group_z, DIAMOND_ORE_SALT) % 997 < 8
+        {
+            return 20;
+        }
+        if y < 32
+            && depth >= 8
+            && ore_hash(seed, group_x, group_y, group_z, GOLD_ORE_SALT) % 997 < 24
+        {
+            return 19;
+        }
+    }
     if depth >= 8 && ore_hash(seed, group_x, group_y, group_z, IRON_ORE_SALT) % 97 < 6 {
         return 15;
     }
     if depth >= 4 && ore_hash(seed, group_x, group_y, group_z, COAL_ORE_SALT) % 97 < 10 {
         return 14;
+    }
+    base
+}
+
+#[inline(always)]
+fn geology_voxel(
+    seed: u32,
+    x: i32,
+    y: i64,
+    z: i32,
+    height: i64,
+    kind: i32,
+    water_level: i64,
+    base: u32,
+    generator_version: u32,
+) -> u32 {
+    if generator_version < 9 {
+        return base;
+    }
+    let hash = ore_hash(
+        seed,
+        x.div_euclid(2),
+        y.div_euclid(2) as i32,
+        z.div_euclid(2),
+        GEOLOGY_SALT,
+    );
+    if y <= 0 || (y < 5 && hash % 5 >= y as u32) {
+        return 42;
+    }
+    if kind == 4 && base == 8 && y == water_level {
+        return 46;
+    }
+    if kind == 4 && base != 0 && y == height - 1 {
+        return 47;
+    }
+    if water_level != i64::from(i32::MIN) && base != 0 && y > height - 3 && hash % 5 < 3 {
+        return 45;
+    }
+    if base == 3 && y >= 0 && y < 32 && height - y >= 8 && hash % 997 < 20 {
+        return 44;
+    }
+    if generator_version >= 10 && base == 3 && y >= 0 && y < 24 && height - y >= 10 {
+        let redstone = ore_hash(
+            seed,
+            x.div_euclid(2),
+            y.div_euclid(2) as i32,
+            z.div_euclid(2),
+            REDSTONE_SALT,
+        );
+        if redstone % 997 < 32 {
+            return 72;
+        }
+    }
+    if base == 3 && height - y >= 4 && (hash >> 8) % 97 < 8 {
+        return 43;
     }
     base
 }
@@ -49,8 +208,31 @@ fn column_voxel(
     let height = i64::from(columns[(column) as usize]);
     let kind = columns[(column + 1) as usize];
     let water_level = i64::from(columns[(column + 2) as usize]);
+    if let Some(voxel) = dungeon_voxel(seed, world_x, y, world_z, generator_version) {
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            voxel,
+            generator_version,
+        );
+    }
     if y > height && y <= water_level {
-        return 8;
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            8,
+            generator_version,
+        );
     }
     if y <= height {
         let base = if y == height {
@@ -74,7 +256,22 @@ fn column_voxel(
         } else {
             3
         };
-        return ore_voxel(seed, world_x, y, world_z, height, base, generator_version);
+        let generated = if cave_air(seed, world_x, y, world_z, height, generator_version) {
+            0
+        } else {
+            ore_voxel(seed, world_x, y, world_z, height, base, generator_version)
+        };
+        return geology_voxel(
+            seed,
+            world_x,
+            y,
+            world_z,
+            height,
+            kind,
+            water_level,
+            generated,
+            generator_version,
+        );
     }
     let mut tx = x;
     while tx <= x + 6 {
@@ -85,10 +282,23 @@ fn column_voxel(
                 let th = i64::from(columns[(tree_column) as usize]);
                 let dx = (x + 3 - tx).abs();
                 let dz = (z + 3 - tz).abs();
-                if dx == 0 && dz == 0 && y > th && y <= th + 4 {
+                let trunk_height = if generator_version >= 11 { 5 } else { 4 };
+                if dx == 0 && dz == 0 && y > th && y <= th + trunk_height {
                     return 4;
                 }
-                if dx <= 2 && dz <= 2 && y >= th + 3 && y <= th + 6 && (dx + dz < 4 || y >= th + 5)
+                if generator_version >= 11 {
+                    let crown_y = y - th;
+                    if (crown_y >= 4 && crown_y <= 5 && dx <= 2 && dz <= 2 && dx + dz < 4)
+                        || (crown_y == 6 && dx <= 1 && dz <= 1)
+                        || (crown_y == 7 && dx + dz <= 1)
+                    {
+                        return 5;
+                    }
+                } else if dx <= 2
+                    && dz <= 2
+                    && y >= th + 3
+                    && y <= th + 6
+                    && (dx + dz < 4 || y >= th + 5)
                 {
                     return 5;
                 }
@@ -96,6 +306,29 @@ fn column_voxel(
             tz += 1;
         }
         tx += 1;
+    }
+    if generator_version >= 7 && y == height + 1 && water_level == i64::from(i32::MIN) {
+        let roll = hash2(seed ^ VEGETATION_SALT, world_x, world_z);
+        if kind == 3 {
+            return if roll > 0.992 { 36 } else { 0 };
+        }
+        if kind == 5 {
+            return if roll > 0.94 { 35 } else { 0 };
+        }
+        if kind == 1 && roll > 0.985 {
+            return 34;
+        }
+        if (kind == 0 || kind == 1) && roll > 0.965 {
+            return 33;
+        }
+        let tall_grass_threshold = if generator_version >= 11 && (kind == 0 || kind == 1) {
+            0.88
+        } else {
+            0.82
+        };
+        if kind != 2 && kind != 4 && roll > tall_grass_threshold {
+            return 32;
+        }
     }
     0
 }
@@ -115,22 +348,32 @@ pub fn fill_chunk_versioned(
 ) {
     assert_eq!(columns.len(), 38 * 38 * 4);
     assert_eq!(output.len(), 32 * 32 * 32);
-    for z in 0..32 { for x in 0..32 { for y in 0..32 {
-        output[(x + 32 * (z + 32 * y)) as usize] = column_voxel(
-            columns,
-            38,
-            x,
-            i64::from(oy) + i64::from(y),
-            z,
-            seed,
-            ox.wrapping_add(x),
-            oz.wrapping_add(z),
-            generator_version,
-        ) as u16;
-    }}}
+    for z in 0..32 {
+        for x in 0..32 {
+            for y in 0..32 {
+                output[(x + 32 * (z + 32 * y)) as usize] = column_voxel(
+                    columns,
+                    38,
+                    x,
+                    i64::from(oy) + i64::from(y),
+                    z,
+                    seed,
+                    ox.wrapping_add(x),
+                    oz.wrapping_add(z),
+                    generator_version,
+                ) as u16;
+            }
+        }
+    }
 }
 
-pub fn fill_halo(columns: &[i32], known: &[u32], halo: &mut [u16], fluid: &mut [u8], oy: i32) -> u32 {
+pub fn fill_halo(
+    columns: &[i32],
+    known: &[u32],
+    halo: &mut [u16],
+    fluid: &mut [u8],
+    oy: i32,
+) -> u32 {
     fill_halo_versioned(columns, known, halo, fluid, 0, 0, oy, 0, 3)
 }
 
@@ -145,29 +388,45 @@ pub fn fill_halo_versioned(
     oz: i32,
     generator_version: u32,
 ) -> u32 {
-    assert_eq!(columns.len(),40*40*4);
-    assert_eq!(known.len(),34*34*34); assert_eq!(halo.len(),known.len()); assert_eq!(fluid.len(),known.len());
+    assert_eq!(columns.len(), 40 * 40 * 4);
+    assert_eq!(known.len(), 34 * 34 * 34);
+    assert_eq!(halo.len(), known.len());
+    assert_eq!(fluid.len(), known.len());
     let mut revision = 2166136261u32;
-    for y in 0..34 { for z in 0..34 { for x in 0..34 {
-        let index=(x+34*(z+34*y)) as usize;
-        let packed=known[index];
-        let value=if packed==u32::MAX {
-            column_voxel(
-                columns,
-                40,
-                x,
-                i64::from(oy)+i64::from(y),
-                z,
-                seed,
-                ox.wrapping_add(x),
-                oz.wrapping_add(z),
-                generator_version,
-            ) as u16
-        } else {packed as u16};
-        halo[index]=value;
-        fluid[index]=if packed==u32::MAX {if value==8 {0x88} else {0}} else {(packed>>16) as u8};
-        revision=(revision ^ value as u32).wrapping_mul(16777619);
-    }}}
+    for y in 0..34 {
+        for z in 0..34 {
+            for x in 0..34 {
+                let index = (x + 34 * (z + 34 * y)) as usize;
+                let packed = known[index];
+                let value = if packed == u32::MAX {
+                    column_voxel(
+                        columns,
+                        40,
+                        x,
+                        i64::from(oy) + i64::from(y),
+                        z,
+                        seed,
+                        ox.wrapping_add(x),
+                        oz.wrapping_add(z),
+                        generator_version,
+                    ) as u16
+                } else {
+                    packed as u16
+                };
+                halo[index] = value;
+                fluid[index] = if packed == u32::MAX {
+                    if value == 8 || value == 27 {
+                        0x88
+                    } else {
+                        0
+                    }
+                } else {
+                    (packed >> 16) as u8
+                };
+                revision = (revision ^ value as u32).wrapping_mul(16777619);
+            }
+        }
+    }
     revision
 }
 
@@ -180,7 +439,10 @@ mod tests {
         assert_eq!(ore_hash(0, 0, 0, 0, COAL_ORE_SALT), 686_038_650);
         assert_eq!(ore_hash(1837, 4, -9, 12, COAL_ORE_SALT), 2_132_735_606);
         assert_eq!(ore_hash(u32::MAX, -1, -1, -1, IRON_ORE_SALT), 2_792_393_888);
-        assert_eq!(ore_hash(0x8000_0000, -1_234_567, 765_432, -42, IRON_ORE_SALT), 3_339_286_873);
+        assert_eq!(
+            ore_hash(0x8000_0000, -1_234_567, 765_432, -42, IRON_ORE_SALT),
+            3_339_286_873
+        );
     }
 
     #[test]
@@ -218,15 +480,7 @@ mod tests {
         let mut halo = [0u16; N];
         let mut fluid = [0u8; N];
         let revision = fill_halo_versioned(
-            &columns,
-            &known,
-            &mut halo,
-            &mut fluid,
-            1837,
-            -33,
-            -33,
-            -1,
-            4,
+            &columns, &known, &mut halo, &mut fluid, 1837, -33, -33, -1, 4,
         );
         assert_eq!(halo[0], 12);
         assert_eq!(fluid[0], 5);

@@ -1,0 +1,4 @@
+$ tsc -p tsconfig.classic-tests.json --noEmit
+apps/web/tests/e2e/classic-support/equipment-resource-route.test.ts(110,33): error TS2345: Argument of type 'Readonly<{ support: Point; target: Point; approach: RoutePoint; }>' is not assignable to parameter of type 'V2EquipmentResource'.
+  Type 'Readonly<{ support: Point; target: Point; approach: RoutePoint; }>' is missing the following properties from type 'Readonly<{ itemId: "wood-block" | "stone-block" | "iron-block"; dropItemId: "wood-block" | "iron-block" | "cobblestone"; voxel: number; }>': itemId, dropItemId, voxel
+[ELIFECYCLE] Command failed with exit code 2.

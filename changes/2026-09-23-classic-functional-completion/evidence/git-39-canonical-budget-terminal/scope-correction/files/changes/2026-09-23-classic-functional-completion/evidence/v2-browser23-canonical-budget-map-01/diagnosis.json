@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-BROWSER23-CANONICAL-BUDGET-MAP-01",
+  "status": "MAP_ONLY_NO_IMPLEMENTATION",
+  "identity": {
+    "acceptanceSourceSha": "0eafd4273bc1f5a23e7d147ded37801436074015",
+    "acceptanceTreeSha": "a1cbf676594be93a86c77afcbb59dacc1611899e",
+    "mainHeadSha": "2db4c5fd8cf81294d164b128d667f73fa7e5f01f",
+    "mainDirtyUsedAsSource": false
+  },
+  "browser23Input": {
+    "status": "FAIL",
+    "sourceManifestSha256": "d275044b38e568f82eb054f11356fa1ea12faa5a0bf363b46bb80fdd485b1160",
+    "evidenceManifestSha256": "bada5a3115c8d1b16fe7802e25e1c6bfe87b53f2174dc7008ffecd3def4f29e3",
+    "deliverySha256": "c81a6f68c2453a232172678b17f0cd963945bec3fcad27586b2905ce18ac9428",
+    "priorEvidenceManifestSha256": "f144b09a24ebb6bd0d8e0a11d99407e24f1ccc36f126664cba2679faf55e2316",
+    "priorDeliverySha256": "bf8b7aecfb5a5ad348e03445e766212570bfdee0685931ed13a7196102b7b04c",
+    "packagingPathOnlyRecovery": true,
+    "hookJsonPreviousEvidenceManifestSha256": "e985c56ac652b7af5c1c84bb4853f06d9f321c3754bd6fbb5e94f115c03fd188",
+    "hookJsonPreviousDeliverySha256": "35842ab0daeebd431707a12f92bcf34a48ce25b9b28a2b13e78b9997134fc941",
+    "hookJsonPackagingPathOnlyRecovery": true,
+    "playwrightAttempts": 1,
+    "workers": 1,
+    "retries": 0,
+    "runnerExitCode": 1,
+    "mainTestStatus": "timedOut",
+    "mainTestDurationMs": 761526,
+    "errors": ["Test timeout of 720000ms exceeded.", "Test timeout of 30000ms exceeded."]
+  },
+  "budgetHistory": [
+    {
+      "commit": "5d05607027ad0781a349bec37bb49c1c485b8b99",
+      "committedAt": "2026-09-25T04:33:28+08:00",
+      "change": "V1 browser oracles inserted before C4 and canonical main timeout changed from 480000ms to 720000ms"
+    },
+    {
+      "commit": "3df61d38b0b0de55c48ab709afd6315aa9f23ff2",
+      "committedAt": "2026-09-26T05:59:20+08:00",
+      "change": "Complete V2 equipment journey inserted before C4 and C5 restore assertions expanded; timeout remained 720000ms"
+    }
+  ],
+  "budgetClassification": {
+    "canonicalTotalBudgetMs": 720000,
+    "introducedBeforeCompleteV2": true,
+    "reregisteredWhenCompleteV2WasAdded": false,
+    "distinctSafetyBudgets": {
+      "genericRouteMs": 45000,
+      "equipmentRouteMs": 45000,
+      "equipmentProgressWaitMaxMs": 20000,
+      "snapshotPollDefaultMs": 20000,
+      "equipmentPulseMs": 80,
+      "genericPulseMs": 300,
+      "routeAimMoves": 18,
+      "routeAimObservations": 19
+    },
+    "safetyBudgetsMayBeRelaxedByRecommendation": false
+  },
+  "observedTiming": {
+    "namedC0ThroughC5StageDurationMs": 704373,
+    "C5CompletedOffsetMs": 718819,
+    "timeoutOffsetMs": 720000,
+    "finalAssertionsOffsetMs": 727316,
+    "contextCloseCompletedOffsetMs": 762283,
+    "V2DurationMs": 426474,
+    "V2ShareOfC5CompletionWindowPercent": 59.33,
+    "C4DurationMs": 149669,
+    "C4ShareOfC5CompletionWindowPercent": 20.82,
+    "singleDiagnosticNotPerformanceBenchmark": true
+  },
+  "candidateComparison": [
+    {
+      "candidate": "finite-total-budget-plus-bounded-finalization-contract",
+      "decision": "RECOMMENDED",
+      "evidence": "The assertion chain completed at 727316ms after a 720000ms budget that predates complete V2. A 120 percent derivation yields 872779.2ms, rounded to 900000ms. Final assertion to context close was 34967ms; a separate 60000ms finalization budget is finite and exceeds one-sample times 120 percent.",
+      "tradeoff": "Preserves the single-runtime save/restore chain but consumes up to three more minutes on a genuine hang. It requires one later canonical run and does not prove stability."
+    },
+    {
+      "candidate": "remove-proven-fixture-cost",
+      "decision": "DEFER_TO_SEPARATE_AB",
+      "evidence": "V2 contains 192535ms of explicit pointer-lock cooldown and C4 contains 84647ms of poll steps, but both are current safety/readiness mechanisms.",
+      "tradeoff": "Potentially reduces wall time, but no A/A or single-axis A/B proves equivalent real-input, strict-arrival, restore or trace behavior."
+    },
+    {
+      "candidate": "split-canonical-journey",
+      "decision": "NOT_RECOMMENDED_FOR_THIS_CLOSE",
+      "evidence": "V2 creation, C5 save/restore and continued pointer operation currently share one runtime and world lineage.",
+      "tradeoff": "Splitting loses that causal chain or duplicates setup and introduces cross-test persistence semantics."
+    }
+  ],
+  "recommendation": {
+    "name": "V2-CANONICAL-BUDGET-AND-FINALIZATION-CLOSE",
+    "canonicalMainBudgetMs": 900000,
+    "mainBudgetDerivation": "ceil_to_900000(727316ms * 1.2 = 872779.2ms)",
+    "finalizationBudgetMs": 60000,
+    "finalizationBudgetDerivation": "ceil_to_60000(34967ms * 1.2 = 41960.4ms)",
+    "stabilityOrPercentileClaimed": false,
+    "nextCanonicalAttemptsAuthorizedByMap": 0,
+    "stopLine": "If the next authorized canonical run does not return normally inside 900000ms, or bounded finalization still emits an incomplete trace, preserve FAIL and investigate the specific cost/finalization path without another timeout increase."
+  },
+  "terminalReceipt": {
+    "currentAggregateFailPriorityWorks": true,
+    "currentMainReceiptRecords": 2,
+    "currentMainRecordsShareAttemptZero": true,
+    "localDetailedPassIsCanonicalPass": false,
+    "currentNonClassicSkippedRecordPollutesReceipt": true,
+    "namingOnlyFixSufficient": false,
+    "requiredContract": [
+      "Use test, project and retry as one canonical attempt identity and upsert instead of append.",
+      "Record runner/test outcome separately from local assertion-evidence status and phase.",
+      "Failure or timeout has precedence and cannot be overwritten by a later local PASS from in-flight cleanup.",
+      "Skipped or non-main tests do not create canonical main receipt records.",
+      "The runner validates one unambiguous terminal canonical record in correctness and benchmark modes; benchmark retains its measured-record requirement."
+    ]
+  },
+  "traceBoundary": {
+    "rawBytes": 1269815136,
+    "rawSha256": "fa61f3c1962a0134a85c9cb72eee911f141804f04cc39f764a3d949ca5fbcc48",
+    "parts": 25,
+    "reassembledShaMatchesRaw": true,
+    "reassemblyProvesZipIntegrity": false,
+    "zipinfoExitCode": 9,
+    "rawIntegrity": "INCOMPLETE_MISSING_END_OF_CENTRAL_DIRECTORY",
+    "recoveredZipProduced": false,
+    "missingRange": "UNKNOWN",
+    "observedContextFixtureDurationMs": 41508,
+    "secondTimeoutMs": 30000,
+    "playwrightTraceStopUsesProjectTimeoutSlotMs": 30000,
+    "uniqueCausalOwnerProven": false,
+    "supportedInference": "The total timeout, continued in-flight cleanup, long context close, a second 30000ms timeout and an unfinalized trace are temporally compatible with a finalization race. The frozen report does not identify the second timeout runnable, so trace-stop causality is not proven.",
+    "futureContract": "After the producer and runner exit, a present failure trace must pass EOCD, central-directory and all-entry CRC checks within the finite finalization path. An invalid trace remains TRACE_INCOMPLETE and cannot be repaired into original evidence. A PASS run with retain-on-failure and no trace records NOT_EXPECTED."
+  },
+  "redDesign": [
+    "A static budget contract fails on current 720000ms main and 30000ms default finalization values; GREEN uses finite 900000ms and 60000ms without changing any route, poll, pulse, aim, tolerance or coordinate budget.",
+    "A pure receipt test replays Browser23 FAIL then local detailed PASS for the same canonical identity and expects exactly one terminal FAIL record with detailed assertions retained separately. Reverse order must also remain FAIL.",
+    "Receipt tests reject missing, malformed or duplicate canonical records and prove a skipped non-main test cannot create a canonical record.",
+    "Runner fixture tests require process exit zero plus one terminal PASS receipt; benchmark additionally requires MEASURED. No product/browser process is needed for RED or GREEN.",
+    "Failure-trace fixture tests use a tiny valid ZIP and missing-EOCD/CRC-invalid fixtures. A present invalid trace records TRACE_INCOMPLETE and stays failure; no repair and no automatic retry.",
+    "Exactly one later root-authorized canonical Browser run validates normal main return, one terminal record, expected trace disposition and unchanged C0-C5/V1/V2/save semantics."
+  ],
+  "proposedOwnership": {
+    "implementation": [
+      "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "apps/web/tests/e2e/classic-support/evidence.ts",
+      "playwright.config.ts",
+      "scripts/harness/classic.mjs",
+      "focused canonical budget, receipt terminal and trace integrity tests",
+      "current change contract/spec/evidence assigned to one owner"
+    ],
+    "readOnly": [
+      "production gameplay and Web runtime",
+      "playbooks/classic/scenarios/canonical-runtime-v11.json",
+      "equipment journey, route, aim, mouse input and V1 helpers",
+      "Browser23 frozen evidence and cumulative browser report"
+    ]
+  },
+  "coverage": {
+    "browser23Proved": [
+      "V2 19 checkpoints",
+      "independent bag itemCount growth for 3 wood, 3 cobblestone and 4 iron blocks",
+      "wood and stone pickaxes, five iron armor items and four-slot pointer matrix",
+      "workbench reclamation and stone-pickaxe durability 132 to 128 to 127",
+      "C5 runtime and actor epoch replacement plus equipment/durability restore and continued pointer operation"
+    ],
+    "hardCompletionGaps": [
+      "canonical overall PASS",
+      "new object reference assertion after restore",
+      "16 armor variants and the complete 194-item matrix",
+      "real death, equipment drop and respawn",
+      "V3 structure, climb, route and transport",
+      "V4 lighting and WebGL2 visual matrix"
+    ],
+    "independentLaterStages": [
+      "death/equipment-drop/respawn browser reachability",
+      "remaining 194-item matrix coverage",
+      "V3 gameplay domains",
+      "V4 lighting and dynamic visual acceptance",
+      "Cua and human audio evidence"
+    ],
+    "performance": "NOT_MEASURED"
+  },
+  "estimate": {
+    "mapStageTargetAiHours": 1,
+    "mapStageHardCapHours": 1.5,
+    "mapStageTraditionalPd": 0.25,
+    "recommendedImplementationAiHours": "1-2",
+    "recommendedImplementationHardCapHours": 3,
+    "recommendedImplementationTraditionalPd": "0.25-0.5",
+    "recommendedImplementation120PercentAiHours": 2.4,
+    "recommendedImplementation120PercentTraditionalPd": 0.6,
+    "creditsRateApiEquivalentCostQuotaShare": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "sourceModified": false,
+    "testsRun": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "gitOrIndexWrite": false,
+    "browser23EvidenceModified": "PACKAGING_PATH_ONLY_RAW_BYTES_UNCHANGED",
+    "cumulativeBrowserReportModified": false,
+    "specTasksOrExecutionStateModified": false,
+    "longTermDocsUpdated": false
+  }
+}

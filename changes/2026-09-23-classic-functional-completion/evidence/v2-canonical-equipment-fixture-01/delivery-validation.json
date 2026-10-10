@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-EQUIPMENT-FIXTURE-01",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "484ddf39d7e3bb881dd3d3cbaec775bd091c220d",
+  "metadata": {
+    "sourceManifestEntries": 10,
+    "evidenceManifestEntries": 91,
+    "evidenceManifestExcludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 10,
+    "sha256": "74ffab1a4d8fbe191dd3164935e519da41ae82721f3974c16c8c6ce1d3780051",
+    "validatedEntries": 10
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 91,
+    "sha256": "30bea97d0a8549ee9e4f79bd9649637d08c12369f9a61dd92ec748ee1e491138",
+    "validatedEntries": 91
+  },
+  "readOnlyOracleDependency": {
+    "interface": "HarnessApi.equipmentSnapshot(): HarnessEquipmentSnapshot | null",
+    "sourceManifestSha256": "961b6090670451f1c51c02e737e0c5b24a4e989aa35bf31cc041a39113d20aff",
+    "evidenceManifestSha256": "87a404ee7cbd922a64c41b7e3916b0b601aa05d19d979ab5218cd6c42ec05e50",
+    "deliveryValidationSha256": "c6c226093f86fd9f8042dd5d56908a9051560dab82e23b20e6723196576ed24a",
+    "observabilityTests": "8/8 PASS in the dependency stage"
+  },
+  "deterministic": {
+    "window": "v2-canonical-equipment-fixture-scenario-release",
+    "status": "PASS",
+    "files": 1,
+    "tests": 6,
+    "stdoutSha256": "c1d9cc1411d89bd079b3d40cd5f6fec11ae254ac3c41f73a1a81e314ed2ff957",
+    "receiptSha256": "86886530453cab8ea0dc0b1fb1e401d1afd8e3cd986ba56c9d4089ec19c657a0"
+  },
+  "static": {
+    "classicTestTypes": {
+      "window": "v2-canonical-equipment-fixture-classic-types-release2",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "d3817505307e463a6aaf4cc706d5b7f5940d8cce507b024c83fc1bab6adee922"
+    },
+    "rootTestTypes": {
+      "window": "v2-canonical-equipment-fixture-root-types-release2",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "71e8a53afd0ffb4279ef82a3520952b9385e6a6ce65628c5912ad63ab19219ee"
+    },
+    "eslint": {
+      "window": "v2-canonical-equipment-fixture-eslint-release",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "ccc543ba3b62f6e6c705b7ced6ae0112cd2f6e98bd9e53ac7fb68ec8e07eed38"
+    },
+    "formatAndScopedDiff": {
+      "window": "v2-canonical-equipment-fixture-static-release2",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "07f8a184cd329bfe64fd41f469273a125ebd3b2228f0ec7f7bbc003a17a17f25"
+    },
+    "aggregate": {
+      "window": "v2-canonical-equipment-fixture-release2",
+      "status": "PASS",
+      "startedAt": "2026-09-25T21:27:00.414Z",
+      "endedAt": "2026-09-25T21:27:10.611Z",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "e78f36563bc57ecc54bfa12bd1fbdc1adc700f676663747b7a15280d12ab0435"
+    }
+  },
+  "preservedFailures": [
+    "v2-canonical-equipment-fixture-eslint-01",
+    "v2-canonical-equipment-fixture-eslint-02",
+    "v2-canonical-equipment-fixture-eslint-03",
+    "v2-canonical-equipment-fixture-final-gate-02",
+    "v2-canonical-equipment-fixture-delivery-01"
+  ],
+  "deliveryClosure": {
+    "finalWindow": "v2-canonical-equipment-fixture-delivery-final-01",
+    "status": "PASS",
+    "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "receiptSha256": "f9cc1804e7b278f56da40750804078a2dc98080056f2c3576e7a05adb432c2d0",
+    "scope": "final evidence Markdown and argv archive formatting/whitespace only",
+    "metadataFormatWindow": "v2-canonical-equipment-fixture-delivery-metadata-format-01",
+    "metadataFormatStatus": "PASS",
+    "metadataFormatStdoutSha256": "5b5bcfd59992436211ff6849dc413f794d4637f742ec65ebd8af30a33984cc33",
+    "metadataFormatReceiptSha256": "6fd408c9138ae2a321d2b2c3a9e79affec12a0aaa5734ff525202cfb0592e465"
+  },
+  "boundaries": {
+    "authorityWritesAdded": false,
+    "testTimeoutChanged": false,
+    "v1AssertionsRemoved": false,
+    "browserJourneyValidated": false,
+    "deathDurabilityDropRespawnObserved": false,
+    "completeArmorMatrixValidated": false,
+    "completeItemMatrixValidated": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "The existing scenario, fixture, Authority, Web, and Harness ownership boundaries did not change."
+  },
+  "notRun": ["build", "browser", "cua", "devserver", "ci", "git-stage", "git-commit", "git-push", "deploy"]
+}

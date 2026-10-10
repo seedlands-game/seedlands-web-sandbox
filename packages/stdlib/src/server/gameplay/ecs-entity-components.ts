@@ -1,7 +1,14 @@
-import { hasComponent, type EntityId, type World } from 'bitecs';
+import { clearComponentSlot } from './ecs-component-storage';
+import { addComponent, hasComponent, type EntityId, type World } from 'bitecs';
 import type { ItemStack } from './item-registry';
 import { cloneItemStack } from './item-instance';
-import type { EcsActorArchetype, EcsEntityType, EcsOwnedEntity, EcsPosition } from './ecs-entity-owner';
+import type {
+  EcsActorArchetype,
+  EcsEntityType,
+  EcsOwnedEntity,
+  EcsPosition,
+  PreparedActorSpatialReplacement,
+} from './ecs-entity-owner';
 
 type SlotArray<Value> = Array<Value | undefined>;
 export const createEntityComponents = () => ({
@@ -24,6 +31,9 @@ export const createEntityComponents = () => ({
   creature: {},
   npc: {},
   station: {},
+  fallingBlock: {},
+  painting: {},
+  transport: {},
 });
 export type EntityComponents = ReturnType<typeof createEntityComponents>;
 
@@ -33,6 +43,9 @@ export function ecsEntityType(world: World, components: EntityComponents, eid: E
   if (hasComponent(world, eid, components.creature)) return 'creature';
   if (hasComponent(world, eid, components.npc)) return 'npc';
   if (hasComponent(world, eid, components.station)) return 'station';
+  if (hasComponent(world, eid, components.fallingBlock)) return 'falling-block';
+  if (hasComponent(world, eid, components.painting)) return 'painting';
+  if (hasComponent(world, eid, components.transport)) return 'transport';
   throw new Error('Entity type component is missing.');
 }
 
@@ -41,13 +54,39 @@ export function ecsEntityTypeComponent(components: EntityComponents, type: EcsEn
   if (type === 'world-item') return components.worldItem;
   if (type === 'creature') return components.creature;
   if (type === 'npc') return components.npc;
-  return components.station;
+  if (type === 'station') return components.station;
+  if (type === 'falling-block') return components.fallingBlock;
+  if (type === 'transport') return components.transport;
+  return components.painting;
 }
 
 const readPosition = (
   component: EntityComponents['transform'] | EntityComponents['velocity'],
   eid: EntityId,
 ): EcsPosition => [component.x[eid]!, component.y[eid]!, component.z[eid]!];
+
+export function writeEcsPosition(
+  component: EntityComponents['transform'] | EntityComponents['velocity'],
+  eid: EntityId,
+  position: EcsPosition,
+): void {
+  component.x[eid] = position[0];
+  component.y[eid] = position[1];
+  component.z[eid] = position[2];
+}
+
+export function writePreparedSpatial(
+  world: World,
+  components: EntityComponents,
+  eid: EntityId,
+  spatial: PreparedActorSpatialReplacement,
+): void {
+  if (spatial.position) writeEcsPosition(components.transform, eid, spatial.position);
+  if (spatial.physicsVelocity) {
+    if (!hasComponent(world, eid, components.velocity)) addComponent(world, eid, components.velocity);
+    writeEcsPosition(components.velocity, eid, spatial.physicsVelocity);
+  }
+}
 
 export function projectEcsEntity(world: World, components: EntityComponents, eid: EntityId): EcsOwnedEntity {
   const type = ecsEntityType(world, components, eid);
@@ -81,4 +120,26 @@ export function projectEcsEntity(world: World, components: EntityComponents, eid
     ...(entity.physicsVelocity ? { physicsVelocity: [...entity.physicsVelocity] } : {}),
     ...(entity.stack ? { stack: cloneItemStack(entity.stack) } : {}),
   };
+}
+
+export function clearEcsEntityColumns(eid: EntityId, components: EntityComponents): void {
+  clearComponentSlot(eid, [
+    components.identity.id,
+    components.identity.lifetime,
+    components.identity.order,
+    components.lifecycle.active,
+    components.transform.x,
+    components.transform.y,
+    components.transform.z,
+    components.velocity.x,
+    components.velocity.y,
+    components.velocity.z,
+    components.health.current,
+    components.health.maximum,
+    components.itemStack.itemId,
+    components.itemStack.count,
+    components.itemStack.durability,
+    components.actorMetadata.archetype,
+    components.actorMetadata.persistent,
+  ]);
 }

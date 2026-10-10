@@ -1,10 +1,13 @@
-import type { EntityLifetimeReference } from '../gameplay/entity-store';
+import type { AuthorityRendererReadRequest } from './authority-renderer-requests';
+import type { AuthoritySnapshotMessage } from './authority-snapshot-message';
+import type { AuthorityCropStageProjection } from './authority-gameplay-projections';
+export type { AuthorityCropStageProjection } from './authority-gameplay-projections';
+import type { EntityLifetimeReference, GameplayEntity } from '../gameplay/entity-store';
 import type { StationComponentV1 } from '../gameplay/ecs-station-state';
 import type { StationRecipe } from '../gameplay/modules/station-candidates';
 import type { ItemDefinition } from '../gameplay/item-registry';
 import type { Recipe } from '../gameplay/recipe-registry';
 import type { AuthoritySnapshot } from '../authority/authority-session';
-import type { GameplayEntity } from '../gameplay/entity-store';
 import type { PlayerSnapshot } from '../gameplay/player-state';
 import type { ActorState } from '../simulation/actor-state';
 import type { CommandResult, CommandSource, ServerCommand } from '../commands/command-contract';
@@ -27,6 +30,9 @@ import type {
   InventoryPointerStationRef,
 } from '../gameplay/modules/inventory-pointer-contract';
 import type { CharacterControlRequest, ControlBinding } from '../../runtime/character-control-protocol';
+import type { AuthorityInteractActionV1 } from '../gameplay/modules/structure-target-dispatch';
+export { copyAuthorityActionReference } from './network-action-reference-copy';
+export * from './media-playback-protocol';
 
 type CharacterIntentRequest = Extract<CharacterControlRequest, { kind: 'intent' }>;
 type CharacterCapabilitiesRequest = Extract<CharacterControlRequest, { kind: 'capabilities' }>;
@@ -78,7 +84,9 @@ export type AuthorityInventoryView = Readonly<{
   revision: number;
   slots: readonly InventorySlot[];
   hotbarSize: number;
+  armor: Readonly<Record<import('../gameplay/modules/armor-policy').ArmorSlot, InventorySlot>>;
   cursor: InventoryCursorV1;
+  matchedCraftingRecipeIds: readonly string[];
 }>;
 export type AuthorityInventoryPointerAction = Readonly<{
   type: 'inventory-pointer';
@@ -109,6 +117,14 @@ export type AuthorityGameplayView = Readonly<{
   entities: readonly GameplayEntityView[];
   actors: readonly ActorState[];
   craftableRecipeIds: readonly string[];
+  progress?: import('../gameplay/gameplay-progress-runtime').GameplayProgressCheckpoint['players'][number];
+  difficulty?: import('../gameplay/difficulty-runtime').DifficultyCheckpoint;
+  armorPoints?: number;
+  media?: readonly import('../gameplay/modules/media-playback-model').MediaPlaybackProjectionV1[];
+  cropStages?: readonly AuthorityCropStageProjection[];
+  navigation?: import('../gameplay/navigation-items-runtime').NavigationHeldProjectionV1 | null;
+  transports?: readonly import('../gameplay/modules/transport-model').TransportStateV2[];
+  transportDefinitions?: readonly import('../gameplay/modules/transport-model').TransportDefinitionV1[];
   metrics: AuthorityGameplayMetrics;
 }>;
 
@@ -124,6 +140,11 @@ export type AuthorityReady = Readonly<{
   frequencies: Readonly<{ physicsHz: 30 | 60 | 120; gameplayHz: 10 | 20; fluidHz: 20 | 30 }>;
   snapshot: AuthoritySnapshot;
   gameplay: AuthorityGameplayView;
+  /** Bounded read-only projection of the composed voxel semantics. */
+  voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
+  /** Bounded serializable geometry for this composition; omitted when no custom geometry exists. */
+  voxelGeometry?: readonly import('../../world/voxel-geometry').VoxelGeometryDefinitionV1[];
+  snapshotMigrationReports?: readonly import('../gameplay/gameplay-snapshot-migration').GameplaySnapshotMigrationReport[];
   campPosition?: [number, number, number];
 }>;
 
@@ -135,6 +156,10 @@ export type AuthorityMeshPayload = Readonly<{
   chunkRevision: number;
   generatorVersion: number;
   provider?: KernelWorldgenProviderIdentity;
+  /** Same frozen composition semantics as AuthorityReady, copied into each worker task. */
+  voxelSemantics?: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
+  /** Same validated geometry projection as AuthorityReady, copied into each worker task. */
+  voxelGeometry?: readonly import('../../world/voxel-geometry').VoxelGeometryDefinitionV1[];
   preparationDiagnostics?: Readonly<{
     authorityPrepareMs: number;
     persistenceWaitMs: number;
@@ -179,7 +204,13 @@ export type AuthorityAction =
   | Readonly<{ type: 'place'; position: [number, number, number] }>
   | Readonly<{ type: 'respawn' }>
   | Readonly<{ type: 'move-inventory'; source: number; target: number }>
-  | Readonly<{ type: 'use-inventory'; slot: number }>;
+  | Readonly<{ type: 'use-inventory'; slot: number }>
+  | AuthorityInteractActionV1
+  | Readonly<{
+      type: 'set-difficulty';
+      value: import('../gameplay/difficulty-runtime').Difficulty;
+      expectedRevision: number;
+    }>;
 
 export type AuthorityActionResult = Readonly<{
   /** 当前 Authority 总会提供；可选仅兼容历史本地 fixture。网络投影必须验证存在。 */
@@ -206,6 +237,7 @@ export type AuthorityTransactionKey = Readonly<{
 }>;
 
 export type AuthorityRequest = (
+  | AuthorityRendererReadRequest
   | Readonly<{
       kind: 'start-authority';
       protocolVersion: typeof PROTOCOL_VERSION;
@@ -225,23 +257,6 @@ export type AuthorityRequest = (
       epoch: SessionEpoch;
       requestId: number;
       transaction: AuthorityTransactionKey;
-    }>
-  | Readonly<{
-      kind: 'prepare-mesh';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      requestId: number;
-      cx: number;
-      cy: number;
-      cz: number;
-    }>
-  | Readonly<{
-      kind: 'request-collision-baseline';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      requestId: number;
-      key: string;
-      minimumRevision: number;
     }>
   | Readonly<{
       kind: 'release-mesh';
@@ -411,6 +426,7 @@ export type AuthorityResponse =
       generatorVersion: number;
       provider: KernelWorldgenProviderIdentity;
       starterEcology: StarterEcologyConfiguration | null;
+      voxelSemantics: readonly import('../../world/voxel-semantics').VoxelSemanticsDefinition[];
     }>
   | Readonly<{
       kind: 'authority-ready';
@@ -424,15 +440,9 @@ export type AuthorityResponse =
       epoch: SessionEpoch;
       key: string;
     }>
-  | Readonly<{
-      kind: 'authority-snapshot';
-      protocolVersion: typeof PROTOCOL_VERSION;
-      epoch: SessionEpoch;
-      snapshot: AuthoritySnapshot;
-      gameplay?: AuthorityGameplayView;
-      commits?: readonly WorldCommitResult[];
-    }>
+  | AuthoritySnapshotMessage
   | AuthorityCommitMessage
+  | import('./media-playback-protocol').AuthorityMediaFactsResponseV1
   | Readonly<{
       kind: 'input-decision';
       protocolVersion: typeof PROTOCOL_VERSION;
@@ -445,6 +455,7 @@ export type AuthorityResponse =
       kind: 'authority-response';
       protocolVersion: typeof PROTOCOL_VERSION;
       epoch: SessionEpoch;
+      runtimeEpoch?: SessionEpoch;
       requestId: number;
       ok: true;
       result: unknown;

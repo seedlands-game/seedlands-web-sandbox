@@ -1,0 +1,7 @@
+# 两处间接路线夹具129
+
+精确dcb39a9e的CI416 Classic headless 4FAIL/1026PASS：mineVoxel的Browser64 replay三例和prepareBuildingTarget的fake一例，均缺128新release metadata导致原5000ms超时。Root漏查间接walkTo调用；原两文件本地RED4FAIL/14PASS复现，修复后七个间接消费者文件82PASS，Classic类型与范围lint PASS。
+
+Browser64的位置/tick/ACK原观察保留，仅明确附加合成post-release协议字段，不称其历史浏览器观测；placementfake只在modeled keyboard.up记录release，并分别记录down/up的模拟消费序列。原native生产约束、输入次数、距离/瞄准断言、超时和重试都不改。没有重复production build/Browser；128的本地原visual/native PASS仍绑定5690。当前精确远端Chromium继续自然运行，129完成后先留本地，终态前不push取消它。
+
+相关日志身份见validation.json。完整PR与ledger117仍未准出；真实预算读数仍14:25UTC周75%，刷新待主对话，约60%停止线保持。长期docs baseline无新增更改，派生release职责仍沿128 codemap；没有新玩法、权限或生产部署。

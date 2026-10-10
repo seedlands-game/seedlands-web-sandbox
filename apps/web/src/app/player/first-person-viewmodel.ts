@@ -1,3 +1,5 @@
+import { ModelSurfaceLighting } from '../scene/model-surface-lighting';
+import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import { requireClassicItemDefinition } from '../../client/presentation/classic-item-registry';
 import type { CombatSnapshot } from '@seedlands/stdlib/server/gameplay/combat-runtime';
@@ -14,8 +16,16 @@ import { resolveViewmodelLayout } from '../../client/presentation/viewmodel-layo
 
 import { createDraftPixelResource } from '../gameplay/pixel-model-resource';
 import type { ToolModel } from '../../client/presentation/asset-types';
+import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
+
+const heldItemScale = Object.freeze({
+  tool: 0.72,
+  other: 0.5,
+  narrowToolMultiplier: 0.88,
+});
 
 export class FirstPersonViewmodel {
+  private readonly surfaceLighting: ModelSurfaceLighting;
   private releaseDraft: (() => void) | null = null;
   private readonly root = new pc.Entity('First person viewmodel');
   private readonly handPivot = new pc.Entity('viewmodel hand pivot');
@@ -37,8 +47,11 @@ export class FirstPersonViewmodel {
     private readonly app: pc.Application,
     private readonly camera: pc.Entity,
     assets?: GameplayModelAssets,
+    voxelGeometry?: VoxelGeometryResolver,
+    sampleSurfaceLighting?: SurfaceLightingSampler,
   ) {
-    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app);
+    this.surfaceLighting = new ModelSurfaceLighting(app.graphicsDevice, sampleSurfaceLighting, undefined, 'viewmodel');
+    this.assetsLease = assets ? { assets, release: () => {} } : acquireGameplayModelAssets(app, voxelGeometry);
     if (app.root && app.scene?.layers) {
       this.layer = new pc.Layer({ name: 'First Person Viewmodel' });
       app.scene.layers.push(this.layer);
@@ -76,6 +89,7 @@ export class FirstPersonViewmodel {
 
   setHeldItem(itemId: string | null, definition?: ItemDefinition | null): void {
     if (itemId === this.heldItem && !this.releaseDraft) return;
+    this.surfaceLighting.release(this.item);
     this.releaseDraft?.();
     this.releaseDraft = null;
     this.heldItem = itemId;
@@ -87,7 +101,7 @@ export class FirstPersonViewmodel {
     if (itemId) {
       const itemDefinition = definition ?? requireClassicItemDefinition(itemId);
       this.heldTool = itemDefinition.itemType === 'tool';
-      const scale = this.heldTool ? 0.95 : 0.55;
+      const scale = this.heldTool ? heldItemScale.tool : heldItemScale.other;
       this.assets.addItem(this.item, itemId, scale, undefined, definition);
       this.applyLayer(this.item);
     }
@@ -96,7 +110,7 @@ export class FirstPersonViewmodel {
   setHeldDefinition(definition: ToolModel): void {
     this.setHeldItem(null);
     this.heldTool = true;
-    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, 0.95);
+    this.releaseDraft = createDraftPixelResource(this.app, this.item, definition, heldItemScale.tool);
     this.applyLayer(this.item);
   }
 
@@ -125,9 +139,17 @@ export class FirstPersonViewmodel {
     });
     this.root.setLocalPosition(layout.position.x, layout.position.y, layout.position.z);
     this.root.setLocalScale(layout.scale, layout.scale, layout.scale);
-    if (this.viewmodelCamera?.camera) this.viewmodelCamera.camera.fov = fov;
+    if (this.viewmodelCamera?.camera) {
+      this.viewmodelCamera.camera.fov = fov;
+      if (this.camera.camera) {
+        this.viewmodelCamera.camera.gammaCorrection = this.camera.camera.gammaCorrection;
+        this.viewmodelCamera.camera.toneMapping = this.camera.camera.toneMapping;
+      }
+    }
+    const worldPosition = this.camera.getPosition();
+    this.surfaceLighting.apply(this.root, [worldPosition.x, worldPosition.y, worldPosition.z]);
     const narrowTool = this.heldTool && this.app.graphicsDevice.width < this.app.graphicsDevice.height;
-    const itemScale = narrowTool ? 0.79 : 1;
+    const itemScale = narrowTool ? heldItemScale.narrowToolMultiplier : 1;
     this.item.setLocalScale(itemScale, itemScale, itemScale);
     this.item.setLocalEulerAngles(0, 0, narrowTool ? -16 : 0);
     const authoritativePose = combatViewmodelPose(this.combat);
@@ -144,6 +166,7 @@ export class FirstPersonViewmodel {
   }
 
   dispose(): void {
+    this.surfaceLighting.dispose();
     this.releaseDraft?.();
     this.root.destroy();
     this.viewmodelCamera?.destroy();
@@ -162,6 +185,7 @@ export class FirstPersonViewmodel {
   }
 
   private applyLayer(root: pc.Entity): void {
+    this.surfaceLighting.register(root);
     if (!this.layer) return;
     for (const component of root.findComponents('render')) {
       (component as pc.RenderComponent).layers = [this.layer.id];

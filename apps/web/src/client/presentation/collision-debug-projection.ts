@@ -1,6 +1,6 @@
 import { bodyConfigFor, type BodyKind } from '@seedlands/stdlib/physics/body-registry';
 import type { BodyState, Contact, Vec3, WorldAabb } from '@seedlands/stdlib/physics/types';
-import { collisionBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { collisionBoxesForVoxel, type VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 export const COLLISION_DEBUG_RADIUS = 32;
 export const COLLISION_DEBUG_BODY_LIMIT = 128;
@@ -19,7 +19,8 @@ export type CollisionDebugSensor = Readonly<{
 
 export type CollisionDebugBody = Readonly<{
   id: string;
-  kind: BodyKind;
+  kind: BodyKind | null;
+  localAabb?: WorldAabb;
   state: BodyState;
   grounded: boolean;
   contacts: readonly Contact[];
@@ -40,6 +41,7 @@ export type CollisionDebugProjectionOptions = Readonly<{
   includeContacts?: boolean;
   includeSensors?: boolean;
   includePickupSensors?: boolean;
+  voxelGeometry?: VoxelGeometryResolver;
 }>;
 
 export type CollisionDebugLine = Readonly<{
@@ -178,8 +180,9 @@ function appendSphere(
     }
 }
 
-function bodyAabb(body: Pick<CollisionDebugBody, 'kind' | 'state'>): WorldAabb {
-  const localAabb = bodyConfigFor(body.kind).localAabb;
+function bodyAabb(body: Pick<CollisionDebugBody, 'kind' | 'state' | 'localAabb'>): WorldAabb {
+  const localAabb = body.localAabb ?? (body.kind === null ? null : bodyConfigFor(body.kind).localAabb);
+  if (!localAabb) throw new Error('Collision debug carrier requires its configured body.');
   return {
     min: {
       x: body.state.position.x + localAabb.min.x,
@@ -273,7 +276,7 @@ export function createCollisionDebugBatch(
 
   if (snapshot.targetVoxel) {
     const [x, y, z] = snapshot.targetVoxel.position;
-    for (const box of collisionBoxesForVoxel(snapshot.targetVoxel.voxel))
+    for (const box of collisionBoxesForVoxel(snapshot.targetVoxel.voxel, options.voxelGeometry))
       appendAabb(
         positions,
         colors,

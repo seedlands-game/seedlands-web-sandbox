@@ -1,0 +1,17 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+No test files found, exiting with code 1
+
+filter: playbooks/classic/tests/legacy-composition-lineage.test.ts, apps/web/tests/integration/runtime/server/composition/gameplay-composition-checkpoint.test.ts, apps/web/tests/integration/runtime/server/composition/classic-armor.test.ts
+
+|@seedlands/kernel| 
+
+include: packages/kernel/tests/**/*.test.ts
+exclude:  **/node_modules/**, **/.git/**
+
+|@seedlands/stdlib| 
+
+include: packages/stdlib/tests/**/*.test.ts
+exclude:  **/node_modules/**, **/.git/**
+

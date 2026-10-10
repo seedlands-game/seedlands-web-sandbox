@@ -1,12 +1,10 @@
 import type { AuthorityWorkerPort } from '../../../../src/client/authority/browser-authority-client';
-import type {
-  AuthorityReady,
-  AuthorityResponse,
-} from '../../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
+import type { AuthorityReady } from '../../../../../../packages/stdlib/src/server/protocol/authority-worker-protocol';
 import { testWorldgenProvider } from './worldgen-provider';
+import type { BrowserAuthorityResponse } from '../../../../src/client/authority/pointer-attack-protocol';
 
 export class FakeAuthorityWorker implements AuthorityWorkerPort {
-  onmessage: ((event: MessageEvent<AuthorityResponse>) => void) | null = null;
+  onmessage: ((event: MessageEvent<BrowserAuthorityResponse>) => void) | null = null;
   onerror: ((event: ErrorEvent) => void) | null = null;
   posts: unknown[] = [];
   transfers: Transferable[][] = [];
@@ -21,8 +19,8 @@ export class FakeAuthorityWorker implements AuthorityWorkerPort {
     this.terminated = true;
   }
 
-  emit(message: AuthorityResponse) {
-    this.onmessage?.({ data: message } as MessageEvent<AuthorityResponse>);
+  emit(message: BrowserAuthorityResponse) {
+    this.onmessage?.({ data: message } as MessageEvent<BrowserAuthorityResponse>);
   }
 }
 
@@ -41,7 +39,9 @@ const gameplay = {
     revision: 0,
     slots: [],
     hotbarSize: 8,
-    cursor: { version: 1 as const, revision: 0, stack: null, origin: null },
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+    cursor: { version: 1 as const, revision: 0, stack: null, origin: null, craftingGrid: [null, null, null, null] },
+    matchedCraftingRecipeIds: [],
   },
   gameplayRevision: 1,
   gameplayTime: 0,
@@ -122,4 +122,14 @@ export const ready = (): AuthorityReady => ({
     paused: false,
   },
   gameplay,
+});
+
+export const restoredFrontier = (epoch: string) => ({
+  worldId: 'world',
+  epoch,
+  worldRevision: 0,
+  commitSequence: 0,
+  physicsTick: 0,
+  fluidWorkSequence: 0,
+  logicObservationSequence: 0,
 });

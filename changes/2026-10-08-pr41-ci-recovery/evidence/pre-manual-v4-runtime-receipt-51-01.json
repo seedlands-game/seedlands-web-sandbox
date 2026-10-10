@@ -1,0 +1,65 @@
+{
+  "sourceSha": "ecb7213f3c0a1941aef14ec5a972189aa175e0eb",
+  "runtimeBundleSha256": "5792eaa061a616798f859fa813ab25eeb7eb1088c1d224b68b576afc04439300",
+  "artifactReceipt": {
+    "sourceSha": "5d91421ecbd6a57ecc255f476cb41bb6614c236f",
+    "sourceDigest": "0bfbda814dd97059344262f7a7c1c5a02c2175a92dfab4093006cea392bd183d",
+    "artifactDigest": "2aa9767028ae9394a65e02c5a6eeeda38a68cff784f3049862fb772e11efd8ca",
+    "builtAt": "2026-10-09T09:17:00.827Z"
+  },
+  "verifiedPack": {
+    "algorithm": "sha256",
+    "manifestDigest": "1d6ea8232de71a9449619c6fe669a41771325838d237e014ded6e31c86f06b7b",
+    "entryDigest": "c1ef197e7fea7248a65488494881cbf84cbda77823d09291edf596183184da18",
+    "resources": [
+      {
+        "path": "playbooks/classic/presentation.json",
+        "digest": "bf7ba2ab03a8e1036ca9508e48abebc195d022884474819346d24a709ec4ecf9"
+      },
+      {
+        "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+        "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-0.svg",
+        "digest": "0508ad38578e916ca80378be958304444799ef4e18ebe2a088edb00eb4c03d48"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-1.svg",
+        "digest": "4a580265ab48364b869363777e6b8f8871ac3a6c441c170a8861765e25151d22"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-2.svg",
+        "digest": "a5975f5de62795d5a95aaa34118b17782010255520a951e8e29a86a37d47ea59"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-3.svg",
+        "digest": "16d0f4b712af3aed10286b35b41585fefa8b086e2af567b9c051634de563eae7"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-4.svg",
+        "digest": "d1a40312c1417a9a1d75d2e6df523961a728aaecfd1ff36a02be114532084131"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-5.svg",
+        "digest": "dc6ffcf93f03852ef32c735e9399b6fb2822ecd8bf794ab3b4bbb764c0c6ba9f"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-6.svg",
+        "digest": "3c04b03df47e17e016a3665231093e15044538a9ad49b8ae9653a2d1f952f5c8"
+      },
+      {
+        "path": "playbooks/classic/assets/crops/wheat-stage-7.svg",
+        "digest": "a93ea516eae82c31d04c4acaaed8ea05626c7930826af5aed27f1abf93b829b6"
+      }
+    ]
+  },
+  "exactPredecessorEntrySha256": "c1ef197e7fea7248a65488494881cbf84cbda77823d09291edf596183184da18",
+  "worldId": "manual-cadence-predecessor-capture",
+  "playerId": "pre-manual-saved",
+  "gameplayVersion": 4,
+  "kind": "actual headless GameplayRuntime V4 capture from exact predecessor source and verified production Pack; not browser acceptance",
+  "capturedRawSnapshotSha256": "835b82f47fc1633da57db13420ed419f4bde872cfa22ce3736317df7a678b9a1",
+  "trackedSnapshotSha256": "b47266b54090061bfe3443a9a81be3a1d128ec2e7c9f5d34f28aae6ce02ae9ae",
+  "serializationNote": "Raw capture digest identifies the preserved private Node JSON output; tracked snapshot is the same parsed value formatted by repository Prettier."
+}

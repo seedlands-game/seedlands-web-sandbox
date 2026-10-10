@@ -1,0 +1,103 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/game-harness-observability.test.ts --maxWorkers=1
+4:09:49 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts (8 tests | 2 failed) 9ms
+     × returns a detached recursively frozen equipment projection with all four slots and cursor origin 4ms
+     × returns current data after an epoch change without reusing an older snapshot 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts > BrowserProductHarness V1 read-only observability > returns a detached recursively frozen equipment projection with all four slots and cursor origin
+AssertionError: expected { runtimeEpoch: 'world:2', …(8) } to match object { actor: { epoch: 2 }, …(4) }
+(10 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -10,25 +10,33 @@
+      },
+    },
+    "cursor": {
+      "craftingGrid": [
+        {
++         "count": 1,
+          "instance": {
+            "durability": 6,
+          },
++         "itemId": "sample:craft",
+        },
++       null,
++       null,
++       null,
+      ],
+      "origin": {
+        "slot": 3,
+      },
+    },
+    "player": {
+      "health": 17,
+    },
+    "slots": [
+      {
++       "count": 1,
+        "instance": {
+          "durability": 8,
+        },
++       "itemId": "sample:pickaxe",
+      },
++     null,
+    ],
+  }
+
+ ❯ apps/web/tests/unit/app/game-harness-observability.test.ts:310:22
+    308|     Object.assign(source.inventory.cursor.craftingGrid[0]!.instance!, …
+    309|     Object.assign(source.player, { health: 1 });
+    310|     expect(snapshot).toMatchObject({
+       |                      ^
+    311|       actor: { epoch: 2 },
+    312|       slots: [{ instance: { durability: 8 } }],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/game-harness-observability.test.ts > BrowserProductHarness V1 read-only observability > returns current data after an epoch change without reusing an older snapshot
+AssertionError: expected { runtimeEpoch: 'world:3', …(8) } to match object { runtimeEpoch: 'world:3', …(3) }
+(19 matching properties omitted from actual)
+
+- Expected
++ Received
+
+@@ -5,11 +5,11 @@
+      "lifecycle": "alive",
+    },
+    "runtimeEpoch": "world:3",
+    "slots": [
+      {
+-       "count": 2,
++       "count": 1,
+        "itemId": "sample:new",
+      },
+      null,
+    ],
+  }
+
+ ❯ apps/web/tests/unit/app/game-harness-observability.test.ts:382:20
+    380|
+    381|     expect(first).toMatchObject({ runtimeEpoch: 'world:2', armorPoints…
+    382|     expect(second).toMatchObject({
+       |                    ^
+    383|       runtimeEpoch: 'world:3',
+    384|       slots: [{ itemId: 'sample:new', count: 2 }, null],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 6 passed (8)
+   Start at  04:09:49
+   Duration  569ms (transform 403ms, setup 0ms, import 486ms, tests 9ms, environment 0ms)
+
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/game-harness-observability.test.ts --maxWorkers=1`
+Exit status 1

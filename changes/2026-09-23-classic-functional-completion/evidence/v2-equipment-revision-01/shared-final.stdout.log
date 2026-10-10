@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts --maxWorkers=1 -t 'advances the shared inventory revision when only armor changes'
+6:23:49 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 2 skipped (3)
+   Start at  18:23:49
+   Duration  1.17s (transform 874ms, setup 0ms, import 1.09s, tests 7ms, environment 0ms)
+

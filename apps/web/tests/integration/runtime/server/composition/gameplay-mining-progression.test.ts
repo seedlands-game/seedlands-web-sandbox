@@ -1,14 +1,19 @@
 import { expect, it } from 'vitest';
-import { definePack, defineBlockRulesModule, type ModModule } from '@seedlands/stdlib/mod-api';
+import {
+  defineBlockActionsModule,
+  defineBlockRulesModule,
+  definePack,
+  type ModModule,
+} from '@seedlands/stdlib/mod-api';
 import {
   assembleWorldPacks,
   createGameplayActorAuthority,
   createGameplaySystemAuthority,
 } from '@seedlands/stdlib/host';
 import { GameServer } from '../../../../fixtures/classic/content';
-import { pack } from '../../../../../../../playbooks/classic/src/pack';
 import { overworldBlocks } from '../../../../../../../playbooks/classic/src/blocks';
 import { testCorePlatform } from '../../../../../../../packages/stdlib/tests/support/core-platform';
+import { classicGameplayDomainModules } from './classic-gameplay-domain-options';
 
 const position: [number, number, number] = [2, 60, 0];
 function setup(cloneHook?: (value: unknown) => void, saved?: ReturnType<GameServer['freezePortableSaveSnapshot']>) {
@@ -33,10 +38,10 @@ function setup(cloneHook?: (value: unknown) => void, saved?: ReturnType<GameServ
       ...(definition.voxel === 3 ? { minimumTier: 2 } : {}),
     })),
   });
-  const modules = [
-    ...pack.modules.map((module) => (module.descriptor.id === 'seedlands:overworld-block-rules' ? rules : module)),
-    tools,
-  ];
+  const modules = classicGameplayDomainModules(
+    ['test:mining-rules', 'seedlands:inventory-actions-module', 'test:mining-tools'],
+    [defineBlockActionsModule(), rules, tools],
+  );
   const root = definePack({ id: 'test:mining', version: '1.0.0', kind: 'playbook', modules });
   const composition = assembleWorldPacks(
     [
@@ -106,7 +111,7 @@ it.each([2, 3])('uses tier %s capabilities for time and consumes one durability 
   expect(held(server)?.instance?.durability).toBe(2);
   expect(server.getVoxel(...position)).toBe(0);
   expect(server.queryEntities({ type: 'world-item' }).map((entity) => entity.stack)).toEqual([
-    { itemId: 'stone-block', count: 1 },
+    { itemId: 'cobblestone', count: 1 },
   ]);
   server.advanceGameplayRules(1);
   expect(held(server)?.instance?.durability).toBe(2);

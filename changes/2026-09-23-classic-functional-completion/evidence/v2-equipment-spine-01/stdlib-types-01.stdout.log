@@ -1,0 +1,10 @@
+$ tsc -p tsconfig.json --noEmit
+src/server/gameplay/modules/inventory-pointer-model.ts(81,7): error TS2322: Type 'Readonly<{ kind: "crafting" | "inventory" | "equipment"; slot: number | "helmet" | "chestplate" | "leggings" | "boots"; }>' is not assignable to type 'InventoryCursorOriginV1'.
+  Type 'Readonly<{ kind: "crafting" | "inventory" | "equipment"; slot: number | "helmet" | "chestplate" | "leggings" | "boots"; }>' is not assignable to type 'Readonly<{ kind: "inventory"; slot: number; }> | Readonly<{ kind: "crafting"; slot: number; }> | Readonly<{ kind: "equipment"; slot: "helmet" | "chestplate" | "leggings" | "boots"; }>'.
+    Type 'Readonly<{ kind: "crafting" | "inventory" | "equipment"; slot: number | "helmet" | "chestplate" | "leggings" | "boots"; }>' is not assignable to type 'Readonly<{ kind: "equipment"; slot: "helmet" | "chestplate" | "leggings" | "boots"; }>'.
+      Types of property 'kind' are incompatible.
+        Type '"crafting" | "inventory" | "equipment"' is not assignable to type '"equipment"'.
+          Type '"crafting"' is not assignable to type '"equipment"'.
+/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2

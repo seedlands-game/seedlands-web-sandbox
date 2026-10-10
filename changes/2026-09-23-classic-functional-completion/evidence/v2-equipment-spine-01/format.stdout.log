@@ -1,0 +1,24 @@
+changes/2026-09-23-classic-functional-completion/equipment-spine-contract.md 38ms
+changes/2026-09-23-classic-functional-completion/spec.md 43ms (unchanged)
+changes/2026-09-23-classic-functional-completion/tasks.md 19ms (unchanged)
+packages/stdlib/src/server/gameplay/modules/armor-policy.ts 8ms (unchanged)
+packages/stdlib/src/server/gameplay/modules/inventory-pointer-contract.ts 28ms
+packages/stdlib/src/server/gameplay/modules/inventory-action-model.ts 23ms (unchanged)
+packages/stdlib/src/server/gameplay/modules/inventory-pointer-model.ts 25ms (unchanged)
+packages/stdlib/src/server/gameplay/gameplay-inventory-pointer.ts 4ms
+packages/stdlib/src/server/gameplay/modules/registered-inventory-runtime.ts 19ms (unchanged)
+packages/stdlib/src/server/gameplay/modules/registered-station-runtime.ts 15ms (unchanged)
+packages/stdlib/src/server/gameplay/death-inventory-settlement.ts 8ms
+packages/stdlib/src/server/protocol/authority-worker-protocol.ts 11ms (unchanged)
+packages/stdlib/src/server/protocol/network-reference-projection-types.ts 3ms (unchanged)
+packages/stdlib/src/server/protocol/network-reference-projection.ts 10ms
+packages/stdlib/src/server/composition/mod-api.ts 3ms (unchanged)
+packages/stdlib/tests/server/inventory-pointer-model.test.ts 11ms (unchanged)
+packages/stdlib/tests/server/station-action-model.test.ts 5ms (unchanged)
+packages/stdlib/tests/server/food-health.test.ts 4ms (unchanged)
+packages/stdlib/tests/server/network-reference-integer-zero.test.ts 6ms (unchanged)
+packages/stdlib/tests/server/equipment-spine-contract.test.ts 8ms (unchanged)
+apps/web/tests/integration/runtime/server/composition/inventory-action-candidates.test.ts 12ms (unchanged)
+apps/web/tests/integration/runtime/server/composition/equipment-spine-red.test.ts 4ms (unchanged)
+apps/web/tests/unit/client/fixtures/browser-authority.ts 3ms (unchanged)
+apps/web/tests/unit/client/browser-authority-world-harness.test.ts 14ms (unchanged)

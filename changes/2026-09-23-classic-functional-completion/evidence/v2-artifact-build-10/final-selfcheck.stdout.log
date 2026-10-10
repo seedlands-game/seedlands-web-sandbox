@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "sourceSha": "f282da95833c5ff568b8b7a4caac7d7a7513514f",
+  "sourceTree": "ad93a8e1afdbb461a32f7c87ab4b860fd44a2074",
+  "sourceDigest": "c8463ed87574e1ff1ad4d1c06beb4649fc518ee6815e071a289aec1187c0e865",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "builtAt": "2026-09-28T05:47:05.058Z",
+  "artifactFiles": 276,
+  "distFiles": 277,
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "0ec7982105f6cacb590edb15299e3003102f6497dd05d233e58d507553732ca8"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 19,
+    "sha256": "43681d956aee4e2f2cf7a68b93569b8b8a732d9dc843b81a5d68360d19db6833",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-final.stdout.log",
+      "metadata-final.window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck.window.json.log"
+    ]
+  },
+  "artifactReceiptSha256": "fd010be92fce57ffebb254b0eb2b653a385922d22234856d85317074e39d79e0",
+  "artifactMapSha256": "d1babe3ba4b9a2326cb1e1304b77f8045838ed7004c708e71bc692dc61ef3aa6",
+  "packLockSha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "build09MapDifference": "none",
+  "browser18Status": "FAIL",
+  "browser19Run": false
+}

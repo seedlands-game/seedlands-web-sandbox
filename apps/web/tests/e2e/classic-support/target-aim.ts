@@ -1,0 +1,167 @@
+import type { Point } from './scenario';
+
+const MOUSE_SENSITIVITY_DEGREES = 0.13;
+const MAX_MOUSE_STEP = 80;
+const MAX_ROUTE_AIM_MOVES = 18;
+const MAX_ROUTE_AIM_OBSERVATIONS = MAX_ROUTE_AIM_MOVES + 1;
+
+const normalizeDegrees = (value: number) => {
+  let normalized = value % 360;
+  if (normalized > 180) normalized -= 360;
+  if (normalized < -180) normalized += 360;
+  return normalized;
+};
+
+const clampStep = (value: number, wholeTurn = false) => {
+  const limit = wholeTurn ? 180 / MOUSE_SENSITIVITY_DEGREES : MAX_MOUSE_STEP;
+  return Math.max(-limit, Math.min(limit, value));
+};
+const FACE_INTERIOR_EPSILON = 1e-6;
+
+type VoxelAimObservation = Readonly<{ position: Point; adjacent: Point | null }>;
+
+const samePoint = (left: Point, right: Point) => left.every((value, axis) => value === right[axis]);
+
+export function voxelAimPoint(target: Point, adjacent?: Point): Point {
+  if (![...target, ...(adjacent ?? [])].every((value) => Number.isFinite(value) && Number.isInteger(value)))
+    throw new TypeError('Voxel aim coordinates must be finite integers.');
+  if (!adjacent) return [target[0] + 0.5, target[1] + 0.5, target[2] + 0.5];
+  const distance = target.reduce((sum, value, axis) => sum + Math.abs(value - adjacent[axis]), 0);
+  if (distance !== 1) throw new TypeError('Voxel aim target and adjacent cell must be orthogonally adjacent.');
+  return [
+    target[0] + 0.5 + (adjacent[0] - target[0]) * (0.5 - FACE_INTERIOR_EPSILON),
+    target[1] + 0.5 + (adjacent[1] - target[1]) * (0.5 - FACE_INTERIOR_EPSILON),
+    target[2] + 0.5 + (adjacent[2] - target[2]) * (0.5 - FACE_INTERIOR_EPSILON),
+  ];
+}
+
+export function matchesVoxelAim(observed: VoxelAimObservation | null, target: Point, adjacent?: Point): boolean {
+  if (!observed || !samePoint(observed.position, target)) return false;
+  return adjacent === undefined ? true : observed.adjacent !== null && samePoint(observed.adjacent, adjacent);
+}
+
+export const voxelInteractionDistance = (player: Point, target: Point) =>
+  Math.hypot(target[0] + 0.5 - player[0], target[1] + 0.5 - player[1], target[2] + 0.5 - player[2]);
+
+export function mouseCorrectionToVoxel(
+  player: Point,
+  viewAngles: readonly [number, number],
+  target: Point,
+): Readonly<{ dx: number; dy: number }> {
+  const x = target[0] + 0.5 - player[0];
+  const y = target[1] + 0.5 - player[1];
+  const z = target[2] + 0.5 - player[2];
+  const targetYaw = (Math.atan2(-x, -z) * 180) / Math.PI;
+  const targetPitch = (Math.atan2(y, Math.hypot(x, z)) * 180) / Math.PI;
+  return {
+    dx: clampStep(normalizeDegrees(viewAngles[0] - targetYaw) / MOUSE_SENSITIVITY_DEGREES),
+    dy: clampStep((viewAngles[1] - targetPitch) / MOUSE_SENSITIVITY_DEGREES),
+  };
+}
+
+export function mouseCorrectionToPoint(
+  player: Point,
+  viewAngles: readonly [number, number],
+  target: Point,
+  options: Readonly<{ wholeTurn?: boolean }> = {},
+): Readonly<{ dx: number; dy: number }> {
+  const x = target[0] - player[0];
+  const y = target[1] - player[1];
+  const z = target[2] - player[2];
+  const targetYaw = (Math.atan2(-x, -z) * 180) / Math.PI;
+  const targetPitch = (Math.atan2(y, Math.hypot(x, z)) * 180) / Math.PI;
+  return {
+    dx: clampStep(normalizeDegrees(viewAngles[0] - targetYaw) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn),
+    dy: clampStep((viewAngles[1] - targetPitch) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn),
+  };
+}
+
+export function horizontalMouseCorrectionToRoute(
+  player: Point,
+  yaw: number,
+  target: readonly [number, number],
+  direction: 'KeyW' | 'KeyS',
+  options: Readonly<{ wholeTurn?: boolean }> = {},
+): number {
+  const x = target[0] - player[0];
+  const z = target[1] - player[2];
+  const targetYaw = (Math.atan2(-x, -z) * 180) / Math.PI + (direction === 'KeyS' ? 180 : 0);
+  return clampStep(normalizeDegrees(yaw - targetYaw) / MOUSE_SENSITIVITY_DEGREES, options.wholeTurn);
+}
+
+export type RouteAimObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
+export type RouteAimOutcome<T extends RouteAimObservation> =
+  Readonly<{ kind: 'angle-aligned'; observation: T }> | Readonly<{ kind: 'route-reached'; observation: T }>;
+
+export async function correctMouseToRoute<T extends RouteAimObservation>(
+  options: Readonly<{
+    target: readonly [number, number];
+    direction: 'KeyW' | 'KeyS';
+    observe: () => Promise<T | null>;
+    move: (dx: number, dy: number) => Promise<void>;
+    routeReached?: (observation: T) => boolean;
+    wholeTurn?: boolean;
+  }>,
+): Promise<RouteAimOutcome<T>> {
+  if (!options.target.every(Number.isFinite))
+    throw new Error(`Classic route aim target is invalid: target=${options.target.join(',')}.`);
+  let lastDx: number | null = null;
+  for (let attempt = 0; attempt < MAX_ROUTE_AIM_OBSERVATIONS; attempt += 1) {
+    const current = await options.observe();
+    if (!current) {
+      if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1)
+        throw new Error(
+          `Classic route aim observation remained unavailable: target=${options.target.join(',')}; direction=${options.direction}.`,
+        );
+      continue;
+    }
+    if (![...current.player, current.viewAngles[0]].every(Number.isFinite))
+      throw new Error(
+        `Classic route aim observation is invalid: target=${options.target.join(',')}; direction=${options.direction}.`,
+      );
+    if (options.routeReached?.(current)) return { kind: 'route-reached', observation: current };
+    if (current.player[0] === options.target[0] && current.player[2] === options.target[1])
+      throw new Error(
+        `Classic route aim direction is undefined: target=${options.target.join(',')}; direction=${options.direction}.`,
+      );
+    const dx = horizontalMouseCorrectionToRoute(
+      current.player,
+      current.viewAngles[0],
+      options.target,
+      options.direction,
+      { wholeTurn: options.wholeTurn },
+    );
+    if (Math.abs(dx) < 1) return { kind: 'angle-aligned', observation: current };
+    lastDx = dx;
+    if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1) break;
+    await options.move(dx, 0);
+  }
+  throw new Error(
+    `Classic route aim did not converge: target=${options.target.join(',')}; direction=${options.direction}; lastDx=${String(lastDx)}.`,
+  );
+}
+
+export async function correctMouseUntilEntityAimed(
+  options: Readonly<{
+    entityId: string;
+    observe: () => Promise<Readonly<{
+      aimedEntityId: string | null;
+      entityPosition: Point;
+      player: Point;
+      viewAngles: readonly [number, number];
+    }> | null>;
+    move: (dx: number, dy: number) => Promise<void>;
+  }>,
+): Promise<void> {
+  let aimedEntityId: string | null = null;
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    const aim = await options.observe();
+    if (!aim) throw new Error('Classic hostile presentation disappeared before combat aim.');
+    aimedEntityId = aim.aimedEntityId;
+    if (aimedEntityId === options.entityId) return;
+    const target: Point = [aim.entityPosition[0], aim.entityPosition[1] + 0.9, aim.entityPosition[2]];
+    const correction = mouseCorrectionToPoint(aim.player, aim.viewAngles, target);
+    await options.move(correction.dx, correction.dy);
+  }
+  throw new Error(`Real mouse input did not acquire hostile ${options.entityId}; aimed=${String(aimedEntityId)}.`);
+}

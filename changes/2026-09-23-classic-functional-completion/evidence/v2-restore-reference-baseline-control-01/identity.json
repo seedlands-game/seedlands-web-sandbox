@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-RESTORE-REFERENCE-BASELINE-CONTROL-01",
+  "status": "PREEXISTING_REPRODUCED_CANDIDATE_NEW_TESTS_PASS_AFFECTED_KNOWN_FAIL",
+  "baseline": {
+    "head": "01c650793c79ac34e6184da48b5a4c94a5f161c2",
+    "tree": "e20a8b1d85520c960096b5c898c3ffdd7e241b2a"
+  },
+  "trees": {
+    "control": {
+      "root": "/private/tmp/seedlands-v2-reference-control-01",
+      "source": "all tracked files from baseline HEAD",
+      "preDetachGitStatus": "CLEAN"
+    },
+    "candidate": {
+      "root": "/private/tmp/seedlands-v2-reference-candidate-01",
+      "source": "control plus the approved reference slice paths",
+      "approvedOverlayCount": 11,
+      "oldSessionAndAdapterTestsRemainHeadBytes": true
+    }
+  },
+  "dependencies": {
+    "command": "pnpm install --offline --frozen-lockfile --ignore-scripts",
+    "controlStatus": "PASS_ALREADY_UP_TO_DATE",
+    "candidateStatus": "PASS_ALREADY_UP_TO_DATE",
+    "downloads": 0,
+    "scriptsRun": false,
+    "lockfileChanged": false,
+    "workspaceLinksResolvedInsideOwnTree": true,
+    "verifiedLinksPerTree": 6,
+    "priorReferenceCloneInternalBindingEvidence": "UNKNOWN"
+  },
+  "comparison": {
+    "command": "TZ=Asia/Shanghai LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pnpm exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/world-harness-session.test.ts -t authorizes action ids against their actual actor owner --maxWorkers=1",
+    "control": {
+      "runId": "v2-reference-control-old-case-01",
+      "exitCode": 1,
+      "selected": 1,
+      "failed": 1,
+      "skipped": 9,
+      "failure": "world-harness-session.test.ts:340 expected null not to be null"
+    },
+    "candidate": {
+      "runId": "v2-reference-candidate-old-case-01",
+      "exitCode": 1,
+      "selected": 1,
+      "failed": 1,
+      "skipped": 9,
+      "failure": "world-harness-session.test.ts:340 expected null not to be null"
+    },
+    "classification": "PREEXISTING_REPRODUCED",
+    "candidateRegression": false
+  },
+  "candidateFull": {
+    "runId": "v2-reference-candidate-full-01",
+    "exitCode": 1,
+    "filesPassed": 2,
+    "filesFailed": 1,
+    "testsPassed": 27,
+    "testsFailed": 1,
+    "focusedNew": "11/11 PASS",
+    "existingSession": "9/10 PASS; one PREEXISTING_REPRODUCED failure",
+    "existingAdapter": "7/7 PASS",
+    "otherNewFailures": 0,
+    "affectedStatus": "KNOWN_FAIL_NOT_ALL_GREEN"
+  },
+  "failureChain": [
+    "world-harness-session.test.ts:327-340 requests Classic spawn-actor with retired archetype settler",
+    "gameplay-command-handler.ts:296-302 dispatches spawn-actor to GameServerGameplayHost.spawnAutonomousActor",
+    "game-server-gameplay-host.ts:107-125 and actor-profile.ts:134-137 require settler from the current Classic registry",
+    "playbooks/classic/src/actors.ts:3-111 does not register settler; retired-actors-migration.ts:4 names settler as retired",
+    "server-command-executor.ts:115-131 converts the missing-profile exception into CommandResult success false with COMMAND_EXECUTION_FAILED",
+    "authority-world-harness.ts:220-247 and 456-460 return an outer successful transport result containing that failed command result",
+    "the old test checks only outer ok true for spawn-actor and start-action, so foreign never exists and getActorAction returns null"
+  ],
+  "rootCorrection": {
+    "previousModifiedCloneLogSufficientForBaselineClaim": false,
+    "cleanHeadControlNowExecuted": true,
+    "affectedPreviouslyClaimedPassIsCorrectedTo": "KNOWN_FAIL"
+  },
+  "budget": {
+    "targetMinutes": 45,
+    "hardLimitHours": 1,
+    "traditionalPd": 0.1,
+    "aiRecommended120PercentHours": 0.9,
+    "credits": "UNKNOWN",
+    "rate": "UNKNOWN",
+    "quota": "UNKNOWN"
+  },
+  "boundaries": {
+    "implementationPerformed": false,
+    "productionTestSpecTasksStateDocsModified": false,
+    "historicalEvidenceModified": false,
+    "gitOrIndexWrite": false,
+    "buildRun": false,
+    "artifactRun": false,
+    "browserRun": false,
+    "cuaRun": false,
+    "ciRun": false,
+    "productGreenClaimed": false
+  }
+}

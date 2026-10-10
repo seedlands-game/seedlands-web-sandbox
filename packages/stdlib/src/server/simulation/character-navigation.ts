@@ -1,5 +1,5 @@
 import { bodyConfigFor, bodyKindForEntity, CollisionLayer } from '../../physics/body-registry';
-import type { LocalAabb, WorldAabb } from '../../physics/types';
+import type { BodyConfig, LocalAabb, WorldAabb } from '../../physics/types';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { NavigationConstraint, NavigationPosition } from './ground-navigator';
 import type { PerceptionSnapshot } from './perception-runtime';
@@ -13,6 +13,7 @@ type CharacterNavigationOptions = Readonly<{
   target: NavigationPosition;
   perception: PerceptionSnapshot;
   resolveEntity: (entityId: string) => NavigationEntity | null;
+  bodyConfig?: (entity: NavigationEntity) => BodyConfig;
 }>;
 
 type BodyObstacle = Readonly<{ position: NavigationPosition; localAabb: LocalAabb }>;
@@ -82,18 +83,19 @@ const containsTarget = (obstacle: BodyObstacle, target: NavigationPosition): boo
   );
 };
 
-const bodyObstacle = (entity: NavigationEntity): BodyObstacle | null => {
-  try {
-    const config = bodyConfigFor(bodyKindForEntity(entity));
-    if (
-      ((config.collisionLayer ?? CollisionLayer.World) & CollisionLayer.Character) === 0 ||
-      ((config.collisionMask ?? CollisionLayer.World) & CollisionLayer.Character) === 0
-    )
-      return null;
-    return { position: [...entity.position], localAabb: config.localAabb };
-  } catch {
+const bodyObstacle = (
+  entity: NavigationEntity,
+  resolve: (entity: NavigationEntity) => BodyConfig,
+): BodyObstacle | null => {
+  // Stations are voxel-owned fixtures and have no independently simulated body.
+  if (entity.type === 'station') return null;
+  const config = resolve(entity);
+  if (
+    ((config.collisionLayer ?? CollisionLayer.World) & CollisionLayer.Character) === 0 ||
+    ((config.collisionMask ?? CollisionLayer.World) & CollisionLayer.Character) === 0
+  )
     return null;
-  }
+  return { position: [...entity.position], localAabb: config.localAabb };
 };
 
 const createBodyConstraint = (moverLocalAabb: LocalAabb, obstacles: readonly BodyObstacle[]): NavigationConstraint => {
@@ -141,7 +143,8 @@ export const createCharacterNavigationConstraint = (options: CharacterNavigation
     throw new TypeError('Character navigation perception belongs to another actor.');
   const actor = options.resolveEntity(options.actorId);
   if (!actor) throw new RangeError(`Unknown navigation actor: ${options.actorId}`);
-  const actorConfig = bodyConfigFor(bodyKindForEntity(actor));
+  const resolveBody = options.bodyConfig ?? ((entity: NavigationEntity) => bodyConfigFor(bodyKindForEntity(entity)));
+  const actorConfig = resolveBody(actor);
   const visibleIds = [
     ...new Set(options.perception.visibleEntities.slice(0, MAX_LOCAL_BODY_OBSTACLES).map(({ entityId }) => entityId)),
   ]
@@ -151,7 +154,7 @@ export const createCharacterNavigationConstraint = (options: CharacterNavigation
     .filter((entityId) => entityId !== options.actorId)
     .map((entityId) => options.resolveEntity(entityId))
     .filter((entity): entity is NavigationEntity => entity !== null)
-    .map(bodyObstacle)
+    .map((entity) => bodyObstacle(entity, resolveBody))
     .filter((obstacle): obstacle is BodyObstacle => obstacle !== null)
     .filter((obstacle) => !containsTarget(obstacle, options.target));
   return createBodyConstraint(actorConfig.localAabb, obstacles);

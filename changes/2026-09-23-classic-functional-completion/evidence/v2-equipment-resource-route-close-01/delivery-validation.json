@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-EQUIPMENT-RESOURCE-ROUTE-CLOSE-01",
+  "status": "FIXTURE_DETERMINISTIC_STATIC_GREEN",
+  "baseline": "4e78e14255ec2dbbbfe26c1e5bf6e8e0dc57dcf0",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 7,
+    "sha256": "92cde4c820d88c822fced9e9e40e0f90165d982f4aad1ae26f6b49ab098674b3",
+    "validatedEntries": 7
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 54,
+    "sha256": "bb776cbb6075907973a5398d77f7e84234cd1a4383863920d88a9a5cadd7b904",
+    "validatedEntries": 54,
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "browser15Red": {
+    "window": "129ac7e8-effb-44a0-a011-3a8f56076510",
+    "status": "FAIL_AFTER_RESOURCES_PLACED",
+    "sourceSha": "25adda5becbcab339a8364bbd23ac86ace3d8d8e",
+    "traceSha256": "e123610dcb014804b9b4f2ce6de96ce5a887f002a99bd65911e13a113097d612",
+    "failure": "Real input route timed out before 77.2,2.5.",
+    "miningInputSent": false,
+    "equipmentPointerReached": false
+  },
+  "change": {
+    "corridorZ": -0.5,
+    "routeOptions": {
+      "tolerance": 0.06,
+      "corridorTolerance": 0.08,
+      "pulseMs": 80,
+      "timeoutMs": 45000
+    },
+    "directionRule": "current x <= target x uses KeyW; current x > target x uses KeyS",
+    "arrival": "same snapshot client grounded/non-colliding, client and server route reached, physics tick advanced, ack nondecreasing",
+    "miningDistance": "same snapshot client and server both within 2.5..4.5 of target center",
+    "resourceOrderPreserved": true,
+    "scenarioCoordinatesChanged": false,
+    "genericWalkToChanged": false,
+    "genericMineVoxelChanged": false,
+    "productionChanged": false
+  },
+  "coverage": {
+    "resources": 10,
+    "batches": ["wood", "stone", "iron"],
+    "directions": ["KeyW", "KeyS"],
+    "browser15DiagonalBlockedByExpandedVoxelAabb": true,
+    "pickupRetreatBeforeHorizontalMove": true,
+    "workbenchRoundTripAndMiningApproach": true,
+    "clientAndServerRouteDomainEdgesWithinMiningDistance": true,
+    "playerHalfWidth": 0.32
+  },
+  "validation": {
+    "red": {
+      "window": "v2-equipment-resource-route-close-01-red",
+      "status": "EXPECTED_FAIL",
+      "files": 1,
+      "testsFailed": 1,
+      "reason": "The placeholder V2 direction returned KeyW for Browser-15 east-to-west movement; existing reachedRouteTarget already demonstrated the premature crossing.",
+      "stdoutSha256": "8e8685239ff00adcc78ebccb03b5374f969d87cc786a7355a5bc8082a9236bcd",
+      "receiptSha256": "3199f8f9fa3d954cb7910b950b41fab8bd68fc6493042ed1217a499ae571bd69"
+    },
+    "green": {
+      "window": "v2-equipment-resource-route-close-01-green",
+      "status": "PASS",
+      "files": 1,
+      "tests": 7,
+      "maxWorkers": 1,
+      "stdoutSha256": "8fde9839563daf9661d252cd9faf5646bb416319cd4643ec0cdba1626a2f0e03",
+      "receiptSha256": "fe8e2b3c06ba4171238c01047120509ec8839782e64c4d2f76f60e9daa785091"
+    },
+    "intermediateFailures": [
+      {
+        "window": "v2-equipment-resource-route-close-01-affected",
+        "status": "FAIL_1_PASS_26",
+        "reason": "scenario source-policy still expected the superseded direct walkTo text",
+        "stdoutSha256": "20dc053bd0c5603dc568b8526277838e22453070a256eed502593d9018530456",
+        "receiptSha256": "5bc4c56b95ab35e223f5dc8c430ba3fd11c9f1b49f88d37d61912b2f3c0bbe1f"
+      },
+      {
+        "window": "v2-equipment-resource-route-close-01-classic-types",
+        "status": "FAIL_TS2345",
+        "reason": "test obstacle fixture was unnecessarily typed as V2EquipmentResource instead of the target-only geometry shape",
+        "stdoutSha256": "ee764068c01bfbf55ffbe8968f48b55b910dda6597f90b98e91f283a28bcfdfe",
+        "receiptSha256": "70a30319d363c3386362c93321583f779066c15b4c51be7e5b139ec3e395152f"
+      }
+    ],
+    "finalAffected": {
+      "window": "v2-equipment-resource-route-close-01-final-affected-02",
+      "status": "PASS",
+      "files": 4,
+      "tests": 28,
+      "maxWorkers": 1,
+      "stdoutSha256": "80c38479e0948c870ad6042bd397468556b0296ac543773f8d42f2539d143d0c",
+      "receiptSha256": "dfbdfeb6a3a83cc2098c575d79cef5548251008a12788985154ac52ab32b9815"
+    },
+    "finalClassicTypes": {
+      "window": "v2-equipment-resource-route-close-01-final-classic-types-02",
+      "status": "PASS",
+      "stdoutSha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+      "receiptSha256": "a423aa0d56fef5631148c35db9799f10f120a62d3e505549024815cc70fc8146"
+    },
+    "finalRootTypes": {
+      "window": "v2-equipment-resource-route-close-01-final-root-types-02",
+      "status": "PASS",
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "b4467ca5a02fbfa28851459959abe4d89f0b0647ce040e0ee84a7a01bf36328e"
+    },
+    "finalEslint": {
+      "window": "v2-equipment-resource-route-close-01-eslint-final",
+      "status": "PASS",
+      "files": 4,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "receiptSha256": "4d5b02f755d19634cf3d5aa52eb979cf1ec851e0576583df2939ac9b409faf86"
+    },
+    "finalStatic": {
+      "window": "v2-equipment-resource-route-close-01-static-final",
+      "status": "PASS",
+      "stdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+      "receiptSha256": "562e2545aeae1fee4e1eb6512e12d6029946eab3a83578cb15696a80c08a61a3"
+    },
+    "evidenceFinal": {
+      "window": "v2-equipment-resource-route-close-01-evidence-final-02",
+      "status": "PASS",
+      "stdoutSha256": "091ff2174631f722769b117a5584278f4f4d0caa38bb28424db8110da89aba8a",
+      "receiptSha256": "576bbb4198ad05f74e7466c7f48d9e5b435ccb6f65e1a70eb7f1e677710d171c"
+    },
+    "metadataFormat": {
+      "window": "v2-equipment-resource-route-close-01-metadata-format",
+      "status": "PASS",
+      "stdoutSha256": "40214f94aac7868b68d8af5b5410281794d6c21921825348965a4aea2bad7b4c",
+      "receiptSha256": "b2571a3836341d6abd53c22abfdf9ac76a6db77300a727083c9f681d4e6d1693"
+    }
+  },
+  "boundaries": {
+    "browserValidated": false,
+    "browser16Authorized": false,
+    "buildRun": false,
+    "fullEquipmentMatrixClaimed": false,
+    "longTermDocsUpdated": false,
+    "longTermDocsReason": "This change only specializes the canonical V2 fixture route and does not change owner, protocol, or architecture boundaries."
+  },
+  "budget": {
+    "estimatedAiHours": "2-4",
+    "hardLimitHours": 6,
+    "traditionalEstimatePd": "0.5-1",
+    "creditsAndApiEquivalentCost": "UNKNOWN",
+    "rateAndQuotaShare": "UNKNOWN"
+  },
+  "notRun": ["browser", "build", "cua", "devserver", "ci", "git", "index", "push", "deploy"]
+}

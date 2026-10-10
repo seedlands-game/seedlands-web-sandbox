@@ -1,0 +1,125 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts (5 tests | 5 failed) 35ms
+     × applies non-Classic armor reduction and durability in the real registered resolve transaction 20ms
+     × caps protection at twenty points and removes a piece only after it protects this hit 3ms
+     × preserves unarmored damage and does not consume armor for creative immunity or a miss 2ms
+     × does not consume armor for invalid targets, missing authority, or rejected resolve 7ms
+     × rejects armor or lifetime changes after prepare without committing health or armor 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > applies non-Classic armor reduction and durability in the real registered resolve transaction
+AssertionError: expected { success: false, …(1) } to match object { success: true, damage: 9.2 }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "damage": 9.2,
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:172:56
+    170|     const before = runtime.getInventoryPointerView('target');
+    171|
+    172|     expect(runtime.attackEntity('attacker', 'target')).toMatchObject({…
+       |                                                        ^
+    173|     expect(runtime.entities.get('target')?.health).toBe(10.8);
+    174|     expect(runtime.simulation.combat.snapshotFor('attacker').lastResul…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > caps protection at twenty points and removes a piece only after it protects this hit
+AssertionError: expected { success: false, …(1) } to match object { success: true, damage: 2 }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "damage": 2,
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:197:56
+    195|     });
+    196|
+    197|     expect(runtime.attackEntity('attacker', 'target')).toMatchObject({…
+       |                                                        ^
+    198|     expect(runtime.entities.get('target')?.health).toBe(18);
+    199|     expect(runtime.getInventoryPointerView('target').armor).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > preserves unarmored damage and does not consume armor for creative immunity or a miss
+AssertionError: expected { success: false, …(1) } to match object { success: true, damage: 10 }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "damage": 10,
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:210:58
+    208|     const unarmored = setup();
+    209|     const unarmoredRevision = unarmored.getInventoryPointerView('targe…
+    210|     expect(unarmored.attackEntity('attacker', 'target')).toMatchObject…
+       |                                                          ^
+    211|     expect(unarmored.entities.get('target')?.health).toBe(10);
+    212|     expect(unarmored.getInventoryPointerView('target').revision).toBe(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > does not consume armor for invalid targets, missing authority, or rejected resolve
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:250:65
+    248|     equip(rejected, { helmet: armor('sample:visor', 3) });
+    249|     const rejectedBefore = rejected.entities.exportComponentSnapshot();
+    250|     expect(rejected.attackEntity('attacker', 'target').success).toBe(t…
+       |                                                                 ^
+    251|     expect(rejected.entities.exportComponentSnapshot()).toEqual(reject…
+    252|     expect(rejected.simulation.combat.snapshotFor('attacker').lastResu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > rejects armor or lifetime changes after prepare without committing health or armor
+AssertionError: expected [Function] to throw an error
+
+- Expected:
+null
+
++ Received:
+undefined
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:270:65
+    268|     });
+    269|     equip(armorStale, { helmet: armor('sample:visor', 3) });
+    270|     expect(() => armorStale.attackEntity('attacker', 'target')).toThro…
+       |                                                                 ^
+    271|     expect(armorStale.entities.exportComponentSnapshot()).toEqual(conc…
+    272|     expect(armorStale.simulation.combat.snapshotFor('attacker').lastRe…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  20:24:56
+   Duration  907ms (transform 660ms, setup 0ms, import 797ms, tests 35ms, environment 0ms)
+

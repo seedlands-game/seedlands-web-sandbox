@@ -3,6 +3,7 @@ import {
   COMMAND_RESOURCE_DIRECTORY,
   WorldResourceAuthorizer,
   commandAuthorizationRequests,
+  playerActionAuthorizationRequests,
   type WorldAuthorizationPolicy,
 } from '../../src/server/harness/world-authorization';
 import type { ServerCommand } from '../../src/server/commands/command-contract';
@@ -154,5 +155,42 @@ describe('world resource authorization', () => {
         () => 'hostile',
       ),
     ).toEqual([{ resource: 'world.action', operation: 'read', target: { kind: 'entity', entityId: 'hostile' } }]);
+  });
+
+  it('derives interaction authorization only from its bounded trusted target', () => {
+    expect(
+      playerActionAuthorizationRequests('player-1', {
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'self' },
+        expectedSelection: { inventoryRevision: 4, modeRevision: 2, creativeCatalogRevision: 3, selectedSlot: 1 },
+      }),
+    ).toEqual([
+      { resource: 'world.action', operation: 'execute', target: { kind: 'entity', entityId: 'player-1' } },
+      { resource: 'world.interaction', operation: 'execute', target: { kind: 'entity', entityId: 'player-1' } },
+    ]);
+    expect(
+      playerActionAuthorizationRequests('player-1', {
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'voxel', hit: [1, 2, 3], adjacent: [1, 3, 3] },
+        expectedSelection: { inventoryRevision: 4, modeRevision: 2, creativeCatalogRevision: 3, selectedSlot: 1 },
+      }),
+    ).toEqual([
+      { resource: 'world.action', operation: 'execute', target: { kind: 'entity', entityId: 'player-1' } },
+      { resource: 'world.interaction', operation: 'execute', target: { kind: 'voxel', position: [1, 2, 3] } },
+      { resource: 'world.interaction', operation: 'execute', target: { kind: 'voxel', position: [1, 3, 3] } },
+    ]);
+    expect(
+      playerActionAuthorizationRequests('player-1', {
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'entity', reference: { entityId: 'cow-1', epoch: 1, lifetime: 2 } },
+        expectedSelection: { inventoryRevision: 4, modeRevision: 2, creativeCatalogRevision: 3, selectedSlot: 1 },
+      }),
+    ).toEqual([
+      { resource: 'world.action', operation: 'execute', target: { kind: 'entity', entityId: 'player-1' } },
+      { resource: 'world.interaction', operation: 'execute', target: { kind: 'entity', entityId: 'cow-1' } },
+    ]);
   });
 });

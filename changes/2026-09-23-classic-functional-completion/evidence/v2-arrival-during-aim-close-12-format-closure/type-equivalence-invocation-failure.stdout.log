@@ -1,0 +1,3 @@
+PRE_VERIFIER_SHELL_FAILURE
+zsh:1: parse error near `)'
+The benchmark wrapper and TypeScript verifier did not start. No type-equivalence result was produced by this invocation.

@@ -1,6 +1,10 @@
 import type { AuthorityAction } from '../protocol/authority-worker-protocol';
 import { canonicalReferenceInteger } from './network-reference-integer';
 import { validateInventoryPointerInput } from '../gameplay/modules/inventory-pointer-contract';
+import {
+  cloneItemInteractionExpectedSelection,
+  isItemInteractionTarget,
+} from '../gameplay/modules/item-interaction-module';
 
 const actionTypes = new Set<AuthorityAction['type']>([
   'station',
@@ -14,6 +18,8 @@ const actionTypes = new Set<AuthorityAction['type']>([
   'move-inventory',
   'use-inventory',
   'inventory-pointer',
+  'interact',
+  'set-difficulty',
 ]);
 const isAuthorityActionType = (value: string): value is AuthorityAction['type'] =>
   actionTypes.has(value as AuthorityAction['type']);
@@ -50,6 +56,31 @@ const position = (value: unknown): [number, number, number] => {
   ];
 };
 
+const entityReference = (value: unknown) => {
+  const source = record(value);
+  const reference = {
+    entityId: text(source.entityId, 'entityId'),
+    epoch: nonNegativeSafeInteger(source.epoch, 'epoch'),
+    lifetime: nonNegativeSafeInteger(source.lifetime, 'lifetime'),
+  };
+  if (!reference.epoch || !reference.lifetime) throw new TypeError('Invalid interaction entity reference.');
+  return reference;
+};
+
+const interactionTarget = (value: unknown): Extract<AuthorityAction, { type: 'interact' }>['target'] => {
+  const source = record(value);
+  const target =
+    source.kind === 'self'
+      ? { kind: 'self' as const }
+      : source.kind === 'voxel'
+        ? { kind: 'voxel' as const, hit: position(source.hit), adjacent: position(source.adjacent) }
+        : source.kind === 'entity'
+          ? { kind: 'entity' as const, reference: entityReference(source.reference) }
+          : null;
+  if (!isItemInteractionTarget(target)) throw new TypeError('Invalid interaction target.');
+  return target;
+};
+
 /** 仅保留 Host 真实接收的 AuthorityAction 字段，丢弃任意扩展字段。 */
 export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   const source = record(value);
@@ -57,6 +88,12 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
     case 'inventory-pointer': {
+      if (
+        Object.keys(source).some(
+          (key) => !['type', 'actor', 'expectedInventoryRevision', 'station', 'command'].includes(key),
+        )
+      )
+        throw new TypeError('Inventory pointer action contains unknown fields.');
       const input = {
         actor: source.actor,
         expectedInventoryRevision: source.expectedInventoryRevision,
@@ -96,6 +133,14 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
     case 'select-hotbar':
     case 'use-inventory':
       return { type, slot: nonNegativeSafeInteger(source.slot, 'slot') };
+    case 'interact':
+      if (source.intent !== 'use' && source.intent !== 'alternate') throw new TypeError('Invalid interaction intent.');
+      return {
+        type,
+        intent: source.intent,
+        target: interactionTarget(source.target),
+        expectedSelection: cloneItemInteractionExpectedSelection(source.expectedSelection),
+      };
     case 'craft':
       return { type: 'craft', recipeId: text(source.recipeId, 'recipeId') };
     case 'attack':
@@ -109,5 +154,13 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
     case 'begin-break':
     case 'place':
       return { type, position: position(source.position) };
+    case 'set-difficulty':
+      if (!['peaceful', 'easy', 'normal', 'hard'].includes(source.value as string))
+        throw new TypeError('Invalid difficulty.');
+      return {
+        type,
+        value: source.value as import('../gameplay/difficulty-runtime').Difficulty,
+        expectedRevision: nonNegativeSafeInteger(source.expectedRevision, 'difficultyRevision'),
+      };
   }
 }

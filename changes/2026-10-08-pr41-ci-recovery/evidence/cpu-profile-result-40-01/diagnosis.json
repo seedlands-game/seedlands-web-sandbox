@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "diagnosticOnly": true,
+  "eligible": false,
+  "sourceSha": "63f8d24cfc2c083fc82f4f298932cec648550022",
+  "runId": "pr41-cloud-browser-30",
+  "wholeResult": {
+    "main": "FAIL",
+    "visual": "PASS",
+    "modular": "SKIP",
+    "wrapperExitCode": 1
+  },
+  "failure": "Original 900000ms main deadline; stone pickaxe crafted and station closed before entry into the iron-resource route.",
+  "profile": {
+    "samplingIntervalUs": 10000,
+    "durationSeconds": 900.139563,
+    "sampleCount": 75033,
+    "nodeCount": 4537,
+    "sampledDeltaSeconds": 900.130167,
+    "sampleCategoriesSeconds": {
+      "(program)": 178.344947,
+      "JavaScript": 199.77235,
+      "(idle)": 506.821847,
+      "(garbage collector)": 15.191023
+    },
+    "minuteCategoriesSeconds": [
+      {
+        "minute": 0,
+        "(program)": 1.658282,
+        "JavaScript": 6.894843,
+        "(idle)": 51.072453,
+        "(garbage collector)": 0.363739
+      },
+      {
+        "minute": 1,
+        "(program)": 6.445887,
+        "(idle)": 37.700821,
+        "JavaScript": 14.972202,
+        "(garbage collector)": 0.89059
+      },
+      {
+        "minute": 2,
+        "(idle)": 39.571355,
+        "JavaScript": 12.832085,
+        "(program)": 6.772095,
+        "(garbage collector)": 0.819262
+      },
+      {
+        "minute": 3,
+        "(program)": 6.128069,
+        "JavaScript": 12.378498,
+        "(idle)": 40.584004,
+        "(garbage collector)": 0.913346
+      },
+      {
+        "minute": 4,
+        "(idle)": 37.307815,
+        "JavaScript": 14.785882,
+        "(program)": 6.881368,
+        "(garbage collector)": 1.02487
+      },
+      {
+        "minute": 5,
+        "(idle)": 31.787846,
+        "JavaScript": 13.217305,
+        "(program)": 13.831732,
+        "(garbage collector)": 1.16195
+      },
+      {
+        "minute": 6,
+        "(idle)": 31.585309,
+        "(program)": 14.321759,
+        "JavaScript": 12.906735,
+        "(garbage collector)": 1.187959
+      },
+      {
+        "minute": 7,
+        "(idle)": 21.899433,
+        "JavaScript": 13.573698,
+        "(garbage collector)": 1.447905,
+        "(program)": 23.079674
+      },
+      {
+        "minute": 8,
+        "(program)": 25.489703,
+        "JavaScript": 13.162889,
+        "(idle)": 20.262143,
+        "(garbage collector)": 1.080002
+      },
+      {
+        "minute": 9,
+        "JavaScript": 12.571666,
+        "(program)": 21.645752,
+        "(idle)": 24.925137,
+        "(garbage collector)": 0.86138
+      },
+      {
+        "minute": 10,
+        "JavaScript": 13.656254,
+        "(idle)": 35.936727,
+        "(program)": 9.463696,
+        "(garbage collector)": 0.935821
+      },
+      {
+        "minute": 11,
+        "(idle)": 34.038998,
+        "(program)": 10.726877,
+        "JavaScript": 14.282124,
+        "(garbage collector)": 0.960523
+      },
+      {
+        "minute": 12,
+        "JavaScript": 14.280274,
+        "(program)": 8.867782,
+        "(idle)": 35.579097,
+        "(garbage collector)": 1.271709
+      },
+      {
+        "minute": 13,
+        "(idle)": 34.962009,
+        "(program)": 7.976151,
+        "JavaScript": 16.084749,
+        "(garbage collector)": 0.974245
+      },
+      {
+        "minute": 14,
+        "JavaScript": 14.173146,
+        "(program)": 15.05612,
+        "(idle)": 29.6087,
+        "(garbage collector)": 1.297722
+      }
+    ]
+  },
+  "current": {
+    "player": [78.50032043457031, 32.599998474121094, 0.47512730956077576],
+    "serverPlayerPosition": [78.50031720629488, 32.6, 0.4751273090176692],
+    "quality": "low",
+    "triangles": 110942,
+    "drawCalls": 34
+  },
+  "pairedFrameSampleMedians": {
+    "updateWallMs": 19.199999999254942,
+    "renderWallMs": 1.75,
+    "renderEnvelopeWallMs": 5.0,
+    "renderTailWallMs": 0.0,
+    "tickWallMs": 26.75,
+    "interTickGapWallMs": 793.1500000022352,
+    "receiveGapWallMs": 64.3500000052154,
+    "receiveGapCount": 27.0
+  },
+  "limitations": [
+    "V8 isolate sampling includes current production assets but excludes Worker and GPU execution.",
+    "idle/program categories do not establish GPU, trace or compositor causality.",
+    "Profile is diagnostic and cannot serve as an eligible A/A or A/B measurement.",
+    "Frame medians are from the same final 128 samples; do not subtract from other-window performance medians."
+  ]
+}

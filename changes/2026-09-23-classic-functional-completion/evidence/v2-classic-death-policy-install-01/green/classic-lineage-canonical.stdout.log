@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  01:17:39
+   Duration  677ms (transform 443ms, setup 0ms, import 549ms, tests 61ms, environment 0ms)
+

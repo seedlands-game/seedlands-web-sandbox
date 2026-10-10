@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "f6a4d814-884a-4317-85f8-1919e3f45592",
+  "pid": 75869,
+  "startedAt": "2026-09-25T05:33:22.009Z",
+  "windowId": "f6a4d814-884a-4317-85f8-1919e3f45592",
+  "evidencePath": "harness/results/performance-windows/f6a4d814-884a-4317-85f8-1919e3f45592.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T05:33:25.083Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T05:33:22.010Z",
+      "loadAverage": [
+        4.67138671875,
+        3.1494140625,
+        3.11376953125
+      ],
+      "freeMemoryBytes": 745668608,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T05:33:25.081Z",
+      "loadAverage": [
+        5.017578125,
+        3.24609375,
+        3.14794921875
+      ],
+      "freeMemoryBytes": 957169664,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

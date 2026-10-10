@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-13",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-13-00009bf2",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-00009bf2",
+  "sourceSha": "00009bf26c821d115264d224899dafde0d6cc163",
+  "treeSha": "e263d29f14a607103c3a80a40a9b7bed4997c58d",
+  "sourceDigest": "315820d63fc0ca323380ca45b6a537cb541842a41e396f3bfe94b0507d062dff",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fc7ac0053fd73c08035e95b41d39bf80889c7e23155a9e14d88a096f0b54f6e2",
+  "artifactReceiptSha256": "fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d",
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "audioMp3Sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "67994c3515a7d59c8aa62f59c520db0710822aac00f843cf173fd004afc47f98",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 36,
+    "sha256": "803effac1601a866cc9643c0248d1f0029f5a98434314213400b26922a1c58d9",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "window": {
+    "id": "ca001977-b334-4fbc-962f-254c2bc44a46",
+    "status": "FAIL",
+    "startedAt": "2026-09-25T22:19:45.188Z",
+    "endedAt": "2026-09-25T22:23:10.346Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED"
+  },
+  "playwright": {
+    "passed": 1,
+    "failed": 1,
+    "skipped": 1,
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1
+  },
+  "failure": {
+    "classification": "canonical-fixture-v1-door-lower-center-occluded-by-upper",
+    "failedAt": "v1-door-lower-reopen-real-mouse-reacquire-before-click",
+    "expectedTarget": [70, 31, 0],
+    "observedTarget": [70, 32, 0],
+    "playerEye": [71.475830078125, 32.60000228881836, 0.502830982208252],
+    "viewAngles": [-270.17999999999995, -48.37],
+    "authorityDispatchObservedForFailedLowerReopen": false,
+    "diagnosisSha256": "a8677c5125f34e3e6b2fc15260096b57a451300dffcb42966b8d8eb616b2b5fd"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "FAIL",
+    "V2": "NOT_REACHED",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED",
+    "visual": "PASS",
+    "nonClassicSmoke": "SKIPPED"
+  },
+  "restoreEvidence": null,
+  "failureAttachmentObservability": {
+    "pageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT"
+  },
+  "trace": {
+    "sizeBytes": 281535240,
+    "parts": 6,
+    "sha256": "5c382e5fd523e975859b1ee3642e762382eff70a7c61af160cb42a4d4a6d3115",
+    "reassemblyValidated": true
+  },
+  "runnerArchive": {
+    "outputRecords": 7,
+    "execLifecycleRecords": 2,
+    "terminalInteractionRecords": 6,
+    "processId": "69227"
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "files": 276,
+    "artifactReceiptSha256": "fa846dd12d91662a0f64b6a109df4b9c366f94d18d5108de5e10f94d7ccfb92d",
+    "benchmarkReceipt": "NOT_CREATED_BY_DIRECT_READ_ONLY_VERIFIER"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256": "dcf8ee2fa55fe08b0e21f3f7d525b0f8a43cc7dc72bb3d83bfb382c5edb61056",
+    "formatWindow": "v2-canonical-browser-13-report-final",
+    "formatReceiptSha256": "652c99d89f10bcea1bbfc0b2e2805905bc242f07fc381194ce972bfa9bdd0c1c",
+    "metadataFormatWindow": "v2-canonical-browser-13-metadata-format",
+    "metadataFormatStatus": "PASS",
+    "metadataFormatStdoutSha256": "4cce5b7127a45037526d643a168630fa2b5a418776fccef2102ffa6d9e54ff45",
+    "metadataFormatReceiptSha256": "b76b78a6e4754f14f362cafff785c13f424aeb872494d55586006d59c90e6c69",
+    "finalResourceCheckSha256": "3644e3bcb7f210f0273d605e4e091f8b3b8153285b7fe3982d703d415a6e2f4f"
+  },
+  "notObserved": [
+    "v2-equipment-journey",
+    "equipment-durability-loss",
+    "death",
+    "equipment-drop",
+    "respawn",
+    "Cua",
+    "human-audible-audio",
+    "performance"
+  ],
+  "notRun": ["build", "second-browser-attempt", "cua", "ci", "git", "deploy"]
+}

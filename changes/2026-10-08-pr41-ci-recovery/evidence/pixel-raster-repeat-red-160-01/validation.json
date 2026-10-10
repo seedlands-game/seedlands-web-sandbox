@@ -1,0 +1,43 @@
+{
+  "sourceSha": "aef4d3f2070cd6940e691c866d028a64d77bec88",
+  "status": "FAIL",
+  "durationMs": 78906,
+  "icons": 130,
+  "cases": 260,
+  "sourceURLMatches": 260,
+  "controlSameObjectRepeatDifferent16": 105,
+  "domSameObjectRepeatDifferent16": 1,
+  "all32Zero": true,
+  "rawRedstoneColors": {
+    "first": 46,
+    "repeated": 3
+  },
+  "rawPaperColors": {
+    "first": 27,
+    "repeated": 3
+  },
+  "interpretation": "A repeated draw of the same source object is not stable in current readback context; not a production geometry conclusion. Readback policy remains a hypothesis.",
+  "main151": "NOT_STARTED",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-repeat-visual-160-01.log",
+      "bytes": 24110,
+      "sha256": "ace8cf54895ce2902232c20505b57b1fa74d79875a8c3f6af63d5aade8eb5701"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-repeat-verify-160-01.json",
+      "bytes": 386,
+      "sha256": "679cbec60dce374953c5f42a07758fa783bc45bc40d28b9342a2335d702c6915"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-repeat-visual-attachments-160-01.json",
+      "bytes": 460081,
+      "sha256": "e32153df5f24026d1cda02ee3e8ecf764453a469fe10c74b2fb0f0aa959f25a1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-repeat-visual-result-160-01.json",
+      "bytes": 504816,
+      "sha256": "b2073bcc0e77a41deb7419cf045c951a9285d3c90e9d40707468b83253b5be83"
+    }
+  ]
+}

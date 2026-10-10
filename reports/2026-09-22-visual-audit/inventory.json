@@ -1,0 +1,1409 @@
+{
+  "sourceSha": "9115766075b8ae348397a38205fe74e24342da74",
+  "evidence": "静态注册清单；不代表逐项视觉验收通过",
+  "voxels": [
+    {
+      "id": 1,
+      "name": "Grass"
+    },
+    {
+      "id": 2,
+      "name": "Dirt"
+    },
+    {
+      "id": 3,
+      "name": "Stone"
+    },
+    {
+      "id": 4,
+      "name": "Wood"
+    },
+    {
+      "id": 5,
+      "name": "Leaves"
+    },
+    {
+      "id": 6,
+      "name": "Sand"
+    },
+    {
+      "id": 7,
+      "name": "Snow"
+    },
+    {
+      "id": 8,
+      "name": "Water"
+    },
+    {
+      "id": 9,
+      "name": "Glowstone"
+    },
+    {
+      "id": 10,
+      "name": "Lantern"
+    },
+    {
+      "id": 11,
+      "name": "Workbench"
+    },
+    {
+      "id": 12,
+      "name": "Chest"
+    },
+    {
+      "id": 13,
+      "name": "Furnace"
+    },
+    {
+      "id": 14,
+      "name": "CoalOre"
+    },
+    {
+      "id": 15,
+      "name": "IronOre"
+    },
+    {
+      "id": 16,
+      "name": "Planks"
+    },
+    {
+      "id": 17,
+      "name": "Cobblestone"
+    },
+    {
+      "id": 18,
+      "name": "Glass"
+    },
+    {
+      "id": 19,
+      "name": "GoldOre"
+    },
+    {
+      "id": 20,
+      "name": "DiamondOre"
+    },
+    {
+      "id": 21,
+      "name": "IronBlock"
+    },
+    {
+      "id": 22,
+      "name": "GoldBlock"
+    },
+    {
+      "id": 23,
+      "name": "DiamondBlock"
+    },
+    {
+      "id": 24,
+      "name": "Sandstone"
+    },
+    {
+      "id": 25,
+      "name": "StoneBricks"
+    },
+    {
+      "id": 26,
+      "name": "Farmland"
+    },
+    {
+      "id": 27,
+      "name": "Lava"
+    },
+    {
+      "id": 28,
+      "name": "Obsidian"
+    },
+    {
+      "id": 29,
+      "name": "Fire"
+    },
+    {
+      "id": 30,
+      "name": "Tnt"
+    },
+    {
+      "id": 31,
+      "name": "Sapling"
+    },
+    {
+      "id": 32,
+      "name": "TallGrass"
+    },
+    {
+      "id": 33,
+      "name": "Flower"
+    },
+    {
+      "id": 34,
+      "name": "Mushroom"
+    },
+    {
+      "id": 35,
+      "name": "SugarCane"
+    },
+    {
+      "id": 36,
+      "name": "Cactus"
+    },
+    {
+      "id": 37,
+      "name": "Spawner"
+    },
+    {
+      "id": 38,
+      "name": "DungeonChest"
+    },
+    {
+      "id": 39,
+      "name": "Rail"
+    },
+    {
+      "id": 40,
+      "name": "PoweredRail"
+    },
+    {
+      "id": 41,
+      "name": "DetectorRail"
+    },
+    {
+      "id": 42,
+      "name": "Bedrock"
+    },
+    {
+      "id": 43,
+      "name": "Gravel"
+    },
+    {
+      "id": 44,
+      "name": "LapisOre"
+    },
+    {
+      "id": 45,
+      "name": "Clay"
+    },
+    {
+      "id": 46,
+      "name": "Ice"
+    },
+    {
+      "id": 47,
+      "name": "SnowBlock"
+    },
+    {
+      "id": 48,
+      "name": "LapisBlock"
+    },
+    {
+      "id": 49,
+      "name": "Slab"
+    },
+    {
+      "id": 50,
+      "name": "WoodStairs"
+    },
+    {
+      "id": 51,
+      "name": "CobblestoneStairs"
+    },
+    {
+      "id": 52,
+      "name": "WoodenDoor"
+    },
+    {
+      "id": 53,
+      "name": "Ladder"
+    },
+    {
+      "id": 54,
+      "name": "Torch"
+    },
+    {
+      "id": 55,
+      "name": "Bed"
+    },
+    {
+      "id": 56,
+      "name": "Sign"
+    },
+    {
+      "id": 57,
+      "name": "Fence"
+    },
+    {
+      "id": 58,
+      "name": "Cake"
+    },
+    {
+      "id": 59,
+      "name": "DeadBush"
+    },
+    {
+      "id": 60,
+      "name": "Wool"
+    },
+    {
+      "id": 61,
+      "name": "RedFlower"
+    },
+    {
+      "id": 62,
+      "name": "RedMushroom"
+    },
+    {
+      "id": 63,
+      "name": "Bricks"
+    },
+    {
+      "id": 64,
+      "name": "Bookshelf"
+    },
+    {
+      "id": 65,
+      "name": "MossyCobblestone"
+    },
+    {
+      "id": 66,
+      "name": "NoteBlock"
+    },
+    {
+      "id": 67,
+      "name": "Jukebox"
+    },
+    {
+      "id": 68,
+      "name": "Pumpkin"
+    },
+    {
+      "id": 69,
+      "name": "JackOLantern"
+    },
+    {
+      "id": 70,
+      "name": "Trapdoor"
+    },
+    {
+      "id": 71,
+      "name": "LitFurnace"
+    },
+    {
+      "id": 72,
+      "name": "RedstoneOre"
+    },
+    {
+      "id": 73,
+      "name": "LitRedstoneOre"
+    }
+  ],
+  "faceMaterials": [
+    {
+      "id": 1,
+      "name": "GrassTop"
+    },
+    {
+      "id": 2,
+      "name": "GrassSide"
+    },
+    {
+      "id": 3,
+      "name": "Dirt"
+    },
+    {
+      "id": 4,
+      "name": "Stone"
+    },
+    {
+      "id": 5,
+      "name": "Sand"
+    },
+    {
+      "id": 6,
+      "name": "WoodSide"
+    },
+    {
+      "id": 7,
+      "name": "WoodEnd"
+    },
+    {
+      "id": 8,
+      "name": "Leaves"
+    },
+    {
+      "id": 9,
+      "name": "Snow"
+    },
+    {
+      "id": 10,
+      "name": "Water"
+    },
+    {
+      "id": 11,
+      "name": "Glowstone"
+    },
+    {
+      "id": 12,
+      "name": "LanternFrame"
+    },
+    {
+      "id": 13,
+      "name": "LanternGlow"
+    },
+    {
+      "id": 14,
+      "name": "Workbench"
+    },
+    {
+      "id": 15,
+      "name": "Chest"
+    },
+    {
+      "id": 16,
+      "name": "Furnace"
+    },
+    {
+      "id": 17,
+      "name": "CoalOre"
+    },
+    {
+      "id": 18,
+      "name": "IronOre"
+    },
+    {
+      "id": 19,
+      "name": "Planks"
+    },
+    {
+      "id": 20,
+      "name": "Cobblestone"
+    },
+    {
+      "id": 21,
+      "name": "Glass"
+    },
+    {
+      "id": 22,
+      "name": "GoldOre"
+    },
+    {
+      "id": 23,
+      "name": "DiamondOre"
+    },
+    {
+      "id": 24,
+      "name": "IronBlock"
+    },
+    {
+      "id": 25,
+      "name": "GoldBlock"
+    },
+    {
+      "id": 26,
+      "name": "DiamondBlock"
+    },
+    {
+      "id": 27,
+      "name": "Sandstone"
+    },
+    {
+      "id": 28,
+      "name": "StoneBricks"
+    },
+    {
+      "id": 29,
+      "name": "Farmland"
+    },
+    {
+      "id": 30,
+      "name": "Lava"
+    },
+    {
+      "id": 31,
+      "name": "Obsidian"
+    },
+    {
+      "id": 32,
+      "name": "Fire"
+    },
+    {
+      "id": 33,
+      "name": "Tnt"
+    },
+    {
+      "id": 34,
+      "name": "Sapling"
+    },
+    {
+      "id": 35,
+      "name": "TallGrass"
+    },
+    {
+      "id": 36,
+      "name": "Flower"
+    },
+    {
+      "id": 37,
+      "name": "Mushroom"
+    },
+    {
+      "id": 38,
+      "name": "SugarCane"
+    },
+    {
+      "id": 39,
+      "name": "Cactus"
+    },
+    {
+      "id": 40,
+      "name": "Spawner"
+    },
+    {
+      "id": 41,
+      "name": "DungeonChest"
+    },
+    {
+      "id": 42,
+      "name": "Rail"
+    },
+    {
+      "id": 43,
+      "name": "PoweredRail"
+    },
+    {
+      "id": 44,
+      "name": "DetectorRail"
+    },
+    {
+      "id": 45,
+      "name": "Bedrock"
+    },
+    {
+      "id": 46,
+      "name": "Gravel"
+    },
+    {
+      "id": 47,
+      "name": "LapisOre"
+    },
+    {
+      "id": 48,
+      "name": "Clay"
+    },
+    {
+      "id": 49,
+      "name": "Ice"
+    },
+    {
+      "id": 50,
+      "name": "SnowBlock"
+    },
+    {
+      "id": 51,
+      "name": "LapisBlock"
+    },
+    {
+      "id": 52,
+      "name": "Slab"
+    },
+    {
+      "id": 53,
+      "name": "WoodStairs"
+    },
+    {
+      "id": 54,
+      "name": "CobblestoneStairs"
+    },
+    {
+      "id": 55,
+      "name": "WoodenDoor"
+    },
+    {
+      "id": 56,
+      "name": "Ladder"
+    },
+    {
+      "id": 57,
+      "name": "Torch"
+    },
+    {
+      "id": 58,
+      "name": "Bed"
+    },
+    {
+      "id": 59,
+      "name": "Sign"
+    },
+    {
+      "id": 60,
+      "name": "Fence"
+    },
+    {
+      "id": 61,
+      "name": "Cake"
+    },
+    {
+      "id": 62,
+      "name": "DeadBush"
+    },
+    {
+      "id": 63,
+      "name": "Wool"
+    },
+    {
+      "id": 64,
+      "name": "RedFlower"
+    },
+    {
+      "id": 65,
+      "name": "RedMushroom"
+    },
+    {
+      "id": 66,
+      "name": "Bricks"
+    },
+    {
+      "id": 67,
+      "name": "Bookshelf"
+    },
+    {
+      "id": 68,
+      "name": "MossyCobblestone"
+    },
+    {
+      "id": 69,
+      "name": "NoteBlock"
+    },
+    {
+      "id": 70,
+      "name": "Jukebox"
+    },
+    {
+      "id": 71,
+      "name": "Pumpkin"
+    },
+    {
+      "id": 72,
+      "name": "JackOLantern"
+    },
+    {
+      "id": 73,
+      "name": "Trapdoor"
+    },
+    {
+      "id": 74,
+      "name": "LitFurnace"
+    },
+    {
+      "id": 75,
+      "name": "RedstoneOre"
+    },
+    {
+      "id": 76,
+      "name": "LitRedstoneOre"
+    }
+  ],
+  "itemVisualBindings": [
+    {
+      "id": "dirt-block",
+      "name": "泥土块"
+    },
+    {
+      "id": "stone-block",
+      "name": "石块"
+    },
+    {
+      "id": "wood-block",
+      "name": "原木"
+    },
+    {
+      "id": "sand-block",
+      "name": "沙块"
+    },
+    {
+      "id": "berry",
+      "name": "浆果"
+    },
+    {
+      "id": "plank",
+      "name": "木板"
+    },
+    {
+      "id": "cobblestone",
+      "name": "圆石"
+    },
+    {
+      "id": "glass",
+      "name": "玻璃"
+    },
+    {
+      "id": "charcoal",
+      "name": "木炭"
+    },
+    {
+      "id": "gold-ore",
+      "name": "金矿石"
+    },
+    {
+      "id": "diamond-ore",
+      "name": "钻石矿石"
+    },
+    {
+      "id": "iron-block",
+      "name": "铁块"
+    },
+    {
+      "id": "gold-block",
+      "name": "金块"
+    },
+    {
+      "id": "diamond-block",
+      "name": "钻石块"
+    },
+    {
+      "id": "gold-ingot",
+      "name": "金锭"
+    },
+    {
+      "id": "diamond",
+      "name": "钻石"
+    },
+    {
+      "id": "apple",
+      "name": "苹果"
+    },
+    {
+      "id": "bread",
+      "name": "面包"
+    },
+    {
+      "id": "raw-porkchop",
+      "name": "生猪排"
+    },
+    {
+      "id": "cooked-porkchop",
+      "name": "熟猪排"
+    },
+    {
+      "id": "raw-fish",
+      "name": "生鱼"
+    },
+    {
+      "id": "cooked-fish",
+      "name": "熟鱼"
+    },
+    {
+      "id": "wheat",
+      "name": "小麦"
+    },
+    {
+      "id": "wheat-seeds",
+      "name": "小麦种子"
+    },
+    {
+      "id": "leather",
+      "name": "皮革"
+    },
+    {
+      "id": "bowl",
+      "name": "碗"
+    },
+    {
+      "id": "bucket",
+      "name": "桶"
+    },
+    {
+      "id": "water-bucket",
+      "name": "水桶"
+    },
+    {
+      "id": "shears",
+      "name": "剪刀"
+    },
+    {
+      "id": "minecart",
+      "name": "矿车"
+    },
+    {
+      "id": "chest-minecart",
+      "name": "运输矿车"
+    },
+    {
+      "id": "furnace-minecart",
+      "name": "动力矿车"
+    },
+    {
+      "id": "boat",
+      "name": "船"
+    },
+    {
+      "id": "bow",
+      "name": "弓"
+    },
+    {
+      "id": "arrow",
+      "name": "箭"
+    },
+    {
+      "id": "string",
+      "name": "线"
+    },
+    {
+      "id": "feather",
+      "name": "羽毛"
+    },
+    {
+      "id": "flint",
+      "name": "燧石"
+    },
+    {
+      "id": "wool",
+      "name": "羊毛"
+    },
+    {
+      "id": "ink-sac",
+      "name": "墨囊"
+    },
+    {
+      "id": "rotten-flesh",
+      "name": "腐肉"
+    },
+    {
+      "id": "bone",
+      "name": "骨头"
+    },
+    {
+      "id": "gunpowder",
+      "name": "火药"
+    },
+    {
+      "id": "slimeball",
+      "name": "黏液球"
+    },
+    {
+      "id": "bed",
+      "name": "床"
+    },
+    {
+      "id": "saddle",
+      "name": "鞍"
+    },
+    {
+      "id": "milk-bucket",
+      "name": "奶桶"
+    },
+    {
+      "id": "egg",
+      "name": "鸡蛋"
+    },
+    {
+      "id": "fishing-rod",
+      "name": "钓鱼竿"
+    },
+    {
+      "id": "lava-bucket",
+      "name": "熔岩桶"
+    },
+    {
+      "id": "obsidian",
+      "name": "黑曜石"
+    },
+    {
+      "id": "tnt",
+      "name": "TNT"
+    },
+    {
+      "id": "sapling",
+      "name": "树苗"
+    },
+    {
+      "id": "flower",
+      "name": "花"
+    },
+    {
+      "id": "mushroom",
+      "name": "蘑菇"
+    },
+    {
+      "id": "sugar-cane",
+      "name": "甘蔗"
+    },
+    {
+      "id": "cactus",
+      "name": "仙人掌"
+    },
+    {
+      "id": "rail",
+      "name": "铁轨"
+    },
+    {
+      "id": "powered-rail",
+      "name": "动力铁轨"
+    },
+    {
+      "id": "detector-rail",
+      "name": "探测铁轨"
+    },
+    {
+      "id": "paper",
+      "name": "纸"
+    },
+    {
+      "id": "redstone-dust",
+      "name": "红石粉"
+    },
+    {
+      "id": "compass",
+      "name": "指南针"
+    },
+    {
+      "id": "clock",
+      "name": "时钟"
+    },
+    {
+      "id": "map",
+      "name": "地图"
+    },
+    {
+      "id": "flint-and-steel",
+      "name": "打火石"
+    },
+    {
+      "id": "mushroom-stew",
+      "name": "蘑菇煲"
+    },
+    {
+      "id": "painting",
+      "name": "画"
+    },
+    {
+      "id": "golden-apple",
+      "name": "金苹果"
+    },
+    {
+      "id": "sign",
+      "name": "告示牌"
+    },
+    {
+      "id": "wooden-door",
+      "name": "木门"
+    },
+    {
+      "id": "snowball",
+      "name": "雪球"
+    },
+    {
+      "id": "brick",
+      "name": "红砖"
+    },
+    {
+      "id": "clay",
+      "name": "黏土"
+    },
+    {
+      "id": "book",
+      "name": "书"
+    },
+    {
+      "id": "sugar",
+      "name": "糖"
+    },
+    {
+      "id": "cake",
+      "name": "蛋糕"
+    },
+    {
+      "id": "dead-bush",
+      "name": "枯灌木"
+    },
+    {
+      "id": "wool-block",
+      "name": "羊毛块"
+    },
+    {
+      "id": "red-flower",
+      "name": "红花"
+    },
+    {
+      "id": "red-mushroom",
+      "name": "红蘑菇"
+    },
+    {
+      "id": "bricks",
+      "name": "砖块"
+    },
+    {
+      "id": "bookshelf",
+      "name": "书架"
+    },
+    {
+      "id": "mossy-cobblestone",
+      "name": "苔石"
+    },
+    {
+      "id": "note-block",
+      "name": "音符盒"
+    },
+    {
+      "id": "jukebox",
+      "name": "唱片机"
+    },
+    {
+      "id": "pumpkin",
+      "name": "南瓜"
+    },
+    {
+      "id": "jack-o-lantern",
+      "name": "南瓜灯"
+    },
+    {
+      "id": "trapdoor",
+      "name": "活板门"
+    },
+    {
+      "id": "lit-furnace",
+      "name": "燃烧熔炉"
+    },
+    {
+      "id": "redstone-ore",
+      "name": "红石矿"
+    },
+    {
+      "id": "lit-redstone-ore",
+      "name": "发光红石矿"
+    },
+    {
+      "id": "sandstone-slab",
+      "name": "砂岩半砖"
+    },
+    {
+      "id": "wood-slab",
+      "name": "木半砖"
+    },
+    {
+      "id": "cookie",
+      "name": "曲奇"
+    },
+    {
+      "id": "cocoa-beans",
+      "name": "可可豆"
+    },
+    {
+      "id": "record-13",
+      "name": "唱片 13"
+    },
+    {
+      "id": "record-cat",
+      "name": "唱片 Cat"
+    },
+    {
+      "id": "gravel",
+      "name": "砂砾"
+    },
+    {
+      "id": "lapis-ore",
+      "name": "青金石矿石"
+    },
+    {
+      "id": "clay-block",
+      "name": "黏土块"
+    },
+    {
+      "id": "ice",
+      "name": "冰"
+    },
+    {
+      "id": "snow-block",
+      "name": "雪块"
+    },
+    {
+      "id": "lapis-block",
+      "name": "青金石块"
+    },
+    {
+      "id": "slab",
+      "name": "半砖"
+    },
+    {
+      "id": "wood-stairs",
+      "name": "木楼梯"
+    },
+    {
+      "id": "cobblestone-stairs",
+      "name": "圆石楼梯"
+    },
+    {
+      "id": "ladder",
+      "name": "梯子"
+    },
+    {
+      "id": "torch",
+      "name": "火把"
+    },
+    {
+      "id": "fence",
+      "name": "栅栏"
+    },
+    {
+      "id": "leather-helmet",
+      "name": "皮革头盔"
+    },
+    {
+      "id": "leather-chestplate",
+      "name": "皮革胸甲"
+    },
+    {
+      "id": "leather-leggings",
+      "name": "皮革护腿"
+    },
+    {
+      "id": "leather-boots",
+      "name": "皮革靴子"
+    },
+    {
+      "id": "iron-helmet",
+      "name": "铁头盔"
+    },
+    {
+      "id": "iron-chestplate",
+      "name": "铁胸甲"
+    },
+    {
+      "id": "iron-leggings",
+      "name": "铁护腿"
+    },
+    {
+      "id": "iron-boots",
+      "name": "铁靴子"
+    },
+    {
+      "id": "gold-helmet",
+      "name": "金头盔"
+    },
+    {
+      "id": "gold-chestplate",
+      "name": "金胸甲"
+    },
+    {
+      "id": "gold-leggings",
+      "name": "金护腿"
+    },
+    {
+      "id": "gold-boots",
+      "name": "金靴子"
+    },
+    {
+      "id": "diamond-helmet",
+      "name": "钻石头盔"
+    },
+    {
+      "id": "diamond-chestplate",
+      "name": "钻石胸甲"
+    },
+    {
+      "id": "diamond-leggings",
+      "name": "钻石护腿"
+    },
+    {
+      "id": "diamond-boots",
+      "name": "钻石靴子"
+    },
+    {
+      "id": "sandstone",
+      "name": "砂岩"
+    },
+    {
+      "id": "stone-bricks",
+      "name": "石砖"
+    },
+    {
+      "id": "gold-pickaxe",
+      "name": "金镐"
+    },
+    {
+      "id": "diamond-pickaxe",
+      "name": "钻石镐"
+    },
+    {
+      "id": "stone-axe",
+      "name": "石斧"
+    },
+    {
+      "id": "iron-axe",
+      "name": "铁斧"
+    },
+    {
+      "id": "gold-axe",
+      "name": "金斧"
+    },
+    {
+      "id": "diamond-axe",
+      "name": "钻石斧"
+    },
+    {
+      "id": "stone-sword",
+      "name": "石剑"
+    },
+    {
+      "id": "iron-sword",
+      "name": "铁剑"
+    },
+    {
+      "id": "gold-sword",
+      "name": "金剑"
+    },
+    {
+      "id": "diamond-sword",
+      "name": "钻石剑"
+    },
+    {
+      "id": "wood-shovel",
+      "name": "木锹"
+    },
+    {
+      "id": "stone-shovel",
+      "name": "石锹"
+    },
+    {
+      "id": "iron-shovel",
+      "name": "铁锹"
+    },
+    {
+      "id": "gold-shovel",
+      "name": "金锹"
+    },
+    {
+      "id": "diamond-shovel",
+      "name": "钻石锹"
+    },
+    {
+      "id": "wood-hoe",
+      "name": "木锄"
+    },
+    {
+      "id": "stone-hoe",
+      "name": "石锄"
+    },
+    {
+      "id": "iron-hoe",
+      "name": "铁锄"
+    },
+    {
+      "id": "gold-hoe",
+      "name": "金锄"
+    },
+    {
+      "id": "diamond-hoe",
+      "name": "钻石锄"
+    },
+    {
+      "id": "stick",
+      "name": "木棍"
+    },
+    {
+      "id": "wood-axe",
+      "name": "木斧"
+    },
+    {
+      "id": "wood-sword",
+      "name": "木剑"
+    },
+    {
+      "id": "stone-pickaxe",
+      "name": "石镐"
+    },
+    {
+      "id": "glowstone-block",
+      "name": "辉光石"
+    },
+    {
+      "id": "lantern",
+      "name": "灯笼"
+    },
+    {
+      "id": "workbench",
+      "name": "工作台"
+    },
+    {
+      "id": "chest",
+      "name": "箱子"
+    },
+    {
+      "id": "furnace",
+      "name": "炉体"
+    },
+    {
+      "id": "coal",
+      "name": "煤"
+    },
+    {
+      "id": "raw-iron",
+      "name": "铁矿石"
+    },
+    {
+      "id": "iron-ingot",
+      "name": "铁锭"
+    },
+    {
+      "id": "wood-pickaxe",
+      "name": "木镐"
+    },
+    {
+      "id": "iron-pickaxe",
+      "name": "铁镐"
+    },
+    {
+      "id": "white-wool",
+      "name": "白色羊毛"
+    },
+    {
+      "id": "orange-wool",
+      "name": "橙色羊毛"
+    },
+    {
+      "id": "magenta-wool",
+      "name": "品红色羊毛"
+    },
+    {
+      "id": "light-blue-wool",
+      "name": "淡蓝色羊毛"
+    },
+    {
+      "id": "yellow-wool",
+      "name": "黄色羊毛"
+    },
+    {
+      "id": "lime-wool",
+      "name": "黄绿色羊毛"
+    },
+    {
+      "id": "pink-wool",
+      "name": "粉红色羊毛"
+    },
+    {
+      "id": "gray-wool",
+      "name": "灰色羊毛"
+    },
+    {
+      "id": "light-gray-wool",
+      "name": "淡灰色羊毛"
+    },
+    {
+      "id": "cyan-wool",
+      "name": "青色羊毛"
+    },
+    {
+      "id": "purple-wool",
+      "name": "紫色羊毛"
+    },
+    {
+      "id": "blue-wool",
+      "name": "蓝色羊毛"
+    },
+    {
+      "id": "brown-wool",
+      "name": "棕色羊毛"
+    },
+    {
+      "id": "green-wool",
+      "name": "绿色羊毛"
+    },
+    {
+      "id": "red-wool",
+      "name": "红色羊毛"
+    },
+    {
+      "id": "black-wool",
+      "name": "黑色羊毛"
+    },
+    {
+      "id": "white-dye",
+      "name": "白色染料"
+    },
+    {
+      "id": "orange-dye",
+      "name": "橙色染料"
+    },
+    {
+      "id": "magenta-dye",
+      "name": "品红色染料"
+    },
+    {
+      "id": "light-blue-dye",
+      "name": "淡蓝色染料"
+    },
+    {
+      "id": "yellow-dye",
+      "name": "黄色染料"
+    },
+    {
+      "id": "lime-dye",
+      "name": "黄绿色染料"
+    },
+    {
+      "id": "pink-dye",
+      "name": "粉红色染料"
+    },
+    {
+      "id": "gray-dye",
+      "name": "灰色染料"
+    },
+    {
+      "id": "light-gray-dye",
+      "name": "淡灰色染料"
+    },
+    {
+      "id": "cyan-dye",
+      "name": "青色染料"
+    },
+    {
+      "id": "purple-dye",
+      "name": "紫色染料"
+    },
+    {
+      "id": "blue-dye",
+      "name": "蓝色染料"
+    },
+    {
+      "id": "brown-dye",
+      "name": "棕色染料"
+    },
+    {
+      "id": "green-dye",
+      "name": "绿色染料"
+    },
+    {
+      "id": "red-dye",
+      "name": "红色染料"
+    },
+    {
+      "id": "black-dye",
+      "name": "黑色染料"
+    }
+  ],
+  "actors": [
+    "grazer",
+    "night-stalker",
+    "settler",
+    "chicken",
+    "cow",
+    "pig",
+    "pig-zombie",
+    "sheep",
+    "squid",
+    "wolf",
+    "zombie",
+    "skeleton",
+    "spider",
+    "creeper",
+    "slime"
+  ],
+  "uiImages": ["health-heart", "hunger-drumstick", "arcane-crest", "obsidian-brass-panel", "obsidian-hotbar-slot"],
+  "additionalAuditSurfaces": [
+    "player/full-body",
+    "player/first-person-arm",
+    "equipment/held-dropped-equipped",
+    "crop/growth-stages",
+    "vehicles/projectiles/painting",
+    "weather/water/fire/particles",
+    "menu/HUD/target/selection/break-overlay"
+  ]
+}

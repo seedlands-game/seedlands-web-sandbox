@@ -9,6 +9,7 @@ export type PersistenceWorkerConfig = {
   seedText: string;
   generatorVersion: number;
   provider: KernelWorldgenProviderIdentity;
+  voxelStorageIds: readonly number[];
 };
 export type PersistenceInitTask = {
   kind: 'init';
@@ -16,6 +17,7 @@ export type PersistenceInitTask = {
   openMode: WorldOpenMode;
 } & PersistenceWorkerConfig;
 export type PersistenceLoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
+export type PersistenceColumnDirectoryTask = { kind: 'column-directory'; requestId: number; cx: number; cz: number };
 export type PersistenceLoadBatchTask = {
   kind: 'load-batch';
   requestId: number;
@@ -51,10 +53,18 @@ type StatsTask = { kind: 'stats'; requestId: number };
 export type PersistenceSeedCorpusTask = { kind: 'seed-corpus'; requestId: number; chunkCount: number };
 type MarkLegacyMigratedTask = { kind: 'mark-legacy-migrated'; requestId: number };
 export type PersistenceLatestWorldTask = { kind: 'latest-world'; requestId: number; databaseName: string };
+export type PersistenceListWorldsTask = { kind: 'list-worlds'; requestId: number; databaseName: string };
+export type PersistenceDeleteWorldTask = {
+  kind: 'delete-world';
+  requestId: number;
+  databaseName: string;
+  worldId: string;
+};
 
 export type PersistenceWorkerTask =
   | PersistenceInitTask
   | PersistenceLoadTask
+  | PersistenceColumnDirectoryTask
   | PersistenceLoadBatchTask
   | PersistenceSaveTask
   | PersistenceSaveMetadataTask
@@ -63,7 +73,9 @@ export type PersistenceWorkerTask =
   | StatsTask
   | PersistenceSeedCorpusTask
   | MarkLegacyMigratedTask
-  | PersistenceLatestWorldTask;
+  | PersistenceLatestWorldTask
+  | PersistenceListWorldsTask
+  | PersistenceDeleteWorldTask;
 
 export type PersistenceCorpusSummary = {
   storedChunkCount: number;
@@ -87,6 +99,7 @@ export type PersistenceWorldRecord = {
   updatedAt: number;
   commitSequence?: number;
   worldRevision?: number;
+  chunkDirectoryRevision?: number;
 };
 
 export type PersistenceWorkerSuccess = { requestId: number; ok: true; result: unknown };

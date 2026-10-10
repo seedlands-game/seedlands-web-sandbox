@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "stage": "GIT-23-REGISTERED-COMBAT-ARMOR",
+  "status": "READY_FOR_EVIDENCE_COMMIT",
+  "baseline": "5a835ab88454e8506db986c73187c695df1263ea",
+  "sourceCommit": "067c87607de7d85dace165f81947f84290ed0231",
+  "sourceTree": "73348a00123f0c65fcd4031bed701739654b1411",
+  "stagedPatchSha256": "2489605d9b012d5f35885c12193de0deb21f13eed4f22f9124157cb2cafe2ae4",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 8,
+    "sha256": "3723c42c449ef45d7a426470612a239d7eb04d375e9f87cf9bd768101e25a2a6"
+  },
+  "historicalEvidence": {
+    "manifestSha256": "13ef2fdfc10f79708e62ee7be86378e78e9383807227ff9d9ac01cbe0302522b",
+    "entries": 52,
+    "sourceManifestSha256": "6cc7868f658bd44e0bbf2eec0845102b3b6419065f7ff5a51937940a080dbb3b",
+    "unchanged": true
+  },
+  "dependencies": {
+    "tree": "/private/tmp/seedlands-git23-combat",
+    "internalPackagesResolveInsideTree": true,
+    "thirdPartyPnpmStoreReused": true,
+    "taskStateInsideTree": true,
+    "armorEquipmentSha256": "819282b141199970efc58755a7cae217b9c99993c8cbabf8e789cf99d7442f41",
+    "armorEquipmentModified": false
+  },
+  "tests": {
+    "registeredCombatArmor": { "window": "git23-combat-armor", "files": 1, "passed": 8 },
+    "combatRegression": { "window": "git23-combat-regression", "files": 2, "passed": 22 },
+    "combatFrontier": { "window": "git23-combat-frontier", "files": 3, "passed": 14 },
+    "classicArmor": { "window": "git23-classic-armor", "files": 1, "passed": 6 },
+    "equipmentRegression": { "window": "git23-equipment-regression", "files": 3, "passed": 43 },
+    "sharedDeathRed": {
+      "window": "git23-death-red",
+      "status": "EXPECTED_FAIL",
+      "exitCode": 1,
+      "failed": 1,
+      "skipped": 2,
+      "reason": "combat death producer retains equipped armor"
+    }
+  },
+  "static": {
+    "stdlibTypes": { "window": "git23-stdlib-types", "status": "PASS" },
+    "rootTestTypes": { "window": "git23-root-test-types", "status": "PASS" },
+    "classicTestTypes": { "window": "git23-classic-test-types", "status": "PASS" },
+    "stagedEslint": { "window": "git23-staged-eslint", "status": "PASS" },
+    "editableFormat": { "window": "git23-editable-format", "status": "PASS" },
+    "scopedDiff": { "window": "git23-scoped-diff", "status": "PASS" }
+  },
+  "notRun": ["web-pointer", "restore", "build", "browser", "cua", "ci", "deploy", "merge"]
+}

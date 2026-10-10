@@ -13,6 +13,7 @@ import { pixelCanvas } from '../gameplay/asset-image';
 import { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { addBuiltinActorModel, addPlayerArm } from '../gameplay/builtin-actor-models';
 import { addVoxelPreview } from './voxel-preview-resource';
+import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
 import { addGlbModel } from '../gameplay/glb-model-resource';
 import type { ModelAnimationPlayback } from '../gameplay/model-animation';
 import { terrainMaterials } from '../../client/presentation/terrain-assets';
@@ -128,6 +129,8 @@ export class PreviewScene {
         const lease = await addGlbModel(this.app, stage, asset.payload.modelId, this.abort.signal);
         release = lease.release;
         glbPlayback = lease.playback;
+        if (classicCreatureDefinition(asset.payload.modelId))
+          glbPlayback?.play('idle', { loop: true, blendSeconds: 0 });
       } else if (asset.type === 'builtin-voxel-model') {
         distance = 2.6;
         release = await addVoxelPreview(this.app, stage, asset.payload.voxelId, undefined, all);

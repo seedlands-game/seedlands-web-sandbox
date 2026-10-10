@@ -1,0 +1,1374 @@
+# PR41 当前源码 CI 与可玩性修复
+
+## Classic普通矿车生产入口 checkpoint75（预注册）
+
+2026-10-10 00:49UTC，冻结09f2803e，CI74自然运行，Root先以正式Classic Pack/Authority use请求验证当前矿车未注册的有效RED，并保存当前V4 composition及恢复基线。最小产品范围普通minecart/普通rail39：正式definition/provider/item binding，真实消耗与ECS lifetime/projection原子提交，已占位/陈旧选择/unknown拒绝，原V4身份显式兼容；接续同accepted transport投影的通用呈现、真实use entity mount/alternate self dismount以及已接受输入。直线先闭合，角/坡、powered/detector、燃料货箱及非空旧V1迁移另验，不从sample参数臆造Classic合同。新增namespace和composition不能悄然损坏当前存档；完整产品Browser待新identified artifact原唯一runner。
+
+Root独占Classic transport及binding/pack/migration、既有Web生产目标/呈现文件、新Classic Authority测试、selector/type/spec/evidence；Luna只读Task136已完成，无新实现委派。传统1PD×120%=1.2PD，AI60min×120%=72min，01:01首次有界checkpoint，02:01保守上限，到点必须重估或保留可恢复进度。最新真实UI00:09剩82%/5d2h，00:44已请求刷新；约60%立即停止线。此功能片不声称性能收益，守原超时/质量/键鼠与存档整体验证；CI74不取消、不抢push。长期docs和codemap仅随实际新职责更新，不先宣称完整运输。
+
+01:02首次checkpoint75：正式Classic部署有效RED1FAIL，候选正确接入后1PASS。真实09f生产Pack及exact host admission校验后保存Authority V4；占位a/b/c fixture另标。恢复先因缺新manual system再因顺序失败，保留全部日志；按target注册顺序插入唯一zero cursor并保持旧时钟后四项PASS，未知摘要/缺旧system仍拒绝。Singleton item interaction门禁保留，binding并入原provider；deployments使用现有runtime storage item key，selector仍作者namespace。当前只是未提交候选，真实呈现/上下车、原子负例与完整检查未完成；预计继续在02:01保守上限内复验。CI74已自然terminal FAIL（五非浏览器SUCCESS、C0/V1失败、VisualPASS、Modular/部署SKIP），PR仍不可合入。
+
+01:49静态checkpoint75：普通矿车/普通直轨39正式注册和生产准入，原创GLB10,140bytes/2primitives，generic accepted定义/pose/yaw及lifetime替换释放，原生右键entity/Shift右键self入口已接通。正式Authority占位、陈旧selection/lifetime、无效site拒绝并保持原子性；use上车、真实协议input推进、alternate下车通过。实际09f生产Pack旧V4捕获推进175ms后time0.15/forage remainder0.15，迁移保留旧lifetime/inventory/时钟；非空V1明确拒绝并保留原存档，不宣称完整legacy转换。pre-Media来源从固定真实pre-transport图派生，保留既有075摘要；新target不能改写允许集合。旧身份手工fixture同步去除未来system，sealed真实捕获字节不动。Task137只读指出身份/lifetime事项后Root已修复，9文件68PASS及后续完整覆盖，不把其早期报告当最新GREEN。
+
+完整headless首轮760PASS/4FAIL（旧fixture和新增空ECS字段断言）；修正后与静态并行时原木板5秒超时，763PASS/1FAIL；孤立木板+本片7PASS，最终串行121files/764PASS。lint/paths、16工程测试、全仓Web/Svelte/tools/Classic类型、完整format及5/5sealed字节校验均PASS；Classic Pack26PASS。Stdlib并行1194PASS/1原mesh5秒超时，孤立4PASS，串行全量此刻进行中。所有原FAIL日志保留，不改原时限或断言。新矿车Browser在原唯一spec注册120秒用例；主900秒/visual240秒/Modular90秒不变，诊断重试下总容纳42分钟＋原5分钟报告余量，CI job45→47分钟，容量合同有效RED后16工程PASS。该附加测试用独立失败附件，不继承主旅程stage状态。当前无BrowserPASS，旧894e dist保留，须新identified build与原runner；不宣称性能收益或整帧A/A/A+B。最新真实UI01:24剩81%/5d1h，约60%停止线，02:01片内保守上限保持。远端01:45fetch仍09f/mainfba，未提交推送，无merge/automerge/生产部署。
+
+01:50收尾checkpoint75：Stdlib最终单worker166files/1195PASS/191.53s，前一默认并行超时与孤立4PASS保留。其他静态/764headless均已通过；先保存源码commit，再保留旧产物、构建新精确identity和原唯一runner验证原生矿车。此时Browser仍NOT_RUN，PR仍不可合入。
+
+## 控制台Authority字段收窄 checkpoint74（预注册）
+
+2026-10-10 00:38UTC，73已提交7928a990。CI71实际motion.authority除类型声明的tick/ACK/commit/residency外还含physicsCost样本数组；原直接复制对象未执行窄字段合同。仅在既有同次snapshot控制台presentation显式挑选声明字段和三个residency计数，完整snapshot附件保持。实际collector新增额外运行时字段反例，原三例保持；不改输入、断言、超时、生产行为或性能结论。
+
+Root独占evidence.ts及既有failure-motion-diagnostics.test.ts、spec/evidence，无新委派。传统0.05PD×120%=0.06PD；AI5min×120%=6min，00:44前checkpoint。最近真实UI00:09UTC剩82%/5d2h，约60%停止线；实际型号未核实、不换算额度。定向测试/Classic类型/lint/format，复用73完整headless，不重复无关全量。长期docs不改。CI71已自然terminal；后续推送仅已授权PR preview，无生产部署。
+
+00:39本地checkpoint74：实际collector有效RED1FAIL/3PASS，候选4PASS/EXIT0；Classic类型与相关lint通过。显式字段保持null及原snapshot对象，完整附件不变；复用73完整headless及工程16项。详见evidence/failure-motion-narrow-checkpoint-74-01.md，精确SHA CI仍待验。
+
+## Block-light GPU立即失效 checkpoint73（预注册）
+
+2026-10-10 00:25UTC，本地78fb17d0仅完成CPU陈旧采样；远端66467feb的CI71仍自然运行。当前cache失效仅标记待重建，sink没有失败暗化端口，terrain/water/crop借用的同一R8纹理可继续保留旧亮度。先用真实cache的显式编辑与另一brick优先重建反例证明旧sink未失效，再给现有sink补必需failDark，首次失效清空同一R8像素并unlock，已有borrowers保持相同texture引用；多次失效不重复清空，成功重建沿原apply发布。
+
+source residency可先于mesh通知变化，World drain在render前显式刷新当前halo新鲜度；failure diagnostics getter仍只读，不能为观察修改状态。原cache owner、重建预算/aging优先级、prepare/attach/release边界保持；CPU采样复用72校验，GPU清零不是sky统一接线或性能收益。关键测试包括同revision不暗化、连续失效幂等、另brick优先时所有陈旧sink暗化、zero R8上传及texture引用/metadata保持、实际World drain接线。真实WebGL像素仍需后续生产artifact矩阵，不以Mock texture宣称像素PASS。
+
+Root独占cache/adapter/World三个生产文件、相关原cache/pump测试及新GPU失效测试、package/type/spec/evidence；无新委派。传统0.25PD×120%=0.3PD，AI20min×120%=24min，00:49前checkpoint；CI71终态前不push、不取消。最新主对话真实UI读数00:09UTC剩82%/5d2h，00:25收到；约60%停止线，实际型号/费用未核实，不换算周额度。长期产品docs不改，失效端口属于既有owner职责。
+
+00:36本地checkpoint73：六文件38PASS，完整headless串行116文件726PASS/EXIT0（222.79秒），完整Web/Svelte及Classic类型、相关lint/paths通过。原始有效RED及所有原断言保留。纹理清零端口只验证mock lock/unlock，不是WebGL像素证据；成本未测量、无性能改善声明。CI71已自然terminal FAIL，门请求被流体可见性屏障延后但释放缺陷未证实。详见evidence/block-light-gpu-invalidation-checkpoint-73-01.md；后续精确SHA CI/真实玩法待验证。
+
+## Block-light消费者陈旧读 checkpoint72（预注册）
+
+2026-10-10 00:19UTC，精确66467feb的CI71自然运行，不取消或抢推。生产entity/drop经Game→AdvancedVisualEffects→WorldRuntime→ChunkBlockLightCache.sample取得block光；sample目前只检查缓存是否存在，未核对当前Authority halo revision，invalidateAround也只标记待重建。先用真实缓存/体积及Classic voxel semantics建立反例：移除光源后的显式失效、revision先于mesh通知变化、区域变unknown，重建前不得继续采样旧光值；同revision控制保持原亮度。若有效RED成立，仅在sample使用当前既有chunkBlockLightNeedsRefresh合同失败暗化，不改变重建、sink、texture、帧预算、队列优先级或GPU资产。
+
+本片只闭合entity/drop CPU采样的新鲜度，terrain/crop GPU立即失效、sky可见度与统一SurfaceLightingSample仍需生产接线和像素验收。无性能改善声明，不改全局sun/ambient。Root独占block-light-volume.ts及其既有测试、package/type追加、spec/evidence；现有Luna只读Task134已完成，无新委派。传统0.1PD×120%=0.12PD、AI8min×120%=9.6min，00:29前checkpoint。最新真实额度82%/5d3h（23:09），刷新待答，约60%停止线；无法核实实际型号/credits/API，不作换算。长期docs暂不更新，复用既有缓存owner和revision合同。
+
+00:22本地checkpoint72：三类有效RED3FAIL/10PASS；最小采样revision检查后五文件32PASS/EXIT0，Web生产/Svelte/tools与Classic测试类型通过，相关lint/paths通过。package/type集合仅追加原block-light-volume测试，所有原字段/选择保持。源sample不修改owner状态或重建，仅陈旧返回0；GPU失效和sky统一接线仍未完成。实际生产代理精确核对后更正早期WorldEnvironment误写为AdvancedVisualEffects；不是新owner。详见evidence/block-light-stale-sample-checkpoint-72-01.md，CI71尚在运行，不抢推。
+
+## V2失败控制台快照 checkpoint71（预注册）
+
+2026-10-10 00:12UTC，第70组本地commit d9d41f18已完成，尚未push；CI69自然terminal FAIL。真实ZIP传入仍待具体域名授权，现有failure collector已读取同一正式harness.snapshot，却仅输出chunk/trace而丢弃玩家与Authority位置、速度、ground/collision及ACK字段。仅将该次既有读回的窄motion字段加入diagnosticOnly/eligible:false控制台结果；不添加采样、不改输入/状态、超时、断言、质量或产品路径。用实际collector执行取得缺字段RED，覆盖有效snapshot、未启动无harness、snapshot异常时原错误及input诊断保持；必要类型/lint及定向测试后与70一起正常推送，不重复全量headless以凑证据。真实console新字段仍需新head唯一CI runner验证，不宣称V2修复。
+
+Root独占evidence.ts、新failure-motion-diagnostics.test.ts、package/type选择及spec/evidence；无新委派。传统0.1PD×120%=0.12PD、AI12min×120%=14.4min，最晚00:27有界checkpoint。真实额度最新82%（23:09），刷新仍待答，不换算tokens/credits，不扩预算。长期产品docs不更新，既有失败附件仍保留完整snapshot及restoreEvidence；此片仅补控制台可得字段。
+
+00:14本地checkpoint71：有效RED2FAIL/1PASS；四文件17PASS/EXIT0、Classic测试类型、相关lint/paths及工程16项通过。确定性JSON比较证明package仅追加新headless测试、类型集合仅追加同一路径。复用70完整static/113文件704PASS，不凑重复全量检查；真实浏览器字段输出及V2尚未验收。00:12–00:14约2分钟本地实现/验证，保存证据/正常提交推送另记实际墙钟，仍在14.4分钟保守量内。详见evidence/failure-motion-console-checkpoint-71-01.md。
+
+## 网格失败诊断 checkpoint70（预注册）
+
+2026-10-09 23:48UTC，精确5790da0的CI69仍自然运行，五项非浏览器SUCCESS；不取消、不抢推。CI68重试实际下半门chunk 2,0,0 authority126/render125，trace105已worker完成但仅见两个part提交，没有发布事件。现有日志缺请求优先级/可见屏障及分片总数，不能据此认定producer缺陷或starvation。仅补充现有trace mark可选不可变属性：请求有效priority/排队状态/barrier、accepted result的partsTotal/taskId/revision、实际adapter已提交partsCommitted。trace身份不可被属性覆盖，未完成trace也须导出字段；原发布、取消、丢弃边界不变。以当前导出丢失属性的执行RED先证明诊断缺口，再验证实际scheduler请求和accepted worker结果产生字段。保留原输入、5/900秒、帧预算、优先级算法、门断言、质量与runner；不声称修复门或取得性能收益。
+
+根独占上述三个生产文件、相关既有测试及本spec；无新委派。传统0.15PD×120%=0.18PD，AI20min×120%=24min，次日00:12前checkpoint并重估；actual型号/credits/API未核实且不换算周额度。23:09真实UI剩82%/5d3h，23:38已请求刷新读数，约60%停止线保持。CI artifact域名授权仍pending，现有console不依赖ZIP传输。长期docs不更新：仅扩展既有诊断字段，无owner或产品合同变更。
+
+有效属性RED 1FAIL/6PASS、实际scheduler RED 1FAIL/14PASS均取得；首次错选根Vitest项目为No tests found，仅安装/选择失败。初轮五文件31PASS，但真实lint及完整static在两个500行门槛处FAIL。保持门槛，新增mesh-task-telemetry.ts承接诊断及原Worker generation/halo原样记录，将新测试单独放入mesh-task-scheduler-diagnostics.test.ts；旧scheduler测试恢复原字节。新诊断测试和既有telemetry测试只追加headless和类型集合，所有原选择不变。代码地图只更新新职责入口；长期产品合同不变。修正后结果仍待实际执行。
+
+00:11UTC checkpoint70本地闭合：七文件41项PASS，完整static EXIT0；完整headless首轮703PASS/1既有木板建造5秒超时，隔离原两项2PASS，最终串行113文件704PASS/EXIT0（175.35秒）。门槛和源码不因超时改动，失败记录保留。23:48–00:11约23分钟在24分钟保守量内；新SHA真实浏览器字段及CI待验收。精确5790da0的CI69已自然terminal：五项非浏览器SUCCESS，主旅程两次V2铁资源阶段耗尽原900秒，VisualPASS、ModularSKIP、部署SKIP。附件分别240438738/251229792 bytes成功上传但未传入本环境。详见evidence/mesh-failure-diagnostics-checkpoint-70-01.md，PR仍不可合入。
+
+## 正式路线运输运动 checkpoint69（预注册）
+
+2026-10-09 22:48UTC，head52f41c10的CI68自然执行，不取消。注册motion当前明确拒绝route，runtime仅projectSurfaceMotion；纯route模型通过不能证明正式玩法。先以实际非Classic注册组合、部署、mount和accepted world-space输入取得RED，再沿同一manual system/prepared ECS frontier接入route adapter。局部端点原点高度复用67合同，所有当前/邻格用frame.world.querySolids记录包括non-solid轨道的chunk revision；未知/断开/多个邻格失败关闭，保持64transition上限。沿当前directed cursor前进，负输入仅减速到零，不静默倒车或改cursor方向。
+
+碰撞包括实际yaw及rider body；quarter arc须有保守弧线/转动包络，不能以单一chord当完整路线。真实Authority覆盖平轨跨格、坡道、mount seat同tick、loaded墙、before-rule veto及route revision陈旧；pure adapter补反向/四角/unknown/ambiguous与观察集，不冒充真实Browser运输UI。surface行为、权限、cargo/fuel/lifetime和单一事务owner保持；静态/相关测试通过后再完整必要检查。本片不增加Classic默认轨道或运输UI，不宣称完整V3/非空旧存档迁移/照明/194/性能准出。
+
+根独占route adapter/runtime/module/test/spec；无新agent。传统0.75PD×120%=0.9PD、AI60min×120%=72min，首个有界checkpoint23:18、最晚次日00:00前重新估计；实际模型/credits/API无法核实，不换算周额度。22:09真实UI剩83%/5d4h，约60%停止线。CI66已terminal ChromiumFAIL、部署SKIP；其trace引用下载进云环境HTTPS代理403，已报告具体oaiusercontent域名等待许可，不绕过或扩权限。长期docs暂不更新：复用已冻结route provider与事务合同。
+
+23:09UTC主对话产品UI实测周剩82%/5d3h，停止线仍约60%。Task130最终实际RED-03不是浮点夹具失败：两条真实first-pass候选均clear、端点不交，字面同步弧线AABB相交而relative chord无contact，旧第二pass漏判。Root在同帧第二pass传递first-pass候选Map，以另一carrier实际traveledDistance保守扩张全yaw/rider水平及上下包络，覆盖多曲线/坡段；Map不跨帧、不新增owner。最终定向29项PASS，完整类型EXIT0；近距离并行路径可能提前停车，不宣称精确time-of-impact/性能收益。完整stdlib第一轮1193PASS/1FAIL：既有CLI用例15.97秒超过原15秒；保持原门槛，隔离串行复核及完整headless仍运行。
+
+23:15有界风险复核发现新增route provider使既有surface adapter面对另一route carrier时仍只有弦/原body，可能漏掉曲线或rider包络。现有唯一Luna Task131只扩展同一专属stdlib测试文件与private日志，以真实surface候选对route弧线建立独立mixed-provider RED；先验证实际first-pass、literal同步AABB与chord控制，不因模型推测直接改源码。现有source冻结到当前headless结束；若反例成立，再复用同帧候选长度包络覆盖surface→route，不扩大产品内容或性能声明。原CLI文件在无并发types的隔离串行复核7/7PASS，67.81秒；原整轮1193PASS/1FAIL不改写成PASS。
+
+CI68精确52f41c10已自然terminal：build/architecture/deterministic/headless/static SUCCESS，Chromium FAIL，部署SKIP。首次V2铁资源路线耗尽原900秒；重试V1新木门跨Chunk mesh原5秒检查得到[-1,0]而预期[0,0]，visual PASS，Modular SKIP。不能与旧V2 inventory失败混为相同原因。Group68原始trace/results及完整HTML分别成功上传139049592/150359464 bytes，均低于536870912下载工具cap；尚未传入环境检查ZIP树/trace。前述具体域名许可仍pending，无绕过。
+
+23:30最终本地checkpoint69：冻结候选完整stdlib166文件1195项PASS/EXIT0、完整headless111文件695项PASS/EXIT0；混合修复相关四文件37项PASS、生产workspace全部types及测试/tools/classic三集合通过，format/lint/paths通过。完整type命令最初在测试session epoch类型处FAIL，精确行修正后相关集合全部通过；未把旧失败改成PASS。测试max-lines实际FAIL后原样分为route与mixed两文件，无门禁豁免。最终有界复核补核实际Authority held transport first-pass入口；没有其他可证实P0/P1，但保守包络可能提前停车。实现/协调/返工/审阅/本地验证22:48–23:30约42分钟，在原72分钟保守量内；新head远端CI及真正产品验收待结果。详见evidence/registered-route-motion-checkpoint-69-01.md，长期docs保持既有合同。
+
+## Modular 正常玩家方块入口 checkpoint66（预注册及实际局部验收）
+
+Group65已有正常feature提交da2a2ed6，76项定向/673项完整headless/完整static/build通过。原Browser65实际EXIT1：正式C0–C3 PASS、crop第一条[65.5,-0.5]原45秒FAIL、visual2.5min PASS、Modular SKIP；最后80ms事件生成83–87ms而page callback312–319ms，停稳pose在64.9399/66.3587两侧漂移。该事实不授权改变physics、late policy、range/原.06/.08到达、45/900秒或quality。当前精确CI65五项SUCCESS、Chromium仍运行，不能取消或抢推新head。
+
+Task126只读确认sample:modular-world已有sentinel-glass place:500、hardness.2/drop及通用BlockActions/Rules、Creative UI/正式player place入口。现有90秒smoke仅用Harness.setVoxelAt改变世界，因此当前缺玩家行为证据，未证实生产producer缺陷。先以实际verified Pack/其精确声明权限/loaded sample world，通过既有registered玩家mode/creative-slot命令和Authority.performAction放置/挖掘取最低充分合同；若当前已GREEN如实记录已有行为，不凑RED。occupied/stale/无权/unknown等关键反例必须保持各owner无变化，不用GameServer.edit替代成功动作或直接改entity/inventory owner。
+
+Task127有效诊断区分两个组合：exact Pack 的正常set-mode被OPERATION_UNKNOWN拒绝；仅临时补充标准Mode/Ruleset的组合进一步在place返回Unknown Block rule voxel: 0，尚未到occupied/break断言。原HeadlessSession出生失败保留为setup failure，根因未定位，不作行为RED。Root在实际sample Pack注册标准Mode/Ruleset及自有Air rule0（不可挖、无drop、replaceable），不导入Classic定义；现有product admission已显式允许mode/ruleset，未改grants。测试移除全部补充模块，只装exact Pack并使用声明权限；测试摘要只是可信组合夹具，不是实际字节验证。Root两文件5项PASS/EXIT0，正常place/break及occupied无部分写入已到达；后续生产构建/浏览器仍待验。完整verify:static:ci实际EXIT0，新增证据文档随后单独Prettier检查；不重复全部检查。
+
+Root追加现有Mode/Block回归出现实际38 PASS/7 FAIL：gameplay-registered-mode.test与mode-command-host.test两份旧Classic可信组合夹具把resources写成[]，在实际Pack已有presentation/resources时被完整性门禁拒绝，玩法尚未执行。此缺口与Modular新声明无依赖，最小修复仅按当前pack.manifest.resources补齐测试摘要路径，保留其mock digest边界、所有鉴权/landing/reentry/queue/restore/Authority断言，不修改assembly或production grants；追加两份原行为测试到headless选择，修复后必须实际重跑并单独验证格式/lint/types。根负责集成，此范围扩展不新增agent，原失败完整保留。
+
+补齐资源摘要后第二次实际40 PASS/5 FAIL：同一registered-mode夹具缺少当前Pack注册Media要求的getLoadedCell，仍在构造阶段失败。继续最小补齐该夹具已有floor采样端口：floor=true为相同0层石地/其余Air且fluid0，floor=false保持unknown并返回null，不能把unknown当Air。保留unknown landing及所有原拒绝断言，生产Media门禁不改。
+
+第三次该夹具进一步暴露Structure构造要求prepareVoxelEdits，仍未进入行为；补齐会抛unexpected的batch port，保证Mode测试若意外编辑世界立即失败，不移除Pack模块来规避初始化合同。三份新进入headless选择的测试也追加到tsconfig.classic-tests.include，避免仅运行而未类型检查；需要实际定向类型与lint结果。
+
+把新Modular测试纳入正式类型集合后实际tsc发现旧sample Pack两份faceMaterials被推断为readonly number[]，不满足六面tuple合同；补as const只收紧类型，不改变数值、材质或产物行为。原静态失败保留，修复后重跑受影响类型/格式/lint。
+
+当前delta lint/types/format实际EXIT0；registered-mode原五项最终PASS/EXIT0，mode-command-host三项先前PASS，其余五文件37项有效结果复用，完整七文件初始38/7与后续40/5FAIL均保留，不宣称同次全绿。21:54精确CI65自然终态五项SUCCESS/ChromiumFAIL/部署SKIP；两次主900秒均在V2铁装备背包手势等待耗尽，未到C4，Visual PASS。
+
+精确8ecc7b00的identified Modular build实际PASS（sourceDigest2c9d064a…/artifactDigest452aacce…），pr41-modular-browser66-01原唯一runner实际EXIT1，Modular13.1秒FAIL/Classic与visual按该Pack选择SKIP。固定初态、正常步行、背包开启已到达；点击切换创造后原5秒目录断言FAIL，未执行挖掘/放置/保存。正常UI mode()先经inventoryPointer close结算，sample Pack未注册Inventory/InventoryActions；先在exact Pack Authority测试中加入同样actor/revision的close断言取得新RED，再在actual Pack注册现有标准两模块。现有alternativePermissions已允许inventory/inventory-item，grants不改；不绕过UI close或用Harness command替换模式。新run独立pr41-modular-browser66-02，新精确HEAD再build，原66-01完整保留。当前本地8ecc尚未push，先完成这一已证明的前置缺口。 正式close新增RED实际EXIT1 inventory-rejected；实际Pack注册两模块后两文件5项PASS/EXIT0，定向lint/full classic-tests types/format EXIT0。原Browser66-01 FAIL及完整产物保留，详见evidence/modular-ui-close-checkpoint-66-02.md。
+
+精确88de Browser66-02实际EXIT1（Modular11.1秒FAIL，主/visual按Modular选择SKIP），UI close/创造目录/自有选物/正常aim已到达，左键后500未变Air；未到place/save。原0-trace frame-snapshot timestamp8100.477明确反馈“采集高度限1–63层”。Browser固定BROWSER_VERTICAL_CHUNKS=2并只常规request y0/1，而sample地板y64/cy2，既有纯Authority/Harness成功不能证明它在真实宿主可玩。这推翻本片“样例worldgen无需改变”的早期假设；不扩大浏览器MVP范围或删除bounds gate。最小兼容修复选择更新未发布的样例Pack为1.1.0、worldgen implementation1.1.0/configuration v2/artifactIdentity@1.1.0，并显式地板常量32（仍Chunk边界/自有500一层平面），fixture出生与真实动作按该声明同步。远端孤立哨兵[10000,100,10000]继续证明纯core坐标无浏览器限制，不改变其语义。此为样例内容支持范围修正，不作性能收益。
+
+先在既有实际safe-spawn/compute测试加入宿主可玩范围合同（floor上方一格≤原BROWSER_MAX、ground>原MIN），旧64样例必须RED；随后新version实际generate/sample/bootstrap、正常Authority和唯一Browser必须GREEN。保留原0/500/持久化/输入/90秒/low/Pack验证等同强度oracle，只坐标来自新版声明；不声称旧1.0世界迁移，provider identity显式更换，不静默重解释其存档。此Agile样例fixture尚未发布、没有生产部署或协议变更，非全局世界规则改写。新run独立pr41-modular-browser66-03；所有前两次FAIL完整保留，仍在本片21:39–22:21 checkpoint预算内，预算/阻塞及时报告。 已有真实bootstrap宿主范围RED实际1 FAIL/3 PASS；新版四文件17项PASS/EXIT0。将该worldgen行为文件也只追加到headless与classic-test types，保留全部原选择；新版旧存档迁移未验不报PASS。
+
+然后只扩展既有唯一modular-pack-smoke.ts与classic-runtime.spec.ts的原Modular选择：原固定seed、自有worldgen voxel500/pack lock/Authority/WebGL2/compute/原保存恢复断言保留，正常UI选择自有物品、PointerLock、真实瞄准和鼠标产生放置/挖掘事实，Authority-backed voxel变更与reload持久结果做oracle。成功动作不得Harness写，原cleanup仅清理测试残留，不作成功证据；90秒、low质量、原trace/真实输入不变，不新开runner、通道或专属selector，不扩权限。先验证当前入口并记录不可自动化/尚未实现的观察预期，浏览器失败原样保留。
+
+本片只补最小正常非Classic玩家方块纵向证据，不宣布Modular门/climb/route/transport/media全链、统一lighting、194/完整Classic/组合整帧性能完成。不修改已sealed证据。Root独占spec/package/evidence/modular Browser helper与必要production修复；既有唯一Luna仅独占apps/web/tests/integration/runtime/server/composition/modular-player-block-actions.test.ts和私有task127，不再委派，不跑browser/build/全仓检查。传统0.25PD×120%=0.3PD；AI35min×120%=42min，21:39起22:21有界checkpoint。最后实际UI21:10剩83%、5d5h重置，约60%停止线；实际served元数据未核实，预算不以tokens/credits/时间估算。新run预留pr41-modular-browser66-01，必须使用明确SEEDLANDS_PLAYBOOK=modular-world的新精确HEAD identified artifact；不复用Classic artifact假装Modular。长期docs baseline暂不变，验证后说明是否有真实合同改变。
+
+## Mining safe-band handoff checkpoint65（有效RED与76项回归通过，浏览器待验）
+
+原Browser64已实际PTY43357 EXIT1，main5.0min在C2采集[38,31,0]中心距离>5拒绝，visual1.0min原lighting/revision predicate FAIL、Modular SKIP；正式C0/C1 PASS。default-off键盘诊断COMPLETE，42可信edges/0 dropped，最后S100 dispatch gap609.5ms/eventStamp123.7ms，区分页面回调与事件生成时刻；不是whole-frame或输入协议根因证明。0-trace metadata显示原mining approach从[39.10158,33.6,.4862]经第一次S100停稳[36.24328,32.6,.49216]，已目标中心distance约2.51原安全band内；仍继续S至[33.54338,32.6,.51054]，>5被原guard拒绝。
+
+本片正确性合同只在mineVoxel已有walkTo调用复用yieldAfterSettledPulse：原完整观察已经ACK推进、ground/noncollision、Authority velocity0与presentation追上，且player/serverPlayerPosition到同target中心均在原[2.5,4.5]安全band时可交接，随后原fresh snapshot、>5 guard、PointerLock、正常aim和采掘全部保留。approach target、tol.45、100ms输入、15秒route/8秒action/原整体900与其他时限不变；通用walkTo单向crossing语义及其它consumer不变。不改速度、物理、late-input拒绝、quality或renderer；不把少调用当性能收益。
+
+先用真实callback的readonly observation model重放以上三份实际Browser64观察，正常mouse correction/keyboardPress与fresh ACK/tick边界保留；传入aim stub只记录正常交接并抛marker，避免假挖掘/写owner。旧source须secondS后out-of-range FAIL，新sourcefirstS后原safe snapshot进入aim；若模型不能证明该消费边界则不凑RED。反例保留server unsafe不能早交接、fresh snapshot漂移仍>5拒绝、PointerLock失败传播及原aim marker传播；15秒route配置与原20秒settled观察等待均不改，不宣称整段mineVoxel墙钟必然不超过15秒。unit观察模型不是实际Authority或浏览器PASS。
+
+Root独占harness.ts/spec/package/evidence及验收；既有唯一Luna只独占apps/web/tests/e2e/classic-support/mining-approach-handoff.test.ts和private task125，不再委派、不跑browser/build/fullstatic。传统0.2PD×120%=0.24PD、AI35min×120%=42min，21:00起约21:42有界checkpoint；实际服务元数据未核实，按用户Sol/high/default及Luna/medium请求。20:26真实UI剩83%，约60%停止线保持，未知计量不换算token/credits。新run独立pr41-classic-browser65-01；CI64自然终态前不抢推取消，编辑前remote e71/base fba21:00核对不变。剩余完整产品/lighting/transport/Modular/combined性能未准出。
+
+有效旧行为RED为Task125 red-02；red-01遗漏PointerLock mouse baseline，属无效夹具尝试并保留。候选四项GREEN，Root加入global cleanup并按原trace更正起点末位后，九文件76/76回归实际EXIT0。完整verify:static:ci实际EXIT0；更新后的完整headless106文件673项PASS/EXIT0。新identified build与Browser65待验。CI64已自然终态：五项SUCCESS、两次主C4返回900秒FAIL、Visual PASS、部署SKIP。详见evidence/mining-handoff-checkpoint-65-01.md。
+
+## 路线部署邻格入口高度 checkpoint67（预注册及局部GREEN）
+
+2026-10-09 22:24UTC，当前 head894e8152，CI66 Chromium仍执行，其余五项SUCCESS；该CI自然终态前不推送新head。本片仅修正式部署投影的相邻端口世界高度，不宣称注册route motion、真实运输UI、旧非空存档迁移或完整V3通过。
+
+旧读取为`sourceCellY + exit.elevation`；正确邻格原点还须扣除配置中反向入口的局部高度。先在真实projectTransportDeploymentSite上用四方向双向坡、字面量相邻cell/中点坐标取得RED；错高、缺少反向端口、候选未知与多高度连接分别拒绝。候选枚举同family的反向入口高度，所有可能cell精确读取；任一未知优先chunk-unavailable，多个已知连接拒绝transport-route-ambiguous，不添加配置字段/权限，不改World/Inventory/ECS owner。保持平轨部署、body碰撞和保存回归。纯投影测试不冒充Authority部署或Browser验收。
+
+根独占该geometry/stdlib test/spec/evidence；无需新agent。传统0.2PD×120%=0.24PD，AI30min×120%=36min，约23:00有界checkpoint。最新真实周额度由主对话刷新为22:09UTC剩83%，5天4小时重置；约60%停止线，未知credits/API及实际模型元数据不换算额度，不重复安装或运行同条件Browser。长期docs不变：此为既有端点合同修复。
+
+67结果：旧13项12FAIL/1PASS，候选四文件34PASS；实际Authority旧坡道部署1FAIL/原7PASS、候选成功。冻结后六文件35PASS、完整stdlib164文件1165PASS、完整static EXIT0。首轮full检查与旧源码反证时间重叠虽EXIT0仍不作冻结证据，已保留并按冻结候选重跑。详见evidence/route-height-checkpoint-67-01.md；不声明Browser/完整运输准出。
+
+## CI完整证据分包 checkpoint68（预注册及工程GREEN，实际CI待验）
+
+2026-10-09 22:31UTC，CI65 artifact11647256747实际570695923 bytes，下载连接器返回InvalidInputException，单包上限536870912 bytes；不是权限审批拒绝。原job日志可读，但两个V2失败trace无法取得。不重复相同下载，不读取凭据、不扩网络或更换连接器绕过限制。
+
+候选只把原Chromium上传中的playwright-report独立成同run/attempt命名的report artifact；原classic artifact继续完整保存harness/results及test-results。三个原目录均保留、不裁剪trace/video/HTML/附件、不改运行选择、断言、900/240/90秒、重试、flaky拒绝、生产产物下载或部署条件，upload action精确pin及7天retention不变。原class结果与trace上传仍if-no-files-found:error；独立report缺目录仅warn，匹配原聚合上传允许任一目录缺失的语义，不能因成功时没有failure trace制造新失败。分包后的实际尺寸与可下载性待下一CI取得，不能预称已解决所有大包。
+
+68结果：旧布局工程1FAIL/1PASS，候选完整16CI合同PASS、完整static EXIT0；三目录完整保留与部署边界已源码复核，新实际artifact仍待下一CI。详见evidence/ci-evidence-split-checkpoint-68-01.md。66最终实际Modular正常方块PASS与686项headless记录补入evidence/modular-final-checkpoint-66-04.md，完整Classic与其他准出仍保留。
+
+先给既有CI工程测试增加三个目录全保留、唯一归属、trace与HTML分离、同失败保留条件及同pin/retention合同，旧单包须RED；修改后GREEN。根独占workflow/该脚本/spec/docs/evidence，无agent；传统0.1PD×120%=0.12PD，AI15min×120%=18min。与67共用83%实际读数及约60%停止线，当前CI66自然终态前不推新head。长期docs只更新可执行CI证据布局，不写性能收益或产品PASS。
+
+## 瞄准同轮观测 checkpoint63（候选撤回，无生产或测试改动）
+
+Root和现有Luna复核后确认：旧aim.ts已经在同一次evaluate读取HUD target与正式ray；另外的snapshot用于未命中后的correction，较晚姿态未被证明错误。仅要求“一次evaluate”或使用第一帧view不是可验收产品不变量。Task123新fixture由其作者撤回，未运行无效RED、未修改aim.ts；减少调用若作为优化理由仍须按既有A/A/A/B门禁，不能贴正确性标签绕过。保持原代码。私有task123结论仅分析，不计PASS。
+
+## 真实键盘事件时序 checkpoint64（只读诊断待验）
+
+Task124缺诊断helper RED实际EXIT1（0 tests/module missing，仅缺入口）；四项GREEN实际EXIT0。Root诊断/CPU/native/canonical五文件35/35 PASS，完整verify:static:ci原PTY9004实际EXIT0。20:38短暂transport断开后原会话保留，无重跑。详见evidence/keyboard-timing-checkpoint-64-01.md；后续identified build实际EXIT0，Browser64实际EXIT1、正式C0/C1 PASS而C2与视觉FAIL，完整终态见evidence/browser64-final-checkpoint-01.md。
+
+接续56294bff Browser62本地原主900秒FAIL/visual PASS及远端CI62五项SUCCESS/Chromium FAIL/部署SKIP。远端两次主旅程最终失败均C4返回路线耗尽原900秒，V2步骤耗时8.3/8.5min；不从耗时行宣布V2完成。本地第二块crop最后截图仅442.4ms，前四张成功，不是截图自身长阻塞。API delay80/300与前后pose无法证明实际keydown/up间隔。原Browser61的20秒C3 native仅两组keyboard事件，间隔5.791/235.523ms，无key code且不覆盖crop，不当路线因果证据。
+
+新增默认关闭的SEEDLANDS_CLASSIC_KEYBOARD_TIMING=1诊断，仅原唯一Classic生产旅程、原production artifact与真实keyboard输入；benchmark禁止开启。既有beforeEach里addInitScript在新document安装passive capture keydown/up listener，只记录KeyW/A/S/D/Space的code/type/event.timeStamp/performance.now/repeat/isTrusted/PointerLock/visibility及document timeOrigin。listener不调用Harness、发输入、preventDefault或改状态；固定1024条有界ring记录total/dropped，stop只读取回后移除监听并删除私有diagnostic property。新document重新建立时钟及记录，明确只覆盖当前document而非跨navigation补造历史。
+
+启用前验证runId/sourceSHA，重复start不重复安装；关闭时不触碰page。正常afterEach在原PointerLock清理之前记录附件，保留原完整trace/CPU/native诊断及原900/240/90/45/20秒、所有质量、步骤、snapshot和断言。页面已关闭明确PAGE_CLOSED、尚未navigation没有state则NOT_STARTED，不伪造事件；其他安装/采集失败按原diagnostic hooks聚合报FAIL。附件schemaVersion1、diagnosticOnly=true/eligible=false，关联runId/sourceSHA，不进入正式owner、存档或产品UI。读回只作本次真实持键长度/累计路线排查，不是whole-frame性能样本。
+
+先以新helper不存在取得可执行功能RED；再测试真实init callback的passive参数、键过滤、固定容量/丢弃计数、完整字段、cleanup/重复/关闭/identity/benchmark拒绝。unit手动callback不冒充浏览器trusted输入；原唯一完整runner新run pr41-classic-browser64-01开启这一个诊断。原Browser62不重跑。新identified build、scoped及必要完整静态验证后正常feature提交推送；CI62已经自然终态，无取消。新输出独立路径，不改sealed证据。
+
+Root独占helper/hooks、package selector/spec和集成；现有唯一Luna仅独占apps/web/tests/unit/app/classic-keyboard-timing.test.ts及private task124证据，不再委派、不跑browser/build/fullstatic。传统0.25PD×120%=0.3PD，AI约40min×120%=48min，20:31起有界checkpoint约21:19；服务型号未核实，按用户Sol/high/default与Luna/medium请求。主对话真实产品UI额度20:26剩83%、5天6小时后重置，本工具不可查询UI，约60%停止线保持，无token/credit百分比换算。此片不改输入排程或renderer，不宣称性能改善，真实事件证据仍待采集。
+
+## Native single-click boundary checkpoint62（visual通过，主旅程失败）
+
+19:36–19:38有效单击RED实际EXIT1，修复后六文件42/42 PASS，完整verify:static:ci实际EXIT0。失败清理保持原错误并释放held。精确8ea CI60自然终态：五项SUCCESS、Chromium两次V2铁装备路线耗尽900秒FAIL、Visual PASS、部署SKIP；不取消它。详见evidence/single-block-click-checkpoint-62-01.md。19:41真实UI周剩83%，5天7小时后重置，账户总下降不能独占归因PR。新精确SHA浏览器与产品准出尚未完成。
+
+Browser61已实际EXIT1，主9.9min在crop[65.5,-0.5]原45秒超时、Visual3.3min在one-click原断言失败、Modular SKIP。visual原始附件beforeClick前/后两块均3，afterRelease两块均0、worldRevision36→38。0-trace记录mouseDown142.235ms，server method end后180.308ms才开始mouseUp；没有测试故意等待，但两个独立调用期间保留了held状态。生产PlayerMiningState的原250/200ms连续held节奏保持，不把真实长按当单击。原native20秒只覆盖主旅程，不能冒充visual事件时间或整帧性能证据。
+
+本片只将visual的一次点击producer抽取为有界helper，先保持原down/up控制流取得有效延迟响应RED，再复用既有clickCanvasCenter的原生page.mouse.click。原生click在同一server动作内完成释放，再等待after-call trace响应；无direct DOM event、状态写入、PointerLock/输入门禁旁路，也不改变真实按住攻击的mining/combat路径。保留beforeClick/afterRelease/afterPoll附件、first block Air和neighbor保持3、后续20 physics ticks、原900/240/90秒、质量和全旅程。
+
+源码进一步核对：Worker PointerAttackInputPump只负责entity attack，本次block破坏由PlayerMiningState的creative cadence处理（首个250ms held之后开始重复，之后200ms）。RED/GREEN使用真实PlayerMiningState与固定322ms输入API响应延迟；初始mousedown进入一次正常shouldBegin/recordBegin，原分开down/up期间一帧322ms允许第二次请求，候选原生click在响应等待前release使第二块保持。夹具保留controller的held guard、stop/cancel语义，验证正式consumer节奏、release之后不复活，既有mouse positions/PointerLock helper保持；它不是Authority/真实浏览器或性能证据。新文件路径先discovery，Root独占source/test/spec/package；现有唯一Luna只读native报告已结束，无新增委派。定向pointer/input与类型/static验证后，用新identified artifact和独立pr41-classic-browser62-01原唯一完整runner验证；CI60自然终态前不抢推取消。
+
+传统0.2PD×120%=0.24PD，AI约30min×120%=36min，从19:34附近开始、20:10附近checkpoint；最新确认18:37周剩84%，19:12已向主对话请求新UI读数，未将任何tokens/credits折算周百分比。60%停止线保持。本片不改renderer，不作GPU/host豁免或性能收益声明。
+
+## Browser frame-gap diagnosis checkpoint61（诊断闭合，原浏览器失败）
+
+原唯一Browser61实际PTY EXIT1（19:22已收到，之后重连未丢失）：C0–C3 PASS、crop原45秒FAIL、visual单击后两块均Air FAIL、Modular SKIP。360秒后的20秒native trace COMPLETE、无丢失，仅覆盖C3；实际page线程72次ReadPixels的中位238.969ms、最大387.694ms，首个233ms等待嵌在LayerTreeHost::DoUpdateLayers。该线程区间union包含等待，不能冒充CPU busy或whole-frame A/A/A/B，不能归因全部路线/visual。组61仅诊断无生产更改；详见evidence/frame-gap-diagnosis-checkpoint-61-01.md。19:30单次只读恢复保留全部证据，无重复setup/browser。
+
+接续8ea883a1与Browser60实际双失败。Root流式读取已结束的0-trace.trace取得37份视觉snapshot：day-gallery已ready，随后传送至[-6,62.7,-9.2]，原20秒内loaded从19升至28、light rebuild从70升至92，最后14砖pending。不能把单点附件解释成调度饥饿；现有8次重建年龄优先和独立续泵保持。主旅程失败前最后128帧update+render中位9.2ms，inter-tick gap中位197.7ms；只说明有明显帧外等待，不能据此认定GPU、trace或宿主根因。现有Luna只读提取两次未取得有效字段，Root独立正确解码；无伪造PASS、无额外并行任务。
+
+本片仅复用已有SEEDLANDS_CLASSIC_NATIVE_TRACE=1诊断合同：从原完整主旅程开始后360秒抓取20秒toplevel/gpu/cc/viz/devtools.timeline原始事件，16MiB trace buffer、64MiB stream上限、10秒完成界限，数据丢失或清理失败照原合同FAIL；保留原Playwright trace、真实键鼠、900/240/90秒、单次本地完整runner、C0–C5/V1/V2与Modular验收。无生产行为、测试断言或质量变更；benchmark不开profiler，诊断eligible=false，不作性能A/A或A/B。
+
+新证据目标是分别观察原输入等待/快照/驻留过程中主线程、compositor/GPU服务和任务间隔；若20秒未覆盖失败路径，明确时间窗口限制，不用线程存在或SwapBuffers事件代替因果证明。identified build仅为当前提交SHA身份重新标识；保留旧dist/results/report到独立未占用路径，原完整runner使用pr41-classic-browser61-01。无新安装/权限/网络扩张、无sealed重写、无旁路浏览器验收。当前CI60自然运行，不为诊断取消或抢推。
+
+传统0.25PD×120%=0.3PD，AI约40min×120%=48min，从19:06附近开始、19:54附近有界checkpoint；18:37真实UI周剩84%，约60%停止线保持。无实际周额度接口，继续依赖主对话读数；诊断不足则记录缺口并选择有新证据的下一片，不盲目同源重复。
+
+## Far diagonal route planning checkpoint60（模型、静态和完整headless通过，浏览器双失败）
+
+原Browser60实际EXIT1，主6.5分钟FAIL/Visual1.1分钟FAIL/Modular SKIP，正式C0–C2 PASS。C3浆果格子hover原10秒失败，未到crop新规划；Visual原20秒光照谓词失败，worldRevision9、cache pending14。不能把未执行斜向路线计为产品PASS。完整headless103文件663例EXIT0，identified build EXIT0；全静态候选EXIT0后，漏补的target-aim端口定向格式/lint/classic-test类型EXIT0。精确904 CI59已终态失败（headless1/658、Chromium首轮启动10秒/重试900秒，Visual PASS、部署SKIP）。详见evidence/diagonal-route-checkpoint-60-01.md。
+
+旧选择器的斜向实际45秒RED与正/反两个直接选择器RED有效；候选后Root九文件53/53 PASS、完整verify:static:ci实际EXIT0。18:35读到精确904 CI59 headless为1 FAIL/658 PASS：target-aim.test经prepareBuildingTargetWithRealMouse间接调用walkTo的旧fake keyboard漏补press。本片补齐相同原生端口语义，保留原body-clear/actual-face瞄准断言，先定向格式/lint/classic-test类型，再运行原完整headless集合；不是production fallback。实际证据依赖当前运行结果。
+
+接续904a78f4与原Browser59实际失败。最后距目标约0.205但超过原45秒；一路从z约0.5斜向接近z=-0.5，各pulse前双owner停稳且对齐目标，仍全部选择80ms，因为Group58额外要求当前位置已在目标z的0.08终点走廊内。对于斜向远段，该条件通常直到x距目标不足3格才成立，300ms远段因此不可用。这是输入规划候选，不以本次未重现6.4格越界宣称真实持键或全部稳定。
+
+冻结候选仅移除远段选择器的固定目标z走廊前置条件：双owner沿原方向的x剩余均大于3、ground/noncollision、当前Authority停稳且呈现追上、有限完整观测、真实视角已对齐完整目标向量小于原1px时，仍用原300ms普通walking上限。任何near、方向不符、滞后、移动、未知/非法观测、未对齐仍原80ms；routePulseDurationMs继续裁剪。0.08终点走廊、0.06双owner到达、0.45交接邻域与45/20/900秒、原native keyboard与全部fresh/ACK/settle门禁保持，不以取消终点断言替换规划。
+
+先用既有stepBody模型、原250ms每次snapshot等待与真实walkEquipmentRoute取得斜向长段RED；禁止为制造失败调延迟、直接赋目标、放宽最终断言。模型输入start[98.5,32.6,0.5]→原target[78.5,-0.5]，固有mouse correction与ground floor；同时直接选择器反例确认合法对齐远段的缺口。GREEN要求双owner各自原0.06内、完整释放、ground/noncollision、velocity0、fresh tick/ACK，旧near/overshoot/方向/滞后反例保持。模型不作为真实Authority或性能证据。
+
+现有唯一agent按Luna/medium请求参数独占一个新diagonal路线测试文件，实际会话型号未获服务元数据核实；Root独占选择器、既有边界测试、package selector、spec和集成。必要静态、identified build与原唯一完整runner，独立run ID pr41-classic-browser60-01；实际浏览器检验crop/V1/V2及后续原旅程。无关封存输出不重建，没有额外模型、包安装、侧Playwright路线或新网络权限。当前CI59待终态，不取消抢推；各失败保留，下一push只在终态后执行。
+
+传统0.3PD×120%=0.36PD；AI约45min×120%=54min，从18:29附近开始、19:23附近有界checkpoint。18:37实际UI周剩84%为最新读数，5天8小时后重置；账户总下降不单独归因PR，约60%停止线保持。不是whole-frame A/A/A/B，不声称性能收益。
+
+## Native keyboard pulse boundary checkpoint59（模型与静态通过，完整浏览器失败）
+
+有效延迟响应RED、near/long3例GREEN、Root70及兼容修正后45例PASS；完整静态第二次EXIT0、identified build EXIT0。原Browser59日志和canonical receipt均FAIL：主10.6分钟FAIL/Visual2.6分钟PASS/Modular SKIP，总13.4分钟，正式C0–C3 PASS，作物共享路线[65.5,-0.5]仍超过原45秒。最后双owner停稳在x65.705/z-0.484，距目标约0.205，未到原0.06；原生80ms参数不能证明实际物理持键时长。连接中断后18:21只读恢复确认原进程18:02正常收尾，未重跑。CI58首轮启动10秒失败、重试900秒失败、Visual PASS、部署SKIP。详见evidence/keyboard-pulse-checkpoint-59-01.md。
+
+接续Group58的实际原完整失败：crop共享路线最后一次距目标不足1格，仍选80ms，却从x66.412跨到x59.975。流式原trace记录keydown method结束后815ms才开始keyup，完整释放间隔约1451ms。已读实际安装Playwright1.62.1：dispatcher在method end后等待tracing after snapshot才返回；当前walkTo等待keyboard.down响应后才启动计时，记录等待因此进入真实按住区间。不能用加大45/20/900秒、放宽0.06/0.08/0.45、关trace/截图、跳阶段或伪造输入解决。
+
+冻结最小合同修复：复用同版本原生keyboard.press(key,{delay:pulseMs})，jump时使用其支持的KeyW/KeyS+Space真实chord；同一次原生动作完成down/delay/up后才等待after snapshot。pulseMs仍由原routePulseDurationMs及Group58上限决定，0ms数字夹具合同保持；若原生动作失败，尝试释放全部涉及键并保留原错误。没有页面JS派发事件、teleport/setView、协议/应用状态写入、包源码补丁或自建调度。原fresh full snapshot、ACK/ground/noncollision/settle、方向交接/越界拒绝与全部原时限不变。
+
+先用实际walkEquipmentRoute和真实stepBody near路线取得有效RED：fake输入事件立即生效，仅让公共keyboard.down/up返回前追加固定1000ms模拟after-call观察等待；fixed snapshot延迟与原模型不改。对照native press在同一次输入内部执行down/delay/up，观察延迟只在释放后发生。GREEN检查原0.06圆内的两个owner、停稳、fresh ACK、实际模拟持键不超过原80ms；旧far模型与现有near-overshoot/ground/方向反例保持。端口替身只模拟已确认的Playwright语义，不冒充真实Authority/PointerLock或FPS。
+
+必要静态、identified build及原唯一完整runner，独立run ID `pr41-classic-browser59-01`；只有新修复后才复验，不重跑已闭合Browser58。实际浏览器核查crop与V2/后续原旅程，当前失败和skip继续原样记录。功能脉冲边界修复不是whole-frame A/A或A/B，也不声称性能收益；最终组合性能仍独立准出。传统0.25PD×120%=0.3PD；AI约40min×120%=48min，17:33附近开始、18:21附近有界checkpoint。服务503造成此前中断，不以盲目重试恢复。
+
+现有一个精确Luna/medium独占新模型helper、near timing test及既有long test抽取；Root独占实际harness、其他端口夹具、spec和集成。禁止额外委派或并发重负载；所有输出新路径。17:38实际UI确认周剩84%，账户自初始98%下降14点不能单独归因PR；约60%停止线不变。CI58推送后正在运行，下一push等其终态，不取消取证。
+
+## V2 far-corridor real input planning checkpoint58（模型与静态通过，完整浏览器失败）
+
+旧实际调用链45秒长段RED、near control PASS后，候选模型两例PASS；Root原八文件55例通过，新候选边界15例通过。新夹具较严0.005断言、unused声明与类型错误的失败日志均保留，按原0.06合同及正式snapshot接口修正；最终verify:static:ci实际EXIT0、identified build实际EXIT0。原唯一Browser58实际EXIT1：主FAIL/Visual PASS/Modular SKIP，正式C0–C3 PASS；Creative作物共享walkEquipmentRoute到[65.5,-0.5]超过原45秒，未进入V1/V2/C4/C5。新300ms条件在这一失败段所有读回均未成立；仍不能宣布V2修复或可合入。详见evidence/equipment-route-checkpoint-58-01.md。
+
+16:49之后服务端503阻断，17:25单次原环境恢复成功，HEAD/七个修改/原始结果完整且无活跃测试进程；没有重复Browser58或环境setup。原17:08 checkpoint受服务中断影响，恢复后先完成证据交接，不把阻断墙钟或tokens换算成实际周额度。16:05真实84%为历史读数，16:48刷新请求待答；60%停止线保持。CI57现已完整终态：五项SUCCESS，Chromium两次V2原45秒失败、Visual PASS，部署SKIP；正常下一push不会取消该证据。
+
+接续cea9a948与Browser56实际原45秒失败：回工作台的长段从约x98.5沿z=-0.5持续西行，末尾x82.845、ground且无collision、velocity0、ACK持续推进。原80ms精细脉冲被用于整个约20格远段，每次都按原门禁等待release/Authority停稳与呈现追上；不能据此认定世界永久阻挡或修改45/20/900秒、到达0.06/走廊0.08/目标邻域0.45、fresh ACK/ground/collision/settle。
+
+冻结有界输入规划候选：仅当当前full snapshot中的玩家与Authority都处在目标同一窄走廊、ground/noncollision、velocity全0且两者位置已追上，距目标沿程超过3格且当前航向对计划KeyW/KeyS满足原correctMouseToRoute小于1px误差时，可用既有普通walkTo最大300ms真实键盘脉冲；近目标、偏走廊、moving、presentation未追上、航向未对齐、missing或非法观察继续原80ms。每个真实输入后保留原fresh观测与所有到达/资源距离断言；没有setView、teleport、途中补给、采集捷径或世界状态写入。routePulseDurationMs仍依实际剩余距离进一步缩短，退出/方向切换/overshoot原流程保持。
+
+先在现有实际walkEquipmentRoute调用链取得旧80ms长段失败RED：fake Page仅模拟协议/DOM/输入端口与固定虚拟观察延迟，位移/加速/制动用真实stepBody/BodyConfig/PhysicsWorld，不手造到达位置，不冒充真实Pointer Lock/Authority/browser或性能证据。GREEN还保留所有near-overshoot、drift、ground、new ACK与pulses原反例；Root验证候选阈值/freshness/非法输入分支。必要静态后新identified artifact、原唯一完整Classic runner，run ID `pr41-classic-browser58-01`。只证明真实输入能在原验收合同内到达，不宣称FPS/机器时延或whole-frame A/B收益；若后续保留理由变为性能改善，另注册独占A/A及交错A/B。
+
+16:08附近开始，传统0.3PD×120%=0.36PD；AI约50min×120%=60min，17:08附近有界checkpoint。现有精确Luna/medium仅独占新equipment-long-route-pulse.test.ts fixture，禁止再委派；Root独占helper/spec/其他测试与集成。16:05产品UI真实周剩84%（账户其他任务共同下降），约60%停止线不变；不估算PR专属周比例。CI57正在运行，下一正常push前等其终态，不取消取证。
+
+## CI browser job resource budget checkpoint57（本地闭合，继续V2修复）
+
+15:52附近开始，实际25分钟RED后45分钟GREEN，现有工程选择器15/15；初版正则ESLint空格失败保留并等价修正，最终完整verify:static:ci实际EXIT0。仅job资源上限与失败后只读附件改变，各测试时限/断言、retry/flaky策略、生产artifact和部署边界保持。Browser55/56原始FAIL不被改写，PR仍不可合入。详见evidence/ci-browser-budget-checkpoint-57-01.md；随后正常feature提交推送及精确新SHA CI。传统/AI预算与15:45真实UI请求保持，不购买或扩大每周额度。
+
+实际CI54 run37949472227/job113884710636的首轮主旅程15.3分钟FAIL，原一次诊断重试于15:34:55被job取消；五项其他CI SUCCESS、部署SKIP。首轮V2耗时行不能计完整PASS，取消使原runner最终错误/报告不完整。源码明确主旅程900秒、visual240秒、CI retries1且failOnFlakyTests=true；Classic配置下Modular互斥跳过。原job25分钟小于主旅程与视觉两次的38分钟最大预算，尚未计setup/upload/cleanup。
+
+冻结最小工程修复：仅将Chromium job资源上限25→45分钟，覆盖38分钟runner加7分钟setup/附件/上传裕量；原900/240/90秒及动作/poll、一次retry与flaky拒绝不变，生产build仍只一次且Chromium只校验/消费既有artifact。正常失败仍失败，取消/skip仍不合入。先确定性读取实际workflow/config/spec，断言job预算至少覆盖既有完整runner及5分钟裕量，取得25分钟RED，再45分钟GREEN；同一检查保留唯一runner/原重试和flaky拒绝。新工程合同纳入现有test:ci-selection，不增Playwright旁路线、不将job时长当性能阈值。
+
+先等Browser56实际终态以保持artifact/source冻结；然后必要静态/工程合同、自然hook、核对最新远端后正常feature commit/push。workflow的部署trigger/权限/目标不变，只有此前授权的PR preview，禁止main/生产/merge。传统0.12PD×120%=0.144PD；AI25min×120%=30min，从实际开始时计有界checkpoint。14:09真实周剩85%，15:45再次请求实际UI；约60%停止，未知费用/工时不得折成周占比。
+
+## Failure presentation readback checkpoint56（原完整运行失败，诊断交付）
+
+完整静态与build实际EXIT0；原唯一runner实际EXIT1，1 FAIL/1 visual PASS/1 Modular SKIP、总14.9分钟。主旅程12.4分钟在V2铁资源准备的原45秒移动时限失败，`Real input route timed out before 78.5,-0.5`，未耗尽900秒。最后canonical/player停稳于x82.845/z-0.509、grounded且无collision，距目标4.345格。V1已返回并进入V2，但Browser55相同production bytes的门mesh失败仍保留为不稳定证据，不能由这次关闭。新failure只读revision/末256trace成功附加；仍无完整V2/C4/C5/恢复/全194、Modular产品或组合性能准出。详见evidence/browser-checkpoint-56-01.md。15:45真实周额度刷新仍待主对话。
+
+接续3f784078与Browser55真实失败。只在原失败附件增加只读presentation readback：玩家/当前瞄准所在Chunk及六个面邻居的Authority与实际rendered revision，以及现有有界PerformanceTelemetry导出的末256事件。只在失败后读取，不加每帧扫描、不改变玩法/worker/mesh owner、不影响原断言poll、时限、retry、renderer或quality。观察用于区分目标提交丢失、authority accept拒绝、上传排队与postrender等待；不把全局队列空当门已可见，不将诊断当性能A/A/A/B或产品GREEN。
+
+先必要格式/类型/静态核验，再新identified artifact与原唯一完整Classic runner，run ID `pr41-classic-browser56-01`，不追加旁路线。传统0.15PD×120%=0.18PD；AI30min×120%=36min，15:35附近开始、16:11附近checkpoint。14:09真实周剩85%，15:09请求仍待当前UI；60%停止线保持。CI54仍在运行，不抢推取消。
+
+## Current artifact / original browser revalidation checkpoint55（完整运行失败，证据保留）
+
+新build实际EXIT0，唯一原runner实际EXIT1：主旅程8.3分钟在V1木门closed mesh原5000ms期望[0,0]实际[-1,-1]；visual PASS、Modular SKIP，总9.9分钟。正式阶段附件确认C0–C3 PASS；农业/V1耗时行不是完整PASS。体素93/94和geometry正确，失败时compute269/269、running0/queued0/failed0，但generationQueue2/meshingQueue1/uploadQueue1，rendered18。当前不能证明mesh丢失或新门可见；无完整V2/C4/C5/194/恢复或性能准出。artifact/source与原始trace身份及剩余风险见evidence/browser-checkpoint-55-01.md；结果原目录移动保留，未改历史sealed证据。
+
+source3f784078。15:10附近开始，重新构建一个identified production artifact并用原唯一Classic旅程、原900秒、原C0–C5/V1–V4/视觉断言及默认本地retry策略检验；不新增partial/side Playwright路线，不把前驱CI步骤完成当当前PASS。新run ID `pr41-classic-browser55-01`；原dist44/test-results按原目录移动到Root独立retained路径保留，不复制或删除sealed证据。新结果/trace按新run ID记录，完整本地trace用于定位CI53 C4/总时限问题；此前artifact域名403未获新授权，不绕过网络边界。此轮正确性验证不加CPU/native profiler、不作为AA/AB或性能收益证据，无CPU亲和性/质量变更。浏览器开始到结束不改apps/packages/scripts等源身份，只有独立证据/spec可写。
+
+传统0.3PD×120%=0.36PD；AI30min×120%=36min，15:46附近必须checkpoint。Group54已提交正常push，CI54待结果；PR仍Draft/未合并/未生产部署。14:09真实周剩85%，15:09已请求当前真实UI，60%停止线保持。
+
+## Registered surface transport motion checkpoint54（本地闭合，继续产品闭环）
+
+14:10–15:07有界片完成：stdlib78/78、Authority37/37、最后前沿10/10及完整verify:static:ci EXIT0；实际运动、veto旁路、mounted crossing、stale、伪造与双车相对碰撞RED均保留，详见evidence/registered-motion-checkpoint-54-01.md。Classic Pack精确字节对照相同；本片没有本地build/browser/performance PASS，整体产品仍未完成。
+
+接续2e120b62。下一有界片完成显式非Classic surface transport 的正常 accepted world-space输入→manual registered system→同一physics prepared frontier，不能把world-space moveX/moveZ直接当车辆局部throttle/steering。新增显式motion module/policy，按canonical heading投影前后与转向；现有纯motion builder提供候选，loaded provider/完整vehicle+rider扫掠与当前实体相对运动由Host派生几何端口。载具pose/velocity/component/fuel及rider新seat与所有普通body更新一次mixed series发布，沿原128×192容量、原按实体数的Kernel batch计数；系统操作veto/permission拒绝时普通实体保留原physics fallback，载具保持当前canonical pose，乘员留该pose派生seat并保持对应速度；stale拒绝时不得用先前普通physics结果覆盖已变化owner，本tick保持当前权威实体及seat、下tick重算。14:40实际moving-veto RED证明普通stepBody会按载具已有velocity自行推进（z0.570320→0.581309），因此transport普通分支必须显式保持canonical body，不以maxSpeed=0/acceleration=0误当冻结。无第二position、cargo、relation或motion时钟owner，无自动module grant；新增固定产品Host transport系统许可不得由Pack请求扩大。
+
+14:43 additional bounded collision correction：普通角色的既有碰撞投影需包含current mounted rider身体（座位派生位置），否则车辆底座上方的角色实际扫掠可从x0穿到x6，停住transport不能撤销普通角色已计算的路径。仅派生本步collider，不新增relation/position owner；自体rider仍排除。
+
+module只消费当前transport与派生geometry/motion观察，不复制整次普通body数据给registered操作；Host持有短生命周期本tick frame并在prepare/apply前核对world revision、entity lifetime/component/pose、输入tick/epoch与候选精确重推导。无配置世界保持原路径。surface policy明确acceleration/drag/maxSpeed/steeringRate/fuelPerMeter并有界冻结，只用于当前实例definition/provider。扫掠采用保守旋转包围体与乘员compound volume，未知阻挡并请求已有chunk；角色与载具互相的相对位移必须纳入，不以目标位置overlap冒充连续碰撞。路线运动、真实燃料/货箱交互、旧载具迁移、renderer/UI及完整Classic/Modular随后独立闭环，本片不宣称完成运输产品。
+
+先取得正常目录/部署/use挂载/receiveInput后实际静止RED；GREEN须检查同tick载具与seat移动/速度、货箱/fuel/lifetime保持，当前输入重放/错epoch不额外控制、下车恢复walking、world/entity/unknown支持或扫掠拒绝及registered规则veto/stale不半提交。固定motion模型与owner/physics/部署/关系/死亡回归按实际影响验证；最后当前精确SHA完整浏览器/性能仍不得被单元替代。
+
+14:10附近开始；传统1.2PD×120%=1.44PD，AI约60min×120%=72min，最迟15:22附近有界checkpoint，不盲目超时返工。14:09主对话产品UI确认真实周剩85%（含其他任务），60%停止线保持，无法将工时/credits/token换算真实周占比。一个现有精确Luna/medium独占正常Authority运动fixture文件，禁止再委派；Root独占生产/spec/其他测试与集成，协调同属PR预算。所有新输出独立run ID。
+
+## Mesh preparation commit race checkpoint53（异步接缝已验证，尚未证明 CI 根因）
+
+两层竞态RED与实际BrowserAuthorityClient路由RED后，12文件60/60及最后MessageEvent夹具6/6 PASS；完整verify:static:ci EXIT0。原main-snapshot反例初版FAIL与两个fixture类型失败保留并修正；worker-first一次刷新及连续提交反例通过，旧/后继trace独立。详见evidence/mesh-preparation-checkpoint-53-01.md；CI52尚未终止，不抢推取消。
+
+接续8dceef28；CI51原浏览器失败含新门下半Chunk无门材质mesh（axes[-1,0]）和另一attempt路线跌出支撑。只读源码发现结构提交仅查询latestTask或已有repository record，漏掉已请求但queued/preparing/failed的Chunk；异步prepare期间强制后继还会沿用旧准备租约。先用真实MeshTaskScheduler的worker-first路径与World.consumeServerCommit重现：prepare持有revision1，结构提交到revision2，旧租约释放，必须重新准备并派发/接受revision2，不能丢失请求或发布revision1。fluid同样保持现有revision可见屏障和interactive-fluid优先级；完全未请求、未呈现的offscreen Chunk不被新增入队。
+
+13:48原有main-snapshot连续流体修订反例揭示无界重新准备会饿死Worker，初版候选31项中1FAIL，保留失败。实际main-snapshot在派发时读取实时owner，保持原合并/一次准备合同；worker-first每次派发前至多重新准备一次，期间新提交保留后继至结果结算，旧结果不得被普通呈现接纳。新增119次提交压力夹具覆盖两次prepare后仍派发、旧结果零发布、最终revision121接纳；不删原反例、不降低断言。
+
+本片仅修当前请求的新鲜度及提交路由，不增加重试次数/超时、不改assert/输入/质量/World owner、不将unit异步租约夹具声称真实Authority或浏览器根因。先RED，最小生产修复后GREEN及既有调度/流体/提交回归、完整静态；新增夹具纳入现有Classic headless选择器。原浏览器仍须同一精确生产artifact完整复验，CI52正在运行，不打断它。传统0.25PD×120%=0.3PD；AI约30min×120%=36min，13:46附近开始，最新13:10真实周剩85%（含其他任务），60%停止线不变。长期docs仅在实际职责改变时更新；全部输出独立run ID。
+
+## Parked transport collision checkpoint52（正式静态碰撞消费者已验证）
+
+正常目录/deploy/Survival/input实际穿透RED后，consumer1/1 GREEN，完整transport snapshot保持。Root Authority四文件24/24、stdlib八文件36/36与完整verify:static:ci EXIT0；canonical yaw检查取得部署占位/出口两个有效几何RED并统一修复。Classic Pack control/candidate字节相同3bb6fb96，无browser/性能PASS声明。详见evidence/transport-collision-checkpoint-52-01.md。13:10真实周剩85%、60%停止线保持，正式registered motion与完整产品仍未完成。
+
+接续4a477ad8，实际运输 motion 接缝检查发现普通角色的 `stepBody` 与角色分离只查询体素，停放运输虽有显式 definition body 和 canonical pose，却不在这些碰撞候选中。先修这一正式消费者缺口，作为后续运输连续运动的必要基础：从当前 world-local ECS 投影 transport body colliders，复用既有 swept AABB 求解；普通 walking/flight/world-item、角色分离与已存在的 geometry recovery 使用同一当前载具体积，transport 自身不撞自身，mounted rider 仍从 seat 派生。已退役/已 restore 的实体不得被长期缓存；未配置或无 transport 的世界返回原 PhysicsWorld，体素 unknown blocker/流体/active chunks 保持。
+
+当前载具体积以 definition AABB 和 canonical yaw 旋转后包围盒表达，静态 yaw0 与旧 definition body 保持；只由当前实例 definitions 解析，不猜 archetype、不添加第二 position/relation owner。连续运动尚未接线，旋转包围盒是保守体积，不声称精确旋转多边形碰撞。本组不增加 motion policy/操作、Host grants、输入字段、浏览器断言/时限、画质或 legacy vehicle 迁移。
+
+13:27非对称实际ECS geometry fixture取得2 FAIL/1 PASS：当前physics body selector已读canonical yaw，但部署占位与出口投影仍用未旋转definition体积，导致允许占用旋转载具、两个safe出口实际重叠。修复范围包含这两个同体积消费者及route deployment候选yaw，统一使用同一body helper。layer/mask保持原值；world-item经过相同PhysicsWorld端口，但原Item mask不与Character层相撞，本组不改变此策略。fixture首次inventory=null违反原空容量数组合同，不计行为RED；改为[]后的两个几何断言FAIL为有效RED。
+
+先实际 Authority 正常 deploy、accepted receiveInput 与 physics tick RED 穿过停放实体；GREEN 检查角色持续移动在载具体积前停止且 canonical transport/关联/payload 保持，mount 后不会自撞或偏离 seat，移除/恢复后没有旧 collider；已有 voxel unknown/角色/拾取/关系回归按影响验证。非对称 definition yaw 对照覆盖实际 body selector 与保守 AABB；不把直接 owner seed 当正式部署证明。只读候选和同一现有 physics batch 保持，最终 payload/revision/source 新鲜度仍由 owner 校验。
+
+传统0.3PD×120%=0.36PD；AI约35min×120%=42min，13:14附近开始。13:10产品UI真实周剩85%（含其他任务），60%停止线不变。新输出独立run ID；完成本片后继续正式registered motion与两向连续实体碰撞、Classic/Modular产品和原浏览器验收，不把静态障碍物修复当运输产品完成。
+
+## Manual system cadence checkpoint51（通用 cadence 与精确 V4 兼容已验证）
+
+真实assembly RED后新增夹具6/6、原lifecycle8/8与Classic checkpoint两文件12/12 PASS；最后只改fixture immutable构造后的新文件3/3补验。生产/测试类型、scopedlint与完整verify:static:ci实际EXIT0。Classic entry不变假设FAIL后，从精确前驱Host与正式loader校验的真实Pack导出完整V4；候选恢复先RED零写、唯一完整前驱迁移后GREEN，默认definitionMap保持且foreign digest/definition拒绝。证据及未通过浏览器边界见evidence/manual-cadence-checkpoint-51-01.md。本组未实现运输运动，继续正式产品和原浏览器验收。
+
+接续ecb7213f，正式运输运动接缝审查确认 `bindSystem` 必须绑定已注册system，而现有interval/every-advance都由gameplay schedule推进；不能用假长interval或lifecycle start冒充physics tick，也不能让两个时钟重复推进运输。先增加显式通用 `cadence: 'manual'`：Host可按已有system principal/resource审批调用其唯一注册operation，lifecycle advance/preview不调它，schedule snapshot仍记录该system且remainder严格0。manual无interval和时间排序依赖；scheduled/manual间before/after依赖拒绝，避免承诺不存在的时序。旧interval/every-advance定义、顺序与快照保持；Classic entry identity是否不变由精确字节核验决定。
+
+本片只改cadence合同、注册/身份校验、调度及legacy schedule投影，不实现运输运动、不扩Host resource grants，不修改input协议、browser/性能或sealed证据。先实际assembly RED拒绝manual；GREEN验证真实registered system binding/invoke、无自动调用/预算消耗、显式权限拒绝、manual snapshot恢复/非零remainder原状态不变、坏interval/dependency/serialized identity拒绝及原调度回归。运输控制仍需后续把当前已接受world-space moveX/moveZ与原body batch在同一prepared frontier发布，不能将moveX/moveZ误作车辆局部输入或独立前后提交。传统0.15PD×120%=0.18PD，AI约30min×120%=36min，12:38附近开始；11:40真实周剩86%，12:07新读数仍待主对话，60%停止线保持。
+
+12:42精确前驱Classic entry字节核验FAIL：control c1ef197e…与candidate 8b732487…不同，实际diff仅嵌入pack的checkpoint identity validator加入manual合同。原默认entry不变假设撤回；兼容处理扩展预注册为从精确前驱actual runtime导出的完整V4 identity，新增唯一确切前驱，不广泛匹配digest、版本或重解释字段。取得旧档真实来源和实际恢复/foreign identity拒绝后才可提交；若36分钟边界内无法完成，保留可恢复证据并继续有界诊断，不把字节失败改写为PASS。
+
+## Mounted death settlement checkpoint50（正式死亡结算已验证；运输产品未完成）
+
+实际Authority正常部署/use骑乘后，显式death policy的direct Vitals致死RED在prepare期被悬空rider校验拒绝；不是缺policy。共享death series现从当前owner精确id+lifetime派生解除关系replacement，与actor死亡/退役和四容器掉落同一allocator/frontier提交，原128×192上限保持。风险反例抓到手造alive replacement仍被当death候选接受，补health0/lifecycle dead门禁后拒绝零写。新Authority3/3与stdlib5/5 PASS，含注册Combat、非零运输velocity/payload/lifetime保持、存活rider、四容器drops、重放/新鲜度/容量拒绝、mounted死亡保存恢复/复活以及无policy fail-closed。根原death63/63、transport owner14/14、Classic死亡/复活/特殊伤害25/25 PASS。类型与格式完成状态见evidence/transport-death-checkpoint-50-01.md；本组无browser/性能验收声明。
+
+接续7ff66457，实际骑乘后致死的Vitals/registered Combat/Needs现有共同death inventory settlement必须在同一prepared series清除transport rider并推进该component revision，不能先解除关系或让dead/despawned rider悬空。从同一个当前EntityStore transport component选取精确actor id+lifetime关系，保留transport pose/velocity/fuel/cargo/lifetime，只生成transports replacement；与death actor/四容器drops/despawn/其他survivors沿原单allocator/frontier和128×192上限共同预检、apply，容量/源新鲜度失败原owner全部不变，未骑乘世界原顺序/数量保持。除正式death producer之外的一般死actor/despawn仍要求显式关系settlement，不在底层EntityStore偷偷自动修复或丢弃rider。
+
+先真实mounted player致死producer RED（缺death policy failure不算该RED）；正式非Classic policy的direct Vitals与注册Combat/Needs caller GREEN证明dead/retired关系清除、物品只掉一次、幸存者仍挂在原transport、cargo/fuel/pose/ref保持、重复/prepare后变化/capacity失败零写。mounted死亡checkpoint恢复/respawn证明关系不会重现，实际无policy仍按原fail-closed行为。传统0.45PD×120%=0.54PD；AI约55min×120%=66min，12:08附近开始。无Classic identity/legacy迁移、运输运动/UI或browser/performance修改；完成后继续正式产品与真实验收，不能由death模型夹具代替玩家玩法。11:40产品周剩86%、60%停止线保持。
+
+## Transport registered mount/dismount checkpoint49（上下车与静态骑乘已验证；运输产品未完成）
+
+实际正式caller RED缺state owner，接线后partition类型失败按原合同修为两个component；最终2文件20/20 PASS。实际use/alternate、四项selection、重复/堵seat、world/player占出口、自然unknown frontier、规则veto/forge、receiveInput+flight/walking/jump physics、mounted portable恢复/坏rider active restore零写已验证。风险审查抓到first player-blocked出口仍选中后拒绝，实际RED12/13；出口投影过滤真实players后可选另一个安全出口，GREEN20/20。deploy后World edit原transport:undefined不是setup错误，真实RED保留且physics/recovery已统一definition body selector。根68/68 owner/physics、48/48 dispatch、原geometry8加新增4PASS；完整static原EXIT2仅最后编辑中Classic tuple错误，其余format/paths/lint/生产types/Svelte0/0有效，最终scopedlint/stdlib与Classictypes补验、规则66/CI选择14均PASS。详见evidence/transport-relations-checkpoint-49-01.md。
+
+接续07ed9416，只实现显式非Classic relation module的真实Authority interact entity primary上车、self secondary下车。配置moduleId/operationId，requires正式运输能力；operation只读actor与transport投影，返回关系/空间候选，Host重建并使用同一个prepared EntityStore participant发布transport rider+revision和角色位置/零速度，保持单一transform/lifetime owner。验证四项selection revision、当前目标lifetime、存活/唯一双向关系、当前距离/加载射线、seat和出口的真实body AABB及world/entity占位；unknown/blocked出口拒绝且全部owner/revision不变。只为显式注册module提供Host stateport，不自动扩张Host权限或module可写owner。
+
+Authority从当前ECS状态派生mountedSeatConstraints；本片transport body仍静态，mounted player跳过独立walking/flight/gravity/separation/recovery的position写入，真实receiveInput+physics tick不能偏离canonical seat。恢复沿原完整preflight和transport关系校验，实际mounted portable checkpoint重开仍同实体/lifetime且seat约束生效。先缺正式API/真实caller RED，GREEN覆盖成功/重复/过期lifetime或selection/已乘/阻挡或未知出口/规则veto与候选改写零写、正常physics输入及portable恢复。传统0.8PD×120%=0.96PD；AI约90min×120%=108min，11:32附近开始；最近真实周额度10:10剩86%，10:40更新未返回，60%停止线保持。
+
+不改变Classic pack/旧V4 identity、legacy vehicles、旧voxel0–88/Chunk bytes、浏览器断言/900秒或sealed证据。运输运动、燃料/货箱UI、Classic与Modular真实产品、mounted death结算、非空legacy迁移与浏览器仍后续片，不能由本组静态关系或模型夹具宣布完成。
+
+## Transport registered deploy checkpoint48（正式 Authority 部署已验证；运输产品未完成）
+
+实际正常 Authority interact 从 WORLD_PERMISSION_DENIED 的2FAIL/1PASS修到7/7 PASS；覆盖 surface/route 部署、库存同次消费、加载几何/占位与选择新鲜度、registered after-rule veto/候选改写零写、静态body推进及便携checkpoint恢复。未知definition用同一persistence写入并实际source.server.restore()拒绝，当前owner与畸形存档均保持。根授权18/18、owner/Kernel/Authority/恢复37/37，完整verify:static:ci实际exit0（冻结5、格式/路径/lint/完整types、Svelte0/0、规则66/CI选择14）；先前半编辑types失败独立保留。Classic pack同构建配置精确HEAD control overlay与candidate entry bytes SHA256同为c1ef197e7fea7248a65488494881cbf84cbda77823d09291edf596183184da18，不替代生产build/真实玩法。详见evidence/transport-deploy-checkpoint-48-01.md。
+
+接续72462e84，将显式Pack运输定义与部署绑定接入world-local EntityStore及正式注册Actor operation；新增defineTransportInteractionModule配置moduleId/operationId/definitions/deployments/routes/surfaces。deployment绑定存储itemId和definitionId；route provider由RouteDefinitionV1和注册voxel集合表达，surface provider由namespace id、voxel集合与surfaceOffset表达。显式配置改变definition identity，不改默认未配置世界、旧Classic pack identity或legacy vehicles。本片先用非Classic Pack的真实Authority performAction(interact)做RED/GREEN，不把直接runtime facade调用算产品通过。
+
+正式部署使用现有item-interaction registry和Actor授权；operation返回只读候选，由单一host state port重建并校验，然后库存消费和transport创建同一次prepared EntityStore发布。校验存活角色、四项selection revision、真实当前选中物、射线/距离、已加载route/surface、definition/body AABB静态及实体占位、候选/规则改写与owner新鲜度；失败inventory/entity/issued/sequence/gameplay/world保持。prepare/apply都检查当前加载几何；不将unknown视为空气，不给模块可写world/owner或新增隐式Host权限。deployment后Authority body使用显式definition AABB；运输位置仍由同一canonical transform持有，本片部署实体为受约束静态body，不承诺运动/骑乘已实现。元数据与lifetime进入accepted gameplay view。缺定义世界不创建transport child；Kernel候选restore显式使用同一运输定义，坏child原owner零写。
+
+RED覆盖自定义surface pod与route cart的实际Authority入口；GREEN验证一次扣物品、accepted entity/reference/component、重复占位/未知surface/错物品/selection stale拒绝，规则veto/forge与prepare后变化零写。World-local非Classic ID证明模块无Classic常量。限定此片不动原浏览器断言/时限、旧voxel0–88/Chunk bytes、sealed evidence、Classic identity迁移和legacy facade；随后必须继续mounted physics、Classic producers/consumers、存档及真实浏览器验收。传统1.2PD×120%=1.44PD；AI约110min×120%=132min，11时附近开始。真实周额度最新仍10:10剩86%，更新请求未返回；60%停止线不变。
+
+## Transport prepared entity publication checkpoint47（有界基础已验证；产品接入未完成）
+
+在已提交5912eab1的ECS owner上增加host-only prepared transportSpawns与transport component replacements；玩家库存消费与运输创建共享同一EntityStore participant、allocator reservation与commit frontier。prepare/validate不写真实component、inventory、issued IDs、sequence或lifetime；apply前再次核对owner/epoch/allocator、目标transform/immutable component、所有rider生命周期和唯一性。更新definition不得在同一lifetime改换，component revision恰好+1；位置/速度只写canonical transform。metadata与cargo在prepare时冻结复制，未知definition/溢出货物/错revision/重放/owner已替换/重复ID/冲突target/退役引用/坏array一律零写。裸reference不带worldId；不同world数值相同的reference不能仅凭这些字段判源，后续Authority envelope/Host绑定仍须保证实例隔离，不声称本组解决此边界。默认world item/station/actor参与者及192×128 series原额度与顺序保持，不吞掉新类型或放宽500行门禁。
+
+先做实际missing API/ignored spawn RED；真实EntityStore验证库存+spawn同次publication、invalid候选零写、取消/prepare期间状态变化与重复apply拒绝、混合world-item/station/transport allocator、多segment单一frontier及rider恢复关系。已有owner/shadow状态不作第二份canonical位置owner；future actor death/despawn不得使已接受运输rider引用悬空，候选预检必须检查该关系。此组仍不是Pack/Authority正式部署或浏览器产品PASS，legacy车辆迁移/骑乘physics/container与真实输入仍未完成。传统0.55PD×120%=0.66PD；AI约70min×120%=84min。10:10真实周剩86%、约60%停止线；不跑重复性能候选或扩大限额。
+
+## Transport lifetime ECS owner checkpoint46（有界实施；尚未验收）
+
+实际owner缺type/API RED后，新增货箱单槽overflow反例抓到normalizeStack并不限制待分槽count，补实体分配前stack-limit预检。最终owner+既有ECS/model3文件17/17 PASS；Web四文件24/24有效回归，加修正局部NPC profile的V4 codec文件5/5，合计29/29。完整静态首轮在Authority port旧enum处失败，原format/paths/lint/sealed5有效；修正canonical enum派生后余项完整types、Svelte0/0、规则/CI选择实际exit0。500行门禁未放宽，拆类型与纯校验职责；必要V4 regression追加既有headless/type路径。详见evidence/transport-owner-checkpoint-46-01.md；正式生产消费者、legacy迁移与浏览器验收未完成。
+
+先落实单一transform owner：新增transport entity/type和bitECS component，由显式world-local TransportDefinitionRegistry与同一items registry校验。component只存definition/yaw/routeCursor/rider stable lifetime/fuel/cargo/revision，不重复position/velocity，也不存跨restore失效的epoch；完整TransportStateV2从当前ECS transform、velocity和当前epoch/reference投影。snapshot沿用EntityStore V2增加optional transports child，旧缺省为空；restore在candidate ECS完整创建、定义/容量/货物/唯一rider及实际actor lifetime验证全部通过后一次替换，失败保留原owner、epoch、序列、issued IDs和状态。不同world registry不混用，缺配置、缺/重复/额外child、错误生命周期、退役引用和空间/库存非法输入fail closed。
+
+先做真实EntityStore缺type/API的RED，再所有权/移动投影/生命周期、未知定义/容量、存档原子失败、rider唯一性、旧snapshot兼容的GREEN；不把纯模型fixture当Authority产品验收。此组只建立必要owner接缝，后续正式prepared deploy、Pack/Host权限、Authority caller/view/physics/container与V4 legacy非空vehicles迁移仍需独立落实。旧Map没有ECS lifetime，不能猜reference、丢弃或假称已迁移；本组保持其原保存字节与行为。旧voxel0–88及Chunk bytes不动。固定工具检查相关types/lint/现有ECS与snapshot回归，暂不跑重复浏览器或性能实验。传统0.6PD×120%=0.72PD；AI约75min×120%=90min，09:40实际周剩87%、60%停止线保持。
+
+## Logic terrain 派生缓存候选 checkpoint45（预注册后 A/A 失败；已撤回）
+
+唯一组件实验于10:05:37.758–10:05:38.427 UTC完成；reservation与子进程实际exit1，status=A_A_NOISE_FAIL。四对A/A噪声分别6.229527529626598%、15.174364395031265%、32.23019034291813%、1.933799408579085%；最大32.23019034291813%超过原15%门槛，A/B NOT_RUN。完整50输入两轮deep equal通过，容量峰值2023 cells；这些正确性结果不能覆盖性能否决。未追加样本、重测或改变门槛；生产3文件、脚本/类型选择与code-map均恢复当前HEAD，新增夹具移出工作树。原候选9文件、patch、manifest、RED/GREEN、静态原失败及修复余项、raw/reservation全部保留Root独立路径。详细闭合见evidence/logic-terrain-checkpoint-45-01.md；不宣称组件收益或采用。
+
+精确5d91421远端run37910217197终态：Architecture、Static、Deterministic modules、Classic headless、Production build五项SUCCESS，Chromium FAIL、Cloudflare SKIP。headless87文件575/575；Chromium首次在铁资源路线walkTo目标78.5,-0.5超时，retry1在V1门交互原5秒断言期望[2,2]实得[2,0]失败。远端与本地Browser34失败分别保留，不能以任何构建或旧Browser25宣布可合入；PR仍OPEN/DRAFT、mergeable=true、merged=false。
+
+计时细节在首个样本前固定：50个synthetic pose输入，五个相邻x位置各重复10次，使用同一实际GameServer canonical Chunk；不冒充浏览器原始世界负载。每个arm/sample各warmup200次再计时200次，A/A按A1/A2、A2/A1交错，噪声为abs(A1-A2)/min(A1,A2)×100；p95为nearest-rank。Chunk边长实际32，32768-cell预算沿用原协议；早期夹具错误profile/Chunk Y和readonly resolver赋值失败均保留，不改生产常量或阈值。
+
+Browser34精确5d91421/build33原三测试终态main FAIL、visual PASS、Modular条件SKIP，17.6min；C0–C3、作物/导航、V1完成，V2石块[90,31,2]采矿1.0/1.2秒时触及原900秒，C5未到达。精确Authority URL/asset/hash的嵌套CDP采样实际COMPLETE、无错误，UTC09:23:23.838–09:23:43.880、1701样本。采样delta20.27291秒与Node capture20.042772417秒不同，不混用。按函数身份合并后createTerrainWindow self1.922548秒、buildLogicObservation inclusive2.660231秒；prepared mutation JSON比较self0.979733秒。嵌套指标不可相加，诊断不等于性能准出。
+
+候选只改变重复terrain occupancy构造；A为现有逐格peekLoadedVoxel，B为Authority实例内派生缓存。canonical Chunk实例提供opaque identity与revision的只读stamp，无voxel/Chunk可写对象泄漏；相同identity/revision/bounds/固定semantics才能命中，输出occupancy每次独立复制。改块、换Chunk（含同revision）、卸载、bounds改变、跨Authority实例均失效；不缓存null，保留逐格revision一致预检，缓存总cells<=MAX_LOGIC_TERRAIN_CELLS，剪除不再参与窗口。其他逻辑状态、输入频率、物理/玩法、Worker传输、renderer、画质、trace、900/45/20秒与断言保持。
+
+先实际RED：未实现cache导出或缺少有效复用失败；GREEN负例覆盖修改、换实例、卸载/重新加载、bounds、输出buffer被修改/transfer、容量、不同owner及不一致stamp。复用现有buildLogicObservation默认A合同，新增实际GameServer/Authority builder消费者对照。实验只使用同一bundle和固定loaded Chunk/语义/actors/bounds序列，记录source/worktree、lock、bundle、corpus hash与Node身份，独占reservation运行，不与测试/构建并发。组件主指标为同等输出的完整窗口构造/复制墙钟中位数；每sample200次、warmup200次，A/A四对交错后A/B八对AB/BA平衡。A/A最大配对相对差>15%即停止、不得追加无新证据重试；B中位收益>=10%且超过A/A最大噪声、p95不回退>5%、输出逐字节相同、派生容量不超上限才组件通过。所有失败/raw保留，未达标恢复A并删除生产候选。组件通过仍不宣称FPS/whole收益；当前已接受栈为control的原完整浏览器及组合整帧A/A/A/B未完成前不得宣称采用或可合入，最多一次有界消融。
+
+传统0.25PD×120%=0.3PD；AI约45min×120%=54min。09:40产品UI周剩仍87%，约5天17小时重置，含其他任务；60%停止线不变，费用/credits分母未知不换算。运输Task90只读计划保留Agent独立路径，不是实施或产品证据。
+
+## 精确 Authority Worker 采样 checkpoint44（仅诊断；未选优化）
+
+Browser33精确b17dc509/build32原完整3测试闭合：main FAIL、visual PASS、Modular条件SKIP，17.4min。C0–C3、作物与导航、V1完成；V2在铁资源准备的walkTo→waitForSnapshot触及原900秒，C4/C5未到达。末态双端位置约80.865,32.6,-0.461，落地/无碰撞，不认定永久卡住；128帧中位tick25.05ms/gap446.2ms/同步receive39.6ms，仅描述该窗口。
+
+原生20.171419372秒采集COMPLETE、无dataLoss、126610事件、33862305bytes，UTC08:22:44.089–08:23:04.260；全部原始闭合trace/元数据/失败字节/派生保留Root browser-33独立路径。GPU SwapBuffers29次inclusive wall19158.374ms、原生tdur70633us；CrGpuMain RunTask CPU383.521ms，不能把等待说成着色器CPU或GPU执行时间。DedicatedWorker169480 TimerFire(timerId1)1460次，inclusive wall12352.965ms、tdur8728654us；该线程整体RunTask CPU9639.469ms，不能相加。源码Authority唯一8ms周期与此相符只是推断，尚未直接确认该trace线程owner。V2闭合Playwright调用中snapshot1467次约118996.569ms，PointerLock/关包click各24次约35656.342/34289.279ms；调用可能重叠，不据此采纳旧slimSnapshot或压缩旅程。
+
+下一步只在原唯一main hook启用SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE=1，默认关闭、与主线程CPU/native trace互斥、benchmark拒绝。固定延迟360秒、20秒10ms V8 sampler；原runner从同次artifact receipt精确唯一assets/authority-worker-*.js及其hash派生选择器，CDP Target.getTargets只接受当前page同origin、完全匹配该pathname的唯一worker，记录实际target URL/id/context、source/run/asset/hash/UTC/elapsed。不依线程编号或timer频率猜owner，不暂停worker、改变线程/频率/品质/输入/协议或原900/45/20秒。
+
+使用已安装Playwright官方CDP类型明确支持的Target.attachToTarget(flatten=false)、sendMessageToTarget/receivedMessageFromTarget嵌套会话及Profiler接口；不patch SDK私有connection。协议失败、目标缺失/歧义、目标退出、超时、attach/start/stop/detach错误保留为诊断FAIL，未开始timer提前取消；pending请求有界且清理，子会话与browser session均detach。所有附件diagnosticOnly=true/eligible=false，不作为整帧性能。实际missing模块RED保留，三诊断fixture26/26、scoped lint及完整verify:static:ci PASS；fresh build和原完整browser采集仍未运行。传统0.2PD×120%=0.24PD；AI约40min×120%=48min。08:55实际周剩仍87%、约60%停止；当前不可合入，未完成全194/真实Modular/组合整帧A/A/A/B。
+
+## 有界 Chromium 原生 trace checkpoint43（仅诊断；未选优化）
+
+Browser32 精确1b6ba70d/build31原完整3测试为main FAIL、visual PASS、Modular条件SKIP（17.2min）。C0–C3、Creative作物及导航、中性目标下地图map-1/81pixel/revision2与作物保持、V1完成；V2在followEquipmentRoute→mineResources→prepareCraftedIronArmor的keyboard.up触及原900秒，C5未到达。实际地图截图与失败字节/闭合trace保留Root独立browser-32路径，不把步骤耗时作为通过依据。
+
+同失败128帧CPU样本中位tick22.5ms、interTick gap402.35ms、同步receive29.55ms；同窗之外1200帧p50为442.4ms，不能相减或宣称GPU归因。V2阶段独立10.010824402秒原生CPU观测显示gpu-process五工作线程合计26.58CPU秒、renderer主线程2.45秒、单DedicatedWorker5.23秒；宿主四核CPU预算保持。现有V8主线程sample和同步receive不能覆盖这些native/Worker占用，不改变线程数、CPU亲和/额度、renderer、品质或trace/输入断言来消除失败。
+
+下一诊断只在原唯一Classic main hook启用SEEDLANDS_CLASSIC_NATIVE_TRACE=1，默认关闭，与CPU sampler互斥、benchmark模式拒绝。使用Playwright Chromium browser CDP Tracing官方类型已声明的getCategories/start/end/IO stream：先发现并记录实际categories，固定Node延迟360000ms开始、采集20000ms，实际UTC/elapsed/source/run/类别/数据丢失状态如实保留。选择toplevel/gpu/cc/viz/devtools.timeline及存在的gpu.service/debug类别；缺核心类别拒绝，不用截图类别。原生buffer16MiB、返回JSON stream64MiB上限、chunk64KiB、完成等待10秒，所有路径关闭stream与session。早期main失败取消未开始的timer；start/end/read/detach失败保留并使诊断失败，不以吞错制造通过。所有附件diagnosticOnly=true/eligible=false；raw trace区分原生任务和跨线程调度，不把重叠task相加当整帧GPU时间或FPS收益。
+
+先做实际可执行session/timer/stream生命周期负例与GREEN，纳入原headless/type/selector路径；复用有效生产/static结果，只跑新增相关检查，然后新精确SHA build/原完整browser采集一次新证据。传统约0.2PD×120%=0.24PD；AI约40min×120%=48min。07:39真实周剩88%，含博客等共用账户用量，约60%停止。未完成全产品、C5、真实Modular与整帧A/A/A/B，当前不可合入。
+
+## 导航正常输入与 target-first 共存 checkpoint42（诊断后有界修复）
+
+Browser31 精确6e1a1f26/build30原完整3测试为main FAIL、visual PASS、Modular条件SKIP（8.1min）。C0–C3和Creative作物完成；已正常选中指南针/时钟/地图并显示accepted HUD，但地图第一次右键后的原5秒SVG断言FAIL，尚未运行V1/V2/C5。原始trace/results/失败字节保留独立browser-31路径。不可由step耗时宣称导航PASS。
+
+现有输入优先voxel target，其次held self；实际crop dispatcher对非种子/非肥料所持物品执行目标收割。新增导航旅程沿用了成熟作物的瞄准方向；先用真实Authority与前端secondary helper组合取得该触发的定向反例，区分目标收割与self地图更新。若反例确认，只用既有真实Pointer Lock鼠标瞄准邻近中性Stone地面再右键，保留target-first生产行为、原map owner/HUD/map-ID/inventory断言和期限；导航后立即复核待保存作物仍stage7，不把真实目标交互改成无条件self，也不以admin更新地图。修复后定向测试/必要静态与原完整browser重新验收。传统0.15PD×120%=0.18PD；AI约25min×120%=30min，周额度读数待主对话更新、60%停止。
+
+Browser31只读原生CPU观测：固定10秒GPU process五个Thread工作线程合计约25.12CPU秒、renderer主线程1.97CPU秒，宿主cpu.max为400000/100000（四核总预算）。第一份角色字段只是未核实的browser默认值，后独立显式--type扫描确认为gpu-process/renderer并保留原件。此为诊断而非GPU执行计时或因果/收益证据，不修改环境资源、安全策略、render质量/输入/trace，不选优化候选。
+
+## 正式导航 producer / consumer checkpoint41（实施中；未验收）
+
+整体复验实际结果：Classic headless 84文件552例PASS；stdlib 153文件1101例PASS、Headless CLI同一宿主navigation resource未许可导致7例FAIL；静态format/冻结5/5/paths/lint/产品types与Svelte0/0通过，Classic夹具读取可空inventory slot导致后续types失败。下一步仅补工程脚本Overworld的明确navigation读/写/执行许可（不采用Pack自请求权限、不改其他Playbook许可），显式排除null slot，再复验受影响CLI/Authority夹具、types与未运行规则/选择器；复用有效结果。
+
+复用既有 Authority interact self，无新增动作/协议 target。新增可组合 navigation-items policy，Classic storage item ID 与 voxel→颜色配置移至 Playbook；windowRadius0..4、色值0..15保留既有 V1 child 保存接受边界，不虚构128×128需求。Classic 从 player body feet 下方一个 voxel 采样已加载表面；未知 cell 不填色、不加载、不调用 MacroMap。已有地图 center、scale、像素与map-ID序列保持；缩放索引解释不变。
+
+导航模块声明自己的 actor resource/state/operation，纯 operation 读 observation、写 candidate；唯一 NavigationItemsRuntime 提供 prepared port，验证 actor/selection/loaded samples/map/revision/lifetime 与授权，拒绝伪造候选、额外写、旧 revision、取消/after-rule veto 和跨生命周期重放后才替换状态。指南针出生点、时钟世界时间与当前选中地图只经 Authority accepted gameplay view 进入 HUD；地图更新从真实右键 self consumer 进入正式 owner，客户端不存第二份地图。实际旧 composition 身份取自 Browser30 已结束原完整 trace 的 world.checkpoint export；新前驱仅精确V4 allowlist，缺省 navigation child 恢复空 owner，畸形 child 在原预检拒绝。
+
+验证先覆盖 policy 与实际 registered owner/Authority caller 的定向 RED/GREEN、失败前后 snapshot/inventory不变和旧V4恢复，再必要静态/构建与原唯一完整 browser。UI成功、恢复、整帧性能及194完成只以实际结果为准；本组不修改原期限/输入断言/renderer/trace，不宣称当前可合入。传统约0.8PD×120%=0.96PD；AI含浏览器约90min×120%=108min；未知额度分母不换算，06:09实际周剩89%、60%停止。Luna仅独占policy/fixture，根集成。
+
+## 主线程采样结果 checkpoint40（whole 已失败；未选生产优化）
+
+Browser30 精确63f8d24c/build29，原完整runner main FAIL、visual PASS、Modular条件SKIP。C0–C3、Creative作物与V1完成；石镐制作/关闭工作台已发生，随后进入铁资源路线，原900秒终结。真实75033样本覆盖900.139563秒并含生产应用，但idle/program约56%/20%无法直接定位主要空档；同步receive、UI比较和光照样本不足以建立GPU/trace因果。只固化原始profile的有界派生与真实旧V4 composition投影，不声称性能GREEN，不恢复已否决slimSnapshot，不改输入/断言/期限/质量/trace。证据在evidence/cpu-profile-result-40-01，原始大文件保留私有Root。06:09实际周剩89%；当前仍不可合入，持续正式producer/consumer与完整玩法验收。
+
+## 主线程 sampling 诊断 checkpoint39（确定性与静态完成；真实采样待运行）
+
+Browser29精确6b459cbf/build28 whole1 FAIL、visual1 PASS、Modular条件1 SKIP，V1与新作物完成并进入V2，stone-pickaxe的placeOneEach→committedPointer在900秒失败。最后camera[78.47565,32.6,0.45011]、Authority[78.47565,32.6,0.45011]。同128帧gap中位439.45ms、同步receive38.7ms/17次，配对比例中位9.037%、sum(wall)/sum(gap)9.676%；仅同步receive占用，不能证明整体消息处理或GPU因果。原始trace/results/失败字节保留私有Root browser-29-results、browser-29-failure-39-01.json。
+
+只在现有唯一Classic spec的主旅程启用可选Chromium Profiler sampling：SEEDLANDS_CLASSIC_CPU_PROFILE=1，默认关闭，采样间隔固定10000微秒。原生产artifact、输入/断言、trace、renderer、质量、线程、20/45/900秒不变；benchmark启用时拒绝采样，所有profile标diagnosticOnly/eligible=false。启动前固定runId/sourceSha，正常及失败均stop→attach原始profile→detach，启动/停止失败仍清理并保留失败，不吞掉错误。profile只覆盖当前主线程isolate，timeDeltas为相邻样本微秒间隔，不能将采样归属视为精确函数wall、Worker或GPU执行测量。先用fake原CDP port验证benchmark拒绝、命令顺序、start/stop/attach异常清理与元数据原样保留；真实采样仅由新artifact的原完整runner取得。
+
+主spec已500有效行，只将原beforeAll/afterEach与新增诊断beforeEach按同一生命周期抽到classic-support/diagnostic-hooks.ts；原headless检查、exitPointerLock、visual/modular跳过失败采集及stage/restore引用保持，不新增runner或改选项。必要types/lint与新hook测试后构建/运行；未定位主要热点前不增加生产优化。旧slimSnapshot仍拒绝。只读Task72纠正旧Task66：Authority interact已支持self，无需新增action/协议；未来导航注册producer/accepted-view/UI仍未实现。
+
+checkpoint38派生JSON的serverPosition:null是字段名查找缺失，不能表示Authority无位置；原失败真实字段serverPlayerPosition已核实，本组新的diagnosis记录真实字段并保留旧派生与原始字节。最新05:40实际周UI仍剩89%，60%停止；传统0.12PD×120%=0.144PD、AI含18min浏览器约35min×120%=42min，未知额度分母不换算比例。根必要静态cpu-profile-static-39-02.log PASS（冻结5/5、全格式/路径、scoped lint、完整Classic types、CI选择14），联合4文件18/18 PASS；spy类型与cause失败保留。完整V2/V3/V4/194/恢复和组合整帧AB仍未完成，无合并/生产部署。
+
+## 相邻帧空档 receive wall 诊断 checkpoint38（确定性与静态完成；浏览器待运行）
+
+Browser28精确5f3f679/build27 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。V1已结束并进入V2，石镐制作返回工作台在900秒上限失败；末尾Pointer Lock错误发生于超时退出附近，不认定为首因。最后128样本同步tick中位21.05ms、renderEnvelope3.2ms、interTickGap434.95ms；不同窗口不能相减，GPU/Worker/trace因果仍未知。原始结果保留在私有Root browser-28-results，失败原字节browser-28-failure-38-01.json。
+
+只在原BrowserAuthorityClient worker.onmessage外层测同步receive全调用（含早退及回调），finally计数并原样传播异常。实例注入单调now；有界累计runtimeEpoch/generation/count/totalWallMs，不按消息无限缓存。epoch切换、dispose或非法/倒退时钟使累计身份断链，重入仅计外层，副本冻结；读取不暴露写入口。frameend记累计baseline，下一frameupdate只对相同epoch/generation且有限非递减的累计差输出receiveGapWallMs/receiveGapCount，wall差不得超过该gap；首帧/缺phase/换app/reset/不可用/非法累计皆null，有效无receive才为0。不得跨断帧或epoch串样。
+
+同步入口不包括structured clone进JS前、排队、异步后续、Worker CPU、GPU及其他task。只回答已完成同步receive的空档占用，不宣称因果或FPS收益。保持原owner、协议、selection、线程、renderer、trace、质量、45/20/900秒及唯一完整Classic runner；不用旧slimSnapshot候选。RED覆盖实际client调用者、异常不吞、重入/clock失效/epoch/dispose，frame字段正确差值及断链反例；GREEN后必要lint/types/观察和client回归，新artifact唯一browser读取证据。
+
+05:10真实UI剩余89%、约5天21小时重置，60%停止；传统0.15PD×120%=0.18PD、AI约25min×120%=30min，未知credits/API分母不换算周比例。根receive-gap-static-38-01.log完整静态PASS，冻结5/5、Svelte0错误/警告、规则66与CI选择14；联合4文件26/26 PASS，原fixture/行数失败保留。长期docs仅记录实际观察owner。完整V2/V3/V4/194、恢复及组合整帧AB仍未完成；不合并、不部署生产。
+
+## 门撤退双端路线 checkpoint37（确定性与静态完成；浏览器待运行）
+
+Browser27精确32422f99/build26 whole1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3和作物通过，V1关闭门探测后retreat readiness20秒FAIL，未进入V2；不声明V1通过。实际geometry93是x[0.8125,1]薄门，plan contact70.4925、approach69.4925。松开探测W后首snapshot camera69.49097、Authority70.49250；旧walkTo固定KeyS在camera已越过approach时直接返回，trace之后无任何S，camera追上70.4925后纯wait不可能使双方到门体素外。这是有效实际RED，不是瞄准或900秒失败。
+
+只将V1关闭门后的retreat调用复用已有walkEquipmentRoute的双端邻域/arrival、推进tick/ACK与drift重试，保留原碰撞探测、ground/collision、门内外体素/几何/mesh、20/45/900秒及全部V1/V2断言。其他walkTo/物理/渲染器/时钟不改；不创建新runner。既有对应路线及door readiness回归为必要确定性检查，随后新build27/browser28唯一完整入口验证。
+
+Browser27最后128样本tick中位21.25ms、renderEnvelope4.95ms、renderTail0ms、interTickGap675.7ms；同步循环外间隔占大头但不推定GPU/Worker/trace因果，保留原样本与trace。本组不是性能改善声明。最新04:38真实UI89%、含博客等同期用量，60%停止；传统0.05PD×120%=0.06PD、AI约10min×120%=12min，非周额度换算。本组Classic全类型/scoped lint及6文件51/51路线/门回归PASS；生产/其他既有静态沿用有效结果，无生产源码修改。完整V2/V3/V4/194及组合整帧AB未闭环，无合并/生产部署。
+
+## 完整tick边界诊断 checkpoint36（确定性与静态完成；浏览器待运行）
+
+Browser26精确669ca56b/build25 whole 1 FAIL、visual1 PASS、Modular条件1 SKIP。C0-C3/新作物/原V1通过，V2在stone-pickaxe的回工作台路线耗尽900秒，不能视作永久路线死锁。最后128个CPU样本update中位19.5ms、中心render1.8ms；原frame窗口1200帧中位459.1ms。窗口不同且相关计时不能相加推导因果，旧center render明确遗漏canvas/device边界。
+
+只扩观察至同帧frameend：framerender→frameend renderEnvelopeWallMs包括完整render调用，postrender→frameend renderTailWallMs包括device收尾，frameupdate→frameend tickWallMs；previous frameend→new frameupdate interTickGapWallMs首帧/断链null。仅五事件完整有限有序pair在frameend入样，缺phase/重复start/倒退不串frame；仍capacity128、冻结复制/reset/destroy清理。所有是CPU/driver墙钟或事件间等待，不是GPU/cull时间，仍不更改renderer、trace、质量、时钟、线程、玩法、路线断言或900/45/20秒。
+
+适配原observer合同测试并以新增envelope/gap/缺frameend行为取得RED→GREEN，必要types/lint后新build26/browser27唯一完整入口；保存Browser26原始trace/failure/128样本，不直接重跑相同源码。最新实际03:55UI90%，账户另博客任务不能精确归因，60%停止；传统0.08PD×120%=0.096PD、AI约10min×120%=12min，非周额度换算。新观察6/6及联合PerformanceTelemetry共2文件12/12 GREEN、生产与Classic types/scoped lint/格式PASS；沿用本组未改变的checkpoint35完整静态与77文件526项结果。完整V2/V3/V4/194及组合整帧AB仍未完成，无合并/生产部署。
+
+## 公开帧事件诊断 checkpoint35（确定性与静态完成；浏览器待运行）
+
+Browser25精确939e0165/build24 whole结果1 FAIL、1 visual PASS、1 Modular条件SKIP。C0-C3、新负Z双田创造种植/成熟/收割/库存保持及原V1均PASS；V2完成木镐、石镐，在铁资源准备前回工作台走廊时达到900秒整场期限。最后player[78.5315,32.6,-0.555]、ground=true/colliding=false，未证明永久路线停滞。保留原始trace与failure，不提高900/45/20秒或弱化玩家/ACK断言。
+
+默认PlayCanvas2.21.4不写有效updateTime/cullTime/renderStart；不可直接暴露初始化计时作为测量。本组只添加公开事件配对只读CPU wall观察：frameupdate→framerender包括同步update/input polling；prerender→postrender仅中心render与driver调用，不含resize/frameStart/frameEnd，不是GPU/cull时长。容量128，同帧完整有限非负pair才入样；重复start、缺事件、clock倒退丢弃，换app/reset detach并清空，snapshot冻结独立复制。不得改变renderer/线程/质量/时钟/玩法/性能阈值。
+
+先取得有界emitter时序、missing/invalid/reset隔离及冻结复制RED，再GREEN；选择器纳入现有Classic headless，必要format/lint/types后新build25/browser26唯一完整入口读取诊断。最新03:55真实UI90%，账户另有独立博客任务、不能精确归因PR41，60%停止；传统0.15PD×120%=0.18PD、AI约20min×120%=24min，不换算周额度。确定性77文件526/526、完整verify:static:ci通过（冻结5/5、Svelte0错误/警告、规则66、选择器14）；最初Game行数与新JSON格式失败保留，必要修正后复验。完整产品与组合A/B未闭环，长期docs仅更新实际owner地图。
+
+## 作物视线隔离修正 checkpoint34（静态验收完成；浏览器复验待运行）
+
+Browser24（489c1941 / build23）完整结果 1 FAIL、1 原visual PASS、1 Modular条件SKIP。新双端/ACK路线完成两块田真实创造种植0/施肥7、第一田收割与恢复Survival库存保持，实际批次8/12；尚未运行保存恢复。随后原V1水支撑[68,30,2]从approach[66,2.5]连续12次实际命中新增Farmland[67,31,2]；作物田块挡住既有视线，不能删除原V1断言或跳过。
+
+只将新增plots改为[67,31,-2]/[69,31,-2]、approach改为[x-1.5,z+1.5]，全部仍在原Stone/Air范围内。原V1水[68,31,2]、door[70,31/32,0]、jukebox[76,31,2]及对应approaches保持；新田块z[-2,-1]与这些视线/站位不共享目标列，V2沿z=-0.5中心线与农田边缘距0.5。静态坐标不等于真实body sweep/LOS PASS。继续复用原walkEquipmentRoute与正常UI/鼠标，原C0-C5、V1/V2、aim12次、45/900秒、visual/modular和画质不变。
+
+保留Browser24原receipt、failure、五个crop观察及截图；旧task55/57静态审查遗漏已由readonly61纠正，不重写旧失败。必要format/lint/types后新build24/browser25唯一完整入口检验，未改变生产源码或新建runner。预算03:09真实UI90%，约5天23小时重置、60%停止线；本修正传统约0.1PD×120%=0.12PD、AI约10min×120%=12min，非周额度换算。完整V2/V3/V4/Modular/194与组合整帧A/B尚未闭环。
+
+## 作物路线消费者修正 checkpoint33（确定性验收完成；浏览器复验待运行）
+
+Browser23（7a675c50 / build22）完整 correctness 结果 1 FAIL、1 visual PASS、1 modular 条件 SKIP，未达到 V1/V2/C4/C5。第一田 [67,31,2] 经真实创造 UI/鼠标完成 stage0→7→harvest，实际 GPU 8 vertices/12 indices、清理为空，夜间截图可见幼苗/成熟/移除；此仅局部消费者证据，不是 whole 或 Survival PASS。第二田瞄准 [69,30,2] 连续12 null。失败双端 x≈65.329、z≈0.4998、y≈32.6、速度0、onGround true；新crop helper固定KeyS，而原reachedRouteTarget对S使用xDelta≤0，因此向更大x的第二站提前返回，没有真实走到approach。
+
+修正仅在crop-journey复用既有walkEquipmentRoute的fresh-heading方向选择、双端邻域/arrival、ground/collision、推进tick/ACK与drift重试；删除新crop固定KeyS调用，初次和restore同一路线合同。不修改标准walkTo、route-progress、Authority物理或瞄准12次/超时/画质。既有回归覆盖被复用流程，必要静态检查后用新build23/browser24唯一完整入口验证；不因首次局部PASS跳过第二田或保存恢复。原Browser23 receipt/trace和六个crop附件独立保存，source/artifact不复用。
+
+预算最新02:41真实产品UI90%，60%停止线不变；本小消费者修正约传统0.1PD×120%=0.12PD、AI约10min×120%=12min，不换算周额度。完整V2/V3/V4/Modular/194与组合整帧A/B仍未完成，无合并/生产发布。
+
+## 作物真实输入与观测 checkpoint32（接线与确定性验收完成；浏览器未验收）
+
+为checkpoint31补实际产品证据，仅扩展唯一完整Classic旅程及只读BrowserProductHarness，不另造runner或developer玩法写入。cropStageSnapshot()返回runtimeEpoch/gameplayRevision、accepted Authority cropStages的冻结独立复制，以及当前adapter live GPU batch的只读摘要：Chunk/呈现ID/阶段/soil positions、Mesh.getPositions实际vertexCount、primitive实际indexCount、材质绑定的light参数是否存在、local enable/mesh visibility标志。参数存在和enable不是实际照明/可见性结论，须结合真实截图。ready/authority实例/gameplay引用/runtime/rendered-world epoch不一致时返回null；无新权威crop Map、写API、wire版本或route-slim重试。
+
+先API/新观测契约RED，GREEN证明getter就绪/新鲜度拒绝、复制冻结不修改既有view或GPUmetadata、实际mesh计数而非从authority猜数、destroy/epoch后的空资源与灯光绑定观测。正式新字段纳入原selector/types；旧fixture只补必需接口，不放宽原owner/epoch断言。
+
+真实路线复用既有已铺平/已加载Stone走廊。不得猜自然土壤/水/高草坐标；可通过正常mode UI/创造目录选择dirt-block并按既有placement helper用真实右键放土，再木锄→小麦种子→white-dye完成锄地/0→7。此为创造模式农业消费者验证，不冒充完整Survival材料/骨粉/水化自然成长链。收割/施肥实际已由authority-player-action的正常interact fallback→dispatchAuthorityCropTarget进入registered prepared host，不能因item selector里无独立项而重复新入口。明确的新plots只能使用原floor/air覆盖、避开原build/workbench/V1/V2targets与bodyClearance的支持格；用同样瞄准/双端到达/ACK/碰撞/20s/900s合同，运行后才能登记坐标通过。保留第二株进入原C5 portable save/继续，并校验新epoch的accepted crop及实际mesh；不跳过V2或把部分步骤改记whole PASS。原每个阶段、原visual与modular条件、画质/线程/PointerLock合同保持。
+
+planned captures含stage0/mature/harvest空/restore截图与只读观测附件，失败亦保存原始receipt/trace；新的精确source/artifact build22/browser23，不能使用4db dist。本组未运行browser或性能；完整V2/V3/Modular/V4/194和组合整帧A/B仍待闭环。预算02:41真实UI90%、约6天重置，60%停止；子片保守传统1PD×120%=1.2PD、AI约1h×120%=1.2h，实际费用/模型元数据与周额度分母不可换算，不额外探测或购买。现有PR持续修复授权不变，无合并/生产发布。
+
+## 作物 Chunk 呈现消费者 checkpoint31（接线与确定性验收完成；浏览器未验收）
+
+承接checkpoint30内容合同，只新增派生渲染消费者。唯一CropRuntime仍拥有种植/阶段/时钟；Web仅消费accepted AuthorityGameplayView.cropStages，按已呈现terrain Chunk、presentationId和stage批处理非碰撞crossed-quads，不创建逐作物Entity、体素、碰撞体、可写crop Map或新提交。缺presentationId的旧投影不绘制；声明的未知ID/非法stage/position失败关闭、清理overlay并报告既有runtime错误UI，不默默显示替代物。渲染与normal soil-target action保持分开的合同。
+
+新增纯CropStagePresenter<Resource>位于app/world；constructor(catalog.crops, adapter)，adapter只有create(batch)/destroy(resource)，batch含chunkKey/cx/cy/cz/presentationId/stage/definition/positions（soil positions，readonly）。update(epoch, projections, residentChunkKeys)仅保留相同内容签名的GPU资源；坐标按floorDiv/CHUNK_SIZE含负坐标与边界。新增client/presentation/crop-stage-geometry纯生成批次positions/normals/uvs/indices，相对Chunk原点，base=soilY+1，两片对角双面cutout平面，尺寸完全来自Pack；每作物8 vertices/12 indices，无写World/Authority接口。
+
+World drainCommits在terrain attach之后协调overlay，Chunk卸载立即销毁相应batch，beginScenario/world-restore清理全部，dispose终止late update。accepted crop删除/成长/恢复在下一正常frame交付；无变化不重建GPU批次。PlayCanvas适配器只创建按chunk/stage批次Entity与Mesh/Material/Texture，关闭碰撞与shadow体，无terrain repository替换；World销毁batch，visualResources销毁材质纹理，异步加载/部分创建失败完整回收。继承旧场景epoch与资源owner，不增加Worker/Kernel状态或素材域名。`world-crop-presentation.ts`窄协调器连接resident keys/错误UI与GPU资源，避免继续扩张World类；作物材质复用现有voxelBlockLightGlsl与terrain的只读光照砖。terrain替换时bind新砖，更新直接观察原GPU纹理；卸载/恢复/退出先撤除引用，不销毁借用砖。夜间光照与透明轮廓需在新artifact实际画面验证，mock仅证明生命周期。
+
+先API RED及旧缺消费者观察：此前Task45实际rg确认cropStages无Web消费者，浏览器可见性预期为在正常种植后应看到stage0、施肥后stage7、收割/移除土壤后消失，restore后如实重现。新增纯测试用实际新owner合同先失败，GREEN覆盖空/旧投影、resident限制、同签名复用、0→7、删除、负坐标/边界、unload/epoch/dispose、未知资产与非法数据/部分创建失败清理、8/12几何与Pack尺寸，不把fake adapter当视觉证据。静态门禁与相关headless回归后仅以新的精确source/artifact、唯一完整Classic入口检验真实输入/作物可见与生命周期；不加debug teleport/setView，不改既有断言/期限/画质，不复用4db dist，不宣称性能提升。
+
+预算02:09UTC产品UI实际周剩余90%，约6天重置；约60%停止线保持。本有界消费者预估传统1–2PD、AI约1–2小时，模型/费用与真实周额度不可换算。当前获授权持续PR修复及正常feature推送；不合并/自动合并/生产部署。V2超时、V3/Modular正式producer、V4完整旅程、194项产品矩阵、组合整帧A/B仍未完成；渲染通过也不自动闭环这些项。
+
+## 作物 Pack 呈现合同 checkpoint30（内容合同完成；呈现未验收）
+
+本组补齐此前仅有 position/stage 投影的内容合同，未完成浏览器呈现验收。CropPolicy 可选 presentationId 是经原 CropRuntime 冻结的只读内容元数据；无标识的旧配置继续只投影原字段，有标识时每条 cropStages 增加同一个通用 presentationId，不泄漏成长时钟、不改 crop checkpoint 字节或新增状态 owner。Classic 声明 seedlands:wheat-crop，八个阶段资产完全由 Pack 指定；stdlib/Web 不硬编码 Classic 作物或体素。
+
+Pack presentation schemaVersion1 新增可选 crops 数组。每项 id 唯一，stages 必须恰好8项，每项只含 texture、height、width；texture 必须是相对路径并进入 manifest resources、资源锁、SHA256 校验与同源读取，height/width 为有限正数且不超过2。缺 crops 的旧Pack保持有效；声明错误、未锁定资源、重复作物、阶段数不合法均失败且释放已创建URL。不得用既有地形 faceMaterial 槽位伪装作物或改体素/碰撞语义。Classic 提供8张本仓库原创16×16 SVG透明纹理，后续按Chunk crossed-quads消费者另组实现。
+
+先有效RED：旧loader拒绝合法crops扩展，旧Authority投影不含配置标识。GREEN覆盖旧格式兼容、完整8阶段加载/锁校验/销毁、缺失资源与错误尺寸/重复id/阶段数量拒绝、标识冻结与非法id、Authority旧/新配置及成长/恢复仍保持独立投影。不以这些确定性测试宣称实际可见或正式玩法PASS。Pack/模块定义变化仅新增 Browser22 在4db1a0b实际捕获、与cd5同玩法定义的精确 V4 predecessor；不猜摘要或使用wildcard。保持旧 captured identities 及sealed evidence不变。
+
+预算沿用本PR：01:41UTC真实产品UI周剩余90%，包括其他账户任务；约60%停止线。当前子片预估传统1PD、AI约1–2小时，实际模型会话与credits/API/周额度换算不可核实，不另做探测或估算比例。授权为当前PR持续修复、正常feature提交推送，无合并/生产发布。验证以 focused RED/GREEN、生产静态检查、相关headless回归为准；渲染、真实输入、完整V2/V3/V4/194项与组合整帧A/B仍未完成。
+
+## 独立输入事件路线观测候选 checkpoint29
+
+终态：候选29未采用。源码 `4db1a0bdd86e8a8e2422b829d422fc560896bd78` 的 Browser22/window `pr41-cloud-browser-22` 为 FAIL / NOT_RECORDED，主旅程 FAIL，visual/modular SKIP。20次观测为4warmup+完整16次A/A，所有实际输入事件计数0，固定owner/profile身份唯一、同任务精确投影通过；A/A左右median为53.69309150000481/62.12084249999316ms，偏差15.696155249297933%超过15%否决线。未采A/B，不能以接近门槛或部分样本宣称收益。生产API、路线切换、工程probe、测量接线及相关测试/selector全部撤回至cd5源码；保留原始附件、trace、窗口回执与候选checkpoint，不追加同条件重采。当前read-boundary候选停止，继续正式玩法消费者与主旅程其他瓶颈。
+
+新证据：Browser21/window28在14次精确同任务投影中，仅input ack由743推进至755；位置/视角/速度/ground/collision/world/runtime/generator不变，测量区间无Playwright键鼠调用。Controller每次prediction advance仍发送生成命令，ack应视为可推进的流水线确认时钟。本轮28已FAIL并撤回，不复用部分样本作A/A或收益。
+
+候选29仍只检验相同的只读路线投影边界，不改生产输入、物理、世界、预测、渲染、quality、pulse、到达、期限、存档或正式玩法断言。新的测量身份以工程层短生命周期DOM输入事件观察器冻结：keydown/up、pointerdown/up/move、mousemove、wheel、blur/focus、pointerlockchange的总事件序号须不变。观察器仅在当前页面测量窗口安装，拒绝已有实例，finally移除全部listener与自有probe；不得消费/阻止事件或写任何玩法owner。固定三轴双端位置/速度、视角、ground/collision、world revision/runtime/generator、quality/render backend/请求实验配置/worker counts；同任务完整与精简字段包括tick/ack仍须精确相等。physicsTick/ack在样本之间只允许非递减，safe integer/owner-ready规则不变；其倒退或实际输入事件变化均否决，不允许把真实新输入或epoch替换当自然时钟。
+
+先用旧固定ack实现取得有效RED：真实协议允许保持中性/无DOM事件时tick/ack单调前进，旧实现仍拒绝；输入事件变化但姿态暂未改变时旧实现无法拒绝。GREEN覆盖事件监听安装/全量清理、成功与失败清理、owner同任务不等、pose/world/profile改变、tick/ack倒退、非法计时、输入事件变化、无输入时钟前进，保留之前导航双端与真实键鼠handoff断言。确定性时钟fixture不作性能证据。
+
+性能维度、完整唯一canonical入口、独占窗口、4warmup/8对A/A/8对ABBA-BAAB、15%噪声否决与20%改善门槛保持28注册值；原始样本新增实际probe事件序号、tick/ack及固定身份，在失败时也保留。新source/artifact/window独立，全部原Canonical断言继续，whole FAIL不能通过资格。非收益/否决后再次撤除候选，不通过更换阈值、选择器、baseline或重复同条件采样改绿。最新预算01:09 UTC产品UI剩余91%，仍共用PR预算，约60%停止；本轮无当前A/A或性能结论。
+
+## 路线只读观测候选 checkpoint28
+
+终态：候选未采用。源码 `8255157424f8f7f776b8c4224092744e9392385b` 的 Browser21/window `pr41-cloud-browser-21` 为 FAIL / NOT_RECORDED，主旅程 FAIL、visual/modular SKIP。仅取得4次warmup和10次A/A观测，未达到A/A资格，未进行平衡A/B。14次同任务投影全部精确相等；第14次input ack从743推进至755，其余位置/视角/速度/ground/collision/world/runtime/generator不变，trace测量区间无Playwright键鼠调用。客户端预测循环仍持续发送命令，ack是流水线时钟，不等同物理输入状态。本轮固定ack合同不能满足真实流水线；不放宽本轮否决线、不追认部分样本。生产API、路线切换、测量接线及相关候选测试/selector撤回到父提交cd5；原候选checkpoint与失败原始记录保留。后续若需要新实验，须先登记独立输入事件观测与tick/ack单调新鲜度合同，而非简单移除校验或盲目重试。
+
+Browser20 的2142次V2快照，CDP编码值中位90335 bytes、合计193283849 bytes；trajectory中位约51KB，其次是waterTransitions/compute/authority诊断。此后验体积不是延迟因果证据。注册单一候选：增加只读routeSnapshot，直接从与完整snapshot相同的Controller/已接受Authority owner复制player/server三轴位置、三轴速度、viewAngles、onGround/colliding、physicsTick/input ack。缺少/未就绪/非有限owner数据返回不可用，不沿用完整诊断snapshot的默认假坐标。完整snapshot及所有版本、呈现、光照、存档、失败诊断保留。
+
+先取得有效RED：当前完整投影含无关诊断且在owner缺失时提供默认坐标，不满足新路线投影合同；再验证新投影精确等价、独立只读副本、无写入，以及原双端到达/velocity/tick/ack/grounded/collision条件不变。仅设备路线与真实移动内部观测可切换；其余消费者继续完整snapshot。所有原Pointer Lock/真实键鼠、pulse、到达/邻面判断和900000/45000/20000期限保持。失败时仍取完整owner诊断。
+
+保留理由涉及观测成本，必须受控A/A+A/B：只在唯一canonical spec的同一次当前artifact/同浏览器/同固定Classic低质量场景/同窗口运行；A=完整snapshot过CDP后在Node投影相同字段，B=同owner在浏览器投影后过CDP。除投影边界外不改变渲染、Worker、输入或世界状态。每次测量前同一同步页面任务内比较完整投影和B字段精确相等；owner不可用、字段差异、输入状态变化、world/runtime身份变化均否决。记录原始样本、顺序、source/artifact/profile与观测值；payload大小标清逻辑JSON/实际CDP编码，不推断网络bytes。
+
+先有界warmup，再A/A交错8对，median偏差须<=15%；通过才做平衡ABBA/BAAB至少8对，B端到端观测elapsed median改善须>=20%，所有原玩法断言保持。无确定收益或超过否决线，撤除候选及路线切换，保留失败证据，不改benchmark baseline、不追加盲目重试。候选通过也只证明读出边界成本；完整当前SHA玩法、必需CI和既有frame优化的组合端到端A/B仍独立待验。实施前无RED/GREEN/A/A/A-B结论。
+
+测量执行细化：使用既有 `SEEDLANDS_CLASSIC_BENCHMARK=1` 的完整无选择参数入口，额外开关 `SEEDLANDS_ROUTE_OBSERVATION_AB=1` 只在C0正式初态就绪后采样，不另开浏览器线路。4次有界warmup、16次A/A与16次平衡A/B；每个页面同步任务的owner等价证明计入两臂相同开销。固定站立、零速度、输入ack/三轴位置/视角/碰撞/世界revision/runtime/generator身份，physicsTick自然推进不作身份变化。结果独立attachment保存，只有整段canonical及独占窗口均PASS才有资格采用；失败的部分测量不得另写成功声明或绕过现有receipt。字节数只标逻辑UTF-8 JSON，实际CDP编码仅由保留的原始trace另行取证。
+
+作物支撑观测改变 Block capability 定义身份；V4 兼容仅增加 Browser20 在精确 source `c3ac4d81996b3693f2f86fa60d045d7ce2a3d31c` 导出的完整前驱身份，保持所有已有捕获不变。先验证此前驱当前被拒绝，再验证单点允许后存档恢复原作物且正式挖掘可清理；篡改任一 Pack integrity/定义字段继续拒绝，不允许通配或以新组合构造旧身份。
+
+### 注册作物支撑状态清理 checkpoint27
+
+只读owner检查发现：普通注册方块破坏/替换和注册soil-transform不观察crop-cell，也不参与CropRuntime清理；支撑变为不支持的voxel后，advance只跳过成长，checkpoint仍保留孤立作物。冻结目标：同一注册观察/授权和prepared transaction内，支撑改变为当前CropPolicy不支持的voxel时删除该位置的唯一crop记录；支持土壤间转换保留记录。不得绕过注册观察直接读取/修改owner，不创建第二map或提交后补清理，不改变普通方块drop或新增未定义的crop-drop；未加载/unknown、stale和准备失败均不能删除作物或部分扣物。没有crop时也观察expected null，以拒绝准备后并发种植造成的孤立状态。
+
+RED先覆盖实际完整Classic Authority注册种植→Survival begin/正常clock finish、Creative立即begin、portable保存/新Authority恢复/清理后二次恢复；原土壤方块drop/工具状态保持原语义。race注入明确区分owner并发测试与正常玩家action，不用reentrant registered action制造非法fixture。实现还须覆盖有实际非Classic policy的支持→不支持soil-transform、支持→支持控制及缺省未装作物模块的普通block操作；注册状态依赖缺失必须明确拒绝，不能弱化观察集或权限门禁。可见crop mesh、上邻格覆盖语义及额外drop不属于本片证明，继续作为后续正式V2工作。
+
+### Browser19 建造前身体清场 checkpoint26
+
+source `259e09ef28758f85efaf5d022288a8e669969561` 的完整 Browser19 为主旅程 FAIL、visual PASS、modular SKIP。C3 首次建造目标 `[52,31,0]` 保持 Air；点击前相机/Authority eye 为 `[51.855609,32.600002,0.499404]`，实际 Controller interactionAttempts 从5到6，不能将失败解释为没有点击。正式 player body 半宽0.32、eye offset1.6，候选格和身体重叠。下一片先以相同坐标和正式碰撞 owner 取得 RED：仅瞄准支撑格仍不提供建造空间。建造前经已有真实键盘路线退至 `[50.5,0.5]`，沿用严格双端 settle、grounded、collision 和45秒期限，再通过实际 ray 与目标卡确认支撑格及上邻面。原建造方块、扣物、网格与后续验收断言不变，不绕过碰撞、不直接 teleport/setView，不增加 timeout。此片是正确输入前置条件，不宣称性能收益。
+
+Visual 单击只读 attachment 证实 pointer lock 与未暂停保持；interactionAttempts 0→1、目标3→0、邻格3不变、worldRevision36→37。Browser18 的单击失败原因仍未证实；一次通过不抹除旧 FAIL。18/19 导出的 compositionIdentity 完全相同，生产 artifact digest 不同，不混用两个产物身份。
+
+### Browser13 session 反馈接线
+
+`765eef9f` 的Browser13为主旅程FAIL、visual PASS、modular SKIP；C0启动卡原10秒期限失败，未到C3。原生phase显示worker约6.43秒、first-visible约2.90秒，剩余启动步骤使总量越过期限；不能增加timeout或声称持续攻击产品验收通过。
+
+组合入口复查发现Game传入攻击结果callback，但startBrowserWorkerSession未继续转发给实际BrowserAuthorityClient。先使用实际session入口、真实Authority/Logic客户端和受控worker派送重现：有效当前epoch回执已接受，feedback调用仍为0。候选只添加可选callback并转发，保持既有receipt去重/epoch/revision门禁；重复receipt只能反馈一次，不改Combat平衡。新完整browser仍待验证。
+
+启动候选：Graphics/材料准备和Authority bootstrap期间没有可玩World，loading卡始终覆盖画布，但现有app.start已不断执行全分辨率空场景render。仅在该初始化窗口关闭autoRender，保留app update与Worker/世界生成；World、Controller及frameLoop安装后、等待first-visible之前恢复autoRender。不会改变质量、可见Chunk门槛或10秒断言；是否减轻实际争用必须由新browser和phase marks判断，不能预先宣称性能收益。
+
+### Browser12 持续指针输入补验与 CI 元数据边界
+
+worker 输入租期在 service 和新包准入时都检查；期限内没有 service 时，排队续期也不得复活已过期手势，必须真实新 mousedown。实际 release、blur、PointerLock 丢失、hidden 和 dispose 经已安装 Controller 输入链取消后，独立推进 Authority 不得新增攻击，已开始 swing 保持原结算。
+
+CI1df 的 Chromium 作业于16:57:42开始 Harness，17:05:07才开始测试，并记录 GitCommitInfo 全 PR diff 超时。已安装 Playwright 1.62.1 的 gitDiff 实现先无filter fetch PR base，再完整diff；这会重新下载 sparse 排除的历史 blob。仅关闭可选 HTML git diff 元数据采集，commit 元数据保留，source SHA/digest/lock/artifact identity 和实际三测试 canonical receipt 原门禁保留；不提高 job/test timeout，不改变重试或验收选择。
+
+状态：实施中 / Agile，用户明确授权持续诊断、最小修复、验证和处理 review，直到完成或预算停止线。
+
+## 目标与边界
+
+基线 head `2d144c366dbae8323516a5de9f73bb64029b12fa`，base `fba4486e433c145db658f6b1598b70c47f759c8a`。恢复专用 Codex Cloud 快照后，修复当前 CI 与真实输入旅程至可审阅、可合入状态。继承 Classic 当前 spec 的行为，不扩大产品功能，不改写 sealed evidence，不降低断言、不伪造 GREEN。禁止合并、自动合并和生产部署。
+
+推送前再次核对远端并保留他人修改。用户已明确允许本次修复过程自动发布 Cloudflare `pr-41` 公开预览；仅沿用已有 workflow，不推 main，不触发生产发布。仅使用现有安装与网络授权。
+
+## 行为与测试设计
+
+1. Given 完整当前领域 fixture，When stdlib consumer projection 和 route motion 执行，Then 既有 allowlist、深复制、非法输入、14 directed edges 断言全部通过。先重现 CI 的 32 个失败，再修 fixture/import；不为不合法输入提供生产默认值。
+2. Given Classic runtime 的 loaded-cell/media 合同与正式生存模式，When difficulty/lighting/special-damage 测试执行，Then 既有持久化、复活、原子编辑与死亡拒绝断言通过。先保留当前 4 个失败及根因证据。
+3. Given manifest 绑定的历史字节，When 格式门禁执行，Then 不改写其内容；明确区分不可变字节与活跃代码格式检查，并验证精确 manifest 项。非证据源码格式检查保留。
+4. Given 当前 source 唯一 build 的已校验 artifact，When 唯一 Classic Chromium 线路使用真实键鼠/Pointer Lock，Then 当前 C0-C5、装备恢复、V1 和 visual 既有断言通过，failure/flaky 保持失败。瞄准与视觉诊断先取正式 owner/readback 的证据，不以 timeout 扩大或补状态代替修复。
+5. Given pnpm 11.25 当前锁定要求，When CI 使用 Node，Then 工具链满足其 Node 下限；核实现有 Node22.12 的实际 CI 执行和潜在不兼容，不能由云环境成功推导旧 CI 成功。
+
+## 验收与任务
+
+### Browser02 新证据与第二修复组
+
+空闲机器 Browser02 仍为 FAIL：默认 `walkTo` 的 target `[33,0.5]` 在 aim 内观察到 client/server x≈35.04、z≈0.386、grounded/non-colliding，已经满足外层既有 `reachedRouteTarget`；默认分支却未传入该 predicate，继续转向直至 18 moves 耗尽。本组让默认分支同样在 helper 返回 `route-reached` 时停止，使用原 predicate/坐标/容差，不增加 observation、move、timeout 或键盘 pulse。不把 angle-aligned 视为到达；原 equipment 的额外刷新与严格双端 handoff 保留。
+
+Visual 两次均在同一全缓存 light-ready 条件失败。缓存 `register` 无条件使邻居 dirty，即使其 Authority halo revision 完全未变；为该语义先取得 RED。本组仅允许 revision 未变的既有 cache entry 保持有效，真实 edit/residency 变化、unknown→loaded 和新 entry 必须失效。每次 drain 至多重建一个 brick，原 visual 全缓存与 worldRevision 断言不变。不宣称性能收益。
+
+实施前回归：默认到达期间不得再发 mouse/keyboard，未到达仍走原 pulse；邻居注册但 halo 字节身份不变时只新 entry pending，真实 halo revision 改变时全部受影响 entry dirty，unload 与 stale release 仍保持资源隔离。
+
+### Browser03 新证据与第三修复组
+
+Browser03 的 C0/C1 PASS；C2 完成前三个原木采集/拾取，第四目标 `[45,31,0]` FAIL。trace 的反向接近 pulse 在 camera x≈41.547 时已满足旧 ack/grounded predicate，但 Authority x≈40.797、velocity x=-4.5，随后停在 x≈39.730，退出五格交互范围。等待不能以较早 ack 代替 key-up 的实际完成。本组要求 pulse 后 Authority 三轴速度为零且 camera 与 Authority 对齐，再判断到达；不提高交互距离、不放宽读出、不扩 timeout。真实轨迹值纳入确定性反例。
+
+Visual 同一 readiness 条件仍 FAIL，30 个缓存 brick 累积重建137次而 worldRevision 固定9。为相同 chunk/halo revision 的网格资源替换先取得 RED：新 sink 应使用原有效体积；旧资源迟到释放不能移除新 sink，revision 改变必须重新计算。每次 drain 一次重建与全缓存 ready 断言保持。缓存复用是否消除实际 visual FAIL 仍待当前产物验证。
+
+### Browser04 诊断闭包
+
+已推送修复 source `7cb68b5c917a86afcf74f3d1641fc48cdc5e9037` 的 Browser04 C0/C1/C2 PASS；C3 的 buffered/secondStep 为 true，secondDamage 的 UI 读出为 false，随后正式快照中固定目标已移除。尚不能区分伤害结果丢失、UI 合并或完成时序。Visual 原全缓存 ready 断言仍 FAIL，缓存局部修复未关闭该实际缺口。
+
+下一轮只补必要的只读失败诊断：Combat 保存 owner player/target 查询及 DOM observer 已观察文本；Visual 保存 pending brick、cached/current Authority halo revision。所有成功/失败 predicate、timeout、点击、输入与世界状态保持，不用 readback 代替真实操作，也不据此宣称通过。缓存诊断只在失败时构造，不增加正常每帧扫描。
+
+修复提交的稀疏 evidence gate 审阅反例：skip-worktree 路径存在 dangling symlink 时，`existsSync` 为 false，错误回退 HEAD blob 并 PASS。用实际临时 Git sparse flag 和原四个 blob 重现 RED；应使用 lstat 拒绝所有非普通文件，再允许真正不存在的 S 路径读取精确 HEAD。
+
+远端 run37776529858 的 deterministic/Classic headless/build 已 PASS，Architecture 在四项 formatting 修复后继续到了 ESLint，并首次暴露 sealed `git-40-canonical-discovery/manifest-closure/strict-manifest.mjs:33` 的 `no-regex-spaces`。其 SHA-256 `fd4b7d09…b412` 被原根 MANIFEST 绑定；禁止改写。仅该精确文件加入 ESLint 例外，并加入原字节门禁第五项；其它代码的规则保留，负例继续验证修改、缺失、普通与悬空 symlink 都被拒绝。
+
+- [x] 最小恢复：Node22.23.3、pnpm11.25、Rust1.88/Wasm target；匹配 Chromium151 实际 click/key/pointerlock/mouse/WebGL2 PASS；工作区干净且远端一致。
+- [x] 确定性 fixture/import RED→GREEN：stdlib47、Web12。
+- [x] 历史证据格式边界与工具链核实：4/4原字节、11个门禁正反例；pnpm11.25要求Node>=22.13，CI固定22.23.3。
+- [x] 第一组源码 static/deterministic/Classic headless：全 static PASS；Kernel28、stdlib1080、Classic62。此前并行负载下5个timeout保留，隔离后同源码GREEN，不放宽timeout。
+- [ ] 当前 artifact 唯一 Classic 真实浏览器验收。
+- [ ] 精确最终 SHA 的 CI、冲突、review 与 PR 状态读回。
+
+### Browser05 真实键盘边沿
+
+Browser05 在 C2 接近首个原木前失败；连续快照的 Authority/player 坐标不变且 velocity 为零，frameMs≈1.59s。生产控制器仅在 render update 采样 keys Set，100ms KeyS down/up 可全落在两帧之间。先用实际安装的 keyboard handlers 和正式 InputCommandBuffer 取得 RED：不调用 update，按下后 Authority 连续消费移动，100ms 后松开消费 neutral；预测不得凭键盘事件制造物理步。修复应通过同一 epoch/sequence/target-tick stream 即时提交键盘状态，保留 render 固定步预测与现有门禁。重复 keydown 不重复提交，UI/暂停不接受按下；松开、blur 不能留下粘滞输入，jump edge 与 movement revision 保留。真实浏览器断言、pulse、timeout 均不变。
+
+Visual 第三个 closeup FAIL 的 pending13 中六个尚无 volume，其余为 halo unavailable→loaded 的真实变化，worldRevision 仍9，Authority 无 eviction。尚不能归因于 CPU 光照计算或 GPU 帧成本。下一轮在既有失败诊断添加 light rebuild 的实际 elapsed（last/total/max）；只记录时间，不改调度、质量、ready 或 timeout，不把计时当作性能 GREEN。
+
+本组 RED 为实际 keyboard handler 的两例无输入包；修复后 input/prediction/transport/light/mining 六文件43例 PASS，共享采样抽取后 focused controller/prediction26例及最终 keyboard12例 PASS。全生产、根/tool/Classic 测试类型检查 PASS。首次完整 static 在 controller max-lines 处失败；按原500行上限抽取方向/按键采样后 scoped ESLint PASS，保留失败日志。新 source 的浏览器与远端 CI 仍待验证。
+
+### Browser06 窄路线与 light 收敛
+
+source `107c7fc984290dcfeb71a6e739f71785a46caf1c` 的完整 attempt 为2 FAIL/1 SKIP。C0-C3/V1完成；V2失败于workbench corridor `[78.5,-0.5]`，并未完成装备/C4/C5。末端双端 x≈78.499673、z≈−0.636142、velocity0，原走廊±0.08仍未满足；固定80ms脉冲可跨过该窄窗口并反复大幅转向。下一组保留所有到达/双端/grounded/collision断言、45s deadline和既有最大pulse，按当前位置剩余距离与正式player加速/最大速度选择更短的末段真实按键脉冲。不增加转向观察或mouse step，不通过状态设置移动玩家。先用原失败坐标、正式stepBody与30/60/120Hz验证固定pulse越窗和自适应pulse收敛。
+
+Visual FAIL 时generation/meshing均0；cache30、pending3、rebuild94，三个pending均无volume。last build/apply40.4ms、累计8.0644s、max540ms，计时仅属该运行，不作性能GREEN。nearest-only调度允许重复变脏的近brick一直抢占较远新brick；为此先构造连续近halo revision变化、远brick未获重建的确定性RED。调度保持每drain最多一个真实重建、默认最近/稳定key tie-break，等待超过有限重建轮数的项按等待年龄优先以免饿死。不得提前把未重建项标ready、扩大visual timeout或改变质量；实际FAIL是否因此关闭仍待新artifact验证。
+
+本组路线RED首轮因测试遗漏PhysicsInput.verticalIntent而无效，已保留；补齐正式input后有效RED为3 FAIL/4 PASS，30/60/120Hz均在原窗口外。自适应pulse GREEN 7/7；与原瞄准/装备handoff/光照联合验证10文件117/117 PASS。light公平性独立RED为8 PASS/1 FAIL；GREEN9/9，重复失效保持首次等待年龄，满8次真实重建后优先最老项，其余保持nearest/key。首轮类型检查暴露BodyConfig字段可选，已加入正式player配置缺失时失败的类型收窄；日志保留。尚未运行新source的Browser07，不以单测证明visual或完整旅程GREEN。
+
+### Browser07 Authority观察与光照区域读取
+
+source `d39d63096216d466ccf4e17affafc4cca90e3abd` 为2 FAIL/1 SKIP；C0-C3完成，V1 closed-door probe失败，未进入V2。probe实际keyDown到keyUp约1.404s，before tick24212，唯一接触观察tick24305（+93）与x70.492499正确接触面；原1250ms/75tick窗口内没有两次持续接触观察，原6tick hold断言如实FAIL。RAF等待依赖低帧率renderer而Authority持续推进。下一片仅移除读Authority碰撞观测前的RAF依赖，按新鲜physicsTick轮询同一正式只读RPC；重复tick时有界让出，原1250ms/最大physicsTick、6tick hold、位置/横向/ack/断言保留，keydown/up保持finally释放。先保留渲染帧停顿而Authority推进的确定性RED，不通过降低hold或增大期限关闭。
+
+Visual skeleton-front closeup仍FAIL：cache29、pending18、rebuild92；13项是unavailable→loaded的真实halo变化，5项尚无volume，meshingQueue1。累计真实build/apply9.9408s、max656ms；公平性已修但未关闭实际fail。假设为每cell重复chunk/guard/string查询造成大量主线程占用；候选仅改同步派生区域读取，27个chunk guard一次验证，再复制已知体素到有界密集Uint16/loaded Uint8缓冲，未知保持fail-dark，原R8/flood/halo/revision/one-per-drain/ready/timeout/质量均不变。既有Authority mirror仍是唯一来源，不暴露其可写底层buffer、不transfer owner数据；新派生buffer归消费者，大小/有效长度/复制bytes显式记录。
+
+性能候选在实现前冻结：A=当前逐cell getVoxelIfLoaded，B=当前同身份collision baseline经有界dense region adapter；唯一轴为输入读取方式；固定64³区域与相同27chunk/voxel/semantics/revision，包括unknown、loaded Air、光源和阻挡。预约窗口中先A/A检查两组median偏差<=15%，超线仅诊断不宣称收益；再交错AB/BA各至少8对，主要指标为完整buildLight elapsed median，B需改善>=20%，否决项为输出levels任何byte差异、缺失/陈旧chunk被当loaded、owner buffer被修改或生命周期泄漏。次要指标记录派生copy bytes/分配量与source-read count，不声称整帧/产品收益。候选不达线则删除新生产路径。若通过，还须新artifact唯一Classic端到端验证两项组合，不用微基准替代产品或比较旧非同环境Browser数据。测试先证明dense区域negative/chunk边界/unknown/guard/当前revision语义，再证明B输入实际被生产light reader消费；无新证据不重复完整browser。
+
+本组收口：closed-door runner独立RED→GREEN与原oracle18/18；根审阅补充RPC晚于wall/tick预算两项拒绝后，同一联合6文件共48例中43有效PASS、5例region suite补验5/5 PASS，构成48例闭包。首个region suite4例RED为2 FAIL（262144而非27读取、整数加法溢出）/2 PASS；region基元GREEN4/4。完整联合首轮47/48，失败是fixture未遵循browser release cache删除与pending lease生命周期，已保留失败后用真实guard pending/release/delete/finish路径复验。Web生产types含svelte零错误/警告、Classic types、12个TS路径scoped lint与13个变更文件格式检查通过；新完整browser待验证。
+
+性能证据01有锁与原始A/A/AB，但未绑定正式measurement declaration；保留而不冒充完整身份收据。证据02补齐local declaration、dirty candidate source/bundle digest、window identity与原始样本，预约输出为PASS/RECORDED。A/A median43.714/44.255ms、偏差1.224%；16对交错AB/BA，A44.015ms/B11.154ms，局部完整build下降74.658%，262144输出bytes完全相同。候选source digest `624b774362cc0c3f1fa21bf9b9efd2d671ca80b2b703a8d7c857a009243867cd`，benchmark bundle digest `6d8c9ca28df83a5654fee37ffb48247b5e14ac6a6479570aee41365c94c9867c`。64³派生copy786432bytes、owner transfer0，窗口内没有其它测试/build/browser；不推导整帧收益。生产batch仅在实际BrowserAuthority mirror port可用时启用，同步捕获每chunk的现有guard，复制行到consumer-owned buffers，不引入可写owner泄漏或长期新缓存；缺port的既有严格fixture保持原逐cell读取，不制造loaded默认值。block-light consumer测试明确禁止退回per-cell并逐byte比较同源control；negative/boundary/unknown/Air/guard/stale/release/alias反例保留。
+
+### Browser08 真实转向观察与护甲覆盖
+
+精确source `3d00b3b93a32ef433b3d181cafedf200944b9ef6` 的Browser08：主旅程FAIL、视觉PASS、modular按Classic产物SKIP。C0-C3及V1全部完成；V2仍在workbench corridor `[78.5,-0.5]` 的原45s deadline失败。末端Authority/player一致于x78.673859/z−0.609932、静止/落地/无碰撞；反向修正连续80px真实mouse move各等待两次RAF，原窗口内未完成最后转向。先构造渲染帧延迟但真实mousemove已更新yaw的RED。候选仅为route转向去掉与其读取无关的双RAF；默认体素/实体/视觉mouse helper继续等待双RAF。保留真实PointerLock/鼠标事件、80px上限、18moves/19observations、失败分支、45s deadline、Authority静止及原位置窗口；不设置yaw、位置或世界状态。转向仍读取实际controller yaw，不认为发送事件就证明角度完成。新source完整Browser仍须验证，原PASS视觉不覆盖其它source。
+
+原V2要求全部16件护甲，不以四铁UI和五件metadata测试替代。本组冻结当前Classic平衡literal oracle：leather helmet/chestplate/leggings/boots = 1/3/2/1 points、max durability55；iron =2/6/5/2、165；gold=2/5/3/1、77；diamond=3/8/6/3、363。固定registered zombie-claw基础3，单件损失分别为3乘以(1−points×0.04)，测试逐行写literal预期而不从registry推导oracle。正式Authority inventory-pointer pickup→错误槽拒绝且视图不变→正确槽装备→持久化新实例恢复；完整Classic注册combat producer解析唯一hit、耐久3→2并snapshot恢复。不得改用直接applyDamage；此组headless证据不代表UI/death-drop/respawn矩阵或全物品链完成。
+
+本组初始route render依赖RED为1 FAIL/1 PASS：原18次转向额外双RAF累计28.8s；移除route专用等待后原合同等4文件40/40 PASS。补充实际walkTo两种refresh路径与实际controller mouse handler无render时的方向捕获，联合有效42例通过（原不变25例与补验17例）。护甲33例初跑即PASS，属于新增覆盖，不制造行为RED；首次格式FAIL已修。Luna并发较早types读到mouse helper旧签名而FAIL，根最终Classic types与五个TS路径scoped ESLint PASS。原trace十进制字面量触发两轮no-loss-of-precision FAIL，保留日志；改为Number原始字符串读取，不更改坐标或lint规则。完整Classic headless含新矩阵24文件95/95 PASS。将新护甲文件加入原headless命令和Classic test types，不能只运行一次然后让CI遗漏。
+
+### Browser09 输入投递时钟与护甲死亡闭包
+
+精确source `991b4b435c3afb08569cc5dddc1973d530a19a57`：Browser09主旅程FAIL、visual PASS、modular SKIP。资源条全部放置后，首次木材采集前返回 `[78.5,-0.5]` 的45s窗口失败；末端Authority约94.999734、client约95.099731，Authority静止但render呈现滞后。约844s时prediction累计12335次authority-resync；正常本地传输的inputLead只有2ticks，输入基于已排队的旧snapshot tick，真实键盘边沿虽即时捕获仍可能已被Authority消费。下一候选只修输入调度估算，不修改Authority位置、世界状态、固定physics步长、输入拒绝规则或路线期限。
+
+冻结方案：Browser Worker在周期snapshot envelope附可选跨同浏览器realm的单调绝对capture时间（performance.timeOrigin+now），不加入AuthoritySnapshot、持久化或确定性owner。Browser client仅在原epoch/order gate接受该snapshot后绑定时间；新的已接受但无时间消息清除旧估算，旧epoch/重复/倒序不得覆盖。输入调度基准为当前snapshot tick加采样年龄对应的floor ticks，年龄有限且非负、上限2000ms；paused不外推，缺失/非法/未来时间回退原tick。只作为PlayerInputStream的target基准，预测body/reconcile仍使用原snapshot；既有配置的传输lead保留。restore/new epoch清除时钟，所有原late/out-of-order/too-far-ahead与256pending门禁不变。该估算不是Authority tick或性能收益证据。
+
+先用stale snapshot tick100、Authority consumed130、input scheduling base130构造RED，期待capture与render输入target132并被原InputCommandBuffer接受；补充30/60/120Hz、paused、无时间、未来/NaN、年龄上限、旧epoch/倒序/restore清除的边界与实际BrowserClient→controller连接。新artifact完整browser必须验证，不以helper单测替代产品验收。
+
+护甲闭包另用原16行literal balance覆盖注册zombie-claw致死、inventory/cursor/crafting/armor四来源只掉落一次、耐久3→2、死亡存档新实例恢复（epoch更新/lifetime保留）、死者拒绝后续攻击、正式respawn健康20且不恢复旧armor、再次存档无重复掉落。初始health1仅fixture配置；死亡必须由注册Combat producer结算，不直接applyDamage。先运行新增覆盖，如原实现已满足则记新增PASS而不制造RED；加入正式headless选择和Classic类型检查。
+
+本组确定性RED分别2/16与3/17（旧target102，预期132），修复后capture/render/interrupt维持同一序列。7文件81/81 PASS包含原0/50/150ms transport fault覆盖、真实键盘边沿/neutral、epoch/order/restore时钟、护甲16件死亡闭包；补充world-item位置/lifetime保存验证后仍PASS。stdlib与Web生产types、Classic测试types通过。初次scoped ESLint因有效行数500上限FAIL，保留日志并按已有职责拆出水体采样和session control、独立snapshot envelope type，不降低门禁。最新 `991b4b43` CI run37794086450终态FAIL：architecture/deterministic/headless/build/static PASS，Chromium FAIL，preview SKIP；CI首次start-card10s超时，重试combat仅5/5/2伤害且未见衔接/第二击，visual两次原20s未ready。云内visual PASS不覆盖CI。连接器artifact下载引用可得但本云读取403，暂以job日志确定症状，根因尚未关闭。
+
+最终补验：新增原too-far-ahead拒绝反例13/13 PASS；输入相关6文件66/66 PASS，护甲死亡16/16构成82例有效闭包；完整Classic headless25文件111/111 PASS，CI选择/冻结证据12/12 PASS。测试专用types首轮因配置位于仓库外无法解析type roots失败；修正配置后暴露现有fixture缺craftingGrid/matched recipe IDs/完整frontier与直接改readonly snapshot，已修为完整fixture和测试自有副本，最终专项types PASS。原断言、输入limits与sealed bytes保持不变。新artifact/browser和新SHA CI尚未运行，不能宣布可合入。
+
+本组审阅补充structured-clone非法metadata反例：BigInt原先先减法而抛TypeError，1 FAIL/16 PASS的RED已保存；改为先验证finite number再计算年龄，17/17 PASS。该拒绝仅回退调度tick，不修改snapshot或Authority门禁。
+
+### Browser10 内外路线进度交接
+
+精确source `98b9a115376fc7645c5c78949d1460d33d16c786`、build10的Browser10为2 FAIL/1 SKIP；C0-C3/V1完成，V2首次workbench corridor失败，visual skeleton-front仍未ready。实际轨迹在一次静止pulse后从 `[78.4337,32.6,-0.4564]` 到 `[78.5587,32.6,-0.5803]`，越过目标x但z超出原±0.08走廊。内层walkTo继续以KeyW作约180度转向，约26秒后回到目标另一侧，又开始反向转向并耗尽45秒；外层已有KeyW/KeyS选择逻辑未收到这次已完成pulse的进度。
+
+本组先验证实际walkTo与实际equipment driver组合的RED：完成、确认ack、静止、落地且无碰撞的pulse越过请求方向的x边界时，应将双端位置仍在既有±0.45 x邻域的进度交回外层，让外层按当前x选择下一次真实KeyS/KeyW；返回进度不表示到达，z不在±0.08内必须继续纠偏。仅equipment路线启用此交接；普通walkTo语义不变。保留最终双端到达、原0.06/0.08/0.45窗口、45秒deadline、80ms上限、真实键鼠及所有新鲜性/grounded/collision门禁。禁止以更宽z窗口作为成功或增加deadline。visual失败pending13中9项真实halo变化、4项尚无volume，下一修复组另行建立因果证据。
+
+### CI连击输入与渲染时钟隔离
+
+CI991正式query-player-state给出lastResult `sequence:3,comboStep:0,damage:2`；目标12HP收到5/5/2，三次均第一击。源码wood-sword第一步windup0.18/hit0.08/recovery0.24，衔接窗口0.18–0.50s；实际controller仅render update重复攻击，frame约447ms。下一定向RED使用真实安装mousedown、完整Classic registered Combat和单调假时钟：render停止，Authority仍按60Hz推进；200ms真实按住重复应在窗口内buffer第二步，结果必须literal第一击5、第二击7。对比旧447ms渲染驱动可作诊断，不调Combat时间窗，不使用绕过controller的攻击或写combat状态。
+
+候选仅将按住指针的攻击重试按200ms单调deadline排程到有界主线程timer；render与timer共享同一deadline，晚callback每次最多一次，不补积压。每次读取当前真实控制器yaw/pitch及摄像机位置、现有目标/range/LOS，正式Authority仍决定接受/衔接/伤害。鼠标松开、失焦、PointerLock丢失、隐藏、UI/暂停、模式变化、world销毁/控制器dispose必须停；矿物破坏的elapsed进度继续由原render/Authority路径负责，timer不得额外推进采掘。真实键鼠与HUD连击完整browser仍为最终门槛。
+
+### CI98 检出超时与持续回归
+
+run37800926606的Classic headless于15:27:36开始无filter的depth1 fetch，15:42:36在既有15分钟job期限被取消，测试未运行。Chromium于15:37:31开始fetch，15:43:33才checkout，15:45:01开始旅程，16:02:43被取消；终态cancelled不冒充测试FAIL或PASS。历史大证据整仓下载是独立CI环境问题，不能通过提高测试期限掩盖。
+
+保持checkout的原pinned action、精确ref、architecture/deterministic fetch-depth0、其他depth1及job权限/期限。使用该pinned action的non-cone sparse-checkout（源码自动fetch blob:none），代码/docs和历史spec保留；archives/reports/harness产物与历史evidence只按需Git blob取。直接被legacy测试读取的pre-death-v4-identity精确文件明确物化；新repair evidence物化。五个sealed原字节门禁仍运行，缺失只能用skip-worktree HEAD精确blob，不能删manifest或跳过验证。以实际Git临时小fixture测试每个checkout block的patterns：保留代码/docs/spec与必要fixture，排除历史大证据，缺失项保持indexed S且HEAD原blob仍可取，不复制真实历史。
+
+将本组真实route handoff与held attack定向合同加入原Classic headless持续回归入口并纳入测试types，保留原25个完整Classic合同，不替换或减少既有覆盖。根因图单独记录已证明/待证明与证据边界。
+
+本组checkpoint：有效held attack RED在第三次fixture完整后取得，前两次Structure port/target predicate fixture失败保留不计行为RED；GREEN联合5文件50/50、采掘另3文件34/34、单调旧gate补验14/14。完整新headless入口27文件125/125 PASS；Web生产types零错误/警告、完整Classic types（含新held attack）与9个TS/MJS scoped ESLint PASS。路线新fixture类型首轮FAIL已补齐严格字段；CI sparse首轮新evidence未物化FAIL后修正，13/13门禁PASS。根有界审阅输入生命周期、共同deadline、最终路线窗口与pinned sparse action源码，尚无本组未处理可证实finding；不代表完整PR审查或产品可合入。下一步需要光照调度因果验证，再运行新artifact唯一browser。
+
+### Browser10 derived light 调度的判别合同
+
+World.drainCommits原每render只调用一次真实cache.rebuildNearest；在慢帧与新的Authority halo到达时，正确dirty会持续积压。先用真实ChunkBlockLightCache与真实World.drainCommits建立无render推进的RED，不从“pending13”直接认定调度是唯一根因。候选只把derived light队列服务移至有界主线程timer；repository mesh drain与全部可见/postrender预算不变，flood/R8/revision/未知阻光/全部cache ready语义不变。每timer turn最多一次build/apply，复制最近实际camera position，有dirty才继续；以max(16ms,上次完整build/apply耗时×4)让出主线程，禁止零延迟积压循环或同时启动多个timer。dispose先取消timer再销毁sink/cache；已释放key/陈旧replacement沿原生命周期隔离。
+
+定向测试区分调用者与pure helper：只调用一次实际World.drainCommits后、render不推进，真实dirty cache仍须完成；新的halo revision到来须重新计算，未完成不得ready；重复request不产生并发timer，取消后不得写sink，负camera输入拒绝。固定假时钟是调度功能证据，不冒充性能测量。若定向闭包通过，先同一唯一Classic spec按既有selectionArgs执行visual correctness subset（不宣称主旅程或性能GREEN），再新artifact完整验收。可观测耗时只诊断，不从Browser10跨source数据宣称FPS收益；若性能结论需要，另冻结同源A/A及交错A/B窗口。当前candidate尚未运行产品浏览器，原visual FAIL仍未关闭。
+
+Browser10仍有803次prediction authority-resync，但次数不能区分late、capacity或target-out-of-order。下一browser之前仅增加按client生命周期隔离的只读已接收input-decision计数，记录decision与requiresResync，不改sequence/epoch/order/owner拒绝逻辑或包timing；只在失败attachment读出，无每帧扫描、逐包日志或玩家状态写入。用实际client消息router验证重复/旧sequence不计、不同client隔离、读取副本不可修改；计数不当输入延迟测量。新CI e3b8f938检出约1秒，五项静态/构建/headless全部PASS；Chromium主旅程两次start-card原10秒等待FAIL，visual首轮原20秒未ready、重试start-card FAIL。启动失败额外只读DOM alert/按钮disabled/label与card display，输出有界诊断到失败attachment及job log；保持所有启动等待与验收predicate，先取得状态证据再诊断，不任意提高timeout。测试hook的相同失败采集抽到evidence helper以保留500行边界。
+
+### Derived light 当前 halo 身份与 readiness
+
+新增判别反例：真实 cache 已完成一次构建后，reader 的 Authority halo revision 改变，且没有人为调用 invalidate/register。此时旧 volume 不得让 snapshot.ready 继续为 true；下一次 rebuildNearest 必须能发现并重建此变化。先取得该反例 RED，再决定修复。候选仅比较已注册 brick 的 27 个 halo 身份并标记 derived dirty，不读取全体 voxel、不修改 Authority 或 flood/R8 语义。已 dirty 的首次等待序号必须保留，避免重复扫描使公平性失效。此检查是正确性合同，不宣称帧率或整体性能改善。
+
+### Browser12 主线程停顿期间的持续攻击
+
+source1df46ae0/build11的visual-only为1/1 PASS、全缓存ready且worldRevision41/lightRevision41，12GLB呈现、页面/响应/渲染错误为空，截图检查可见封闭房间未照明与glowstone照明差异。完整Browser12终态2 FAIL/1 SKIP：C0-C2完成，C3连击buffer/第二步可见但第二步实际damage2、sequence3/comboStep1，原7点断言FAIL；未到V1/V2/C4/C5。该次失败frameMs961，receipt分类accepted1164/late367；不能由计数证明战斗原因。后续visual启动仅有loading card、无alert/buttons，原10秒FAIL；旧子集通过不覆盖该失败。
+
+下一个判别RED必须同时停止render和主线程timer回调，让完整Classic registered Combat仍按独立Authority时钟推进：真实mousedown持续按住应通过正式攻击入口形成literal第一击5、第二击7且第二个sequence就是第二段，而非两次第一击后剩余2。当前主线程timer只证明render独立，未证明长主线程任务期间可玩。
+
+若RED确认此边界，候选把持续指针意图交给现有Authority worker的串行hostOperation节奏服务；每200ms至多一个正式AuthorityAction.attack，不补积压、不改Combat窗口/伤害、权限、range/LOS、lifetime或位置owner。worker根据最近真实yaw/pitch与当前Authority实体/位置重新选目标；输入epoch/递增sequence、释放、失焦、解锁、隐藏、UI/暂停、模式/世界替换、dispose及有界失活lease必须停止，旧packet不得复活意图。首次mousedown仍立即执行，采掘elapsed沿原路径。该输入状态仅瞬态，不进入存档，不新增Classic硬编码或第二套Combat owner。先验证实际consumer和取消/新鲜性反例，再新artifact原完整browser。
+
+Browser-local pointer envelope携带递增sequence、同次gesture、绝对monotonic采样时间与方向；不扩公开GameplayAction或存档协议。2秒lease过期/生命周期或模式变化会退休gesture，旧renew不得重启，必须新按下。结果按runtimeEpoch拒绝旧世界、 bounded64去重并允许当前窗口内重排commit一次交付；gameplay既有revision gate保留。必要的500行边界仅把既有request/transaction计数与post失败生命周期整体抽到request sender，行为与原client合同不变。
+
+启动失败先追加只读boot阶段/时间诊断，区分scene/material/worker bootstrap与首chunk可见等待；不提高10秒、不改变加载成功或质量口径。新证据后才能选择产品修复，不能仅再跑同源码重试。
+
+## 模型与预算
+
+主力按用户指定 Sol/high/default；一个有界独占测试 fixture 子任务使用精确 Luna/medium，不再委派。禁止 ultra/Astra 开发。所有工作共享每周总额度40%上限，保守剩余约60%停止；本云工具没有真实周额度 UI 查询，依赖主对话提供读数（14:26 UTC剩余94%，包含同账户其他任务），不由 token/credit/API 金额换算百分比。收到停止即保存进度。
+
+## Delivery Snapshot
+
+### 作物时钟与正式入口 RED（checkpoint 19）
+
+默认 Authority gameplay20Hz 每次推进0.05秒，现有 CropRuntime 的 Math.floor(seconds) 丢弃不足一秒部分；真实 Authority 累计一秒后 crop tick=0。修复只在唯一 CropRuntime owner 累计时间，旧 V1 child checkpoint 缺 fractional 字段按0恢复，新 checkpoint 验证 finite、0<=fraction<1，fresh restore 后不得丢失余量。相同总时间不同合法 cadence 应得到相同 tick/作物状态；水化、loaded 边界、seed/random与成熟上限保持。测试可用既有 crops.plant 搭建时钟前提，明确不证明正式种植。
+
+同时真实 Classic Authority 的 loaded Farmland/Air、reachable、selected wheat-seeds 与当前四 selection 值下 performAction(interact/use) 返回 item-no-interaction；成功扣种与 stage0 checkpoint 为下一正式 producer 的验收目标。Generic机制/Classic内容归属、原range/LOS/新鲜度门禁与失败原子性必须保留；植物呈现、收割、骨粉及完整恢复仍需后续独立完成。
+
+### 正式种植提交子片
+
+复用唯一 CropRuntime child owner；stdlib 接收明确 Pack soil/empty/water/seed/drop 配置，删除农业机制中的 Classic voxel/item literals。新 registered crop component 仅投影该 owner 的单位置记录，与已有 Block actor/voxel 观察走同一个 prepared host，模块不能自行写 map/inventory。正式 seed interaction 保留当前四 selection、loaded hit/adjacent/独立 above、range/LOS 与 actor authority；host重推导候选、核对精确观察集合，先验证 inventory/crop 全部participant再提交。Survival 扣一粒种子并增加 stage0 crop；Creative 增加作物但不改生存背包；重复、未知上方、错误地面/物品、过期选择或提交期世界变化均不得部分提交。
+
+本子片在土壤上记录作物，不制造 soil WorldCommit（土壤/上方 voxel 均未改变）；child仍是唯一阶段 owner。可见阶段应由该 child 的只读投影呈现，尚未实现则必须保持产品验收未完成。旧精确75f V4 composition 来自 Browser17实际checkpoint，只允许V4明确predecessor，禁止合成宽松身份迁移。非Classic内容必须能通过同一registered玩家路径种植，具体标识由自己的Pack提供。
+
+### 作物阶段公开投影子片
+
+实际 registered seed interaction 后，AuthorityRuntime.view 必须从唯一 CropRuntime owner 输出只含 position/stage 的 cropStages；不得泄漏 subSeconds、内部时钟或可写 owner 引用。Authority 正常推进后新 view 反映成长，先前 view 保持独立；空记录及恢复后的记录如实投影。旧 Worker fixture 缺可选字段时仍可启动，生产投影始终输出数组。该字段经现有 Worker structured clone 与 gameplay revision 门禁交付，不新增存档/网络 wire 版本，也不改冻结 v1/v2 reference corpus 的字段合同。当前片仅证明公开投影，不证明 mesh、射线选择或正式收割。
+
+### 正式收割与骨粉子片
+
+继承当前Classic完整农业合同与194项item identity。既有bone→3 white-dye配方就是本内容目录的骨粉来源；不新增bone-meal物品或第195项。具体 fertilizer item/growthStages 由Classic crop policy声明：white-dye消耗1，使未成熟小麦到stage7；已成熟拒绝且不扣物，Creative不消耗。stdlib只处理配置，不持有这些具体标识。
+
+既有 farmland/crop cell 的 target-first right-click 经过原Authority interact action与四selection门禁。use持有种子仍走种植（重复occupied，不意外收割）；use持有配置肥料走施肥；空手/其它物品的use及alternate走收割。收割未成熟只返种子，成熟返小麦和种子；Creative只移除作物，不改变Survival背包。所有返回物必须先在detached候选里完整容纳，随后与唯一crop owner变更在同一prepared Block host原子提交。若第二种掉落无法容纳，第一种也不得漏入owner。种植/施肥/收割不制造soil WorldCommit。
+
+scope内RED先用实际正式种植→正常Authority成长→空手interact收割及既有white-dye施肥取得。负例包括满包二次产出失败、成熟肥料、stale四selection、loaded/range/LOS与prepared crop/inventory/voxel race；Creative与fresh portable restore继续通过实际入口。当前片不声称左键植物ray、mesh、土壤破坏清理或完整Browser农业完成，这些仍保持产品验收缺口。
+
+### 未使用几何配置的 Worker meshing 候选
+
+精确75f生产诊断的18个任务已有Worker阶段trace：meshing总9891.8ms、generation3424.5ms、halo2758.9ms；不同任务排队等待不可相加为critical path。原适配器只因Pack注册过任何geometry就使所有Chunk的W04/W05退回JS，即使实际canonical/halo未使用这些定义。本候选只允许在既有完整36³派生窗口确认没有任何注册geometry voxel后复用既有W04/W05；canonical、halo/AO邻居或水顶额外单元有自定义geometry时仍走原JS，失败保持原fallback/failed语义。保留seed、voxel/geometry/semantics、质量、Chunk数量、bytes与真实browser断言，不新增mesh owner。
+
+A=当前whole-task geometry→JS fallback；B=每task完整窗口检测并按实际使用选择既有kernel，唯一轴为geometry适用判断；full preparation+mesh+pack均计时。固定相同天然Chunk与含custom-body/halo/water-top负例、相同已有scalar Wasm与同一机器，warmup后A/A交错8对median差<=15%，然后AB/BA交错至少8对。主要指标为full call elapsed median，B需改善>=20%；否决项为任意输出typed-array byte、material/category/layout/order差异、custom几何误用kernel、未知/缺失输入当Air、owner buffer变更或failed状态污染。记录窗口identity、输入digest、copy bytes、所有原始样本；未达线删除生产候选而保留证据。即便通过也只证明局部meshing，组合新artifact唯一Browser仍需原完整验收。预注册时尚无RED/GREEN/A/A/AB。
+
+实施结果：ABI调用缺失RED、三文件11项GREEN；独占35-01测试断言通过但stdout原始report缺失，wrapper FAIL/eligible=false，保留。35-02只增加计时结束后的raw JSON写入，A/A偏差2.9188476%，完整任务A/B中位765.3202725/14.4374225ms，98.113545%改善；五组输出bytes/metadata与输入哈希保持，window PASS/RECORDED，候选保留。具体身份、原始样本及copy边界见 `evidence/unused-geometry-35-02/README.md`，不写成整帧或产品结论。
+
+### 构建身份读取边界
+
+现有 artifact.sourceIdentity 先调用完整 readWorkingSnapshot，读取/hash 所有物化文件，然后才选 code/config；新 build 不得全量读取历史证据。只给 readWorkingSnapshot 增加可选路径选择参数，artifact 用原 source predicate 在任何文件读/metadata 前过滤。默认 Harness snapshot 语义不变；sourceSha/sourceDigest/lockDigest 的算法、具体路径集合和源码变更拒绝规则不变。RED 用独立临时 Git fixture 和 fs read guard 拒绝历史文件读取；GREEN 还验证历史内容不影响源码摘要、源码变化仍改变摘要、默认 snapshot 继续完整捕获其输入。CI 纳入这一确定性工程合同，不能借过滤排除真实 code/config。
+
+实施中。新运行使用独立 ID。静态/构建不替代产品验收；旧 Browser25 不为本 head 背书。长期 docs baseline 暂不更新，待修复事实确定后记录理由。
+
+### Browser18 完整真实转向与单击诊断（checkpoint 25）
+
+47f5af6/build17 的唯一 canonical attempt 已终止为 2 FAIL / 1 SKIP：C0-C3 和 V1 已执行，V2 在原 900000ms 总时限耗尽；视觉单击目标仍为 voxel3。失败、末尾 Pointer Lock 清理及 trace 保留，不能把阶段耗时行计为 PASS。局部 meshing A/B 不代表整帧；本次末尾 frame interval p50=449ms、p95=1091.4ms，未取得整帧性能准出。23:01UTC 产品真实周剩余91%，初始差7个百分点包含其它任务，停止线仍约60%。
+
+V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 snapshot 约184233ms；嵌套等待不可叠加为 critical path。旧辅助器对每次真实鼠标 delta 限80px，180度需要多达18次事件。冻结新的 correctness 输入合同：路线和精确 voxel helper 可用一次有限的最短完整转向（yaw<=180度、pitch仍由同一观察计算）进入既有 Pointer Lock handler，之后必须重新读取实际 view/target；不能直接 setView、修改状态、重新锁定来伪装命中。旧逐步 correction 保留为测试 control；19-observation/18-move 路线失败上限、180-attempt voxel上限、到达/邻面/grounded/Authority settle、所有操作断言及900000/45000/20000等时限不变。RED 使用现有真实输入适配与几何 ray，反向固定 pose 的成功仍需实际目标观测，但最多两次 gesture；无响应或卡片与ray不一致仍失败。GREEN 后再做新的生产 artifact 真实浏览器；本片不宣称 FPS 或 A/B 性能改善，也不更新 benchmark baseline。
+
+视觉单击的旧 trace 已确认点击前 fresh ray 命中 [0,61,17]、Authority未暂停，无交互反馈；最终暂停 modal 出现在断言失败后的 exitPointerLock 清理，不是点击前根因。下次同一真实 down/up 前后追加只读 target、pointer lock、player-state/action反馈与提交观察，失败时也保存；不代采集、不降低单击断言、不增加 poll时限。具体生产修复待最后确认边界后再决定。
+
+### 原生矿车非实心体素遮挡修复 checkpoint76（预注册）
+
+2026-10-10 02:00UTC：397ec45生产artifact原生右键部署和实际GLB渲染成功，上车5秒断言FAIL；原始trace/截图保留browser75-native-01。体素target.distance为整格入口，非实心铁轨提前截断entity ray。只按正式voxelSemantics.solid截断实心/未知目标，明确non-solid允许既有5m实体选择；Authority仍复核5m、实心LOS、lifetime、占位和事务，不扩距离，不设Classic-ID分支。定向真实适配器RED→GREEN后新source/artifact重新跑原native旅程，原断言/超时不变。
+
+有界扩展传统约0.1PD，AI墙钟约20分钟×120%=24分钟，上限02:24UTC；最新真实周读数01:24为81%、停止线约60%，本环境无法独立读UI，费用/额度百分比不估算。旧第75组超过原窗口，基于新真实失败证据停止盲目重试后登记本片。复用已通过完整static/headless/stdlib，必要定向验证；新native不代替完整Classic、照明或性能验收。长期docs baseline不变：修正通用交互适配器。
+
+02:06UTC checkpoint76：0db575df生产artifact ea9ace30原native browser76-01成功部署、真实模型和右键上车；W10秒移动FAIL，实际Authority tick119/ACK26和位置固定而客户端预测x14.855。源码确认新fixture只pause后未run（Authority暂停全部physics），这是新用例夹具错误，不宣称transport runtime缺陷。只在地形/teleport完成后恢复正式world.clock run，全部真实输入和原移动断言/时限保留。为保留原10秒停稳及精确存档断言，继续真实W至既有9格直轨末端附近x>8.5后释放，额外增加到达断言；不把drag指数渐近误当十秒内精确归零，不增加既有120秒总限。只读pwd成功确认exec-server短暂断开已恢复，没有重启或重跑旧测试。新增测试片沿原02:24有界上限。
+
+02:13UTC：a9e3da7c/browser76-02实际23.2秒FAIL，原native部署5秒未得到transport。Authority恢复推进（tick909/ACK206），world revision2→3/新增单个voxel mutation；已有target读数2,31,0但无动作拒绝原因，不能认定输入适配器、Creative选择或流体原因。登记仅诊断增强：同一次原点击前后附件记录实际target、目标voxel/fluid、player/viewAngles、selected hotbar及HUD；失败附件保留同字段。未改变动作、时限或成功断言。下一运行为补齐失败证据，不进行无依据重试或暂停来掩盖失败。
+
+02:16UTC：读取原browser76-02 trace确认关闭背包后连续两个canvas.click；closeInventory自身已lockPointer，而新用例再次lockPointer无条件左击。PlayerController在已locked时把第二左击送入正式creative mining，与新增一格mutation一致；这是新夹具的额外采集输入，禁止靠暂停隐藏。移除重复左击，仅断言原helper已完成Pointer Lock，原native右键保留。诊断5801aba0已构建但不为已确认额外采集继续运行错误输入；新源码统一补诊断并移除重复点击后再跑。没有修改正式玩家采集路径或假定流体/Creative模块根因。
+
+### 已配置载具物理/Logic消费者接线 checkpoint77（预注册）
+
+2026-10-10 02:24UTC，冻结ffca887c，native76-04为原C0 FAIL，唯一76-05诊断复验rail39/fluidnull/目标正确/attempt0/矿车热栏确认，原native右键后应用错误页明确Entity has no registered body: transport:undefined。新诊断在harness被撤销后又抛错，须fail-soft保留原始异常。Authority body已有正式按definition/yaw解析；正常Logic observation及Browser确定性/Headless载具collision preloading仍固定bodyKind，需按当前实际定义接通。
+
+先定向有效RED，修正式body projection，载具继续作为只读实体可观察；不跳过carrier或伪造固定archetype，未知定义fail-closed，Actor控制与导航权限保持。类型/回归、正常运行与确定性推进、identified artifact真实矿车旅程必要复验；不宣称所有运输、旧载具转换、整个Classic/照明/性能或PR可合入。Root独占源码/测试/spec，必要Luna仅只读消费者审阅与私有报告，委派一层。
+
+传统0.5PD×120%=0.6PD，AI35分钟×120%=42分钟，03:06UTC保守上限，中途有意义修复及时checkpoint。最新真实UI01:24为81%，02:01刷新请求待答，约60%停止线；产品实际额度无法从环境独立读取，不做token/credits百分比换算。旧失败/产物全部保留，新输出独立ID。长期docsbaseline只随真实公共投影合同更新，不扩大Kernel或权限。
+
+02:41UTC checkpoint77消费者补全：Logic wire升为v2，nullable bodyKind + 当前definition/yaw bodyAabb只用于被动carrier；旧v1 Worker消息拒绝，外层direct-envelope与既有Authority输入版本不改。Authority snapshot新增可忽略bodyAabb派生字段供碰撞诊断，不另持世界或转成固定Actor。导航按当前EntityStore配置解析；station无独立物理body仍由voxel地形约束，其他未知body不再静默漏障碍。预加载分别验证Browser advance与真实Headless加载。现行Classic已退役settler，因此旧deterministic advance夹具换成正式cow，原移动/时限断言保留；两条准备债务用例在准备完成后安装受测回调，以免普通wake提前触发failure。有效Logic RED1FAIL/4PASS已保存，修复5PASS；配置旋转/nav/Logic22PASS。其他新消费者测试尚未全部GREEN。最新真实UI02:26为81%/5日0小时重置，停止线约60%；以上不构成产品或性能通过。
+
+02:46UTC验证选择登记：现行`test:classic:headless`没有上述Browser推进、Logic Worker/client、碰撞debug及Logic lifetime六个消费者文件。将六项加入同一现有Headless回归命令，保留既有全部selection、单worker、断言与时限；不新增浏览器旁路或弱化CI。旧Headless preloader与旧Browser preloader逐个故障替换均让新用例出现精确transport:undefined异常；两次私有RED已保存，源码恢复当前候选。七文件33例串行GREEN，导航/Logic22例GREEN；全stdlib回归运行中。
+
+02:57UTC checkpoint77：完整stdlib166files1197tests为1196PASS/1条原CLI15000ms超时；原失败用例隔离1PASS/6未选，14640ms。完整Headless127files795tests为793PASS/2条原5000ms超时（plank clearance/crop cadence），失败两文件隔离6PASS。保留所有原时限/断言；整批仍为FAIL，超时根因和稳定性未证实。后续容器窗口无新增CPU限流，不足以解释早先失败。七文件33PASS覆盖新增消费者，stdlib定向22PASS；格式/五冻结字节、CI选择16、路径与源码lintPASS。完整类型最后test fixture问题已修复，尾部类型和全lint复核中；新生产native尚未运行。新增evidence/configured-body-consumers-77-01只记录本轮事实，源SHA由后续提交冻结。
+
+03:00UTC静态复核：生产/测试/工具/Classic类型尾部PASS；全lint发现既有Browser推进测试加入新用例后超过500行。将配置载具preload用例及其专用真实runtime夹具移到同职责unit/client文件，加入同一回归选择；保留测试行为，不压行或豁免规则。搬移后定向复验并更新候选字节身份，不重跑已无行为变化的整批来抹掉早先失败。
+
+03:01UTC补齐相同消费者的静态选择：现行Classic测试tsconfig使用显式清单，新增七个消费者文件也进入该清单，防止Vitest仅转译通过而漏掉测试源码类型错误。原条目保持，既有未选择Legacy Actor用例不冒充本轮行为通过。
+
+03:03UTC：新增显式类型清单PASS，全仓lintPASS；故意旧wire消息反例的类型转换仅在测试模拟不可信输入，运行时拒绝断言保持。搬移后两文件10PASS；证据分别保留搬移前/后输入，整批3条超时均仍为FAIL。准备冻结本组source commit供同一canonical identified artifact的真实玩法验证，尚不推断可合入。
+
+03:09UTC真实UI剩余仍81%，4日23小时重置。source68ad4222/build14285c69 native77-01实际41.3s FAIL于重开reference equality：entityId transport-2/lifetime2保持，epoch1→2。已走过真实部署/modelReady/上车/W到轨尾/停稳/Shift下车；尚未执行重开后位置/rider末尾断言，不能写整条PASS。EcsEntityOwner.resolveReference明确拒绝非当前epoch，EntityStore单次restore建立下一epoch；新用例错误要求旧epoch相同。仅修测试恢复合同：full reference equality期望同id/lifetime且epoch+1，同时WorldHarness inspect旧引用stale、新引用current，保留pose/rider和原全部输入/时限，补正式Authority保存重开验证。旧失败保留，新identified source跑原canonical旅程；不改生产identity规则、不豁免断言。仍在checkpoint78原03:18界内；连接正常，无断联阻塞。
+
+03:14UTC恢复引用合同定向5PASS/Classic类型PASS。新增Authority实际保存重开保持pose/rider/id/lifetime，epoch+1，旧引用解析null而新引用解析实体；中间一次夹具误按boolean断言保存为FAIL，不冒充有效生产RED。Browser继续full reference equality到预期下一epoch，并新增实际WorldHarness旧stale/新current和runtimeEpoch变更断言；全部原pose/rider/输入/时限保留。native77部署PNG已观察到正式矿车模型，仍是失败运行局部视觉证据；本轮修正纯测试/spec，不做无新证据的整批重跑。
+
+03:20UTC checkpoint79预注册：e6d78993/同14285c69产物 native78-01实际33.5s FAIL，只因新增的跨页面runtimeEpoch不等断言（两者seedlands:classic-ordinary-minecart-75:1）；原新ECS reference epoch+1已通过，后面的inspect尚未执行。Root该新增断言无合同依据：game.ts每页面sessionSequence初始0，BrowserWorkerSession用seed+sequence生成epoch；跨reload重置合法。改为world.identity当前epoch与transportSnapshot.runtimeEpoch、frontier相符，transportSnapshot已检查当前Ready与renderedWorld身份；保留ECS epoch+1/full reference/old stale/new current及所有pose/rider输入时限。无生产改动，不为连接重跑或重试原源；新source验证只针对已确认错误。剩余AI8分钟×120%=9.6分钟，03:30检查点；传统0.05PD×120%=0.06PD，最新实际周剩余81%（03:09，4日23小时重置），约60%停止线，费用/预测百分比未核实。
+
+03:22UTC当前world.identity绑定的原生用例类型PASS。保留e6d78失败trace/33.5s及当前body68ad有效运行到save局部证据；这项仅测试/spec修正待identified产物复验，不能先写PASS。没有生产epoch规则变更。
+
+03:30UTC checkpoint80预注册：source29a8/14285c69 native79-01为32.4s FAIL，真实old reference stale/new current均已通过，新增metadata断言错误混用runtimeEpoch与WorldHarness epoch；authority-worker.ts明确worldEpoch=`runtimeEpoch:world:restoreSequence`，身份/frontier归同一AuthorityWorldOwner。只按实际合同检查world.identity的非空epoch与自身及两条inspect的frontier一致，不把它同runtimeEpoch比较。仍保留ECS full-reference epoch+1与原position/rider/全部输入/时限；先保存原失败，不改生产规则。剩余AI6分钟×120%=7.2分钟，03:38检查点，传统0.05PD×120%=0.06PD；最新真实周81%/03:09，原约60%停止线。没有全量重试，下一运行针对已经冻结的测试合同修正。
+
+03:32UTC静态检查指出测试本地HarnessResult为unknown data/error分支无frontier。af301afa已本地提交但未构建/未推送，类型尚FAIL；立即按真实判别联合补成功分支与string守卫，不用any绕过。仅是类型/测试诊断修正，生产文件不改；下一提交及artifact在类型通过后执行。
+
+03:37UTC补判别联合/string守卫后的Classic类型检查80-03 exit0；80-02日志无错误但上次工具会话退出状态不可恢复，未将其单独声称PASS。只为取得丢失的退出证据执行同一静态检查，非浏览器重试。下一步提交并构建精确SHA，按03:38检查点继续有界6分钟×120%=7.2分钟至03:45；传统0.05PD×120%=0.06PD，周额度仍以03:09实际81%为最新、停止线约60%。
+
+03:40UTC checkpoint80：5eee6e15/14285c69原生普通矿车45.0s PASS，runner48.9s，canonical NON_MAIN；真实部署/骑乘/W行驶x2.5→9/停稳/下车/保存重开与旧stale新current、位置和rider断言均PASS。完整HTML内嵌raw JSON及两张PNG已核验，PASS不保留trace；恢复截图不能证明模型可见，未宣称视觉运动/照明/性能。全stdlib与Headless原超时保留，PR仍不可合入。远端main/feature未变，reviews/threads空、Draft/无冲突；当前授权范围内正常推feature并等待最终SHA CI，生产main工作流不触发。后续主旅程失败诊断有界AI15分钟×120%=18分钟，传统0.1PD×120%=0.12PD，约03:59 checkpoint；03:09实际81%为最新周额度。
+
+## 出生路径区块列内邻树复用 checkpoint82（性能候选预注册）
+
+04:04UTC，当前778811f6 CI80五非浏览器SUCCESS/Chromium未结束，不抢推/取消。只读canonical源码fixture计数20generate/20unique，排除重复chunk假设；单次CPU诊断queryMacro自身41%/makeChunk包含79.9%，仅diagnosticOnly，不能冒充性能或浏览器根因。当前C0原10秒FAIL为实际产品RED观察，启动worker阶段8.156秒；下一候选只触碰已观察的出生区块生成热点。
+
+固定A为778811f6的voxel/chunk-generation/tree-generation三个原始文件，独立私有保存原字节及仅改相对import的可执行control，其他依赖和锁不变；不拷贝历史 evidence。B只在makeChunk每个x/z列中惰性收集原顺序49邻树anchor一次，每个y按原treeVoxelAtOffset查询；点采样默认路径、地下/水/dungeon/植被顺序、generator2–11、seed、完整体素输出及edits次序不变。不缓存跨chunk/世界/版本，不添加合法topY或unknown=Air，也不改C0/门/900秒/质量/输入/帧预算。
+
+首测预约性能窗口中的固定20chunk batch（seed2726385568/g11、81观察的keys），先一轮预热再5对交错A/A，原始输入/输出摘要/样本全部保留。A/A两组median相对差须≤15%，否则停止优化并记录无有效收益证据。随后A/B 5对交错且倒置顺序，primary=batch生成median至少20%下降，p95不得回归>10%，所有chunk完整bytes一致；内存和候选临时数组/闭包数量另记，不能用SoA或CPU诊断冒充整帧收益。功能对照覆盖种子/负坐标/所有gen2–11/高空与地下/跨边界树/edits。A/A或否决项失败撤候选，不提高噪声线。此独立batch不证明cold worker、浏览器C0或whole-frame；若采用仍须生产startup与组合浏览器/整帧A/B，原整PR阻塞保持。
+
+传统0.2PD×120%=0.24PD，AI20分钟×120%=24分钟，04:28检查点。credits/费率/API等价及周分母不可读，不换算；周额度最新03:09实际81%，03:38刷新待答、原60%停止线。Root独占三生产文件、相关真实等值测试与本spec/新独立输出；Luna Task139已结束无新实现委派。候选空间每列至多49个anchor、1024列每chunk，惰性只在above-ground树分支使用；实际数量与bytes待测，现阶段不保留未测优化结论。
+
+04:23UTC checkpoint82：最终源码范围lint/格式、完整类型及最终stdlib范围类型、路径lint、五冻结证据字节检查PASS；全stdlib167files1211tests PASS，完整Headless128files795tests PASS。A/A相对差0.494%，原15%线保持；第一轮AB89.750%与静态简化后的最终字节AB91.114%改善均保存原始样本/绑定字节，20chunk全摘要一致。两轮control median发生变化，不能拼样本或外推产品收益。内部列缓存最多49anchor、1024列/chunk，原65536B输出/传输不变；对象/闭包实际字节NOT_COLLECTED。新evidence/tree-column-micro-candidate-82-01明确仅warmNode分项候选；生产startup/矿车reload/组合Browser及whole-frame门禁仍待完成。下一步仅本地冻结candidate source供identified artifact验证，未采用/未推送/不可合入，原CI80终态ChromiumFAIL保留。长期docs不变：无新owner、协议或持久化语义。周额度最新03:09实际81%，04:18请求更新待答，约60%停止线保持；仍按04:28 checkpoint。
+
+04:26UTC checkpoint82完成有界分项：source2b17241b/artifactefd549f3本地生产native矿车38.2s PASS/runner42.8s，NON_MAIN；保存page.reload原10000ms和全真实输入/pose/rider/reference断言不变。此前local45s与当前38.2s不作受控产品收益。候选未推送/未正式采用，完整Classic及组合/整帧门禁待完成；新增evidence/tree-column-native-followup-82-02补实际产物、JSON摘要和闭包总空间说明，旧原始证据不改。
+
+### 当前候选完整Classic产品验收 checkpoint83（预注册）
+
+04:27UTC，固定2b17241b source及efd549f3 artifact，无新实现轴。只执行唯一canonical classic-runtime.spec.ts全选择、原900000/10000/5000等时限、真实click/key/mouse/PointerLock/WebGL2与全部原断言；本地没有CI retry，不为连接或状态反复启动。新run ID pr41-tree-column-full-browser83-01；保留所有错误/trace/终态与C0阶段观察。门模型5秒FAIL与V2仍未关闭，full功能PASS也不替代组合/whole-frame受控A/A与A/B。一次完整功能运行后按实际新证据决定下一片，没证据不盲目重跑。
+
+传统0.15PD×120%=0.18PD；AI20分钟×120%=24分钟，04:51UTC检查点。额度最新03:09实际81%、04:18请求待答，约60%停止线；本环境不能读取实际UI，费用/credits/API等价与预测百分比未知，不换算、不扩预算。Root仅验收/只读诊断及新证据/spec路径，无其他agent实施、无源文件变更、无部署/合并。
+
+04:33UTC主对话实际产品UI回报：周剩余80%，4日22小时后重置；初始98%的账户总降18个百分点含其他任务，不能归因本PR。约60%停止线不变。checkpoint83继续原完整canonical单次验收，无新源码或阈值变更；阶段C0–C3/作物导航已完成，V1步骤结束、整次仍未终态。当前候选未经组合产品/whole-frame性能准入，未推送。
+
+04:49UTC checkpoint83终态：2b17241b/efd549f3唯一canonical全选择17.3min FAIL，main15.3min、visual1.3min PASS、native25.8s PASS、default modularSKIP。C0–C3/作物导航/V1完成，V2 wood-pickaxe阶段的第二stone88仅breakAction0.6/1.2即被原总限截断，C4/C5及装备/死亡恢复NOT_RUN。完整trace/库存/frontier与API诊断记录evidence/tree-column-full-failure-83-01；不抬时限/豁免/换绿。出生阶段仅diagnostic，micro候选仍未采用/未推送；当前整帧p50=469.2ms/p95=1206.5ms不达准出，当前JS tick与巨大帧间隙差未归因，下一片必须先补主要延迟证据，不能盲目重复whole Browser。周额度最新04:33实际80%，约60%线；本片在04:51前终止采样并报告。
+
+### 帧间隙与观察成本只读定位 checkpoint84（预注册）
+
+04:50UTC固定source2b17241b与刚结束83失败trace/receipt；Root只读当前源码、单个本地trace/原始采样统计，不改生产/测试/口径，不启动新Browser或性能采样。先确定trace中各类记录bytes、snapshot字段成本边界、自动存档与Authority接收是否有具体匹配的时间证据；CPU tick与帧间隙差不能直接定为GPU或trace根因。若无法归因，记录缺口并停止该假设，下一实验另注册同身份AA/AB，不靠同源重试。新增私有输出独占browser83-readonly-gap-84-*，不重写sealed evidence。初步入口frameCpu/update loop、harness snapshot以及已有performance observer。
+
+传统0.1PD×120%=0.12PD，AI15分钟×120%=18分钟，05:08UTC检查点；真实UI04:33周剩余80%（4日22小时重置），原约60%停止线；费率/credits/API等价/占比未知，不换算。无新agent或网络权限；常规静态元数据保存不等于性能候选正式采用，PR不可合入。后续范围实变先另注册，不为了预算检查读取用户电脑或启动额外模型。
+
+04:56UTC checkpoint84只读结束：Playwright1.62.1源码collectionTime为DOM浏览器采集wall；8706条合计21.416s、中位1.5ms，最大24.45MB记录22.5ms，不足以解释持续405ms帧间隙。停止主要内联SVG假设，不从bytes推出延迟收益；序列化/调度/异步GPU/Svelte微任务仍缺归因。private browser83-readonly-gap-84-*保留记录统计和源码结论。没有源码、测试口径或新的Browser运行。
+
+### 精确候选主线程CPU诊断 checkpoint85（预注册）
+
+04:56UTC，仍固定2b17241b/efd549f3及原唯一Classic spec，使用现有diagnostic-hooks与SEEDLANDS_CLASSIC_CPU_PROFILE=1。唯一改变轴为10ms CDP Profiler诊断；Authority CPU/native trace/benchmark flags保持关闭。只选原main完整C0–C5+扩展的同一旅程（不删其内部步骤/断言），新run pr41-main-cpu-diagnostic-browser85-01，保留原900000ms、全部输入/质量/WebGL2和失败；不是为了换绿同源重试，是补当前唯一未测JS/GC/program/idle分布证据。profiler结果diagnosticOnly/eligible=false，不能充当AA/AB或最终性能/产品验收；默认afterEach停止并detach，保持所有负结果和原83失败。
+
+Root只运行/读取诊断与metadata，不改源文件，不新建浏览器入口/域名/权限，无其他agent。原产物仍匹配HEAD与源bytes，先verify现有artifact、不重建。AI22分钟×120%=26.4分钟，05:23UTC检查点；传统0.15PD×120%=0.18PD。周额度04:33实际80%/4日22小时重置，约60%停止线；费用/credits/API等价及占比无法核实，不换算、不扩预算。一次诊断后用实际新证据注册最小修复/实验或记录阻塞，不盲目再次full retry。
+
+04:57UTC诊断85-01在Browser测试开始前FAIL（No tests found）：root误给grep加^，Playwright匹配完整标题含文件前缀。原失败/空HTML/receipt保留，不是产品RED或CPU证据。修正无源码/口径变化；确定性--list已确认唯一匹配原main1test1file。新run pr41-main-cpu-diagnostic-browser85-02、新HTML/output/log路径继续同一原05:23有界上限，选中测试内部步骤与断言全部不变。
+
+05:18UTC checkpoint85结束：原main900000ms FAIL，C0–C3 PASS记录，C4/C5未通过。诊断profile唯一payload1539334bytes/71608samples身份PASS；idle51.0%、program24.3%、GC1.9%、Authority receive包含约9.9%（重叠不可相加），不能从idle推GPU因果。私有raw与两次解码失败保留，公共main-cpu-diagnosis-85-01记录准确身份/界限。无源码修改、未推送、不采纳82候选；本片在05:23上限前结束。最新实际UI04:33剩80%，05:17刷新待答，约60%停止线。
+
+### 观察取帧成本单变量诊断 checkpoint86（预注册）
+
+05:19UTC，固定source2b17241b/artifactefd549f3/lock44db46fb、Chromium151/SwiftShader/viewport960×540、原Classic场景与quality low。只在私有诊断脚本复用现有startClassicWorld/prepareInitialState和原生PointerLock；不是新产品验收入口。初态准备后使用现有world clock pause冻结权威场景，静止视角、空按键、worldRevision/geometry/pose固定，观察真实生产renderer。此静止暂停场景不代表主旅程的持续Authority消息/移动/组合性能。
+
+唯一轴为Playwright context tracing的screenshots（A=true，B=false），两组snapshots=true/sources=true，其他输入/产物不变。轻量只读rAF计时探针两组一致，每段30s、先5s稳定；原始rAF deltas/起止snapshot完整保留，trace stop/zip写入在计时之外，不开CPU/nativeProfiler，不删旧证据。先A/A两对（4段）检查中位帧时差≤15%，失败则停止、不做AB/不提高噪声线。通过后平衡2AB+2BA（8段）；primary=各段median帧时的组median，预注册可解释观察成本线≥20%下降，p95不回归>10%；严格要求起止pose/view/worldRevision/triangles/drawCalls/resident-loaded-rendered/chunk queues一致且ready/原WebGL2成立。任一负结果保留、无明确收益保留现状；不能由此采用截图关闭、放宽原900000/断言、删掉正式trace或宣称PR可合入。
+
+机器独占窗口持锁，Root仅私有脚本/本spec/新evidence，无生产、正式Playwright配置、CI或测试选择修改，无其他agent。传统0.15PD×120%=0.18PD，AI12分钟×120%=14.4分钟，05:34UTC检查点；credits/API/费率/真实周分母未知不换算。最新实际额度04:33剩80%，刷新待答，约60%停止线保持。一次AA→条件AB后按证据决定下一片，不盲目full retry。
+
+05:24UTC checkpoint86终态：暂停静止场景真实A/A四段median416.7/300/283.4/283.3ms，原15%线被18.2017%超过，FAIL，AB NOT_RUN。全部场景固定字段PASS，window FAIL/measurement RECORDED；真实UUID0edf2443-aa60-4e48-b827-e704a43bd293已绑定，不伪装初始未生效命名env。四trace/raw/log及失败保留，公共observer-aa-failure-86-01记准确界限。明显顺序下降支持控制未稳定假设，不能挑后两段宣布AA通过、不能推GPU原因或更改验收。早于05:34原片上限停止。
+
+### 观察控制完整路径预热 checkpoint86-02（新预注册）
+
+05:25UTC，唯一新证据是86-01稳定身份下417→300→283ms的显著顺序下降，此前仅5s取帧稳定期不足。新实验先以A相同screenshots=true/snapshots=true/sources=true真实取帧连续90s预热，保存warm trace；再执行与86-01完全相同4段30s AA、同原15%线，失败立即停止。仅改变预热程序，不改生产/质量/窗口长/指标/限值；不合并旧样本，不用重置或旧两段换绿。AA通过后仍仅原2AB+2BA，收益≥20%、p95回归≤10%，场景身份严格一致。
+
+仍只私有暂停静止renderer诊断，不是正式产品或组合准入；不删正式trace/截图，不改CI或断言。固定同source2b17241b/artifactefd549f3/lock、Chromium151/SwiftShader、独占lock，不与其他测试/构建并行。实际新run pr41-observer-warm-aa-ab-86-02（使用正确SEEDLANDS_RESERVATION_RUN）。Root只一脚本与证据/spec，其他agent无工作。AI14min×120%=16.8min，05:42UTC检查点，传统0.15PD×120%=0.18PD；最新04:33真实80%，05:17刷新待答，约60%停止线，费用/credits/API/占比未知不换算。此有界控制修正若AA仍失败则关闭观察成本候选，不进行第三次控制重试。
+
+05:35UTC checkpoint86-02自然终态：原90s warm、四AA和2AB+2BA全完成、12段场景身份PASS。AA11.051%≤原15%，AB median A345.85/B370.775ms，改善-7.207%不达≥20%，p95 A924.9/B908.3ms。结论NO_PREDECLARED_BENEFIT；window PASS/measurement RECORDED不表示收益或产品通过。关闭截图观察轴候选，正式trace/CI/时限/质量不改，不做第三次控制试验；86-01原AAFAIL、全部raw/trace保留。公共observer-no-benefit-86-02绑定身份/限制。05:29主对话实际产品UI剩80%/4天21小时重置，60%停止线保持；用户要求等待自然终态不重复运行已遵守，本轮05:34:24完成（早于05:42上限）。后续先整理可恢复证据/精确分支状态，不盲目full重试。
+
+### 保存重开矿车实际呈现 checkpoint88（预注册）
+
+05:49UTC，精确远端34fee5f1的CI407运行，不取消/抢推；五项非浏览器SUCCESS，Chromium待终态。既有native旅程只在deployed阶段等待模型ready，保存重开后虽然pose/rider/epoch/reference正确，截图仍朝天空/背离模型，实际恢复模型可见性未验证。控制观察预期：当前真实原native82/83保存重开附件不足以确认画面，保留此缺口，不伪造自动产品RED。
+
+本片只增强原唯一Classic spec已注册native矿车旅程：保存重开后的accepted transport当前ID在现有presentedEntityModelReady中就绪，使用真实首次canvas左键获取PointerLock、现有18次aimAtCart原生鼠标转向，确认呈现位置与acceptedpose一致，再取得原restored截图。重查cart pose/rider/reference及当前epoch，原120000/10000ms和所有原断言保持，不通过harness.setView/teleport或额外状态写入取得画面。source PlayerController证明未锁定时左键mousedown立即返回，onclick请求PointerLock，因此首次重锁不挖掘；明确断言开始未锁定，避免误在已锁定场景点击。
+
+modelReady/位置与截图需要分层：数值观察不是像素证明；Root实际查看PNG，模型未见仍记未通过/阻塞，不因为helper通过宣布连续运动或194矩阵/整个运输完成。production无变更，不另造浏览器入口；保持原runtime失败记录与真实输入。Root独占minecart-journey.ts、本spec与新私有run/evidence，无其他agent。必要Classic类型/范围lint/格式；test口径增强后冻结精确SHA、新identified build，再原native纵向验证（NON_MAIN），原83mainFAIL与当前远端CI结果保持。AI15min×120%=18min，06:07UTC检查点；传统0.15PD×120%=0.18PD。最新05:29真实80%/4d21h，60%停止线；费用/credits/API/占比未知不换算。
+
+05:54UTC checkpoint88产品纵向终态：c889f405/artifactefd549f3/sourceDigest34aee033，原native120000ms用例39.9s PASS/runner43.5s、NON_MAIN，receipt PASS（attempts空，不伪造main阶段）。恢复模型ready与实际presented位置[9,31,0.5]、epoch2/current与epoch1/stale、转向后pose/rider/reference保持均PASS。Root实际查看restored PNG，中央灰色空矿车与准星/矿车HUD可见，不再朝天空/被debug覆盖；此静止恢复画面不是连续运动、统一lighting或完整运输矩阵。原始HTML重复PNG附件第一次提取FAIL保留空目录，第二次按rawSHA验证两个引用的唯一payload成功；PNG362671bytes/SHA3b7a8d7b17689f0d0091c34ceb645e7a9a2a38e2c30f80b74b1a3a2f6684cc28。新私有browser88-*及公共minecart-restored-presentation-88-01绑定，原失败不改。当前本地c889未推送，远端34 CI407五非BrowserSUCCESS/Chromium运行，原60%线保持。
+
+### 未接线Sky来源只读合同定位 checkpoint89（预注册）
+
+05:55UTC，冻结c889实际生产源码及原已批准Classic spec/architecture。当前SkyVisibilityCache需要worldTopY而source没有可信合法上界，不能从展示cy0..1臆造63、unloaded当Air或添加未授权world-height限制。本片只读定位可验证的现有Worldgen/Authority/Persistence元数据、列上方编辑完整性与最高生成solid保证；提出能保留既有合法存档/无新dimension/unknown fail-dark/同per-chunk owner的最小接线合同，并明确缺少事实，不能写假顶界或未测收益。
+
+复用唯一既有Luna/medium请求会话做有界leaf只读任务，服务型号仍未核实、不新开probe、不再委派；独占private task140-sky-source-readonly-01.md，禁止源文件/测试/构建/Browser/远端写入/全历史复制或size枚举。Root独占88 evidence/spec/metadata与CI状态，负责集成和验收，不重复Luna来源调查。此片无新增source/协议/发布，不以架构建议当产品通过。传统0.1PD×120%=0.12PD，AI20min×120%=24min，06:19UTC检查点；真实05:29周剩80%/4d21h，60%停止线；credits/API/费率/占比未知不换算。当前CI407自然终态前不抢推/取消；88有界纵向PASS不替代mainFAIL或194矩阵。
+
+06:07UTC checkpoint89只读终态：Luna报告由Root核对provider、持久化、浏览器高度与Sky cache源码，现有合同没有可证明完整的worldTopY。Kernel provider无天空边界；持久化只能按已知key读，不能发现未加载高层存档；512样本/64依赖是资源上限，不是世界高度。最小接线方向是Pack/stdlib拥有生成边界证明、同一持久化owner提供完整列key目录，并绑定world epoch及目录/Chunk revision；缺证明、超预算或失效均unknown/fail-dark。仍为待实施合同，不新增Kernel字段/第二可写truth/世界高度限制、不宣称Sky产品通过。私有task140-sky-source-readonly-01.md保存来源；公共sky-source-contract-89-01.md保存可恢复边界。
+
+### 质量预算不覆盖相机tone mapping checkpoint90（预注册）
+
+06:07UTC，远端34fee5f1与base fba4486e精确核对未变，CI407自然运行。源码advanced-visual-effects.ts按colorGradeStrength/postProcessing把相机切为ACES/NEUTRAL/LINEAR，违反已批准固定tone mapper/exposure与质量预算分离合同。此片只移除质量owner对camera.toneMapping的覆盖，让相机既有配置保留；不在此臆造Pack profile、不改曝光、阴影/反射/postprocess质量预算，不宣称统一受光或性能收益。当前相机创建使用引擎默认tone mapper，因此low现有实际取值保持；medium/high由质量强制覆盖的路径移除。
+
+RED设计：在原AdvancedVisualEffects真实构造函数的low无GPU特效路径中传入预配置ACES与exposure1.25的相机，原代码会错误改为LINEAR；断言原配置保持。复用既有STATIC_RED_ONLY质量不选tone mapper断言做定向静态检查，其余未接线lighting RED仍不写PASS。Root独占advanced-visual-effects.ts、advanced-lighting.test.ts/spec及新证据，Luna无任务；不改变唯一browser入口与原断言/超时。必要定向测试、Classic类型、范围lint/格式、冻结/路径检查，生产build与后续同精确产物原visual旅程；完整main不盲目重跑，CI407不取消。AI20min×120%=24min，06:31UTC检查点；传统0.15PD×120%=0.18PD；最新05:29真实80%/4d21h，约60%停止线，费用/credits/API/占比未知不换算。
+
+06:22UTC checkpoint90终态：47aa9eb2/sourceDigest9be0e5b2/artifact399aea0a（289files），实际构造函数有效RED1FAIL/5PASS→GREEN6PASS，既有质量静态合同1PASS/5未执行；Classic类型、范围lint、格式、冻结5/5、路径、commit hook及identified build PASS。唯一既有visual用例2.9m PASS/runner3.0m、NON_MAIN/attempts空。Root实际查看day-gallery、sealed-room-unlit/glowstone三张原始PNG；昼间素材可见、两张夜室亮度有可见差异。它不是中高档像素、完整光照/材质传输正确性或性能证明；所有旧lighting RED/主旅程失败保留。公共quality-camera-tone-90-01绑定精确身份与原始PNG摘要。低档引擎默认LINEAR已在实际安装PlayCanvas2.21.4源码确认。
+
+06:22UTC checkpoint87精确CI407终态补记：34fee5f1五非BrowserSUCCESS；Chromium FAIL/preview SKIP。主旅程首/重试V2分别8.6m/8.1m完成，但C4首900000ms/20ssettle失败（x118.16/airborne），重试return72.5原90s失败（x76.7606/grounded/velocity0，Authority/render revisions匹配）；visual56.5s PASS，native两次reload start-card原10s失败。decoded job log精确保留，首次单次写日志ARG_MAX失败无文件/第二次分块成功；原失败不删。新416824261B ZIP已由GitHub connector返回文件ID，Library仅signed URL/workspace_path=null，同一待批准oaiusercontent域名，未重试403或绕过网络。
+
+### 矿车重载低核心提示合同与C4只读诊断 checkpoint91（预注册）
+
+06:22UTC，生产冻结47aa9eb2；只读源码已证实初始startClassicWorld确认“仍然进入”，native reload手写路径遗漏；ApplicationShell新实例的performanceWarningAccepted初值false，lowCoreWarning会直接停留菜单。此为明确缺失路径，尚未从CI407 ZIP核实实际UI，不把推测当远端根因。本片Root仅在唯一既有native线路增加显式低核心能力故障诊断（navigator advertised cores覆盖4，实际机器核心数不冒充4，diagnosticOnly/eligible=false/NON_MAIN、不用于性能）。先保持旧reload输入取得有效start-card RED与实际warning/phase诊断，再复用同一真实“仍然进入”点击闭环；保留所有120000/10000ms、真实输入、存档、pose/rider/reference/模型断言。若反例不是该提示则不猜修。默认正式CI不设置故障环境变量。
+
+唯一既有Luna/medium leaf Task141只读C4源码/精确两条motion，允许私有实际physics诊断，独占task141-c4-*；禁止源/活跃测试/spec/Browser/build/远端/网络/.env/历史枚举，不再委派。Root独占start.ts、minecart-journey.ts/spec/新证据与串行浏览器，不重复其分析。C4的目标、真实W/S/Space、到达/ground/停稳/碰撞、90s及900s保持；Luna建议不是自动授权采用性能或门槛变化。Root AI20min×120%=24min，06:46UTC检查点；Luna10min×120%=12min，06:31UTC回报；传统合计0.2PD×120%=0.24PD。最新05:29实际80%/4d21h，约60%停止线，06:29额度刷新；分模型服务信息未核实/费用credits占比未知不換算。CI407已自然terminal，本片完成前不盲目full重跑/推送抢跑。
+
+06:36UTC checkpoint91终态：589ed99c/sourceDigest4e6bd223低核心故障诊断在原reload start-card 10000ms处有效RED；真实advertised核心5、测试注入4、页面性能提示与“仍然进入”实际文本保留。eda37826/sourceDigest8f947a7b/artifact399aea0a复用初次启动同一真实确认步骤后，原native用例1.4m PASS，NON_MAIN/attempts空，原120000/10000ms及输入/pose/rider/epoch/reference/模型断言保持。故障注入仅correctness diagnostic、eligible=false，默认CI不开启、不充当性能或实际4核心硬件。最终raw JSON85731B/SHA011e9a38绑定原核心5/注入4及恢复pose[9,31,0.5]、epoch2；首个HTML提取遇header-only引用FAIL/空目录保留，第二次只校验实际raw payload成功。早前TS nullable失败也保留，修复后类型/范围lint/格式/路径/五冻结证据/commit hook/identified build PASS。实际CI407 native UI仍未下载，不能把本地故障证明冒充远端根因。Luna Task141只读终态，不能由单个失败pose决定增大pulse或放宽路线。06:10UTC主对话产品UI实测剩80%、4天20小时重置，约60%停止线不变；本环境不可直接读产品UI、不换算credits。
+
+### C4逐脉冲真实输入诊断 checkpoint92（预注册）
+
+06:37UTC，原CI407在C4首总900s/重试返回90s失败，最后停稳pose不能说明各pulse的新鲜ACK、落地和往返成本。本片只在原walkTo既有snapshot/predicate/keyboard调用处记录节点时间、原tick/ACK与双端pose、配置delay/真实keyboard API wall、first-fresh ACK、first-complete settled、最后观察与route累计/剩余时间；不增加snapshot、poll、mouse、输入或状态写口。仅C4两次调用启用，有界最多512个pulse、超出明确标truncated；完整失败与pending pulse仍由finally输出，不替换原异常。diagnosticOnly/eligible=false，benchmark采样不开启此记录，不把诊断耗时当性能结论。
+
+原target、136米往返、W/S+Space、300ms默认pulse、到达容差、三轴速度/ground/collision/呈现追上判断、20/90/900秒均保持；不因诊断推测做production修复。Root独占harness.ts、一个职责明确的诊断helper、C4接线/spec与新证据；无其他agent、新Browser入口或权限。范围类型/lint/格式、既有route正反例以及原时限CI合同验证后正常提交推送既有feature，核对远端无并发变更和生产main部署条件，再等待新SHA自然CI取得逐pulse真实证据；不重复本地整900秒旅程或重跑旧CI。AI15min×120%=18min，06:55UTC检查点；传统0.15PD×120%=0.18PD，真实06:10剩80%为当前额度，约60%停止线；费用/credits/API/预测占比未知。长期owner/协议docs无变更。
+
+06:45UTC checkpoint92接线准出：407774d33838664fb7eb20b1456a3ea8bcb21735正常推原feature，远端读回PR Draft/open/unmerged/无冲突、reviews/threads空；main仍fba4486e，workflow未变、feature不触发生产main部署。新CI408/run38031941067自然运行，未取消或重跑旧407。最终类型/范围lint/格式/路径/冻结5/提交hookPASS，route/scenario14例、CI原时限2例PASS；首504行lint及commit FAIL保留，原C4参数包装移helper后通过，无规则豁免。原C4 runtime诊断待CI，NOT_RUN；Root冻结407范围核对不是独立批准/完整PR审查。PR正文已按新SHA/CI及旧FAIL和产品缺口更新；截至本阶段仍不可合入。
+
+### 可信生成天空保证与持久化列索引 checkpoint93（只读预注册）
+
+06:46UTC，冻结407实际生产源码，CI408远端自然运行，不用本地重复browser。当前Sky缺少可信generated-clear保证和未加载存档高层发现路径。本片不写production，仅检查能否从现有默认generator的有限公式证明“该source在某Y以上不会生成solid”，明确每版本/custom macro反例；不是把世界合法高度限制到该Y。复用唯一Luna/medium leaf，独占private task142-generated-sky-proof-01.md，禁止仓库写、Browser/build/网络/安装/委派、全历史枚举。Root独立只读当前同一持久化owner/Authority存档source目录接口，判断完整列key发现与epoch/revision失效闭环；不重复Luna生成公式分析，不捏造bound或unknown=Air。
+
+准出只记录可证明与缺口，供后续最小接线RED设计；无新光照truth/Kernel lighting字段/高度政策，不宣称Sky或GPU通过。Root AI15min、Luna AI15min各×120%=18min，07:04UTC checkpoint；传统合计0.2PD×120%=0.24PD。真实06:10产品剩80%/4天20小时重置，约60%停止线；服务型号未独立核实/credits/API/占比未知。所有后续实现另登记，不为等CI盲目改源码。
+
+06:54UTC checkpoint93只读完成：默认macro公式terrain≤44、V11树最高h+7，默认生成非空上界51；这是default实现证明，不是世界高度/存档/unknown区块结论。Root已核对原源码，并补同Classic identity下generateChunk/sampleMacro注入反例；freeze剥额外字段，不能按字符串识别保证。持久化chunks主键[worldId,cx,cy,cz]可在原owner以bounded cursor查询同cx全部cy并按cz跳过，无需迁移索引；现有port没有该方法。普通save仅写chunks，world checkpoint不能当directory revision，需覆盖全部write/delete/replace原子路径并合并当前Authority dirty/resident源；尚未实现。private task142-generated-sky-proof-01.md/persisted-column-source-readonly-93-01.md保留推导与具体缺口；不宣称Lighting/Sky通过。CI408五非BrowserSUCCESS、Chromium运行，仍不可合入。
+
+### 生成源只读空域保证 checkpoint94（预注册）
+
+06:54UTC，Root只实现上一片已证明的最小生成source端口：StandardWorldgenProvider可选generatedEmptyAboveY(seed/generatorVersion/x/z)返回安全整数上界或null，仅描述未被编辑覆盖的程序生成空域。Kernel provider、world合法高度、体素生成、provider/descriptor/persisted identity不变；stdlib模块显式保留/校验此端口，无能力或不支持版本为unknown。Classic仅在generateChunk===makeChunk且sampleMacro===macroAt时提供保守51保证；注入任一callback不授予，即使identity相同。无法安全覆盖邻树坐标的整数边缘也unknown，不把其改成合法坐标限制。
+
+RED：真实Classic默认provider缺该能力；实际stdlib注册模块freeze剥离声明的端口。GREEN覆盖同identity custom generator/macro拒保证、版本/非法输入、坏结果拒绝、原生成/采样函数保留及composition definitionMap不变；有限默认采样只作回归，全球上界来源是93公式。Root独占standard-worldgen-module.ts、Classic worldgen.ts及两owner测试/spec/新输出，Luna已完成不改源。不添加Sky production消费者，完整持久化高层发现/当前修改合并/同per-chunk owner接线仍分别待完成。
+
+必要定向RED/GREEN、owner类型/范围lint/格式、相关旧worldgen/Classic pack回归与identified build；仅有生产source元数据能力变化，无GPU/input/streaming逻辑变化，后续浏览器由该完成片精确SHA在唯一原线路验证，不能以构建代替Sky。CI408自然终态前不推新source取消它，也不盲目重跑full main。AI25min×120%=30min，07:24UTC checkpoint；传统0.25PD×120%=0.3PD。真实06:10剩80%、约60%停止线，07:10请求主对话实际UI；unknown费用/credits/API占比不换算。
+
+07:04UTC checkpoint94源码阶段：90ed75049ecff9e621caf12cb8317be149042741本地提交、未推。默认source与注册freeze两条RED→GREEN，最终Classic定向6/全29 PASS，stdlib保证＋原V11回归16PASS；production/test类型、范围lint/格式及提交hookPASS。首次稀疏缺冻结blob造成28PASS/1FAIL，精确Git树物化原文件/冻结5字节校验后全29PASS，历史bytes不改。Web geometry6PASS/1FAIL，原407生产模块对照同样FAIL；candidate原字节已恢复，独立fixture95解决floor32与旧起步65失配。94的artifact/原native验证与随后test-only95合用一次最终冻结SHA产物，不重复build；Sky消费者/持久化列发现仍未实现。
+
+### Geometry fixture与真实Modular floor对齐 checkpoint95（预注册）
+
+07:04UTC，原geometry-capability-integration已有效RED：实际floor32，fixture却Y65起步/接受cy2空chunk；原407模块对照重现64.995而非65，排除94回归。本片仅从MODULAR_WORLD_FLOOR_Y/CHUNK_SIZE推导player Y、floor chunk/key、放置/recovery位置，并验证原canonical floor含500，不改生成bytes/identity/世界/collision。原严格4位精度、blocking/open、placement/recovery/mesh/registry断言和20ms wake保持，不改浏览器坐标/门槛。
+
+Root独占该Web fixture/spec/新证据，无新agent；相关Web7例、types/范围lint/格式后独立提交，94production不变。最终identified build与唯一原native仅做现有Worker/保存恢复回归，不宣称空域能力已接到Browser Sky；full main不重复，CI408自然终态前不推取消。AI10min×120%=12min，07:16UTC checkpoint；传统0.1PD×120%=0.12PD；真实06:10剩80%/约60%停止线，07:10额度刷新，unknown费用/credits不换算。
+
+07:14UTC checkpoint94/95终态：本地2682a223 sourceDigest de88a861/artifact f21f6819/lock44db46fb、289files identified build PASS；默认真实核数无故障注入的原native1.6m PASS，原120000/10000ms与真实鼠标/键盘/存档恢复断言保持，NON_MAIN/attempts空。原JSON85639bytes/SHAae64adaf绑定恢复epoch2/current、epoch1/stale、pose[9,31,0.5]、rider=null及模型ready/位置一致。私有raw HTML/trace/receipt与公共94/95证据保留，Root范围复核不等于独立LGTM。生成源端口未接Browser Sky；持久化高层发现/失效、GPU、完整主旅程、运输与194矩阵仍未闭合。远端407 CI408五非BrowserSUCCESS、Chromium仍运行，未抢推取消。07:10主对话产品UI实测周剩79%、4天19小时重置，约60%停止线；费用/credits不换算。
+
+### 同事务区块目录版本 checkpoint96（预注册）
+
+07:18UTC，冻结cbce2e9a，普通chunks save没有能证明目录新鲜度的版本。先在同一worlds/chunks事务维护可选chunkDirectoryRevision；旧记录缺字段按0起步，坏整数/溢出拒绝且回滚。普通save、frozen save/replace、seed corpus的clear/每batch覆盖全部现有chunk写入，保留世界其他元数据和原checkpoint顺序。delete-world删世界后目录来源须unknown，不能把旧ticket延续到新runtime epoch；本片不宣称跨旧客户端的目录事件协议已完成，也不提供Sky消费者或假世界高度。
+
+RED用真实persistChunkSnapshots/persistFrozenGameSnapshot函数在IndexedDB兼容事务适配内验证普通save没有版本；GREEN覆盖单事务版本增长、equal-revision conflict/后续record失败/坏目录版本/溢出时所有chunk及metadata不部分提交、replace删高层旧chunk并增长、旧metadata保持。优先复用已安装能力，缺IndexedDB测试适配时仅增加有界dev测试依赖并保留lock校验，不重新setup。测试适配不冒充真实浏览器；最终源码identified build+唯一原native检验真实Worker保存/恢复，新增字段不改generator/存档组成身份。完整列cursor/Memory/Switchable/query新鲜度另片；本片不能宣布Sky/GPU完成。
+
+Root独占persistence写入源码/protocol、相关新owner事务测试、package/lock（如需）、spec/code-map与独立新证据；无新agent。原CI408等自然终态，拿到C4事实优先处理，实施中可保存有界进度，不推取消它。AI30min×120%=36min、07:54UTC checkpoint；传统0.3PD×120%=0.36PD。真实07:10周剩79%/4天19小时、约60%线；本环境无实际UI、费用/credits/API占比未知不换算。
+
+07:27UTC实施细化：seed corpus原先会重置player/gameplay/checkpoint元数据，保持这个既有benchmark语义，仅在末尾保留同事务目录版本，不将旧checkpoint接到新corpus。原body精确保留私有控制；提取到同worker owner文件后，原逻辑真实RED为末尾版本undefined，修复后版本save+clear+两batch为4。native原用例新增只读观察现有IndexedDB worlds记录，缺DB时abort upgrade，不初始化；在原flush之后及同存档reload后验证目录版本存在/非负/前进且worldId一致，保留原input/模型/存档断言及原时限。该观察不冒充完整列查询或Sky，也不另开浏览器线路；生产RED已有事务测试，浏览器正例待最终冻结artifact。
+
+### CI408自然终态 checkpoint97
+
+07:22UTC已读精确407/run38031941067原job日志：五非Browser SUCCESS、Chromium FAILURE/preview SKIP；原900000ms主旅程first/retry均15.3m在V2资源链失败，C4 NOT_RUN/pulse诊断0。首次walk settle栈、retry drop/pickup栈均由整体时限中断，不能把8.4m/8.6m失败step结束记为V2成功或臆测局部永久不满足。视觉1.6m PASS、native42.5s PASS；细节与原始/派生身份见ci408-terminal-97-01.md。新V2诊断另预注册，不盲目重跑旧full、不放宽时限/断言/质量，当前仍不可合入。真实07:10剩79%/约60%停止线保持。
+
+### V2既有资源操作与route pulse诊断 checkpoint98（预注册）
+
+07:33UTC，冻结04d98c5c。CI408两次均在V2总时限结束、C4未触达，现有日志没有逐资源操作或每pulse耗时。唯一新轴是Node只读诊断：复用原walkTo已读snapshot/键盘release/settle predicate，加到原followEquipmentRoute驱动；原80/300选择、45000 route/20000 settle/900000总时限、鼠标、snapshot次数和所有断言保持。每route最多512 pulse，截断明确unknown；V2标签与C4分别输出，既有C4语义不变。每资源原有place/mine操作前后只记Date.now/status，缺成功不写通过，不额外query/帧/输入，不缩短资源矩阵、不关trace/降低quality。
+
+正式BENCHMARK=1时全诊断旁路，不加入计时样本。Node合同测试验证回调只执行一次、原返回/错误保留、benchmark无observer/log/Date.now采样；这些不是实际浏览器因果或性能证据。原CI408 FAIL与没有该字段是观察基线，不伪造新的runtime RED。范围types/lint/格式与既有route/scenario/原CI时限回归；合96只做一次最终identified build，原native包括真实目录字段正例，然后正常推feature触发原完整CI。新的原900旅程仅为取得此前没有的V2诊断，不重复无新增证据的旧full；C4仍需要真正触达后才有事实。
+
+Root独占route-pulse-diagnostics.ts、equipment-journey-support.ts、新operation诊断及其Node合同测试/spec/新证据；Luna143只读冻结96并写私有报告，不改这些路径。AI15min×120%=18min、07:51UTC checkpoint；传统0.15PD×120%=0.18PD。真实07:10剩79%/4天19小时，约60%线；费用/credits/API未知不换算。96浏览器及全主旅程暂NOT_RUN，不提前宣称统一lighting/194/运输或可合入。
+
+07:44UTC范围细化：原scenario源码契约在包装后仍搜索直接await调用，55PASS/1FAIL保留。改用TypeScript语法树验证外层await、准确phase/target、返回原调用的无参数箭头回调，原操作顺序/新鲜tick/ground门禁不改；新增漏await、错操作/标签、丢弃Promise、注释伪调用反例。首次复核误用不存在的equipment-route-progress路径，只执行4files33PASS；apps/web/tsconfig.test.json不存在导致类型命令FAIL，随后使用实际route-progress/equipment-resource-route及根tsconfig.test.json核验，不把不存在项写PASS。
+
+07:48UTC checkpoint96/98：最终5files56PASS、原CI预算2PASS、test/Classic类型、范围ESLint/格式/路径/冻结5份PASS；4ec0dfbe identified build PASS，默认原native1.5m PASS/NON_MAIN，实际保存及重载目录版本均2，原pose/reference/epoch/rider/model/真实输入与timeout不改。Luna143对冻结04d同事务版本未发现确认P0/P1/P2，部分覆盖不是全PR批准。全部运行已terminal；下一步正常feature推送，原全CI的新V2诊断需实际运行，旧CI408 FAIL保留。源码96约26min/98约16min，原预算检查点内；真实周额度仍仅07:10的79%，08:10刷新，不能推算。
+
+### 同owner有界列目录查询 checkpoint99（预注册）
+
+07:53UTC冻结dde3c593，CI409运行中，不取消、不重复本地900旅程。目的为Sky来源发现取得同一Persistence owner的真实列目录，不从resident集合或固定世界高度推空。Stdlib新增可选只读列查询合同，Worker在原worlds/chunks同一readonly事务绑定当前world/seed/generator/provider和目录版本；扫描原主键同world/cx的所有cy，只返回目标cz的key/revision，不读取全库、不迁移DB版本。最大128条匹配/2048次cursor访问，预算超过返回unknown且不发布部分完整列；缺world、旧缺目录版本或非法record返回unknown，不初始化/写入/解码/生成区块，不消费Authority prepared cache。
+
+Browser公开可选端口经原worker队列发送，结果校验坐标、身份、版本、条数/唯一性；期间save/replace/dispose或world identity变化使旧回复unknown，不能伪造当前目录。新world init明确0；旧world缺字段保留unknown直到真实新writer写入，目录版本只是该次观察，旧客户端/跨tab写入协议及每次消费新鲜度还需后续闭合，不能把版本字段当永久空域证明。
+
+先fake-indexeddb和真实Browser类worker边界RED，再以空/负cy/高cy/异world/x/z隔离、准确预算边界、损坏/legacy/missing/目录变化、回调失败/无缓存消耗及异步save/replace/dispose反例GREEN；原save owner/regression按改动范围复用。Root独占新列查询及合同/Worker/Browser/helper/tests/spec/code-map；不委派、不改Sky或shader，本片不声称实际lighting验收。AI20min×120%=24min，08:17UTC检查点；传统0.2PD×120%=0.24PD。真实07:10剩79%，08:10须产品UI刷新，約60%停止线；未知credits/费用不换算。新的CI全程绑定dde3，不提前推后续本地代码。
+
+### V2挖掘静态等待契约 checkpoint100（预注册）
+
+07:59UTC，CI409 headless在dde3上795PASS/1FAIL：equipment-mining-aim.test.ts要求直接await mineVoxel文本，资源消费者已包装而workbench仍原直接调用。原CI日志作为RED，不改生产操作、full aim注入、调用数量、不得额外pre-aim或timeout。复用98准确语法树await/返回原操作Promise检查至新测试helper，仅资源消费者认可原awaited诊断回调；workbench保持直接await精确完整瞄准调用。原负例/顺序检查继续适用，定向旧测试先重现RED再GREEN，types/lint及现有邻近矿物/route回归。Root独占两个测试及测试helper/spec/证据，AI5min×120%=6min，08:05检查点；传统0.05PD×120%=0.06PD。费用未知，实际周额度仍07:10的79%，不推算；CI409浏览器继续自然运行，不提前推送。
+
+08:01UTC checkpoint100：本地原挖掘RED26PASS/1FAIL；共享准确await/Promise源码契约后4files58PASS，范围ESLint及根test types PASS，生产行为完全未改。headless整批没有本地重复，远端CI409仍待Chromium自然终态；下一精确CI必须验证该修复。先提交有界测试改动，99列目录源码仍独立本地进行，不夹带未验收生产代码。
+
+### 新owner保护的CI收集闭包 checkpoint101（预注册）
+
+08:08UTC，新96/99 Web单元测试尚不在原显式Classic headless脚本/类型名单，根tsconfig.test只收Kernel/stdlib；不把该根检查当新Web夹具类型通过。私人跨目录tsconfig首次缺node/vite类型路径FAIL保留，不做重装。仅给既有test:classic:headless和tsconfig.classic-tests登记三项目录写/读及Browser新单元，另登记98诊断合同测试（E2E已由目录纳入类型）；先CI收集断言RED再GREEN。原Classic其他全部测试、唯一Browser/900秒/重试/artifact不改，增加保护不能缩减收集。CI选择静态检查、Classic精确类型及必要定向回归，原CI409继续自然终态不取消。Root独占package.json、tsconfig.classic-tests.json及ci-browser-time-budget.test.mjs/spec/证据；AI5min×120%=6min、08:14检查点，传统0.05PD×120%=0.06PD。真实07:10周79%，08:10更新；費用未知不换算。
+
+08:12UTC checkpoint99/101：真实保存记录与主键查询RED4FAIL/15PASS，GREEN2files29PASS；最终6files75PASS。首个手写fixture GREEN不覆盖真实producer，旧错误签名/provider及507/504行lint/编译失败全部保留。真实Classic收集暴露新Web夹具类型盲区，按ES2022与原FrozenSnapshot身份补齐后第三轮types PASS，75回归及范围lint PASS；收集RED1/2→GREEN3，原全部旅程/timeout/断言保留。99约19min、101约4min，最后CI选择/冻结校验及提交后记录；08:10实际产品UI查询已发送而未回复，不假设额度。新query只是point-in-time目录，Matched IDB get仍克隆stored record，Memory/Switchable、旧客户端/跨tab新鲜度、Authority dirty/resident与Sky/GPU未闭合；不宣称性能、实际Browser query或PR可合入。
+
+08:15UTC最终CI选择17PASS、格式/路径/冻结5份PASS，99/101共同提交以保持新端口和保护收集一致；101墙钟约7min略超过预估6min，失败和类型盲区产生了新证据，没有全量盲重测或扩用户预算。唯一既有Luna/medium Task144只读此次冻结query commit（从main fba取规则）做一次有界风险审阅，独占私有task144-column-*报告路径；禁止仓库写/测试/Browser/build/远端/网络/.env/再委派，只关注cursor完整性、point-in-time/异步fence、身份与误报完整。AI5min×120%=6min、08:21UTC回报，传统0.05PD×120%=0.06PD，模型服务元数据仍未核实；整个PR共享预算且08:10真实额度回复未到。不是完整PR批准，不追加重复多阶段review。
+
+### Memory/Switchable列目录端口 checkpoint103（预注册）
+
+08:19UTC冻结a00eb730；Task144有限审阅未发现确认P0/P1/P2，不是整PR批准。Memory在原snapshot Map同owner维护按canonical key的列key派生索引和安全单调目录版本，非空普通/冻结保存仅在原copies全部成功后一起更新；查询最多128项，只给同cx/cz所有合法cy的key/revision，损坏数据unknown。索引由唯一commitSnapshots维护，不引入worldgen/渲染/第二世界truth，不扫描整个Memory存档、不宣称速度收益。原load clone/写记录及失败语义保留，空写不推进目录。查询期间写入使旧观察superseded，返回metadata detached。
+
+SwitchableAuthorityPersistence从当前delegate转发可选端口；无能力返回source-unavailable而非空完整列。replace即使同delegate对象及其转发的chunk/frozen save均换fence，旧异步回复unknown，不复活旧world来源。World epoch/dirty/resident与实际Sky仍未接线，目录point-in-time不保证永久缓存有效。
+
+先真实Memory/Switchable类测试RED，再空/正负高cy/跨列/覆盖键/不消费load或泄漏voxel/普通及冻结写版本/clone失败/坏key/128超限/异步写/替换同对象/无能力反例GREEN；按纯Stdlib owner及Web现有restore范围核验，给新Web unit登记原CI/类型，Stdlib tests由既有扫描收集。Root独占Memory、Switchable、新tests/CI收集/spec/code-map；不再委派，不改Sky/shader/世界高度/生产输入。AI12min×120%=14.4min，08:34检查点；传统0.12PD×120%=0.144PD。最新真实07:10周79%，08:10请求待答，约60%线保持；未知credits不换算，不提前推送或重跑CI409。
+
+### Memory/Switchable103 结果与 CI409 诊断104预注册
+
+08:30UTC：Memory实际RED9FAIL→GREEN10PASS（含目录计数安全上限）；Switchable首次RED夹具相对路径错误，纠正后实际缺方法RED6FAIL→GREEN6PASS，错误日志保留。真实冻结写、空冻结、失败冻结、同对象替换和异步回复均覆盖。最终 stdlib169files/1235PASS，Web列查询/版本/恢复/冻结6files/61PASS，实际Classic与根stdlib测试类型、stdlib生产类型、范围ESLint、CI选择17PASS。newWeb unit加入原headless/types名单，既有行为与浏览器验收范围保留。目录入口完成，Sky和world epoch/resident/dirty组合仍待实现，整PR不可合入；源码与证据同提交，最终SHA CI未运行。实际08:26周剩78%，约60停止线不变。
+
+CI409于08:26自然结束：dde3c593 build/deterministic/architecture/static成功，headless795/1FAIL（100本地已修，远端尚未验证），Chromium主旅程首次与retry均900000ms超时；visual1.7m/native42.7sPASS、modular分支SKIP、previewSKIP。完整新V2原始日志保留，190 operation/74route只是诊断，不是性能准入或因果证明。
+
+104于08:30UTC预注册：现有唯一Luna Task145仅只读精确dde3源与CI409日志，Root独占实现，Luna输出独占private task145-ci409-v2-diagnosis-01.md。目标定位模式切换/重复等待或80ms真实输入与ACK/投影迟到的问题；区别确认与推断，6分钟上限到08:36UTC，不运行测试/Browser/build，不改源或网络，不调高900000ms、不降低断言。Root先保存103并分析同日志，失败重试需新证据；未确认原因不实施猜测。
+
+08:36UTC checkpoint104结束：Task145原只读候选被已有refresh时序反例否定并撤回；无确认P0根因、不猜改。CI409终态、完整1.14MB日志/哈希、两次V2操作/路线分组及client-lifetime拒绝计数写入ci409-terminal-104-01。目录103已提交f38942c0，stdlib1235/Web61/type/lint/选择/格式/路径/freeze PASS，仍未推送且整PR不可合入。
+
+### hotbar backdrop 单变量诊断105（预注册）
+
+08:40UTC：基于f38942c0实际生产源，新identified artifact在本注册提交后构建，只保留旧dist到独立路径。CI409显示终末600–800ms生产帧间隔但没有GPU因果；唯一待检轴为既有#hotbar backdrop-filter blur(11px)（A）和私有诊断DOM style override none（B），原viewport960×540、Classic场景/quality low、WebGL2/SwiftShader、同机器/同源bytes、pose/view/worldRevision/geometry/queues/resident固定。不改生产CSS或graphics antialias/质量，不开GPU/CPU profiler、不关闭trace，不授权凭本结果采用永久修改。
+
+复用private observer86受控脚本的原startClassicWorld/prepareInitialState、原生PointerLock、world clock pause，只是静止生产渲染的因素诊断，不是完整产品验收或真实移动性能。90秒暖机、每段5秒稳定和30秒轻量rAF采样，trace截图/snapshot/source两组均开启，ZIP写在采样外；四段A/A组median差≤15%，失败即停止，禁止提高噪声线或第三次重试。通过后2AB+2BA共八段，primary组median帧时需≥20%改善且p95不回归>10%；完整raw/start/end与DOMcomputed滤镜、trace身份保留。任何场景变化/队列不空/源不匹配均失败，未知不升级为优化采纳。若仅paused idle正收益，需后续独立功能/视觉与动态整帧准入才能采取改动。
+
+Root独占private blur105脚本/config/raw/window/spec/new证据，不委派、不跑并行工作或整900s。所有输出独立命名，保留sealed/history。实际08:26周剩78%，60停止线；AI18min×120%=21.6min，09:02UTC检查点；传统0.18PD×120%=0.216PD。持现有机器性能reservation锁，原浏览器与安全策略不变。
+
+08:46UTC105提前结束：四段actual median300.1/550/483.4/516.65ms，A/A组差30.6083%>15%，FAIL；A/B NOT_RUN，不再重试，不采纳blur候选。完整raw、window FAIL/measurement RECORDED、warmup+四trace保留，public blur-aa-failure-105-01记录产物身份与原始哈希。未改生产CSS/质量/antialias，不从idle/GPU推测做实现。
+
+### 权威列来源106（预注册）
+
+08:50UTC冻结48d9ccde实际生产源；先保存105完整失败。本片仅把94真实provider generatedEmptyAboveY端口与99/103原Persistence列目录接到GameServer同owner只读观察，合并当前resident/dirty chunk metadata，不生成/加载/释放chunk、不读voxel payload、不扫描完整存档。不从generator版本或identity猜51；缺保证/目录unknown继续unknown。合法任意正负高cy与现有世界高度保持，source保证只针对程序生成。
+
+有界resident最多1024 visits，目录与合并结果最多128keys；边界/坐标/版本/损坏记录无部分complete，所有unknown失败关闭。输出同epoch/worldRevision、目录版本、真实provider生成空上界及detached当前resident或persisted metadata；当前resident同key优先，持久化revision更新于resident则拒绝不一致。异步查询前后epoch/worldRevision与resident vector变化superseded，不使用每physics commitSequence导致静态列无条件失效。只形成该点观察，不缓存永久negative proof；后续world epoch/dirty/resident失效、实际voxel/R8/shader消费仍需独立接线，不声称当前Sky已闭合。
+
+先真实GameServer+Memory/受控provider RED，再覆盖空/生成cell上界聚合/高cydirty与persisted/覆盖/unknown/保存/异步edit、纯生成residency变化及restore epoch反例GREEN。原load/gen调用不得被source inspect消费。Root独占新server-column-source helper/类型/GameServer窄接线及Stdlib测试/spec/code-map/evidence；不委派，不改WorldHarness协议、Worker RPC或Sky/shader/input。必要types/lint/原chunk residency与save回归，已有效1235全量不无新理由重复；最终prod实际消费者需后续验收。AI18min×120%=21.6min，09:12UTC检查点；传统0.18PD×120%=0.216PD，实际08:26周78%、60停止线。
+
+08:57UTC106范围细化：GameServer新增窄接线触发原max-lines514>500，范围lint失败且后续types未执行，保留日志。不提高门槛/例外；将原isValidSnapshot上下文拼装原样收拢至既有game-server-restore helper，仍委托相同validServerChunkSnapshot与composition语义判定。不压缩格式凑行，真实load/save/legacy/residency回归核验保留行为。
+
+09:07UTC106结果：真实RED6FAIL→首6PASS，最终source20与邻近stdlib6files65PASS，Web restore/冻结/代理3files14PASS；production/test/Classic types及WebSvelte0error0warning+2tsc PASS，范围ESLint500lines PASS。原max-lines514/503/501失败保留，后续types在这些失败链未运行；原ensureNeighborhood完整async体也原样收拢至既有canonical-chunk-observation，GameServer直接返回其Promise，必要回归通过，不改变门槛。code-map更新实际owner与外层Worker/Sky消费仍待接线界限，server-column-source-106-01与源同提交。本组尚无最终精确SHA CI/identified/Browser，不把旧结果当新SHA产品证明。真实08:26周78%，09:10刷新请求待答，60停止线。
+
+### 授权异步列观察107（09:15:35UTC预注册）
+
+从84b9347b接既有World inspect列来源请求，复用world.chunk read世界范围，不添加授权资源。授权启动与重新授权发布分别占用现有宿主队列，持久化等待在队列外；外层epoch/worldId/runtime替换拒绝旧结果，Kernel worldRevision迟变unknown superseded。坐标严格二个safe integer且捕获防caller mutation。Root独占helper、Harness合同与窄接线、stdlib和原Browser代理/Harness会话测试；不修改输入推进、Sky/R8/shader或浏览器超时。18min×120%=21.6min，09:37:11UTC检查点，08:26实际周78%、60停止线。
+
+首轮stdlib12PASS/生产typesPASS；测试types发现provider字面量上下文收窄和it.each坐标数组展开，两项测试写法已改，后3files38PASS/根测试typesPASS。Web首轮16PASS/2FAIL：新增RPC测试把真实args数组误写object，已修；原未收集Harness有效Logic batch夹具使用旧v1而实际协议v2，改用真实observation.protocolVersion，保留accepted:true断言。两个既有文件加入原Classic CI/types名单及静态收集保护。不是更改生产协议或放松接受条件；完整原失败日志保留。
+
+09:22UTC107新证据纠正：仅将夹具更新v2后原Harness仍FAIL；validateWorldLogicRequest也硬编码v1，导致边界与真实runtime协议分裂。范围扩展为同文件引用既有LOGIC_PROTOCOL_VERSION，旧v1明确validation拒绝，保留当前v2 accepted:true。未新建协议/降低断言。首次Classic types揭示原未收集Browser FakeAuthorityWorker仅AuthorityResponse而真实port含pointer-attack；改复用既有fixtures/browser-authority正确同port FakeWorker，移除重复17行定义并保持max-lines500，不抬门槛。
+
+09:25UTC107完成：新增14例加原source20/authorization6，stdlib3files40PASS；Web原Harness/Browser代理+新列RPC3files18PASS；stdlib生产/root test/Classic/Web Svelte0error0warning+tsc/tools types、范围lint/格式/paths/freeze5/CI17PASS。原v1生产边界有效失败已修到共享LOGIC_PROTOCOL_VERSION，旧v1拒绝且当前v2 accepted:true，浏览器正确Fixture复用并单列新测试，不改500门槛。Worker世界RPC本来在外层hostOperation前分发，只读I/O不被另队列阻塞。纯residency和真实320000高处voxel edit两类查询期间反例都PASS。暂未identified/完整浏览器/新SHA CI，不作为Sky/完整玩法或性能PASS。
+
+### 生产Sky来源/缓存/R8接线108（09:33UTC预注册）
+
+从1398ea2a承接107授权观察，在World当前Authority/同voxel revision owner派生有界sky volume并绑定原区块mesh/water R8资源，不改shader/输入/超时/质量，不新建权限/Kernel lighting字段/世界高度政策。source实际生成保证、持久化与resident dirty最高相关chunk控制采样上界；目标32cell含全上方证明，512只是工作预算，超限unknown fail-dark，不能截断当天空。高cy不限制、不主动生成/载入missing payload。原registry lightCost的超过透明air成本作为vertical absorption，opaque16全遮挡，unknown语义保留unknown。单有界派生异步作业、提交前epoch/worldRevision/revision/residency/registration复核、原drain及时失效清R8；释放阻断迟到发布，纹理由resource独占销毁。R8上传/Mock单测不是真实GPU像素或统一受光验收。Root独占新Sky源/driver及原World/adapter窄接线、相关测试/spec/code-map/evidence，不委派。AI30min×120%=36min，10:09UTC检查点，最新实测09:11周78%/4天17小时，约60%停止线。
+
+09:43UTC108范围细化：真实browserWorldOwnerPolicy没有world.chunk read，107开发Harness入口授权正确但普通生产renderer不能使用。保持World授权原样，不抬权限、不拿identity伪装chunk授权；通过既有可读本world canonical/voxel的Authority renderer channel增加有界column metadata request，session/runtime fences保持。复用hostOperation启动/提交，目录await必须队列外；覆盖迟到restore/替换与宿主未阻塞。Worker协议/窄早分发纳入Root108范围；需要重新identified并在唯一原生产入口做浏览器基线，不新开旁路线。其余预算/期限/禁止事项不变。
+
+10:03UTC108 source回归：新marker2只允许真实来源证明且obstruction0，不伪装resident；来源有效RED2FAIL/3PASS→15PASS，最终11files82PASS，覆盖真实hostOperation目录等待、旧epoch、原World权限仍拒绝、当前renderer合法只读、client迟到恢复、cached源/commit-floor/revision/residency/释放失效以及NullDevice真实Texture/MeshInstance R8绑定清零。一次失效原release已darken，driver重复清零1FAIL保留，修生产不降断言。actualWeb Svelte0error0warning+tsc/tools、Classic/root test/stdlib生产types、范围lint/CI17PASS。500行501/509/519及protocol509失败保持，原world RPC、block revision loop/fluid-active body与类型/renderer请求移至同职责helper，原行为/门槛不变。既有Native restoredPresentation同一读取加只读sky diagnostics，无额外Authority query/新断言/timeout变化，identified/browser基线尚待执行；shader/unified/GPU readback仍未闭合。最新实际09:11周78%，10:00刷新待答，约60%停止线。
+
+10:06UTC108源完成：追加Native诊断后E2E独立Harness接口缺方法的Classic类型FAIL保持，改引用生产Harness同一字段类型，最终Classic types/接口lint PASS；format/paths/freeze5/diff PASS。生产源不再修改；identified原入口浏览器基线另登记有界阶段，当前NOT_RUN。最新真实10:05周77%/4天17小时，账户总下降含其他任务，约60%停止线。本地工具执行正常、未重启或重跑验证；按下一正常GitHub只读核实连接。
+
+### 剩余模型统一受光117（12:59UTC预注册）
+
+承接生产22034491/远端cdd6e1fb，已有真实夜间PNG显示手持模型偏亮。角色/world-item/viewmodel改用现有SurfaceLightingSample：同World Sky visibility与已就绪当前revision的block volume、同Pack环境frame在线性received通道合成，unknown全received归零，自己的emission/map独立保留。材质仅配置调用方拥有的clone，UI/assets借用资源不修改；独占feature texture与clone按原生命周期释放。手持相机跟随主相机既有gamma/tone mapper，不改质量、曝光政策、输入、超时或断言。不改Authority/Kernel，也不从未驻留数据猜光。
+
+先执行真实旧消费者反例，失败必须显示旧emission混光/缺统一sample行为；纯辅助adapter的RED标为contract，Null设备不算GPU。范围单测覆盖unknown/陈旧revision、自身发光、借用材质及销毁；实际WebGL2固定像素与原唯一visual/native入口按新生产身份验收，原完整矩阵仍未关闭时如实列出。已有33像素/真实场景局部PASS不直接推广所有模型几何。
+
+Root独占World/cache/sampler、三个实际消费者接线与测试、GPUprobe/spec/evidence。可用唯一Luna/medium做独立PlayCanvas材质adapter及其单测，仅两个明确路径，20分钟内交付且不得再委派。Root负责集成，构建/浏览器前全体冻结源码。AI45min×120%=54min，13:53UTC停止本片并基于证据重估；传统0.45PD×120%=0.54PD。credits/API费率与真实周额度分母未知，不换算；最新12:28UTC产品UI周剩76%，约60%全PR停止线。未改长期docs baseline/历史sealed evidence。本片完成不等于PR可合入。
+
+13:06UTC117细化：原sole visual固定画廊新增一件真实world-item，原33像素仍保留；在画廊实际材质已存在后新增三种模型clone的同固定11case像素，合计66。probe必须从真实消费者拥有的已配置材质取源，不能新造adapter冒充接线；对白色控制面/固定uniform的readback仍非全模型几何矩阵。原所有日夜/closeup/连续帧/真实单击和240s/20s不改。相关新单测及此前未登记的模型/纯sample合同追加到现有Classic行为/types与选择保护，不删除已有项。static合同沿真实ModelSurfaceLighting helper核验相同语义，不用虚假marker注释凑过断言。
+
+13:09UTC117检查：相关9files71PASS，正常范围lint发现Game504/BrowserGameplay506/World512有效行，保留FAIL。实际职责收拢至model-surface-lighting、world-surface-lighting与browser-gameplay-presentation，并移除已无消费者的旧数值block-only展示wrapper；Game世界时间同步收拢到已有runtime-controls的同类时钟职责，不抬门槛/压缩格式。新正式Classic types发现此前未收集的transport fixture缺epoch以及Null测试的显式类型适配，修为真实合同并保留原失败，不改变生产协议。
+
+13:14UTC117源码验证：旧消费者修正fixture后的有效RED2FAIL保留，最终9files73PASS；真实Web/Svelte0error0warning+tsc/tools、实际Classic tests types、范围ESLint500上限、格式/路径及原CI/freeze选择17PASS。新增actor受击/unknown/clone释放与当前world恢复闭包测试；Null仍非GPU。code-map更新实际展示owner路径，长期架构/安全政策与历史sealed evidence不改。接下来冻结源、正常提交、identified构建和原visual/native验收，尚不声明66GPU/产品矩阵PASS。
+
+13:21UTC117首GPU运行：6230b10b/source39e5ad39/artifact0a165895原visual34秒FAIL。原33像素PASS；新增模型received/unknown/invalidation等均符合固定值，但world-item/viewmodel的self-only和self-unknown实得0而期望64。原始66pixels/HTML/day PNG/失败receipt保留，非PASS。SDK实际getEmission为material_emissive×material_emissiveIntensity；控制面只设置颜色而继承非发光源的intensity0，属于probe设置缺项，不是确认生产自己发光缺陷。唯一修正模型probe clone的独立intensity=1并去除借用emissiveMap作为白色控制，生产材质字段不改，64/128/0断言与原输入/时限不变；须新身份构建和原visual再验。不把此失败冒充有效旧生产GPU RED。
+
+13:37UTC117交付：精确d237b27e/source db048b2d/artifactc8ba11c2原visual1.4m PASS、六类66个不同固定GPU像素PASS，Root实际查看日/夜八源/移除源PNG确认手持共同变暗且UI图标保留；原native31.2s PASS（runner34.7s），两者NON_MAIN/noConflict。新证据model-received-lighting-117-01与ledger117绑定。CI413/cdd已自然终态五项非浏览器SUCCESS、main两轮V2返回后C4-outbound失败：首次900秒总限截断，retry90秒route至208.5,0.5未达；原visual1.2m/native28.1sPASS、Modular/previewSKIP。原1.97MB完整日志/两组C4pulse与哈希保留；每settled pulse均有正向位移，不能猜定input丢失。源码确认keydown/up直接capture并发布，否定仅80ms短于RAF就必然丢输入的假设。本组约38分钟内结束，未把时间换算额度；13:27产品UI实测周剩75%，约60%全PR停止线保持。
+
+### C4实际input推进118（13:43UTC预注册）
+
+承接远端7831cb86/生产d237b27e与已结束CI413。两轮C4 outbound69/78个W+Space300ms脉冲，68/78个settled均正向位移，约79秒到x190/91秒到x159；V2先前均返回。只针对真实输入到Authority推进的原因诊断：Root读同次已保存input-decision与Authority scheduler，唯一已有Luna可独立读client prediction/input stream/capture路径并只写private结论，8分钟限时、不跑测试/build/browser、不改源。不得把RAF低频、累计late计数或单次ACK当因果；复现须由真实现有owner的可执行行为反例验证。没有确认原因就不猜改、不追加无依据性能实验。
+
+确认后Root独占最小生产修复及相关测试/证据，保留原W/S+Space、90/900秒、到达/停稳/碰撞和玩法断言，禁止更改测试gate掩盖失败。必要当前源码types/lint/原唯一生产入口按新identity验证；已有73单测/66GPU不无理由重跑。CI414继续自然运行，不取消前驱或提早用新push替换证据。AI30min×120%=36min，14:19UTC本片停止并按新证据重估；传统0.3PD×120%=0.36PD，费率/额度分母未知不换算。13:27实际UI周剩75%，约60%全PR停止线不变。固定汇总先用确定性工具，Luna不再委派；写路径互斥，Root负责集成验收。完整原范围与ledger117保持，不扩大权限或生产部署。
+
+14:00UTC118只读检查点：当前7831与CI413的input capture/prediction/clock/Worker/buffer/Authority源无差异；Root与唯一Luna未确认生产原因，未改源码、未运行新测试/build/browser。两组正向pulse、累计late以及四步预测cap不能单独归因；重试pulse22/x112.8645起约半位移差异保留为未解释事实。新input-cadence-118-01记录原始数据派生与边界。原350789197字节失败ZIP已由GitHub定位，传入workspace_path=null，具体sdmntprjapaneast.oaiusercontent.com单次授权待答，无自行扩权。CI414五非Browser成功/Chromium继续自然运行，14:00reviews/threads均空；保留原W/S+Space/90/900/全部玩法断言，不猜改、不取消、不宣布可合入。13:27实际UI75%与约60%停止线保持；新证据到达后再按有界最小修复复评。
+
+### 非驻留持久化Sky源119（14:04UTC预注册）
+
+现有明确功能缺口：完整列目录包括已保存非驻留cy记录，但116的requestBrowserSkyChunk仅调用resident collision baseline，无法取得该记录的payload，严格保持暗。Root仅补当前world的独立只读Sky源请求，不扩大原碰撞baseline可用性；沿现有Persistence load解码当前seed/generator/provider记录，直接返回独占数据，不消费prepared registry/cache、不ensure/generate/insert/改变residency、无持久缓存。列预算128条/512高度/至多16临时副本与32MiB持久Sky预算不改。
+
+现有Authority列源的短host frontier→队列外IO→短frontier复核模式复用，禁止持有host队列等待存储。请求缺/旧runtime epoch先拒绝，等待期间restore/server/persistence替换、world revision/save fence变化、坐标/key/revision/shape错配或存储缺失都返回未知且不发布部分证明；自己的世界与精确revision严格绑定，canonical/流体借用buffer不detach。BrowserPersistence新增nonconsuming只读读法，所有save/replace/corpus/dispose fences保持。根独占新helper/入口接线/测试/spec/code-map/独立evidence，不新增agent、外部域名或权限；C4附件传输仍待明确答复。
+
+先实际旧非驻留读取RED，再有效持久记录/缺失/版本错配/保存与restore竞态/Host input可在IO期间服务的行为GREEN，复用有效117范围结果，仅核对新增入口和生产/test类型、范围lint/原owned格式与正常hooks。后续源冻结identified build与实际冷存档Sky消费者验收独立记状态，不以单测当像素/整矩阵通过。CI414继续自然终态，不push取消，不重复本地900秒；若取得新C4事实优先转向已证实原因。AI25分钟×120%=30分钟，14:34UTC检查点；传统0.25PD×120%=0.3PD，真实13:27周75%与约60%全PR停止线保持、费用与额度占比未知不估算。
+
+14:19UTC新CI414精确7831自然终态五非BrowserSUCCESS/ChromiumFAIL/previewSKIP，visual1.6m与native34.9sPASS；main首次V1闭门开始not-before-door，retry V2目录铁块button已click action done但等待scheduled navigation触及原10000ms，两轮C4未运行。完整新日志单独保存，sha256 6392aec1df75f8e974f84494fdfff4301968a07dc5f45956fd78b4829b251747。唯一现有Luna做120有界只读首次闭门诊断至14:25，独占private pr41-door-diagnosis-120-luna-01/diagnosis.md，不改仓库/测试/build/browser/网络、不再委派、不处理未确定retry原因；Root独占119剩余类型/证明/证据。没有确认前不弱化before-door/oracle或10秒click/90/900门槛，当前仍不可合入。
+
+14:32UTC119源码检查点：相关5files49PASS（真实持久屋顶进入客户端列proof/无碰撞驻留、队列外IO时输入服务、保存/恢复/版本/借用buffer反例），生产Web/Svelte0error0warning+tsc/tools、最终Classic types、范围500有效行lint、CI选择3合同与diff检查PASS。最后集成proof的provider字面量过窄类型FAIL已修为独立结构声明，原失败保留。新stored-sky-source-119-01记录源码层范围；冷存档Browser/identified build/提交推送尚未执行，不能声称完整矩阵或PR可合入。实际14:25产品UI周75%/4天12小时，60停止线不变。
+
+### 闭门探测精确approach120（14:33UTC预注册）
+
+CI414第一次main在真实probe键盘之前被原oracle正确拒绝；日志X与east闭门contact条件重建一致，原初位置/plan未记录，不能宣称门ID已确认。共享walkTo crossing半平面会把超过approach的墙接触位置当到达，导致缺少1米前置距离。Root仅为此调用增加显式point到达模式，默认crossing与原正向/反向消费者保持；实际walkTo/aim/native输入循环使用同一point谓词，不改80ms/.06/.08/45s/20s或原blocked oracle与1250ms输入窗口。先以真实stepBody墙接触+实际walkTo取得旧代码行为RED，再点定位/默认crossing/正反门几何回归；新mode仅此door setup使用，最终原main/全部玩法是否通过另记，不修未确认的retry导航猜测。
+
+独占harness、route-progress、现有route-aim-contract测试与v1-slice及spec/evidence，复用已结束Luna只读结果，不新增委派。AI20min×120%=24min，14:57UTC检查点；传统.2PD×120%=.24PD。14:25实际产品UI周75%，60停止线，credits/API/比例未知不估算。119源码已保存，冷存档验收需随后与新身份绑定；不盲跑原900秒，不提高原门槛。
+
+14:37UTC120范围检查点：真实stepBody+闭门+实际walkTo旧入口RED1FAIL/19PASS，point模式相关5files50PASS，最终Classic types与范围lint PASS；原harness501行FAIL已通过把同一arrival谓词归属既有route-progress处理，没有提高500上限。默认crossing保持（新测试同一墙边case直接验证无输入默认越线，再point实际退回），门前1米/.06/.08/80ms及原oracle/时限不变。新door-point-120-01证据保留条件几何推断边界；原main/远端CI尚未验证，retry scheduled navigation及C4原因仍未确认。实际14:25周75%，60停止线保持。
+
+### 冷存档Sky来源121（14:38UTC预注册）
+
+在原唯一visual用例结束前追加当前生产保存/重新进入同seed世界的Sky只读验收，不新开spec/旁路或改变240秒、既有33/66像素/场景/真实单击断言。当前已证实119非resident持久payload缺口修复；设置可验证opaque屋顶[0,226,0]（cy7超过当前startup驻留层），正式world edit后flushSave，记录column-source/key/revision与world identity，再从原startClassicWorld真实UI进入同存档。必须再次观察同世界、精确row revision、resident false/client canonical revision null，以及目标0,1,0 Sky ready；只读column inspection不能加载屋顶，原consumer从persistence Worker读取证明后仍非resident。失败保留，不扩大20秒Sky时限或让unknown变亮；截图只补场景观察，ready不冒充遮挡像素矩阵。
+
+Root独占新visual-stored-sky helper/原visual窄调用及spec/evidence；复用119有效旧生产入口RED，冷Browser本项没有伪造旧产物RED。代码类型/lint/collector检查后冻结全部源码、正常提交、identified build并原visual/native局部验收；当前新door setup需要最终main远端CI，避免同时重复本地900秒。AI20分钟×120%=24分钟，15:02UTC检查点；传统.2PD×120%=.24PD，实际14:25周75%，60停止线，费率/分母未知不换算。无新模型、权限、生产部署，单组通过不关闭原ledger117。
+
+14:52UTC121结果：999dadf7/source d2cfc704/artifact42a2687f identified build PASS，原visual整体FAIL2.9m，前段66不同GPU/全部原画廊输入步骤完成；新冷恢复原start-card10000ms失败，cold源/ready断言NOT_RUN。实际startup save-flush→first-visible11339.7ms，失败后cardDisplay none，原超时仍FAIL，未确认单一原因、不提高任何等待。原HTML/trace/JSON/receipt保留，Root查看night-source-removed热场景PNG；不冒充冷像素或全矩阵。随后同产物原native56.4s/runner59.4sPASS，NON_MAIN，真实输入/存档/PointerLock原断言保留。生产stdlib与root test types额外PASS，11949/12050及此前Web/Svelte/Classic/lint有效输出复用。cold-stored-sky-121-01新证据与哈希绑定，原ledger117未关闭。
+
+122仅唯一现有Luna6分钟内完成CI414 retry creative click只读诊断：普通type=button→Authority mode command/UI refresh/save，无确认导航调用或receipt；实际scheduled navigation owner仍未知。新v2-click-navigation-122-01保留边界，没有noWaitAfter/增时限或猜改，也不拿累计input归因C4。14:25实际UI周75%，约60%全PR停止线保持。当前两组源码有有效行为验证，但PR整体仍不可合入；计划正常feature push绑定下一次完整远端CI，前驱414已自然终态，生产workflow只main且既有PR preview授权不扩展。
+
+### 已确认失效的Sky源恢复125（15:09UTC预注册）
+
+冻结308d2cc5，CI415五项非Browser SUCCESS、Chromium原主旅程仍运行，不push取消。124冷启动只读检查未确认初始化顺序错误，11339.7ms不是原因或性能结论；本片不将独立Sky保存竞态归因启动超时/C4。待复现假设：列目录unknown/superseded，或非驻留payload在save fence改变后被拒绝，但runtime/worldRevision/client revision均未变，WorldSky将dirty清除后不会再次排队，当前合法列可能一直暗。
+
+先以实际WorldSky与原requestBrowserSkyChunk解码器取得旧行为RED：一次明确superseded后同owner完整目录/独占roof复制恢复，32ms原调度应发布合法遮挡；持续缺失、损坏、budget-exhausted保持暗且静止。若RED成立，Sky专用响应仅新增superseded原因（碰撞baseline合同不扩张），Client在当前epoch且准确key时传递有类型的暂时失效，WorldSky在原16ms/至多一个pending内重新排队。旧epoch/key、释放和dispose不得复活旧consumer；未知普通错误不轮询、不把unknown变亮、不增存储/目录/高度/复制/缓存预算。Worker最终frontier必须区分保存或owner新鲜度失效与真正缺失记录，复用119真实Host队列外IO和buffer所有权反例。
+
+Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据，不新增委派、浏览器full重跑或权限。范围测试、生产Web/Classic类型、lint/格式及正常hooks，原冷Browser仍FAIL/cold proof NOT_RUN，之后有实际新证据才重评。传统.15PD×120%=.18PD；AI16min×120%=19.2min，15:29UTC检查点。真实14:25产品UI剩75%，最新读数待主对话，约60%全PR停止线；credits/费率/API分母未知不换算。源码层GREEN不关闭原ledger117、不宣布可合入。
+
+15:15UTC125范围检查点：旧实际WorldSky及真实Sky解码RED2FAIL/20PASS；修复相关5files62PASS，最终坐标端口夹具类型修正后WorldSky27PASS、生产Web/Svelte0error0warning及tsc/tools、Classic types、范围lint/格式/diff PASS。第一次Classic类型FAIL保留，新增数据与缺失/损坏不轮询、save前后Host frontier、原epoch/key/释放/单pending保护均覆盖。sky-superseded-125-01独立证据绑定基线308d与原日志摘要；长期codemap更新局部失败传递合同。最新远端仍308d/main fba、Draft mergeable true，CI415自然运行，本片尚未push、build或真实冷Browser，不扩大任何门槛或宣布全PR可合入。实际额度仍14:25周75%，刷新待主对话，原约60%停止线保持。
+
+15:23UTC125补充：正常hooks后本地7aaf2951，独立Luna只读审查冻结308d→7aaf，未发现可证实P0/P1/P2，完整范围/未覆盖项在私有125报告。一次identified build PASS，source7aaf2951/sourceDigest6c43d4d96af52e29169f29347c6e5fab78e78dae3e73b35340d6d4f58b390767/artifactDigest0b9e6be8dbafa0b10fdf31ab396d4b017680e163f276b3e7f7f488ef153830fe/289files，旧999产物独立保留。没有重复冷Browser，不能把build或审查当冷场景通过。
+
+15:28UTC127检查点：CI415精确308d自然终态，五非Browser SUCCESS/Chromium FAIL；两轮V1 PASS，首次V2触及原900000总时限，retry在78.5,-0.5原45000路线超时，C4均NOT_RUN。两轮visual原单击目标0,61,17期望0实得3/5000ms，冷121阶段NOT_RUN；原普通native约36.6sPASS，Modular SKIP。完整raw日志360907bytes/sha256 2a5af1e59cfac273fada85aa2f569cde5d06326c27eb5b0f78a2f92b43855374，18route/45operation独立解析，失败输入计数为client lifetime而非阶段因果。Luna只读visual诊断没有确认生产缺陷；已有creative-one-click-input附件正文不在raw log，CI ZIP本地不可得，新传输域权限待答复，不猜改生产挖掘或再点一下。126只读首次网格postrender15946.2→first-visible15946.6ms一致，部分Worker completed spans回填时间，不构造跨线程因果或性能收益。当前PR不可合入，125未push。
+
+### 原生释放消费边界与已有单击诊断128（15:34UTC预注册）
+
+冻结7aaf2951，远端308d/main fba；先复核最新远端再编辑。待证伪假设：walkTo只用ACK>按键前值+静止，可能把较早neutral ACK当作本次原生keyup已消费，后续才开始移动；CI415若干zero-motion pulse后继续位移仅作诊断线索，不宣称原因已确认。先用实际PlayerController键盘捕获、PlayerInputStream/InputCommandBuffer及旧route消费者取得RED；只读暴露同Controller最后实际原生keyup发出的command epoch/code/sequence，不引入状态写口或另造输入。消费者需观察本次release版本，再等待Authority ACK消费该序列且原静止/ground/presentation条件成立；旧epoch、前次release、keydown或没有发出command不得当本次完成。不增脉冲、输入次数、时限/容差，不用计时近似替代释放回执。若RED不成立则不采用生产修改。
+
+独立第二项是将visual原finally已经采集的creative-one-click-input对象同时写Node诊断日志，不额外浏览器查询、点击或等待；原断言和附件保持，BENCHMARK旁路诊断输出。该诊断可在下一精确CI给出已存在的pointer/target/attempt/player/voxel实值，仍不凭attempt增长声称Authority成功。Root独占Controller局部观察、snapshot合同/producer、route消费者/相关现有测试与visual窄日志/spec/新证据；唯一Luna已完成127，本片不委派。范围类型/lint/format/选择合同、source冻结identified build与按实际新证据选Browser/完整CI，失败日志保留。传统.3PD×120%=.36PD，AI25min×120%=30min，16:04UTC检查点。真实14:25UI仍75%，刷新待主对话，约60%全PR停止线不变，credits/API/额度占比未知不推算。
+
+15:48UTC128范围检查点：原实际Controller/InputCommandBuffer旧空闲ACK反例RED成立；10files75PASS，生产Controller记录复制隔离/非neutral/换epoch反例补充后17PASS；Classic类型、生产Web/Svelte0error0warning及tsc/tools、范围lint PASS。原路线夹具显式升级合成post-release协议观察，物理模型只在keyboard.up记录；不作为真实浏览器证明。finally诊断仅复用同一次已有查询。128不委派，root逐文件复核输入与观察边界；等待额外Harness/选择检查后冻结一次build及原入口Browser。125独立review/build PASS不证明冷Sky已验收，127原CI失败保持。预算真实读数仍14:25的75%，刷新待回复；16:04检查点与约60%停止线保持。
+
+15:55UTC128真实输入检查点：精确5690ed3c identified build PASS（sourceDigest ba947271c79871781d42fe02f9db9d6c3d9689fc58de44873fbca14f9c63e066/artifactDigest6df19efb5c70b9c688fc9bdd063b5acc19cbb776b8a8b6922b4dcec71b9418e8/289files），原入口visual1.5m及native47.0s，两例PASS/NON_MAIN。原cold121 stored source首次本地PASS：同worldId、roof revision1在cold/after均nonresident/clean/canonicalRevision null，原20sec目标0,1,0ready；不归因旧启动timeout或声明冷遮挡像素。原单击3→0/neighbor3/PointerLock有效；真实模型66GPU像素（普通33为子集）原断言PASS，Root看本次夜景及cold暗场。主V2释放消费与V1–V4/C4尚待下一精确远端CI，完整ledger117保持未关闭。下一正常push须复核远端/workflow，无生产部署，仅既有PR预览；预算最新真实75%@14:25，刷新待答复、60%停止线不变。
+
+### 遗漏的间接路线页面夹具129（16:01UTC预注册）
+
+冻结dcb39a9e，CI416 Classic headless终态4FAIL/1026PASS：mining-approach-handoff三例及target-aim一例原5000ms超时，Chromium仍自然运行。128范围漏查了mineVoxel/placeVoxel的间接walkTo页面，现先以原两文件复现RED。Root独占这两处测试夹具/spec/新证据，不改生产128 release约束，不增超时/重试或弱化原range/target/assertion。Browser64 replay明确补合成post-release metadata，不将新字段称历史浏览器原值；target-aim fake只在modeled keyboard.up记释放序列。相关间接消费者索引复核并选择最小必要检查；范围GREEN/types/lint/hooks，不重复production build/Browser，因为生产及唯一Browser入口无改动。后续正常push要等CI416 Chromium自然结束，禁止取消来掩盖失败。传统.05PD×120%=.06PD，AI8min×120%=9.6min，16:12UTC检查点；真实预算仍14:25周75%，新UI待回复，全PR≈60%停止线保持，无额度换算。
+
+16:03UTC129检查点：CI416遗漏夹具失败在原两文件本地RED4FAIL/14PASS复现；显式补合成release后7files82PASS，Classic types及范围lint PASS，生产/唯一Browser入口未改，build/Browser不重复。原未改1026例CI通过复用，所有间接路线调用索引复核；不把新metadata标作Browser64历史原值。正常hooks提交后先留本地，CI416 Chromium自然运行不取消；全PR仍不可合入，真实75%@14:25额度刷新待回复。
+
+### 原路线诊断的释放观测130（16:15UTC预注册）
+
+冻结本地183f339d/远端dcb39a9e，CI416 Chromium自然运行，129夹具已本地修复未push。原route pulse JSON不包含128消费者已使用的nativeMovementInput，远端ZIP不可得时无法从原Node日志区分release缺失/旧epoch/非neutral/ACK未消费。仅将已有snapshot的nativeMovementInput复制到motion观测，不新增浏览器RPC、轮询、输入、计时或判定；原512样本上限、benchmark旁路、标签/错误返回保持。先用现有equipment-diagnostics-contract取得缺字段/复制隔离RED，再范围GREEN/types/lint；源码仅原Node诊断与现有测试/spec/新证据，Root独占、不委派，不据诊断声明性能或CI主路线通过。原生产Web产物不变，且CI416终态前不push取消。传统.03PD×120%=.036PD，AI6min×120%=7.2min，16:22UTC检查点；16:03实际产品UI周剩74%、重置4d11h、共享账户降24pp，约60%停止线保持，不另启额度验证或换算。
+
+16:17UTC130检查点：原Node诊断缺release字段RED1FAIL/5PASS，补仅两行复制后5files50PASS（含复制隔离与不制造firstSettled），Classic types、范围lint/diff PASS。生产Web/路线predicate/输入/等待/512cap不改，不重复build/Browser；本地129/130待CI416 Chromium自然终态后正常push，仍不得宣布全PR可合入。主对话实际16:03周74%、4d11h重置，共享账户下降24pp，约60%停止线保持，额度更新不另开验证。
+
+### CI416 终态诊断132（16:45UTC）
+
+精确dcb39a9e自然终态：architecture/build/deterministic/static SUCCESS，headless4FAIL/1026PASS（129原两文件RED后7files82PASS本地修复），Chromium1FAIL/1SKIP/2PASS32.4m，previewSKIP。两轮V1 PASS，V2原900000总限中断placeOneEach committedPointer/铁头盔Shiftclick，C4/C5 NOT_RUN；原visual含cold来源1.0m及普通native23.3s PASS，不能代替main。原日志两轮各57routes全部returned、合计866pulses；分段计时与260资源操作均只作diagnosticOnly，不相加包含项、不推断GPU或命令因果。完整raw1595197bytes/SHA20273a92d62a6f2306f7411d05f1033807491c8de621069682b5f6ac25839af6与解析私有保存，marker误名已纠正，ZIP仍不可得。132证据独立ci416-terminal-132-01.md；正常feature push交付129/130与本终态，再按当前来源注册有界诊断。周74%@16:03/约60停止线，PR不可合入。
+
+### 当前来源精确 Authority Worker 诊断133（16:49UTC预注册）
+
+冻结129/130/132源码，在本注册正常提交后的精确HEAD构建一次identified artifact；先将旧5690 dist保留到私有独立路径，不改写旧回执。只选原唯一Classic主旅程完整C0–C5及其扩展，原900000/45000/20000ms、输入、trace、SwiftShader/WebGL2、quality low和全部断言不变；不增加重试。新run pr41-authority-profile-browser-133-01，仅开启现有SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE=1（固定360sec延迟/20sec/10ms sampler），main CPU/native trace/benchmark关闭；runner从本次artifact唯一worker asset/hash派生精确目标，原attach/stop/detach和错误保留。
+
+待检问题是当前统一Sky/模型和新释放边界的生产栈中，V2等待期间同一Authority Worker的采样工作分布；历史旧源主线程idle/program和原生SwapBuffers等待无法回答当前Worker的函数归属。当前原CI416路线全部返回但整场900sec仍失败，计时不提供因果。新诊断仅回答本次精确Worker/source/阶段的热点，不宣称GPU因果、收益、A/A或A/B、可合入；即使main PASS也仍标带sampler的diagnosticOnly/eligible=false，标准最终验收另需无sampler。采样未开始就失败或没有V2采样则如实未覆盖，不补跑盼绿。
+
+Root独占spec/新私有run/回执，源码与生产产物在构建到runner结束冻结；不委派、不增加CPU/网络/线程权限。本轮AI20min×120%=24min，17:13UTC检查点，传统.1PD×120%=.12PD；不将该估计换算实际额度。最新产品UI16:03周74%、约60停止线；正常feature push包含129/130/132/本注册，先复核远端与现有workflow生产仅main/原PR preview，无合并、automerge或生产部署。长期docs baseline未修改，现有证据边界不变。
+
+### 曲线与坡道配置及已部署矿车兼容135（16:58UTC预注册）
+
+当前356ec528/CI417五非Browser SUCCESS、Chromium自然运行，不取消/抢推。133本地identified build PASS（sourceDigest ec436a3058f6d7f1ae87bd4aacb17b6bda78fdecfcac46fa80f067a2264e662a/artifact6df19efb/289files，builtAt16:48:38.530Z）；原main1.2m在prepareInitialState Authority request165原30000ms失败，采样metadata NOT_STARTED/createdAt16:49:16.824Z，未触达V2、不补跑。原trace7140959bytes/SHA c54e8c5b02ce427388962e1036019d4334bde56ec32f05c304cdf5fbbd6ac7e4和raw完整保留。133标题16:49UTC是手工标签；真实预注册commit356ec528为16:47:14UTC、真实执行/构建时间以上述记录为准，修正标签精度、不改旧记录。tick已由tickQueued有界，本地早期失败不证明无界tick队列；正式生产原因未知。
+
+Luna134只读核实stdlib支持quarter/双向坡但Classic只两直轨；新增routes会改变transport definitionIdentity，当前pre-transport V4不含非空运输状态，不能代替当前straight-only旧存档保护。已从原成功Browser128 native JSON正式composition export取得精确5690生产身份（entryDigest1e053907236afca3792b7b6d0c0ed7548becac6c28a99ac8ce24193d80e2a347），与当前356ec528 verified artifact entry和全部dist bytes一致；不再跑另一次native来重复采集。以此实际身份新增独立capture与窄predecessor，只允许gameplay V4精确旧identity，不改写已有历史。
+
+可验证行为：Classic保留两直线variant，并声明四个quarter角和四个ascending方向的双向edge；不增加三/四向自动tie-break，歧义/unknown继续fail-closed。先通过正式resolveRouteSegmentV1取得配置缺失RED，再GREEN；正式Authority已有真实部署/骑乘/推进测试回归不变，新非空旧straight carrier/state/remainder/库存/lifetime恢复需以实际旧production composition作源，未知digest/definition tampering仍拒绝。Root负责真实capture、predecessor/迁移及保存反例、原CI/types登记和集成；唯一现有Luna/medium只写transport.ts及新的apps/web/tests/integration/runtime/server/composition/classic-rail-route-definition.test.ts，路径互斥、不得再委派。
+
+本片仅配置/旧当前V4兼容；轨道实际neighbor-aware mesh、真实放置/曲线与坡道玩家旅程、其余两轨两车/boat/fuel/container/更早非空legacy仍开放，不以配置GREEN宣布运输完成。原唯一Browser/20/45/90/900sec、selection既有项、质量/输入/全部旧断言保持；只登记新增测试，不弱化门槛。必要范围测试/Classic与Pack生产类型/lint/format/hooks；生产变更后新的identified build和原native验收另按证据选择，最终精确CI417不可替代135。传统.35PD×120%=.42PD，AI25min×120%=30min，17:28UTC检查点；最新16:55产品UI周74%/4d10h，约60停止线保持，不算token占比，不新增权限，不修改长期架构baseline。
+
+17:05UTC135集成新证据与有界范围修订：Luna旧route配置消费者RED13FAIL/13PASS→26PASS；Root旧当前identity/nonempty保存RED2FAIL/1PASS→3PASS。原Authority矿车5例中1例部署真实回归（新增坡后同Rail voxel被同时投影低/高端，不能为通过改旧fixture/断言）。泛型resolveRouteSegmentV1仅在多candidate时应用placementTieBreak；同一邻居集合不同entry会因此输出不同variant，正式deployment拒绝。这是待用正式Owner反例验证的合同缺口，不靠配置数量宣称可用。Root增加窄RED：已声明cell placement rule选quarter时，另一个唯一straight entry不得把该cell改形；旧原世界直轨部署断言保持。
+
+允许Root在原route-definition resolver及其既有单测修正显式已声明shape对所有entry一致生效，原unknown/disconnected/无rule歧义仍关闭；Classic只对准确两个物理方向的端点组合声明平/角/坡placement rule，不给三/四方向junction选默认路。新Classic正式邻居投影+Authority真实部署配置反例验证这一层，不修改邻居的loaded/unknown、碰撞或输入语义。该范围是在原曲线配置不能通过既有正式部署后产生的新证据修订；若不能保留旧生产断言则不交付此候选。135仍按17:28检查点、实际74%@16:55/60停止线；真正mesh、曲线/坡道行驶和原非空legacy等仍未准出，禁止将配置/模型冒充产品。
+
+17:08UTC135第二个真实存档回归：显式placement choice单entry漏洞在stdlib旧消费者RED1FAIL/14PASS成立，修正后3files57PASS；不改unknown，已声明cell shape对所有entry一致，原Classic部署恢复为成功。但新增合法10variant+准确两方向placement配置的transport definitionIdentity全文超过现有checkpoint string4096上限，原矿车save/restore失败，不能抬旧输入预算或删曲线。Root补范围：只对原全文超过4096的transport配置使用带显式format discriminator、全部字段无损的route endpoint/edge tuple身份编码；4096以内原字节保持，最终仍拒绝超过4096，早在装配失败而非产生不可恢复存档。实际配置须canonical比较/字段变化导致身份变化、旧小配置identity原字节与新大配置snapshot往返反例，原上限及断言保持。该编码只属控制平面的定义身份，不改runtime config/渲染/数据平面，不宣称性能收益。若完整语义无法保持则撤候选，不绕过快照门禁。
+
+17:22UTC135检查点（运行时间以原日志为准）：原Classic headless152files/1072PASS、stdlib172files/1274PASS，定向Web5files56PASS、stdlib6files94PASS，四组types/lint/17 CI selection/format/diff PASS。原选择150文件完整保留，仅加入两新测试；不存在的pre-transport-v4-checkpoint路径未运行、不计第六文件，旧identity恢复本来位于原minecart Authority文件。原部署歧义与4096 identity回归日志完整保留。窄current straight-only V4 predecessor保留实际mounted/moving carrier状态和schedule；不声称世界编辑/真实曲线mesh或旧legacy完成。新README/validation为route-shapes-save-135-01。
+
+135冻结后验证预注册：仅从新的pnpm build identified production产物运行原唯一classic-runtime.spec.ts中的普通矿车native用例（原120000ms、原真实右键/键盘/Shift右键/存档恢复断言），新runId pr41-route-shapes-native-135-01；保持所有sampler/benchmark/trace旁路关闭。旧356产物及133失败保留，不以旧Browser128冒充当前。无输入补偿/超时或断言变化，原失败不盲重跑；独立校验artifact/source/lock/Pack identity。共享generic resolver/identity/存档Root改动仅作一轮有界Luna只读风险review，既有Luna自己配置不由其自审。CI417自然终态前不push。该验证只验证原直轨native流程及当前save/restore，不替代shape产品journey；预算仍16:55实际74%/约60停止线，17:28报告冻结/构建/浏览器/审阅各状态。
+
+17:31UTC135冻结后验收检查点：b705f370 identified build PASS（sourceDigest cb7cc554/artifact fe182af4/lock882341/289files/builtAt17:24:48.677Z），原native135-02 1PASS/48.0sec/runner51.5sec，已读actual artifact/Pack/composition/state、deployed/restored原PNG。135-01选择起始锚点0testsFAIL完整保留，collection-only确认正确原唯一用例后新runId执行，非生产重试盼绿。现有Luna对Root共享resolver/identity/V4窄compat一轮冻结源码review未发现P0/P1/P2，不自审自己的配置、不把源码review当产品。Root identity constant与fixture真实composition equalityPASS。新native证据为route-shapes-native-135-02。
+
+CI417旧356ec528真实终态已保留ci417-terminal-135-01：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS32.0m/previewSKIP；主旅程两次V2失败，首轮900sec截断、retry到78.5,-.5原45sec超时，原visual/nativePASS，C4/C5未跑。39route/132operation原JSON与723656bytes完整raw留私有，真实release+ACK存在，不能声称根因已明。135当前native仅straight NON_MAIN，新shape驾驶/mesh等开放、PR仍Draft/不可合入。CI417已终态，核对最新远端/workflow后只正常feature push135与当前交付记录，最终精确SHA CI独立核对，无merge/automerge/main/生产部署。
+
+### 正式Classic弯道/坡道连续运动诊断136（17:40UTC预注册）
+
+当前本地/远端a1a9ed3b、main fba4486e已17:39UTC fetch核对；135当前source b705f370原nativePASS、CI41838072280710正在验证a1a9ed3b，不取消/抢推。135配置loaded-cell投影不证明实际驾驶。Root先在正式Classic AuthorityRuntime/注册普通矿车部署和relation/motion Owner建立八个行驶用例：四corner从deployment实际选中的有向edge驶入下一平轨，四ascending方向在实际Stone支持台阶上驶入上层平轨，检查carrier真实position/height/cursor/rider/reference同次保持；显式已加载Air与Stone地形，不用无支持的浮空假轨证明可玩，不直接写carrierstate。使用现有InputBuffer接口与原推进，非Browser原生按键验收；Browser/mesh与全矩阵仍开放。
+
+先取得当前精确owner的可执行RED/结果与stop路径，再选择最小修复；此诊断不修改生产geometry/碰撞/route配置/identity/存档，不弱化原wall/unknown/mixed collision或输入约束，不向当前正式CI提交未修复的RED用例，不作性能声明。新增owner测试路径classic-rail-motion-shapes.test.ts由Root独占，根spec/独立私有日志亦独占，不委派/新增模型/权限，不改长期baseline。若修复会扩大route/identity或collision语义，需要带新证据另注册有限范围，保留135及当前非空save兼容后再交付。AI12min×120%=14.4min，17:54UTC检查点；实际UI最近16:55周74%共享账户、约60停止线保持，不推算tokens。
+
+17:54UTC136检查点：8正式Owner例中4corner PASS/4受Stone支撑ascending FAIL，实际沿坡约0.049912m即停止；当前source a1a9ed3b，未修改生产geometry。原始日志shape-owner-red-136-01完整私有保留，新RED测试未加入CI/未提交。Luna只读方案指出yaw-only compound AABB和整格Stone可能冲突，但首个collider尚未直接观察；仅pitch OBB也不能覆盖flat→slope接缝，不据猜测修复。现有Luna仅以私有新supported-slope-collider-136-luna-02路径做8min×120%=9.6min原实现观察，18:04UTC检查点，不写生产、不再委派、不声明候选即命中。
+
+### 坡顶平轨连接选择与当前非空V4兼容137（17:55UTC预注册）
+
+136真实Stone坡道失败之外，Root源码发现上层平轨的邻居可同时有一个低位incoming slope和一个同层延伸；loadedRouteConnections因全Rail voxel可暴露其合法端点，当前flat rule准确要求两个高位probe，而坡顶实际只有一个，会令另一个entry的flat/ascending同时候选。先在原正式projectTransportDeploymentSite loaded-cell测试增加四方向一个低邻居的坡顶反例及两方向双低邻居基线，证明准确variant/平height/双entry一致，不修改loaded/unknown/resolver/rail邻居逻辑。
+
+若RED成立，仅为既有EW/NS flat variant补四个准确单高probe placement pattern；不加入第三/四方向或unknown默认选择，不展开32组合，不改motion/物理/pitch/renderer。此配置变动会改变transport definition identity，因此已在17:49执行一次当前精确十variant正式Authority nonempty V4 capture（source a1a9ed3b，composition等于actual135-02 native source b705f370；mounted/moving同一carrier、七铁块/schedule）；raw95032bytes/SHA b1e64969f503e2939d9f03ebf88fc9865e4aa964f97978c27f6ee598a3cca81f。它是headless capture，不能称Browser capture。新增窄exact identity predecessor只允许V4，保留135旧straight-only；真实nonempty恢复/未知digest/配置篡改拒绝，既有旧fixture不改写。
+
+Root独占transport.ts原route声明、原route-definition.test新断言、新pre-route-transitions fixture/identity与原lineage.test扩展、spec/私有日志，Luna只读私有136观察路径互斥。传统.15PD×120%=.18PD，AI15min×120%=18min，18:13UTC检查点；最新UI16:55实际74%，17:54已请求主对话新读数，60%停止线保持。必要定向Web/stdlib回归、types/lint/format/hooks；不运行Browser来证明坡道已修复，不以此规则修复宣布136闭环。CI418目前五非Browser成功/Chromium自然运行，不取消或提前push。长期baseline不修改，当前物理/mesh/full产品矩阵仍开放。
+
+18:05UTC137定向检查点：正式坡顶反例校正deployment字段position后4FAIL/40PASS→仅四个flat placement rule新增后44PASS；初轮错误使用option.pose导致另两非生产FAIL，原日志保留、不算产品失败。新十shape旧V4身份/restore RED2FAIL/4PASS→窄predecessor后原三文件55PASS，两正式transport Authority deployment/route-motion回归16PASS，共5实际文件71PASS。Root曾请求两个不存在mounted/save文件，Vitest只执行实际三文件，不计五文件；有效另两文件由rg定位、另次运行，保留原命令。Pack types/Classic types/roottest types/lint PASS，首个Classic type路径apps/web/不存在造成NOT_RUN，已按实际root tsconfig.classic-tests.json修正一次并通过，旧失败日志保留。身份constant用TypeScript AST解码、fixture/raw实际composition语义等同PASS；Prettier把JSON literal改为single quote，首次JSON直解析方法失败不算源码测试，正确AST方法只验同一数据。
+
+136首实际sweep contact已由Luna spy调用原实现直接观察，voxel:3,31,2:0/[3,31,2]–[4,32,3]，normal(-1,0,0)，body局部半宽.45/y0–2.35含rider，position约[2.55,31.55,2.5]；原east 1.5sec/位移断言不改仍RED。运行时HEAD a1a但含137工作树flat rules，movement/collision未变、接触在crest前；原JSON/raw保留，独立source-correction sidecar声明dirty状态，不称exact clean artifact。该新证据拒绝“只是unknown或候选”的旧推测；完整一致姿态与接缝连续碰撞尚未设计实施，未绕过Stone。
+
+当前完整原Classic headless选择152files执行一次137回归（新增shape RED不登记、不算通过）；生产generic stdlib逻辑未变，复用135已通过1274作为原代码回归背景、不得称137精确源码全stdlib重跑。无Browser/build/性能验收，本地137可提交交付有限规则修复后待CI418自然终态正常feature push。主对话17:54实际UI周74%/4d9h，60停止线保持，本轮不因额度回传新增诊断。
+
+18:11UTC137完整回归完成：原152files/1081PASS/252.63sec（原150文件加135两文件的152选择完整保留；137只在原两文件增加九例）。未登记仍RED的136新增文件，保留待修复；不把未覆盖坡道称PASS。types/lint/format/identity语义校验以上，工作树生产定义冻结，交付137规则、旧存档保护及检查记录。
+
+CI418精确a1a9ed3b自然终态：五非Browser SUCCESS，Chromium1FAIL1SKIP2PASS/27.9m，previewSKIP。主旅程首轮V2路线82.5,-.5原45sec超时45141ms，25pulse，末段在z=-.2828546与-.7328519/-.8078514之间反向来回；实际原生请求65.9–78.5ms、键盘wall206–343ms，真实fresh release/ACK/ground/noCollision/zeroV均有，不能归因未keyup或伪造settle。retry原900sec总限截断route78.5,-.5，route自身26.363sec尚剩18.637sec。原visual1.3m/普通native28.2sec PASS，ModularSKIP，C4/C5未跑；主旅程并未通过。完整raw1037754bytes/SHA651bd41692c1f7c74ea6533e043595afa1ba239d45ae02fe9bd65a22d1bd9c3a和54route/155operation解析留私有，首解析错误将operation outcome误认status已纠正、不改raw、不重新运行CI。计时仅diagnosticOnly，不推断GPU/优化因果。CI418已终态，可以远端/workflow复核后正常feature push137有限修复，精确后续CI独立判断。
+
+### V2 真实键盘事件与输入调度诊断138（18:16UTC预注册）
+
+137当前feature b47a6c22、base fba4486e已18:13 fetch/远端PR核实，CI41938074837191自然运行，不取消/抢推。CI418首次原45sec路线的最后7pulse真实W/S requested65.9–78.5ms而keyboardWall206–343ms，稳态z在-.2828546和-.7328519/-.8078514反复越过目标-.5，fresh release/ACK已到且ground/noCollision/zeroV成立；不能推断缺keyup，也未有实际DOM事件时长或packet targettick证据。Root因此优先诊断当前原主旅程输入链，连续坡道仍公开未解决，不加入忽略solid/pitch猜测性生产补丁。
+
+源码冻结后仅构建一次identified production artifact，再选原唯一classic-runtime.spec.ts原完整C0–C5主旅程一次，原900000/45000/20000ms、输入/predicate/断言/quality/SwiftShader不变，不加重试；只开启现有passive keyboard timing（真实trusted事件timeStamp/observedAt、1024有界ring、清理）读回DOM down/up间隔与handler延迟。所有CPU/nativeTrace/benchmark/Authority sampler均关闭；该观察不生成事件/核心注入，不证明性能或GPU根因，functional结果亦明示带passive observer，最终无观察器CI另看419。若C0早失败则timing NOT_STARTED/无V2覆盖，如实停止该候选、不盲重跑。build前保留旧b705 dist到私有独立路径，source/artifact/lock/Pack/实际阶段/失败/trace完整记录。
+
+136尚未交付的新8例RED源码现从Root创建的untracked repo文件无损移动至私有shape-owner-pending-138-01.test.ts（SHA作为私有记录），不是删用户文件或排除原CI用例；原152headless选择未包含该未通过的新文件。将来坡道真正修好再恢复原路径/登记，公开137已有4FAIL/4PASS和首contact未修复声明，PR仍不可合入。此移动用于保存可恢复进度及本轮生产源码clean freeze，不能当功能通过。
+
+Root独占spec/identified build/唯一原主旅程及私有run pr41-keyboard-event-browser-138-01。现有Luna可只读输入Owner链并在独占私有v2-input-scheduling-138-luna-01路径记录有界counterexample或否定证据，不写生产、不再委派；Root负责集成，不因模型或配额探测开新会话。传统.1PD×120%=.12PD，AI20min×120%=24min，18:40UTC检查点。实际产品UI17:54周74%/4d9h，约60停止线，额度下降时停止保留记录；不换算tokens。长期baseline不改，CI/workflow不改，不做生产或合并。
+
+18:34UTC138有界检查点：identified source53d29c1f/build PASS/sourceDigest49b149dc/artifacte9f51798/lock882341/289files。原唯一主旅程一次FAIL4.4min，C0–C3/Creative PASS，V1首水区66,2.5跌落FAIL，V2/C4/C5 NOT_REACHED；非CI418 V2复现。真实220event/110pair完整无丢弃，末两KeyS事件stampHeld340/458.6ms、observedHeld517.7/675.3ms，原请求300/200.97ms，keyup handling205.1/240ms。trace从[66.4353,32.6,1.7073]到[64.8859,19.6,4.6351]，原支撑Z最大3 voxel、world面到4；fresh neutral release被ACK后角色已落地。只观察handler延迟及实际路线过冲，不归因GPU/native/输入queue，无实际packet tick。只读138审计没有confirmed scheduler defect。当前FAIL/完整trace/原raw保留，138不重跑；public keyboard-event-diagnosis-138-01，136未解决，CI41918:30仍运行，不取消/抢推。
+
+### 主线程延迟栈诊断139（18:34UTC预注册）
+
+新问题是138实际KeyS handler延迟与可见过冲期间的主线程采样Owner，而非盼原旅程变绿。生产代码保持b47/identified artifact53d，138后仅spec/evidence变化不在artifact sourceDigest过滤范围；先再次verifyArtifact校验sourceSHA/digest/lock/每个dist byte，相同生产artifact有效则复用、不重复build，不提交docs改变HEAD直到采样结束。原唯一完整主旅程一次，runId pr41-main-cpu-browser-139-01，保持原输入、45/20/900sec、断言/predicate/质量/SwiftShader与无额外retry。仅既有main CPU profiler10ms与passive keyboard timing开启，Authority/nativeTrace/benchmark全部关闭；每个实际profile/事件/阶段必须留存，若早失败仍保留profile/NOT_REACHED不盲重跑。
+
+Root独占spec/public证据与私有main-cpu-*139-01，不启动新agent。通过actual profile node/callFrame及sample/timeDelta关联真实DOM事件附近栈，只分JS采样Owner与未归属native/idle，不将采样计数当exclusive时长、不嵌套相加、不称GPU根因或性能A/B。profiling运行功能结果diagnosticOnly，最终精确CI仍独立判断。传统.1PD×120%=.12PD，AI20min×120%=24min，18:58UTC检查点；实际UI17:54周74%/4d9h，18:54再请求主对话实际读数，约60停止线。长期baseline/CI/workflow/production代码不改，不做合并或生产部署。
+
+18:48UTC139提前检查点：原唯一主旅程583984ms/FAIL，C0–C3/Creative/V1 PASS，V2 creative catalog原5000ms可见性失败，C4/C5未到达；46416实际main CPU样本和338events无丢弃完整回收。trace/原日志/结果全部保留，不重跑。profile与DOM精确时钟桥接未建立，不作单keyup因果。实际bundle stamp/readableChunk体与只读源码唯一Owner核实，主要leaf来自WorldSkyLighting.sample全entries invalidation，通过snapshot onGameplay与frame gameplay.advance两路；只记leaf observed sample，不嵌套计时、不推断GPU。CI419精确b47已自然FAIL，五非Browser PASS，Chromium首轮V1 closed-door pending/insufficient-progress；retry V1 PASS后V2原900sec总限在route78.5,-.5/2031ms截断，非45sec超时；visual1.7min/native35.6sec PASS，previewSKIP。public main-cpu-sky-owner-139-01，不把原先step duration印出误认为失败stagePASS。
+
+### 单列Sky采样查询合同140（18:48UTC预注册）
+
+新实际owner证据允许独立最小候选：sample只校验其请求chunk的完整16个column dependency revisions，保留request/notifyCommit/每帧invalidateStale的全局检查、原stale failDark、epoch/revisionFloor、unknown、async publication fences/reader/task不变。没有时间缓存、不靠epoch/worldRevision粗缓存掩盖same-revision residency变化；不删/减原sky proof，不改输入/renderer/CI/原断言。Root独占world-sky-lighting.ts、原world-sky-lighting.test.ts新增多column合同、spec/public/私有sky-sample-*140-01，不委派。
+
+按治理受控exact A/A与A/B，只声明独立硬预算：一个sample当前column16个revision lookup，数量不随其他registered columns增长；唯一主指标是固定4个ready column、64个目标column sample的getChunkRevision调用数，A/A各4096预期、B上限1024，最小75%减少，确定性计数不用计时噪声替代、不声称尾延迟收益。sample相同返回值/current readiness，目标same-revision revision/residency变更必须立即dark，其他column在原全局invalidate/commit/epoch变更下仍dark、异步源拒绝和全原测试为否决项。先旧owner新增合同RED/精确A/A记录，再一维B/GREEN；不通过则恢复A并保留负结果。该合同仅准入查询硬预算及语义，不证明139主旅程/GPU/最终组合产品性能。
+
+定向实际sky source/reader/cache/surface/model消费者回归、必要types/lint/format；生产变更后新的identified artifact与原无sampler主旅程另登记，不将当前139或CI419代替B验收。传统.1PD×120%=.12PD，AI15min×120%=18min，19:06UTC检查点；UI17:54周74%/60停止线，18:54请求真实新读数；无tokens换算/新权限。CI419已终态，后续交付仍先remote/workflow核实再正常featurepush。supported slope、mesh/full产品矩阵仍开放，长期baseline不改。
+
+18:54UTC140提前检查点：正确actual Web config旧Owner预算RED1FAIL32PASS，A/A[4096,4096]；B原Owner33PASS、最后primary exact[1024,1024] assertion1PASS32SKIP，8消费者文件59PASS，共9unique files92tests，不重复叠加。最小75%硬查询预算通过，同revision target dependency/residency即时dark、原frame/commit/epoch全局失效及27旧async/source保护保持。Webtypes/Svelte0errors0warnings、Classictypes（实际包括该unit）、lint通过。初次root Vitest onlyKernel/stdlib NoTestsFound NOT_RUN、五个新增registration failDark基数写错均留原日志、纠正后不算产品缺陷；passingconsole未打印，B用实际exact assertion证明两个1024，不伪造raw。生产仅point lookup/helper抽取，无timecache/粗revisioncache/input/shader/CI变更；Root核实cache.sample仅一entry、GameFrameLoop原全局drain在render前，未省全局边界。公开sky-point-query-budget-140-01；只声明query count，不称139延迟/GPU修复或组合产品性能。
+
+18:48 remote编辑前fetch后feature tracking仍a1a仅因既有fetch refspec只main；精确ls-remote确认actualfeatureb47/basefba，无远端变更，不扩大refspec。140正式交付前正常remote/workflow复核；CI419已自然终态不抢推。实际额度新读数18:52 async请求PENDING，仍以17:54真实74%为最近观测，不用tokens估算。
+
+### 冻结后原无sampler产品验收141（18:54UTC预注册）
+
+140有界候选正式commit后保存旧53d identified dist到新私有路径，新的pnpm build一次冻结source/artifact/lock/Pack bytes，verifyArtifact通过后只选原唯一完整C0–C5主旅程一次，runId pr41-sky-point-browser-141-01。原输入/quality/SwiftShader/20/45/90/900sec/predicate/断言保持，keyboard/mainCPU/nativeTrace/AuthorityCPU/benchmark全部关闭，不额外retry或核心注入。实际结果按阶段/精确artifact记录；早失败原trace/evidence保留，不盲重跑，不以old139/CI419代替当前。源码与docs冻结直到Browser结束，正式push若先行则同一feature正常push且不触发main production；CI420自然结束不取消。
+
+Root独占spec/私有sky-point-*141-01，不启动agent。仅产品功能，不宣称性能有效；最终exact CI、review/conflict/full产品矩阵和136仍须独立验收。传统.1PD×120%=.12PD，AI20min×120%=24min，19:18UTC检查点，actual UI17:54周74%及18:52新请求PENDING/60停止线；预算回传触停止时立即保存可恢复状态。无权限/预算扩大、长期baseline未改、不merge/auto-merge/生产部署。
+
+18:55UTC140正常commit hook：staged ESLint/format与ls-lint通过，但commit-msg拒绝未支持的perf type（允许feat/fix/refactor/test/docs/chore/ci/build）。保留原失败log，改用refactor消息再次走完整hook，不绕过；生产与查询合同不变。
+
+19:18UTC141有界检查点：sourcef01a69fa identified build/verify PASS，sourceDigest5fd103a2/artifact679503c8/lock882341/289files/builtAt18:56:21.520Z。原唯一无sampler主旅程一次FAIL，原900000ms在V2 takeCraftResult→committedPointer→waitForEquipmentSnapshot截断，result917325ms含cleanup，未增加限额。C0–C3/Creative/V1 PASS，资源放置完成并实际采掘拾取，C4/C5未到达；最后两route正常返回，非45secroute超时，不归因command腐败。最后原trace frame已实际查看：背包/合成界面与剩余木板/木棍/剑，不证明craft完成。完整raw/trace/receipt与source绑定public sky-point-main-timeout-141-01，不重跑。140查询硬预算保持，不宣称139→141 observer不同的末段推进是性能A/B；CI42019:15仍五非Browser SUCCESS/Chromium自然运行，不抢推。18:56实际UI周仍74%/4d8h，60停止线，不因新额度读数增验证。
+
+### 同模型同帧世界采光合同142（19:18UTC预注册）
+
+139实际leaf ancestry加当前ModelSurfaceLighting.apply源码确认，每个instance材质在同一position的同步apply内重复World Sky/block采样。141新的原主旅程global900截断提供继续有界工作理由，不以该失败证明唯一CPU/GPU因果。候选独立轴：显式可选batch sampler合同，由当前World/presentation sampler一次捕获world/frame、一次Sky和block读取，为各材质独立selfEmission生成原SurfaceLightingSample；Model consumer使用batch，旧opaque sampler无batch时逐材质原调用顺序/次数完全保留。批次只存在一次同步apply，无跨调用/帧持久缓存，current world/frame/epoch恢复和unknown仍在下一次apply即时生效。不跳过0dt snapshot采光，原unknown当帧归零、模型clone/material/damage、首人称与各emission语义保持。
+
+Root独占scene/surface-lighting.ts（可选readonly batch type）、world-surface-lighting.ts（生产batch/fallback）、model-surface-lighting.ts（仅batch consumer）、原world-surface-lighting.test.ts与model-consumer-surface-lighting.test.ts新增反例、spec/public及私有model-light-batch-*142-01；不写Presenter/输入/renderer shader/physics/CI/Pack/存档，不派新agent。旧opaque callback不假设纯函数，不对其作memoization；batch长度错误fail-closed而非读undefined。
+
+看结果前固定exact A/A与A/B，唯一硬预算主指标：同一已注册真实4材质model、固定position、64次apply，Sky与block调用每个A/A分别256/256，B每个64/64，最小75%降低；timing不采集，不当产品frame/输入延迟收益。当前accepted stack f01（含140）作control，仅一批世界采光维度。各clone received/selfEmission/独立texture/material、hurt、即时unknown、current world/frame replacement、缺presentation、空material与旧opaque四次调用/顺序为否决；不能减少原断言或丢材质更新。先RED/原始A/A，再B；未通过即恢复control并保留负结果。确定性硬查询预算无需计时噪声，无endpoint优化声明，最终组合主旅程/性能准出仍开放。
+
+必要定向consumer/world/sky/firstperson回归、Web/Classic types/lint/format/hooks；生产候选通过后新的identified build与原无观察器主旅程另登记。CI420自然终态前不推，不取消。传统.15PD×120%=.18PD，AI20min×120%=24min，19:42UTC检查点；实际UI18:56周74%/60停止线，不算tokens/no新权限。长期baseline不改，136/full产品矩阵仍开放，不merge/auto-merge/production。
+
+19:40UTC142有界检查点：旧Owner A/A Sky/block各[256,256]，最终B exact各[64,64]，75%查询次数减少；2files18PASS+7files95PASS=9unique113PASS。Web/Classic types与五TS lint PASS。初次旧2FAIL、fixture绑定漏position的author错误1FAIL、候选legacy receiver丢this1FAIL日志均保留并纠正，最后GREEN包括receiver/sparse/empty/emission/damage/current/unknown。NullGraphicsDevice非WebGL，无延迟或GPU收益声明；全量Classic/stdlib/build/Browser在142未跑，public model-world-sample-batch-142-01。CI420已自然FAIL：五非Browser成功，原main两次V2总900000ms截断，visual1.6min/native34.9secPASS，previewSKIP；不取消、不将旧CI替代新候选。remote实际f01/basefba复核一致，workflow原PR preview边界/production仅main，不改workflow。
+
+### 冻结后原无观察器完整主旅程143（19:40UTC预注册）
+
+142有界源码及141/142新证据正常feature commit/push后，保留旧f01 identified dist到独立私有路径，新pnpm build一次并verifyArtifact全bytes。只运行原唯一完整C0–C5主旅程一次，runId pr41-model-world-batch-browser-143-01，所有keyboard/mainCPU/AuthorityCPU/nativeTrace/benchmark为0，原SwiftShader/input/20/45/90/900sec/predicate/assertions保持，无额外retry。冻结HEAD/source/docs直到Browser结束；若失败记录实际阶段/trace/source不盲重复，无完整mainPASS不宣布可合入。Root独占spec/evidence/private model-world-batch-*143-01，不派agent。传统.1PD×120%=.12PD，AI20min×120%=24min，20:04UTC检查点；UI18:56实际74%/4d8h，约60停止线，19:56请求实际读数，不以额度更新增加验证。136/full矩阵仍开放，无合并/auto-merge/main/生产部署，无新权限或长期baseline变更。
+
+19:59UTC143终态检查点：source21c0739e identifiedbuild/verify PASS（sourceDigestd7883734/artifacta3a0b9a6/289files/builtAt19:40:22.394Z），原一次无观察器main FAIL，C0–C3/Creative/V1 PASS，V2石料90.5,2.5 pickup原global900000ms截断，C4/C5未到达。result928510ms含cleanup，最后route31527ms仍剩13473ms，非45sec超时；次20sec settle与After Hooks重叠（After Hooks19:55:55.178Z，28.473s），不能把finalAuthority paused/ACK停止猜为input defect。实际trace末帧已看，woodpick57/60/cobble3/sticks5/sword/planks14，没有全装备。原日志/7实际JSON attachments/39route100ops/trace/receipt保留public model-world-main-timeout-143-01；不重跑盼绿，142只查询预算PASS不宣称端到端性能。143手工19:40标题为近似标签；注册在19:38commit前，actual privateprereg19:39:24.984Z，执行19:40:55.101Z，按实际时间纠正，不改历史。
+
+144现有Luna只读核实CPU/descriptor普通Rail都固定水平[1,.08,1]薄盒、不读取neighbor选择variant，entitypresenter仅yaw；source21c0739e，私有rail-presentation-owner-144-luna-01.md。无tests/build/Browser/source写，与136实际Stone collider独立，configvariants不冒充mesh/drive。Root未选择physical candidate。CI421五非Browser SUCCESS/Chromium19:58自然运行，不取消/抢推；预算授权和停止条件保持，真实额度仅记私有恢复记录。
+
+### 当前组合生产栈归属诊断145（19:59UTC预注册）
+
+139profile所见Model→全column stamp已由140/142两条独立硬预算修复，143当前原main仍FAIL；旧139profile不能回答新source21c0739e的剩余主线程工作归属。新诊断只回答当前组合V2过程中真实JS leaf及ancestor Owner，非重复盼main变绿，不将functionalduration作为A/B性能、不归因GPU/单事件时钟。保持source/HEAD21、现有143已verified productionartifact，docs outside sourcefilter；verifyArtifact再次通过才复用，不重建。原唯一完整main一次，runId pr41-combined-main-cpu-browser-145-01，只开启既有mainCPU10ms，keyboard/AuthorityCPU/nativeTrace/benchmark全0；原输入/quality/SwiftShader/20/45/90/900sec/predicate/assertions保持，无extra retry/注入。只对实际采样到的阶段归属；早失败NOT_REACHED/采样NOT_STARTED如实，不补跑。profile rawnode/callframe/sample/timeDelta与exactbundle绑定，只统计leaf observed count、不嵌套相加或冒充exclusiveCPU时间；DOM精确时钟桥未建立，不作keyup因果。
+
+Root独占spec/public及私有combined-main-cpu-*145-01，源代码/HEAD/docs从verify到runner结束冻结，不派新agent/模型，不增加权限/改变CI/长期baseline。后续候选只由新Owner证据建立原实现反例后选择，禁止猜修输入或回收API语义。传统.1PD×120%=.12PD，AI20min×120%=24min，20:24UTC检查点；真实额度仅留私有恢复记录，授权预算停止条件保持，收到停止或触线立即保存停，不新增额度验证。PR仍Draft，136/144/fullmatrix/finalCI/review开放，无merge/automerge/main/production。
+
+20:21UTC145有界检查点：source21c0739e，143同产物verify PASS复用，无rebuild。原一次mainCPU10ms/其他observer0诊断FAIL，global900000ms在石料86.5,-.5接近期间截断，result923801ms含cleanup，最后route4743ms非45sec超时；C0–C3/Creative/V1 PASS，C4/C5未到达。70034actualleaf samples，idle29373/program17769；剩余可归属JS为Workeronmessage receive wrapper1891、HUD JSON比较735、取消Skyproof/generator/reader471/400/453，stamp198/readableChunk840为互斥leaf总数。actualframe/body/bundle/source祖先链核实，不嵌套计时、不称exclusiveCPU/GPU因果。旧139flags/阶段/时长不同，不能作时延A/B；未确认剩余JS端到端瓶颈，不猜修UI比较或cache。public combined-main-cpu-owner-145-01；一次结束不重跑。
+
+CI421精确21自然FAIL：五非Browser SUCCESS/Chromium1FAIL1SKIP2PASS33.5m，两次main原900000ms截断，首轮craftArmor/placeOneEach pointer，visual1.5m/native33.2sPASS/previewSKIP。完整decodedraw2241696bytes SHA7b450ef4b2b029a82b272cb2af06d18dd4017fe4b0e3792c1d6635883c6746e8，114routes260ops，原负结果保留。PR正文已如实更新工程进展。新公开证据仅保留工程证据，个人额度真实读数仅私有，不改sealedhistory。
+
+### 当前原生任务窗口归属146（20:21UTC预注册）
+
+新问题是145 currentJS叶多数idle/program未归属等待的原生任务分布；不将这两个category直接称GPU耗时或原因，不继续猜修JS函数。保持HEAD/source21及同143productionartifact，docs outside sourcefilter，verifyArtifact通过才复用、不重复build。原唯一完整main一次，runId pr41-combined-native-browser-146-01，仅既有nativeTrace=1，mainCPU/AuthorityCPU/keyboard/benchmark0，原SwiftShader/input/20/45/90/900sec/predicate/assertions不变。完全保留既有nativeTrace延后360000ms、窗口20000ms、16MiBbuffer/64MiBstream及原categories，不改采样器或强制V2；若窗口落V1/其它阶段如实标注，早失败NOT_STARTED/NOT_REACHED，不为拿到V2补跑。
+
+只由actualtrace的pid/tid/process/thread/name/timestamp/duration/metadata归属native task、render/IPC/GPU-service可观察边界；CPU任务duration不等于deviceexecution，未有clockbridge不作单DOM事件因果，不嵌套加sum、无性能A/B/准出声明。诊断main结果非普通产品验收。Root独占spec/public/private combined-native-*146-01，不派agent或新model，无新权限或networkdomain。原source/HEAD/docs从verify到runner结束冻结；后续fix须实际Owner反例，不遮断言/加timeout。传统.1PD×120%=.12PD，AI20min×120%=24min，20:45UTC检查点；既有授权预算停止条件保持，真实额度仅私有，收到停止立即保存停。136/144/fullmatrix/finalCI/review开放，无merge/automerge/main/production/长期baseline修改。
+
+20:34UTC146终态：一次原main FAIL426843ms，C0–C3/Creative PASS，V1闭门探针pending/no-observations，V2/C4/C5未到达。native实际20:28:03.333–20:28:23.366UTC窗口在V1，38711768bytes/141984个保留event，metadata FAILED/dataLossOccurred=true；原检查正确拒绝完整归属结论。丢失trace中个别CrGpuMain SwapBuffers任务可见，但不能恢复缺失事件、推导完整工作分布或宣称device执行/产品GPU根因。保留raw/结果/trace/receipt，不相同条件补跑。
+
+### 原生诊断窗口有界修复147（20:35UTC预注册）
+
+仅将opt-in native trace duration从20000缩到5000ms；delay360000、16MiB buffer、64MiB stream、全部类别及data loss即FAILED保持。实际146 data loss是RED观察；原既有定向unit先在5000ms检查Tracing.end及metadata时限取得旧实现RED，再改duration，回归原缺category、not-started、读/关闭/启动/完成失败、benchmark冲突与raw保留合同。此项不触碰生产玩法、原main输入/predicate/900000/45000/20000ms验收、CI选择或quality/SwiftShader。
+
+完成必要types/lint/unit后正常feature commit，新identified build/verify冻结身份；原唯一完整main仅nativeTrace开启运行一次pr41-combined-native-browser-147-01。唯一采集轴是5000ms窗口；若NOT_STARTED/data loss/early fail保留负证据，不为取得V2补跑，按actual metadata和步骤报告阶段。诊断非产品/性能A/B准出。Root独占两TS及spec/evidence，无agent/新权限；传统.1PD×120%=.12PD，AI20min×120%=24min，20:59UTC检查点；136/144/完整旅程/最终精确CI及review保持开放。长期docs baseline无需更新：只修既有opt-in诊断，未改产品合同。
+
+20:38UTC147交付/启动检查点：f01f22dce3de3ab4e0a7b17dcfa0fb210b60820b正常feature commit/push完成，5files35PASS/Classic types/lint/hooks PASS，新identified build/verify PASS（sourceDigest071f2a07/artifacta3a0b9a6/289files/builtAt20:36:25.359Z），CI42238084363062运行中。Root启动命令错误使用标题起始锚点，Playwright实际No tests found/EXIT1，没有运行浏览器玩法或采集；保留prereg/log，不将其标作功能或诊断PASS。
+
+148只纠正selector：实际playwright --list --grep 'Classic 生产旅程'明确1test/1file，原唯一classic-runtime.spec.ts:71。新独立runId pr41-combined-native-browser-148-01，仅复用f01已verify的同产物，保持147所有条件及5000ms诊断窗口，不改变源码/输入/断言/超时。147是启动选择失败，不是重复功能采样；148运行时source/HEAD/docs冻结，实际窗口阶段与缺失如实记录，不为拿V2补跑。20:59UTC检查点不变，无模型/权限/生产部署扩张。
+
+20:49UTC148终态：原一次main FAIL413387ms，C0–C3/Creative PASS，V1原水区66,2.5路线跌落，V2/C4/C5未到达。native实际20:44:55.841–20:45:00.908UTC在Creative导航目录，COMPLETE/dataLossOccurred=false，15850311bytes/47913events；147窗口修复真实Chrome采集合同通过，不代表完整主旅程准出。最长SwapBuffers wall1787815us/threadCPU1819us，main HandlePostMessage wall1215673us/threadCPU1042572us；不嵌套相加、不称exclusive GPU耗时。121个实际不同像素SVG请求合计35333rects，122layout frame/121ParseHTML事件；精确resource→document映射尚未建立，证据不能单独证明SVG为全部延迟或跌落原因。
+
+### 像素图标几何等价的元素预算149（20:50UTC预注册）
+
+实际Owner asset-image.ts builtinPixelIcon为每个非透明像素发一个rect。唯一候选轴：相同RGB的互不重叠1×1像素合并到一个SVG path的独立闭合子路径；viewBox、crispEdges、RGB、透明index0、像素坐标、旧缓存、Pack/appearance优先级均保持，不改世界/玩法/质量/输入/原验收时限。不是删除图标或改成低分辨率。Root独占asset-image.ts、owner app unit、package显式CI登记及本spec/evidence，无agent。
+
+受控A/A固定现有全部唯一builtin pixel binding：原URL解码逐像素重建，记录重复请求的SVG元素与字节相等；B在同一工作负载断言逐像素RGB/透明/边界完全等价、元素数等于实际不透明RGB颜色数。新预算测试先在旧实现RED，生产候选后GREEN；主指标为实际SVG元素数量，次指标URL字节，否决任一像素差异/缓存或优先级变化。只宣称结构预算，不宣称帧、输入或主旅程延迟收益。原真实无观察器主旅程与visual由新identified身份验收，结果与未到达项分别记录。
+
+149真实浏览器补充只进入原visual既有打开Creative目录与截图之间：消费实际DOM img.src中的builtin pixel SVG，以原逐像素rect reference在同一Chromium Canvas2D按16/32像素栅格逐RGBA对照，任一不同即FAIL。检查实际压缩元素预算；PNG/blob等Pack/appearance override逐项记录为非本轴，不用它们冒充SVG覆盖。覆盖所有该目录实际pixel SVG并要求超过100项，附件保留每case像素hash及错误；这是图像解码/栅格正确性诊断，不是WebGL或性能采样。不增加第二spec/runner，不改变原输入、240秒visual或任何旧断言；新增helper及窄调用纳入Root独占写路径与types/lint。
+
+20:59UTC149检查点：有效旧RED1FAIL/1PASS，几何/缓存2PASS与4资源文件11PASS=5unique13PASS；旧A/A130icons各37564elements/4315978URLbytes，新B/B各583elements/645222bytes，主次指标实际raw已显式打印，无计时收益声明。Web/Svelte0error0warning+tsc/tools PASS，最终Classic types/四TS lint PASS；初始import0tests及NodeList helper类型失败保留并已修正，不改tsconfig。新build后先原visual一次run150验证RGBA否决项，只有该图像合同通过才启动原无观察器main一次run151，不为错误或NOT_REACHED重复原场景；真实玩法/旧visual结果分别保留。
+
+传统.15PD×120%=.18PD，AI25min×120%=30min，21:20UTC检查点；先做范围unit/types/lint与已有CI预算/选择合同，再正常commit/newbuild。CI422自然运行期间不抢推以取消原CI；其终态后按实际远端与workflow复核正常feature push。原唯一Browser/source从verify到结束冻结，不改CI阈值/采样baseline/生产部署或长期docs baseline。完整产品准出、136/144及最终精确CI/review继续开放，真实预算停止要求优先。
+
+21:06UTC150否决检查点：local23e58b5d正常commit，尚未push；identified build/verify PASS（sourceDigestb0c5d8f2/artifact06d64718/289files/built21:01:15.378Z）。原visual一次FAIL101476ms；旧前段素材/连续帧/单击步骤完成，新图标260case覆盖130项、32像素全相同，16像素105项RGBA不同。cold-stored-sky未到达，不能宣布完整visual通过。原raw/图像/hash保留，main151 NOT_STARTED，候选不准出。
+
+152有界新问题是150对照环境：actualDOM Image与新建reference Image的相同URL A/A是否仍相同。只为现有helper每个case增加同source fresh Image对照及equal-context candidate/control指标，原differentChannels断言、元素budget、所有旧输入/240秒/断言保持；不先假定path绘制或DOM上下文谁有问题，不修改生产候选。新test-only commit/newidentified build后原visual一次run152，实际A/A决定原对照能否归因；失败/负样本原样保留，未确证前不推23、不启main。传统.05PD×120%=.06PD，AI8min×120%=9.6min，21:15UTC检查点；仅Root两TS/spec/evidence私有，无新模型/权限/网络，真实停止要求优先。21:20总修复检查点保持。
+
+21:15UTC152结果：local9c99d904、新identified build/verify通过，生产字节与150一致。原visual一次FAIL71170ms；130图标260case，same-context candidate/control仍105项16px不同，32px全部相同。source A/A只有paper@16为72channels不同，其余259case为0，不能据此消除104项A/A为0的真实候选差异。149按颜色聚合path生产候选拒绝，未推送；main151仍未启动。另CI422远端f01自然FAIL：五非Browser SUCCESS/main C4首次global900、retry208.5,.5原45sec路线超时，visual1.3min/native29.5secPASS/previewSKIP，C5未完成；不同运行进度不是性能A/B。
+
+### 保留rect原语和绘制顺序的行内合并153（21:16UTC预注册）
+
+149 path逻辑像素等价但缩小栅格不等价，撤销该生产分支。新唯一候选轴只把同一行、相邻同RGB的不透明单位rect合并成一条height=1的rect；保留原rect原语、逐行绘制顺序、透明间隔、RGB/边界/viewBox/crispEdges/cache/override，禁止跨行或跨不同颜色合并。仍DOM-free，不引入PNG编译器或canvas平台依赖。
+
+固定149同130图标A/A原37564elements/4315978bytes，新的硬预算为实际行内色段数（按行首、透明到不透明、RGB变化独立计数），逐格展开rect验证全像素。当前未采用path实现先取得新representation contract RED，C后GREEN并打印counter；将元素预算更新为新候选的行段合同，不改变原任何玩法/视觉断言。原260case 16/32逐RGBA零差异与source A/A保持，任何非0拒绝。Root独占原asset-image/既有两个helper与unit/spec/evidence，没有新agent/权限；必要unit/types/lint后commit/newidentified build，原visual一次154，严格通过才启动原main151。失败必须产生新证据后才进入下一候选，21:25UTC检查点；长期docs/CI质量与原资源时限不改。
+
+21:28UTC154终态：local0ff82ec7，新identified build/verify PASS，原visual一次FAIL68347ms；130icons/260case、105个16px不同、32px全同，paper source A/A456channel，cold sky未到达/main151未启动。候选未准出/未push。152与154 fresh候选260个hash全相等，控制260hash也相等，未证实原几何原因；旧结论仅代表候选被测试否决，不能称实际几何缺陷。
+
+### 原资源身份与等价资源A/A155（21:28UTC预注册）
+
+新有界问题：恢复f01原逐像素rect生产owner，验证同sourceDOM/fresh/reference，以及几何完全相同仅尾部换行的另一URL是否获得同16/32px结果。除生产owner精确恢复旧字节外不改玩法/视觉质量，保留当前新增RGBA零差异与sourceAA断言；元素合同回到未优化旧opaque计数，不冒充新硬预算准出。另为freshEquivalentControl记actual DOM与fresh source的natural/CSS尺寸和imageRendering，等价URL任一RGBA非0也FAIL，不能以它替换原比较或容差。
+
+Root独占原3TS/spec/evidence，新unit/Classic types/lint后提交build/verify，原visual一次156，源码从verify冻结到terminal。仅诊断measurementValidity，不是新生产候选或性能样本；基线失效则先纠正对照环境再考虑候选，不盲重试主旅程。原main151保持未启动，21:40UTC检查点；无新agent/权限/网络，不修改原240秒、旧断言或CI口径。
+
+21:32UTC156终态：localc012e9e6、identified build/verify PASS且生产bytes精确a3a0b9a6旧实现。原visual一次FAIL74132ms；全部260case DOM/reference URL相同，但104个16px仍不同；paper sourceAA/等价URL621channel不同，32px全同。实际DOM width/height34、natural150、imageRendering pixelated；fresh width/height150。旧实现A/A失败说明150/152/154measurement validity未成立，不得继续称几何缺陷，原负结果全保留。
+
+### 同一图像尺寸与绘制样式A/A157（21:32UTC预注册）
+
+唯一新轴是在创建参考、fresh同源、尾换行等价资源Image时，都显式匹配实际DOM image.width/height及computed imageRendering。资源src、原生产owner、canvas16/32/imageSmoothing=false、原全部differentChannels/sourceAA/equivalentResource零断言保持不变，补充完整fresh样式记录。不切掉失败icon、不调整容差或原visual输入/240sec/旧断言。156是当前旧A/A真实RED；先必要Classic types/lint/hooks、新test-only commit/build/verify，原visual一次158，只检验旧measurement GREEN。旧A/A未通过前不得重启生产候选或main151。
+
+Root独占既有helper/spec/新证据，无agent/新权限。21:42UTC检查点；非性能采样，不从不同运行duration推断优化；完整产品/CI/review继续开放。
+
+21:36UTC158终态：local48ffa300、build/verify PASS、appbytes仍原a3a0b9a6。原visualFAIL80513ms，匹配34×34/pixelated后原104个16px同URL差异/paperAA621/32px全同保持。157没有解决基线RED，不能以图像尺寸解释全部差异，原main151未启动。
+
+### 同对象重复绘制诊断159（21:36UTC预注册）
+
+实际旧A/A source一致且尺寸一致，原控制是每case第一个draw；fresh/DOM/等价资源后续draw相互一致（paper首次例外）。唯一新轴记录同一个control对象在原序列后重复draw与第一次RGBA的差异，以及同DOM对象重复draw与原actual差异。原所有比较与零断言保持，新增同对象重复也要求0，不允许用后一次替换前一次或自动warmup而掩盖基线失效。仅paper/redstone16保留原控制/actual/repeat三张完整RGBA数组用于确定性分析，无其他生产/质量/输入/timeout变更。
+
+Root独占原helper/spec/evidence，无agent/权限，Classic types/lint/hooks后新身份build/verify，原visual一次160；只定位measurement不稳定，不采用任何生产候选/main151。21:47UTC检查点。新证据仍不支持修复时停止该图标优化诊断单元并保留旧生产owner，避免继续无结论尝试。
+
+21:40UTC160终态：原visual一次FAIL78906ms，105个16px同control对象first/repeat不同，paper同DOMrepeat也不同，32px全同。原RGBA表明红石首次46种/重复3种，paper首次27种/重复3种；不能解释为生产候选像素缺陷。现在有新事实支持读回上下文不稳定诊断，非无证据重复。
+
+### 明确频繁读回Canvas2D用途161（21:40UTC预注册）
+
+唯一轴getContext('2d',{willReadFrequently:true})，增加getContextAttributes实际配置回执。旧生产/图像尺寸与style/16&32/first/每条draw顺序、imageSmoothing=false和原different/sourceAA/equivalent/同对象repeat全零断言保持，不warmup、不丢掉first、不改变GPU/WebGL质量。160实际同对象重复是此诊断RED；新test-only commit/build/verify后原visual一次162，检验全部first/repeat稳定性。此API配置不单独证明浏览器backend或GPU性能，只有RGBA/A/A实际结果才准出测量；若仍失败停止此图标优化单元并保持旧生产。
+
+Root独占helper/spec/evidence，无agent/权限/域名扩张；Classic types/lint/hooks适度验证，原主旅程151仍未启动，21:47UTC检查点不变。
+
+21:44UTC162准出检查点：local5e9cada3、build/verify PASS，appbytes仍原a3a0b9a6。原完整visual一次PASS88189ms，130图标260case、16/32px全部首次/sourceAA/等价URL/同对象repeat零差异；原cold stored sky也PASS。willReadFrequently实际配置true，测量基线成立，不宣称engine backend/GPU因果或优化收益。所有负样本保留。
+
+### 有效测量基线下颜色path结构预算163（21:44UTC预注册）
+
+162旧A/A GREEN允许重新检验149的有界单轴候选：原相同RGB单位rect逻辑合并为一个path的独立闭合unit子路径，所有37564像素/RGB/透明/cache/override/坐标/viewBox/crispEdges保持。仍同130bindings，主指标SVG元素37564→实际RGB颜色数583，次指标URLbytes，不宣称任何时长或GPU收益。先新budget unit在旧owner有效RED，恢复该精确候选owner后GREEN与4资源既有回归；不混入rowrect或world/input/quality变化。
+
+Browser测量保留162全部first/repeat/AA/equivalent零断言，新增实际DOM显示宽度（当前34）到原16/32案例，不移除任何原案例；控制同对象repeat同时覆盖这个新增尺寸A/A。控制元素budget按同一候选RGB独立计数，不改变原玩法或视觉阈值/240秒。新commit/build/verify后原visual一次164，严格PASS才原无观察器main151一次。负结果保留，不以默认context的旧无效测量重新归因，164不通过则撤销生产候选。
+
+Root独占原asset-image、既有unit/helper、spec/evidence，无agent/权限。必要13tests/Classic类型/lint/hooks，Web类型复用候选旧已通过且新build仍执行Web类型。21:55UTC检查点，最新远端/工作流正常feature push前复核，未merge/生产部署。完整136/144/矩阵/最终精确CI/review仍开放。
+
+21:46UTC163定向交付：有效旧budget RED1FAIL/1PASS；新5unique13PASS，Classic types/lint PASS，production source树与149相同，Web类型由旧有效输出加新build复验。固定A/A37564元素/4315978bytes，新B/B583元素/645222bytes，尚未browser164/main151或时间性能准出。
+
+22:16UTC166检查点：exact93c4cd60正常push，CI423五nonbrowserSUCCESS/Chromium仍运行。原visual164完整PASS149652ms，130×3=390case16/32/34所有first/AA/equiv/repeat零差异、coldskyPASS。原无sampler main151 FAIL460480ms，C0–C3/Creative完成，水桶取放后生存门前67.5,.5路线跌离地板z[-3,3]；V2/C4/C5未到达。trace校正前后位置同65.916,32.6,2.712、速度0，KeyW+Space请求300/API1947.203ms、最后70.93,19.6,-4.326/neutral release；不等同实际heldTime，不认定生产owner根因。
+
+### 原生移动脉冲的释放请求独立于ACK167（预注册）
+
+安装Playwright1.62.1实际press实现将W down/Space down/delay/Space up/W up逐项await，方向键在跳跃键最后释放。新唯一轴：在既有Native keyboard.down/up上并发发出参与键按下；从发出请求开始计原pulse时限，到期并发发出所有keyup，不等待任何keydown或另一keyup ACK；所有参与命令allSettled回收后才取下一snapshot，任一失败仍尝试release全部键并传播原错误。声明的是释放请求顺序，不保证堵塞renderer的DOM事件绝对时间，不把API时间当heldTime。无JS dispatchEvent/CDP输入、Actor intent/pose注入、World/碰撞/quality修改。
+
+旧路线/地板/targets/tolerance/jump/300ms计算/45sec deadline/20sec settle/900sec总限及实际nativeRelease ACK+停止/未落地否决保持。先以新helper临时复用旧press取得模拟延迟ACK的真实行为RED，再独立helperGREEN，故障down/up仍释放全部/传播错误；原harness调用迁移，全部相关路由回归。旧位置未证实问题不纳入此轴。
+
+仅原普通矿车同spec在既有地形fixture后增一个真实W+Space pulse：PointerLock/初始onGround，原API和新helper，等待新native neutral release被Authority ACK、角色真实运动后停稳/回到同地板高度；原deployment/mount/rail-end/Shift右键/durable恢复断言保持。该附加输入不是其他spec/runner，仍headless/原120sec，无伪造坐标或证据。必要路由/Native unit与Classic类型/lint、显式headless注册、hooks后新身份commit/build/verify，原普通Native一次168严格PASS才原完整无sampler main169一次；失败新事实前不重试。CI423自然终态前不推新head以取消旧CI。
+
+Root独占harness.ts、新native-movement-pulse.ts与test、minecart-journey.ts、package显式登记、spec/public/private证据，不委派。22:40UTC检查点；只修测试原生gesture请求协议，不宣称性能收益。完整136/144/需求矩阵/finalCI/review继续开放，无新权限/网络/模型会话/合并或生产部署。
+
+### 矿车前置脉冲的原生返回170（预注册）
+
+168 exact ec929b7a、build/verify PASS，但完整普通Native FAIL16584ms，后续部署未生成矿车。新增脉冲本身通过：从[2.5,32.600002,2.5]到[2.5,32.600002,1.116668]，neutral KeyW sequence57、Authority ACK69、原高度/落地/停止成立。部署owner对所有实体执行完整AABB overlap并拒绝target-occupied；当前玩家已靠近目标轨道，源码碰撞判定与部署失败一致，尚无独立拒绝receipt，不称已观测拒绝reason。原168负证据保留，main169未启动。
+
+新唯一轴是在新增脉冲之后、原库存/部署步骤之前，用现有walkTo/真实鼠标与KeyS回到原baseline水平坐标，arrival point/tolerance0.06，原300ms最大pulse、45sec路线/20secsettle/120sec整体不变；新增返回原高度与距离断言，保留第一次真实移动与ACK证据并附返回证据。不teleport/reset、不移动地形或目标、不忽略碰撞、不改原矿车断言，不修改生产helper。必要定向回归/types/lint/hooks后新commit/identified build，原普通Native171一次，严格PASS才原完整无观察器main172一次。失败须有新事实再决定下一单元。Root独占minecart/spec/新证据，无agent/权限，22:40UTC检查点保持。
+
+170定向交付：3files/32unique路由契约PASS、Classic类型与changed-file lint PASS。初始root Vitest选错project未找到文件exit1，保留日志并显式web project完成实际验证；不计为测试通过。生产source不变，原Native171/main172仍待验收。
+
+### 原Native171/主旅程172终态与headless观察夹具175
+
+Exact e308fcd6原普通Native171完整PASS44179ms，新pulse/neutral ACK/同地板、真实KeyS返回误差约.038m<.06及原部署/上车/轨道终点/下车/同存档身份全部通过。167+170正常push，CI424 exact38092118531自然运行。原完整无optional sampler main172 FAIL924580ms，C0–C3/Creative/V1完成；V2已到craftArmor/openWorkbench返回原78.5,-.5工作台路线，被原global900000ms中断于settle，C4/C5未到达。失败末尾pause/presentation差异是终态观察，不能单独归因。无受控时长收益，不直接重跑。
+
+175于22:44UTC在独立私有文档预注册，主旅程freeze期间仅准备候选，terminal后才编辑。CI424 headless3FAIL/1099PASS154files；同一mining-approach-handoff.test.ts观察夹具只在press推进快照，down/up为空，因此Native调用不能推进释放观察。原RED本地3FAIL/1PASS复现。唯一修复轴把相同Browser64观察、相同unsafe边界/漂移/PointerLock失败及mouse负断言迁移到nativeKeySdown/up，fake clock验证原精确100ms。4files36unique GREEN、Classic类型/lint PASS；不改产品/physics/路线/guard/timeout。没有新Browser重试；CI424自然terminal前不推新head取消它。Root独占一test/spec/新证据，无agent或新权限。
+
+### 当前Authority worker的有界CPU归因178（预注册）
+
+172新终态证据是在无optional sampler/原900sec下V2 craftArmor工作台返回中被global打断，Native pulse协议与V1已通过仍不能闭合主旅程。当前artifact Authority worker为assets/authority-worker-CKx6lt5d.js、SHA743154881ce50ace03ce28ce024fa3a05d537188056acf11efba71fcf49676f0。旧44真实worker profile属于5d91421e、assetSHA2a21deaf613c53836f83bcd0f85adfaf1a50772cb76f051a966b700439d8e73e；133 assetSHA55a4b364f37abdbb62665d15afade46e9df2eab388e7c73cf76b9508e4f259ff但NOT_STARTED，无实际profile。它们不覆盖142后当前worker，145 main线程idle也不能代替当前Authority采样。先复用并核对这些输出，不重跑旧采样。
+
+本片仅启用已有互斥Authority CPU sampler：同原唯一main，360sec延迟、20sec独占window、10ms采样；精确artifact asset/URL/hash匹配worker target，runtime/read receipt齐全才分析。无mainCPU/nativeTrace/keyboardTiming/benchmark、无额外输入runner/CDP输入/质量/Actor/路线/原900/45/20更改。175 test-only修复提交后新identified build177/verify，原main178一次diagnosticOnly/eligible=false；不是新的性能准入或产品PASS，不能从duration比较得出收益。capture失败/未开始则保留新失败与owner元数据；完整capture若没有新的可归因owner则终止此CPU归因单元，不盲重复。源/HEAD/文档从verify冻结到terminal；CI424自然结束前不推新head取消它。
+
+Root独占既有sampler执行与新证据，不修改sampler/生产owner、不委派、不新增模型/权限/域名。传统.12PD×120%=.144PD，AI22min×120%=26.4min，23:25UTC检查点；真实停止要求优先。完整需求矩阵/136与144/最终精确CI与审查仍开放。

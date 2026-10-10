@@ -1,0 +1,69 @@
+scripts/harness/classic-receipt.mjs 30ms (unchanged)
+scripts/harness/classic-receipt.test.mjs 27ms (unchanged)
+apps/web/tests/e2e/classic-support/canonical-reporter.test.ts 27ms (unchanged)
+changes/2026-09-23-classic-functional-completion/spec.md 72ms (unchanged)
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-contract.md 7ms (unchanged)
+changes/2026-09-23-classic-functional-completion/canonical-terminal-receipt-evidence.md 5ms (unchanged)
+changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/README.md 1ms (unchanged)
+✔ Browser23 failure and local PASS become one terminal FAIL in either attachment order (0.868333ms)
+✔ test outcome and local failure both fail closed while complete PASS preserves measurement (0.16575ms)
+✔ present non-object failure attachments fail closed without losing detailed evidence (0.308625ms)
+✔ non-main tests do not pollute receipt and duplicate keys are idempotent or conflicting (0.098875ms)
+✔ different retries remain visible and the unique-attempt gate rejects them (0.297083ms)
+✔ runner validation rejects process failure and stale or missing full receipts (0.192709ms)
+✔ missing receipt files and ambiguous main selections fail closed (2.587042ms)
+✔ benchmark requires MEASURED while non-main correctness and modular selections remain valid (0.2455ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 42.096125
+3:03:37 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts (5 tests | 1 failed) 12ms
+     ✓ writes one terminal main attempt from the completed Playwright result and attachments 3ms
+     ✓ uses the filtered suite and excludes visual and skipped non-main tests from attempts 1ms
+     × reads file-backed attachments and fails closed on malformed evidence 5ms
+     ✓ treats a parsed null failure attachment as present and invalid 1ms
+     ✓ marks a modular-world selection without accepting a canonical main attempt 1ms
+ ✓ |@seedlands/web| apps/web/tests/integration/engineering/performance-window.test.ts (3 tests) 156ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/canonical-reporter.test.ts > CanonicalReporter > reads file-backed attachments and fails closed on malformed evidence
+AssertionError: expected { schemaVersion: 1, …(19) } to match object { …(3) }
+(21 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "assertionEvidenceStatus": "PASS",
+    "failureEvidence": null,
+    "receiptErrors": [
+      "classic-runtime-failure.json is not valid readable JSON",
++     "failure attachment is not a JSON object",
+    ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/canonical-reporter.test.ts:131:33
+    129|     expect(receipt.status).toBe('FAIL');
+    130|     expect(receipt.attempts).toHaveLength(1);
+    131|     expect(receipt.attempts[0]).toMatchObject({
+       |                                 ^
+    132|       assertionEvidenceStatus: 'PASS',
+    133|       failureEvidence: null,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 7 passed (8)
+   Start at  03:03:37
+   Duration  377ms (transform 37ms, setup 0ms, import 53ms, tests 168ms, environment 0ms)
+

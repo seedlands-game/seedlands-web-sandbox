@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-DEATH-NEEDS-FIXTURE-CLOSE-02",
+  "status": "REGISTERED_NEEDS_FIXTURE_GREEN",
+  "baseline": "5fcdc1dffe3b4a7fbcf5e43c91ae45189ed10708",
+  "sourceManifestSha256": "37359d1a71d516362e9a73b2a920ffd15c98724b2d5b8a18c7702c778547b111",
+  "dependencies": {
+    "classicDeathPolicySha256": "8a0e10f1c84949a8d9c49d99466b8699c93a623e51f07f53c35ca342d8a1c02d",
+    "classicPackSha256": "18f5cc832e27bf3cdf5c336604db58e1bbd3bba32c7af30680b77014d1fc3374",
+    "retiredActorsMigrationSha256": "1bbcdcd857ebbb45a8e0194adf8a2579f3bfa0af8e7d12fcfcc7bb7a11636eee",
+    "preDeathV4IdentitySha256": "60f19dd4ca9a354fc06efe30dc821c65548490b70b81b03b7c8f603a524c136b"
+  },
+  "red": {
+    "window": "v2-death-registered-needs-regression-01",
+    "status": "FAIL",
+    "passed": 8,
+    "failed": 2,
+    "testSourceSha256": "5f014572301ecee20d2b665d8e0ee202d82545d6f058e426d03896de144e167f",
+    "stdoutSha256": "df9c3acdad10b4405e4444f49f26463b75bb068ed5a35c3f7e4f3c4c4e74a5d4",
+    "receiptSha256": "9d5df8d21a7197d10a9926819928ffdd1b14571dc40b69295c23b32d81921a49"
+  },
+  "green": {
+    "window": "v2-death-needs-fixture-green-01",
+    "status": "PASS",
+    "files": 1,
+    "tests": 10,
+    "stdoutSha256": "4b1847913f9630e389cd180bcf68bab1404eb40ccde287f74e4bd0a862ad34fa",
+    "receiptSha256": "43fb4e90a9f98fdb20ea58520caa16317f67de58d36822c780da1acf710e14eb"
+  },
+  "static": {
+    "rootTestTypesWindow": "v2-death-needs-fixture-type-root-01",
+    "rootTestTypesStatus": "PASS",
+    "classicTestTypesWindow": "v2-death-needs-fixture-type-classic-01",
+    "classicTestTypesStatus": "PASS",
+    "eslintWindow": "v2-death-needs-fixture-eslint-01",
+    "eslintStatus": "PASS",
+    "scopedDiffWindow": "v2-death-needs-fixture-diff-delivery-frozen-02",
+    "scopedDiffStatus": "PASS"
+  },
+  "remaining": [
+    "Classic death policy and migration delivery remain owned by the parallel Classic stage",
+    "production, build, browser, Cua, CI, and complete V2 acceptance were not run"
+  ]
+}

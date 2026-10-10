@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-registered-combat-armor-fixture-diagnostic-01",
+  "pid": 79029,
+  "startedAt": "2026-09-25T12:25:47.562Z",
+  "windowId": "v2-registered-combat-armor-fixture-diagnostic-01",
+  "evidencePath": "harness/results/performance-windows/v2-registered-combat-armor-fixture-diagnostic-01.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T12:25:48.857Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T12:25:47.563Z",
+      "loadAverage": [
+        2.9658203125,
+        3.376953125,
+        3.3623046875
+      ],
+      "freeMemoryBytes": 1223819264,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T12:25:48.855Z",
+      "loadAverage": [
+        2.9658203125,
+        3.376953125,
+        3.3623046875
+      ],
+      "freeMemoryBytes": 1281916928,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

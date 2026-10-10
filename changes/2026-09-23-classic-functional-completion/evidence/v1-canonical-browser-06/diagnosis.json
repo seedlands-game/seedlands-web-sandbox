@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-06-5d52330f",
+  "status": "FAIL",
+  "sourceSha": "5d52330fa58d315e9e10b1298e1bdc65e2321898",
+  "sourceDigest": "a0775d3e5cc3747f5bd34fea09b3a1c40dc117e41c88beb7117d1a72888fb7e9",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "a91a3528abc9b8154f16e48fd0bf41be8c834bb3226e389fbb7550245b5a1f02",
+  "artifactReceiptSha256": "5f55da779eb0365b78dc67ac6c34c633f4e82143dbf3d065e340eb5a031a7756",
+  "performanceWindowId": "e9b56811-33d6-4f8d-aefc-036a17d076e0",
+  "commandExitCode": 1,
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1 },
+  "passed": [
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "v1-audio-settings",
+    "v1-water-bucket-place-source",
+    "v1-empty-bucket-collect-source",
+    "v1-route-mode-switch-and-grounded-approach",
+    "classic-visual"
+  ],
+  "failedAt": "v1-door-place-target-dispatch",
+  "notReached": [
+    "v1-door-committed-pair-mesh-collision-toggle",
+    "v1-media-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/v1-slice.ts",
+    "line": 184,
+    "publicReason": "blocked",
+    "selectedItem": "wooden-door",
+    "hit": [70, 30, 0],
+    "adjacent": [70, 31, 0],
+    "expectedUpper": [70, 32, 0],
+    "player": [67.35381317138672, 32.60000228881836, 0.6452956795692444],
+    "serverPlayerPosition": [67.35381531679855, 32.600001, 0.6452957045056721],
+    "onGround": true,
+    "colliding": false,
+    "worldRevision": 141,
+    "interactionAttempts": 13
+  },
+  "diagnosis": {
+    "classification": "structure-hit-center-line-of-sight-geometry-mismatch",
+    "actualFirstRejector": "structure-target-dispatch",
+    "summary": "Structure target-first dispatch traces from the solid support center [70.5,30.5,0.5] to the trusted eye origin. The deterministic 1/8-block sampler crosses canonical floor Stone at [69,30,0] and returns blocked before invoking the registered Structure operation. The adjacent-center path crosses only air.",
+    "followupBoundary": "Structure dispatcher and its host revalidation both use hit-center LOS. A follow-up must derive the trusted shared hit/adjacent face endpoint in both layers while retaining adjacent-center LOS, Manhattan adjacency, range, authorization, selection freshness, support and wall-blocking checks."
+  },
+  "artifactPostCheck": { "status": "PASS", "files": 276, "treeClean": true },
+  "originalEvidenceSha256": {
+    "classicReceipt": "7b66aea9c5a4c64c1674b1db1afa0834917bdd0e0e1660a086687f8d8f7410fd",
+    "errorContext": "6b19d2d8e479f5de4a3198d5e97c154318771e6de1e6850e635aa29c492f2394",
+    "trace": "391cc2feb90c5cc9dafed2f2f24f31f5272adbebecf2684fcf82f5815473b84d",
+    "performanceWindow": "0026c444dd0ee940c4f4a5a2cc0e5e1c2b40be16471214841ee64f2dcf956b25",
+    "failurePage": "5f157c6dae31e6db51febe4d09e7b0314b8519b24c29d1bb75bf289e9d6b9eb3",
+    "playwrightLastRun": "5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110"
+  }
+}

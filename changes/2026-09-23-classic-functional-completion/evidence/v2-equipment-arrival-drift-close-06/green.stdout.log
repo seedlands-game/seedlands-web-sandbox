@@ -1,0 +1,75 @@
+3:33:55 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts (6 tests | 2 failed) 6ms
+     × returns client drift from the Browser-17 wait stream before the bounded wait expires 4ms
+     × cannot extend repeated drift corrections past the original route deadline 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts > Classic V2 equipment arrival drift > returns client drift from the Browser-17 wait stream before the bounded wait expires
+AssertionError: expected [ 'KeyS', 'KeyW' ] to deeply equal [ 'KeyW', 'KeyW' ]
+
+- Expected
++ Received
+
+  [
+-   "KeyW",
++   "KeyS",
+    "KeyW",
+  ]
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts:61:19
+     59|       }),
+     60|     ).resolves.toMatchObject({ player: [94.5, 32.6, -0.5] });
+     61|     expect(walks).toEqual(['KeyW', 'KeyW']);
+       |                   ^
+     62|   });
+     63|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts > Classic V2 equipment arrival drift > cannot extend repeated drift corrections past the original route deadline
+AssertionError: promise resolved "{ player: [ 94.5, 32.6, -0.5 ], …(4) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "authority": {
++     "acknowledgedInputSequence": 51,
++     "physicsTick": 102,
++   },
++   "colliding": false,
++   "onGround": true,
++   "player": [
++     94.5,
++     32.6,
++     -0.5,
++   ],
++   "serverPlayerPosition": [
++     94.5,
++     32.6,
++     -0.5,
++   ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-arrival-drift.test.ts:136:5
+    134|         },
+    135|       }),
+    136|     ).rejects.toThrow('Equipment route timed out');
+       |     ^
+    137|     expect(walks).toBe(5);
+    138|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 22 passed (24)
+   Start at  15:33:55
+   Duration  238ms (transform 49ms, setup 0ms, import 66ms, tests 11ms, environment 0ms)
+

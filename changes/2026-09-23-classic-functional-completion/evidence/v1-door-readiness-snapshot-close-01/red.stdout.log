@@ -1,0 +1,53 @@
+9:07:39 AM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts (2 tests | 1 failed) 5ms
+     × does not splice readiness, freshness, and both positions across different exit samples 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/door-readiness.test.ts > Classic door route readiness snapshot > does not splice readiness, freshness, and both positions across different exit samples
+AssertionError: expected { player: [ 71.5, 32.6, 0.5 ], …(4) } to be { player: [ …(3) ], …(4) } // Object.is equality
+
+- Expected
++ Received
+
+  {
+    "authority": {
+      "acknowledgedInputSequence": 50,
+-     "physicsTick": 105,
++     "physicsTick": 102,
+    },
+    "colliding": false,
+    "onGround": true,
+    "player": [
+-     71.60638427734375,
++     71.5,
+      32.6,
+      0.5,
+    ],
+    "serverPlayerPosition": [
+-     71.60638694230313,
++     70.99,
+      32.600001,
+      0.5,
+    ],
+  }
+
+ ❯ apps/web/tests/e2e/classic-support/door-readiness.test.ts:59:35
+     57|     );
+     58|
+     59|     expect(legacyClientOnlyMatch).toBe(samples[5]);
+       |                                   ^
+     60|     expect(legacyClientOnlyMatch?.serverPlayerPosition[0]).toBeGreater…
+     61|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  09:07:39
+   Duration  136ms (transform 29ms, setup 0ms, import 36ms, tests 5ms, environment 0ms)
+

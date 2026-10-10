@@ -1,14 +1,18 @@
 import { KernelMemory } from './kernel-memory';
 import { meshHaloIndex, type MeshData, type MeshOptions } from '@seedlands/stdlib/world/mesh';
-import { renderCategoryForMaterial } from '@seedlands/stdlib/world/mesh-render-category';
-import { modelBoxesForVoxel } from '@seedlands/stdlib/world/voxel-model';
+import { forEachVoxelGeometryFace, voxelModelFaceUvs } from '@seedlands/stdlib/world/voxel-model-mesh';
+import { hasVoxelModelGeometry } from '@seedlands/stdlib/world/voxel-model';
+import { classicMeshSemantics, type MeshSemanticsLookup } from '@seedlands/stdlib/world/mesh-semantics';
 import { shapeWaterFace } from '@seedlands/stdlib/world/water-mesh-height';
-import { CHUNK_SIZE, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
+import { CHUNK_SIZE, FaceMaterial, Voxel, voxelIndex, type FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 
+const MATERIAL_IDS = new Set<number>(Object.values(FaceMaterial));
 const ARENA_START = 64;
 export const MESH_KERNEL_WINDOW_SIZE = CHUNK_SIZE + 4;
 const WINDOW_CELL_COUNT = MESH_KERNEL_WINDOW_SIZE ** 3;
-const WINDOW_OFFSET = ARENA_START;
+const SEMANTICS_OFFSET = ARENA_START;
+const SEMANTICS_BYTES = 4096 * 8;
+const WINDOW_OFFSET = SEMANTICS_OFFSET + SEMANTICS_BYTES;
 const FLUID_WINDOW_OFFSET = WINDOW_OFFSET + WINDOW_CELL_COUNT * Uint16Array.BYTES_PER_ELEMENT;
 const OUTPUT_OFFSET = FLUID_WINDOW_OFFSET + WINDOW_CELL_COUNT;
 const MASK_BYTES = 32 ** 2 * 6;
@@ -103,6 +107,7 @@ function append(
   ao: readonly number[],
   waterSurfaceCode: number,
   waterFloorCode: number,
+  uvs?: number[],
 ): void {
   const quad = (result[material] ??= { p: [], n: [], uv: [], c: [], i: [] });
   const start = quad.p.length / 3;
@@ -116,7 +121,8 @@ function append(
   );
   quad.p.push(...vertices);
   quad.n.push(...normal, ...normal, ...normal, ...normal);
-  if (normalAxis === 0)
+  if (uvs) quad.uv.push(...uvs);
+  else if (normalAxis === 0)
     quad.uv.push(...(back ? [0, 0, height, 0, height, width, 0, width] : [0, 0, 0, width, height, width, height, 0]));
   else
     quad.uv.push(...(back ? [0, 0, 0, height, width, height, width, 0] : [0, 0, width, 0, width, height, 0, height]));
@@ -128,44 +134,30 @@ function append(
   else quad.i.push(start, start + 1, start + 2, start, start + 2, start + 3);
 }
 
-function appendModel(result: Record<number, RawMesh>, x: number, y: number, z: number): void {
-  for (const box of modelBoxesForVoxel(Voxel.Lantern)) {
-    for (let dimension = 0; dimension < 3; dimension += 1) {
-      const u = (dimension + 1) % 3;
-      const v = (dimension + 2) % 3;
-      const width = box.max[u] - box.min[u];
-      const height = box.max[v] - box.min[v];
-      for (const back of [true, false]) {
-        const origin = [x + box.min[0], y + box.min[1], z + box.min[2]];
-        origin[dimension] = (back ? box.min[dimension] : box.max[dimension]) + [x, y, z][dimension];
-        const p1 = [...origin];
-        p1[u] += width;
-        const p2 = [...p1];
-        p2[v] += height;
-        const p3 = [...origin];
-        p3[v] += height;
-        const normal = [0, 0, 0];
-        normal[dimension] = back ? -1 : 1;
-        append(
-          result,
-          box.material,
-          back ? [...origin, ...p3, ...p2, ...p1] : [...origin, ...p1, ...p2, ...p3],
-          normal,
-          dimension,
-          width,
-          height,
-          back,
-          [0, 0, 0, 0],
-          0,
-          0,
-        );
-      }
-    }
-  }
+function appendModel(result: Record<number, RawMesh>, voxel: number, x: number, y: number, z: number): void {
+  forEachVoxelGeometryFace(voxel, [x, y, z], (face) =>
+    append(
+      result,
+      face.material,
+      face.positions,
+      face.normal,
+      face.dimension,
+      face.width,
+      face.height,
+      face.back,
+      [0, 0, 0, 0],
+      0,
+      0,
+      voxelModelFaceUvs(face),
+    ),
+  );
 }
 
 /** 将已校验的描述符按既有五数组布局发射；不扫描体素。 */
-export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, MeshData> {
+export function emitMeshDescriptors(
+  descriptors: Uint8Array,
+  semantics: MeshSemanticsLookup = classicMeshSemantics,
+): Record<number, MeshData> {
   if (descriptors.length % DESCRIPTOR_BYTES !== 0 || descriptors.length > MAX_DESCRIPTOR_BYTES)
     throw new Error('Mesh descriptors have an invalid byte length.');
   const result: Record<number, RawMesh> = {};
@@ -178,7 +170,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       const dimension = descriptors[offset + 2];
       const back = descriptors[offset + 3] === 1;
       if (
-        (descriptors[offset + 1] !== 0xff && (descriptors[offset + 1] < 1 || descriptors[offset + 1] > 18)) ||
+        !MATERIAL_IDS.has(descriptors[offset + 1]) ||
         dimension > 2 ||
         descriptors[offset + 3] > 1 ||
         descriptors[offset + 4] > 32 ||
@@ -226,9 +218,17 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
       descriptors[offset + 1] < 32 &&
       descriptors[offset + 2] < 32 &&
       descriptors[offset + 3] < 32 &&
-      descriptors.slice(offset + 4, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
+      semantics.isModel(descriptors[offset + 4]) &&
+      hasVoxelModelGeometry(descriptors[offset + 4]) &&
+      descriptors.slice(offset + 5, offset + DESCRIPTOR_BYTES).every((value) => value === 0)
     )
-      appendModel(result, descriptors[offset + 1], descriptors[offset + 2], descriptors[offset + 3]);
+      appendModel(
+        result,
+        descriptors[offset + 4],
+        descriptors[offset + 1],
+        descriptors[offset + 2],
+        descriptors[offset + 3],
+      );
     else throw new Error('Wasm mesh descriptor contains an unknown record kind.');
   }
   return Object.fromEntries(
@@ -238,7 +238,7 @@ export function emitMeshDescriptors(descriptors: Uint8Array): Record<number, Mes
         materialId,
         {
           material: materialId,
-          renderCategory: renderCategoryForMaterial(materialId),
+          renderCategory: semantics.renderCategory(materialId),
           layout: 'float32' as const,
           positions: new Float32Array(value.p),
           normals: new Float32Array(value.n),
@@ -256,14 +256,20 @@ export function runMeshDescriptorKernel(
   kernel: KernelMemory,
   voxelWindow: Uint16Array,
   fluidWindow: Uint8Array,
+  semantics: MeshSemanticsLookup = classicMeshSemantics,
 ): Record<number, MeshData> {
   assertInput(voxelWindow, fluidWindow);
+  if (semantics.bytes.length > SEMANTICS_BYTES)
+    throw new RangeError('Mesh semantics lookup exceeds the bounded Wasm arena allocation.');
+  kernel.bytes(SEMANTICS_OFFSET, semantics.bytes.length).set(semantics.bytes);
   kernel.u16(WINDOW_OFFSET, voxelWindow.length).set(voxelWindow);
   kernel.bytes(FLUID_WINDOW_OFFSET, fluidWindow.length).set(fluidWindow);
   const length = kernel.invoke(
-    'mesh_describe',
+    'mesh_describe_with_lookup',
     WINDOW_OFFSET,
     FLUID_WINDOW_OFFSET,
+    SEMANTICS_OFFSET,
+    semantics.bytes.length,
     OUTPUT_OFFSET,
     MAX_DESCRIPTOR_BYTES,
   );

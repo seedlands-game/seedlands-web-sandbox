@@ -30,9 +30,15 @@ function setup() {
     setWorldRevision: (value: number) => {
       revision = value;
     },
-    addMutationCount: (value: number) => {
-      mutations += value;
-    },
+    prepareCommitMetadata: (value: number, count: number) => ({
+      validate() {
+        if (value !== revision + 1) throw new Error('stale metadata');
+      },
+      apply() {
+        revision = value;
+        mutations += count;
+      },
+    }),
   };
   return {
     chunk,
@@ -63,8 +69,7 @@ describe('prepared single voxel participant', () => {
       ...edit,
       worldRevision: 3,
       getChunk: () => control.chunk,
-      setWorldRevision: control.ports.setWorldRevision,
-      addMutationCount: control.ports.addMutationCount,
+      prepareCommitMetadata: control.ports.prepareCommitMetadata,
     });
     expect(result).toEqual(expected);
     expect(world.state()).toEqual(control.state());
@@ -87,7 +92,7 @@ describe('prepared single voxel participant', () => {
     for (const change of ['world', 'chunk', 'voxel'] as const) {
       const world = setup();
       const prepared = prepareSingleWorldEdit(world.ports, edit);
-      if (change === 'world') world.ports.setWorldRevision(4);
+      if (change === 'world') world.ports.prepareCommitMetadata(4, 0).apply();
       if (change === 'chunk') world.chunk.revision++;
       if (change === 'voxel') world.chunk.voxels[voxelIndex(1, 2, 3)] = Voxel.Dirt;
       const before = world.state();
@@ -104,7 +109,7 @@ describe('prepared single voxel participant', () => {
     expect(() => prepareSingleWorldEdit(world.ports, { ...edit, value: -1 })).toThrow();
     expect(() => prepareSingleWorldEdit(world.ports, { ...edit, x: Number.NaN })).toThrow();
     expect(world.state()).toEqual(before);
-    world.ports.setWorldRevision(Number.MAX_SAFE_INTEGER);
+    world.ports.prepareCommitMetadata(Number.MAX_SAFE_INTEGER, 0).apply();
     expect(() => prepareSingleWorldEdit(world.ports, edit)).toThrow(/revision/i);
     expect(world.chunk.voxels[voxelIndex(1, 2, 3)]).toBe(Voxel.Stone);
   });

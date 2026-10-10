@@ -1,0 +1,83 @@
+{
+  "candidateParentSha": "9c99d904ce1f06de2f1b203b8b709f9c90334c72",
+  "rejectedPreviousCandidate": "color paths failed105 downscaled raster cases; production implementation removed",
+  "legacyControlAA": {
+    "icons": 130,
+    "elements": [37564, 37564],
+    "urlBytes": [4315978, 4315978],
+    "evidence": "pixel-icon-red-149-02.log unchanged same builtin corpus"
+  },
+  "candidateCC": {
+    "first": {
+      "icons": 130,
+      "elements": 12112,
+      "colorBound": 583,
+      "runBound": 12112,
+      "opaquePixels": 37564,
+      "urlBytes": 1404636
+    },
+    "repeat": {
+      "icons": 130,
+      "elements": 12112,
+      "colorBound": 583,
+      "runBound": 12112,
+      "opaquePixels": 37564,
+      "urlBytes": 1404636
+    }
+  },
+  "axis": "Only merge adjacent same-RGB opaque unit rects within one row; keep primitive and painting order",
+  "representationRed": {
+    "parentImplementation": "unaccepted color-path B",
+    "failed": 1,
+    "passed": 1,
+    "expectedElements": 12112,
+    "receivedElements": 583,
+    "notLegacyProductRed": true
+  },
+  "uniqueUnitTotals": {
+    "files": 5,
+    "passed": 13
+  },
+  "types": {
+    "classic": "PASS",
+    "webSvelteTscTools": "PASS"
+  },
+  "targetedLint": "PASS",
+  "browser154": "NOT_RUN_AT_DELIVERY",
+  "main151": "NOT_STARTED",
+  "timingConclusion": "NOT_MEASURED",
+  "rasterVeto": "Zero RGBA difference at16/32 plus sourceAA; unchanged original visual timeouts/inputs/assertions",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-red-153-01.log",
+      "bytes": 1570,
+      "sha256": "a8680b4a454cd215de159303d2c1b58ed2a9943a353c2204d0c60b2ce70aaf39"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-green-153-01.log",
+      "bytes": 599,
+      "sha256": "e161fcef1b584779d15185973cb7fea23c31d598cc644841b70b9b22d842389c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-classic-types-153-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-web-types-153-01.log",
+      "bytes": 265,
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-row-lint-153-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-icon-red-149-02.log",
+      "bytes": 1626,
+      "sha256": "6b9b89e55cc6c2d15aa5f45719cdba695371323fc892d7bfcb292becd1c4952d"
+    }
+  ],
+  "longTermDocsBaseline": "unchanged; no accepted product behavior change"
+}

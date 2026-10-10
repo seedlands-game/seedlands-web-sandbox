@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "canonicalMain": {
+    "path": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "line": 75,
+    "timeoutMs": 900000
+  },
+  "explicitOverrides": {
+    "visual": {
+      "path": "apps/web/tests/e2e/classic-support/visual-rebuild.ts",
+      "timeoutMs": 240000
+    },
+    "modular": {
+      "path": "apps/web/tests/e2e/classic-support/modular-pack-smoke.ts",
+      "timeoutMs": 90000
+    }
+  },
+  "config": {
+    "path": "playwright.config.ts",
+    "project": {
+      "name": "chromium",
+      "timeoutMs": 60000
+    },
+    "preserved": {
+      "testMatch": [
+        "apps/web/tests/e2e/classic-runtime.spec.ts"
+      ],
+      "fullyParallel": false,
+      "workers": 1,
+      "retriesExpression": "process.env.CI?1:0",
+      "failOnFlakyTests": true,
+      "actionTimeoutMs": 10000,
+      "navigationTimeoutMs": 30000,
+      "trace": "retain-on-failure",
+      "webServerTimeoutMs": 30000
+    }
+  },
+  "playwright": {
+    "version": "1.62.1",
+    "dependencyRoot": "/private/tmp/seedlands-v2-acceptance-0eafd427",
+    "workerSource": "node_modules/.pnpm/@playwright+test@1.62.1/node_modules/playwright/lib/worker/workerProcessEntry.js",
+    "afterHooksSlots": [
+      {
+        "line": 1650,
+        "initializer": "calculateMaxTimeout(this._project.project.timeout,testInfo.timeout)"
+      }
+    ],
+    "workerTeardownSlots": [
+      {
+        "line": 1690,
+        "initializer": "{timeout:this._project.project.timeout,elapsed:0}"
+      }
+    ],
+    "traceStopSlots": [
+      {
+        "line": 1713,
+        "initializer": "{timeout:this._project.project.timeout,elapsed:0}"
+      }
+    ],
+    "semantics": "The 60000ms project timeout applies independently to worker teardown and trace-stop slots; main after-hooks use max(project timeout, test timeout). It is not a total finalization wall-time promise."
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-ARTIFACT-BUILD-03",
+  "status": "PASS",
+  "sourceSha": "b2b07417ec01870c4ce20befdf29f433f26fc88d",
+  "sourceTree": "4b96f69d6cadb83e60b0eae23e9f37eea7bc7482",
+  "sourceDigest": "4e0e1af0636cdd3fa064201ba0701421f9fa292bfb52e19b68a963ead0471445",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "fee7cf82c0746cb1b7bedab9d7c4fe1c901f57f2a281ebc2a217cf40fa773a60",
+  "builtAt": "2026-09-25T19:00:49.242Z",
+  "artifactFiles": 276,
+  "distFilesIncludingReceipt": 277,
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-b2b07417",
+  "dependencyClosure": {
+    "internalPackagesResolveInsideAcceptanceTree": true,
+    "thirdPartyDependenciesReused": true,
+    "taskStateInsideAcceptanceTree": true
+  },
+  "build": {
+    "command": "pnpm build",
+    "argv": ["pnpm", "build"],
+    "window": "a5f25826-0c9d-4e28-8f38-2fc752f54145",
+    "startedAt": "2026-09-25T19:00:26.903Z",
+    "endedAt": "2026-09-25T19:00:50.814Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "e8ef0abaffe155ff56c65e8754a898767ad98e1eb918fbf92763087354e1133a",
+    "receiptSha256": "a8f7d3eefe248f35ac196c18ca7ba9716504ca9f6722fbfd6debbf97bb2dcd73"
+  },
+  "artifactVerification": {
+    "command": "pnpm harness:artifact",
+    "argv": ["pnpm", "harness:artifact"],
+    "window": "5bca9179-2047-42ae-ab5e-f54d2b5c4154",
+    "startedAt": "2026-09-25T19:01:05.466Z",
+    "endedAt": "2026-09-25T19:01:07.392Z",
+    "status": "PASS",
+    "exitCode": 0,
+    "stdoutSha256": "c78a3ab0368e4740126274f1e01393542934389b51fdd498398f90741530668d",
+    "receiptSha256": "eb44614d4743d76cc56ba54dbfc8e3854710cbafb0efb134f7e29405136b15a5"
+  },
+  "artifactReceiptSha256": "c2f14ef757be3721a6ae1371142e2c60284e652cb5511c17e8ca05c5c4f7d889",
+  "artifactMapSha256": "650d7b11ba5ad48944687a14c925235cd57430c5e730426ba1f753e90e7d6c2e",
+  "diskFileMapSha256": "650d7b11ba5ad48944687a14c925235cd57430c5e730426ba1f753e90e7d6c2e",
+  "artifactMapMatchesDisk": true,
+  "mapDiagnostic": "The first offline disk map sorted complete hash lines instead of paths; it was preserved as attempt-01 and did not mutate or rebuild the artifact.",
+  "packLockSha256": "d365ec8409eee8b1d0155cb0e0ec2fb6e966e1bf351696496314e5cac01950b7",
+  "media": {
+    "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+    "bytes": 2976045,
+    "contentType": "audio/mpeg",
+    "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9",
+    "sourceAndDistMatch": true,
+    "packLockMatches": true
+  },
+  "classicDeathPolicyPack": {
+    "moduleId": "seedlands:overworld-death-inventory-policy",
+    "capabilityId": "seedlands:death-inventory-policy",
+    "uniqueProvider": true,
+    "projectionSha256": "e17a3ec86dd88a1bfa5736789eee9381901871e81315989efae9c48c4bb2f529"
+  },
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 3,
+    "sha256": "a092a2baad81fb1fed3307a1b5e887390e55dc6127b0357719478b645f99156b"
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 19,
+    "sha256": "3ea2df392026f8ed3b58c4a2cf193a7c2ef2b9448ca3ff9ddabf7d026943c23d",
+    "excludes": ["MANIFEST.sha256", "delivery-validation.json"]
+  },
+  "postconditions": {
+    "trackedClean": true,
+    "indexClean": true,
+    "port4273Listening": false,
+    "acceptanceTreeProcesses": 0,
+    "postconditionsSha256": "a85e8c658c969654cf7b1d7a5315586ad9cea9ec26ff791d01a60bead742329a",
+    "acceptanceTreePreserved": true,
+    "previousV2TreesPreserved": 2,
+    "v1AcceptanceTreesPreserved": 9
+  },
+  "includedCapabilities": [
+    "composed-registered-combat-death",
+    "composed-direct-vitals-death",
+    "composed-registered-needs-death",
+    "classic-death-inventory-policy",
+    "exact-pre-death-v4-predecessor"
+  ],
+  "boundaries": {
+    "needsPlayerDespawn": "needs-player-despawn-policy-unsupported",
+    "nonPlayerNeedsHealthLifecycle": "readonly",
+    "legacyPureEquipmentDeathRedStillHistorical": true
+  },
+  "notRun": ["browser", "cua", "ci", "deploy", "merge"]
+}

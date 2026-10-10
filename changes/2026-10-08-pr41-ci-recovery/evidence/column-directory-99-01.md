@@ -1,0 +1,11 @@
+# 同 Persistence owner 的列目录观察
+
+在Stdlib原ChunkPersistence端口新增可选inspectColumnDirectory，Browser经原Worker队列请求，Worker在同worlds/chunks readonly事务读当前world身份与目录版本并扫描原主键。同world/cx的全部合法cy均参与，不设世界高度；只返回目标cz的canonical key与chunk revision。最多128个匹配/2048次cursor访问，超限或损坏/缺world/旧缺目录版本为unknown，没有部分完整列。新world初始化目录0；旧档字段不伪造。没有DB迁移、解码/生成区块或消耗Authority prepared cache。
+
+Browser校验回复坐标、key、版本、条数和唯一性；save/frozen/replace/seed写请求更换本地fence，world/seed/generator/provider变化或dispose使旧回复unknown或原disposed错误。它只是该次事务的完整目录，不是永久空域或缓存新鲜度保证；旧客户端及跨tab writer协议、Authority dirty/resident和最终消费者必须另行闭合。匹配get仍按IndexedDB正常克隆完整stored record，未声称只传metadata或I/O性能收益。
+
+不存在入口的首个RED保留；加入producer后手写provider反例误用不属于合同的version属性造成1FAIL/16PASS，修为真实artifactIdentity后继续验证。Browser端口/坏provider实际RED11FAIL/17PASS；首次28PASS仍是手写记录形状，复核真实codec发现stored record没有key字段。真实codec/保存函数记录最终RED4FAIL/15PASS（首次错误save签名另有FAIL保留），改从原主键推canonical key后2files29PASS。最终与目录writer/Browser persistence/worldgen initialize/game save共6files75PASS，包含真实persistChunkSnapshots→query、正负/高cy、精确预算、异常身份/记录、异步save/world/dispose失效。fake-indexeddb与FakeWorker不是实际Browser/GPU验收。
+
+Web/stdlib production types、范围ESLint/路径/格式及五份冻结证据原字节PASS。根test types仅覆盖Kernel/stdlib，不能证明新增Web夹具；私人跨目录config因node/vite类型路径失败，未用重装绕过。101登记原Classic类型与行为收集后，实际类型检查暴露ES2022 findLast、冻结保存夹具缺seed/generator、预算literal推断；按合同修复，最终Classic types与75例PASS，不改变语言目标或门禁。507/504有效行lint FAIL保留；观察逻辑及原clone按既有persistence helper职责提取后范围lint PASS，不豁免500门槛。
+
+代码地图按真实查询owner和Browser helper更新。Memory/Switchable、Sky来源与GPU、完整统一lighting/194/运输矩阵仍未闭合；本片未做新identified build/真实查询消费者/完整主旅程验收，当前CI409绑定前驱dde3并有headless失败，不可据本片宣布PR可合入。

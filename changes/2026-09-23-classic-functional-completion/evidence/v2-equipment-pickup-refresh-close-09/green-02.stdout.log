@@ -1,0 +1,43 @@
+3:13:27 PM [vite-plugin-svelte] no Svelte config found at /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts (10 tests | 1 failed) 180ms
+     ✓ returns the Browser19 strict correction snapshot before sending pulse 9 1ms
+     ✓ does not send input when correction exhausts the original deadline 1ms
+     ✓ does not send input when the refresh await exhausts the original deadline 0ms
+     ✓ fails closed when the post-correction refresh is unavailable 0ms
+     × continues with the original pulse when the refreshed client has not arrived 2ms
+     ✓ keeps the 'omitted' default path and snapshot read count 89ms
+     ✓ keeps the 'false' default path and snapshot read count 84ms
+     ✓ returns a refreshed client arrival to the existing outer bounded wait when the server is late 1ms
+     ✓ keeps stale, unready, and one-sided snapshots out of strict arrival 0ms
+     ✓ enables refresh only for the V2 equipment walk options 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts > Classic V2 pickup route post-correction refresh > continues with the original pulse when the refreshed client has not arrived
+AssertionError: promise rejected "Error: Real mouse movement requires a Poi…" instead of resolving
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:184:5
+    182|         refreshAfterCorrection: true,
+    183|       }),
+    184|     ).resolves.toStrictEqual(reached);
+       |     ^
+    185|     expect(calls).toMatchObject({ reads: 4, down: 1, up: 1 });
+    186|   });
+
+Caused by: Error: Real mouse movement requires a Pointer Lock baseline.
+ ❯ moveMouseBy apps/web/tests/e2e/classic-support/mouse-input.ts:23:23
+ ❯ Object.move apps/web/tests/e2e/classic-support/harness.ts:294:25
+ ❯ correctMouseToRoute apps/web/tests/e2e/classic-support/target-aim.ts:103:19
+ ❯ walkTo apps/web/tests/e2e/classic-support/harness.ts:290:5
+ ❯ apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts:176:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 9 passed (10)
+   Start at  15:13:27
+   Duration  453ms (transform 47ms, setup 0ms, import 196ms, tests 180ms, environment 0ms)
+

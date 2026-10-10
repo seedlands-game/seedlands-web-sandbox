@@ -1,9 +1,9 @@
 .hud-chip {
-  border: 1px solid var(--ui-border);
-  border-radius: var(--ui-radius);
-  background: var(--ui-surface);
-  box-shadow: 0 16px 48px rgba(1, 8, 10, 0.3);
-  backdrop-filter: blur(14px) saturate(120%);
+  border: 2px solid #202020;
+  border-radius: 0;
+  background: #5a5a5a;
+  box-shadow: 2px 2px 0 rgb(0 0 0 / 50%);
+  backdrop-filter: none;
 }
 
 .row {
@@ -58,7 +58,7 @@
   content: '';
   position: absolute;
   background: rgba(255, 255, 246, 0.92);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 #crosshair::before,
@@ -296,11 +296,12 @@
   width: min(760px, calc(100vw - 32px));
   padding: 20px;
   transform: translate(-50%, -50%);
-  border: 1px solid var(--ui-border);
-  border-radius: 18px;
-  background: var(--ui-surface-strong);
+  border: 8px solid transparent;
+  border-image: url('/assets/ui/classic-panel.png') 8 fill / 8px / 0 stretch;
+  border-radius: 0;
+  background: #606060;
   color: var(--ui-color-content);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.65);
 }
 .inventory-dialog header {
   display: flex;
@@ -330,8 +331,8 @@
   min-height: 36px;
   padding: 0 10px;
   border: 1px solid var(--ui-border);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+  background: #3f3f3f;
   color: white;
 }
 .inventory-layout {
@@ -351,9 +352,9 @@
   aspect-ratio: 1;
   min-width: 0;
   padding: 4px;
-  border: 1px solid var(--ui-border);
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.055);
+  border: 2px solid #222;
+  border-radius: 0;
+  background: #3b3b3b;
   color: white;
 }
 .inventory-grid [role='gridcell'].active {
@@ -385,8 +386,8 @@
 .recipe-list {
   padding: 12px;
   border: 1px solid var(--ui-border);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.035);
+  border-radius: 0;
+  background: #4d4d4d;
 }
 .recipe-list h3 {
   margin: 0 0 9px;
@@ -402,8 +403,8 @@
   gap: 8px;
   align-items: center;
   padding: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9px;
+  border: 2px solid #292929;
+  border-radius: 0;
 }
 .recipe-list [role='listitem'].available {
   border-color: rgba(177, 213, 112, 0.38);

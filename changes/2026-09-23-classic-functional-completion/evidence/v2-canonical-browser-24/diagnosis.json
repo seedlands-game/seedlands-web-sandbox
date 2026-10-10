@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-24",
+  "status": "FAIL_BEFORE_TEST_DISCOVERY",
+  "runId": "v2-canonical-browser-24-556c9b76",
+  "runnerExitCode": 1,
+  "browserAttemptConsumed": false,
+  "receipt": {
+    "status": "FAIL",
+    "sourceSha": "556c9b76fb4447c49ad7d6f7a76bd7233d0011e6",
+    "selectionMode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "selectedTests": [],
+    "runnerOutcome": "failed",
+    "attempts": 0,
+    "conflicts": 0,
+    "sha256": "5674f2e6c2345fbf17a03b6c3bb3f86ec0ef71e4b9c689e8c4ca75f3fe6734e0"
+  },
+  "firstCause": {
+    "phase": "PLAYWRIGHT_TEST_DISCOVERY",
+    "matchedProductionSpec": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "matchedEvidenceSnapshots": [
+      "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16/predecessor-close15/files/apps/web/tests/e2e/classic-runtime.spec.ts",
+      "changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-terminal-receipt-close-16-null-closure/prior-release/files/apps/web/tests/e2e/classic-runtime.spec.ts"
+    ],
+    "missingRelativeImport": "./classic-support/visual-rebuild",
+    "productionVisualRebuildExists": true,
+    "sourceFixPerformed": false
+  },
+  "stages": {
+    "C0": "NOT_STARTED",
+    "C1": "NOT_STARTED",
+    "C2": "NOT_STARTED",
+    "C3": "NOT_STARTED",
+    "V1": "NOT_STARTED",
+    "V2": "NOT_STARTED",
+    "C4": "NOT_STARTED",
+    "C5": "NOT_STARTED",
+    "visual": "NOT_STARTED",
+    "nonClassic": "NOT_STARTED"
+  },
+  "trace": {
+    "status": "NOT_PRODUCED_BEFORE_TEST_DISCOVERY_FAILURE",
+    "zipOrCrcCheckRun": false,
+    "repairRun": false
+  },
+  "notRecorded": [
+    "assertionEvidenceStatus",
+    "failureEvidencePresent",
+    "testId",
+    "retry attempt identity",
+    "C0-C5 steps",
+    "V1/V2 checkpoints",
+    "bag counts",
+    "equipment pointer",
+    "save/restore",
+    "pageErrors",
+    "failedResponses"
+  ],
+  "boundaries": {
+    "browser23StatusChanged": false,
+    "browser23Status": "FAIL_TIMEOUT_TRACE_INCOMPLETE",
+    "implementationChanged": false,
+    "secondAttemptRun": false,
+    "budgetChanged": false,
+    "buildRun": false,
+    "browser24FixRun": false
+  }
+}

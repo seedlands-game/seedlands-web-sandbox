@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-21",
+  "status": "FAIL",
+  "runId": "v2-canonical-browser-21-908d0d82",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-908d0d82",
+  "sourceSha": "908d0d82881e3e8c7dff7ee27cf3a4785013f37a",
+  "treeSha": "eb8a5d9a3cc423378f243e93804a6284f64539e6",
+  "sourceDigest": "e22c3a5bec65a09deeb271f8aabc30b07044b74e7a2649c56dccc88b93949312",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "982d9156954c395c6bc93913f824562b2cda849330e1e66464095b74595e1a38",
+  "builtAt": "2026-09-28T09:55:13.206Z",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 14,
+    "sha256": "fb23dc4103d57b34f150beb6a48bef0d0f89563a619379293dbf4d2a8d4f2001",
+    "validatedAgainstAcceptanceTree": true
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 43,
+    "sha256": "83cd38aa8ef30c0eee03c725faf5b8ecd591f6e2b823820b0e5db48ab17247a8",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "delivery-format.stdout.log",
+      "delivery-format-window.json.log",
+      "delivery-format-02.stdout.log",
+      "delivery-format-02-window.json.log",
+      "delivery-format-final.stdout.log",
+      "delivery-format-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "window": {
+    "id": "bbbc47c3-d740-4c35-ba3b-2f67e995fec7",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T10:16:07.407Z",
+    "endedAt": "2026-09-28T10:22:10.904Z",
+    "waitedMs": 1,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "956f039412dbc9791a2f029c52dab1f09aaf95335f40afbd82354a1d0dd7a26d"
+  },
+  "playwright": {
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1,
+    "canonicalMainStatus": "FAIL",
+    "visualStatus": "PASS_BY_RUNNER_STDOUT",
+    "nonClassicStatus": "SKIPPED_BY_RUNNER_STDOUT",
+    "runnerStdoutRecordedFromStart": true,
+    "runnerStdoutSha256": "fd5df1c8fd5f206755dd5cb5a9c34a78401ba84bad5a21dda747166f3c366d95"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_FIRST_WOOD_PICKUP_ON_RETURN_ROUTE_AIM",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v2-return-route-dynamic-direction-flip-exhaustion",
+    "sourceLocation": "apps/web/tests/e2e/classic-support/target-aim.ts:126",
+    "error": "Classic route aim did not converge: target=80.5,-0.5; direction=KeyS; lastDx=-15.749887530628607.",
+    "target": [80.5, -0.5],
+    "direction": "KeyS",
+    "correctionObservations": 19,
+    "correctionMouseMoves": 18,
+    "nextKeyboardPulseSent": false,
+    "diagnosisSha256": "940ccd32c4dc7b41af039c80df4989e13513c8b039288c1dad86b20033099269",
+    "timelineSha256": "9f424f6aaac3d499d54415e266e5380812e330bbbb77723a257f6de93a3ed6d3"
+  },
+  "firstWood": {
+    "target": [80, 31, 2],
+    "realLeftMouseInput": true,
+    "voxelCleared": true,
+    "dropOrPickupObserved": true,
+    "inventoryItemCountIncreased": true,
+    "worldItemsZeroUsedAsPickupProof": false
+  },
+  "notReached": [
+    "first-wood-return-route-completion",
+    "second-and-third-wood-mining-and-pickup",
+    "wood-pickaxe-crafting-and-equipping",
+    "stone-mining-pickup-and-stone-pickaxe",
+    "iron-mining-and-pickup",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "wrong-slot-no-change",
+    "swap-quickmove-and-close-settlement",
+    "C4",
+    "before-v2EquipmentPreSave",
+    "C5",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "durability-revision-and-new-reference-restore"
+  ],
+  "observability": {
+    "failureAttachmentPageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failureAttachmentFailedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "afterEachSnapshotUsedAsFailureTimeline": false,
+    "durability1DeathDropRespawn": "NOT_OBSERVED",
+    "cuaAndHumanHearing": "NOT_RUN",
+    "performance": "NOT_MEASURED"
+  },
+  "traceReadback": {
+    "consoleEvents": { "log": 1 },
+    "testErrorEvents": 1,
+    "networkResourceSnapshots": 996,
+    "httpStatusAtLeast400": 0,
+    "pageErrorEvents": 0
+  },
+  "trace": {
+    "sizeBytes": 502812277,
+    "parts": 10,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "248e8063558af124373fbfca7c27263c87009e3f1d1a36dad2895c3cbe66df06",
+    "partsManifestSha256": "46501a56ef7419b4629dc2c2b68ff2094662d085b29cbc7cbe0b1c757e8acaae",
+    "reassemblyValidated": true,
+    "filesAtLeast100MB": 0
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-21-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-28T10:33:42.620Z",
+    "endedAt": "2026-09-28T10:33:46.429Z",
+    "files": 276,
+    "stdoutSha256": "e42d0636cf4e2e4264f5c786037bf507ff95f414a23a360e03caf7f7faac6f0d",
+    "receiptSha256": "a5549e5986d8bed0710aea522671343a8e10b3cb516dfd49ae243fefdb3e5958"
+  },
+  "metadata": {
+    "initialFormatStatus": "FAIL",
+    "initialFormatReason": "Two newly generated JSON files required Prettier; no ignore rule was changed.",
+    "initialFormatStdoutSha256": "59cd6225af2522da9464b9b12676c6523e8e4331db58c16547937d2cc7de806f",
+    "initialFormatReceiptSha256": "96a4a81fb49317e62b4e0f1d9d2812263d264118df6626cbb2e7902d8ef79c1b",
+    "formatWriteStdoutSha256": "796f4466f07883de357e552206a0eeea702f7d862ccd34ab59f9667b391d4d77",
+    "formatWriteReceiptSha256": "cf3a980d01c8299eee48d0e03181b18241b035b5a934e4ea072faf0ea40ad06f",
+    "finalSelfcheckStatus": "PASS",
+    "finalSelfcheckStdoutSha256": "bf0a9c100c01672d349903aac73810eb9675a00aa762f294f96a20d5ad4c1afd",
+    "finalSelfcheckReceiptSha256": "0186e309a64ed7fe1bff513070233eb7f4fdde049487ceae4ed0eb90c636a571"
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256": "9ea5fcc3f7bb3f7050b4a57c35d77255699b395a6a5eb3683946d51429a9de55",
+    "historicalTailSha256": "5ed3069c12eed5e456ee9f2732bc5c30bc82ce37f817811d4fda408785dd0b94"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "distFilesIncludingReceipt": 277,
+    "distSymlinks": 0,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "build11TreePreserved": true,
+    "build12TreePreserved": true,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016"
+  },
+  "notRun": [
+    "build",
+    "second-browser-attempt",
+    "browser22",
+    "source-fix",
+    "cua",
+    "ci",
+    "git-write",
+    "index-write",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

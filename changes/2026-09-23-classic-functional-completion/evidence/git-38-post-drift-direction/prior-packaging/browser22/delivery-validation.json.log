@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "status": "FAIL_EVIDENCE_SEALED",
+  "runId": "v2-canonical-browser-22-8ae9e354",
+  "acceptanceTree": "/private/tmp/seedlands-v2-acceptance-8ae9e354",
+  "sourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+  "treeSha": "f91590626a01d1a6b2d771e27fdb74b5d022d47b",
+  "sourceDigest": "af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "artifactReceiptSha256": "2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388",
+  "builtAt": "2026-09-28T12:34:28.272Z",
+  "sourceManifest": {
+    "path": "SOURCE-MANIFEST.sha256",
+    "entries": 15,
+    "sha256": "e19abad273e8a7c7bfe5a1bb4e375a327ae3dd584f8c7c01d4a166e5ccbda801",
+    "validatedAgainstAcceptanceTree": true,
+    "mainWorktreeSourceUsed": false
+  },
+  "evidenceManifest": {
+    "path": "MANIFEST.sha256",
+    "entries": 50,
+    "sha256": "3e0befb7e39e367f7caf506b242cd347e37782cb3a2b5b440cc7358b0adabd12",
+    "excludes": [
+      "MANIFEST.sha256",
+      "delivery-validation.json",
+      "metadata-format-final.stdout.log",
+      "metadata-format-final-window.json.log",
+      "final-selfcheck.stdout.log",
+      "final-selfcheck-window.json.log"
+    ]
+  },
+  "window": {
+    "id": "9c2c7c2a-bf89-4739-9e69-5d62d22e0bec",
+    "status": "FAIL",
+    "startedAt": "2026-09-28T12:50:41.523Z",
+    "endedAt": "2026-09-28T12:59:12.609Z",
+    "waitedMs": 2,
+    "exitCode": 1,
+    "measurementStatus": "NOT_RECORDED",
+    "receiptSha256": "ddfb746b47405f4b8cec3d47aaf936522cee19122f51ea7e26e563e15e289fe0"
+  },
+  "playwright": {
+    "workers": 1,
+    "retries": 0,
+    "canonicalMainAttempts": 1,
+    "canonicalMainStatus": "FAIL",
+    "visualStatus": "PASS_BY_RUNNER_STDOUT",
+    "nonClassicStatus": "SKIPPED_BY_RUNNER_STDOUT",
+    "runnerStdoutRecordedFromStart": true,
+    "runnerStdoutSha256": "9bee8dda14fc08a96d378d393b5852dadded35db8e58021b286b539ce786e567"
+  },
+  "stages": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "V1": "PASS_BY_COMPLETED_TEST_STEP",
+    "V2": "FAIL_AFTER_THREE_WOOD_PICKUPS_ON_WORKBENCH_APPROACH_ROUTE",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "failure": {
+    "classification": "canonical-fixture-v2-workbench-approach-route-deadline",
+    "sourceLocation": "apps/web/tests/e2e/classic-support/harness.ts:223",
+    "error": "Real input route timed out before 78.5,0.5.",
+    "target": [78.5, 0.5],
+    "diagnosisSha256": "bc3d5de3da1d3da88a24de510818cb1ee56a36c32b9b7f428c6e70ed69a72962",
+    "routeCallsSha256": "19be23dc41569aec1c64ace90b1bf58cdc0c27e6a846c7e0942b12ad5eaea06c",
+    "repairSelected": false
+  },
+  "wood": {
+    "targetsMined": 3,
+    "realLeftMouseInput": true,
+    "voxelsCleared": true,
+    "dropOrPickupObserved": true,
+    "independentInventoryItemCountIncreased": true,
+    "finalStack": { "slot": 0, "itemId": "wood-block", "count": 3 },
+    "worldItemsZeroUsedAsPickupProof": false
+  },
+  "notReached": [
+    "wood-pickaxe-crafting-and-equipping",
+    "stone-mining-pickup-and-stone-pickaxe",
+    "iron-mining-and-pickup",
+    "iron-unpack-and-five-armor-crafting",
+    "four-slot-equipment-pointer-matrix",
+    "wrong-slot-no-change",
+    "swap-quickmove-and-close-settlement",
+    "C4",
+    "before-v2EquipmentPreSave",
+    "C5",
+    "save-return-continue",
+    "v1-media-after-restore",
+    "runtime-and-actor-epoch-rotation",
+    "durability-revision-and-new-reference-restore"
+  ],
+  "observability": {
+    "typedAimOutcome": "NOT_RECORDED_DIRECTLY",
+    "outerClassifierReturnValues": "NOT_RECORDED_DIRECTLY",
+    "failureAttachmentPageErrors": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "failureAttachmentFailedResponses": "NOT_RECORDED_BY_FAILURE_ATTACHMENT",
+    "standaloneScreenshotAttachment": "NOT_RECORDED",
+    "afterEachSnapshotUsedAsFailureTimeline": false,
+    "durability1DeathDropRespawn": "NOT_OBSERVED",
+    "cuaAndHumanHearing": "NOT_RUN",
+    "performance": "NOT_MEASURED"
+  },
+  "trace": {
+    "sizeBytes": 667031083,
+    "parts": 13,
+    "directory": "trace-50m",
+    "maxPartBytes": 52428800,
+    "sha256": "9f99c6907e7c498d870c9e5ea8f501a46c4040aa5be515dd8d71738936b8ea19",
+    "partsManifestSha256": "2114b524122cf58fb53f7d85f606153bc2d02083259fb48b9357ecbdb36ba74a",
+    "reassemblyValidated": true,
+    "filesAtLeast100MB": 0
+  },
+  "artifactPostCheck": {
+    "window": "v2-canonical-browser-22-artifact-postcheck",
+    "status": "PASS",
+    "startedAt": "2026-09-28T13:12:07.044Z",
+    "endedAt": "2026-09-28T13:12:11.785Z",
+    "files": 276,
+    "diskRegularFilesIncludingReceipt": 277,
+    "symlinks": 0,
+    "missingExtraOrMismatch": 0,
+    "stdoutSha256": "340aa77e6c52452d338e54157f0cb7eab45fd9f2b39e95a0a3a7069e582f0496",
+    "receiptSha256": "c0b7cd38e28590cc9774920526c258bcc254d15ec4b85f50a264837df64c8bab",
+    "reusedExistingPostcheck": true,
+    "rerunDuringSeal": false
+  },
+  "metadata": {
+    "initialFormatStatus": "FAIL",
+    "initialFormatReason": "Five newly generated JSON or Markdown files required standard Prettier formatting; no ignore or suppression was added.",
+    "initialFormatStdoutSha256": "df4c0b5e3c364b8a258f65ae98e6c5b071ef330c08ddba0ca25aa436f9c7ee24",
+    "initialFormatReceiptSha256": "6ad6ed65067bc66fa86ede4cf5eea261d023c443e79a63813c9ea294d7be6dde",
+    "formatWriteStdoutSha256": "a175da518227a8da1250e2ae579013b0f6062445fc46af11b4eb6a8648c9edb7",
+    "formatWriteReceiptSha256": "2fa312f8b74c4115709b7262b967371229a343e490b539f22ce44d47a5b3aa25",
+    "finalFormatStatus": "PASS",
+    "finalFormatStdoutSha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20",
+    "finalFormatReceiptSha256": "857e122da2a2bc806e86032cee05bf732d9b894a85872a39e51378a0a555931b",
+    "finalSelfcheckStatus": "PASS",
+    "finalSelfcheckStdoutSha256": "a99b60b2df1623e8f21465256b8d27fe6483ee0c7383cce7024a0c51f83f72a1",
+    "finalSelfcheckReceiptSha256": "7a7118023065a6c625ca96aa6a765a2e15e18c96782cf9c0169ec483d3fadd59",
+    "manualSelfcheckCwdFailureDisclosed": true,
+    "ignoreOrSuppressionAdded": false
+  },
+  "report": {
+    "path": "changes/2026-09-23-classic-functional-completion/v2-canonical-browser-evidence.md",
+    "sha256BeforeFinalMetadata": "5b705cb75e7bc82188f38be6fd23a3692eed7c208ee7a4934895d327f1eb79b1",
+    "historicalTailFromBrowser21Sha256": "ae311c42e5554861f4d25773a305485fb24cfb31e1128fba20a8f35a2d28d8dd"
+  },
+  "cleanup": {
+    "port4273Listening": false,
+    "ownedPlaywrightChromiumPreviewProcesses": 0,
+    "ownedProcessReadback": "ROOT_CONFIRMED_AND_LOCAL_PS_SANDBOX_DENIED",
+    "benchmarkLockPresent": false,
+    "acceptanceTreeTrackedClean": true,
+    "acceptanceTreeIndexClean": true,
+    "build09TreePreserved": true,
+    "build10TreePreserved": true,
+    "build11TreePreserved": true,
+    "build12TreePreserved": true,
+    "build13TreePreserved": true,
+    "backupRefPreserved": "refs/task-backups/git32-evidence-a402b016"
+  },
+  "scope": {
+    "acceptanceSourceChanged": false,
+    "mainClose13DirtyExcludedFromSource": true,
+    "mainClose13DirtyReverted": false,
+    "tasksOrExecutionStateChanged": false,
+    "historicalBrowserEvidenceChanged": false
+  },
+  "notRunDuringSeal": [
+    "canonical-browser",
+    "artifact-postcheck-rerun",
+    "build",
+    "vitest",
+    "typecheck",
+    "eslint",
+    "source-fix",
+    "browser23",
+    "cua",
+    "ci",
+    "git-write",
+    "index-write",
+    "push",
+    "deploy",
+    "merge"
+  ]
+}

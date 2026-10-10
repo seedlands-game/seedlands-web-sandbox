@@ -1,3 +1,4 @@
+import { PLAYER_INVENTORY_LAYOUT_CAPABILITY, type PlayerInventoryLayout } from './inventory-layout';
 import {
   createKernelDefinitionRegistry,
   createKernelRuntime,
@@ -29,15 +30,26 @@ const SHARED_ENTITY_STORE = 'seedlands:entity-store';
 
 const asKernelValue = (value: unknown): KernelValue => value as KernelValue;
 
-const storeFor = (port: KernelStorageAllocationPort, content: GameplayContent) =>
-  port.shared(SHARED_ENTITY_STORE, () => new EntityStore(content.items, content.stations?.codec));
+const storeFor = (port: KernelStorageAllocationPort, content: GameplayContent, layout?: PlayerInventoryLayout) =>
+  port.shared(
+    SHARED_ENTITY_STORE,
+    () =>
+      new EntityStore(
+        content.items,
+        content.stations?.codec,
+        layout,
+        content.actorProfiles,
+        content.transportDefinitions,
+      ),
+  );
 
 const entityProjectionStorage = (
   port: KernelStorageAllocationPort,
   content: GameplayContent,
   project: (store: EntityStore, entity: GameplayEntity) => unknown,
+  layout?: PlayerInventoryLayout,
 ): KernelComponentStorage<KernelValue> => {
-  const store = storeFor(port, content);
+  const store = storeFor(port, content, layout);
   const storage: KernelComponentStorage<KernelValue> = Object.freeze({
     has: (entityId: string) => store.get(entityId) !== null,
     read: (entityId: string) => {
@@ -83,6 +95,9 @@ export function createGameplayKernelRuntime(
   additionalModules: readonly KernelModuleDefinition[] = [],
   checkpoint?: KernelRuntimeCheckpoint,
 ) {
+  const layout = composition?.definitionMap.capabilities.some(({ id }) => id === PLAYER_INVENTORY_LAYOUT_CAPABILITY)
+    ? composition.capability<PlayerInventoryLayout>(PLAYER_INVENTORY_LAYOUT_CAPABILITY)
+    : undefined;
   const registry = createKernelDefinitionRegistry();
   registry.register(
     defineModule({
@@ -117,13 +132,27 @@ export function createGameplayKernelRuntime(
           (store: EntityStore, entity: GameplayEntity) =>
             entity.type === 'station' ? store.stationSnapshot(entity.id) : null,
         ],
+        ...(content.transportDefinitions
+          ? [
+              [
+                'seedlands:transport-state',
+                (store: EntityStore, entity: GameplayEntity) =>
+                  entity.type === 'transport' ? store.transportComponentSnapshot(entity.id) : null,
+              ],
+            ]
+          : []),
       ].map(([id, project]) =>
         defineComponent({
           id: id as string,
           moduleId: ENTITY_RUNTIME_MODULE,
           codec: componentCodec,
           storage: (port) =>
-            entityProjectionStorage(port, content, project as (store: EntityStore, entity: GameplayEntity) => unknown),
+            entityProjectionStorage(
+              port,
+              content,
+              project as (store: EntityStore, entity: GameplayEntity) => unknown,
+              layout,
+            ),
         }),
       ),
       moduleStates: [
@@ -134,14 +163,20 @@ export function createGameplayKernelRuntime(
             version: 2,
             encode: (store: EntityStore) => asKernelValue(store.exportComponentSnapshot()),
             decode: (value) => {
-              const store = new EntityStore(content.items, content.stations?.codec);
+              const store = new EntityStore(
+                content.items,
+                content.stations?.codec,
+                layout,
+                content.actorProfiles,
+                content.transportDefinitions,
+              );
               store.restoreComponentSnapshot(value);
               return store;
             },
           },
-          create: (port) => storeFor(port, content),
+          create: (port) => storeFor(port, content, layout),
           restore: (port, value) => {
-            const store = storeFor(port, content);
+            const store = storeFor(port, content, layout);
             store.restoreComponentSnapshot(value);
             return store;
           },

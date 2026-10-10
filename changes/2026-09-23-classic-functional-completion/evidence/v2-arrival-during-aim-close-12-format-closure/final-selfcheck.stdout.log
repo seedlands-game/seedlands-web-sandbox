@@ -1,0 +1,83 @@
+apps/web/tests/e2e/classic-support/target-aim.ts: OK
+apps/web/tests/e2e/classic-support/harness.ts: OK
+apps/web/tests/e2e/classic-support/harness-snapshot.ts: OK
+apps/web/tests/e2e/classic-support/equipment-arrival-during-aim.test.ts: OK
+apps/web/tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts: OK
+apps/web/tests/e2e/classic-support/route-aim-contract.test.ts: OK
+changes/2026-09-23-classic-functional-completion/spec.md: OK
+changes/2026-09-23-classic-functional-completion/arrival-during-aim-contract.md: OK
+changes/2026-09-23-classic-functional-completion/arrival-during-aim-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12/delivery-validation.json: OK
+docs/code-map.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/README.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/classic-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/classic-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/delivery-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/delivery-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/delivery-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/delivery-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/eslint-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/eslint.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format-write-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format-write.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/format.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/metadata-write-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/metadata-write.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release-verification.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/SOURCE-MANIFEST.sha256: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/arrival-during-aim-contract.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/arrival-during-aim-evidence.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/equipment-arrival-during-aim.test.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/equipment-pickup-route-refresh.test.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/harness.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/route-aim-contract.test.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/spec.md: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/prior-release/target-aim.ts: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/root-types-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/root-types.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/scoped-diff-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/scoped-diff-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/scoped-diff-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/scoped-diff.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-02-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-02.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-03-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-03.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-04-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-04.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-05-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-05.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-06-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-06.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-07-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-07.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-08-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-08.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-final-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-final.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-invocation-failure.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-release-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-release.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence-window.json.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.cjs: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/type-equivalence.stdout.log: OK
+changes/2026-09-23-classic-functional-completion/evidence/v2-arrival-during-aim-close-12-format-closure/validation-argv.txt: OK
+Checking formatting...
+All matched files use Prettier code style!
+SOURCE11=PASS
+MANIFEST57=PASS
+DELIVERY=PASS
+PRIOR_RELEASE_IDENTITY_AND_SOURCE8=PASS
+TYPE_RUNTIME_EQUIVALENCE=PASS
+SUPPRESSION_BASELINE_PRIOR_CURRENT_ADDED=3_9_2_0
+HARNESS_LINES=467
+CLASSIC_TYPES=PASS
+ROOT_TYPES=PASS
+ESLINT6=PASS
+FORMAT=PASS
+SCOPED_DIFF=PASS
+INDEX_EMPTY=PASS

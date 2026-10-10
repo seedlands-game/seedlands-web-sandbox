@@ -2,7 +2,8 @@ import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { bodyWorldAabb } from '../../physics/geometry';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { WorldCommitResult } from '../game-server-types';
-import { collisionBoxesForVoxel } from '../../world/voxel-model';
+import { collisionBoxesForVoxel, type VoxelGeometryResolver } from '../../world/voxel-model';
+import type { BodyConfig } from '../../physics/types';
 
 const EXTERNAL_GEOMETRY_RECOVERY_DISTANCE = 2;
 
@@ -10,12 +11,16 @@ export function queueBodyRecoveriesAfterCommit(
   commit: WorldCommitResult,
   entities: readonly GameplayEntity[],
   requestRecovery: (entityId: string, maxDistance: number) => void,
+  geometry?: VoxelGeometryResolver,
+  bodyFor: (entity: GameplayEntity) => BodyConfig = (entity) => bodyConfigFor(bodyKindForEntity(entity)),
 ): void {
   const bounds = commit.structuralChange?.bounds;
   if (!commit.committed || !bounds) return;
   if (
     commit.collisionDelta &&
-    !commit.collisionDelta.some((delta) => delta.cells.some((cell) => collisionBoxesForVoxel(cell.voxel).length))
+    !commit.collisionDelta.some((delta) =>
+      delta.cells.some((cell) => collisionBoxesForVoxel(cell.voxel, geometry).length),
+    )
   )
     return;
   const changed = {
@@ -32,7 +37,7 @@ export function queueBodyRecoveriesAfterCommit(
           z: entity.physicsVelocity?.[2] ?? 0,
         },
       },
-      bodyConfigFor(bodyKindForEntity(entity)),
+      bodyFor(entity),
     );
     if (
       body.max.x <= changed.min.x ||

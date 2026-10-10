@@ -53,7 +53,11 @@ const actor = (
   reference: { entityId, epoch: 3, lifetime: entityId === 'alice' ? 4 : 5 },
   kind,
   slots: [{ itemId: 'test:wood', count: 2 }, { itemId: 'test:berry', count: 2 }, null, null],
-  equipment: { selectedSlot: 0, hotbarSize: 2 },
+  equipment: {
+    selectedSlot: 0,
+    hotbarSize: 2,
+    armor: { helmet: null, chestplate: null, leggings: null, boots: null },
+  },
   lifecycle: 'alive',
   needs: { hunger: 10, maxHunger: 20, meaning: 'satiety' },
   inventoryRevision: 0,

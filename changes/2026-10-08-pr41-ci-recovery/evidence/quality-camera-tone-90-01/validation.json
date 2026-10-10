@@ -1,0 +1,56 @@
+{
+  "sourceSha": "47aa9eb2207bbc047df68cdcefef0ebd03d6b7d7",
+  "sourceDigest": "9be0e5b282eb4556d15073d48ffb5a9f99d52874ecfcb26508a3f1924177fedf",
+  "artifactDigest": "399aea0a6e0bc1bb6a1874973cbf62f8e4b794e3d91ad3eada95643e02fda956",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "runId": "pr41-quality-tone-visual-browser90-01",
+  "selection": "NON_MAIN",
+  "attempts": [],
+  "browser": "PASS",
+  "testDurationRecorded": "2.9m",
+  "runnerDurationRecorded": "3.0m",
+  "scope": "low quality original visual correctness journey; no performance or complete lighting pixel matrix claim",
+  "red": {
+    "failed": 1,
+    "passed": 5,
+    "actualToneMapping": 0,
+    "expectedToneMapping": 3,
+    "exposure": 1.25
+  },
+  "green": {
+    "passed": 6
+  },
+  "staticQualityContract": {
+    "passed": 1,
+    "notRun": 5
+  },
+  "classicTypes": "PASS",
+  "scopedLint": "PASS",
+  "format": "PASS",
+  "frozenEvidence": "5/5 PASS",
+  "paths": "PASS",
+  "build": "PASS",
+  "originalAttachments": [
+    {
+      "name": "day-gallery",
+      "bytes": 284186,
+      "sha256": "e4e2716a3b34a8d79cb4ff76f9406c6167df4fc8328000eb2761244b7893479b"
+    },
+    {
+      "name": "sealed-room-unlit",
+      "bytes": 297365,
+      "sha256": "0b0e5b7da58828dc10fbd1204ae4235f387d68bfe71b93b58c3cdcac740ceb83"
+    },
+    {
+      "name": "sealed-room-glowstone",
+      "bytes": 403709,
+      "sha256": "d3fed35b2d6115de7d1a6bba1a9dc58da59b63e817e4148769ec714551408273"
+    },
+    {
+      "name": "visual-identity-and-observations",
+      "bytes": 148304,
+      "sha256": "d6caa27be916a41475b30472d12d2ac53ba1c35d30335b2b3bbd6e2d96e9ca09"
+    }
+  ],
+  "visualInspection": "Root viewed exact three PNGs; day models/plants visible and night sealed-room unlit/glowstone brightness visibly different; not radiometric correctness proof"
+}

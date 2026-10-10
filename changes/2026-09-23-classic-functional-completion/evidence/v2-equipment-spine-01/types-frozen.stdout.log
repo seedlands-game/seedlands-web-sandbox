@@ -1,0 +1,2 @@
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.classic-tests.json --noEmit

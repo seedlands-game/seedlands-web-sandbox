@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "stage": "V2-CANONICAL-BROWSER-22",
+  "sourceSha": "8ae9e3545c40cca83798afea0aa52ef156e4e3d3",
+  "sourceDigest": "af113628bfdc367da6bfa8e837636d87bc998af36ee346e4116f97e4b56262ee",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "f6f1ea672dc8d19dacf70482aa900538c6d81f33637c16e9a718fc22fc1acfa4",
+  "builtAt": "2026-09-28T12:34:28.272Z",
+  "receiptSha256": "2a1a930b6897e1ea5ec06a9e4189b1f832608e96a49cbebfcbf5a0df37358388",
+  "receiptMappedFiles": 276,
+  "diskRegularFiles": 277,
+  "symlinks": [],
+  "missing": [],
+  "extra": [],
+  "mismatch": [],
+  "packLocks": [
+    {
+      "path": "apps/web/public/packs/packs.lock.json",
+      "bytes": 922,
+      "sha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f"
+    },
+    {
+      "path": "apps/web/dist/packs/packs.lock.json",
+      "bytes": 922,
+      "sha256": "f362a074758f751d828d3881d9427a0945ae5efbce3237dfd3e287d24676c16f"
+    }
+  ],
+  "mp3": [
+    {
+      "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "mimeType": "audio/mpeg",
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "apps/web/public/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "mimeType": "audio/mpeg",
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    },
+    {
+      "path": "apps/web/dist/packs/playbooks/classic/assets/audio/to-far-shores.mp3",
+      "bytes": 2976045,
+      "mimeType": "audio/mpeg",
+      "sha256": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+    }
+  ]
+}

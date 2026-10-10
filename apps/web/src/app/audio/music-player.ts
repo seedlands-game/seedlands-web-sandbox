@@ -8,10 +8,6 @@ export class MusicPlayer {
   private gain: GainNode | null = null;
   private releaseTimer: ReturnType<typeof setTimeout> | null = null;
   private retired: (() => void) | null = null;
-  private reference: AudioBuffer | null = null;
-  private referenceSource: AudioBufferSourceNode | null = null;
-  private importSequence = 0;
-  referenceName = '';
   cue = '';
 
   constructor(private readonly mixer: AudioMixer) {
@@ -30,15 +26,6 @@ export class MusicPlayer {
     gain.gain.linearRampToValueAtTime(1, context.currentTime + 1.8);
     gain.connect(this.mixer.music);
     this.gain = gain;
-    if (this.reference) {
-      const source = context.createBufferSource();
-      source.buffer = this.reference;
-      source.connect(gain);
-      source.start();
-      this.referenceSource = source;
-      this.cue = `本地参考曲 · ${this.referenceName}`;
-      return;
-    }
     const pad = new Tone.PolySynth(Tone.Synth, {
       oscillator: { type: 'sine' },
       envelope: { attack: 2.5, decay: 1, sustain: 0.45, release: 3.5 },
@@ -74,17 +61,13 @@ export class MusicPlayer {
   stop(immediate = false) {
     const gain = this.gain;
     const voices = this.voices;
-    const reference = this.referenceSource;
     this.gain = null;
     this.voices = [];
-    this.referenceSource = null;
     this.cue = '';
     this.finishRetired();
     if (!gain) return;
     const cleanup = () => {
       for (const voice of voices) voice.dispose();
-      reference?.stop();
-      reference?.disconnect();
       gain.disconnect();
     };
     if (immediate) return cleanup();
@@ -94,30 +77,6 @@ export class MusicPlayer {
     gain.gain.linearRampToValueAtTime(0, now + 0.45);
     this.retired = cleanup;
     this.releaseTimer = setTimeout(() => this.finishRetired(), 500);
-  }
-
-  async importReference(file: File) {
-    if (file.size > 30 * 1024 * 1024) throw new Error('参考曲请小于 30 MiB。');
-    const sequence = ++this.importSequence;
-    const bytes = await file.arrayBuffer();
-    let buffer: AudioBuffer;
-    try {
-      buffer = await this.mixer.context.decodeAudioData(bytes);
-    } catch {
-      throw new Error('无法读取这首曲子，请选择可播放的音频文件。');
-    }
-    if (buffer.duration > 600) throw new Error('参考曲最长为 10 分钟。');
-    if (sequence !== this.importSequence) return false;
-    this.reference = buffer;
-    this.referenceName = file.name;
-    return true;
-  }
-
-  removeReference() {
-    ++this.importSequence;
-    this.reference = null;
-    this.referenceName = '';
-    this.stop();
   }
 
   private finishRetired() {

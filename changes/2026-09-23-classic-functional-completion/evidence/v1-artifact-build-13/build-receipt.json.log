@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "44d478a5-0f1c-4be3-8a98-2913df47892d",
+  "pid": 53576,
+  "startedAt": "2026-09-25T08:21:55.405Z",
+  "windowId": "44d478a5-0f1c-4be3-8a98-2913df47892d",
+  "evidencePath": "harness/results/performance-windows/44d478a5-0f1c-4be3-8a98-2913df47892d.json",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T08:22:23.180Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T08:21:55.406Z",
+      "loadAverage": [
+        5.0810546875,
+        3.806640625,
+        3.5966796875
+      ],
+      "freeMemoryBytes": 3712172032,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:00.409Z",
+      "loadAverage": [
+        5.234375,
+        3.859375,
+        3.6162109375
+      ],
+      "freeMemoryBytes": 495763456,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:05.411Z",
+      "loadAverage": [
+        5.29541015625,
+        3.89453125,
+        3.6298828125
+      ],
+      "freeMemoryBytes": 62013440,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:10.413Z",
+      "loadAverage": [
+        5.431640625,
+        3.94580078125,
+        3.6494140625
+      ],
+      "freeMemoryBytes": 88965120,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:15.416Z",
+      "loadAverage": [
+        6.03759765625,
+        4.095703125,
+        3.7041015625
+      ],
+      "freeMemoryBytes": 485392384,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:20.418Z",
+      "loadAverage": [
+        6.1142578125,
+        4.1435546875,
+        3.72314453125
+      ],
+      "freeMemoryBytes": 64897024,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T08:22:23.178Z",
+      "loadAverage": [
+        6.1142578125,
+        4.1435546875,
+        3.72314453125
+      ],
+      "freeMemoryBytes": 817397760,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

@@ -50,6 +50,8 @@ export async function createSceneApplication(
     });
     app.setCanvasFillMode(pc.FILLMODE_FILL_WINDOW);
     app.setCanvasResolution(pc.RESOLUTION_AUTO);
+    // Loading UI covers the canvas; world setup continues without repeatedly rendering an empty scene.
+    app.autoRender = false;
     app.start();
     const effectiveRenderer = app.graphicsDevice.deviceType as ExperimentalRenderer;
     return {

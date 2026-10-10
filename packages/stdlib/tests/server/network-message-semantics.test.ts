@@ -30,7 +30,75 @@ describe('public network message semantics', () => {
         capabilities: ['administrative'],
       }),
     ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 15,
+        action: {
+          type: 'interact',
+          intent: 'toggle',
+          target: { kind: 'self' },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 14,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'voxel', hit: [0, 0, 0], adjacent: [1, 1, 0] },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 12,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'entity', reference: { entityId: 'cow-1', epoch: 1, lifetime: 2 } },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 13,
+        action: {
+          type: 'interact',
+          intent: 'use',
+          target: { kind: 'entity', reference: { entityId: 'cow-1', epoch: 1, lifetime: 2 }, operationId: 'x:y' },
+          expectedSelection: { inventoryRevision: 4, modeRevision: 1, creativeCatalogRevision: 2, selectedSlot: 3 },
+        },
+      }),
+    ).toBe(false);
     expect(isPublicInboundMessage({ ...action, capabilities: ['mutation'] })).toBe(false);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 10,
+        action: { type: 'set-difficulty', value: 'hard', expectedRevision: 0 },
+      }),
+    ).toBe(true);
+    expect(
+      isPublicInboundMessage({
+        kind: 'player-action',
+        ref,
+        requestId: 11,
+        action: { type: 'set-difficulty', value: 'nightmare', expectedRevision: 0 },
+      }),
+    ).toBe(false);
     expect(isPublicInboundMessage({ ...action, action: { type: 'set-block', position: [0, 0, 0], voxel: 1 } })).toBe(
       false,
     );
@@ -75,6 +143,40 @@ describe('public network message semantics', () => {
         entities: [{ id: 'grazer-1', type: 'creature', archetype: 'grazer', position: [1, 2, 3], velocity: [0, 0, 0] }],
       }),
     ).toBe(true);
+    expect(
+      isPublicOutboundMessage({
+        kind: 'entity-pose',
+        ref,
+        poseSequence: 5,
+        physicsTick: 21,
+        entities: [
+          {
+            id: 'sentinel-1',
+            type: 'creature',
+            archetype: 'sample:sentinel',
+            position: [1, 2, 3],
+            velocity: [0, 0, 0],
+          },
+        ],
+      }),
+    ).toBe(true);
+    expect(
+      isPublicOutboundMessage({
+        kind: 'entity-pose',
+        ref,
+        poseSequence: 6,
+        physicsTick: 22,
+        entities: [
+          {
+            id: 'invalid-1',
+            type: 'creature',
+            archetype: 'invalid archetype',
+            position: [1, 2, 3],
+            velocity: [0, 0, 0],
+          },
+        ],
+      }),
+    ).toBe(false);
     expect(
       isPublicOutboundMessage({
         kind: 'snapshot',

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "git21-stdlib-types",
+  "pid": 38853,
+  "startedAt": "2026-09-25T11:51:16.145Z",
+  "windowId": "git21-stdlib-types",
+  "evidencePath": "changes/2026-09-23-classic-functional-completion/evidence/v2-equipment-core-git-21/stdlib-types-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-25T11:51:18.783Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-25T11:51:16.146Z",
+      "loadAverage": [
+        3.21337890625,
+        3.00390625,
+        3.12841796875
+      ],
+      "freeMemoryBytes": 71483392,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-25T11:51:18.781Z",
+      "loadAverage": [
+        3.1162109375,
+        2.98681640625,
+        3.12158203125
+      ],
+      "freeMemoryBytes": 840990720,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

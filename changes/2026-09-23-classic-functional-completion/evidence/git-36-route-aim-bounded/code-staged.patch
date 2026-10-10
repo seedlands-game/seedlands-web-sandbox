@@ -1,0 +1,408 @@
+diff --git a/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts b/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+new file mode 100644
+index 00000000..dddeb95d
+--- /dev/null
++++ b/apps/web/tests/e2e/classic-support/route-aim-contract.test.ts
+@@ -0,0 +1,270 @@
++import type { Page } from '@playwright/test';
++import { describe, expect, it } from 'vitest';
++import { walkTo, type ClassicSnapshot } from './harness';
++import { lockPointer } from './mouse-input';
++import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
++import type { Point, RoutePoint } from './scenario';
++
++const SENSITIVITY = 0.13;
++
++type RouteObservation = Readonly<{ player: Point; viewAngles: readonly [number, number] }>;
++
++const observation = (player: Point, yaw: number): RouteObservation => ({ player, viewAngles: [yaw, -26.79] });
++
++const BROWSER20_OBSERVATIONS: readonly RouteObservation[] = [
++  observation([69.55583739362123, 32.6, 0.5851294206764114], 41.17000000000004),
++  observation([69.39230994509148, 32.6, 0.38707929317700357], 30.77000000000004),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], 20.37000000000004),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], 9.97000000000004),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -0.42999999999996064),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -10.829999999999961),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -21.22999999999996),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -31.62999999999996),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -42.02999999999996),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -52.42999999999996),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -62.829999999999956),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -73.22999999999996),
++  observation([69.39230994509148, 32.6, 0.38617787241326273], -83.62999999999997),
++];
++
++const routeSnapshot = (player: Point, yaw: number, tick: number, ack: number): ClassicSnapshot =>
++  ({
++    player,
++    serverPlayerPosition: player,
++    viewAngles: [yaw, -20],
++    onGround: true,
++    colliding: false,
++    interactionAttempts: 1,
++    authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
++  }) as unknown as ClassicSnapshot;
++
++function nonResponsiveRoutePage(refreshAfterCorrection: boolean) {
++  const target: RoutePoint = [1, 0];
++  const initial = routeSnapshot([0, 32.6, 0], -89.74, 1, 1);
++  const reached = routeSnapshot([1, 32.6, 0], -89.74, 2, 2);
++  const calls = { reads: 0, down: 0, up: 0, moves: 0, pressed: false };
++  const page = {
++    evaluate: async (callback: (...args: unknown[]) => unknown) => {
++      const source = String(callback);
++      if (source.includes('snapshot()')) {
++        calls.reads += 1;
++        return calls.pressed ? reached : initial;
++      }
++      return undefined;
++    },
++    keyboard: {
++      press: async () => undefined,
++      down: async () => {
++        calls.down += 1;
++        calls.pressed = true;
++      },
++      up: async () => {
++        calls.up += 1;
++      },
++    },
++    locator: (selector: string) => ({
++      isVisible: async () => false,
++      boundingBox: async () => (selector === '#game' ? { x: 0, y: 0, width: 10_000, height: 540 } : null),
++      click: async () => undefined,
++    }),
++    mouse: {
++      move: async () => {
++        calls.moves += 1;
++      },
++    },
++    waitForFunction: async () => undefined,
++  } as unknown as Page;
++  return { calls, initial, page, target, options: refreshAfterCorrection ? { refreshAfterCorrection: true } : {} };
++}
++
++describe('Classic shared route aim bounded contract', () => {
++  it('does not silently accept the exact Browser20 13-observation prefix', async () => {
++    let read = 0;
++    const moves: Array<readonly [number, number]> = [];
++
++    await expect(
++      correctMouseToRoute({
++        target: [71.4925, 0.5],
++        direction: 'KeyW',
++        observe: async () => BROWSER20_OBSERVATIONS[read++] ?? null,
++        move: async (dx, dy) => {
++          moves.push([dx, dy]);
++        },
++      }),
++    ).rejects.toThrow('route aim observation remained unavailable');
++
++    expect(read).toBe(19);
++    expect(moves).toHaveLength(13);
++    expect(moves.slice(0, 12)).toEqual(Array.from({ length: 12 }, () => [80, 0]));
++    expect(moves[12]?.[0]).toBeCloseTo(72.86287224169372, 9);
++  });
++
++  it.each([
++    { name: 'W +X +180 wrap', direction: 'KeyW' as const, target: [1, 0] as RoutePoint, yaw: 90 },
++    { name: 'W -X -180 wrap', direction: 'KeyW' as const, target: [-1, 0] as RoutePoint, yaw: -90 },
++    { name: 'W +Z +180 wrap', direction: 'KeyW' as const, target: [0, 1] as RoutePoint, yaw: 0 },
++    { name: 'W -Z +180 wrap', direction: 'KeyW' as const, target: [0, -1] as RoutePoint, yaw: 180 },
++    { name: 'S +X -180 wrap', direction: 'KeyS' as const, target: [1, 0] as RoutePoint, yaw: -90 },
++    { name: 'S -X +180 wrap', direction: 'KeyS' as const, target: [-1, 0] as RoutePoint, yaw: 90 },
++    { name: 'S +Z +180 wrap', direction: 'KeyS' as const, target: [0, 1] as RoutePoint, yaw: 180 },
++    { name: 'S -Z -180 wrap', direction: 'KeyS' as const, target: [0, -1] as RoutePoint, yaw: 0 },
++  ])('covers the fixed-pose full yaw domain for $name', async ({ direction, target, yaw: initialYaw }) => {
++    let yaw = initialYaw;
++    let reads = 0;
++    let moves = 0;
++
++    await correctMouseToRoute({
++      target,
++      direction,
++      observe: async () => {
++        reads += 1;
++        return observation([0, 32.6, 0], yaw);
++      },
++      move: async (dx) => {
++        moves += 1;
++        yaw -= dx * SENSITIVITY;
++      },
++    });
++
++    expect(moves).toBe(18);
++    expect(reads).toBe(19);
++    expect(Math.abs(horizontalMouseCorrectionToRoute([0, 32.6, 0], yaw, target, direction))).toBeLessThan(1);
++  });
++
++  it('recovers after a transient null within the shared observation bound', async () => {
++    let yaw = -79.6;
++    let reads = 0;
++    let moves = 0;
++
++    await correctMouseToRoute({
++      target: [1, 0],
++      direction: 'KeyW',
++      observe: async () => {
++        reads += 1;
++        return reads === 1 ? null : observation([0, 32.6, 0], yaw);
++      },
++      move: async (dx) => {
++        moves += 1;
++        yaw -= dx * SENSITIVITY;
++      },
++    });
++
++    expect({ reads, moves }).toEqual({ reads: 3, moves: 1 });
++  });
++
++  it('fails unavailable after 19 persistent null observations without moving', async () => {
++    let reads = 0;
++    let moves = 0;
++    await expect(
++      correctMouseToRoute({
++        target: [1, 0],
++        direction: 'KeyW',
++        observe: async () => {
++          reads += 1;
++          return null;
++        },
++        move: async () => {
++          moves += 1;
++        },
++      }),
++    ).rejects.toThrow('route aim observation remained unavailable');
++    expect({ reads, moves }).toEqual({ reads: 19, moves: 0 });
++  });
++
++  it('fails exhaustion after 18 no-response moves and the final observation', async () => {
++    let reads = 0;
++    let moves = 0;
++    await expect(
++      correctMouseToRoute({
++        target: [1, 0],
++        direction: 'KeyW',
++        observe: async () => {
++          reads += 1;
++          return observation([0, 32.6, 0], 90);
++        },
++        move: async () => {
++          moves += 1;
++        },
++      }),
++    ).rejects.toThrow('route aim did not converge');
++    expect({ reads, moves }).toEqual({ reads: 19, moves: 18 });
++  });
++
++  it.each([
++    {
++      name: 'non-finite target',
++      target: [Number.NaN, 0] as RoutePoint,
++      current: observation([0, 32.6, 0], 0),
++      message: 'route aim target is invalid',
++    },
++    {
++      name: 'non-finite player',
++      target: [1, 0] as RoutePoint,
++      current: observation([Number.POSITIVE_INFINITY, 32.6, 0], 0),
++      message: 'route aim observation is invalid',
++    },
++    {
++      name: 'non-finite yaw',
++      target: [1, 0] as RoutePoint,
++      current: observation([0, 32.6, 0], Number.NaN),
++      message: 'route aim observation is invalid',
++    },
++  ])('fails closed for $name without mutating source input', async ({ target, current, message }) => {
++    const targetBefore = [...target];
++    const currentBefore = structuredClone(current);
++    let moves = 0;
++
++    await expect(
++      correctMouseToRoute({
++        target,
++        direction: 'KeyW',
++        observe: async () => current,
++        move: async () => {
++          moves += 1;
++        },
++      }),
++    ).rejects.toThrow(message);
++
++    expect(target).toEqual(targetBefore);
++    expect(current).toEqual(currentBefore);
++    expect(moves).toBe(0);
++  });
++
++  it('rejects an exact zero route vector but accepts an aligned finite near-zero vector', async () => {
++    const player: Point = [1, 32.6, 2];
++    await expect(
++      correctMouseToRoute({
++        target: [1, 2],
++        direction: 'KeyW',
++        observe: async () => observation(player, 0),
++        move: async () => undefined,
++      }),
++    ).rejects.toThrow('route aim direction is undefined');
++
++    let moves = 0;
++    await expect(
++      correctMouseToRoute({
++        target: [1 + Number.EPSILON, 2],
++        direction: 'KeyW',
++        observe: async () => observation(player, -90),
++        move: async () => {
++          moves += 1;
++        },
++      }),
++    ).resolves.toBeUndefined();
++    expect(moves).toBe(0);
++  });
++
++  it.each([
++    { name: 'default', refreshAfterCorrection: false },
++    { name: 'Close10 refresh', refreshAfterCorrection: true },
++  ])('propagates helper exhaustion before $name walk input', async ({ refreshAfterCorrection }) => {
++    const { calls, page, target, options } = nonResponsiveRoutePage(refreshAfterCorrection);
++    await lockPointer(page);
++
++    await expect(walkTo(page, target, { key: 'KeyW', timeout: 45_000, pulseMs: 0, ...options })).rejects.toThrow(
++      'route aim did not converge',
++    );
++    expect(calls).toMatchObject({ down: 0, up: 0, moves: 18 });
++  });
++});
+diff --git a/apps/web/tests/e2e/classic-support/target-aim.ts b/apps/web/tests/e2e/classic-support/target-aim.ts
+index 247e46c0..6dc923b4 100644
+--- a/apps/web/tests/e2e/classic-support/target-aim.ts
++++ b/apps/web/tests/e2e/classic-support/target-aim.ts
+@@ -2,6 +2,8 @@ import type { Point } from './scenario';
+ 
+ const MOUSE_SENSITIVITY_DEGREES = 0.13;
+ const MAX_MOUSE_STEP = 80;
++const MAX_ROUTE_AIM_MOVES = 18;
++const MAX_ROUTE_AIM_OBSERVATIONS = MAX_ROUTE_AIM_MOVES + 1;
+ 
+ const normalizeDegrees = (value: number) => {
+   let normalized = value % 360;
+@@ -90,9 +92,26 @@ export async function correctMouseToRoute(
+     move: (dx: number, dy: number) => Promise<void>;
+   }>,
+ ): Promise<void> {
+-  for (let attempt = 0; attempt < 12; attempt += 1) {
++  if (!options.target.every(Number.isFinite))
++    throw new Error(`Classic route aim target is invalid: target=${options.target.join(',')}.`);
++  let lastDx: number | null = null;
++  for (let attempt = 0; attempt < MAX_ROUTE_AIM_OBSERVATIONS; attempt += 1) {
+     const current = await options.observe();
+-    if (!current) continue;
++    if (!current) {
++      if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1)
++        throw new Error(
++          `Classic route aim observation remained unavailable: target=${options.target.join(',')}; direction=${options.direction}.`,
++        );
++      continue;
++    }
++    if (![...current.player, current.viewAngles[0]].every(Number.isFinite))
++      throw new Error(
++        `Classic route aim observation is invalid: target=${options.target.join(',')}; direction=${options.direction}.`,
++      );
++    if (current.player[0] === options.target[0] && current.player[2] === options.target[1])
++      throw new Error(
++        `Classic route aim direction is undefined: target=${options.target.join(',')}; direction=${options.direction}.`,
++      );
+     const dx = horizontalMouseCorrectionToRoute(
+       current.player,
+       current.viewAngles[0],
+@@ -100,8 +119,13 @@ export async function correctMouseToRoute(
+       options.direction,
+     );
+     if (Math.abs(dx) < 1) return;
++    lastDx = dx;
++    if (attempt === MAX_ROUTE_AIM_OBSERVATIONS - 1) break;
+     await options.move(dx, 0);
+   }
++  throw new Error(
++    `Classic route aim did not converge: target=${options.target.join(',')}; direction=${options.direction}; lastDx=${String(lastDx)}.`,
++  );
+ }
+ 
+ export async function correctMouseUntilEntityAimed(
+diff --git a/changes/2026-09-23-classic-functional-completion/route-aim-contract.md b/changes/2026-09-23-classic-functional-completion/route-aim-contract.md
+new file mode 100644
+index 00000000..680f4b5a
+--- /dev/null
++++ b/changes/2026-09-23-classic-functional-completion/route-aim-contract.md
+@@ -0,0 +1,48 @@
++# Shared Route Aim 有界合同
++
++阶段：`V1-ROUTE-AIM-BOUNDED-CLOSE-11`
++
++状态：合同冻结，等待可执行 RED/GREEN。依据为 MAP01 SOURCE19
++`5848879ef25500c0c786ada0d86d84e91c17c06f3ed8b96912e341ac6061525a`、MANIFEST4
++`7f788fe22817bb678067f9731a986fc3bb56ed144f651756440f5f70ff0e49b4`、delivery
++`852f5fac254fd209235eec0813613d241ba1226b45da560aed72cd13be9a2d45`。
++
++## 行为
++
++1. `correctMouseToRoute` 保留参数和 `Promise<void>`，只把旧 12 moves 静默耗尽改为 shared 有界 fail-closed。
++2. 最多调用 `move` 18 次、`observe` 19 次。null 占 observation 配额，不 move、不复用旧 snapshot；短暂 null 后
++   仍可使用后续有效 observation，最后为 null 或持续 null 时抛稳定 unavailable。
++3. target、player、yaw 必须有限。非有限值抛 stable invalid；player x/z 与 target 精确重合时方向未定义，抛 stable
++   undefined-direction。该错误不证明 route 尚未完成，位置完成仍由 caller 的 `reachedRouteTarget` 所有。
++4. 每个有效 observation 调用既有 `horizontalMouseCorrectionToRoute`，不复制角度算法。只有真实
++   `abs(dx)<1` 正常返回；否则在尚有 move 配额时调用 `move(dx,0)`，再重新 observation。
++5. 第 18 次 move 不构成成功；第 19 次 observation 仍不满足时抛 stable exhaustion，并包含 target、direction 与
++   last dx。no-response 只在同一固定上界耗尽，不另加随机 early retry。
++6. helper reject 必须在 `walkTo` keyboard down 前向上传播。Close10 true/default 路径在 helper 成功后保持当前
++   refresh/deadline 行为。
++
++## 不变量
++
++- 不改 `MAX_MOUSE_STEP=80`、生产/fixture sensitivity `0.13`、45/90s route、20s poll、80/100/300ms pulse、
++  1250ms closed-door input、720000ms canonical、voxel aim 180、`.06/.08/.45`、路线或坐标。
++- 不改 `walkTo`、`v1-slice`、`mouse-input`、`route-progress`、Close10、production 或 V1/V2 组合顺序。
++- 不增加 callback、第二 helper 调用、fallback、teleport、setView 或 Harness 写口。
++- 固定 pose 的 `ceil(180/(80*0.13))=18` 只证明全 yaw 域需要的 move 上界；动态 route vector 必须逐帧重算，
++  不能据此宣称必达。
++
++## RED / GREEN
++
++- Browser20 TSV 的 13 个真实 observation/12 moves 前缀必须使旧 helper 的静默成功 RED；没有第 14 个记录时新合同
++  在执行第 13 个真实 correction 后按 observation 配额明确 unavailable。任何追加 GREEN 帧都标为生产公式生成的反事实。
++- W/S、X/Z 正负与 wrap `±180°` 固定 pose 通过真实 helper/correction，fake move 只做
++  `yaw -= dx*0.13`；最远案例恰为 18 moves，并由第 19 次 observation 成功。
++- 覆盖第 19 次仍未收敛、持续/瞬时 null、invalid、精确零/近零 vector、no-response 和输入不变。
++- fake Page 直接调用真实 `walkTo`；default 与 `refreshAfterCorrection=true` 均须在 shared helper 耗尽时零
++  keydown/up。既有 Close10 12 tests 继续通过。
++
++## Ownership 与预算
++
++实现 ownership 仅 `target-aim.ts` 的 route helper、一个新 route aim contract test、当前 spec/合同/证据。其他 helper、
++caller 和 production 默认只读。建议 AI 1-2h、硬上限 3h；传统 0.25-0.5 PD。credits、费率、API 等价费用、额度与
++占比 unknown；120% 保守容量为 AI 3.6h、传统 0.6 PD，但不扩大本阶段硬上限。长期 docs 不更新，因为本片只收紧
++既有 canonical fixture helper，不改变生产架构或公共协议。
+diff --git a/changes/2026-09-23-classic-functional-completion/spec.md b/changes/2026-09-23-classic-functional-completion/spec.md
+index bb8e6634..ef96a2b5 100644
+--- a/changes/2026-09-23-classic-functional-completion/spec.md
++++ b/changes/2026-09-23-classic-functional-completion/spec.md
+@@ -228,6 +228,17 @@ Close-10 精确取代 Close-09 的默认兼容声明：Close-09 把 correction 
+ Close-09 的原 SOURCE/MANIFEST/delivery、合同、报告、源码与测试字节归档到 Close-10 `prior-release/`；其真实
+ RED/GREEN/static 结果不抹去，但不得继续声称当时 generic default deadline 行为未改变。
+ 
++Browser-20 唯一 canonical attempt 在完整 C0-C3 后、V1 closed-door probe 发键前失败。生产 Pointer Lock 对
++`movementX` 使用 `0.13°/unit`，fixture route correction clamp 为 `80 units`，故单次真实 move 最多覆盖 `10.4°`；
++合法归一化 yaw 差最大 `180°`，旧 12 moves 只覆盖 `124.8°`。`correctMouseToRoute` 的 shared 合同必须显式改为
++最多 18 moves/19 observations：null 消耗同一 observation 配额但不 move、不复用旧值；每个有效 observation 都用
++既有 `horizontalMouseCorrectionToRoute` 根据最新 position/yaw 重算，只有合法非零水平 route vector 且真实
++`abs(dx)<1` 才成功。最后一次 move 后仍须 observation 证明；持续 null、非有限输入、精确零 route vector、mouse
++不响应或最终仍未收敛必须稳定 fail closed，不能静默返回让 `walkTo` 发键。18 是固定 vector/正常 0.13 响应下的完整
++yaw 域上界，不保证动态漂移必达；动态场景在同一上界内重算并在耗尽时失败。不得改变 step/sensitivity、route/door/
++canonical timeout、pulse、voxel aim 180、容差、坐标、Close10 refresh 或增加第二 helper/fallback。Browser-20 仍为
++fixture FAIL，V2 未到达；deterministic/static GREEN 不等于 Browser-21 或产品 GREEN。
++
+ V2 death-combat producer 子片冻结 `death-combat-contract.md`：registered combat 构造时从当前 composition
+ 解析一次无状态 death inventory policy capability。非致命命中继续走 I2.1c 的 health+armor replacement；致命
+ 命中按真实 actor kind 构造 source 与 post-hit settlement components，并把 health/lifecycle、bag、cursor、

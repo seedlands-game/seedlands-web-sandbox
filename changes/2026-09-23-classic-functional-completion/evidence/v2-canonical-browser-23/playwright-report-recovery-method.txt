@@ -1,0 +1,1 @@
+data URL prefix was stripped before base64 decoding. The resulting derived report ZIP passed unzip -t and contains report.json plus 11cc3b97c787507062ad.json. This recovered report is complete for Playwright report metadata and attachments; it does not repair or replace the incomplete trace ZIP.

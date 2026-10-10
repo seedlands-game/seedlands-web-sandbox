@@ -1,0 +1,96 @@
+
+ RUN  v4.1.11 /Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts (5 tests | 4 failed) 48ms
+     × applies non-Classic armor reduction and durability in the real registered resolve transaction 26ms
+     × caps protection at twenty points and removes a piece only after it protects this hit 4ms
+     × preserves unarmored damage and does not consume armor for creative immunity or a miss 6ms
+     × rejects armor or lifetime changes after prepare without committing health or armor 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > applies non-Classic armor reduction and durability in the real registered resolve transaction
+AssertionError: {"success":true,"actionId":"action-1","buffered":false,"damage":10}: expected { success: true, …(3) } to match object { success: true, damage: 9.2 }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "damage": 9.2,
++   "damage": 10,
+    "success": true,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:173:44
+    171|
+    172|     const result = runtime.attackEntity('attacker', 'target');
+    173|     expect(result, JSON.stringify(result)).toMatchObject({ success: tr…
+       |                                            ^
+    174|     expect(runtime.entities.get('target')?.health).toBe(10.8);
+    175|     expect(runtime.simulation.combat.snapshotFor('attacker').lastResul…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > caps protection at twenty points and removes a piece only after it protects this hit
+AssertionError: expected { success: true, …(3) } to match object { success: true, damage: 2 }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "damage": 2,
++   "damage": 10,
+    "success": true,
+  }
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:198:56
+    196|     });
+    197|
+    198|     expect(runtime.attackEntity('attacker', 'target')).toMatchObject({…
+       |                                                        ^
+    199|     expect(runtime.entities.get('target')?.health).toBe(18);
+    200|     expect(runtime.getInventoryPointerView('target').armor).toEqual({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > preserves unarmored damage and does not consume armor for creative immunity or a miss
+TypeError: Actor mode component snapshots must be supplied together.
+ ❯ validateActorModeFacets packages/stdlib/src/server/gameplay/ecs-actor-mode-state.ts:38:29
+     36|   const supplied = [facets.mode, facets.creativeCatalog, facets.flight…
+     37|   if (supplied === 0) return defaultActorModeFacets(defaultHotbarSize);
+     38|   if (supplied !== 3) throw new TypeError('Actor mode component snapsh…
+       |                             ^
+     39|   const mode = facets.mode!;
+     40|   const catalog = facets.creativeCatalog!;
+ ❯ Object.replaceModeComponents packages/stdlib/src/server/gameplay/ecs-actor-state.ts:442:45
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:218:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/registered-combat-armor.test.ts > registered Combat armor transaction > rejects armor or lifetime changes after prepare without committing health or armor
+AssertionError: expected [Function] to throw error matching /owner, epoch or sequence is stale/i but got 'Combat resolution failed: OPERATION_F…'
+
+- Expected:
+/owner, epoch or sequence is stale/i
+
++ Received:
+"Combat resolution failed: OPERATION_FAILED: Combat projection observation is stale."
+
+ ❯ packages/stdlib/tests/server/registered-combat-armor.test.ts:283:68
+    281|     });
+    282|     equip(lifetimeStale, { helmet: armor('sample:visor', 3) });
+    283|     expect(() => lifetimeStale.attackEntity('attacker', 'target')).toT…
+       |                                                                    ^
+    284|     expect(lifetimeStale.entities.exportComponentSnapshot()).toEqual(c…
+    285|     expect(lifetimeStale.simulation.combat.snapshotFor('attacker').las…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  20:26:50
+   Duration  891ms (transform 633ms, setup 0ms, import 767ms, tests 48ms, environment 0ms)
+

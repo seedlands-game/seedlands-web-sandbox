@@ -1,19 +1,21 @@
+import { projectEntityComponentSnapshot } from './entity-component-projection';
+import { prepareEntitySpawn, entityTypeForSpawn, assertPosition } from './entity-spawn-validation';
+import { freezePlayerInventoryLayout, type PlayerInventoryLayout } from './inventory-layout';
 import {
   EcsEntityOwner,
   type EcsActorArchetype,
   type EcsEntityLifecycle,
   type EcsEntityType,
   type EcsOwnedEntity,
-  type EcsPosition,
   type EntityLifetimeSnapshot,
   type EntityLifetimeReference,
 } from './ecs-entity-owner';
+import type { ActorProfileRegistry } from './actor-profile';
 import type { ActorComponentSnapshot } from './ecs-actor-components';
 import type { CharacterComponentStateV1 } from '../simulation/character-runtime-types';
 import { isActorEntityType } from './ecs-actor-state';
 import {
   collectStationSnapshots,
-  validateStationEntityInput,
   type StationComponentV1,
   type StationKind,
   type StationStateCodec,
@@ -26,11 +28,18 @@ import {
   type PreparedEntityMutationInput,
 } from './prepared-entity-mutation';
 import { addEntityToBucket, removeEntityFromBucket } from './entity-spatial-buckets';
+import { entityIdentityFor } from './entity-identity';
+import {
+  createTransportStateCodec,
+  collectTransportSnapshots,
+  type TransportSpawnState,
+  type TransportStateCodec,
+} from './ecs-transport-state';
+import type { TransportComponentV1, TransportDefinitionRegistryV1, TransportStateV2 } from './modules/transport-model';
 
 export type EntityType = EcsEntityType;
 export type ActorArchetype = EcsActorArchetype;
 export type EntityLifecycle = EcsEntityLifecycle;
-type Position = EcsPosition;
 export type GameplayEntity = EcsOwnedEntity;
 export type { EntityLifetimeReference } from './ecs-entity-owner';
 
@@ -46,6 +55,7 @@ export type EntitySpawn = {
   archetype?: ActorArchetype;
   persistent?: boolean;
   station?: Readonly<{ kind: StationKind }>;
+  transport?: TransportSpawnState;
 };
 
 export type EntityUpdate = Partial<Pick<GameplayEntity, 'position' | 'physicsVelocity' | 'health'>>;
@@ -62,6 +72,7 @@ export type EntityStoreComponentSnapshotV1 = {
 export type EntityStoreComponentSnapshotV2 = Omit<EntityStoreComponentSnapshotV1, 'version'> & {
   version: 2;
   stations: StationComponentV1[];
+  transports?: TransportComponentV1[];
 };
 export type EntityStoreComponentSnapshot = EntityStoreComponentSnapshotV1 | EntityStoreComponentSnapshotV2;
 
@@ -75,18 +86,26 @@ export class EntityStore {
   private visitedEntityCount = 0;
   private returnedEntityCount = 0;
 
+  readonly playerLayout: PlayerInventoryLayout;
+  readonly transportCodec?: TransportStateCodec;
+
   constructor(
     readonly items: ItemDefinitionRegistry = defaultItemDefinitionRegistry,
     readonly stationCodec?: StationStateCodec,
+    playerLayout?: PlayerInventoryLayout,
+    private readonly actorProfiles?: ActorProfileRegistry,
+    readonly transportDefinitions?: TransportDefinitionRegistryV1,
   ) {
+    this.playerLayout = freezePlayerInventoryLayout(playerLayout);
     if (stationCodec && stationCodec.items !== items)
       throw new TypeError('EntityStore and station codec item registries must match.');
-    this.owner = new EcsEntityOwner(1, items, stationCodec);
+    this.transportCodec = transportDefinitions ? createTransportStateCodec(transportDefinitions, items) : undefined;
+    this.owner = new EcsEntityOwner(1, items, stationCodec, this.playerLayout, this.transportCodec);
   }
 
   spawn(input: EntitySpawn): GameplayEntity {
-    const type = this.entityType(input);
-    const { id, sequence: nextSequence } = this.identityFor(this.owner, input, type, this.sequence);
+    const type = entityTypeForSpawn(input);
+    const { id, sequence: nextSequence } = entityIdentityFor(this.owner, input, type, this.sequence);
     if (!id.trim()) throw new TypeError('Entity id must not be empty.');
     if (this.owner.get(id)) throw new Error(`Entity already exists: ${id}`);
     if (this.owner.isIssued(id)) throw new Error(`Entity id was already issued or retired: ${id}`);
@@ -94,7 +113,9 @@ export class EntityStore {
     const created =
       type === 'station'
         ? this.owner.createStation(entity, this.stationCodec!.create(id, input.station!.kind))
-        : this.owner.create(entity);
+        : type === 'transport'
+          ? this.owner.createTransport(entity, input.transport!)
+          : this.owner.create(entity);
     this.sequence = nextSequence;
     addEntityToBucket(created, this.buckets);
     return created;
@@ -116,7 +137,7 @@ export class EntityStore {
       throw new TypeError('Station spatial and actor fields cannot be updated through the dynamic entity API.');
     if (update.position) this.moveEntity(entity, update.position);
     if (update.physicsVelocity) {
-      this.assertPosition(update.physicsVelocity);
+      assertPosition(update.physicsVelocity);
       this.owner.setVelocity(id, [...update.physicsVelocity]);
     }
     if (update.health !== undefined) {
@@ -168,7 +189,7 @@ export class EntityStore {
   stationSnapshot = (id: string): StationComponentV1 => this.owner.stationSnapshot(id);
 
   queryNearby(position: readonly [number, number, number], radius: number, filter: EntityQuery = {}): GameplayEntity[] {
-    this.assertPosition(position);
+    assertPosition(position);
     if (!Number.isFinite(radius) || radius < 0)
       throw new TypeError('Query radius must be a non-negative finite number.');
     const minimum = position.map((value) => bucketCoordinate(value - radius));
@@ -210,19 +231,7 @@ export class EntityStore {
   }
 
   exportComponentSnapshot(): EntityStoreComponentSnapshotV2 {
-    const entities = this.owner.queryAll();
-    return {
-      version: 2,
-      sequence: this.sequence,
-      lifetimeHighWater: this.owner.lifetimeHighWater,
-      issuedIds: [...this.owner.issuedIds()].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)),
-      entities,
-      identities: this.owner.identitySnapshots(),
-      actors: entities
-        .filter((entity) => isActorEntityType(entity.type))
-        .map((entity) => this.owner.actorComponentSnapshot(entity.id)),
-      stations: this.owner.queryStations().map((entity) => this.owner.stationSnapshot(entity.id)),
-    };
+    return projectEntityComponentSnapshot(this.owner, this.sequence, this.transportCodec !== undefined);
   }
 
   /** Reads one actor's complete ECS component state without exporting or scanning the world. */
@@ -232,6 +241,14 @@ export class EntityStore {
 
   actorComponentSnapshot(id: string): ActorComponentSnapshot {
     return this.owner.actorComponentSnapshot(id);
+  }
+
+  transportComponentSnapshot(id: string): TransportComponentV1 {
+    return this.owner.transportComponentSnapshot(id);
+  }
+
+  transportState(reference: EntityLifetimeReference): TransportStateV2 | null {
+    return this.owner.transportState(reference);
   }
 
   bindActorCharacterComponent(id: string): CharacterComponentStateV1 | null {
@@ -267,6 +284,10 @@ export class EntityStore {
       ) => {
         const entity = this.prepareEntity({ ...input, type: 'station', station: { kind: input.kind } }, id, 'station');
         return Object.freeze({ entity, station: this.stationCodec!.create(id, input.kind) });
+      },
+      prepareTransport: (input: import('./prepared-entity-mutation').PreparedTransportSpawn, id: string) => {
+        const entity = this.prepareEntity({ ...input, type: 'transport' }, id, 'transport');
+        return Object.freeze({ entity, transport: this.transportCodec!.create(id, input.transport) });
       },
       removeFromBucket: (entity: GameplayEntity) => removeEntityFromBucket(entity, this.buckets),
       addToBucket: (entity: GameplayEntity) => addEntityToBucket(entity, this.buckets),
@@ -325,20 +346,34 @@ export class EntityStore {
     }
 
     const stationSnapshots = collectStationSnapshots(snapshot.version === 2 ? snapshot.stations : []);
+    if ('transports' in snapshot && (snapshot.version !== 2 || !this.transportCodec))
+      throw new TypeError('Transport snapshots require a configured V2 entity owner.');
+    const transportSnapshots = collectTransportSnapshots('transports' in snapshot ? snapshot.transports : []);
 
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec);
+    const candidateOwner = new EcsEntityOwner(
+      this.owner.epoch + 1,
+      this.items,
+      this.stationCodec,
+      this.playerLayout,
+      this.transportCodec,
+    );
     const candidateBuckets = new Map<string, Set<string>>();
     try {
       for (const input of snapshot.entities) {
-        const type = this.entityType(input);
+        const type = entityTypeForSpawn(input);
         if (input.id === undefined || input.kind !== type || input.lifecycle !== 'active')
           throw new TypeError('Canonical entity identity, kind or lifecycle is invalid.');
         const lifetime = identities.get(input.id);
         if (lifetime === undefined || !issued.has(input.id))
           throw new TypeError('Canonical entity identity metadata is missing.');
         const savedStation = type === 'station' ? stationSnapshots.get(input.id) : undefined;
+        const savedTransport = type === 'transport' ? transportSnapshots.get(input.id) : undefined;
         const entity = this.prepareEntity(
-          type === 'station' && savedStation ? { ...input, station: { kind: savedStation.kind } } : input,
+          type === 'station' && savedStation
+            ? { ...input, station: { kind: savedStation.kind } }
+            : type === 'transport' && savedTransport
+              ? { ...input, transport: savedTransport }
+              : input,
           input.id,
           type,
         );
@@ -352,7 +387,16 @@ export class EntityStore {
                     throw new TypeError(`Station component snapshot is missing: ${input.id}`);
                   })(),
               )
-            : candidateOwner.createRestored(entity, lifetime);
+            : type === 'transport'
+              ? candidateOwner.createRestoredTransport(
+                  entity,
+                  lifetime,
+                  savedTransport ??
+                    (() => {
+                      throw new TypeError(`Transport component snapshot is missing: ${input.id}`);
+                    })(),
+                )
+              : candidateOwner.createRestored(entity, lifetime);
         addEntityToBucket(created, candidateBuckets);
       }
       if (identities.size !== snapshot.entities.length)
@@ -371,6 +415,9 @@ export class EntityStore {
       const stationEntityIds = candidateOwner.queryStations().map((entity) => entity.id);
       if (stationSnapshots.size !== stationEntityIds.length)
         throw new TypeError('Station component snapshot set does not match canonical entities.');
+      if (transportSnapshots.size !== candidateOwner.queryAll({ type: 'transport' }).length)
+        throw new TypeError('Transport component snapshot set does not match canonical entities.');
+      candidateOwner.validateTransportRelations();
       candidateOwner.setLifetimeHighWater(Math.max(snapshot.lifetimeHighWater, this.owner.lifetimeHighWater));
       candidateOwner.reserveIssued([...issued, ...this.owner.issuedIds()]);
     } catch (error) {
@@ -396,13 +443,19 @@ export class EntityStore {
       explicitIds.add(input.id);
     }
     const blockedGeneratedIds = new Set([...this.owner.issuedIds(), ...explicitIds]);
-    const candidateOwner = new EcsEntityOwner(this.owner.epoch + 1, this.items, this.stationCodec);
+    const candidateOwner = new EcsEntityOwner(
+      this.owner.epoch + 1,
+      this.items,
+      this.stationCodec,
+      this.playerLayout,
+      this.transportCodec,
+    );
     const candidateBuckets = new Map<string, Set<string>>();
     let candidateSequence = sequence;
     try {
       for (const input of entities) {
-        const type = this.entityType(input);
-        const { id, sequence: nextSequence } = this.identityFor(
+        const type = entityTypeForSpawn(input);
+        const { id, sequence: nextSequence } = entityIdentityFor(
           candidateOwner,
           input,
           type,
@@ -415,7 +468,9 @@ export class EntityStore {
         const created =
           type === 'station'
             ? candidateOwner.createStation(entity, this.stationCodec!.create(id, input.station!.kind))
-            : candidateOwner.create(entity);
+            : type === 'transport'
+              ? candidateOwner.createTransport(entity, input.transport!)
+              : candidateOwner.create(entity);
         addEntityToBucket(created, candidateBuckets);
         candidateSequence = nextSequence;
       }
@@ -443,6 +498,10 @@ export class EntityStore {
     return this.owner.createReference(id);
   }
 
+  validateCreateIdentities = (count: number, ids: readonly string[]): void =>
+    this.owner.validateCreateIdentities(count, ids);
+  validateCreateCapacity = (count: number): void => this.owner.validateCreateCapacity(count);
+
   resolveReference(reference: EntityLifetimeReference): GameplayEntity | null {
     return this.owner.resolveReference(reference);
   }
@@ -457,85 +516,18 @@ export class EntityStore {
   }
 
   private prepareEntity(input: EntitySpawn, id: string, type: EntityType): GameplayEntity {
-    this.assertPosition(input.position);
-    const entity: GameplayEntity = { id, type, kind: type, lifecycle: 'active', position: [...input.position] };
-    if (input.physicsVelocity) {
-      this.assertPosition(input.physicsVelocity);
-      entity.physicsVelocity = [...input.physicsVelocity];
-    } else if (type !== 'player' && type !== 'station') entity.physicsVelocity = [0, 0, 0];
-    if (type === 'station') {
-      validateStationEntityInput(input, this.stationCodec);
-    } else if (input.station !== undefined) throw new TypeError('Station state requires a station entity.');
-    if (type === 'world-item') {
-      if (!input.stack) throw new TypeError('World item entity requires an item stack.');
-      entity.stack = this.items.normalizeStack(input.stack);
-    }
-    if (type === 'player') {
-      const health = input.health ?? 20;
-      if (
-        (input.maxHealth !== undefined && input.maxHealth !== 20) ||
-        !Number.isFinite(health) ||
-        health < 0 ||
-        health > 20
-      )
-        throw new TypeError('Player health must be finite and within its maximum.');
-      entity.health = health;
-      entity.maxHealth = 20;
-    }
-    if (type === 'creature' || type === 'npc') {
-      const maxHealth = input.maxHealth ?? 12;
-      const health = input.health ?? maxHealth;
-      if (!Number.isFinite(maxHealth) || maxHealth <= 0 || !Number.isFinite(health) || health < 0 || health > maxHealth)
-        throw new TypeError('Creature health must be finite and within its maximum.');
-      entity.health = health;
-      entity.maxHealth = maxHealth;
-      const archetype = input.archetype ?? (type === 'creature' ? 'grazer' : undefined);
-      if (archetype) {
-        if (!['grazer', 'night-stalker', 'settler'].includes(archetype))
-          throw new TypeError(`Unsupported actor archetype: ${String(archetype)}`);
-        if ((type === 'npc') !== (archetype === 'settler'))
-          throw new TypeError('Settlers must be NPC entities and creature archetypes must be creatures.');
-        entity.archetype = archetype;
-        entity.persistent = input.persistent ?? true;
-      }
-    }
-    return entity;
-  }
-
-  private entityType(input: EntitySpawn): EntityType {
-    const type = input.type ?? input.kind;
-    if (type !== 'player' && type !== 'world-item' && type !== 'creature' && type !== 'npc' && type !== 'station')
-      throw new TypeError(`Unsupported entity type: ${String(type)}`);
-    return type;
-  }
-
-  private identityFor(
-    owner: EcsEntityOwner,
-    input: EntitySpawn,
-    type: EntityType,
-    sequence: number,
-    blockedGeneratedIds: ReadonlySet<string> = new Set(),
-  ): { id: string; sequence: number } {
-    if (input.id !== undefined) return { id: input.id, sequence };
-    let nextSequence = sequence;
-    let id: string;
-    do {
-      nextSequence += 1;
-      if (!Number.isSafeInteger(nextSequence)) throw new RangeError('Entity sequence is exhausted.');
-      id = `${type}-${nextSequence}`;
-    } while (owner.isIssued(id) || blockedGeneratedIds.has(id));
-    return { id, sequence: nextSequence };
+    return prepareEntitySpawn(input, id, type, {
+      items: this.items,
+      stationCodec: this.stationCodec,
+      actorProfiles: this.actorProfiles,
+      transportCodec: this.transportCodec,
+    });
   }
 
   private moveEntity(entity: GameplayEntity, position: readonly [number, number, number]): void {
-    this.assertPosition(position);
+    assertPosition(position);
     removeEntityFromBucket(entity, this.buckets);
     this.owner.setPosition(entity.id, [...position]);
     addEntityToBucket(this.owner.get(entity.id)!, this.buckets);
-  }
-
-  private assertPosition(position: readonly number[]): asserts position is Position {
-    if (position.length !== 3 || !position.every(Number.isFinite))
-      throw new TypeError('Entity position must contain three finite numbers.');
   }
 }

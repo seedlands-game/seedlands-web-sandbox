@@ -1,5 +1,5 @@
 import type { ActorAction } from '../simulation/action-runtime';
-import { rangeByArchetype, type ActorState } from '../simulation/actor-state';
+import { actorDisposition, rangeByArchetype, type ActorState } from '../simulation/actor-state';
 import type { Poi } from '../simulation/poi-registry';
 import {
   LOGIC_INTENT_TTL_MS,
@@ -12,6 +12,7 @@ import {
   type LogicPosition,
 } from './logic-protocol';
 import { LogicTerrain } from './logic-terrain';
+import { finiteAabb } from '../../physics/geometry';
 
 export type LogicDecisionOptions = Readonly<{ physicsHz: 30 | 60 | 120 }>;
 
@@ -64,7 +65,9 @@ function validateObservation(observation: LogicObservation): void {
       !Number.isInteger(entity.poseRevision) ||
       entity.poseRevision < 0 ||
       !finitePosition(entity.position) ||
-      !finitePosition(entity.velocity)
+      !finitePosition(entity.velocity) ||
+      (entity.bodyKind === null && !entity.bodyAabb) ||
+      (entity.bodyAabb !== undefined && !finiteAabb(entity.bodyAabb))
     )
       throw new TypeError('Logic entity is invalid or duplicated.');
     entities.add(entity.id);
@@ -143,7 +146,7 @@ function chooseGoal(
   if (!state.active) return { kind: 'hold' };
   const activeMovement = activeMovementGoal(entry.activeAction);
   if (entry.controlSource === 'behavior') return activeMovement ?? { kind: 'hold' };
-  const perceptionRange = rangeByArchetype[state.archetype];
+  const perceptionRange = rangeByArchetype[state.archetype] ?? 10;
   const recordedAttacker =
     state.behavior === 'flee' && state.targetEntityId
       ? observation.entities.find((candidate) => candidate.id === state.targetEntityId)
@@ -158,13 +161,15 @@ function chooseGoal(
     entity,
     observation.entities.filter(
       (candidate) =>
-        candidate.bodyKind === 'night-stalker' &&
+        observation.decisionContext.actors.some(
+          (observed) => observed.state.entityId === candidate.id && actorDisposition(observed.state) === 'hostile',
+        ) &&
         candidate.health !== 0 &&
         distance(entity.position, candidate.position) <= perceptionRange,
     ),
     terrain,
   );
-  if (state.archetype !== 'night-stalker' && threat)
+  if (actorDisposition(state) !== 'hostile' && threat)
     return { kind: 'move', target: fleeTarget(entity, threat), targetEntityId: threat.id };
 
   if (activeMovement) return activeMovement;
@@ -189,7 +194,7 @@ function chooseGoal(
     return { kind: 'move', target: wanderTarget(state, entity) };
   }
 
-  if (state.archetype === 'night-stalker') {
+  if (actorDisposition(state) === 'hostile') {
     const isNight = observation.worldTime >= 18 || observation.worldTime < 6;
     const player = isNight
       ? visibleNearest(
@@ -262,7 +267,7 @@ function holdIntent(entry: ActorObservation, entity: LogicEntity, terrain: Logic
 
 function decideActor(entry: ActorObservation, observation: LogicObservation): LogicIntent | null {
   const entity = observation.entities.find((candidate) => candidate.id === entry.state.entityId);
-  if (!entity || entity.identityRevision !== entry.identityRevision) return null;
+  if (!entity || entity.identityRevision !== entry.identityRevision || entity.bodyKind === null) return null;
   const terrain = new LogicTerrain(observation.decisionContext.terrainWindows);
   const goal = chooseGoal(entry, entity, observation, terrain);
   if (terrain.hasMissingData || goal.kind === 'hold') return holdIntent(entry, entity, terrain);

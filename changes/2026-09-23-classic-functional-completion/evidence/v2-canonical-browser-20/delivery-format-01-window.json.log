@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "FAIL",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "v2-canonical-browser-20-delivery-format",
+  "pid": 83346,
+  "startedAt": "2026-09-28T08:42:33.669Z",
+  "windowId": "v2-canonical-browser-20-delivery-format",
+  "evidencePath": "/Users/bytedance/.codex/worktrees/6dd1/seedlands-web-sandbox/changes/2026-09-23-classic-functional-completion/evidence/v2-canonical-browser-20/delivery-format-window.json.log",
+  "waitedMs": 1,
+  "endedAt": "2026-09-28T08:42:33.992Z",
+  "exitCode": 1,
+  "signal": null,
+  "measurement": {
+    "status": "NOT_RECORDED"
+  },
+  "samples": [
+    {
+      "at": "2026-09-28T08:42:33.670Z",
+      "loadAverage": [
+        4.2021484375,
+        2.94775390625,
+        3.0458984375
+      ],
+      "freeMemoryBytes": 1337835520,
+      "totalMemoryBytes": 38654705664
+    },
+    {
+      "at": "2026-09-28T08:42:33.990Z",
+      "loadAverage": [
+        4.2021484375,
+        2.94775390625,
+        3.0458984375
+      ],
+      "freeMemoryBytes": 1330774016,
+      "totalMemoryBytes": 38654705664
+    }
+  ]
+}

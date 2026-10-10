@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "runId": "v1-canonical-browser-08-06f42f5d",
+  "status": "FAIL",
+  "sourceSha": "06f42f5d0943c2f12a24264d9e5e607b22b33dee",
+  "sourceDigest": "607294f043101061d632e0b669b9aafe367c68ea6dc67d9dc1037f37cc94c245",
+  "lockDigest": "44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169",
+  "artifactDigest": "ea44e00745788392cd668daf67fe3b0eb2ca17bdef8f9804ad6275656891dd0e",
+  "artifactReceiptSha256": "6aa1a95de2f549dbf82186ca018a2bc1d272124e54269a11a99c00b33f4e9bd2",
+  "performanceWindowId": "8c83c1ed-9482-464c-a2b0-89f70e52b78e",
+  "commandExitCode": 1,
+  "playwright": { "passed": 1, "failed": 1, "skipped": 1 },
+  "passed": [
+    "C0",
+    "C1",
+    "C2",
+    "C3",
+    "v1-audio-settings",
+    "v1-water-bucket-place-source",
+    "v1-empty-bucket-collect-source",
+    "v1-route-mode-switch-and-grounded-approach",
+    "v1-door-two-voxel-commit",
+    "v1-door-closed-mesh-epoch-vertices-indices",
+    "v1-door-closed-collision",
+    "v1-door-open-mesh-and-no-collision",
+    "v1-door-open-traverse",
+    "v1-door-upper-and-lower-half-toggle",
+    "v1-jukebox-approach-and-selection",
+    "classic-visual"
+  ],
+  "failedAt": "v1-jukebox-real-mouse-aim",
+  "notReached": [
+    "v1-jukebox-place",
+    "v1-record-insert-fact-projection-audio",
+    "C4",
+    "C5",
+    "v1-save-return-continue",
+    "v1-resume-eject-audio-cleanup"
+  ],
+  "failure": {
+    "file": "apps/web/tests/e2e/classic-support/aim.ts",
+    "line": 99,
+    "requestedTarget": [76, 30, 2],
+    "lastObservedTargets": [
+      "75,30,3",
+      "75,30,2",
+      "75,30,2",
+      "75,30,2",
+      "75,30,3",
+      "75,30,2",
+      "75,30,2",
+      "75,30,2",
+      "75,30,2",
+      "75,30,3",
+      "75,30,2",
+      "75,30,2"
+    ],
+    "attemptLimit": 180,
+    "selectedItem": "jukebox",
+    "rightClickSent": false,
+    "player": [73.74300384521484, 32.60000228881836, 2.7646305561065674],
+    "serverPlayerPosition": [73.74300345791752, 32.600001, 2.764630528427571],
+    "onGround": true,
+    "colliding": false,
+    "worldRevision": 145,
+    "interactionAttempts": 16
+  },
+  "diagnosis": {
+    "classification": "canonical-fixture-real-mouse-aim-oscillation",
+    "summary": "After the complete door journey, the player reached the jukebox approach and selected jukebox. The bounded real-mouse aim helper exhausted 180 corrections while alternating between neighboring floor voxels [75,30,2] and [75,30,3], never reacquiring support [76,30,2]. placeSelected therefore never sent the jukebox right-click.",
+    "productBoundary": "This is a fixture input-convergence failure before jukebox interaction. It does not establish a jukebox, media fact, projection, audio, C4/C5, or restore product failure."
+  },
+  "artifactPostCheck": {
+    "status": "PASS",
+    "windowId": "8da857cf-cb26-45a0-b3bf-591ed418718e",
+    "files": 276,
+    "treeClean": true
+  },
+  "originalEvidenceSha256": {
+    "classicReceipt": "0d6fbd6d89dcdf7c09559688bca7f47f40a3dfff70d6c1900594184989b43ee8",
+    "errorContext": "d8302ce9b6fa5f171f5d996dea077ea3d7f81d58c39c1cf228565fc71bd9ecb4",
+    "trace": "c44963dfd3d562a69b36e5ec0011fd32e4a99b623d34c931562d8ee38bc776cc",
+    "performanceWindow": "f9a447eb98548ae134839d5c63090734b6b31390b850218f77c22b4dfbb78fe8",
+    "failurePage": "7c35fa0a3bb40a88f9bc6f202c0cb91d4e07501e2413cace03b66ccc933c9518",
+    "playwrightLastRun": "5262b31103943407deaf88a647802902459402b0d8f03911857af87b24844110"
+  }
+}
