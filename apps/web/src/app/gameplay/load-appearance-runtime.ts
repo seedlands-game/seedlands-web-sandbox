@@ -39,6 +39,8 @@ export async function createAppearanceMaterials(app: pc.Application, quality: Qu
     return {
       ...materials,
       crops,
+      cropLightingMaterials: crops.lightingMaterials,
+      updateAuxiliaryLightingFrame: crops.setLightingFrame,
       destroy() {
         crops.dispose();
         materials.destroy();

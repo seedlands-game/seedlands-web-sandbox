@@ -14,7 +14,7 @@ const state = vi.hoisted(() => ({
     specular: { set: ReturnType<typeof vi.fn> };
     emissive: { set: ReturnType<typeof vi.fn> };
     destroy: ReturnType<typeof vi.fn>;
-    getShaderChunks: ReturnType<typeof vi.fn>;
+    getShaderChunks: ReturnType<typeof vi.fn<() => Map<string, string>>>;
   }>,
   meshes: [] as Array<{
     positions?: Float32Array;
@@ -145,6 +145,7 @@ vi.mock('playcanvas', () => {
     ADDRESS_CLAMP_TO_EDGE: 2,
     CULLFACE_NONE: 0,
     SHADERLANGUAGE_GLSL: 'glsl',
+    PIXELFORMAT_RGBA8: 7,
   };
 });
 
@@ -229,13 +230,33 @@ describe('PlayCanvas crop stage adapter', () => {
     expect(Math.max(...state.meshes[0]!.positions!)).toBeCloseTo(5.8);
     expect(state.materials[3]).toMatchObject({ alphaTest: 0.5, cull: 0, twoSidedLighting: true });
     expect(state.materials[3]!.specular.set).toHaveBeenCalledWith(0, 0, 0);
-    expect(state.materials[3]!.emissive.set).toHaveBeenCalledWith(1, 1, 1);
+    expect(state.materials[3]!.emissive.set).toHaveBeenCalledWith(0, 0, 0);
+    expect(state.materials[3]).toMatchObject({ useLighting: false, useSkybox: false, lightMapUv: 0 });
+    expect(state.materials[3]!.getShaderChunks().get('lightmapPS')).toContain('uSkyVisibilityReady');
     expect(state.textures[0]!.options).toMatchObject({ minFilter: 1, magFilter: 1, mipmaps: false });
 
-    adapter.bindChunkLight('0:0:0', { blockLightTexture: brick, blockLightOrigin: origin, blockLightSize: 34 });
+    const sky = { destroy: vi.fn() } as unknown as import('playcanvas').Texture;
+    const listeners = new Set<() => void>();
+    const lighting = {
+      blockLightTexture: brick,
+      blockLightOrigin: origin,
+      blockLightSize: 34,
+      blockLightReady: true,
+      skyTexture: sky,
+      skyOrigin: origin,
+      skyReady: true,
+      lightingListeners: listeners,
+    };
+    adapter.bindChunkLight('0:0:0', lighting);
     expect(resource.instance.setParameter).toHaveBeenCalledWith('texture_blockLight', brick);
     expect(resource.instance.setParameter).toHaveBeenCalledWith('uBlockLightOrigin', origin);
     expect(resource.instance.setParameter).toHaveBeenCalledWith('uBlockLightSize', 34);
+    expect(resource.instance.setParameter).toHaveBeenCalledWith('texture_skyVisibility', sky);
+    expect(resource.instance.setParameter).toHaveBeenCalledWith('uSkyVisibilityReady', 1);
+    expect(listeners.size).toBe(1);
+    lighting.skyReady = false;
+    for (const notify of listeners) notify();
+    expect(resource.instance.getParameter('uSkyVisibilityReady')).toEqual({ data: 0 });
     expect(adapter.snapshot()).toEqual([
       {
         chunkKey: '0:0:0',
@@ -260,6 +281,7 @@ describe('PlayCanvas crop stage adapter', () => {
       blockLightSize: 34,
     });
     expect(resource.instance.setParameter).toHaveBeenCalledWith('texture_blockLight', replacementBrick);
+    expect(listeners.size).toBe(0);
     adapter.destroy(resource);
     adapter.destroy(resource);
     expect(adapter.snapshot()).toEqual([]);

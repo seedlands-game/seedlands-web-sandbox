@@ -52,6 +52,11 @@ export type VoxelMaterials = {
   water: readonly pc.StandardMaterial[];
   waterLayer: pc.Layer;
   lightingProfile?: PackLightingProfile;
+  cropLightingMaterials?: readonly pc.StandardMaterial[];
+  updateAuxiliaryLightingFrame?: (
+    sky: readonly [number, number, number],
+    tint: readonly [number, number, number],
+  ) => void;
   destroy: () => void;
 };
 
