@@ -11,6 +11,7 @@ import { itemInteractionSelection } from '../../../../../src/app/player/secondar
 import type { LogicObservation } from '../../../../../../../packages/stdlib/src/server/logic/logic-protocol';
 
 it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同次提交', async () => {
+  const persistence = new MemoryGamePersistence({ clone: testCorePlatform.clone });
   const observations: LogicObservation[] = [];
   const runtime = await AuthorityRuntime.create({
     ...classicOptions(),
@@ -22,6 +23,7 @@ it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同
     startTimeMs: 0,
     initialPlayerBodyPosition: [2.5, 32.6, 2.5],
     onLogicObservation: (observation) => observations.push(observation),
+    persistence,
   });
   const edits = [];
   for (let x = -1; x <= 5; x++)
@@ -144,6 +146,27 @@ it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同
   });
   expect(dismounted.result).toMatchObject({ success: true });
   expect(runtime.view().transports![0]!.rider).toBeNull();
+  const savedCarrier = runtime.view().transports![0]!;
+  await runtime.persistPortableCheckpoint(runtime.exportPortableCheckpoint());
+  const restored = await AuthorityRuntime.create({
+    ...classicOptions(),
+    worldgenProvider: classicWorldgenProvider,
+    platform: testCorePlatform,
+    epoch: 'classic-minecart-restored',
+    seedText: 'classic-minecart-production',
+    persistence,
+    initialWorldTime: 8,
+    startTimeMs: 0,
+    initialPlayerBodyPosition: [2.5, 32.6, 2.5],
+  });
+  const restoredCarrier = restored.view().transports![0]!;
+  expect(restoredCarrier.reference).toEqual({ ...savedCarrier.reference, epoch: savedCarrier.reference.epoch + 1 });
+  expect(restoredCarrier.pose).toEqual(savedCarrier.pose);
+  expect(restoredCarrier.rider).toBeNull();
+  expect(restored.server.resolveEntityReference(savedCarrier.reference)).toBeNull();
+  expect(restored.server.resolveEntityReference(restoredCarrier.reference)).toMatchObject({
+    id: restoredCarrier.reference.entityId,
+  });
 });
 
 it('恢复真实09f2803e生产Pack V4身份与空载具基线，保留玩家原lifetime与库存', async () => {

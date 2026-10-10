@@ -770,3 +770,7 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 03:01UTC补齐相同消费者的静态选择：现行Classic测试tsconfig使用显式清单，新增七个消费者文件也进入该清单，防止Vitest仅转译通过而漏掉测试源码类型错误。原条目保持，既有未选择Legacy Actor用例不冒充本轮行为通过。
 
 03:03UTC：新增显式类型清单PASS，全仓lintPASS；故意旧wire消息反例的类型转换仅在测试模拟不可信输入，运行时拒绝断言保持。搬移后两文件10PASS；证据分别保留搬移前/后输入，整批3条超时均仍为FAIL。准备冻结本组source commit供同一canonical identified artifact的真实玩法验证，尚不推断可合入。
+
+03:09UTC真实UI剩余仍81%，4日23小时重置。source68ad4222/build14285c69 native77-01实际41.3s FAIL于重开reference equality：entityId transport-2/lifetime2保持，epoch1→2。已走过真实部署/modelReady/上车/W到轨尾/停稳/Shift下车；尚未执行重开后位置/rider末尾断言，不能写整条PASS。EcsEntityOwner.resolveReference明确拒绝非当前epoch，EntityStore单次restore建立下一epoch；新用例错误要求旧epoch相同。仅修测试恢复合同：full reference equality期望同id/lifetime且epoch+1，同时WorldHarness inspect旧引用stale、新引用current，保留pose/rider和原全部输入/时限，补正式Authority保存重开验证。旧失败保留，新identified source跑原canonical旅程；不改生产identity规则、不豁免断言。仍在checkpoint78原03:18界内；连接正常，无断联阻塞。
+
+03:14UTC恢复引用合同定向5PASS/Classic类型PASS。新增Authority实际保存重开保持pose/rider/id/lifetime，epoch+1，旧引用解析null而新引用解析实体；中间一次夹具误按boolean断言保存为FAIL，不冒充有效生产RED。Browser继续full reference equality到预期下一epoch，并新增实际WorldHarness旧stale/新current和runtimeEpoch变更断言；全部原pose/rider/输入/时限保留。native77部署PNG已观察到正式矿车模型，仍是失败运行局部视觉证据；本轮修正纯测试/spec，不做无新证据的整批重跑。
