@@ -888,3 +888,21 @@ RED设计：在原AdvancedVisualEffects真实构造函数的low无GPU特效路�
 06:37UTC，原CI407在C4首总900s/重试返回90s失败，最后停稳pose不能说明各pulse的新鲜ACK、落地和往返成本。本片只在原walkTo既有snapshot/predicate/keyboard调用处记录节点时间、原tick/ACK与双端pose、配置delay/真实keyboard API wall、first-fresh ACK、first-complete settled、最后观察与route累计/剩余时间；不增加snapshot、poll、mouse、输入或状态写口。仅C4两次调用启用，有界最多512个pulse、超出明确标truncated；完整失败与pending pulse仍由finally输出，不替换原异常。diagnosticOnly/eligible=false，benchmark采样不开启此记录，不把诊断耗时当性能结论。
 
 原target、136米往返、W/S+Space、300ms默认pulse、到达容差、三轴速度/ground/collision/呈现追上判断、20/90/900秒均保持；不因诊断推测做production修复。Root独占harness.ts、一个职责明确的诊断helper、C4接线/spec与新证据；无其他agent、新Browser入口或权限。范围类型/lint/格式、既有route正反例以及原时限CI合同验证后正常提交推送既有feature，核对远端无并发变更和生产main部署条件，再等待新SHA自然CI取得逐pulse真实证据；不重复本地整900秒旅程或重跑旧CI。AI15min×120%=18min，06:55UTC检查点；传统0.15PD×120%=0.18PD，真实06:10剩80%为当前额度，约60%停止线；费用/credits/API/预测占比未知。长期owner/协议docs无变更。
+
+06:45UTC checkpoint92接线准出：407774d33838664fb7eb20b1456a3ea8bcb21735正常推原feature，远端读回PR Draft/open/unmerged/无冲突、reviews/threads空；main仍fba4486e，workflow未变、feature不触发生产main部署。新CI408/run38031941067自然运行，未取消或重跑旧407。最终类型/范围lint/格式/路径/冻结5/提交hookPASS，route/scenario14例、CI原时限2例PASS；首504行lint及commit FAIL保留，原C4参数包装移helper后通过，无规则豁免。原C4 runtime诊断待CI，NOT_RUN；Root冻结407范围核对不是独立批准/完整PR审查。PR正文已按新SHA/CI及旧FAIL和产品缺口更新；截至本阶段仍不可合入。
+
+### 可信生成天空保证与持久化列索引 checkpoint93（只读预注册）
+
+06:46UTC，冻结407实际生产源码，CI408远端自然运行，不用本地重复browser。当前Sky缺少可信generated-clear保证和未加载存档高层发现路径。本片不写production，仅检查能否从现有默认generator的有限公式证明“该source在某Y以上不会生成solid”，明确每版本/custom macro反例；不是把世界合法高度限制到该Y。复用唯一Luna/medium leaf，独占private task142-generated-sky-proof-01.md，禁止仓库写、Browser/build/网络/安装/委派、全历史枚举。Root独立只读当前同一持久化owner/Authority存档source目录接口，判断完整列key发现与epoch/revision失效闭环；不重复Luna生成公式分析，不捏造bound或unknown=Air。
+
+准出只记录可证明与缺口，供后续最小接线RED设计；无新光照truth/Kernel lighting字段/高度政策，不宣称Sky或GPU通过。Root AI15min、Luna AI15min各×120%=18min，07:04UTC checkpoint；传统合计0.2PD×120%=0.24PD。真实06:10产品剩80%/4天20小时重置，约60%停止线；服务型号未独立核实/credits/API/占比未知。所有后续实现另登记，不为等CI盲目改源码。
+
+06:54UTC checkpoint93只读完成：默认macro公式terrain≤44、V11树最高h+7，默认生成非空上界51；这是default实现证明，不是世界高度/存档/unknown区块结论。Root已核对原源码，并补同Classic identity下generateChunk/sampleMacro注入反例；freeze剥额外字段，不能按字符串识别保证。持久化chunks主键[worldId,cx,cy,cz]可在原owner以bounded cursor查询同cx全部cy并按cz跳过，无需迁移索引；现有port没有该方法。普通save仅写chunks，world checkpoint不能当directory revision，需覆盖全部write/delete/replace原子路径并合并当前Authority dirty/resident源；尚未实现。private task142-generated-sky-proof-01.md/persisted-column-source-readonly-93-01.md保留推导与具体缺口；不宣称Lighting/Sky通过。CI408五非BrowserSUCCESS、Chromium运行，仍不可合入。
+
+### 生成源只读空域保证 checkpoint94（预注册）
+
+06:54UTC，Root只实现上一片已证明的最小生成source端口：StandardWorldgenProvider可选generatedEmptyAboveY(seed/generatorVersion/x/z)返回安全整数上界或null，仅描述未被编辑覆盖的程序生成空域。Kernel provider、world合法高度、体素生成、provider/descriptor/persisted identity不变；stdlib模块显式保留/校验此端口，无能力或不支持版本为unknown。Classic仅在generateChunk===makeChunk且sampleMacro===macroAt时提供保守51保证；注入任一callback不授予，即使identity相同。无法安全覆盖邻树坐标的整数边缘也unknown，不把其改成合法坐标限制。
+
+RED：真实Classic默认provider缺该能力；实际stdlib注册模块freeze剥离声明的端口。GREEN覆盖同identity custom generator/macro拒保证、版本/非法输入、坏结果拒绝、原生成/采样函数保留及composition definitionMap不变；有限默认采样只作回归，全球上界来源是93公式。Root独占standard-worldgen-module.ts、Classic worldgen.ts及两owner测试/spec/新输出，Luna已完成不改源。不添加Sky production消费者，完整持久化高层发现/当前修改合并/同per-chunk owner接线仍分别待完成。
+
+必要定向RED/GREEN、owner类型/范围lint/格式、相关旧worldgen/Classic pack回归与identified build；仅有生产source元数据能力变化，无GPU/input/streaming逻辑变化，后续浏览器由该完成片精确SHA在唯一原线路验证，不能以构建代替Sky。CI408自然终态前不推新source取消它，也不盲目重跑full main。AI25min×120%=30min，07:24UTC checkpoint；传统0.25PD×120%=0.3PD。真实06:10剩80%、约60%停止线，07:10请求主对话实际UI；unknown费用/credits/API占比不换算。
