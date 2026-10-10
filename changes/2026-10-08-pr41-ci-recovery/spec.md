@@ -980,3 +980,13 @@ SwitchableAuthorityPersistence从当前delegate转发可选端口；无能力返
 CI409于08:26自然结束：dde3c593 build/deterministic/architecture/static成功，headless795/1FAIL（100本地已修，远端尚未验证），Chromium主旅程首次与retry均900000ms超时；visual1.7m/native42.7sPASS、modular分支SKIP、previewSKIP。完整新V2原始日志保留，190 operation/74route只是诊断，不是性能准入或因果证明。
 
 104于08:30UTC预注册：现有唯一Luna Task145仅只读精确dde3源与CI409日志，Root独占实现，Luna输出独占private task145-ci409-v2-diagnosis-01.md。目标定位模式切换/重复等待或80ms真实输入与ACK/投影迟到的问题；区别确认与推断，6分钟上限到08:36UTC，不运行测试/Browser/build，不改源或网络，不调高900000ms、不降低断言。Root先保存103并分析同日志，失败重试需新证据；未确认原因不实施猜测。
+
+08:36UTC checkpoint104结束：Task145原只读候选被已有refresh时序反例否定并撤回；无确认P0根因、不猜改。CI409终态、完整1.14MB日志/哈希、两次V2操作/路线分组及client-lifetime拒绝计数写入ci409-terminal-104-01。目录103已提交f38942c0，stdlib1235/Web61/type/lint/选择/格式/路径/freeze PASS，仍未推送且整PR不可合入。
+
+### hotbar backdrop 单变量诊断105（预注册）
+
+08:40UTC：基于f38942c0实际生产源，新identified artifact在本注册提交后构建，只保留旧dist到独立路径。CI409显示终末600–800ms生产帧间隔但没有GPU因果；唯一待检轴为既有#hotbar backdrop-filter blur(11px)（A）和私有诊断DOM style override none（B），原viewport960×540、Classic场景/quality low、WebGL2/SwiftShader、同机器/同源bytes、pose/view/worldRevision/geometry/queues/resident固定。不改生产CSS或graphics antialias/质量，不开GPU/CPU profiler、不关闭trace，不授权凭本结果采用永久修改。
+
+复用private observer86受控脚本的原startClassicWorld/prepareInitialState、原生PointerLock、world clock pause，只是静止生产渲染的因素诊断，不是完整产品验收或真实移动性能。90秒暖机、每段5秒稳定和30秒轻量rAF采样，trace截图/snapshot/source两组均开启，ZIP写在采样外；四段A/A组median差≤15%，失败即停止，禁止提高噪声线或第三次重试。通过后2AB+2BA共八段，primary组median帧时需≥20%改善且p95不回归>10%；完整raw/start/end与DOMcomputed滤镜、trace身份保留。任何场景变化/队列不空/源不匹配均失败，未知不升级为优化采纳。若仅paused idle正收益，需后续独立功能/视觉与动态整帧准入才能采取改动。
+
+Root独占private blur105脚本/config/raw/window/spec/new证据，不委派、不跑并行工作或整900s。所有输出独立命名，保留sealed/history。实际08:26周剩78%，60停止线；AI18min×120%=21.6min，09:02UTC检查点；传统0.18PD×120%=0.216PD。持现有机器性能reservation锁，原浏览器与安全策略不变。

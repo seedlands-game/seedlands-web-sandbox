@@ -1,0 +1,11 @@
+# CI409 终态与有界 V2 诊断
+
+精确远端 source dde3c593f52adca1727c9613b7160330826b8eb9，[run38035803020](https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38035803020)。build、deterministic、architecture、static summary成功；headless795PASS/1FAIL（100本地已修，远端待验证）；Chromium主旅程首次/retry均原900000ms全局超时，首个错误同时保留20s waitForSnapshot predicate错误，不能由teardown栈证明某输入永久丢失；visual1.7m/native42.7sPASS，modular原分支SKIP，previewSKIP。V2未完成，C4 route records0，整PR不可合入。
+
+原始decoded日志 /workspace/pr41-recovery-20261008-root-01/ci409-chromium-decoded-log-01.txt，1140259bytes，SHA256 33fe159e1c2327e26c36d62d2b9213e1d9c7496b47c324bf5dff745c3d669c0d。190条operation/74条route，72route返回、2抛错；590个pulse。各operation合计761030ms，route合计685906ms，两者有包含重叠，不可相加。creative-selection20次133584ms，survival-switch20次114711ms。首次末尾mine approach target88耗27175ms抛错；retry末尾mine pickup target90耗5775ms抛错，均处在总旅程中断窗口。私有ci409-derived-operation-summary-104-01.json保留两次分组。
+
+现有决策诊断的client-lifetime累计：首次5014 receipts，late320/accepted4661/target-out-of-order3/invalid30、resync326；retry5058 receipts，late312/accepted4704/invalid42、resync318。这些不是只统计V2，也未关联具体trusted keydown/up和Authority消费tick。原生产keyboard事件已直接capture并发送，不能断言是只靠RAF采样丢键。首失败player相对Authority约0.125m而server静止，retry仍在移动；这些不同终点不能授权放松双端pose/ground/ACK门禁。
+
+唯一Luna Task145只读报告观察到75个新ACK但静止读回pulse，未证明输入丢失或确定原因。它最初提出复用correction observation；补读pickup-route-refresh等已有反例后撤回，保留原refresh/deadline/late-server保护，没有实施该猜测。报告私有task145-ci409-v2-diagnosis-01.md。末尾PlayerMovement trace相邻约600–800ms，JS记录仅数毫秒；这只说明可见生产帧间隔很长，不证明GPU或hotbar blur因果。新单变量诊断先做A/A，未达门槛不跑A/B。
+
+GitHub metadata：results/trace artifact11664800532为200624343bytes，digest8e092caebc295ce81f23dedaba971871d11e778822350e033704bcb146320abe；HTML11665105255为214980468bytes，digestb3c2333b6c0a00be65d262e10137a08ef599c6eda5f23aae3372deaf8a744df0。ZIP未在本地下载校验，不能冒充receipt/实际UI阅读。没有盲目重跑完整900s，没有提高时限/降低断言/关trace或改生产质量。Sky/统一lighting/GPU、完整运输和194矩阵依然未闭合。实际08:26周剩78%，60停止线不变。
