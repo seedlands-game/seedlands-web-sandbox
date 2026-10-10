@@ -1,6 +1,5 @@
 import type {
   ChunkPersistence,
-  ChunkColumnDirectory,
   ChunkPersistenceLoadDiagnostics,
   ChunkSnapshot,
 } from '@seedlands/stdlib/server/persistence/chunk-persistence';
@@ -12,6 +11,7 @@ import {
 } from '@seedlands/stdlib/server/persistence/game-save-checkpoint';
 import { GENERATOR_VERSION, chunkKey } from '@seedlands/stdlib/world/voxel';
 import { prepareBrowserLoadResult, type PreparedBrowserLoadResult } from './browser-persistence-load';
+import { createBrowserPersistenceSourceReads } from './browser-persistence-source-reads';
 import {
   parseBrowserPersistenceLoadBatchResult,
   withBrowserPersistenceRoundTrip,
@@ -43,7 +43,6 @@ import type {
 import { prepareFrozenSnapshotWrite, recordFrozenSnapshotWrite } from './browser-frozen-snapshot-write';
 import { assertWorldgenProviderIdentity, type KernelWorldgenProviderIdentity } from '@seedlands/kernel/spatial';
 import { requestWorldDirectory, type StoredWorldSummary } from './browser-world-directory';
-import { inspectBrowserColumnDirectory } from './browser-column-directory';
 import { cloneBrowserChunkSnapshot } from './browser-persistence-load';
 
 export { decodeBrowserWorldSave } from './browser-world-save';
@@ -66,6 +65,11 @@ export class BrowserChunkPersistence implements ChunkPersistence {
   });
   private requestSequence = 0;
   private directoryFence = Symbol();
+  private readonly sourceReads = createBrowserPersistenceSourceReads(
+    this,
+    () => this.sourceReadFence(),
+    (payload) => this.request(payload),
+  );
   private disposed = false;
   private corpusSummaryValue: ChunkPersistenceCorpusSummary | null = null;
   private metricsValue: BrowserPersistenceMetrics = createBrowserPersistenceMetrics();
@@ -232,13 +236,7 @@ export class BrowserChunkPersistence implements ChunkPersistence {
     });
   }
 
-  async inspectColumnDirectory(cx: number, cz: number): Promise<ChunkColumnDirectory> {
-    return inspectBrowserColumnDirectory(cx, cz, {
-      source: () => JSON.stringify([this.worldId, this.seedText, this.generatorVersion, this.worldgenProvider]),
-      fence: () => (this.disposed ? null : this.directoryFence),
-      request: () => this.request({ kind: 'column-directory', cx, cz }),
-    });
-  }
+  inspectColumnDirectory = this.sourceReads.inspectColumnDirectory;
 
   loadSnapshot(key: string): ChunkSnapshot | null {
     const hasResult = this.snapshots.has(key) || this.missing.has(key);
@@ -251,6 +249,10 @@ export class BrowserChunkPersistence implements ChunkPersistence {
       throw new Error(`Persistence load result was superseded by a save for ${key}.`);
     return snapshot ? cloneBrowserChunkSnapshot(snapshot) : null;
   }
+
+  readStoredSkySnapshot = this.sourceReads.readStoredSkySnapshot;
+
+  sourceReadFence = () => (this.disposed ? null : this.directoryFence);
 
   preparedSnapshotStatus(key: string) {
     if (this.snapshots.has(key)) return 'found' as const;

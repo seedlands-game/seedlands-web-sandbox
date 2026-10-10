@@ -294,3 +294,7 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 ### 模型受光展示 owner
 
 `app/scene/world-surface-lighting.ts`将同World Sky/方块光可用性与当前环境frame组合为SurfaceLightingSample；World持有派生采样器，恢复后的Game闭包读取当前owner。`app/scene/playcanvas-surface-lighting.ts`只拥有feature lightmap及received uniform，`app/scene/model-surface-lighting.ts`只拥有每mesh-instance的材质clone，保持资产纹理借用。`app/gameplay/browser-gameplay-presentation.ts`为角色/掉落物presenter与first-person viewmodel装配同一sampler，不获取Authority提交权。材质/Null测试、真实GPU控制面、实际模型场景与完整矩阵仍分别验收。
+
+### 持久化 Sky 源读取
+
+`client/persistence/browser-persistence-source-reads.ts` 将列目录和单个持久快照的只读读取绑定到现有存档身份及保存/释放 fence；`browser-stored-sky-snapshot.ts` 复用存档解码返回精确 revision 的独占副本，不消费 prepared registry/cache。`worker/authority-renderer-source.ts` 复用短 Host frontier、队列外 IO、最终 owner/worldRevision/fence 复核，为当前 renderer 提供 `request-sky-source`；原 `request-collision-baseline` 仍只观察驻留区块。`client/authority/browser-authority-sky-chunk.ts` 的副本只供原有有界列证明，不插入碰撞/mesh cache、不生成区块。静态、行为、冷存档场景/像素和整矩阵分别验收。

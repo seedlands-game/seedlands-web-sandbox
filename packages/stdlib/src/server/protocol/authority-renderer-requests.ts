@@ -26,4 +26,12 @@ export type AuthorityRendererReadRequest =
       requestId: number;
       key: string;
       minimumRevision: number;
+    }>
+  | Readonly<{
+      kind: 'request-sky-source';
+      protocolVersion: typeof PROTOCOL_VERSION;
+      epoch: SessionEpoch;
+      requestId: number;
+      key: string;
+      minimumRevision: number;
     }>;

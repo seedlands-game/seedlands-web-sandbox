@@ -44,7 +44,7 @@ describe('Browser Authority column inspection', () => {
     const pending = client.readSkyColumnChunk(0, 3, 0, 7);
     const request = worker.posts.at(-1) as { requestId: number };
     expect(request).toMatchObject({
-      kind: 'request-collision-baseline',
+      kind: 'request-sky-source',
       key: '0,3,0',
       minimumRevision: 7,
       runtimeEpoch: 'world:1',
@@ -66,6 +66,23 @@ describe('Browser Authority column inspection', () => {
     await expect(pending).resolves.toMatchObject({ revision: 7, canonical: expect.any(Uint16Array) });
     expect(client.getChunkRevision(0, 3, 0)).toBeNull();
     expect(worker.posts).toHaveLength(1);
+  });
+  it('reads a durable nonresident Sky source without claiming collision residency', async () => {
+    const canonical = new Uint16Array(32768);
+    canonical[19] = 3;
+    const request = async (message: Record<string, unknown>) =>
+      message.kind === 'request-sky-source'
+        ? {
+            status: 'available',
+            key: '0,3,0',
+            chunkRevision: 7,
+            canonical: canonical.buffer,
+            fluid: new ArrayBuffer(32768),
+          }
+        : { status: 'unavailable', key: '0,3,0' };
+    const source = await requestBrowserSkyChunk(request, () => 'world:1', 0, 3, 0, 7);
+    expect(source?.canonical[19]).toBe(3);
+    expect(source?.revision).toBe(7);
   });
   it('rejects a late response after the client runtime epoch changes', async () => {
     let epoch = 'old';
