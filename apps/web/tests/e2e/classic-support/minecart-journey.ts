@@ -17,10 +17,30 @@ export function registerClassicMinecartJourney(test: typeof import('@playwright/
     } catch (error) {
       await testInfo.attach('classic-minecart-native-failure.json', {
         contentType: 'application/json',
-        body: JSON.stringify(await collectClassicFailureDiagnostics(page)),
+        body: JSON.stringify({
+          ...(await collectClassicFailureDiagnostics(page)),
+          minecart: await readMinecartInputDiagnostics(page),
+        }),
       });
       throw error;
     }
+  });
+}
+
+async function readMinecartInputDiagnostics(page: Page) {
+  return page.evaluate(() => {
+    const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+    const s = h.snapshot();
+    return {
+      aimed: h.aimedVoxelTarget(),
+      rail: h.getVoxelAt?.(2, 31, 0),
+      fluid: h.getFluidCell?.(2, 31, 0),
+      player: s.player,
+      viewAngles: s.viewAngles,
+      interactionAttempts: s.interactionAttempts,
+      hotbar: document.querySelector('#hotbar button[aria-pressed="true"]')?.getAttribute('data-item'),
+      hud: document.body.innerText.slice(0, 2000),
+    };
   });
 }
 
@@ -82,7 +102,15 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   await lockPointer(page);
   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'minecart');
   await aimAtVoxelWithRealMouse(page, [2, 31, 0], [2, 32, 0]);
+  await testInfo.attach('classic-minecart-before-deploy.json', {
+    contentType: 'application/json',
+    body: JSON.stringify(await readMinecartInputDiagnostics(page)),
+  });
   await clickCanvasCenter(page, 'right');
+  await testInfo.attach('classic-minecart-after-deploy.json', {
+    contentType: 'application/json',
+    body: JSON.stringify(await readMinecartInputDiagnostics(page)),
+  });
   await expect.poll(async () => (await transportSnapshot(page))?.transports.length).toBe(1);
   const deployed = (await transportSnapshot(page))!.transports[0]!;
   expect(deployed.definitionId).toBe('seedlands:minecart');
