@@ -1,0 +1,7 @@
+# V2 诊断包装的挖掘等待契约
+
+精确远端dde3c593的CI409 Classic headless终态795PASS/1FAIL。equipment-mining-aim.test.ts:165仍要求资源消费者出现直接await mineVoxel文本，98的awaited诊断回调未被识别；workbench仍直接await原调用。完整decoded日志184797B/SHA256 792298a54e9ab15e21daed317d5ed1af14e8667c9f61baf7120f34561bae90d1保留。整个CI的Chromium此时仍运行，不能说CI409成功或取消它。
+
+本地原挖掘测试有效RED为26PASS/1FAIL，原资源等待契约修复后，与scenario、resource-route、diagnostics共4files58PASS。98语法树helper提取到同tests/e2e/classic-support，资源消费者必须外层await准确mine:aim-and-break、resource.target、无参数箭头回调直接返回mineVoxel(page, resource.target, aimAtVoxelWithRealMouse)；workbench保持直接await完整瞄准调用。两消费者仍不得额外pre-aim，mineVoxel调用数量各一次；scenario原等待/顺序及丢弃Promise、漏await、错误调用、注释伪调用负例保留。不是删除断言或仅匹配函数名称。无生产行为、输入、timeout或retry改变。
+
+范围ESLint及根test类型PASS；旧FAIL保留。不会把这一次定向修复冒充整个headless复跑或当前远端CI GREEN。长期docs基线无需改变，纯测试契约提取不移动生产owner。PR仍不可合入。

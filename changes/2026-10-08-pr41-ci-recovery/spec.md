@@ -942,3 +942,17 @@ Root独占route-pulse-diagnostics.ts、equipment-journey-support.ts、新operati
 07:44UTC范围细化：原scenario源码契约在包装后仍搜索直接await调用，55PASS/1FAIL保留。改用TypeScript语法树验证外层await、准确phase/target、返回原调用的无参数箭头回调，原操作顺序/新鲜tick/ground门禁不改；新增漏await、错操作/标签、丢弃Promise、注释伪调用反例。首次复核误用不存在的equipment-route-progress路径，只执行4files33PASS；apps/web/tsconfig.test.json不存在导致类型命令FAIL，随后使用实际route-progress/equipment-resource-route及根tsconfig.test.json核验，不把不存在项写PASS。
 
 07:48UTC checkpoint96/98：最终5files56PASS、原CI预算2PASS、test/Classic类型、范围ESLint/格式/路径/冻结5份PASS；4ec0dfbe identified build PASS，默认原native1.5m PASS/NON_MAIN，实际保存及重载目录版本均2，原pose/reference/epoch/rider/model/真实输入与timeout不改。Luna143对冻结04d同事务版本未发现确认P0/P1/P2，部分覆盖不是全PR批准。全部运行已terminal；下一步正常feature推送，原全CI的新V2诊断需实际运行，旧CI408 FAIL保留。源码96约26min/98约16min，原预算检查点内；真实周额度仍仅07:10的79%，08:10刷新，不能推算。
+
+### 同owner有界列目录查询 checkpoint99（预注册）
+
+07:53UTC冻结dde3c593，CI409运行中，不取消、不重复本地900旅程。目的为Sky来源发现取得同一Persistence owner的真实列目录，不从resident集合或固定世界高度推空。Stdlib新增可选只读列查询合同，Worker在原worlds/chunks同一readonly事务绑定当前world/seed/generator/provider和目录版本；扫描原主键同world/cx的所有cy，只返回目标cz的key/revision，不读取全库、不迁移DB版本。最大128条匹配/2048次cursor访问，预算超过返回unknown且不发布部分完整列；缺world、旧缺目录版本或非法record返回unknown，不初始化/写入/解码/生成区块，不消费Authority prepared cache。
+
+Browser公开可选端口经原worker队列发送，结果校验坐标、身份、版本、条数/唯一性；期间save/replace/dispose或world identity变化使旧回复unknown，不能伪造当前目录。新world init明确0；旧world缺字段保留unknown直到真实新writer写入，目录版本只是该次观察，旧客户端/跨tab写入协议及每次消费新鲜度还需后续闭合，不能把版本字段当永久空域证明。
+
+先fake-indexeddb和真实Browser类worker边界RED，再以空/负cy/高cy/异world/x/z隔离、准确预算边界、损坏/legacy/missing/目录变化、回调失败/无缓存消耗及异步save/replace/dispose反例GREEN；原save owner/regression按改动范围复用。Root独占新列查询及合同/Worker/Browser/helper/tests/spec/code-map；不委派、不改Sky或shader，本片不声称实际lighting验收。AI20min×120%=24min，08:17UTC检查点；传统0.2PD×120%=0.24PD。真实07:10剩79%，08:10须产品UI刷新，約60%停止线；未知credits/费用不换算。新的CI全程绑定dde3，不提前推后续本地代码。
+
+### V2挖掘静态等待契约 checkpoint100（预注册）
+
+07:59UTC，CI409 headless在dde3上795PASS/1FAIL：equipment-mining-aim.test.ts要求直接await mineVoxel文本，资源消费者已包装而workbench仍原直接调用。原CI日志作为RED，不改生产操作、full aim注入、调用数量、不得额外pre-aim或timeout。复用98准确语法树await/返回原操作Promise检查至新测试helper，仅资源消费者认可原awaited诊断回调；workbench保持直接await精确完整瞄准调用。原负例/顺序检查继续适用，定向旧测试先重现RED再GREEN，types/lint及现有邻近矿物/route回归。Root独占两个测试及测试helper/spec/证据，AI5min×120%=6min，08:05检查点；传统0.05PD×120%=0.06PD。费用未知，实际周额度仍07:10的79%，不推算；CI409浏览器继续自然运行，不提前推送。
+
+08:01UTC checkpoint100：本地原挖掘RED26PASS/1FAIL；共享准确await/Promise源码契约后4files58PASS，范围ESLint及根test types PASS，生产行为完全未改。headless整批没有本地重复，远端CI409仍待Chromium自然终态；下一精确CI必须验证该修复。先提交有界测试改动，99列目录源码仍独立本地进行，不夹带未验收生产代码。
