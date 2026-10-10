@@ -870,3 +870,13 @@ modelReady/位置与截图需要分层：数值观察不是像素证明；Root�
 06:07UTC，远端34fee5f1与base fba4486e精确核对未变，CI407自然运行。源码advanced-visual-effects.ts按colorGradeStrength/postProcessing把相机切为ACES/NEUTRAL/LINEAR，违反已批准固定tone mapper/exposure与质量预算分离合同。此片只移除质量owner对camera.toneMapping的覆盖，让相机既有配置保留；不在此臆造Pack profile、不改曝光、阴影/反射/postprocess质量预算，不宣称统一受光或性能收益。当前相机创建使用引擎默认tone mapper，因此low现有实际取值保持；medium/high由质量强制覆盖的路径移除。
 
 RED设计：在原AdvancedVisualEffects真实构造函数的low无GPU特效路径中传入预配置ACES与exposure1.25的相机，原代码会错误改为LINEAR；断言原配置保持。复用既有STATIC_RED_ONLY质量不选tone mapper断言做定向静态检查，其余未接线lighting RED仍不写PASS。Root独占advanced-visual-effects.ts、advanced-lighting.test.ts/spec及新证据，Luna无任务；不改变唯一browser入口与原断言/超时。必要定向测试、Classic类型、范围lint/格式、冻结/路径检查，生产build与后续同精确产物原visual旅程；完整main不盲目重跑，CI407不取消。AI20min×120%=24min，06:31UTC检查点；传统0.15PD×120%=0.18PD；最新05:29真实80%/4d21h，约60%停止线，费用/credits/API/占比未知不换算。
+
+06:22UTC checkpoint90终态：47aa9eb2/sourceDigest9be0e5b2/artifact399aea0a（289files），实际构造函数有效RED1FAIL/5PASS→GREEN6PASS，既有质量静态合同1PASS/5未执行；Classic类型、范围lint、格式、冻结5/5、路径、commit hook及identified build PASS。唯一既有visual用例2.9m PASS/runner3.0m、NON_MAIN/attempts空。Root实际查看day-gallery、sealed-room-unlit/glowstone三张原始PNG；昼间素材可见、两张夜室亮度有可见差异。它不是中高档像素、完整光照/材质传输正确性或性能证明；所有旧lighting RED/主旅程失败保留。公共quality-camera-tone-90-01绑定精确身份与原始PNG摘要。低档引擎默认LINEAR已在实际安装PlayCanvas2.21.4源码确认。
+
+06:22UTC checkpoint87精确CI407终态补记：34fee5f1五非BrowserSUCCESS；Chromium FAIL/preview SKIP。主旅程首/重试V2分别8.6m/8.1m完成，但C4首900000ms/20ssettle失败（x118.16/airborne），重试return72.5原90s失败（x76.7606/grounded/velocity0，Authority/render revisions匹配）；visual56.5s PASS，native两次reload start-card原10s失败。decoded job log精确保留，首次单次写日志ARG_MAX失败无文件/第二次分块成功；原失败不删。新416824261B ZIP已由GitHub connector返回文件ID，Library仅signed URL/workspace_path=null，同一待批准oaiusercontent域名，未重试403或绕过网络。
+
+### 矿车重载低核心提示合同与C4只读诊断 checkpoint91（预注册）
+
+06:22UTC，生产冻结47aa9eb2；只读源码已证实初始startClassicWorld确认“仍然进入”，native reload手写路径遗漏；ApplicationShell新实例的performanceWarningAccepted初值false，lowCoreWarning会直接停留菜单。此为明确缺失路径，尚未从CI407 ZIP核实实际UI，不把推测当远端根因。本片Root仅在唯一既有native线路增加显式低核心能力故障诊断（navigator advertised cores覆盖4，实际机器核心数不冒充4，diagnosticOnly/eligible=false/NON_MAIN、不用于性能）。先保持旧reload输入取得有效start-card RED与实际warning/phase诊断，再复用同一真实“仍然进入”点击闭环；保留所有120000/10000ms、真实输入、存档、pose/rider/reference/模型断言。若反例不是该提示则不猜修。默认正式CI不设置故障环境变量。
+
+唯一既有Luna/medium leaf Task141只读C4源码/精确两条motion，允许私有实际physics诊断，独占task141-c4-*；禁止源/活跃测试/spec/Browser/build/远端/网络/.env/历史枚举，不再委派。Root独占start.ts、minecart-journey.ts/spec/新证据与串行浏览器，不重复其分析。C4的目标、真实W/S/Space、到达/ground/停稳/碰撞、90s及900s保持；Luna建议不是自动授权采用性能或门槛变化。Root AI20min×120%=24min，06:46UTC检查点；Luna10min×120%=12min，06:31UTC回报；传统合计0.2PD×120%=0.24PD。最新05:29实际80%/4d21h，约60%停止线，06:29额度刷新；分模型服务信息未核实/费用credits占比未知不換算。CI407已自然terminal，本片完成前不盲目full重跑/推送抢跑。
