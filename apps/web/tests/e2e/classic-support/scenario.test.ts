@@ -1,11 +1,55 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import ts from 'typescript';
 import { overworldBlocks } from '../../../../../playbooks/classic/src/blocks';
 import { overworldItems } from '../../../../../playbooks/classic/src/items';
 import { overworldCraftingRecipes } from '../../../../../playbooks/classic/src/stations';
 import { classicScenario } from './scenario';
 
+function awaitedEquipmentOperationOffset(source: string, phase: string, operation: string): number {
+  const file = ts.createSourceFile('placement.ts', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+  let offset = -1;
+  const normalized = (text: string) => text.replace(/\s/g, '');
+  const visit = (node: ts.Node): void => {
+    if (ts.isAwaitExpression(node) && ts.isCallExpression(node.expression)) {
+      const call = node.expression;
+      const [label, target, callback] = call.arguments;
+      if (
+        call.expression.getText(file) === 'observeEquipmentOperation' &&
+        call.arguments.length === 3 &&
+        label &&
+        ts.isStringLiteral(label) &&
+        label.text === phase &&
+        target?.getText(file) === 'resource.target' &&
+        callback &&
+        ts.isArrowFunction(callback) &&
+        callback.parameters.length === 0 &&
+        ts.isCallExpression(callback.body) &&
+        normalized(callback.body.getText(file)) === normalized(operation)
+      )
+        offset = node.getStart(file);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  return offset;
+}
+
 describe('Classic canonical scenario contract', () => {
+  it('rejects an unawaited diagnostic, wrong operation, or callback that discards its promise', () => {
+    const operation = 'walkEquipmentRoute(page, resource.approach)';
+    const observed =
+      "observeEquipmentOperation('place:route', resource.target, () => walkEquipmentRoute(page, resource.approach))";
+    expect(awaitedEquipmentOperationOffset(`await ${observed};`, 'place:route', operation)).toBe(0);
+    for (const invalid of [
+      `${observed};`,
+      `await ${observed.replace('walkEquipmentRoute', 'otherRoute')};`,
+      `await ${observed.replace('place:route', 'place:aim')};`,
+      "await observeEquipmentOperation('place:route', resource.target, () => { walkEquipmentRoute(page, resource.approach); });",
+      `// await ${observed};`,
+    ])
+      expect(awaitedEquipmentOperationOffset(invalid, 'place:route', operation)).toBe(-1);
+  });
   it('moves the complete canonical lane down by 29 blocks without changing its x/z route', () => {
     expect(classicScenario.initialState.floor).toEqual({ from: [-4, 30, -3], to: [224, 30, 3], voxel: 3 });
     expect(classicScenario.initialState.air).toEqual({ from: [-4, 31, -3], to: [224, 37, 3], voxel: 0 });
@@ -204,10 +248,22 @@ describe('Classic canonical scenario contract', () => {
       supportSource.indexOf('async function placeResourceStrip'),
       supportSource.indexOf('async function mineResources'),
     );
-    const walk = placement.indexOf('await walkEquipmentRoute(page, resource.approach)');
-    const select = placement.indexOf('await selectCreativeItem(page, resource.itemId)');
-    const placed = placement.indexOf('await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel)');
-    const survival = placement.indexOf('await switchToSurvival(page)');
+    const walk = awaitedEquipmentOperationOffset(
+      placement,
+      'place:route',
+      'walkEquipmentRoute(page, resource.approach)',
+    );
+    const select = awaitedEquipmentOperationOffset(
+      placement,
+      'place:creative-selection',
+      'selectCreativeItem(page, resource.itemId)',
+    );
+    const placed = awaitedEquipmentOperationOffset(
+      placement,
+      'place:voxel-readback',
+      'expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel)',
+    );
+    const survival = awaitedEquipmentOperationOffset(placement, 'place:survival-switch', 'switchToSurvival(page)');
     const freshTick = placement.indexOf('value.authority.physicsTick > beforeSurvival.authority.physicsTick');
     const grounded = placement.indexOf('value.onGround && !value.colliding');
     expect([walk, select, placed, survival, freshTick, grounded].every((offset) => offset >= 0)).toBe(true);

@@ -15,6 +15,8 @@ import {
 } from './harness';
 import { itemCount } from './journey';
 import { classicScenario, type V2EquipmentResource } from './scenario';
+import { withRoutePulseDiagnostics } from './route-pulse-diagnostics';
+import { observeEquipmentOperation } from './equipment-operation-diagnostics';
 import {
   equipmentResourcePickup,
   equipmentRoutePulseMs,
@@ -23,6 +25,7 @@ import {
   equipmentWorkbenchCorridor,
   equipmentWorkbenchMiningApproach,
   EQUIPMENT_RESOURCE_WALK_OPTIONS,
+  EQUIPMENT_ROUTE_TIMEOUT_MS,
   isEquipmentMiningReady,
   shouldYieldEquipmentRoutePulse,
 } from './equipment-resource-route';
@@ -193,32 +196,35 @@ async function switchToSurvival(page: Page): Promise<void> {
 }
 
 export async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
-  return followEquipmentRoute(target, {
-    now: Date.now,
-    observe: () => snapshot(page),
-    walk: (key, timeout) =>
-      walkTo(page, target, {
-        key,
-        timeout,
-        ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
-        pulseMs: (current) => equipmentRoutePulseMs(current, target, key),
-        yieldAfterSettledPulse: (current) => shouldYieldEquipmentRoutePulse(current, target, key),
-      }),
-    waitForProgress: async (baseline, key, timeout) => {
-      let kind: 'arrival' | 'drift' | null = null;
-      const current = await waitForSnapshot(
-        page,
-        (snapshot) => {
-          const result = classifyEquipmentRouteWait(baseline, snapshot, target, key);
-          kind = result?.kind ?? null;
-          return result !== null;
-        },
-        timeout,
-      );
-      if (!kind) throw new Error('Equipment route wait resolved without an arrival or drift result.');
-      return { kind, snapshot: current };
-    },
-  });
+  return withRoutePulseDiagnostics('V2-equipment', target, EQUIPMENT_ROUTE_TIMEOUT_MS, (diagnostics) =>
+    followEquipmentRoute(target, {
+      now: Date.now,
+      observe: () => snapshot(page),
+      walk: (key, timeout) =>
+        walkTo(page, target, {
+          key,
+          timeout,
+          ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
+          diagnostics,
+          pulseMs: (current) => equipmentRoutePulseMs(current, target, key),
+          yieldAfterSettledPulse: (current) => shouldYieldEquipmentRoutePulse(current, target, key),
+        }),
+      waitForProgress: async (baseline, key, timeout) => {
+        let kind: 'arrival' | 'drift' | null = null;
+        const current = await waitForSnapshot(
+          page,
+          (snapshot) => {
+            const result = classifyEquipmentRouteWait(baseline, snapshot, target, key);
+            kind = result?.kind ?? null;
+            return result !== null;
+          },
+          timeout,
+        );
+        if (!kind) throw new Error('Equipment route wait resolved without an arrival or drift result.');
+        return { kind, snapshot: current };
+      },
+    }),
+  );
 }
 
 async function walkToEquipmentWorkbench(page: Page) {
@@ -243,14 +249,20 @@ async function placeWorkbench(page: Page): Promise<void> {
 async function placeResourceStrip(page: Page): Promise<void> {
   await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
   for (const resource of classicScenario.v2Equipment.resourceStrip) {
-    await walkEquipmentRoute(page, resource.approach);
-    await selectCreativeItem(page, resource.itemId);
-    await aimAtVoxelWithRealMouse(page, resource.support, resource.target);
-    await clickCanvasCenter(page, 'right');
-    await expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel);
+    await observeEquipmentOperation('place:route', resource.target, () => walkEquipmentRoute(page, resource.approach));
+    await observeEquipmentOperation('place:creative-selection', resource.target, () =>
+      selectCreativeItem(page, resource.itemId),
+    );
+    await observeEquipmentOperation('place:aim', resource.target, () =>
+      aimAtVoxelWithRealMouse(page, resource.support, resource.target),
+    );
+    await observeEquipmentOperation('place:right-click', resource.target, () => clickCanvasCenter(page, 'right'));
+    await observeEquipmentOperation('place:voxel-readback', resource.target, () =>
+      expect.poll(() => voxelAt(page, resource.target)).toBe(resource.voxel),
+    );
     const beforeSurvival = await snapshot(page);
     if (!beforeSurvival) throw new Error('Classic snapshot is unavailable before returning to survival.');
-    await switchToSurvival(page);
+    await observeEquipmentOperation('place:survival-switch', resource.target, () => switchToSurvival(page));
     await waitForSnapshot(
       page,
       (value) =>
@@ -262,15 +274,30 @@ async function placeResourceStrip(page: Page): Promise<void> {
 async function mineResources(page: Page, resources: readonly V2EquipmentResource[]): Promise<void> {
   await walkEquipmentRoute(page, equipmentWorkbenchCorridor(classicScenario.v2Equipment.workbench.approach));
   for (const resource of resources) {
-    const before = itemCount(await playerState(page), resource.dropItemId);
-    const approach = await walkEquipmentRoute(page, resource.approach);
+    const before = itemCount(
+      await observeEquipmentOperation('mine:inventory-before', resource.target, () => playerState(page)),
+      resource.dropItemId,
+    );
+    const approach = await observeEquipmentOperation('mine:approach-route', resource.target, () =>
+      walkEquipmentRoute(page, resource.approach),
+    );
     if (!isEquipmentMiningReady(approach, resource.target))
       throw new Error(`Equipment resource approach is outside mining range for ${resource.target.join(',')}.`);
-    await mineVoxel(page, resource.target, aimAtVoxelWithRealMouse);
-    await expectPresentedDropOrPickup(page, resource.dropItemId, before);
-    await walkEquipmentRoute(page, equipmentResourcePickup(resource));
-    await expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before);
-    await walkEquipmentRoute(page, resource.approach);
+    await observeEquipmentOperation('mine:aim-and-break', resource.target, () =>
+      mineVoxel(page, resource.target, aimAtVoxelWithRealMouse),
+    );
+    await observeEquipmentOperation('mine:presented-drop-or-pickup', resource.target, () =>
+      expectPresentedDropOrPickup(page, resource.dropItemId, before),
+    );
+    await observeEquipmentOperation('mine:pickup-route', resource.target, () =>
+      walkEquipmentRoute(page, equipmentResourcePickup(resource)),
+    );
+    await observeEquipmentOperation('mine:inventory-after', resource.target, () =>
+      expect.poll(async () => itemCount(await playerState(page), resource.dropItemId)).toBeGreaterThan(before),
+    );
+    await observeEquipmentOperation('mine:return-route', resource.target, () =>
+      walkEquipmentRoute(page, resource.approach),
+    );
   }
 }
 
