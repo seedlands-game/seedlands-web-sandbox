@@ -38,6 +38,8 @@ export type HarnessApi = {
   inputDecisionDiagnostics: () =>
     import('../../client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   skyVisibilityDiagnostics: () => ReturnType<World['getSkyVisibilityDiagnostics']> | null;
+  receivedLightingGpuProbe: () =>
+    readonly import('../scene/received-lighting-gpu-probe').ReceivedLightingGpuPixel[] | null;
   blockLightDiagnostics: () => import('../scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   world: WorldHarnessPort;
   snapshot: () => HarnessSnapshot;
