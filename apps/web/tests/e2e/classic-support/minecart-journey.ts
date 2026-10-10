@@ -29,7 +29,8 @@ export function registerClassicMinecartJourney(test: typeof import('@playwright/
 
 async function readMinecartInputDiagnostics(page: Page) {
   return page.evaluate(() => {
-    const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+    const h = (window as unknown as ClassicWindow).__seedlandsHarness;
+    if (!h) return { available: false, hud: document.body.innerText.slice(0, 2000) };
     const s = h.snapshot();
     return {
       aimed: h.aimedVoxelTarget(),

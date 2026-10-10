@@ -128,6 +128,7 @@ export class AutonomyRuntime {
                 target,
                 perception: this.observe(actorId),
                 resolveEntity: (id) => this.options.entities.get(id),
+                bodyConfig: this.options.bodyConfig,
               }),
             }),
           interruptAction: (actorId, reason) => this.interruptAction(actorId, reason),

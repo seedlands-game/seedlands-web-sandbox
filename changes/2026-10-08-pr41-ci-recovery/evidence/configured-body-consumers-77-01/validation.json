@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "candidateParentSha": "ffca887c242b0dd2751e8dffdc1888badfafff42",
+  "observedAtUtc": "2026-10-10 03:03:28",
+  "candidateInputsSha256": {
+    "apps/web/src/app/player/collision-debug-runtime.ts": "0741a8c64b49baac572b518a4232863691e050eac984952ba7c2e24dc1dc7135",
+    "apps/web/src/client/presentation/collision-debug-projection.ts": "0f18db49b0a65dff17bae8b4c92080e0c3cba970f9f35f6c3a22b9c5a5168d86",
+    "apps/web/src/worker/authority-worker-deterministic-advance.ts": "3a495c1c964953979a0d74f77a57a4936c689373a4792788aad444ebc82c657d",
+    "apps/web/tests/e2e/classic-support/minecart-journey.ts": "4992ee7e1d4b4286c6da2414dbb4be9302b37ecdbccda21bd2de268e022475b0",
+    "apps/web/tests/integration/runtime/server/authority-actor-rules.test.ts": "1d2690c064a57e51f6794b705fc7dd20527085a663b46615a78952308b928bb3",
+    "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts": "b19eabbf397855e0cda75f6f28e61f08907f95f1a77ece8e6077e0327dfc7d3b",
+    "apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts": "abf5c261506cf57ba4e1ceeb0c6f7d8538da528c09a92ea6f609407fa1cd018a",
+    "apps/web/tests/unit/app/collision-debug-renderer.test.ts": "c9954ce9bb61a905c33e439077fd65447757af28d62a4d0b5d083372d8c69ff1",
+    "apps/web/tests/unit/client/authority-worker-deterministic-advance.test.ts": "3f9e0873ed04d3b924c277d09c0774e0dd7e720cf39487fac8f627246ce8249d",
+    "apps/web/tests/unit/client/collision-debug-projection.test.ts": "89d1fab5c40fd5a5203d49fa815256d4d43fa88612ed2930407f0064ab396e19",
+    "apps/web/tests/unit/worker/game-logic-worker.test.ts": "f29a83dd81fdebc27727edea6b6ce58d82b9a5467f411b005fc7c2d020bd7bed",
+    "package.json": "3a6c0cf6603d0fc272dd9b74e5baf1b2345a4cbcfb459f5a7a3093f9b83ab0a0",
+    "packages/stdlib/src/server/authority/actor-movement-projection.ts": "68e5ed82bd51650af77588e0e44de6c72539a54065f082dd389f38cdc6d80cea",
+    "packages/stdlib/src/server/authority/authority-runtime.ts": "aa2f4031fe8bea082e5b042de9f2b946dddd3c9cf68bb993f7e1f12e23e28f4e",
+    "packages/stdlib/src/server/authority/authority-session-types.ts": "f2c6c09e82e037b7080dc6ccbc06425f2d427da189295dd480750df7e5c15677",
+    "packages/stdlib/src/server/authority/logic-observation-builder.ts": "ee25126054d5c17f0f1505bc96be1b04a2c557b6edb28246766369db5cf08bcb",
+    "packages/stdlib/src/server/gameplay/gameplay-autonomy-runtime.ts": "643b0203eaeba5652dd599a3af8abc7a900f08a305b3bdc56de3bb36c734a41d",
+    "packages/stdlib/src/server/headless/headless-chunk-loader.ts": "9345346ae71dfb1db93c9ed8bef69bac749550b889acb3ad1064888ea586a19d",
+    "packages/stdlib/src/server/logic/logic-decision.ts": "474b547f10f301f371fd5ab7455f29a931cb94ea9c95e5ed99fcf1393e51198d",
+    "packages/stdlib/src/server/logic/logic-protocol.ts": "2ce67371f34a24f5452dab19310cd82354e74538f7c00195a1a2ad2716bded66",
+    "packages/stdlib/src/server/simulation/autonomy-runtime-options.ts": "c6fa356db1ca104bf77224efcb5761c0b0cf522d0e72bf998202dc57d50db723",
+    "packages/stdlib/src/server/simulation/autonomy-runtime.ts": "589de0f3bfb450b162e2f071fd8549b47d327442d6e1d6b24d9c3e7ada5ab068",
+    "packages/stdlib/src/server/simulation/character-navigation.ts": "11776b9a062a75b9d44acb356abda648500a585a5e225305f13c5d3f30c15f86",
+    "packages/stdlib/tests/server/authority-runtime.test.ts": "869678113f77264214a0090b26c1830dd1e16b1c7bd57febde3b3abe64ceb096",
+    "packages/stdlib/tests/server/logic/logic-decision.test.ts": "00b6e6a7f8c819fc7fed0526a3eb72dd641b908662b03b9d723857007b426fc9",
+    "packages/stdlib/tests/server/transport-yaw-geometry.test.ts": "c8dfef2f93b2b36799a086b621717803eb6e9565d24a56fe1cb271c3892c30aa",
+    "tsconfig.classic-tests.json": "38c4d47696a9f3806d9321d18054062b443129eacd7991f9a3eb6a123762fd16",
+    "apps/web/tests/unit/client/authority-worker-configured-body-preload.test.ts": "9c18fc5664d26ea359a93d3883e0e62d09fc3e175cc21f324654284fede3c6cf"
+  },
+  "logicRequestedRed": {
+    "status": "FAIL_EXPECTED",
+    "passed": 4,
+    "failed": 1,
+    "trigger": "Entity has no registered body: transport:undefined"
+  },
+  "preloadFaults": {
+    "headless": "FAIL_EXPECTED_SAME_EXCEPTION",
+    "browser": "FAIL_EXPECTED_SAME_EXCEPTION",
+    "workingSourcesRestored": true
+  },
+  "targetedWeb": {
+    "status": "PASS_BEFORE_TEST_SPLIT",
+    "files": 7,
+    "tests": 33
+  },
+  "targetedStdlib": {
+    "status": "PASS",
+    "files": 3,
+    "tests": 22
+  },
+  "fullStdlib": {
+    "status": "FAIL",
+    "files": 166,
+    "passed": 1196,
+    "failed": 1,
+    "failure": "existing CLI 15000ms timeout"
+  },
+  "isolatedCli": {
+    "status": "PASS",
+    "passed": 1,
+    "notSelected": 6,
+    "testDurationMs": 14640
+  },
+  "fullHeadless": {
+    "status": "FAIL",
+    "files": 127,
+    "passed": 793,
+    "failed": 2,
+    "failures": ["existing plank clearance 5000ms timeout", "existing crop cadence 5000ms timeout"]
+  },
+  "isolatedHeadlessFailures": {
+    "status": "PASS",
+    "files": 2,
+    "tests": 6,
+    "originalTimeoutsAndAssertionsRetained": true
+  },
+  "format": "PASS_FIVE_FROZEN_BYTE_IDENTITIES",
+  "ciSelection": {
+    "status": "PASS",
+    "tests": 16
+  },
+  "paths": "PASS",
+  "scopedSourceLint": "PASS",
+  "classicTypes": "PASS",
+  "fullTypes": "PASS_PRODUCTION_AND_CORRECTED_TEST_TOOL_CLASSIC_TAIL_PLUS_EXPANDED_CLASSIC",
+  "nativeNewArtifact": "NOT_RUN",
+  "wholePr": "BLOCKED",
+  "quota": {
+    "remainingPercent": 81,
+    "observedAtUtc": "2026-10-10 02:26",
+    "source": "parent product UI",
+    "stopLinePercent": 60
+  },
+  "beforeTestSplitInputsSha256": {
+    "apps/web/src/app/player/collision-debug-runtime.ts": "0741a8c64b49baac572b518a4232863691e050eac984952ba7c2e24dc1dc7135",
+    "apps/web/src/client/presentation/collision-debug-projection.ts": "0f18db49b0a65dff17bae8b4c92080e0c3cba970f9f35f6c3a22b9c5a5168d86",
+    "apps/web/src/worker/authority-worker-deterministic-advance.ts": "3a495c1c964953979a0d74f77a57a4936c689373a4792788aad444ebc82c657d",
+    "apps/web/tests/e2e/classic-support/minecart-journey.ts": "4992ee7e1d4b4286c6da2414dbb4be9302b37ecdbccda21bd2de268e022475b0",
+    "apps/web/tests/integration/runtime/server/authority-actor-rules.test.ts": "1d2690c064a57e51f6794b705fc7dd20527085a663b46615a78952308b928bb3",
+    "apps/web/tests/integration/runtime/server/authority-logic-lifetime-acceptance.test.ts": "b19eabbf397855e0cda75f6f28e61f08907f95f1a77ece8e6077e0327dfc7d3b",
+    "apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts": "abf5c261506cf57ba4e1ceeb0c6f7d8538da528c09a92ea6f609407fa1cd018a",
+    "apps/web/tests/unit/app/collision-debug-renderer.test.ts": "c9954ce9bb61a905c33e439077fd65447757af28d62a4d0b5d083372d8c69ff1",
+    "apps/web/tests/unit/client/authority-worker-deterministic-advance.test.ts": "1e1a33a3babde02aa2a8fcd2d10c490b567b3d8acfb79d1ce2b8750f2b895460",
+    "apps/web/tests/unit/client/collision-debug-projection.test.ts": "89d1fab5c40fd5a5203d49fa815256d4d43fa88612ed2930407f0064ab396e19",
+    "apps/web/tests/unit/worker/game-logic-worker.test.ts": "ccc4d9093665b71bb6b3a5de826f23c8c1d6ea60fcff49bc08dbdced38682cd2",
+    "package.json": "50ab61b8657c7fef9eefaf30d502861cafa73150bd6e1ef1d2b536fc01532796",
+    "packages/stdlib/src/server/authority/actor-movement-projection.ts": "68e5ed82bd51650af77588e0e44de6c72539a54065f082dd389f38cdc6d80cea",
+    "packages/stdlib/src/server/authority/authority-runtime.ts": "aa2f4031fe8bea082e5b042de9f2b946dddd3c9cf68bb993f7e1f12e23e28f4e",
+    "packages/stdlib/src/server/authority/authority-session-types.ts": "f2c6c09e82e037b7080dc6ccbc06425f2d427da189295dd480750df7e5c15677",
+    "packages/stdlib/src/server/authority/logic-observation-builder.ts": "ee25126054d5c17f0f1505bc96be1b04a2c557b6edb28246766369db5cf08bcb",
+    "packages/stdlib/src/server/gameplay/gameplay-autonomy-runtime.ts": "643b0203eaeba5652dd599a3af8abc7a900f08a305b3bdc56de3bb36c734a41d",
+    "packages/stdlib/src/server/headless/headless-chunk-loader.ts": "9345346ae71dfb1db93c9ed8bef69bac749550b889acb3ad1064888ea586a19d",
+    "packages/stdlib/src/server/logic/logic-decision.ts": "474b547f10f301f371fd5ab7455f29a931cb94ea9c95e5ed99fcf1393e51198d",
+    "packages/stdlib/src/server/logic/logic-protocol.ts": "2ce67371f34a24f5452dab19310cd82354e74538f7c00195a1a2ad2716bded66",
+    "packages/stdlib/src/server/simulation/autonomy-runtime-options.ts": "c6fa356db1ca104bf77224efcb5761c0b0cf522d0e72bf998202dc57d50db723",
+    "packages/stdlib/src/server/simulation/autonomy-runtime.ts": "589de0f3bfb450b162e2f071fd8549b47d327442d6e1d6b24d9c3e7ada5ab068",
+    "packages/stdlib/src/server/simulation/character-navigation.ts": "11776b9a062a75b9d44acb356abda648500a585a5e225305f13c5d3f30c15f86",
+    "packages/stdlib/tests/server/authority-runtime.test.ts": "869678113f77264214a0090b26c1830dd1e16b1c7bd57febde3b3abe64ceb096",
+    "packages/stdlib/tests/server/logic/logic-decision.test.ts": "00b6e6a7f8c819fc7fed0526a3eb72dd641b908662b03b9d723857007b426fc9",
+    "packages/stdlib/tests/server/transport-yaw-geometry.test.ts": "c8dfef2f93b2b36799a086b621717803eb6e9565d24a56fe1cb271c3892c30aa"
+  },
+  "afterTestSplit": {
+    "status": "PASS",
+    "files": 2,
+    "tests": 10,
+    "file": "apps/web/tests/unit/client/authority-worker-configured-body-preload.test.ts"
+  },
+  "fullSourceLint": "PASS"
+}

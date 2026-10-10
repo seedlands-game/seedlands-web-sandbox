@@ -8,8 +8,10 @@ import { MemoryGamePersistence } from '../../../../../../../packages/stdlib/src/
 import baseline from '../../../../fixtures/classic/pre-transport-production-v4.json';
 import activeBaseline from '../../../../fixtures/classic/pre-transport-production-active-v4.json';
 import { itemInteractionSelection } from '../../../../../src/app/player/secondary-interaction';
+import type { LogicObservation } from '../../../../../../../packages/stdlib/src/server/logic/logic-protocol';
 
 it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同次提交', async () => {
+  const observations: LogicObservation[] = [];
   const runtime = await AuthorityRuntime.create({
     ...classicOptions(),
     worldgenProvider: classicWorldgenProvider,
@@ -19,6 +21,7 @@ it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同
     initialWorldTime: 8,
     startTimeMs: 0,
     initialPlayerBodyPosition: [2.5, 32.6, 2.5],
+    onLogicObservation: (observation) => observations.push(observation),
   });
   const edits = [];
   for (let x = -1; x <= 5; x++)
@@ -61,6 +64,10 @@ it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同
   });
   expect(response.result).toMatchObject({ success: true, handled: true });
   expect(runtime.view().transports).toHaveLength(1);
+  expect(runtime.snapshot().entities.find(({ type }) => type === 'transport')?.bodyAabb).toEqual({
+    min: { x: -0.45, y: 0, z: -0.45 },
+    max: { x: 0.45, y: 0.7, z: 0.45 },
+  });
   expect(runtime.view().transports![0]).toMatchObject({ definitionId: 'seedlands:minecart', rider: null });
   expect(runtime.server.getInventoryPointerView(runtime.playerId).slots[player.selectedSlot]).toBeNull();
   expect(runtime.server.getInventoryPointerView(runtime.playerId).revision).toBe(beforeInventory.revision + 1);
@@ -112,8 +119,17 @@ it('正式Classic矿车物品use在普通轨道唯一部署，库存和entity同
       edges: { jumpPressed: false },
     }),
   ).toBe('accepted');
+  runtime.requestLogicObservation();
   runtime.advanceSession(500);
   const moved = runtime.view().transports![0]!;
+  const observed = observations.at(-1)!;
+  expect(observed.entities.find(({ id }) => id === transport.reference.entityId)).toMatchObject({
+    bodyKind: null,
+    bodyAabb: { min: { y: 0 }, max: { y: 0.7 } },
+  });
+  expect(observed.decisionContext.actors.some(({ state }) => state.entityId === transport.reference.entityId)).toBe(
+    false,
+  );
   expect(moved.pose.position[0]).toBeGreaterThan(initial[0] + 0.05);
   expect(runtime.server.getEntity(runtime.playerId)!.position).toEqual([
     moved.pose.position[0],

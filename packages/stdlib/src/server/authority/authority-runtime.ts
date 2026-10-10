@@ -55,6 +55,7 @@ export type { AuthorityResidencyDiagnostics } from './authority-residency-runtim
 
 export class AuthorityRuntime {
   readonly server: GameServer;
+  bodyConfigForEntity = (entity: Parameters<typeof authorityBodyConfig>[1]) => authorityBodyConfig(this.server, entity);
   readonly frequencies: R.AuthorityFrequencies;
   private readonly session: AuthoritySession;
   private readonly newPlayer: boolean;

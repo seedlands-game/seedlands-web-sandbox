@@ -750,3 +750,23 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 02:13UTC：a9e3da7c/browser76-02实际23.2秒FAIL，原native部署5秒未得到transport。Authority恢复推进（tick909/ACK206），world revision2→3/新增单个voxel mutation；已有target读数2,31,0但无动作拒绝原因，不能认定输入适配器、Creative选择或流体原因。登记仅诊断增强：同一次原点击前后附件记录实际target、目标voxel/fluid、player/viewAngles、selected hotbar及HUD；失败附件保留同字段。未改变动作、时限或成功断言。下一运行为补齐失败证据，不进行无依据重试或暂停来掩盖失败。
 
 02:16UTC：读取原browser76-02 trace确认关闭背包后连续两个canvas.click；closeInventory自身已lockPointer，而新用例再次lockPointer无条件左击。PlayerController在已locked时把第二左击送入正式creative mining，与新增一格mutation一致；这是新夹具的额外采集输入，禁止靠暂停隐藏。移除重复左击，仅断言原helper已完成Pointer Lock，原native右键保留。诊断5801aba0已构建但不为已确认额外采集继续运行错误输入；新源码统一补诊断并移除重复点击后再跑。没有修改正式玩家采集路径或假定流体/Creative模块根因。
+
+### 已配置载具物理/Logic消费者接线 checkpoint77（预注册）
+
+2026-10-10 02:24UTC，冻结ffca887c，native76-04为原C0 FAIL，唯一76-05诊断复验rail39/fluidnull/目标正确/attempt0/矿车热栏确认，原native右键后应用错误页明确Entity has no registered body: transport:undefined。新诊断在harness被撤销后又抛错，须fail-soft保留原始异常。Authority body已有正式按definition/yaw解析；正常Logic observation及Browser确定性/Headless载具collision preloading仍固定bodyKind，需按当前实际定义接通。
+
+先定向有效RED，修正式body projection，载具继续作为只读实体可观察；不跳过carrier或伪造固定archetype，未知定义fail-closed，Actor控制与导航权限保持。类型/回归、正常运行与确定性推进、identified artifact真实矿车旅程必要复验；不宣称所有运输、旧载具转换、整个Classic/照明/性能或PR可合入。Root独占源码/测试/spec，必要Luna仅只读消费者审阅与私有报告，委派一层。
+
+传统0.5PD×120%=0.6PD，AI35分钟×120%=42分钟，03:06UTC保守上限，中途有意义修复及时checkpoint。最新真实UI01:24为81%，02:01刷新请求待答，约60%停止线；产品实际额度无法从环境独立读取，不做token/credits百分比换算。旧失败/产物全部保留，新输出独立ID。长期docsbaseline只随真实公共投影合同更新，不扩大Kernel或权限。
+
+02:41UTC checkpoint77消费者补全：Logic wire升为v2，nullable bodyKind + 当前definition/yaw bodyAabb只用于被动carrier；旧v1 Worker消息拒绝，外层direct-envelope与既有Authority输入版本不改。Authority snapshot新增可忽略bodyAabb派生字段供碰撞诊断，不另持世界或转成固定Actor。导航按当前EntityStore配置解析；station无独立物理body仍由voxel地形约束，其他未知body不再静默漏障碍。预加载分别验证Browser advance与真实Headless加载。现行Classic已退役settler，因此旧deterministic advance夹具换成正式cow，原移动/时限断言保留；两条准备债务用例在准备完成后安装受测回调，以免普通wake提前触发failure。有效Logic RED1FAIL/4PASS已保存，修复5PASS；配置旋转/nav/Logic22PASS。其他新消费者测试尚未全部GREEN。最新真实UI02:26为81%/5日0小时重置，停止线约60%；以上不构成产品或性能通过。
+
+02:46UTC验证选择登记：现行`test:classic:headless`没有上述Browser推进、Logic Worker/client、碰撞debug及Logic lifetime六个消费者文件。将六项加入同一现有Headless回归命令，保留既有全部selection、单worker、断言与时限；不新增浏览器旁路或弱化CI。旧Headless preloader与旧Browser preloader逐个故障替换均让新用例出现精确transport:undefined异常；两次私有RED已保存，源码恢复当前候选。七文件33例串行GREEN，导航/Logic22例GREEN；全stdlib回归运行中。
+
+02:57UTC checkpoint77：完整stdlib166files1197tests为1196PASS/1条原CLI15000ms超时；原失败用例隔离1PASS/6未选，14640ms。完整Headless127files795tests为793PASS/2条原5000ms超时（plank clearance/crop cadence），失败两文件隔离6PASS。保留所有原时限/断言；整批仍为FAIL，超时根因和稳定性未证实。后续容器窗口无新增CPU限流，不足以解释早先失败。七文件33PASS覆盖新增消费者，stdlib定向22PASS；格式/五冻结字节、CI选择16、路径与源码lintPASS。完整类型最后test fixture问题已修复，尾部类型和全lint复核中；新生产native尚未运行。新增evidence/configured-body-consumers-77-01只记录本轮事实，源SHA由后续提交冻结。
+
+03:00UTC静态复核：生产/测试/工具/Classic类型尾部PASS；全lint发现既有Browser推进测试加入新用例后超过500行。将配置载具preload用例及其专用真实runtime夹具移到同职责unit/client文件，加入同一回归选择；保留测试行为，不压行或豁免规则。搬移后定向复验并更新候选字节身份，不重跑已无行为变化的整批来抹掉早先失败。
+
+03:01UTC补齐相同消费者的静态选择：现行Classic测试tsconfig使用显式清单，新增七个消费者文件也进入该清单，防止Vitest仅转译通过而漏掉测试源码类型错误。原条目保持，既有未选择Legacy Actor用例不冒充本轮行为通过。
+
+03:03UTC：新增显式类型清单PASS，全仓lintPASS；故意旧wire消息反例的类型转换仅在测试模拟不可信输入，运行时拒绝断言保持。搬移后两文件10PASS；证据分别保留搬移前/后输入，整批3条超时均仍为FAIL。准备冻结本组source commit供同一canonical identified artifact的真实玩法验证，尚不推断可合入。

@@ -1,6 +1,13 @@
 import { projectCombatAction } from '../simulation/combat-action-snapshot';
 import { bodyKindForEntity } from '../../physics/body-registry';
-import { MAX_LOGIC_TERRAIN_CELLS, type LogicObservation, type TerrainWindow } from '../logic/logic-protocol';
+import type { WorldAabb } from '../../physics';
+import { authorityBodyConfig } from './authority-body-config';
+import {
+  LOGIC_PROTOCOL_VERSION,
+  MAX_LOGIC_TERRAIN_CELLS,
+  type LogicObservation,
+  type TerrainWindow,
+} from '../logic/logic-protocol';
 import type { AuthoritySnapshot } from './authority-session';
 import type { GameplayEntity } from '../gameplay/entity-store';
 import type { ActorState, SimulationSnapshot } from '../simulation/actor-state';
@@ -24,6 +31,7 @@ type BuildOptions = Readonly<{
   items: ItemDefinitionRegistry;
   identityRevision: (entity: GameplayEntity) => number;
   controlSource?: (entityId: string) => ActorControlSource;
+  configuredBodyAabb?: (entity: GameplayEntity) => WorldAabb;
   getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
   voxelSemantics?: VoxelSemanticsResolver;
 }>;
@@ -111,6 +119,12 @@ const createTerrainWindow = (
   };
 };
 
+function requireConfiguredBodyAabb(options: BuildOptions, entity: GameplayEntity): WorldAabb {
+  const bounds = options.configuredBodyAabb?.(entity);
+  if (!bounds) throw new Error('Logic configured body requires its current definition.');
+  return bounds;
+}
+
 export function buildLogicObservation(options: BuildOptions): LogicObservation {
   const bodyById = new Map(options.snapshot.entities.map((entry) => [entry.id, entry] as const));
   const identityById = new Map(
@@ -131,7 +145,7 @@ export function buildLogicObservation(options: BuildOptions): LogicObservation {
   }
 
   return {
-    protocolVersion: 1,
+    protocolVersion: LOGIC_PROTOCOL_VERSION,
     epoch: options.epoch,
     observationSequence: options.observationSequence,
     physicsTick: options.snapshot.physicsTick,
@@ -142,7 +156,8 @@ export function buildLogicObservation(options: BuildOptions): LogicObservation {
       const item = entity.stack ? options.items.get(entity.stack.itemId) : null;
       return {
         id: entity.id,
-        bodyKind: bodyKindForEntity(entity),
+        bodyKind: entity.type === 'transport' ? null : bodyKindForEntity(entity),
+        ...(entity.type === 'transport' ? { bodyAabb: options.clone(requireConfiguredBodyAabb(options, entity)) } : {}),
         identityRevision: identityById.get(entity.id)!,
         poseRevision: options.snapshot.physicsTick,
         position: [...entity.position],
@@ -199,6 +214,7 @@ export class AuthorityLogicObservationBuilder {
       items: this.server.itemDefinitions,
       identityRevision: (entity) => this.identityRevision(entity),
       controlSource: (entityId) => this.server.getActorControlSource(entityId) ?? 'none',
+      configuredBodyAabb: (entity) => authorityBodyConfig(this.server, entity).localAabb,
       getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
       ...(this.server.hasGameplayComposition ? { voxelSemantics: this.server.voxelSemantics } : {}),
     });

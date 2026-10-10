@@ -1,3 +1,5 @@
+import { createCharacterNavigationConstraint } from '../../src/server/simulation/character-navigation';
+import type { PerceptionSnapshot } from '../../src/server/simulation/perception-runtime';
 import { describe, expect, it } from 'vitest';
 import { bodyWorldAabb } from '../../src/physics';
 import { bodyConfigFor } from '../../src/physics/body-registry';
@@ -81,6 +83,38 @@ function create() {
 }
 
 describe('canonical transport yaw geometry', () => {
+  it('uses the current configured yaw footprint as a visible navigation obstacle and rejects unresolved bodies', () => {
+    const { entities } = create();
+    entities.spawn({ id: 'mover', type: 'npc', archetype: 'settler', position: [2.5, 60, 0.5] });
+    const server = {
+      createEntityReference: (id: string) => entities.createReference(id),
+      transportState: entities.transportState.bind(entities),
+      gameplayContent: content,
+    };
+    const perceived: PerceptionSnapshot = {
+      observerId: 'mover',
+      visibleEntities: [{ entityId: 'carrier', type: 'transport', distance: 2 }],
+      threats: [],
+      food: [],
+      pois: [],
+      observations: [],
+      candidateCount: 1,
+      lineOfSightChecks: 1,
+    };
+    const options = {
+      actorId: 'mover',
+      target: [4.5, 60, 0.5] as [number, number, number],
+      perception: perceived,
+      resolveEntity: (id: string) => entities.get(id) ?? null,
+    };
+    const constraint = createCharacterNavigationConstraint({
+      ...options,
+      bodyConfig: (entity) => authorityBodyConfig(server, entity),
+    });
+    expect(constraint.blocksNode([0.5, 60, 1.5])).toBe(true);
+    expect(constraint.blocksNode([1.5, 60, 0.5])).toBe(false);
+    expect(() => createCharacterNavigationConstraint(options)).toThrow('no registered body');
+  });
   it('resolves the current world-local body and keeps the zero-yaw definition unchanged', () => {
     const { entities } = create();
     const server = {

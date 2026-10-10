@@ -19,7 +19,8 @@ export type CollisionDebugSensor = Readonly<{
 
 export type CollisionDebugBody = Readonly<{
   id: string;
-  kind: BodyKind;
+  kind: BodyKind | null;
+  localAabb?: WorldAabb;
   state: BodyState;
   grounded: boolean;
   contacts: readonly Contact[];
@@ -179,8 +180,9 @@ function appendSphere(
     }
 }
 
-function bodyAabb(body: Pick<CollisionDebugBody, 'kind' | 'state'>): WorldAabb {
-  const localAabb = bodyConfigFor(body.kind).localAabb;
+function bodyAabb(body: Pick<CollisionDebugBody, 'kind' | 'state' | 'localAabb'>): WorldAabb {
+  const localAabb = body.localAabb ?? (body.kind === null ? null : bodyConfigFor(body.kind).localAabb);
+  if (!localAabb) throw new Error('Collision debug carrier requires its configured body.');
   return {
     min: {
       x: body.state.position.x + localAabb.min.x,

@@ -52,7 +52,7 @@ describe('AuthorityRuntime', () => {
     expect(runtime.ready().snapshot).toMatchObject(paused);
     expect(
       runtime.receiveLogicIntentBatch({
-        protocolVersion: 1,
+        protocolVersion: 2,
         epoch: observation.epoch,
         observationSequence: observation.observationSequence,
         expiresAtPhysicsTick: observation.physicsTick + 1,
@@ -346,7 +346,7 @@ it('暂停确定性推进耗尽Logic请求后，恢复运行会重新发布观�
   expect(previous).toBeDefined();
   expect(
     runtime.receiveLogicIntentBatch({
-      protocolVersion: 1,
+      protocolVersion: 2,
       epoch: previous.epoch,
       observationSequence: previous.observationSequence,
       expiresAtPhysicsTick: previous.physicsTick + 12,

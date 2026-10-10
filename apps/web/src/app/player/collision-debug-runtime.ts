@@ -70,14 +70,15 @@ export class CollisionDebugRuntime {
         epoch: snapshot.epoch,
         physicsTick: snapshot.physicsTick,
         authoritative: snapshot.entities.map((entity) => {
-          const kind = bodyKindForEntity(entity);
+          const kind = entity.type === 'transport' ? null : bodyKindForEntity(entity);
           return {
             id: entity.id,
             kind,
+            ...(entity.bodyAabb ? { localAabb: entity.bodyAabb } : {}),
             state: entity.body,
             grounded: entity.grounded,
             contacts: entity.contacts,
-            sensors: bodySensorsFor(kind).map((sensor) => ({
+            sensors: (kind === null ? [] : bodySensorsFor(kind)).map((sensor) => ({
               ...sensor,
               center: { ...entity.body.position },
             })),

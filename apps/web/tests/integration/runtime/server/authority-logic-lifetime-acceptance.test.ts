@@ -11,7 +11,7 @@ const fixture = (targetRevision: number) => {
   entities.spawn({ id: 'actor', type: 'creature', position: [0, 1, 0] });
   entities.spawn({ id: 'target', type: 'player', position: [1, 1, 0] });
   const observation: LogicObservation = {
-    protocolVersion: 1,
+    protocolVersion: 2,
     epoch: 'session',
     observationSequence: 1,
     physicsTick: 10,
@@ -29,7 +29,7 @@ const fixture = (targetRevision: number) => {
     decisionContext: { actors: [], pois: { version: 1, sequence: 0, pois: [] }, terrainWindows: [] },
   };
   const batch: LogicIntentBatch = {
-    protocolVersion: 1,
+    protocolVersion: 2,
     epoch: 'session',
     observationSequence: 1,
     expiresAtPhysicsTick: 20,
