@@ -3,7 +3,7 @@ import { browserArtifact, browserPackLock, compositionIdentity } from './identit
 import { startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { aimAtVoxelWithRealMouse } from './aim';
-import { clickCanvasCenter, closeInventory, lockPointer, moveMouseBy, snapshot, type ClassicWindow } from './harness';
+import { clickCanvasCenter, closeInventory, moveMouseBy, snapshot, type ClassicWindow } from './harness';
 import { observeBrowserRuntime, collectClassicFailureDiagnostics } from './evidence';
 import { mouseCorrectionToPoint } from './target-aim';
 import { modularPackSmokeEnabled } from './modular-pack-smoke';
@@ -99,7 +99,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   await catalog.locator('#creative-item-filter').fill('矿车');
   await catalog.getByRole('button', { name: /^将矿车放入创造快捷栏 / }).click();
   await closeInventory(page);
-  await lockPointer(page);
+  await expect.poll(() => page.evaluate(() => document.pointerLockElement?.id)).toBe('game');
   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', 'minecart');
   await aimAtVoxelWithRealMouse(page, [2, 31, 0], [2, 32, 0]);
   await testInfo.attach('classic-minecart-before-deploy.json', {

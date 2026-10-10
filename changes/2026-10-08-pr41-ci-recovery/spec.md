@@ -748,3 +748,5 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 02:06UTC checkpoint76：0db575df生产artifact ea9ace30原native browser76-01成功部署、真实模型和右键上车；W10秒移动FAIL，实际Authority tick119/ACK26和位置固定而客户端预测x14.855。源码确认新fixture只pause后未run（Authority暂停全部physics），这是新用例夹具错误，不宣称transport runtime缺陷。只在地形/teleport完成后恢复正式world.clock run，全部真实输入和原移动断言/时限保留。为保留原10秒停稳及精确存档断言，继续真实W至既有9格直轨末端附近x>8.5后释放，额外增加到达断言；不把drag指数渐近误当十秒内精确归零，不增加既有120秒总限。只读pwd成功确认exec-server短暂断开已恢复，没有重启或重跑旧测试。新增测试片沿原02:24有界上限。
 
 02:13UTC：a9e3da7c/browser76-02实际23.2秒FAIL，原native部署5秒未得到transport。Authority恢复推进（tick909/ACK206），world revision2→3/新增单个voxel mutation；已有target读数2,31,0但无动作拒绝原因，不能认定输入适配器、Creative选择或流体原因。登记仅诊断增强：同一次原点击前后附件记录实际target、目标voxel/fluid、player/viewAngles、selected hotbar及HUD；失败附件保留同字段。未改变动作、时限或成功断言。下一运行为补齐失败证据，不进行无依据重试或暂停来掩盖失败。
+
+02:16UTC：读取原browser76-02 trace确认关闭背包后连续两个canvas.click；closeInventory自身已lockPointer，而新用例再次lockPointer无条件左击。PlayerController在已locked时把第二左击送入正式creative mining，与新增一格mutation一致；这是新夹具的额外采集输入，禁止靠暂停隐藏。移除重复左击，仅断言原helper已完成Pointer Lock，原native右键保留。诊断5801aba0已构建但不为已确认额外采集继续运行错误输入；新源码统一补诊断并移除重复点击后再跑。没有修改正式玩家采集路径或假定流体/Creative模块根因。
