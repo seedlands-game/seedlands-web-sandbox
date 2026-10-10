@@ -40,7 +40,7 @@ function realLightCache(
     blockLightRevision: readRevision,
     voxelSemantics: classicContent.voxelSemantics,
   });
-  for (const [key, cx] of chunks) cache.register(key, cx, 0, 0, { apply });
+  for (const [key, cx] of chunks) cache.register(key, cx, 0, 0, { failDark: () => {}, apply });
   return { cache, apply };
 }
 
@@ -137,7 +137,7 @@ describe('World derived-light rebuild pump', () => {
     let revision = 'resident:1';
     const { cache, apply } = realLightCache(() => revision, []);
     const pump = new BlockLightRebuildPump(cache);
-    cache.register('only', 0, 0, 0, { apply });
+    cache.register('only', 0, 0, 0, { failDark: () => {}, apply });
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(cache.snapshot).toMatchObject({ pendingBrickCount: 0, ready: true, rebuildCount: 1 });
 
@@ -156,7 +156,7 @@ describe('World derived-light rebuild pump', () => {
   it('detects a real cache halo revision change without manual invalidation or re-registration', () => {
     let revision = 'resident:1';
     const { cache, apply } = realLightCache(() => revision, []);
-    cache.register('only', 0, 0, 0, { apply });
+    cache.register('only', 0, 0, 0, { failDark: () => {}, apply });
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(cache.snapshot).toMatchObject({ pendingBrickCount: 0, ready: true, rebuildCount: 1 });
 
@@ -171,7 +171,7 @@ describe('World derived-light rebuild pump', () => {
     fakeTimers();
     const { cache, apply } = realLightCache(() => 'resident:1', []);
     const pump = new BlockLightRebuildPump(cache);
-    cache.register('only', 0, 0, 0, { apply });
+    cache.register('only', 0, 0, 0, { failDark: () => {}, apply });
     pump.request([0, 0, 0]);
     expect(vi.getTimerCount()).toBe(1);
 
@@ -185,7 +185,7 @@ describe('World derived-light rebuild pump', () => {
     fakeTimers();
     const { cache, apply } = realLightCache(() => 'resident:1', []);
     const blockLightRebuildPump = new BlockLightRebuildPump(cache);
-    cache.register('only', 0, 0, 0, { apply });
+    cache.register('only', 0, 0, 0, { failDark: () => {}, apply });
     blockLightRebuildPump.request([0, 0, 0]);
     expect(vi.getTimerCount()).toBe(1);
 

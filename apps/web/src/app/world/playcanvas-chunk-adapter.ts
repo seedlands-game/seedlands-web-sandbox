@@ -79,6 +79,13 @@ export const applyChunkBlockLightVolume = (resource: PlayCanvasChunkResource, vo
   if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
 };
 
+export const invalidateChunkBlockLightVolume = (resource: PlayCanvasChunkResource) => {
+  if (!resource.blockLightTexture) throw new Error('Chunk block light texture is unavailable.');
+  const pixels = resource.blockLightTexture.lock() as Uint8Array;
+  pixels.fill(0);
+  resource.blockLightTexture.unlock();
+};
+
 const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) => {
   for (const instance of resource.waterInstances) instance.visible = visible;
 };
@@ -204,6 +211,7 @@ export const createPlayCanvasChunkAdapter = (
     resource.blockLightRelease =
       blockLightHooks?.attached(task, {
         apply: (volume) => applyChunkBlockLightVolume(resource, volume),
+        failDark: () => invalidateChunkBlockLightVolume(resource),
       }) ?? null;
     telemetry.endSpan(span);
     telemetry.markTrace(task.traceId, 'scene-attached', 'main');

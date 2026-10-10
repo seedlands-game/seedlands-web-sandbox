@@ -502,6 +502,7 @@ export class World {
   }
 
   drainCommits(cameraPosition?: readonly [number, number, number]) {
+    this.blockLightCache.invalidateStale();
     this.repository.drain();
     this.crops?.update(this.scenarioId, this.authority.gameplay.cropStages ?? []);
     if (cameraPosition) this.blockLightRebuildPump.request(cameraPosition);

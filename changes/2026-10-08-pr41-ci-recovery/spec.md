@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## Block-light GPU立即失效 checkpoint73（预注册）
+
+2026-10-10 00:25UTC，本地78fb17d0仅完成CPU陈旧采样；远端66467feb的CI71仍自然运行。当前cache失效仅标记待重建，sink没有失败暗化端口，terrain/water/crop借用的同一R8纹理可继续保留旧亮度。先用真实cache的显式编辑与另一brick优先重建反例证明旧sink未失效，再给现有sink补必需failDark，首次失效清空同一R8像素并unlock，已有borrowers保持相同texture引用；多次失效不重复清空，成功重建沿原apply发布。
+
+source residency可先于mesh通知变化，World drain在render前显式刷新当前halo新鲜度；failure diagnostics getter仍只读，不能为观察修改状态。原cache owner、重建预算/aging优先级、prepare/attach/release边界保持；CPU采样复用72校验，GPU清零不是sky统一接线或性能收益。关键测试包括同revision不暗化、连续失效幂等、另brick优先时所有陈旧sink暗化、zero R8上传及texture引用/metadata保持、实际World drain接线。真实WebGL像素仍需后续生产artifact矩阵，不以Mock texture宣称像素PASS。
+
+Root独占cache/adapter/World三个生产文件、相关原cache/pump测试及新GPU失效测试、package/type/spec/evidence；无新委派。传统0.25PD×120%=0.3PD，AI20min×120%=24min，00:49前checkpoint；CI71终态前不push、不取消。最新主对话真实UI读数00:09UTC剩82%/5d2h，00:25收到；约60%停止线，实际型号/费用未核实，不换算周额度。长期产品docs不改，失效端口属于既有owner职责。
+
+00:36本地checkpoint73：六文件38PASS，完整headless串行116文件726PASS/EXIT0（222.79秒），完整Web/Svelte及Classic类型、相关lint/paths通过。原始有效RED及所有原断言保留。纹理清零端口只验证mock lock/unlock，不是WebGL像素证据；成本未测量、无性能改善声明。CI71已自然terminal FAIL，门请求被流体可见性屏障延后但释放缺陷未证实。详见evidence/block-light-gpu-invalidation-checkpoint-73-01.md；后续精确SHA CI/真实玩法待验证。
+
 ## Block-light消费者陈旧读 checkpoint72（预注册）
 
 2026-10-10 00:19UTC，精确66467feb的CI71自然运行，不取消或抢推。生产entity/drop经Game→AdvancedVisualEffects→WorldRuntime→ChunkBlockLightCache.sample取得block光；sample目前只检查缓存是否存在，未核对当前Authority halo revision，invalidateAround也只标记待重建。先用真实缓存/体积及Classic voxel semantics建立反例：移除光源后的显式失效、revision先于mesh通知变化、区域变unknown，重建前不得继续采样旧光值；同revision控制保持原亮度。若有效RED成立，仅在sample使用当前既有chunkBlockLightNeedsRefresh合同失败暗化，不改变重建、sink、texture、帧预算、队列优先级或GPU资产。
