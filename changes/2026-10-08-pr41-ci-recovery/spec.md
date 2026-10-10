@@ -744,3 +744,5 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 2026-10-10 02:00UTC：397ec45生产artifact原生右键部署和实际GLB渲染成功，上车5秒断言FAIL；原始trace/截图保留browser75-native-01。体素target.distance为整格入口，非实心铁轨提前截断entity ray。只按正式voxelSemantics.solid截断实心/未知目标，明确non-solid允许既有5m实体选择；Authority仍复核5m、实心LOS、lifetime、占位和事务，不扩距离，不设Classic-ID分支。定向真实适配器RED→GREEN后新source/artifact重新跑原native旅程，原断言/超时不变。
 
 有界扩展传统约0.1PD，AI墙钟约20分钟×120%=24分钟，上限02:24UTC；最新真实周读数01:24为81%、停止线约60%，本环境无法独立读UI，费用/额度百分比不估算。旧第75组超过原窗口，基于新真实失败证据停止盲目重试后登记本片。复用已通过完整static/headless/stdlib，必要定向验证；新native不代替完整Classic、照明或性能验收。长期docs baseline不变：修正通用交互适配器。
+
+02:06UTC checkpoint76：0db575df生产artifact ea9ace30原native browser76-01成功部署、真实模型和右键上车；W10秒移动FAIL，实际Authority tick119/ACK26和位置固定而客户端预测x14.855。源码确认新fixture只pause后未run（Authority暂停全部physics），这是新用例夹具错误，不宣称transport runtime缺陷。只在地形/teleport完成后恢复正式world.clock run，全部真实输入和原移动断言/时限保留。为保留原10秒停稳及精确存档断言，继续真实W至既有9格直轨末端附近x>8.5后释放，额外增加到达断言；不把drag指数渐近误当十秒内精确归零，不增加既有120秒总限。只读pwd成功确认exec-server短暂断开已恢复，没有重启或重跑旧测试。新增测试片沿原02:24有界上限。

@@ -67,6 +67,8 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     }
     const teleport = await harness.world.command({ type: 'teleport', position: [2.5, 32.6, 2.5] });
     if (!teleport.ok) throw new Error('Fixture teleport failed.');
+    const run = await harness.world.clock({ kind: 'run' });
+    if (!run.ok) throw new Error('Fixture clock resume failed.');
   });
   await page.keyboard.press('KeyE');
   const inventory = page.getByRole('dialog', { name: '背包与合成' });
@@ -114,6 +116,10 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     await expect
       .poll(async () => (await transportSnapshot(page))!.transports[0]!.pose.position[0], { timeout: 10_000 })
       .toBeGreaterThan(mounted.pose.position[0] + 0.1);
+    // Reach the fixture's known rail end so collision, rather than asymptotic drag, stops the cart.
+    await expect
+      .poll(async () => (await transportSnapshot(page))!.transports[0]!.pose.position[0], { timeout: 10_000 })
+      .toBeGreaterThan(8.5);
   } finally {
     await page.keyboard.up('KeyW');
   }
