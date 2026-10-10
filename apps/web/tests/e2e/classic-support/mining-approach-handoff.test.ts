@@ -40,6 +40,11 @@ function observed(
     storageBytes: 0,
     runtime: 'authority-worker',
     workers: { authority: 1, logic: 0, persistence: 0, fluid: 0, general: 0 },
+    // Synthetic post-release protocol metadata; not an original Browser64 field.
+    nativeMovementInput: {
+      epoch: 'browser64-protocol-fixture',
+      release: { code: 'KeyS', sequence: acknowledgedInputSequence, neutral: true },
+    },
     authority: {
       physicsTick,
       acknowledgedInputSequence,

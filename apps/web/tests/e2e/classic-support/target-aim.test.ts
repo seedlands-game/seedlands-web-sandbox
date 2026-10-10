@@ -51,6 +51,9 @@ describe('Classic real-mouse target correction', () => {
     let mouseX = 480,
       mouseY = 270,
       keyDowns = 0;
+    let inputSequence = 0;
+    // Synthetic protocol release recorded only by modeled keyboard.up.
+    let release: { code: string; sequence: number; neutral: boolean } | null = null;
     const occupied = () =>
       playerOccupiesVoxelShape([player[0], player[1] - PLAYER_FEET_OFFSET, player[2]], target, Voxel.Planks);
     expect(occupied()).toBe(true);
@@ -75,7 +78,8 @@ describe('Classic real-mouse target correction', () => {
             viewAngles: view,
             onGround: true,
             colliding: false,
-            authority: { acknowledgedInputSequence: keyDowns },
+            nativeMovementInput: { epoch: 'placement-protocol-fixture', release },
+            authority: { acknowledgedInputSequence: inputSequence },
           };
         throw new Error('Unexpected placement observation');
       },
@@ -95,9 +99,12 @@ describe('Classic real-mouse target correction', () => {
         },
         down: async () => {
           keyDowns += 1;
+          inputSequence += 1;
           player = [50.5, 32.6, 0.5];
         },
-        up: async () => undefined,
+        up: async (code: string) => {
+          release = { code, sequence: ++inputSequence, neutral: true };
+        },
       },
     } as unknown as Page;
     await lockPointer(page);
