@@ -1,4 +1,5 @@
 import * as pc from 'playcanvas';
+import { receivedLightingGpuProbe } from './received-lighting-gpu-probe';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import type { World } from '../world/world-runtime';
 import type { VoxelMaterials } from './voxel-materials';
@@ -137,11 +138,11 @@ export class AdvancedVisualEffects {
   private shadowStableFrameCount = 0;
 
   constructor(
-    app: pc.Application,
+    private readonly app: pc.Application,
     private readonly camera: pc.Entity,
     private readonly world: World,
     private readonly budget: LightingQualityBudget,
-    materials: VoxelMaterials,
+    private readonly materials: VoxelMaterials,
   ) {
     this.reflection =
       budget.reflectionResolution > 0
@@ -195,6 +196,10 @@ export class AdvancedVisualEffects {
   /** 0..1 block light for presentation consumers such as animated actors. */
   sampleBlockLight(position: readonly [number, number, number]): number {
     return this.world.sampleBlockLight(position) / 15;
+  }
+
+  receivedLightingGpuProbe() {
+    return receivedLightingGpuProbe(this.app, this.materials);
   }
 
   private scanNearbyVoxels(): void {

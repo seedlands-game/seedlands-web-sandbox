@@ -46,6 +46,24 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
     if (response.ok() && response.url().includes('/models/classic/')) glbs.add(new URL(response.url()).pathname);
   });
   await startClassicWorld(page, { ...classicScenario, seed: 'classic-visual-v3', quality: 'low' });
+  const receivedPixels = await page.evaluate(() =>
+    (window as unknown as ClassicWindow).__seedlandsHarness!.receivedLightingGpuProbe(),
+  );
+  await testInfo.attach('received-lighting-webgl2-pixels.json', {
+    contentType: 'application/json',
+    body: JSON.stringify({ diagnosticOnly: true, pixels: receivedPixels }),
+  });
+  expect(receivedPixels).toHaveLength(18);
+  for (const pixel of receivedPixels ?? []) {
+    const expected =
+      pixel.name === 'combined'
+        ? 128
+        : pixel.name === 'sky-only' || pixel.name === 'block-only' || pixel.name.startsWith('self-')
+          ? 64
+          : 0;
+    for (const channel of pixel.rgba.slice(0, 3))
+      expect(Math.abs(channel - expected), `${pixel.category}:${pixel.name}`).toBeLessThanOrEqual(3);
+  }
   if (await page.locator('#debug').isVisible()) await page.keyboard.press('F3');
   await expect(page.locator('#companion')).toHaveCount(0);
   const artifact = await browserArtifact(page);

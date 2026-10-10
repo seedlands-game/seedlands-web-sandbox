@@ -47,20 +47,18 @@ export type CharacterObservation = Readonly<{
   gap?: boolean;
 }>;
 export type ChromeTrace = Readonly<{
-  traceEvents: readonly Readonly<{
-    name: string;
-    cat: string;
-    ph: 'X';
-    ts: number;
-    dur: number;
-    pid: string;
-    tid: string;
-    args?: Readonly<Record<string, string | number> & { traceId?: string; traceName?: string }>;
-  }>[];
+  traceEvents: readonly Readonly<
+    ReturnType<
+      import('../../../src/app/gameplay/game-harness-contract').HarnessApi['exportPerformanceTrace']
+    >['traceEvents'][number] & {
+      args?: Readonly<Record<string, string | number> & { traceId?: string; traceName?: string }>;
+    }
+  >[];
 }>;
 
 export type HarnessApi = {
   skyVisibilityDiagnostics: import('../../../src/app/gameplay/game-harness-contract').HarnessApi['skyVisibilityDiagnostics'];
+  receivedLightingGpuProbe: import('../../../src/app/gameplay/game-harness-contract').HarnessApi['receivedLightingGpuProbe'];
   inputDecisionDiagnostics():
     import('../../../src/client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
