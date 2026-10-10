@@ -15,6 +15,20 @@ const timeout = (source) => {
   return Number(match[1].replaceAll('_', ''));
 };
 
+test('Classic owner contracts remain in the explicit behavior and type selections', () => {
+  const script = JSON.parse(read('package.json')).scripts['test:classic:headless'];
+  const types = JSON.parse(read('tsconfig.classic-tests.json')).include;
+  const units = [
+    'apps/web/tests/unit/worker/persistence-chunk-directory-revision.test.ts',
+    'apps/web/tests/unit/worker/persistence-column-directory.test.ts',
+    'apps/web/tests/unit/client/browser-column-directory.test.ts',
+  ];
+  for (const path of [...units, 'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts'])
+    assert.ok(script.split(/\s+/).includes(path), `${path} is absent from the existing headless selection`);
+  for (const path of units) assert.ok(types.includes(path), `${path} is absent from Classic test types`);
+  assert.ok(types.includes('apps/web/tests/e2e'), 'The original whole E2E directory must remain typed');
+});
+
 test('Chromium job covers the original complete journey and diagnostic retry', () => {
   assert.equal(timeout(main), 900_000);
   assert.equal(timeout(visual), 240_000);

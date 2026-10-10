@@ -19,7 +19,16 @@ const baseWorld = { ...config, player: [1, 2, 3], updatedAt: 17, commitSequence:
 const snapshot = (cy = 0, revision = 1, value = 1) => {
   const voxels = empty();
   voxels[0] = value;
-  return { key: `0,${cy},0`, cx: 0, cy, cz: 0, revision, voxels: voxels.buffer };
+  return {
+    seedText: config.seedText,
+    generatorVersion: config.generatorVersion,
+    key: `0,${cy},0`,
+    cx: 0,
+    cy,
+    cz: 0,
+    revision,
+    voxels: voxels.buffer,
+  };
 };
 const frozen = (chunks = [snapshot()], commitSequence = 9): FrozenSaveTaskSnapshot => ({
   version: 1,

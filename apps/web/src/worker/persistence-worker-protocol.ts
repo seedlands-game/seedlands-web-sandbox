@@ -17,6 +17,7 @@ export type PersistenceInitTask = {
   openMode: WorldOpenMode;
 } & PersistenceWorkerConfig;
 export type PersistenceLoadTask = { kind: 'load'; requestId: number; cx: number; cy: number; cz: number };
+export type PersistenceColumnDirectoryTask = { kind: 'column-directory'; requestId: number; cx: number; cz: number };
 export type PersistenceLoadBatchTask = {
   kind: 'load-batch';
   requestId: number;
@@ -63,6 +64,7 @@ export type PersistenceDeleteWorldTask = {
 export type PersistenceWorkerTask =
   | PersistenceInitTask
   | PersistenceLoadTask
+  | PersistenceColumnDirectoryTask
   | PersistenceLoadBatchTask
   | PersistenceSaveTask
   | PersistenceSaveMetadataTask
