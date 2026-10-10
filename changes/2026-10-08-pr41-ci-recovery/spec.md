@@ -1218,3 +1218,21 @@ Root独占spec/public证据与私有main-cpu-*139-01，不启动新agent。通�
 Root独占spec/私有sky-point-*141-01，不启动agent。仅产品功能，不宣称性能有效；最终exact CI、review/conflict/full产品矩阵和136仍须独立验收。传统.1PD×120%=.12PD，AI20min×120%=24min，19:18UTC检查点，actual UI17:54周74%及18:52新请求PENDING/60停止线；预算回传触停止时立即保存可恢复状态。无权限/预算扩大、长期baseline未改、不merge/auto-merge/生产部署。
 
 18:55UTC140正常commit hook：staged ESLint/format与ls-lint通过，但commit-msg拒绝未支持的perf type（允许feat/fix/refactor/test/docs/chore/ci/build）。保留原失败log，改用refactor消息再次走完整hook，不绕过；生产与查询合同不变。
+
+19:18UTC141有界检查点：sourcef01a69fa identified build/verify PASS，sourceDigest5fd103a2/artifact679503c8/lock882341/289files/builtAt18:56:21.520Z。原唯一无sampler主旅程一次FAIL，原900000ms在V2 takeCraftResult→committedPointer→waitForEquipmentSnapshot截断，result917325ms含cleanup，未增加限额。C0–C3/Creative/V1 PASS，资源放置完成并实际采掘拾取，C4/C5未到达；最后两route正常返回，非45secroute超时，不归因command腐败。最后原trace frame已实际查看：背包/合成界面与剩余木板/木棍/剑，不证明craft完成。完整raw/trace/receipt与source绑定public sky-point-main-timeout-141-01，不重跑。140查询硬预算保持，不宣称139→141 observer不同的末段推进是性能A/B；CI42019:15仍五非Browser SUCCESS/Chromium自然运行，不抢推。18:56实际UI周仍74%/4d8h，60停止线，不因新额度读数增验证。
+
+### 同模型同帧世界采光合同142（19:18UTC预注册）
+
+139实际leaf ancestry加当前ModelSurfaceLighting.apply源码确认，每个instance材质在同一position的同步apply内重复World Sky/block采样。141新的原主旅程global900截断提供继续有界工作理由，不以该失败证明唯一CPU/GPU因果。候选独立轴：显式可选batch sampler合同，由当前World/presentation sampler一次捕获world/frame、一次Sky和block读取，为各材质独立selfEmission生成原SurfaceLightingSample；Model consumer使用batch，旧opaque sampler无batch时逐材质原调用顺序/次数完全保留。批次只存在一次同步apply，无跨调用/帧持久缓存，current world/frame/epoch恢复和unknown仍在下一次apply即时生效。不跳过0dt snapshot采光，原unknown当帧归零、模型clone/material/damage、首人称与各emission语义保持。
+
+Root独占scene/surface-lighting.ts（可选readonly batch type）、world-surface-lighting.ts（生产batch/fallback）、model-surface-lighting.ts（仅batch consumer）、原world-surface-lighting.test.ts与model-consumer-surface-lighting.test.ts新增反例、spec/public及私有model-light-batch-*142-01；不写Presenter/输入/renderer shader/physics/CI/Pack/存档，不派新agent。旧opaque callback不假设纯函数，不对其作memoization；batch长度错误fail-closed而非读undefined。
+
+看结果前固定exact A/A与A/B，唯一硬预算主指标：同一已注册真实4材质model、固定position、64次apply，Sky与block调用每个A/A分别256/256，B每个64/64，最小75%降低；timing不采集，不当产品frame/输入延迟收益。当前accepted stack f01（含140）作control，仅一批世界采光维度。各clone received/selfEmission/独立texture/material、hurt、即时unknown、current world/frame replacement、缺presentation、空material与旧opaque四次调用/顺序为否决；不能减少原断言或丢材质更新。先RED/原始A/A，再B；未通过即恢复control并保留负结果。确定性硬查询预算无需计时噪声，无endpoint优化声明，最终组合主旅程/性能准出仍开放。
+
+必要定向consumer/world/sky/firstperson回归、Web/Classic types/lint/format/hooks；生产候选通过后新的identified build与原无观察器主旅程另登记。CI420自然终态前不推，不取消。传统.15PD×120%=.18PD，AI20min×120%=24min，19:42UTC检查点；实际UI18:56周74%/60停止线，不算tokens/no新权限。长期baseline不改，136/full产品矩阵仍开放，不merge/auto-merge/production。
+
+19:40UTC142有界检查点：旧Owner A/A Sky/block各[256,256]，最终B exact各[64,64]，75%查询次数减少；2files18PASS+7files95PASS=9unique113PASS。Web/Classic types与五TS lint PASS。初次旧2FAIL、fixture绑定漏position的author错误1FAIL、候选legacy receiver丢this1FAIL日志均保留并纠正，最后GREEN包括receiver/sparse/empty/emission/damage/current/unknown。NullGraphicsDevice非WebGL，无延迟或GPU收益声明；全量Classic/stdlib/build/Browser在142未跑，public model-world-sample-batch-142-01。CI420已自然FAIL：五非Browser成功，原main两次V2总900000ms截断，visual1.6min/native34.9secPASS，previewSKIP；不取消、不将旧CI替代新候选。remote实际f01/basefba复核一致，workflow原PR preview边界/production仅main，不改workflow。
+
+### 冻结后原无观察器完整主旅程143（19:40UTC预注册）
+
+142有界源码及141/142新证据正常feature commit/push后，保留旧f01 identified dist到独立私有路径，新pnpm build一次并verifyArtifact全bytes。只运行原唯一完整C0–C5主旅程一次，runId pr41-model-world-batch-browser-143-01，所有keyboard/mainCPU/AuthorityCPU/nativeTrace/benchmark为0，原SwiftShader/input/20/45/90/900sec/predicate/assertions保持，无额外retry。冻结HEAD/source/docs直到Browser结束；若失败记录实际阶段/trace/source不盲重复，无完整mainPASS不宣布可合入。Root独占spec/evidence/private model-world-batch-*143-01，不派agent。传统.1PD×120%=.12PD，AI20min×120%=24min，20:04UTC检查点；UI18:56实际74%/4d8h，约60停止线，19:56请求实际读数，不以额度更新增加验证。136/full矩阵仍开放，无合并/auto-merge/main/生产部署，无新权限或长期baseline变更。

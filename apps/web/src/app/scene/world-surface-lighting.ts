@@ -1,5 +1,5 @@
 import { BLOCK_LIGHT_MAX_LEVEL } from './block-light-volume';
-import { createSurfaceLightingSample, type LinearRgb } from './surface-lighting';
+import { createSurfaceLightingSample, type LinearRgb, type SurfaceLightingSampler } from './surface-lighting';
 
 type Frame = Readonly<{ skyRadiance: LinearRgb; blockLightTint: LinearRgb }>;
 export function sampleWorldSurfaceLighting(
@@ -23,11 +23,18 @@ export function sampleWorldSurfaceLighting(
   });
 }
 
-export type WorldSurfaceLightingSampler = (
+export type WorldSurfaceLightingSampler = ((
   position: readonly [number, number, number],
   frame: Frame,
   selfEmission: LinearRgb,
-) => ReturnType<typeof sampleWorldSurfaceLighting>;
+) => ReturnType<typeof sampleWorldSurfaceLighting>) &
+  Readonly<{
+    batch?: (
+      position: readonly [number, number, number],
+      frame: Frame,
+      selfEmissions: readonly LinearRgb[],
+    ) => readonly ReturnType<typeof sampleWorldSurfaceLighting>[];
+  }>;
 
 export function createWorldSurfaceLightingSampler(
   sky: Readonly<{
@@ -35,14 +42,22 @@ export function createWorldSurfaceLightingSampler(
   }>,
   block: Readonly<{ sampleKnown(position: readonly [number, number, number]): number | null }>,
 ): WorldSurfaceLightingSampler {
-  return (position, frame, self) =>
+  const sample: WorldSurfaceLightingSampler = (position, frame, self) =>
     sampleWorldSurfaceLighting(sky.sample(position), block.sampleKnown(position), frame, self);
+  return Object.assign(sample, {
+    batch(position: readonly [number, number, number], frame: Frame, selfEmissions: readonly LinearRgb[]) {
+      if (!selfEmissions.length) return [];
+      const skyValue = sky.sample(position);
+      const blockValue = block.sampleKnown(position);
+      return selfEmissions.map((self) => sampleWorldSurfaceLighting(skyValue, blockValue, frame, self));
+    },
+  });
 }
 
 export function createPresentedSurfaceLightingSampler(
   current: () => readonly [Readonly<{ sampleSurfaceLighting: WorldSurfaceLightingSampler }> | null, Frame | undefined],
-): import('./surface-lighting').SurfaceLightingSampler {
-  return (position, self) => {
+): SurfaceLightingSampler {
+  const sample: SurfaceLightingSampler = (position, self) => {
     const [world, frame] = current();
     return world && frame
       ? world.sampleSurfaceLighting(position, frame, self)
@@ -53,4 +68,24 @@ export function createPresentedSurfaceLightingSampler(
           selfEmission: self,
         });
   };
+  return Object.assign(sample, {
+    batch(position: readonly [number, number, number], selfEmissions: readonly LinearRgb[]) {
+      if (!selfEmissions.length) return [];
+      const [world, frame] = current();
+      if (world && frame) {
+        const sampler = world.sampleSurfaceLighting;
+        return sampler.batch
+          ? sampler.batch(position, frame, selfEmissions)
+          : selfEmissions.map((self) => world.sampleSurfaceLighting(position, frame, self));
+      }
+      return selfEmissions.map((self) =>
+        createSurfaceLightingSample({
+          skyVisibility: null,
+          skyRadiance: null,
+          blockIrradiance: null,
+          selfEmission: self,
+        }),
+      );
+    },
+  });
 }

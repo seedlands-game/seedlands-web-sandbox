@@ -41,6 +41,31 @@ export class ModelSurfaceLighting {
   }
 
   apply(root: pc.Entity, position: readonly [number, number, number], hurt = false): void {
+    const sample = this.sample;
+    if (sample?.batch) {
+      const entries = this.instances(root).flatMap((instance) => {
+        const materials = this.materials.get(instance);
+        if (!materials) return [];
+        const active = hurt && materials.damage ? materials.damage : materials.original;
+        return [{ instance, active, adapter: this.lighting.prepare(active), self: this.lighting.selfEmission(active) }];
+      });
+      if (!entries.length) return;
+      const samples = sample.batch(
+        position,
+        entries.map((entry) => entry.self),
+      );
+      if (
+        !Array.isArray(samples) ||
+        samples.length !== entries.length ||
+        entries.some((_, index) => !samples[index] || typeof samples[index] !== 'object')
+      )
+        throw new TypeError('Surface lighting batch length or sample is invalid.');
+      entries.forEach((entry, index) => {
+        applySurfaceLightingToMaterial(entry.adapter, samples[index]!);
+        entry.instance.material = entry.active;
+      });
+      return;
+    }
     for (const instance of this.instances(root)) {
       const materials = this.materials.get(instance);
       if (!materials) continue;

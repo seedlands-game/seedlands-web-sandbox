@@ -1,0 +1,9 @@
+# 同模型世界采光查询合同142
+
+以f01a69fa为control，同一真实4材质模型固定位置64次apply，A/A两次Sky/block分别256，候选B分别64，精确计数减少75%。仅证明查询预算，不证明输入延迟、GPU或完整产品性能。
+
+生产新增可选同步batch：一次捕获world/frame及Sky/block，为各材质保留独立selfEmission；旧opaque Surface调用顺序/次数保持，旧World method receiver保持。每次apply重新读取，无跨帧缓存、0dt跳过或输入改动；unknown/current replacement/damage/source保护及稀疏批次拒绝通过。
+
+最终2files18PASS加7files95PASS，共9unique files113PASS；Web/Classic类型和五文件lint通过。NullGraphicsDevice/mock app非真实WebGL，原current application诊断保留。旧Owner2FAIL、author fixture参数错误及候选receiver1FAIL均保留；修正后最终检查通过。未在142运行全量Classic/stdlib、build或Browser。
+
+CI420精确f01五非Browser成功，主旅程两次V2原900000ms总限失败；视觉与普通矿车通过，preview跳过。141无观察器主旅程FAIL、136受Stone支撑坡道及完整矩阵仍开放，PR不可合入。源日志路径与SHA见validation.json；历史证据未改。
