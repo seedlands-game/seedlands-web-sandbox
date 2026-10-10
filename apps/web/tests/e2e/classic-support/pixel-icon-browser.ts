@@ -34,6 +34,9 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
       equalContextDifferentChannels: number;
       equivalentResourceDifferentChannels: number;
       sourceIdentityMatchesControl: boolean;
+      controlRepeatDifferentChannels: number;
+      domRepeatDifferentChannels: number;
+      rawRaster?: { control: number[]; actual: number[]; controlRepeat: number[] };
       domImage: { width: number; height: number; naturalWidth: number; naturalHeight: number; imageRendering: string };
       freshImage: {
         width: number;
@@ -123,6 +126,20 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             (count, value, index) => count + Number(value !== after[index]),
             0,
           );
+          context.clearRect(0, 0, size, size);
+          context.drawImage(control, 0, 0, size, size);
+          const controlRepeat = context.getImageData(0, 0, size, size).data;
+          const controlRepeatDifferentChannels = controlRepeat.reduce(
+            (count, value, index) => count + Number(value !== before[index]),
+            0,
+          );
+          context.clearRect(0, 0, size, size);
+          context.drawImage(image, 0, 0, size, size);
+          const domRepeat = context.getImageData(0, 0, size, size).data;
+          const domRepeatDifferentChannels = domRepeat.reduce(
+            (count, value, index) => count + Number(value !== after[index]),
+            0,
+          );
           rows.push({
             itemId,
             size,
@@ -131,6 +148,17 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             equalContextDifferentChannels,
             equivalentResourceDifferentChannels,
             sourceIdentityMatchesControl: image.src === reference.url,
+            controlRepeatDifferentChannels,
+            domRepeatDifferentChannels,
+            ...(size === 16 && (itemId === 'paper' || itemId === 'redstone-dust')
+              ? {
+                  rawRaster: {
+                    control: Array.from(before),
+                    actual: Array.from(after),
+                    controlRepeat: Array.from(controlRepeat),
+                  },
+                }
+              : {}),
             domImage: {
               width: image.width,
               height: image.height,
@@ -153,6 +181,12 @@ export async function verifyPixelIconRaster(page: Page, info: TestInfo) {
             controlSha256: await hash(before),
           });
           if (differentChannels) errors.push(`${itemId}@${size}: ${differentChannels} different RGBA channels`);
+          if (controlRepeatDifferentChannels)
+            errors.push(
+              `${itemId}@${size}: same control object repeat differs by ${controlRepeatDifferentChannels} channels`,
+            );
+          if (domRepeatDifferentChannels)
+            errors.push(`${itemId}@${size}: same DOM object repeat differs by ${domRepeatDifferentChannels} channels`);
           if (equivalentResourceDifferentChannels)
             errors.push(
               `${itemId}@${size}: equivalent resource differs by ${equivalentResourceDifferentChannels} channels`,

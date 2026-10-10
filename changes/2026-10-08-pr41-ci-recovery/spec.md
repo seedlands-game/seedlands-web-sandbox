@@ -1310,3 +1310,11 @@ Root独占原3TS/spec/evidence，新unit/Classic types/lint后提交build/verify
 唯一新轴是在创建参考、fresh同源、尾换行等价资源Image时，都显式匹配实际DOM image.width/height及computed imageRendering。资源src、原生产owner、canvas16/32/imageSmoothing=false、原全部differentChannels/sourceAA/equivalentResource零断言保持不变，补充完整fresh样式记录。不切掉失败icon、不调整容差或原visual输入/240sec/旧断言。156是当前旧A/A真实RED；先必要Classic types/lint/hooks、新test-only commit/build/verify，原visual一次158，只检验旧measurement GREEN。旧A/A未通过前不得重启生产候选或main151。
 
 Root独占既有helper/spec/新证据，无agent/新权限。21:42UTC检查点；非性能采样，不从不同运行duration推断优化；完整产品/CI/review继续开放。
+
+21:36UTC158终态：local48ffa300、build/verify PASS、appbytes仍原a3a0b9a6。原visualFAIL80513ms，匹配34×34/pixelated后原104个16px同URL差异/paperAA621/32px全同保持。157没有解决基线RED，不能以图像尺寸解释全部差异，原main151未启动。
+
+### 同对象重复绘制诊断159（21:36UTC预注册）
+
+实际旧A/A source一致且尺寸一致，原控制是每case第一个draw；fresh/DOM/等价资源后续draw相互一致（paper首次例外）。唯一新轴记录同一个control对象在原序列后重复draw与第一次RGBA的差异，以及同DOM对象重复draw与原actual差异。原所有比较与零断言保持，新增同对象重复也要求0，不允许用后一次替换前一次或自动warmup而掩盖基线失效。仅paper/redstone16保留原控制/actual/repeat三张完整RGBA数组用于确定性分析，无其他生产/质量/输入/timeout变更。
+
+Root独占原helper/spec/evidence，无agent/权限，Classic types/lint/hooks后新身份build/verify，原visual一次160；只定位measurement不稳定，不采用任何生产候选/main151。21:47UTC检查点。新证据仍不支持修复时停止该图标优化诊断单元并保留旧生产owner，避免继续无结论尝试。
