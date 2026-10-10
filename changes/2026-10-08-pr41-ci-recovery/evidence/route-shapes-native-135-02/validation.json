@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-route-shapes-native-135-02",
+  "sourceSha": "b705f3706a8c43d947d9909b05854aca321cf9dc",
+  "recordedAtUTC": "2026-10-10T17:33:19.271352+00:00",
+  "artifact": {
+    "sourceSha": "b705f3706a8c43d947d9909b05854aca321cf9dc",
+    "sourceDigest": "cb7cc554575562fbacf350211af26e2207fa5a19373b648ed647eac9390ed6b1",
+    "artifactDigest": "fe182af48fecd80ee0fa9878e0406ffa2efa948de2c6e3f8275e6d197e358972",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "builtAt": "2026-10-10T17:24:48.677Z"
+  },
+  "artifactFiles": 289,
+  "status": "PASS",
+  "tests": 1,
+  "browserCaseSeconds": 48.0,
+  "runnerSeconds": 51.5,
+  "acceptance": "NON_MAIN original ordinary straight minecart native case; not full Classic or new corners/slopes",
+  "benchmark": false,
+  "samplers": false,
+  "advertisedCoreInjection": false,
+  "firstAttempt": {
+    "runId": "pr41-route-shapes-native-135-01",
+    "status": "FAIL",
+    "tests": 0,
+    "reason": "grep start anchor did not match full Playwright title"
+  },
+  "review": {
+    "kind": "bounded independent source review by existing Luna, excluding authored Classic route implementation",
+    "status": "no confirmed P0/P1/P2 within shared resolver/identity/V4 scope",
+    "baseSha": "356ec528a19d574867631a5e5851284e2a206be1",
+    "headSha": "b705f3706a8c43d947d9909b05854aca321cf9dc"
+  },
+  "evidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-native-prereg-135-02.json",
+      "bytes": 783,
+      "sha256": "606e67350e00a61bac812bc3ca282a3c2231a7d9b0e2b84c93e42840ad57bd33"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-native-selection-135-02.log",
+      "bytes": 218,
+      "sha256": "d1b384c7c12350488467389ab9afc97aab5caebbd29ed69728eb51f6f4ec019f"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-native-browser-135-01.log",
+      "bytes": 1417,
+      "sha256": "112f96c8bb9dd58096b62a23d70b1de3260ab99683910dff3c01a7e2c0e25602"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-native-browser-135-02.log",
+      "bytes": 1086,
+      "sha256": "5892474d7ecc8366aed520ae95f14c67e68e5079a309d2e5a719e7c3b6747873"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-build-135-01.log",
+      "bytes": 3771,
+      "sha256": "d37a4d0f985f018de95c95c557363cb212cf07f5231938185a2e3769a7464ea0"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-shapes-native-browser-attachments-135-04.json",
+      "bytes": 133348,
+      "sha256": "a24016f0079da8ee218c5efebf43cfd9cf4ef4f6965dae93b3ffef4cf5ca0a8e"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/review-root-shared-135-luna-01.md",
+      "bytes": 5364,
+      "sha256": "93efa42e5a050b66c834e826baac48cb0222e2f22ff1ff58589ed227bcbaaf9b"
+    },
+    {
+      "path": "harness/results/pr41-route-shapes-native-135-02/classic.json",
+      "bytes": 688,
+      "sha256": "eccd7d063daeb3894ad9c082ae69a0ed455b9d8ac0f86fcc63c9a945a576af59"
+    }
+  ]
+}
