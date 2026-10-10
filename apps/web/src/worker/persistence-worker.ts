@@ -1,5 +1,4 @@
 import {
-  createStoredChunkRecord,
   decodeStoredChunkRecord,
   storedChunkRecordBytes,
   type StoredChunkRecord,
@@ -10,9 +9,9 @@ import { persistFrozenGameSnapshot } from './persistence-frozen-save';
 import { validatePersistenceLoadBatch, type PersistenceLoadCoordinate } from './persistence-load-batch';
 import { loadPersistenceBatch } from './persistence-load-many';
 import { persistChunkSnapshots } from './persistence-save';
+import { seedPersistenceCorpus } from './persistence-seed-corpus';
 import { browserCorePlatform } from '../platform/core-platform';
 import type {
-  PersistenceCorpusSummary as CorpusSummary,
   PersistenceInitTask as InitTask,
   PersistenceLatestWorldTask as LatestWorldTask,
   PersistenceListWorldsTask as ListWorldsTask,
@@ -38,7 +37,7 @@ import {
   requestPersistenceResult as requestResult,
 } from './persistence-indexeddb';
 import { createPersistenceWorldgenCache } from './persistence-worldgen-cache';
-import { deleteStoredWorld, listStoredWorlds, worldChunkRange } from './persistence-world-directory';
+import { deleteStoredWorld, listStoredWorlds } from './persistence-world-directory';
 import { loadBrowserPackWorldgenProvider } from './pack-worldgen-provider';
 import { preparePersistenceWorldgen } from './persistence-worldgen-initialize';
 
@@ -344,90 +343,14 @@ const stats = async () => {
   return { storedChunkCount: count };
 };
 
-const corpusVoxels = (index: number, count: number) => {
-  const procedural = proceduralChunk(index, 0, 0);
-  const voxels = procedural.slice();
-  if (count <= 8 || index < Math.ceil(count * 0.5)) {
-    const edits = 1 + (index % 64);
-    for (let edit = 0; edit < edits; edit += 1) voxels[(edit * 499 + index * 37) % voxels.length] = Voxel.Wood;
-  } else if (index < Math.ceil(count * 0.875)) {
-    for (let voxelIndex = 0; voxelIndex < voxels.length; voxelIndex += 1)
-      voxels[voxelIndex] = (Math.floor(voxelIndex / 1_024) + index) % 8;
-  } else {
-    for (let voxelIndex = 0; voxelIndex < voxels.length; voxelIndex += 1)
-      voxels[voxelIndex] = (Math.imul(voxelIndex + 1, index + 17) >>> 3) % 9;
-  }
-  return { procedural, voxels };
-};
-
-const seedCorpus = async (task: SeedCorpusTask): Promise<CorpusSummary> => {
+const seedCorpus = async (task: SeedCorpusTask) => {
   if (!config) throw new Error('Persistence worker is not initialized.');
-  if (!Number.isInteger(task.chunkCount) || task.chunkCount < 1 || task.chunkCount > 1_024)
-    throw new Error('Chunk corpus size must be between 1 and 1,024.');
-  const opened = await database();
-  const clearTransaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-  const clearDone = transactionDone(clearTransaction);
-  clearTransaction.objectStore('chunks').delete(worldChunkRange(config.worldId));
-  await clearDone;
-
-  const summary: CorpusSummary = {
-    storedChunkCount: task.chunkCount,
-    rawBytes: task.chunkCount * 32 ** 3 * Uint16Array.BYTES_PER_ELEMENT,
-    legacyJsonBytes: 0,
-    recordBytes: 0,
-    payloadBytes: 0,
-    metadataBytes: 0,
-    codecs: {},
-  };
-  const encoder = new TextEncoder();
-  const batchSize = 32;
-  for (let start = 0; start < task.chunkCount; start += batchSize) {
-    const records: StoredChunkRecord[] = [];
-    for (let index = start; index < Math.min(start + batchSize, task.chunkCount); index += 1) {
-      const { procedural, voxels } = corpusVoxels(index, task.chunkCount);
-      const record = createStoredChunkRecord({
-        worldId: config.worldId,
-        seedText: config.seedText,
-        cx: index,
-        cy: 0,
-        cz: 0,
-        revision: 1,
-        formatVersion: 1,
-        voxelSchemaVersion: 1,
-        generatorVersion: config.generatorVersion,
-        voxels,
-        proceduralVoxels: procedural,
-      });
-      const recordBytes = storedChunkRecordBytes(record, browserCorePlatform.utf8);
-      summary.recordBytes += recordBytes;
-      summary.payloadBytes += record.payload.byteLength;
-      summary.metadataBytes += recordBytes - record.payload.byteLength;
-      summary.legacyJsonBytes += encoder.encode(JSON.stringify([...voxels])).byteLength;
-      summary.codecs[record.codec] = (summary.codecs[record.codec] ?? 0) + 1;
-      records.push(record);
-    }
-    const transaction = opened.transaction('chunks', 'readwrite', { durability: 'strict' });
-    const done = transactionDone(transaction);
-    const store = transaction.objectStore('chunks');
-    records.forEach((record) => store.put(record));
-    await done;
-  }
-
-  const metadataTransaction = opened.transaction('worlds', 'readwrite');
-  const metadataDone = transactionDone(metadataTransaction);
-  metadataTransaction.objectStore('worlds').put({
-    worldId: config.worldId,
-    seedText: config.seedText,
-    generatorVersion: config.generatorVersion,
-    provider:
-      ((await requestResult(metadataTransaction.objectStore('worlds').get(config.worldId))) as WorldRecord | undefined)
-        ?.provider ?? config.provider,
-    player: null,
-    corpusSummary: summary,
-    updatedAt: Date.now(),
-  } satisfies WorldRecord);
-  await metadataDone;
-  return summary;
+  return seedPersistenceCorpus({
+    database: await database(),
+    config,
+    chunkCount: task.chunkCount,
+    proceduralChunk,
+  });
 };
 
 const handle = async (

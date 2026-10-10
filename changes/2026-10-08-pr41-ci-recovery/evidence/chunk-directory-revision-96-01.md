@@ -1,0 +1,11 @@
+# 同事务目录版本：来源前提
+
+在原Persistence owner的worlds记录维护可选chunkDirectoryRevision；旧字段缺失从0开始，非法/负数/非整数/溢出拒绝。普通save经同一strict worlds/chunks事务读取/校验版本、写区块和版本，任一record失败整体abort，不推进版本或残留前面put。world checkpoint和updatedAt不因普通chunk保存改变。空保存不伪造目录变化；并发保存通过同一IndexedDB事务序列避免丢增长。
+
+frozen save与replace仍使用原整笔worlds/chunks事务和旧revision/commitSequence冲突规则，在区块写入或replace时增长目录版本，空gameplay checkpoint不增长。删除世界仍原子删除worlds/chunks，后续旧owner保存拒绝missing metadata，不复活已删除世界。seed corpus原body从消息入口提取到同worker owner文件，clear/每32条batch均同事务增长；末尾保持原benchmark player/gameplay/checkpoint重置语义，同时保留目录版本与provider。未迁移DB版本、改chunk payload/generator/组成身份或新建lighting truth。
+
+真实旧普通/frozen函数RED：10FAIL/2PASS，其中后续normalizeRecord失败时首put部分提交确实重现。实现后12PASS；增加null/seed分支后，原seed body提取控制1FAIL/13PASS，末尾目录版本undefined。修复clear/batch/final metadata后14PASS；最终并发、删除、最大整数、空frozen反例共18个owner用例PASS，连同既有Browser persistence/worldgen initialize/冻结game save回归4files46PASS。适配是fake-indexeddb6.2.5固定dev依赖，仅package/lock新增该项，保留registry SHA512校验；这是IndexedDB兼容事务测试，不是实际GPU或浏览器证据。
+
+Web production/test/Classic E2E类型、范围ESLint、格式、路径与五份冻结证据原字节校验PASS；sealed evidence不改。当前identified build与真实Browser待最终冻结源码后执行。原native唯一线路新增只读现有worlds目录版本观察，缺DB时abort upgrade，保存后及同存档reload后验证存在/正值与非回退，原真实输入/模型/存档断言和120000/10000ms不变。没有另开Browser线路；这个正例尚未运行，不提前写PASS。
+
+本片只提供版本前提；完整列key发现、Memory/Switchable/world epoch失效、Authority dirty/resident合并、旧客户端写入协议与Sky/GPU消费者均未闭合。不能由单个版本字段认定任何高层未加载空间为空。长期code-map按真实worker入口提取更新，其他长期基线不改；PR仍不可合入。最新实际额度07:10周剩79%/4天19小时，约60%停止线保持。

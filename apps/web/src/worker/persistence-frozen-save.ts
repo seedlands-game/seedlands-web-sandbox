@@ -6,6 +6,7 @@ import {
 import type { FrozenGameSaveSnapshot } from '@seedlands/stdlib/server/persistence/game-save-snapshot';
 import { readGameSaveCheckpoint } from '@seedlands/stdlib/server/persistence/game-save-checkpoint';
 import { browserCorePlatform } from '../platform/core-platform';
+import { nextChunkDirectoryRevision } from './persistence-chunk-directory-revision';
 
 export type FrozenSaveTaskSnapshot = Omit<FrozenGameSaveSnapshot, 'chunks'> & {
   chunks: Array<
@@ -25,6 +26,7 @@ type WorldRecord = {
   gameplaySnapshot?: unknown;
   commitSequence?: number;
   worldRevision?: number;
+  chunkDirectoryRevision?: number;
   updatedAt: number;
 };
 
@@ -88,6 +90,8 @@ export async function persistFrozenGameSnapshot(options: {
     if (!existingWorld && !options.replace) throw new Error('Stored world metadata is missing.');
     if (!options.replace && (existingWorld!.commitSequence ?? 0) > snapshot.commitSequence)
       throw new Error('Refusing to replace a newer frozen game checkpoint.');
+    const directoryChange =
+      records.length || options.replace ? { chunkDirectoryRevision: nextChunkDirectoryRevision(existingWorld) } : {};
     if (options.replace)
       chunks.delete(
         IDBKeyRange.bound(
@@ -118,6 +122,7 @@ export async function persistFrozenGameSnapshot(options: {
       gameplaySnapshot: snapshot.gameplay,
       commitSequence: snapshot.commitSequence,
       worldRevision: checkpoint.worldRevision,
+      ...directoryChange,
       updatedAt: Date.now(),
     } satisfies WorldRecord);
     await done;
