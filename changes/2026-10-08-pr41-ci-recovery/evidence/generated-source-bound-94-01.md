@@ -1,0 +1,13 @@
+# 生成源空域保证：局部实现
+
+StandardWorldgenProvider增加可选只读`generatedEmptyAboveY`，只声明程序生成的空域上界，不包含存档/玩家修改或合法世界高度。stdlib模块在原Kernel freeze外显式保留该端口，校验安全整数输入/结果；缺能力、不支持版本或producer返回null均unknown。未增加Kernel字段、Sky消费者或第二可写truth。
+
+Classic默认makeChunk＋macroAt的静态公式：terrain≤44，树最高h+7≤51；因此默认source提供保守51。generateChunk或sampleMacro任一注入即不提供能力，即使Classic identity相同；邻树坐标不可安全表示时也unknown。原generate/sampleVoxel与identity/descriptor/存档组成定义不变。默认有限Y=52/4097采样只作回归，不能代替全球公式证明或证明未加载世界无高层遮挡。
+
+两条真实RED来自旧407 production baseline：Classic默认能力缺失1FAIL/3PASS，stdlib注册剥离端口1FAIL/1PASS。实现后对应GREEN，补同identity高空自定义生成/采样仍合法且无保证、非法输入/坏结果拒绝、negative bound与组成definitionMap不变。最终Classic定向6PASS、stdlib保证＋旧V11回归16PASS；相关production和test类型、范围lint通过。
+
+全Classic首次28PASS/1FAIL，因为稀疏检出缺冻结pre-death-v4-identity.json；仅从当前Git树物化该原blob，冻结5/5原字节校验后，全套7files29PASS。未改历史文件、manifest或格式例外。
+
+Web composition首次6PASS/1FAIL：geometry fixture期望Y65，但实际Modular floor为32、接受cy2空区块。暂以407旧worldgen模块作对照，原严格断言同样64.995失败，候选源码原字节随后恢复；该失败不是新端口回归。独立fixture修复另登记，当前不把Web全量写PASS。旧CI/主旅程与完整lighting/运输/194矩阵仍未闭合。
+
+当前产物/真实浏览器尚未取得；后续固定完成源码SHA构建同一artifact并从唯一原Classic线路验证，不能以局部方法GREEN宣称Sky/GPU/存档来源完整。长期docs不改：这是既有批准生成proof合同的可选运行时能力，完整持久化列查询、directory revision与Authority修改合并仍待实现。

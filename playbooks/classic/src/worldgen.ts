@@ -50,6 +50,18 @@ export function createClassicWorldgenProvider(
   generateChunk: GenerateChunk = makeChunk,
   sampleMacro: SampleMacro = macroAt,
 ): StandardWorldgenProvider {
+  // Default macro terrain is at most 44 and the highest canopy is h+7.
+  // This only describes generated source; arbitrary-height edits remain legal.
+  const generatedEmptyAboveY: StandardWorldgenProvider['generatedEmptyAboveY'] =
+    generateChunk === makeChunk && sampleMacro === macroAt
+      ? ({ seed, generatorVersion, x, z }) =>
+          [seed, generatorVersion, x, z].every(Number.isSafeInteger) &&
+          generatorVersion >= 2 &&
+          generatorVersion <= 11 &&
+          [x - 3, x + 3, z - 3, z + 3].every(Number.isSafeInteger)
+            ? 51
+            : null
+      : undefined;
   const macroColumns = new Map<string, MacroContext>();
   const queryMacro = (seed: number, generatorVersion: number, x: number, z: number): MacroContext => {
     const key = [seed, generatorVersion, x, z].join(':');
@@ -62,6 +74,7 @@ export function createClassicWorldgenProvider(
   };
   return Object.freeze({
     identity: classicWorldgenIdentity,
+    ...(generatedEmptyAboveY ? { generatedEmptyAboveY } : {}),
     acceptsStoredIdentity: isCompatibleClassicWorldgenIdentity,
     generate(input) {
       const { seed, generatorVersion, coordinate, epoch, revision } = input;
