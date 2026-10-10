@@ -4,6 +4,7 @@ import type { PendingMeshTask, StreamingVariant, WorkerResult } from '../app-con
 import { createMainSnapshotDispatch, type MeshTaskDispatch } from './mesh-task-dispatch';
 import { acceptSourceMeshResult, prepareSourceWorkerDispatch, type MeshTaskSchedulerOptions } from './mesh-task-source';
 import { recordMeshPreparationFailure } from './mesh-preparation-telemetry';
+import { recordMeshCommitQueued, recordMeshRequestMark, recordWorkerPreparation } from './mesh-task-telemetry';
 import { higherMeshRequestPriority, promoteMeshRequestPriority, selectMeshRequest } from './mesh-request-priority';
 import type { MeshRequestPriority } from './mesh-request-priority';
 import { MeshVisibilityBarriers } from './mesh-visibility-barriers';
@@ -144,6 +145,16 @@ export class MeshTaskScheduler {
         : { visibilityBarrierRevision: this.visibility.revisionForRequest(key)! }),
     };
     if (existing) this.mergedRequests += 1;
+    recordMeshRequestMark(
+      this.options.telemetry,
+      request,
+      'request-state',
+      delayedUntilVisible
+        ? 'visibility-deferred'
+        : this.preparingRequests.has(key) || this.inFlightKeys.has(key)
+          ? 'replacement'
+          : 'queued',
+    );
     if (delayedUntilVisible) {
       this.visibility.defer(key, request);
       return;
@@ -268,7 +279,7 @@ export class MeshTaskScheduler {
           traceId: request.traceId,
         });
         this.preparingRequests.set(key, request);
-        this.options.telemetry.markTrace(request.traceId, 'prepare-start', 'main');
+        recordMeshRequestMark(this.options.telemetry, request, 'prepare-start');
         try {
           if (this.options.source.beforePrepare)
             await this.options.source.beforePrepare(request.cx, request.cy, request.cz);
@@ -434,7 +445,7 @@ export class MeshTaskScheduler {
           this.discard(task, 'stale-after-authority-accept');
           return;
         }
-        this.recordWorkerPreparation(task, result);
+        recordWorkerPreparation(this.options.telemetry, task, result);
       }
       this.options.telemetry.recordCompletedSpan({
         category: 'meshing',
@@ -445,32 +456,13 @@ export class MeshTaskScheduler {
       });
       this.options.telemetry.markTrace(task.traceId, 'worker-complete', 'worker-derived');
       this.options.onAcceptedResult(task, result);
-      this.options.telemetry.markTrace(task.traceId, 'commit-queued', 'main');
+      recordMeshCommitQueued(this.options.telemetry, task, result.meshes.length);
     } catch (error) {
       this.fail(result.taskId, error instanceof Error ? error : new Error(String(error)));
     } finally {
       this.finishTask(active);
       void this.drain();
     }
-  }
-
-  private recordWorkerPreparation(task: PendingMeshTask, result: WorkerResult) {
-    if (result.workerGenerationMs !== undefined)
-      this.options.telemetry.recordCompletedSpan({
-        category: 'worldgen',
-        name: 'WorkerGeneration',
-        lane: 'worker-derived',
-        durationMs: result.workerGenerationMs,
-        traceId: task.traceId,
-      });
-    if (result.workerHaloMs !== undefined)
-      this.options.telemetry.recordCompletedSpan({
-        category: 'streaming',
-        name: 'WorkerHaloSample',
-        lane: 'worker-derived',
-        durationMs: result.workerHaloMs,
-        traceId: task.traceId,
-      });
   }
 
   private nextQueuedRequest(): [string, PendingMeshRequest] | undefined {

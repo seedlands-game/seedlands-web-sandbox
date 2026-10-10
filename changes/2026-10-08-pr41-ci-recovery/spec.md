@@ -1,5 +1,15 @@
 # PR41 当前源码 CI 与可玩性修复
 
+## 网格失败诊断 checkpoint70（预注册）
+
+2026-10-09 23:48UTC，精确5790da0的CI69仍自然运行，五项非浏览器SUCCESS；不取消、不抢推。CI68重试实际下半门chunk 2,0,0 authority126/render125，trace105已worker完成但仅见两个part提交，没有发布事件。现有日志缺请求优先级/可见屏障及分片总数，不能据此认定producer缺陷或starvation。仅补充现有trace mark可选不可变属性：请求有效priority/排队状态/barrier、accepted result的partsTotal/taskId/revision、实际adapter已提交partsCommitted。trace身份不可被属性覆盖，未完成trace也须导出字段；原发布、取消、丢弃边界不变。以当前导出丢失属性的执行RED先证明诊断缺口，再验证实际scheduler请求和accepted worker结果产生字段。保留原输入、5/900秒、帧预算、优先级算法、门断言、质量与runner；不声称修复门或取得性能收益。
+
+根独占上述三个生产文件、相关既有测试及本spec；无新委派。传统0.15PD×120%=0.18PD，AI20min×120%=24min，次日00:12前checkpoint并重估；actual型号/credits/API未核实且不换算周额度。23:09真实UI剩82%/5d3h，23:38已请求刷新读数，约60%停止线保持。CI artifact域名授权仍pending，现有console不依赖ZIP传输。长期docs不更新：仅扩展既有诊断字段，无owner或产品合同变更。
+
+有效属性RED 1FAIL/6PASS、实际scheduler RED 1FAIL/14PASS均取得；首次错选根Vitest项目为No tests found，仅安装/选择失败。初轮五文件31PASS，但真实lint及完整static在两个500行门槛处FAIL。保持门槛，新增mesh-task-telemetry.ts承接诊断及原Worker generation/halo原样记录，将新测试单独放入mesh-task-scheduler-diagnostics.test.ts；旧scheduler测试恢复原字节。新诊断测试和既有telemetry测试只追加headless和类型集合，所有原选择不变。代码地图只更新新职责入口；长期产品合同不变。修正后结果仍待实际执行。
+
+00:11UTC checkpoint70本地闭合：七文件41项PASS，完整static EXIT0；完整headless首轮703PASS/1既有木板建造5秒超时，隔离原两项2PASS，最终串行113文件704PASS/EXIT0（175.35秒）。门槛和源码不因超时改动，失败记录保留。23:48–00:11约23分钟在24分钟保守量内；新SHA真实浏览器字段及CI待验收。精确5790da0的CI69已自然terminal：五项非浏览器SUCCESS，主旅程两次V2铁资源阶段耗尽原900秒，VisualPASS、ModularSKIP、部署SKIP。附件分别240438738/251229792 bytes成功上传但未传入本环境。详见evidence/mesh-failure-diagnostics-checkpoint-70-01.md，PR仍不可合入。
+
 ## 正式路线运输运动 checkpoint69（预注册）
 
 2026-10-09 22:48UTC，head52f41c10的CI68自然执行，不取消。注册motion当前明确拒绝route，runtime仅projectSurfaceMotion；纯route模型通过不能证明正式玩法。先以实际非Classic注册组合、部署、mount和accepted world-space输入取得RED，再沿同一manual system/prepared ECS frontier接入route adapter。局部端点原点高度复用67合同，所有当前/邻格用frame.world.querySolids记录包括non-solid轨道的chunk revision；未知/断开/多个邻格失败关闭，保持64transition上限。沿当前directed cursor前进，负输入仅减速到零，不静默倒车或改cursor方向。

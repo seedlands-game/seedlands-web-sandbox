@@ -90,6 +90,7 @@ Headless 工程入口 [server-headless.mjs](../scripts/server-headless.mjs) 通�
 最容易混淆的几个名称：
 
 - **`World`** 定义在 [app/world/world-runtime.ts](../apps/web/src/app/world/world-runtime.ts)，是浏览器侧 streaming、编辑请求与网格协调入口。它不拥有另一套权威体素世界。
+- [mesh-task-telemetry.ts](../apps/web/src/app/world/mesh-task-telemetry.ts) 记录请求优先级、可见屏障和 accepted worker 分片数，并承接既有 Worker generation/halo span；调度、网格接纳与可见发布仍由原 owner 负责。
 - **`GameServer`** 持有权威 Chunk 与玩法状态，`editBatch()` 进入事务提交路径。浏览器编辑经 World / Authority 端口到达这里；不要直接改渲染副本。
 - **`AuthorityRuntime` / `AuthoritySession`** 组合权威服务并安排时间、输入和物理推进。浏览器实例由 Authority Worker 持有；无浏览器会话复用同一核心。[authority-state-version.ts](../packages/stdlib/src/server/authority/authority-state-version.ts) 只捕获和比较状态版本，不取得提交权。
 
