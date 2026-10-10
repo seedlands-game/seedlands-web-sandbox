@@ -3,11 +3,21 @@ import { browserArtifact, browserPackLock, compositionIdentity } from './identit
 import { confirmClassicPerformanceWarning, startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { aimAtVoxelWithRealMouse } from './aim';
-import { clickCanvasCenter, closeInventory, lockPointer, moveMouseBy, snapshot, type ClassicWindow } from './harness';
+import {
+  clickCanvasCenter,
+  closeInventory,
+  lockPointer,
+  moveMouseBy,
+  snapshot,
+  waitForSnapshot,
+  type ClassicWindow,
+} from './harness';
 import { observeBrowserRuntime, collectClassicFailureDiagnostics } from './evidence';
 import { mouseCorrectionToPoint } from './target-aim';
 import { modularPackSmokeEnabled } from './modular-pack-smoke';
 import { observePersistedChunkDirectory } from './persisted-directory-observation';
+import { sendNativeMovementPulse } from './native-movement-pulse';
+import { routePulseSettledPredicate } from './route-progress';
 
 export function registerClassicMinecartJourney(test: typeof import('@playwright/test').test) {
   test('Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档', async ({ page }, testInfo) => {
@@ -111,6 +121,27 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     if (!teleport.ok) throw new Error('Fixture teleport failed.');
     const run = await harness.world.clock({ kind: 'run' });
     if (!run.ok) throw new Error('Fixture clock resume failed.');
+  });
+  await lockPointer(page);
+  const pulseBaseline = await waitForSnapshot(page, (value) => value.onGround && !value.colliding);
+  await sendNativeMovementPulse(page, 'KeyW', 300, true);
+  const pulseAfter = await waitForSnapshot(page, routePulseSettledPredicate(pulseBaseline));
+  expect(
+    Math.hypot(pulseAfter.player[0] - pulseBaseline.player[0], pulseAfter.player[2] - pulseBaseline.player[2]),
+  ).toBeGreaterThan(0.05);
+  expect(pulseAfter.serverPlayerPosition[1]).toBeCloseTo(pulseBaseline.serverPlayerPosition[1], 1);
+  await testInfo.attach('classic-native-movement-pulse.json', {
+    contentType: 'application/json',
+    body: JSON.stringify({
+      runId: process.env.SEEDLANDS_HARNESS_RUN_ID,
+      sourceSha: process.env.SEEDLANDS_SOURCE_SHA,
+      requestedPulseMs: 300,
+      before: pulseBaseline.player,
+      after: pulseAfter.player,
+      neutralRelease: pulseAfter.nativeMovementInput,
+      acknowledgedInputSequence: pulseAfter.authority.acknowledgedInputSequence,
+      performanceEligible: false,
+    }),
   });
   await page.keyboard.press('KeyE');
   const inventory = page.getByRole('dialog', { name: '背包与合成' });

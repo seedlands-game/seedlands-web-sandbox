@@ -1,0 +1,74 @@
+{
+  "sourceSha": "93c4cd60742e246950e866b19a4a2d94d170e514",
+  "visual164": {
+    "status": "PASS",
+    "durationMs": 149652,
+    "icons": 130,
+    "cases": 390,
+    "sizes": [16, 32, 34],
+    "allComparisonsZero": true,
+    "coldStoredSky": "PASS"
+  },
+  "main151": {
+    "status": "FAIL",
+    "durationMs": 460480,
+    "completed": ["C0", "C1", "C2", "C3", "Creative"],
+    "failure": "V1 door approach67.5,0.5 left supported surface after water bucket completed",
+    "notReached": ["V2", "C4", "C5"]
+  },
+  "traceRoute": {
+    "beforePlayer": [65.91606140136719, 32.599998474121094, 2.7120559215545654],
+    "beforeVelocity": [0, 0, 0],
+    "afterCorrectionPlayer": [65.91606140136719, 32.599998474121094, 2.7120559215545654],
+    "afterPlayer": [70.93020629882812, 19.600000381469727, -4.326424598693848],
+    "floorZ": [-3, 3],
+    "key": "KeyW+Space",
+    "requestedPulseMs": 300,
+    "apiDurationMs": 1947.203,
+    "nativeReleaseNeutral": true,
+    "apiDurationNotActualHeldTime": true
+  },
+  "interpretation": "Image structural/raster contracts accepted. Full playability fails. Before/after aim pose identical, no stale-pose cause established. Sequential native chord ACK/release is next bounded hypothesis.",
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-visual-164-01.log",
+      "bytes": 7379,
+      "sha256": "71ce6cbb14e1384eee9962f97c607f7c89f39f53d8785181dd5d486f3304c9a8"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-verify-164-01.json",
+      "bytes": 386,
+      "sha256": "30bc438076c3c7c8131b76ee3f7c8d91dcb2e2f4d6eaae0071a32752248e6abe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-visual-attachments-164-01.json",
+      "bytes": 702846,
+      "sha256": "9c1ceb341588deb760e795ce2e8a01a2ca58b2d4965c5adf4d91619d28de00e7"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-main-151-01.log",
+      "bytes": 102578,
+      "sha256": "5c42e3da093b4d87f873f801cf9c24f36f867c0900d9b07fb217b4937fc2cbe2"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-main-verify-151-01.json",
+      "bytes": 386,
+      "sha256": "30bc438076c3c7c8131b76ee3f7c8d91dcb2e2f4d6eaae0071a32752248e6abe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-main-attachments-151-01.json",
+      "bytes": 268233,
+      "sha256": "59842056d14de80369e186f3ab2a8806fb82526f6cdf758d45381a369f45b629"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-main-result-151-01.json",
+      "bytes": 1361913,
+      "sha256": "141f3a1c73e83be67b24346b2c00eaee96baccd23c371d416acf6560a2421ca0"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-validated-route-trace-owner-166-01.json",
+      "bytes": 8052,
+      "sha256": "ea47f0d2e6f4390f4cf41da960793e9f067129cf8fd2ac105e471ccda2fad9b2"
+    }
+  ]
+}

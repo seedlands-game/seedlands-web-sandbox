@@ -1338,3 +1338,15 @@ Browser测量保留162全部first/repeat/AA/equivalent零断言，新增实际DO
 Root独占原asset-image、既有unit/helper、spec/evidence，无agent/权限。必要13tests/Classic类型/lint/hooks，Web类型复用候选旧已通过且新build仍执行Web类型。21:55UTC检查点，最新远端/工作流正常feature push前复核，未merge/生产部署。完整136/144/矩阵/最终精确CI/review仍开放。
 
 21:46UTC163定向交付：有效旧budget RED1FAIL/1PASS；新5unique13PASS，Classic types/lint PASS，production source树与149相同，Web类型由旧有效输出加新build复验。固定A/A37564元素/4315978bytes，新B/B583元素/645222bytes，尚未browser164/main151或时间性能准出。
+
+22:16UTC166检查点：exact93c4cd60正常push，CI423五nonbrowserSUCCESS/Chromium仍运行。原visual164完整PASS149652ms，130×3=390case16/32/34所有first/AA/equiv/repeat零差异、coldskyPASS。原无sampler main151 FAIL460480ms，C0–C3/Creative完成，水桶取放后生存门前67.5,.5路线跌离地板z[-3,3]；V2/C4/C5未到达。trace校正前后位置同65.916,32.6,2.712、速度0，KeyW+Space请求300/API1947.203ms、最后70.93,19.6,-4.326/neutral release；不等同实际heldTime，不认定生产owner根因。
+
+### 原生移动脉冲的释放请求独立于ACK167（预注册）
+
+安装Playwright1.62.1实际press实现将W down/Space down/delay/Space up/W up逐项await，方向键在跳跃键最后释放。新唯一轴：在既有Native keyboard.down/up上并发发出参与键按下；从发出请求开始计原pulse时限，到期并发发出所有keyup，不等待任何keydown或另一keyup ACK；所有参与命令allSettled回收后才取下一snapshot，任一失败仍尝试release全部键并传播原错误。声明的是释放请求顺序，不保证堵塞renderer的DOM事件绝对时间，不把API时间当heldTime。无JS dispatchEvent/CDP输入、Actor intent/pose注入、World/碰撞/quality修改。
+
+旧路线/地板/targets/tolerance/jump/300ms计算/45sec deadline/20sec settle/900sec总限及实际nativeRelease ACK+停止/未落地否决保持。先以新helper临时复用旧press取得模拟延迟ACK的真实行为RED，再独立helperGREEN，故障down/up仍释放全部/传播错误；原harness调用迁移，全部相关路由回归。旧位置未证实问题不纳入此轴。
+
+仅原普通矿车同spec在既有地形fixture后增一个真实W+Space pulse：PointerLock/初始onGround，原API和新helper，等待新native neutral release被Authority ACK、角色真实运动后停稳/回到同地板高度；原deployment/mount/rail-end/Shift右键/durable恢复断言保持。该附加输入不是其他spec/runner，仍headless/原120sec，无伪造坐标或证据。必要路由/Native unit与Classic类型/lint、显式headless注册、hooks后新身份commit/build/verify，原普通Native一次168严格PASS才原完整无sampler main169一次；失败新事实前不重试。CI423自然终态前不推新head以取消旧CI。
+
+Root独占harness.ts、新native-movement-pulse.ts与test、minecart-journey.ts、package显式登记、spec/public/private证据，不委派。22:40UTC检查点；只修测试原生gesture请求协议，不宣称性能收益。完整136/144/需求矩阵/finalCI/review继续开放，无新权限/网络/模型会话/合并或生产部署。
