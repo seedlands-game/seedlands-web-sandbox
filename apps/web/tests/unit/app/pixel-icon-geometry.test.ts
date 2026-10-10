@@ -30,8 +30,9 @@ function pixelsFromSvg(svg: string, texture: PixelTexture) {
     expect(pixels[y * width + x]).toBeNull();
     pixels[y * width + x] = rgb;
   };
-  for (const match of svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="1" height="1" fill="rgb\(([^)]+)\)"\/>/g)) {
-    put(Number(match[1]), Number(match[2]), match[3]!);
+  for (const match of svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="(\d+)" height="1" fill="rgb\(([^)]+)\)"\/>/g)) {
+    for (let offset = 0; offset < Number(match[3]); offset++)
+      put(Number(match[1]) + offset, Number(match[2]), match[4]!);
   }
   for (const match of svg.matchAll(/<path d="([^"]+)" fill="rgb\(([^)]+)\)"\/>/g)) {
     const commands = [...match[1]!.matchAll(/M(\d+) (\d+)h1v1h-1z/g)];
@@ -55,7 +56,7 @@ it('preserves every builtin pixel icon cell, transparency, coordinates and cache
   }
 });
 
-it('bounds the SVG element graph by actual opaque colors on the fixed builtin workload', () => {
+it('bounds the SVG element graph by same-color row segments on the fixed builtin workload', () => {
   const collect = () =>
     workload.reduce(
       (total, { itemId, texture }) => {
@@ -65,19 +66,33 @@ it('bounds the SVG element graph by actual opaque colors on the fixed builtin wo
             .filter((index) => index !== 0)
             .map((index) => texture.payload.palette[index]!.join(',')),
         );
+        const { pixels, palette, width } = texture.payload;
+        const runBound = pixels.reduce(
+          (count, color, index) =>
+            count +
+            Number(
+              color !== 0 &&
+                (index % width === 0 ||
+                  pixels[index - 1] === 0 ||
+                  palette[color]!.join(',') !== palette[pixels[index - 1]!]!.join(',')),
+            ),
+          0,
+        );
         return {
           icons: total.icons + 1,
           elements: total.elements + [...svg.matchAll(/<(?:rect|path)\b/g)].length,
           colorBound: total.colorBound + colors.size,
+          runBound: total.runBound + runBound,
           opaquePixels: total.opaquePixels + texture.payload.pixels.filter((index) => index !== 0).length,
           urlBytes: total.urlBytes + new TextEncoder().encode(url).byteLength,
         };
       },
-      { icons: 0, elements: 0, colorBound: 0, opaquePixels: 0, urlBytes: 0 },
+      { icons: 0, elements: 0, colorBound: 0, runBound: 0, opaquePixels: 0, urlBytes: 0 },
     );
   const first = collect();
   const repeat = collect();
   console.info('pixel-icon-geometry-budget', JSON.stringify({ first, repeat }));
   expect(repeat).toEqual(first);
-  expect(first.elements).toBe(first.colorBound);
+  expect(first.elements).toBe(first.runBound);
+  expect(first.elements).toBeLessThan(first.opaquePixels);
 });

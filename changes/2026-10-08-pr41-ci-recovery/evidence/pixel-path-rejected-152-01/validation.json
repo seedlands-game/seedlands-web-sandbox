@@ -1,0 +1,62 @@
+{
+  "runId": "pr41-pixel-raster-aa-visual-152-01",
+  "sourceSha": "9c99d904ce1f06de2f1b203b8b709f9c90334c72",
+  "visualStatus": "FAIL",
+  "durationMs": 71170,
+  "cases": 260,
+  "icons": 130,
+  "equalContext16DifferentCases": 105,
+  "equalContext32DifferentCases": 0,
+  "sourceAA16DifferentCases": 1,
+  "sourceAA32DifferentCases": 0,
+  "sourceAAAnomaly": "paper@16 72 RGBA channels; cannot explain remaining104 same-source-AA-zero candidate differences",
+  "decision": "REJECT color-grouped path production candidate; no push",
+  "main151": "NOT_STARTED",
+  "ci422": {
+    "head": "f01f22dce3de3ab4e0a7b17dcfa0fb210b60820b",
+    "runId": 38084363062,
+    "status": "FAIL",
+    "fiveNonBrowser": "SUCCESS",
+    "chromium": "1FAIL1SKIP2PASS32.9min",
+    "firstMain": "C4 total900000ms",
+    "retryMain": "C4 route208.5,0.5 original45000ms timeout",
+    "visual": "PASS1.3min",
+    "ordinaryNative": "PASS29.5sec",
+    "deploy": "SKIP",
+    "C5": "NOT_COMPLETED",
+    "timingComparison": "NOT_CONTROLLED_AB"
+  },
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-raster-aa-visual-152-01.log",
+      "bytes": 16049,
+      "sha256": "086ce10eaff2588bdad1a04476c15fa9830f582bb69763ed8cd0bf60f6c9783c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-raster-aa-visual-attachments-152-01.json",
+      "bytes": 182248,
+      "sha256": "6547b2c4214ac6d14d39cb9343adc942a37caae358cc3c2300abf4504d039afe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-raster-aa-visual-result-152-01.json",
+      "bytes": 461640,
+      "sha256": "5210a2ee27d12447ab906898e25572d03e6d34f936e61642829b0b58666cc778"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/pixel-raster-aa-verify-152-01.json",
+      "bytes": 386,
+      "sha256": "81794d2e69184b67da734cbcecd4272277da783f025eb85f1ef4d86fdd5f58f5"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci422-chromium-raw-152-01.log",
+      "bytes": 2627637,
+      "sha256": "1cdfae17fdb1323e4dbcb9f328e86dc15525026aee94c3f710b977f3b24c8e3a"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci422-raw-metadata-152-01.json",
+      "bytes": 328,
+      "sha256": "03abf6294600d4fb28b5bbb0303b7772386cd356e925a0e0da6ca74926c52d4a"
+    }
+  ],
+  "longTermDocsBaseline": "unchanged; candidate rejected"
+}

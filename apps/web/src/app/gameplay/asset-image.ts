@@ -58,26 +58,31 @@ function builtinPixelIcon(textureId: string): string | null {
   const cached = builtinPixelIcons.get(textureId);
   if (cached) return cached;
   const { width, height, palette, pixels } = texture.payload;
-  // Each closed subpath covers the original unit pixel; colors never overlap.
-  const cellsByColor = new Map<string, string[]>();
-  pixels.forEach((color, index) => {
-    if (color === 0) return;
+  // Preserve the rect raster primitive and row order at fractional icon scales.
+  const rectangles: string[] = [];
+  for (let index = 0; index < pixels.length;) {
+    const color = pixels[index];
+    if (color === 0) {
+      index++;
+      continue;
+    }
     const rgb = palette[color].join(',');
-    let cells = cellsByColor.get(rgb);
-    if (!cells) cellsByColor.set(rgb, (cells = []));
-    cells.push('M' + (index % width) + ' ' + Math.floor(index / width) + 'h1v1h-1z');
-  });
-  const paths = Array.from(
-    cellsByColor,
-    ([rgb, cells]) => '<path d="' + cells.join('') + '" fill="rgb(' + rgb + ')"/>',
-  ).join('');
+    const x = index % width;
+    const rowEnd = Math.min(pixels.length, index - x + width);
+    let end = index + 1;
+    while (end < rowEnd && pixels[end] !== 0 && palette[pixels[end]].join(',') === rgb) end++;
+    rectangles.push(
+      `<rect x="${x}" y="${Math.floor(index / width)}" width="${end - index}" height="1" fill="rgb(${rgb})"/>`,
+    );
+    index = end;
+  }
   const svg =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' +
     width +
     ' ' +
     height +
     '" shape-rendering="crispEdges">' +
-    paths +
+    rectangles.join('') +
     '</svg>';
   const url = 'data:image/svg+xml,' + encodeURIComponent(svg);
   builtinPixelIcons.set(textureId, url);
