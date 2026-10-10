@@ -1,0 +1,152 @@
+{
+  "runId": "pr41-native-release-browser-128-01",
+  "artifact": {
+    "schemaVersion": 1,
+    "sourceSha": "5690ed3c6ddb5207e28dc8a7ae170ab7996230c8",
+    "sourceDigest": "ba947271c79871781d42fe02f9db9d6c3d9689fc58de44873fbca14f9c63e066",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "6df19efb5c70b9c688fc9bdd063b5acc19cbb776b8a8b6922b4dcec71b9418e8",
+    "builtAt": "2026-10-10T15:49:28.909Z"
+  },
+  "result": "PASS; 2 original tests selected, NON_MAIN, 2.4m diagnostic elapsed not performance",
+  "visual": "PASS 1.5m including original hot gallery/input and cold121 stored source stage",
+  "nativeMinecart": "PASS47.0s real right-click/W/Shift right-click/save/reload identity",
+  "mainV1V4C0C5": "NOT_RUN locally; next exact remote CI required",
+  "modular": "NOT_RUN in selection",
+  "click": {
+    "beforeClick": {
+      "observedAtMs": 67940.69999998808,
+      "pointerLocked": true,
+      "target": {
+        "position": [0, 61, 17],
+        "adjacent": [0, 61, 18]
+      },
+      "interactionAttempts": 0,
+      "worldRevision": 36,
+      "targetVoxel": 3,
+      "neighborVoxel": 3
+    },
+    "afterRelease": {
+      "observedAtMs": 68110.5,
+      "pointerLocked": true,
+      "target": {
+        "position": [0, 61, 17],
+        "adjacent": [0, 61, 18]
+      },
+      "interactionAttempts": 1,
+      "worldRevision": 37,
+      "targetVoxel": 0,
+      "neighborVoxel": 3
+    },
+    "afterPoll": {
+      "observedAtMs": 68150,
+      "pointerLocked": true,
+      "target": {
+        "position": [0, 61, 16],
+        "adjacent": [0, 61, 17]
+      },
+      "interactionAttempts": 1,
+      "worldRevision": 37,
+      "targetVoxel": 0,
+      "neighborVoxel": 3
+    }
+  },
+  "coldStoredSky": {
+    "saved": {
+      "worldId": "seedlands:g11:classic-visual-v3",
+      "epoch": "seedlands:classic-visual-v3:1:world:0",
+      "roof": {
+        "key": "0,7,0",
+        "cx": 0,
+        "cy": 7,
+        "cz": 0,
+        "revision": 1,
+        "resident": true,
+        "dirty": false
+      },
+      "canonicalRevision": 1,
+      "ready0,1,0": false
+    },
+    "cold": {
+      "worldId": "seedlands:g11:classic-visual-v3",
+      "epoch": "seedlands:classic-visual-v3:1:world:0",
+      "roof": {
+        "key": "0,7,0",
+        "cx": 0,
+        "cy": 7,
+        "cz": 0,
+        "revision": 1,
+        "resident": false,
+        "dirty": false
+      },
+      "canonicalRevision": null,
+      "ready0,1,0": false
+    },
+    "after": {
+      "worldId": "seedlands:g11:classic-visual-v3",
+      "epoch": "seedlands:classic-visual-v3:1:world:0",
+      "roof": {
+        "key": "0,7,0",
+        "cx": 0,
+        "cy": 7,
+        "cz": 0,
+        "revision": 1,
+        "resident": false,
+        "dirty": false
+      },
+      "canonicalRevision": null,
+      "ready0,1,0": true
+    }
+  },
+  "lightingGpu": {
+    "ordinaryProbeCount": 33,
+    "modelProbeCount": 66,
+    "distinctModelPixels": 66,
+    "ordinaryIsSubsetNotAdditional33": true,
+    "assertions": "original per-channel expected64/128/0 tolerance3 PASS",
+    "meaning": "real GPU proof for six model classes, not full indoor/occlusion/quality/save matrix"
+  },
+  "images": {
+    "night": "Root inspected; eight sources visible in original gallery",
+    "cold": "Root inspected; scene is dark at Night00:00; ready and stored column proof do not establish cold occlusion pixels"
+  },
+  "coldCausality": "current original case PASS; does not establish that125 caused old startup timeout or isolate retry performance",
+  "budget": "last actual14:25UTC75%, fresh UI reply pending, stop≈60%",
+  "logs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-browser-128-01.log",
+      "bytes": 7570,
+      "sha256": "3e8af74d75713ed770aa4e86c28e4891ce2c9a3d79641281879a045a67603863"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-build-128-01.log",
+      "bytes": 3771,
+      "sha256": "58cc4703364eddf043bb375521b4d39e9442114a477a4e342ca74869f7582db9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-browser-attachments-128-01.json",
+      "bytes": 35091,
+      "sha256": "0f706d293d52fecc8bc30019ab44a3cf10a373863ca2199835b8af8a10afbe74"
+    },
+    {
+      "path": "harness/results/pr41-native-release-browser-128-01/classic.json",
+      "bytes": 946,
+      "sha256": "51216e7dc062bdcfdd912ed265cf5362418a8c1dc9fd1c24937f1994f38adaaa"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-html-128-01/index.html",
+      "bytes": 619511,
+      "sha256": "1cf2bfe8da26d455cf7dbdd5ea813506df036c100e47c7d66a0774e5b315b8ac"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-html-128-01/data/11115fad606c8b85a046a61b69e4fc231f144956.png",
+      "bytes": 286710,
+      "sha256": "05bd5c7667c4e26500c4c93b37ab94b324d97f675c2e039dba624783a60acf45"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-html-128-01/data/14beb9d33f38eb8548cbefc3b92c55ffd5741db7.png",
+      "bytes": 33376,
+      "sha256": "4250806731cd8e218544136b942c2ef17f1b1ce94783cca436e954e65e386e5d"
+    }
+  ]
+}
