@@ -163,7 +163,8 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     await page.keyboard.up('ShiftLeft');
   }
   await expect.poll(async () => (await transportSnapshot(page))?.transports[0]?.rider).toBeNull();
-  const dismounted = (await transportSnapshot(page))!.transports[0]!;
+  const dismountedSnapshot = (await transportSnapshot(page))!;
+  const dismounted = dismountedSnapshot.transports[0]!;
   await page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.flushSave());
   await page.reload({ waitUntil: 'networkidle' });
   await page.locator('#seed').fill(scenario.seed);
@@ -171,15 +172,46 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   await page.locator('#start-card').waitFor({ state: 'hidden' });
   await expect
     .poll(async () => (await transportSnapshot(page))?.transports[0]?.reference)
-    .toEqual(dismounted.reference);
-  const restored = (await transportSnapshot(page))!.transports[0]!;
+    .toEqual({ ...dismounted.reference, epoch: dismounted.reference.epoch + 1 });
+  const restoredSnapshot = (await transportSnapshot(page))!;
+  const restored = restoredSnapshot.transports[0]!;
+  expect(restoredSnapshot.runtimeEpoch).not.toBe(dismountedSnapshot.runtimeEpoch);
+  const [staleReferenceInspection, currentReferenceInspection] = await page.evaluate(
+    async ({ stale, current }) => {
+      const world = (window as unknown as ClassicWindow).__seedlandsHarness!.world;
+      return Promise.all([
+        world.inspect({ kind: 'entity-reference', reference: stale }),
+        world.inspect({ kind: 'entity-reference', reference: current }),
+      ]);
+    },
+    { stale: dismounted.reference, current: restored.reference },
+  );
+  expect(staleReferenceInspection).toMatchObject({
+    ok: true,
+    data: { kind: 'entity-reference', reference: dismounted.reference, status: 'stale' },
+  });
+  expect(currentReferenceInspection).toMatchObject({
+    ok: true,
+    data: { kind: 'entity-reference', reference: restored.reference, status: 'current' },
+  });
   expect(restored.pose.position).toEqual(dismounted.pose.position);
   expect(restored.rider).toBeNull();
   expect(runtime.pageErrors).toEqual([]);
   expect(runtime.failedResponses).toEqual([]);
   await testInfo.attach('classic-minecart-native-input.json', {
     contentType: 'application/json',
-    body: JSON.stringify({ artifact, packLock, composition, deployed, mounted, moved, dismounted, restored }),
+    body: JSON.stringify({
+      artifact,
+      packLock,
+      composition,
+      deployed,
+      mounted,
+      moved,
+      dismounted,
+      restored,
+      staleReferenceInspection,
+      currentReferenceInspection,
+    }),
   });
   await testInfo.attach('classic-minecart-restored.png', { contentType: 'image/png', body: await page.screenshot() });
 }
