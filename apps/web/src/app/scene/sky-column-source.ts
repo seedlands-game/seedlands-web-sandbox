@@ -16,11 +16,11 @@ export type SkyColumnProof = Readonly<{
 }>;
 
 /** The ceiling closes this observation; it is never a world height or a truncation of unknown cells. */
-export function readSkyColumnProof(
+function* skyColumnProofSteps(
   source: SkyColumnSource,
   chunk: readonly [number, number, number],
   reader: SkyVoxelReader,
-): SkyColumnProof | null {
+): Generator<SkyColumnObstructionSample, SkyColumnProof | null> {
   if (
     source.status !== 'complete' ||
     source.cx !== chunk[0] ||
@@ -89,7 +89,66 @@ export function readSkyColumnProof(
         loaded[offset] = 1;
         obstruction[offset] = Math.round(((definition.lightCost - 1) * 255) / 15);
       }
-      columns.push({ localX, localZ, bottomY, obstruction, loaded });
+      const column = { localX, localZ, bottomY, obstruction, loaded };
+      columns.push(column);
+      yield column;
     }
   return { ceilingY, dependencies, columns };
+}
+
+/** Synchronous pure API; production uses the cancellable task consumer below. */
+export function readSkyColumnProof(
+  source: SkyColumnSource,
+  chunk: readonly [number, number, number],
+  reader: SkyVoxelReader,
+): SkyColumnProof | null {
+  const steps = skyColumnProofSteps(source, chunk, reader);
+  let step = steps.next();
+  while (!step.done) step = steps.next();
+  return step.value;
+}
+
+export const SKY_PROOF_COLUMNS_PER_TASK = 8;
+export const SKY_PROOF_MAX_VOXEL_READS_PER_TASK = SKY_PROOF_COLUMNS_PER_TASK * SKY_VISIBILITY_MAX_COLUMN_HEIGHT;
+
+export type SkyProofTaskOptions = Readonly<{
+  isCurrent(): boolean;
+  yieldTask?: () => Promise<void>;
+}>;
+
+const yieldSkyProofTask = () =>
+  new Promise<void>((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      channel.port1.close();
+      channel.port2.close();
+      resolve();
+    };
+    channel.port2.postMessage(null);
+  });
+
+/** No partial publication; each real task reads at most eight bounded columns. */
+export async function readSkyColumnProofByTask(
+  source: SkyColumnSource,
+  chunk: readonly [number, number, number],
+  reader: SkyVoxelReader,
+  options: SkyProofTaskOptions,
+): Promise<SkyColumnProof | null> {
+  if (!options.isCurrent()) return null;
+  const steps = skyColumnProofSteps(source, chunk, reader);
+  try {
+    let step = steps.next();
+    let columns = 0;
+    while (!step.done) {
+      if (++columns === SKY_PROOF_COLUMNS_PER_TASK) {
+        await (options.yieldTask ?? yieldSkyProofTask)();
+        columns = 0;
+        if (!options.isCurrent()) return null;
+      }
+      step = steps.next();
+    }
+    return options.isCurrent() ? step.value : null;
+  } finally {
+    steps.return(null);
+  }
 }

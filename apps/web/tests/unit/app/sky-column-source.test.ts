@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { Voxel } from '@seedlands/stdlib/world/voxel';
 import { classicContent } from '../../fixtures/classic/content';
-import { readSkyColumnProof, type SkyColumnSource } from '../../../src/app/scene/sky-column-source';
+import {
+  readSkyColumnProof,
+  readSkyColumnProofByTask,
+  type SkyColumnSource,
+} from '../../../src/app/scene/sky-column-source';
 
 const source = (): Extract<SkyColumnSource, { status: 'complete' }> => ({
   status: 'complete',
@@ -20,6 +24,23 @@ const reader = () => ({
 });
 
 describe('sky column proof uses authoritative source and current voxel revisions', () => {
+  it('real task scheduling preserves full opaque, air and water samples', async () => {
+    const voxels = {
+      ...reader(),
+      getVoxel: (_x: number, y: number) => (y === 40 ? Voxel.Stone : y === 39 ? Voxel.Water : Voxel.Air),
+    };
+    const proof = await readSkyColumnProofByTask(source(), [0, 0, 0], voxels, { isCurrent: () => true });
+    expect(proof?.columns).toHaveLength(1024);
+    expect(proof?.columns[1023]?.loaded).toEqual(new Uint8Array(52).fill(1));
+    expect(proof?.columns[1023]?.obstruction[40]).toBe(255);
+    expect(proof?.columns[1023]?.obstruction[0]).toBe(0);
+    expect(proof?.columns[1023]?.obstruction[39]).toBeGreaterThan(0);
+    expect(proof?.columns[1023]?.obstruction[39]).toBeLessThan(255);
+  });
+  it('an unknown voxel in a later task invalidates the whole proof', async () => {
+    const voxels = { ...reader(), getVoxel: (x: number) => (x === 31 ? 65535 : Voxel.Air) };
+    expect(await readSkyColumnProofByTask(source(), [0, 0, 0], voxels, { isCurrent: () => true })).toBeNull();
+  });
   it('proven absent cells above the producer guarantee have a distinct marker without voxel reads', () => {
     const voxels = reader();
     const proof = readSkyColumnProof(source(), [0, 2, 0], voxels);
