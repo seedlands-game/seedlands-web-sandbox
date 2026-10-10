@@ -228,6 +228,35 @@ describe('Classic deployment from actual loaded rail cells with all configured s
     );
   });
 
+  it.each([
+    ['north', 'south', 'seedlands:rail-north-south'],
+    ['east', 'west', 'seedlands:rail-east-west'],
+    ['south', 'north', 'seedlands:rail-north-south'],
+    ['west', 'east', 'seedlands:rail-east-west'],
+  ] as const)(
+    'keeps the flat crest connected to its lower %s slope and level %s continuation',
+    (lower, level, variant) => {
+      const option = projectPlacedRails([endpoint(lower, -1), endpoint(level)]);
+      expect(option.rejection).toBeNull();
+      expect(option.routeCursor?.variant).toBe(variant);
+      expect(option.routeCursor?.segmentLength).toBe(1);
+      expect(option.routeCursor?.entry.elevation).toBe(0);
+      expect(option.routeCursor?.exit.elevation).toBe(0);
+      expect(option.position[1]).toBe(hit[1]);
+    },
+  );
+
+  it.each([
+    ['north', 'south', 'seedlands:rail-north-south'],
+    ['east', 'west', 'seedlands:rail-east-west'],
+  ] as const)('keeps a flat crest between two lower %s/%s slopes', (first, second, variant) => {
+    const option = projectPlacedRails([endpoint(first, -1), endpoint(second, -1)]);
+    expect(option.rejection).toBeNull();
+    expect(option.routeCursor?.variant).toBe(variant);
+    expect(option.routeCursor?.segmentLength).toBe(1);
+    expect(option.position[1]).toBe(hit[1]);
+  });
+
   it('keeps an unavailable possible raised neighbor unknown even when flat rails are visible', () => {
     expect(projectPlacedRails([endpoint('west'), endpoint('east')], [[3, 32, 2]]).rejection).toBe('chunk-unavailable');
   });

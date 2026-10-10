@@ -135,15 +135,27 @@ export const classicMinecartRoute = defineRouteDefinitionV1({
   variants: ordinaryRailVariants,
   // A neighboring rail can expose both low/high endpoint probes. Prefer the
   // ground-level shape when both ends are level; a raised-only end selects a slope.
-  placementTieBreaks: ordinaryRailVariants.map(({ variant, edges: [edge] }) => ({
-    variant,
-    connected: [
-      edge.entry,
-      edge.exit,
-      { ...edge.entry, elevation: 1 as const },
-      ...(edge.slopeDelta === 0 ? [{ ...edge.exit, elevation: 1 as const }] : []),
-    ],
-  })),
+  placementTieBreaks: [
+    ...ordinaryRailVariants.map(({ variant, edges: [edge] }) => ({
+      variant,
+      connected: [
+        edge.entry,
+        edge.exit,
+        { ...edge.entry, elevation: 1 as const },
+        ...(edge.slopeDelta === 0 ? [{ ...edge.exit, elevation: 1 as const }] : []),
+      ],
+    })),
+    // At a crest, the lower neighboring slope exposes only the level endpoint.
+    // The opposite same-level rail still exposes both level and raised probes.
+    ...ordinaryRailVariants
+      .filter(({ edges: [edge] }) => edge.curve === 'line' && edge.slopeDelta === 0)
+      .flatMap(({ variant, edges: [edge] }) =>
+        [edge.entry, edge.exit].map((level) => ({
+          variant,
+          connected: [edge.entry, edge.exit, { ...level, elevation: 1 as const }],
+        })),
+      ),
+  ],
 });
 
 export const classicTransportModules = [

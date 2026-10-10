@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "scope": "four flat crest placement patterns and exact nonempty pre-transition gameplay V4 compatibility",
+  "sourceParentSha": "a1a9ed3ba95fce3e0832dcc1b6947435a7933ee0",
+  "sourceState": "uncommitted 137 candidate on sourceParentSha; no identified Browser artifact",
+  "capturedPredecessor": {
+    "sourceSha": "a1a9ed3ba95fce3e0832dcc1b6947435a7933ee0",
+    "identitySourceSha": "b705f3706a8c43d947d9909b05854aca321cf9dc",
+    "identityRunId": "pr41-route-shapes-native-135-02",
+    "captureKind": "headless-exact-pre-extension-owner",
+    "raw": {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-rule-v4-capture-137-01.json",
+      "bytes": 95032,
+      "sha256": "b1e64969f503e2939d9f03ebf88fc9865e4aa964f97978c27f6ee598a3cca81f"
+    },
+    "publicFixture": "apps/web/tests/fixtures/classic/pre-route-transitions-production-v4.json",
+    "semanticEquality": "PASS"
+  },
+  "tests": {
+    "crestOwnerRed": {
+      "failed": 4,
+      "passed": 40
+    },
+    "crestOwnerGreen": {
+      "passed": 44
+    },
+    "lineageRed": {
+      "failed": 2,
+      "passed": 4
+    },
+    "integratedWeb": {
+      "actualFiles": 3,
+      "passed": 55
+    },
+    "transportAuthorityRegressions": {
+      "actualFiles": 2,
+      "passed": 16
+    },
+    "packTypes": "PASS",
+    "classicTypes": "PASS via root tsconfig.classic-tests.json; first nonexistent apps/web path NOT_RUN",
+    "rootTestTypes": "PASS",
+    "targetedLint": "PASS",
+    "fullClassicHeadless": {
+      "status": "PASS",
+      "files": 152,
+      "tests": 1081,
+      "durationSeconds": 252.63,
+      "rawLog": {
+        "path": "/workspace/pr41-recovery-20261008-root-01/crest-full-classic-137-01.log",
+        "bytes": 22076,
+        "sha256": "b75060d3d88f96a8f4f7f4aa37ece485c59398ef30ec38d15d3f3cf7a9266546"
+      }
+    },
+    "stdlibFull": "NOT_RUN on 137; unchanged generic production logic passed 1274 on 135",
+    "build": "NOT_RUN",
+    "browser": "NOT_RUN",
+    "performance": "NOT_RUN"
+  },
+  "originalFailuresRetained": {
+    "testFixtureAuthorError": "initial option.pose does not exist; original log retained, corrected option.position",
+    "selectionError": "two absent file patterns requested; Vitest executed only three actual files, not claimed as five",
+    "typeCommandError": "initial apps/web/tsconfig.classic-tests.json absent; corrected root path",
+    "identityVerificationMethodError": "Prettier single-quote TS literal not JSON syntax; TypeScript AST decode passed"
+  },
+  "supportedSlope": {
+    "status": "UNRESOLVED",
+    "originalOwnerRed": {
+      "passed": 4,
+      "failed": 4
+    },
+    "firstActualSweepContact": {
+      "colliderId": "voxel:3,31,2:0",
+      "aabb": {
+        "min": [3, 31, 2],
+        "max": [4, 32, 3]
+      },
+      "normal": [-1, 0, 0]
+    },
+    "observerSourceState": "HEAD a1a9ed3b plus 137 dirty flat placement rules; collision/motion unchanged; contact before crest",
+    "sourceCorrection": {
+      "path": "/workspace/pr41-recovery-20261008-root-01/supported-slope-collider-136-luna-02.source-correction.json",
+      "bytes": 588,
+      "sha256": "6de73de7ba766c52a5e56b8283c16f3cdc157611981fa82a6c4f173d46229fe5"
+    },
+    "rawLog": {
+      "path": "/workspace/pr41-recovery-20261008-root-01/supported-slope-collider-136-luna-02.raw.log",
+      "bytes": 3841,
+      "sha256": "37ccd9afd4d3245a3970862e2c870daedb4798b5e9af871fabc084749975aa21"
+    },
+    "observationExport": {
+      "path": "/workspace/pr41-recovery-20261008-root-01/supported-slope-collider-136-luna-02.json",
+      "bytes": 1337594,
+      "sha256": "9cf5c02f6814901596a66982e9672c30a30e680cd9838bbcf8ee325d39690f05"
+    }
+  },
+  "rawLogs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-route-red-137-01.log",
+      "bytes": 3941,
+      "sha256": "5e82f04cf1abd00fee55db32f42695ef6bd04de519b3a1bfa21dd4e83017cd90"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-route-red-137-02.log",
+      "bytes": 2752,
+      "sha256": "75cbd678f271521f44bcac1b54e9297d41b323ec1c583aeffee54ba7704509fe"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-route-green-137-01.log",
+      "bytes": 340,
+      "sha256": "bb779404106022a58606bafcbf37d5c84db1fff2a76077d86cb577fc92331453"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-lineage-red-137-01.log",
+      "bytes": 3016,
+      "sha256": "126d7a9801087f8e4297ea6eb1a69863f039e0e9d9caafe707eb5a265ff6d65c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-integrated-green-137-01.log",
+      "bytes": 341,
+      "sha256": "6b5b0b02e0f62ee8fed066fa3eb48d1f6dc9e5987a784bb86427f94513a63267"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-authority-regressions-137-01.log",
+      "bytes": 341,
+      "sha256": "d7e1aea79a7af320975c81924a68a156ab03d028236503eac0cccd091c600b5c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-pack-types-137-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-classic-types-137-01.log",
+      "bytes": 89,
+      "sha256": "d5e6dd0a363fb23dd95d5dff3a059b704b540d80fb7561d7f955eeeebc5e47eb"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-classic-types-137-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-web-types-137-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/crest-lint-137-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "budget": {
+    "actualUiAt": "2026-10-10T17:54:00Z",
+    "remainingPercent": 74,
+    "resetIn": "4d9h",
+    "sharedAccount": true,
+    "stopRemainingPercent": 60
+  },
+  "mergeReady": false,
+  "longTermBaselineUpdated": false,
+  "ci418": {
+    "runId": 38072280710,
+    "sourceSha": "a1a9ed3ba95fce3e0832dcc1b6947435a7933ee0",
+    "nonBrowser": "five SUCCESS",
+    "chromium": {
+      "status": "FAIL",
+      "failed": 1,
+      "skipped": 1,
+      "passed": 2,
+      "durationMinutes": 27.9
+    },
+    "deploy": "SKIPPED",
+    "rawLogSha256": "651bd41692c1f7c74ea6533e043595afa1ba239d45ae02fe9bd65a22d1bd9c3a",
+    "rawLogBytes": 1037754,
+    "routes": {
+      "count": 54,
+      "returned": 52,
+      "threw": 2
+    },
+    "operations": {
+      "count": 155,
+      "returned": 154,
+      "threw": 1
+    }
+  }
+}
