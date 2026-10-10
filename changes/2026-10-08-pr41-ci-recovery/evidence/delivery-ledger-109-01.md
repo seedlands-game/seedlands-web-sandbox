@@ -1,0 +1,38 @@
+# PR41 delivery and finite merge blockers
+
+Status2026-10-10 10:18UTC: NOT merge-ready. No merge/automerge/main push/production deployment. This inventory does not use checkpoint count or local test count as product completion.
+
+## Actual delivery since takeover2d144c36
+
+Remote feature head isdde3c593f52adca1727c9613b7160330826b8eb9. Product changes include real input surviving render-frame gaps; crop planting/growth state and chunk presentation; ordinary minecart accepted deployment, entity picking, native mount/keyboard movement/dismount and save/restore; current carrier bodies used by collision consumers; stale block-light CPU rejection/shared R8 invalidation; preserving configured tone mapper across quality levels; Modular1.1 normal block actions/inventory settlement and its own terrain. These are bounded capabilities, not completion of every content family.
+
+Native straight ordinary-minecart case and visual capture passed on exact remote CI409 source dde3; original Modular1.1 browser smoke previously passed500 block place/mine and reopening. These do not prove every rail/carrier/legacy save, unified lighting or the full latest journey. Current local native result is FAIL before deployment, as separately recorded in sky-native-109-01.md.
+
+Local unpushed source range29d37e84..8ed41353 contains the mining-await static test correction, bounded persistence-column observations/fences, actual GameServer/provider/resident source merging, current-v2 Logic validation correction and production renderer Sky source/cache/R8 ownership. Intermediate source commits a00eb730/f38942c0/84b9347b/1398ea2a are ancestors of8ed. Sky has no shader/SurfaceLightingSample consumer yet; no visible unified-lighting delivery claimed. New diagnostics describe observed work, not a repaired journey.
+
+## Complete runs and remaining failures
+
+Exact remote CI409: build, deterministic Kernel, architecture and static jobs SUCCESS; Classic headless795PASS/1FAIL (mining-await static contract; local correction not yet remote-verified); Chromium FAIL. Main first attempt and original retry both exceeded900000ms inV2;C4 not run. Visual and default native cases PASS; existing Modular branch SKIP; preview SKIP. Thus no fully green current required CI and no complete current C0-C5/V1-V4 product acceptance. Local source8ed identified build PASS; its original native case FAIL on creative-catalog close, deployment/restore/Sky diagnostics not reached. Source checks are reported separately in sky-runtime-r8-108-01.md, not substituted for product acceptance.
+
+## Finite blocking domains and closing evidence
+
+| Domain                       | Classification and actual gap                                                                                                                                         | Required closing evidence                                                                                                                                          |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Current browser journey      | Confirmed acceptance failure; production/test cause still unproved. V2 exceeds original900s; new native catalog-close fails original5s.                               | Demonstrated cause/correction; original real-input exact-identity native and full canonical journey pass without weaker assertions, timeouts or quality.           |
+| Content behavior closure     | Original product requirements;194 matrix/equipment/death/save paths not all accepted.                                                                                 | Original matrix has owner/input/presentation/save/test for each family; existing V2-V4 and death/restore acceptance close.                                         |
+| Remaining transport          | Product missing/partial: other rail/carrier/boat configurations, corner/slope presentation, chest/fuel/safe exit and legacy compatibility.                            | Original transport matrix through real player input, collision, presentation and save/reopen; no extrapolation from straight ordinary cart.                        |
+| Unified received lighting    | Product missing: Sky R8 source is only a prerequisite; terrain/water/actor/drop/viewmodel still need common received-light consumption and separate surface emission. | Original synthetic tests plus real WebGL2 pixel RED/GREEN and day/night/indoor/occlusion/cross-chunk/quality/save matrix.                                          |
+| Final integration/review     | Test/integration: local await-test fix and new source not on remote; final exact-SHA CI/review/conflict/preview pending.                                              | Normal feature push, required exact-SHA jobs pass, addressed current review threads and conflict check; keep Draft until product evidence closes.                  |
+| Retained optimization claims | Conditional repository performance requirement, not a replacement for functionality. Existing tree work lacks whole dynamic-path claim evidence.                      | Audit retained reasons; any claimed improvement gets controlled same-identity evidence and required combined acceptance. No claim from failed/unknown experiments. |
+
+Environment constraints are evidence limits, not diagnosed causes: local SwiftShader is not hardware-GPU proof; remote artifact download domain was blocked, so ZIP was not obtained there. Original raw CI logs remain usable. Product UI quota cannot be directly read by this agent; parent real10:05 reading77% is used, stop near60%.
+
+## Original contract versus task-added verification
+
+At takeover2d, original classic-functional-completion/spec.md already required194 families, three rail/cart classes/boat, V2-V4/death/save, common received lighting with R8 Sky, WebGL2 pixels and true keyboard/mouse product matrices, Modular substitution, compatibility and final CI/review. Those product domains are not scope expansion. User-specific Cloud/model/budget/no-production restrictions supersede old local-device/model routes.
+
+This task added a focused ordinary-minecart native case; bounded column-source/epoch/authorization/resource unit regressions; read-only diagnostic fields; identified run receipts and local failure documentation. They protect/observe the original implementation and do not add gameplay requirements. Repository AGENTS requires A/A and controlled/combined A/B for retained performance claims;15% noise and20% benefit thresholds are specific experiment preregistrations, not a universal number in the original functional spec. Do not silently delete or promote those experimental contracts into all-PR feature criteria.
+
+Withdrawn/closed candidates: route-observer/snapshot alternatives were withdrawn when timing/noise evidence invalidated them; latest duplicate-snapshot change was contradicted by existing freshness sequencing; observer control showed no adopted benefit; blur A/A noise30.6083% exceeded15%, A/B NOT_RUN, production CSS unchanged. No further experiment is justified merely by another failed journey.
+
+Next actionable blocker: diagnose the captured close-button/Authority/UI chain, produce a justified minimal fix, then verify the same native case. FullV2 cause remains open. Source108 is reviewable with explicit failed browser evidence; it is not accepted production lighting.
