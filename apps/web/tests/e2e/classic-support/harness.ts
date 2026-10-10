@@ -12,6 +12,7 @@ import {
 import { queryEntity } from './combat-entity';
 import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
+import { sendNativeMovementPulse } from './native-movement-pulse';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type {
@@ -264,12 +265,10 @@ export async function walkTo(
     const settledPulse = routePulseSettledPredicate(current);
     options.diagnostics?.beforeInput(current, pulseMs, options.jump ? `${key}+Space` : key);
     try {
-      // Native press releases input before tracing snapshots delay the API response.
-      await page.keyboard.press(options.jump ? `${key}+Space` : key, { delay: pulseMs });
+      await sendNativeMovementPulse(page, key, pulseMs, options.jump);
       options.diagnostics?.inputFinished('returned');
     } catch (error) {
       options.diagnostics?.inputFinished('threw');
-      await Promise.allSettled([page.keyboard.up(key), ...(options.jump ? [page.keyboard.up('Space')] : [])]);
       throw error;
     }
     current = await waitForSnapshot(

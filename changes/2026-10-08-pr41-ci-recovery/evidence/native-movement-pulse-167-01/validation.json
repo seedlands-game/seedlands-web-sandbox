@@ -1,0 +1,64 @@
+{
+  "parentSourceSha": "93c4cd60742e246950e866b19a4a2d94d170e514",
+  "scope": "Native keyboard release request deadline independent of command acknowledgements; no actor, collision, world or quality changes",
+  "red": {
+    "nativeDelayedAckFixture": "4 FAIL on prior sequential press",
+    "oldRouteMocks": "2 FAIL / 77 PASS; prior press-only mocks retained as negative evidence"
+  },
+  "green": {
+    "routeAndNativeContracts": {
+      "files": 11,
+      "uniqueTests": 79,
+      "status": "PASS",
+      "nativeNewTestsIncluded": 4
+    },
+    "classicTypes": "PASS",
+    "changedTypeScriptLint": "PASS",
+    "ciSelection": {
+      "uniqueTests": 17,
+      "status": "PASS"
+    }
+  },
+  "browser168": "NOT_RUN_AT_DELIVERY",
+  "main169": "NOT_RUN_AT_DELIVERY",
+  "strictAcceptanceUnchanged": true,
+  "actualHeldTimeGuaranteed": false,
+  "performanceEligible": false,
+  "rawEvidence": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-red-167-01.log",
+      "bytes": 4151,
+      "sha256": "1d13fbedf020b80dfbc6d4958687dc8db137b5569228b701d74dd1157d9c6571"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-green-167-01.log",
+      "bytes": 337,
+      "sha256": "8a47735ce4ecc7ddccf4ab1f935608b23c4f40815d74a40140205add2a03f48c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-routes-167-01.log",
+      "bytes": 2334,
+      "sha256": "d90ac5e0a025644f5d5e49fa447f6654e41717d93cd4812f277991fb3dad4af3"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-routes-167-02.log",
+      "bytes": 344,
+      "sha256": "99d583863796bb54bdecfd3f8711ae527b1a7b913198ca0b5ff21e69a8114c49"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-types-167-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-lint-167-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-pulse-ci-selection-167-01.log",
+      "bytes": 3981,
+      "sha256": "b4cc5b9d862f39ce9945f610b3347c720cd0fd818054b368feb7be9deddf9a21"
+    }
+  ]
+}

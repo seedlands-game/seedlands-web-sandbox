@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { walkTo, type ClassicSnapshot } from './harness';
 import { lockPointer } from './mouse-input';
 import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-aim';
@@ -33,6 +33,7 @@ it('settles the closed-door approach before probe input even when the initial bo
     presses = 0,
     pointerLocked = false;
   let mouseX = 5000;
+  let heldAt = 0;
   const observe = (): ClassicSnapshot => ({
     ...routeSnapshot([body.position.x, body.position.y + 1.6, body.position.z], yaw, tick, ack),
     serverPlayerVelocity: [body.velocity.x, body.velocity.y, body.velocity.z],
@@ -41,11 +42,16 @@ it('settles the closed-door approach before probe input even when the initial bo
     evaluate: async (callback: (...args: unknown[]) => unknown) =>
       String(callback).includes('pointerLockElement') ? pointerLocked : observe(),
     keyboard: {
-      press: async (key: string, options?: { delay?: number }) => {
+      down: async (key: string) => {
         expect(key).toBe('KeyW');
-        expect(options?.delay).toBeLessThanOrEqual(80);
+        heldAt = Date.now();
         presses++;
-        const heldTicks = Math.ceil((options!.delay! * 60) / 1000);
+      },
+      up: async (key: string) => {
+        expect(key).toBe('KeyW');
+        const delay = Date.now() - heldAt;
+        expect(delay).toBeLessThanOrEqual(80);
+        const heldTicks = Math.ceil((delay * 60) / 1000);
         for (let i = 0; i < 180; i++) {
           const radians = (yaw * Math.PI) / 180;
           const stepped = stepBody({
@@ -65,7 +71,6 @@ it('settles the closed-door approach before probe input even when the initial bo
         }
         ack++;
       },
-      up: async () => undefined,
     },
     locator: () => ({
       isVisible: async () => false,
@@ -87,7 +92,15 @@ it('settles the closed-door approach before probe input even when the initial bo
   expect(crossed.player[0]).toBeCloseTo(plan.contact, 6);
   expect(presses).toBe(0);
   const options = { tolerance: 0.06, corridorTolerance: 0.08, pulseMs: 80, arrival: 'point' as const };
-  const reached = await walkTo(page, plan.approach, options);
+  vi.useFakeTimers();
+  let reached: ClassicSnapshot;
+  try {
+    const pending = walkTo(page, plan.approach, options);
+    await vi.runAllTimersAsync();
+    reached = await pending;
+  } finally {
+    vi.useRealTimers();
+  }
   expect(presses).toBeGreaterThan(0);
   expect(Math.hypot(reached.player[0] - plan.approach[0], reached.player[2] - plan.approach[1])).toBeLessThan(0.06);
   expect(
@@ -191,10 +204,8 @@ describe('Classic shared route aim bounded contract', () => {
     const failure = new Error('Native input interrupted');
     const held = new Set<string>();
     const releases: string[] = [];
-    page.keyboard.press = async (chord, options) => {
-      expect(chord).toBe('KeyW+Space');
-      expect(options?.delay).toBe(80);
-      for (const key of chord.split('+')) held.add(key);
+    page.keyboard.down = async (key) => {
+      held.add(key);
       throw failure;
     };
     page.keyboard.up = async (key) => {
@@ -205,7 +216,7 @@ describe('Classic shared route aim bounded contract', () => {
 
     await expect(walkTo(page, target, { jump: true, pulseMs: 80 })).rejects.toBe(failure);
     expect(held.size).toBe(0);
-    expect(releases).toEqual(['KeyW', 'Space']);
+    expect(releases.sort()).toEqual(['KeyW', 'Space']);
   });
 
   it('does not silently accept the exact Browser20 13-observation prefix', async () => {
