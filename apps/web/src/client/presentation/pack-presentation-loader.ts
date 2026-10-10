@@ -1,3 +1,5 @@
+import { parsePackLightingProfile, type PackLightingProfile } from './pack-lighting-profile';
+
 export type PackPresentationVoxel = Readonly<{ id: string; texture: string; material: string }>;
 export type PackPresentationItem = Readonly<{ id: string; model: string; icon: string; material?: string }>;
 export type PackPresentationActor = Readonly<{ id: string; model: string; texture: string }>;
@@ -15,6 +17,7 @@ export type PackPresentationCatalog = Readonly<{
   actors: Readonly<Record<string, PackPresentationActor>>;
   materials: Readonly<Record<string, PackPresentationMaterial>>;
   crops?: Readonly<Record<string, PackPresentationCrop>>;
+  lighting?: PackLightingProfile;
   assetUrls: Readonly<Record<string, string>>;
   dispose(): void;
 }>;
@@ -148,12 +151,15 @@ function catalogEntry<T extends Record<string, unknown>>(
 function parsePresentation(value: unknown): PackPresentationCatalog {
   if (
     !object(value) ||
-    !exactKeys(
-      value,
-      value.crops === undefined
-        ? ['schemaVersion', 'voxels', 'items', 'actors', 'materials']
-        : ['schemaVersion', 'voxels', 'items', 'actors', 'materials', 'crops'],
-    ) ||
+    !exactKeys(value, [
+      'schemaVersion',
+      'voxels',
+      'items',
+      'actors',
+      'materials',
+      ...(value.crops === undefined ? [] : ['crops']),
+      ...(value.lighting === undefined ? [] : ['lighting']),
+    ]) ||
     value.schemaVersion !== 1
   )
     throw new TypeError('Pack presentation schema is invalid.');
@@ -241,6 +247,9 @@ function parsePresentation(value: unknown): PackPresentationCatalog {
   for (const entry of Object.values(items))
     if (entry.material !== undefined && !materials[entry.material])
       throw new TypeError('Pack presentation material binding is unresolved.');
+  const lighting = value.lighting === undefined ? undefined : parsePackLightingProfile(value.lighting);
+  if (lighting && Object.keys(lighting.surfaceSelfEmission).some((materialId) => !Object.hasOwn(materials, materialId)))
+    throw new TypeError('Pack lighting material reference is unresolved.');
   for (const reference of referencedAssets({ voxels, items, actors, materials, crops, assetUrls: {}, dispose() {} }))
     if (!assetReference(reference)) throw new TypeError(`Pack presentation asset reference is invalid: ${reference}`);
   return Object.freeze({
@@ -249,6 +258,7 @@ function parsePresentation(value: unknown): PackPresentationCatalog {
     actors: Object.freeze(actors),
     materials: Object.freeze(materials),
     crops: Object.freeze(crops),
+    ...(lighting ? { lighting } : {}),
     assetUrls: Object.freeze({}),
     dispose() {},
   });
@@ -286,6 +296,7 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
     dispose() {},
   };
   const createdAssetUrls: string[] = [];
+  let lightingOwner = false;
   try {
     for (const pack of lockValue.packs) {
       if (
@@ -318,6 +329,11 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
       if (!resource) throw new TypeError('Pack presentation resource is not locked.');
       const bytes = await verifyResource(resource, packDirectory);
       const parsed = parsePresentation(JSON.parse(decode(bytes)));
+      if (parsed.lighting) {
+        if (lightingOwner) throw new TypeError('Multiple Pack lighting profiles are not supported.');
+        lightingOwner = true;
+        (merged as { lighting?: PackLightingProfile }).lighting = parsed.lighting;
+      }
       for (const reference of referencedAssets(parsed))
         if (!path(reference) || !resourcesByPath.has(reference.replace(/^\.\//, '')))
           throw new TypeError(`Pack presentation asset is not locked: ${reference}`);
@@ -349,6 +365,7 @@ export async function loadBrowserPackPresentationCatalog(packDirectory: URL): Pr
     actors: Object.freeze(merged.actors),
     materials: Object.freeze(merged.materials),
     crops: Object.freeze(merged.crops!),
+    ...(merged.lighting ? { lighting: merged.lighting } : {}),
     assetUrls,
     dispose() {
       if (disposed) return;

@@ -2,6 +2,7 @@ import { CHUNK_SIZE, chunkKey } from '@seedlands/stdlib/world/voxel';
 
 export const SKY_VISIBILITY_VOLUME_SIZE = CHUNK_SIZE;
 export const SKY_VISIBILITY_VOLUME_BYTES = SKY_VISIBILITY_VOLUME_SIZE ** 3;
+export const SKY_VISIBILITY_DERIVED_BYTES = SKY_VISIBILITY_VOLUME_BYTES + SKY_VISIBILITY_VOLUME_SIZE ** 2;
 export const SKY_VISIBILITY_MAX_COLUMN_HEIGHT = 512;
 export const SKY_VISIBILITY_MAX_DEPENDENCIES = 64;
 
@@ -32,6 +33,8 @@ export type SkyVisibilityVolume = Readonly<{
   size: typeof SKY_VISIBILITY_VOLUME_SIZE;
   sourceRevision: string;
   visibility: Uint8Array;
+  /** Transmission into the chunk from above, proven by the same closed full columns. */
+  upperBoundaryVisibility?: Uint8Array;
 }>;
 
 export type SkyVisibilityBuildTicket = Readonly<{
@@ -104,6 +107,8 @@ const canonicalChunkKey = (value: string): boolean => {
 const validRevision = (value: number | null) => value === null || (Number.isSafeInteger(value) && value >= 0);
 const volumeIndex = (x: number, y: number, z: number) =>
   x + SKY_VISIBILITY_VOLUME_SIZE * (y + SKY_VISIBILITY_VOLUME_SIZE * z);
+const volumeBytes = (volume: SkyVisibilityVolume | null) =>
+  volume ? volume.visibility.byteLength + (volume.upperBoundaryVisibility?.byteLength ?? 0) : 0;
 
 const freezeFrame = (frame: SkyLightingFrame): SkyLightingFrame => {
   if (!Number.isFinite(frame.worldTime)) throw new TypeError('Sky world time must be finite.');
@@ -193,9 +198,14 @@ export function buildSkyVisibilityVolume(ticket: SkyVisibilityBuildTicket): SkyV
     return Object.freeze({ ...base, ready: false, reason: 'source-unavailable' });
 
   const visibility = new Uint8Array(SKY_VISIBILITY_VOLUME_BYTES);
+  const upperBoundaryVisibility = new Uint8Array(SKY_VISIBILITY_VOLUME_SIZE ** 2);
   for (const column of ticket.columns) {
     let transmission = 1;
     for (let offset = column.obstruction.length - 1; offset >= 0; offset -= 1) {
+      if (offset === SKY_VISIBILITY_VOLUME_SIZE - 1)
+        upperBoundaryVisibility[column.localX + SKY_VISIBILITY_VOLUME_SIZE * column.localZ] = Math.round(
+          transmission * 255,
+        );
       transmission *= 1 - column.obstruction[offset]! / 255;
       if (offset < SKY_VISIBILITY_VOLUME_SIZE)
         visibility[volumeIndex(column.localX, offset, column.localZ)] = Math.round(transmission * 255);
@@ -214,6 +224,7 @@ export function buildSkyVisibilityVolume(ticket: SkyVisibilityBuildTicket): SkyV
       size: SKY_VISIBILITY_VOLUME_SIZE,
       sourceRevision: ticket.sourceRevision,
       visibility,
+      upperBoundaryVisibility,
     }),
   });
 }
@@ -344,6 +355,11 @@ export class SkyVisibilityCache {
       return false;
     entry.latestBuildId = null;
     if (!result.ready || !this.validVolume(entry, result.volume)) return false;
+    const otherBytes = [...this.entries.values()].reduce(
+      (sum, candidate) => sum + (candidate === entry ? 0 : volumeBytes(candidate.volume)),
+      0,
+    );
+    if (otherBytes + volumeBytes(result.volume) > this.maximumChunks * SKY_VISIBILITY_DERIVED_BYTES) return false;
     const cached = this.cloneVolume(result.volume);
     entry.sink.publish(this.cloneVolume(cached));
     entry.volume = cached;
@@ -394,8 +410,8 @@ export class SkyVisibilityCache {
       readyChunkCount: values.filter((entry) => !entry.dirty && entry.volume !== null).length,
       dirtyChunkCount: values.filter((entry) => entry.dirty).length,
       buildingChunkCount: values.filter((entry) => entry.latestBuildId !== null).length,
-      allocatedBytes: values.filter((entry) => entry.volume !== null).length * SKY_VISIBILITY_VOLUME_BYTES,
-      maximumBytes: this.maximumChunks * SKY_VISIBILITY_VOLUME_BYTES,
+      allocatedBytes: values.reduce((sum, entry) => sum + volumeBytes(entry.volume), 0),
+      maximumBytes: this.maximumChunks * SKY_VISIBILITY_DERIVED_BYTES,
       frame: this.frame,
     });
   }
@@ -441,6 +457,9 @@ export class SkyVisibilityCache {
       volume.size === SKY_VISIBILITY_VOLUME_SIZE &&
       volume.visibility instanceof Uint8Array &&
       volume.visibility.length === SKY_VISIBILITY_VOLUME_BYTES &&
+      (volume.upperBoundaryVisibility === undefined ||
+        (volume.upperBoundaryVisibility instanceof Uint8Array &&
+          volume.upperBoundaryVisibility.length === SKY_VISIBILITY_VOLUME_SIZE ** 2)) &&
       Array.isArray(volume.chunk) &&
       volume.chunk.length === 3 &&
       volume.chunk.every(Number.isSafeInteger) &&
@@ -462,6 +481,7 @@ export class SkyVisibilityCache {
       chunk: Object.freeze([...volume.chunk]) as readonly [number, number, number],
       origin: Object.freeze([...volume.origin]) as readonly [number, number, number],
       visibility: volume.visibility.slice(),
+      upperBoundaryVisibility: volume.upperBoundaryVisibility?.slice(),
     });
   }
 

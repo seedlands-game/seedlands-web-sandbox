@@ -36,10 +36,12 @@ export type PlayCanvasChunkResource = RenderedMaterialMeshResource & {
   transitionCancel: (() => void) | null;
   skyTexture?: pc.Texture;
   skyOrigin?: Float32Array;
+  skyReady?: boolean;
   skyRelease?: (() => void) | null;
   blockLightTexture?: pc.Texture;
   blockLightOrigin?: Float32Array;
   blockLightSize?: number;
+  blockLightReady?: boolean;
   blockLightRelease?: (() => void) | null;
 };
 
@@ -77,10 +79,12 @@ export const applyChunkBlockLightVolume = (resource: PlayCanvasChunkResource, vo
   resource.blockLightTexture.unlock();
   resource.blockLightOrigin = new Float32Array(volume.origin);
   resource.blockLightSize = volume.size;
+  resource.blockLightReady = true;
   for (const instance of resource.instances) {
     instance.setParameter('texture_blockLight', resource.blockLightTexture);
     instance.setParameter('uBlockLightOrigin', resource.blockLightOrigin);
     instance.setParameter('uBlockLightSize', resource.blockLightSize);
+    instance.setParameter('uBlockLightReady', 1);
   }
   if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
 };
@@ -90,6 +94,9 @@ export const invalidateChunkBlockLightVolume = (resource: PlayCanvasChunkResourc
   const pixels = resource.blockLightTexture.lock() as Uint8Array;
   pixels.fill(0);
   resource.blockLightTexture.unlock();
+  resource.blockLightReady = false;
+  for (const instance of resource.instances ?? []) bindBlockLight(instance, resource);
+  if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
 };
 
 const setWaterVisible = (resource: PlayCanvasChunkResource, visible: boolean) => {
@@ -110,6 +117,7 @@ const bindBlockLight = (instance: pc.MeshInstance, resource: PlayCanvasChunkReso
   instance.setParameter('texture_blockLight', resource.blockLightTexture);
   instance.setParameter('uBlockLightOrigin', resource.blockLightOrigin!);
   instance.setParameter('uBlockLightSize', resource.blockLightSize!);
+  instance.setParameter('uBlockLightReady', resource.blockLightReady ? 1 : 0);
 };
 
 export const summarizeMeshParts = (parts: MeshPart[]): ChunkSummary => ({
@@ -200,6 +208,8 @@ export const createPlayCanvasChunkAdapter = (
     for (const instance of resource.instances) bindChunkSky(instance, resource);
     if (resource.waterTransition) bindChunkSky(resource.waterTransition.instance, resource);
     resource.blockLightTexture = createChunkBlockLightTexture(app.graphicsDevice, task.chunkKey);
+    resource.blockLightOrigin = new Float32Array(blockLightOriginForChunk(task.cx, task.cy, task.cz));
+    resource.blockLightSize = BLOCK_LIGHT_VOLUME_SIZE;
     for (const instance of resource.instances) bindBlockLight(instance, resource);
     if (resource.waterTransition) bindBlockLight(resource.waterTransition.instance, resource);
     for (const [category, entity] of resource.categoryEntities) {

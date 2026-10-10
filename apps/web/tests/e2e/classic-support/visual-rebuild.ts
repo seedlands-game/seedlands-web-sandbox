@@ -53,12 +53,15 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
     contentType: 'application/json',
     body: JSON.stringify({ diagnosticOnly: true, pixels: receivedPixels }),
   });
-  expect(receivedPixels).toHaveLength(18);
+  expect(receivedPixels).toHaveLength(22);
   for (const pixel of receivedPixels ?? []) {
     const expected =
       pixel.name === 'combined'
         ? 128
-        : pixel.name === 'sky-only' || pixel.name === 'block-only' || pixel.name.startsWith('self-')
+        : pixel.name === 'sky-only' ||
+            pixel.name === 'block-only' ||
+            pixel.name.startsWith('self-') ||
+            pixel.name === 'upper-boundary-clear'
           ? 64
           : 0;
     for (const channel of pixel.rgba.slice(0, 3))

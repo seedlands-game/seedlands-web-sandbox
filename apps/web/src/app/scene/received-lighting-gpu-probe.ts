@@ -26,6 +26,8 @@ const cases = [
   { name: 'invalidated-block', sky: 255, block: 15, skyReady: true, blockReady: true },
   { name: 'self-only', sky: 0, block: 0, skyReady: true, blockReady: true },
   { name: 'self-unknown', sky: 255, block: 15, skyReady: false, blockReady: false },
+  { name: 'upper-boundary-clear', sky: 255, block: 0, skyReady: true, blockReady: true },
+  { name: 'upper-boundary-blocked', sky: 255, block: 0, skyReady: true, blockReady: true },
 ] as const;
 
 /** Production shader and R8 lifecycle observation; no Authority writes or input. */
@@ -36,6 +38,8 @@ export function receivedLightingGpuProbe(
   const device = app.graphicsDevice;
   if (!(device instanceof pc.WebglGraphicsDevice)) throw new Error('Received-lighting pixels require WebGL2.');
   const layer = new pc.Layer({ name: 'Received Lighting Pixel Probe' });
+  const previousExposure = app.scene.exposure;
+  app.scene.exposure = 1;
   const color = new pc.Texture(device, { width: 4, height: 4, format: pc.PIXELFORMAT_RGBA8, mipmaps: false });
   const target = new pc.RenderTarget({ colorBuffer: color, depth: true });
   const camera = new pc.Entity('Received Lighting Pixel Camera');
@@ -47,7 +51,6 @@ export function receivedLightingGpuProbe(
     clearColor: pc.Color.BLACK,
     gammaCorrection: pc.GAMMA_NONE,
     toneMapping: pc.TONEMAP_NONE,
-    exposure: 1,
     priority: 1000,
     renderTarget: target,
     layers: [layer.id],
@@ -140,6 +143,10 @@ export function receivedLightingGpuProbe(
       layer.addMeshInstances([instance]);
       try {
         for (const entry of cases) {
+          const upperBoundary = entry.name.startsWith('upper-boundary-');
+          node.setPosition(0, upperBoundary ? 31.9 : 0, 0);
+          camera.setPosition(0.5, upperBoundary ? 34 : 2, 0.5);
+          camera.lookAt(0.5, upperBoundary ? 32 : 0.1, 0.5, 0, 0, -1);
           const self = entry.name.startsWith('self-');
           const emission = new Float32Array(MATERIAL_LAYER_COUNT * 4);
           if (self) for (let index = 0; index < MATERIAL_LAYER_COUNT; index++) emission.set([1, 1, 1, 0.25], index * 4);
@@ -151,6 +158,7 @@ export function receivedLightingGpuProbe(
             size: 32,
             sourceRevision: 'synthetic-probe',
             visibility: new Uint8Array(SKY_VISIBILITY_VOLUME_BYTES).fill(entry.sky),
+            upperBoundaryVisibility: new Uint8Array(1024).fill(entry.name === 'upper-boundary-blocked' ? 0 : entry.sky),
           });
           applyChunkBlockLightVolume(resource, {
             origin: blockLightOriginForChunk(0, 0, 0),
@@ -190,5 +198,6 @@ export function receivedLightingGpuProbe(
     target.destroy();
     color.destroy();
     albedo.destroy();
+    app.scene.exposure = previousExposure;
   }
 }

@@ -17,6 +17,35 @@ const resourceLock = async (path: string, content: string) => ({
   size: bytes(content),
   contentType: contentTypeForPath(path),
 });
+const lightingProfile = (materialId?: string) => ({
+  schemaVersion: 1,
+  blockLightTint: [1, 1, 1],
+  surfaceSelfEmission: materialId ? { [materialId]: { color: [1, 0.8, 0.5], intensity: 1 } } : {},
+  environmentKeyframes: [
+    {
+      hour: 0,
+      top: [0, 0, 0],
+      horizon: [0, 0, 0],
+      fog: [0, 0, 0],
+      ambient: [0, 0, 0],
+      sun: [0, 0, 0],
+      intensity: 0,
+      skyRadiance: [0, 0, 0],
+    },
+    {
+      hour: 24,
+      top: [0, 0, 0],
+      horizon: [0, 0, 0],
+      fog: [0, 0, 0],
+      ambient: [0, 0, 0],
+      sun: [0, 0, 0],
+      intensity: 0,
+      skyRadiance: [0, 0, 0],
+    },
+  ],
+  toneMapper: 'linear',
+  exposure: 1,
+});
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -63,6 +92,7 @@ describe('browser Pack presentation loader', () => {
     );
     const presentation = JSON.stringify({
       schemaVersion: 1,
+      lighting: lightingProfile('sample:glow'),
       voxels: [{ id: 'sample:glow-block', texture: 'builtin:textures/glow.png', material: 'sample:glow' }],
       items: [
         {
@@ -138,6 +168,7 @@ describe('browser Pack presentation loader', () => {
           'sample:sentinel': expect.objectContaining({ model: 'models/sentinel.glb' }),
         }),
         materials: expect.objectContaining({ 'sample:glow': expect.objectContaining({ renderMode: 'opaque' }) }),
+        lighting: expect.objectContaining({ toneMapper: 'linear' }),
         assetUrls: expect.objectContaining({ 'models/sentinel.glb': 'blob:pack-resource' }),
       }),
     );
@@ -156,6 +187,7 @@ describe('browser Pack presentation loader', () => {
     );
     const presentation = JSON.stringify({
       schemaVersion: 1,
+      lighting: lightingProfile(),
       voxels: [{ id: 'sample:block', texture: 'texture.svg', material: 'sample:material' }],
       items: [],
       actors: [],
@@ -397,6 +429,7 @@ describe('browser Pack presentation loader', () => {
     );
 
     const catalog = await loadBrowserPackPresentationCatalog(new URL('http://localhost/packs/'));
+    expect(catalog.lighting).toBeUndefined();
     expect(catalog.assetUrls['models/sentinel.glb']).toBe('blob:verified-model');
     catalog.dispose();
     catalog.dispose();
@@ -415,6 +448,7 @@ describe('browser Pack presentation loader', () => {
     );
     const presentation = JSON.stringify({
       schemaVersion: 1,
+      lighting: lightingProfile(),
       voxels: [],
       items: [],
       actors: [{ id: 'sample:sentinel', model: 'models/sentinel.glb', texture: 'builtin:texture' }],
@@ -458,8 +492,9 @@ describe('browser Pack presentation loader', () => {
         return response('', 404);
       }),
     );
-
-    await expect(loadBrowserPackPresentationCatalog(new URL('http://localhost/packs/'))).rejects.toThrow(/Duplicate/);
+    await expect(loadBrowserPackPresentationCatalog(new URL('http://localhost/packs/'))).rejects.toThrow(
+      /Multiple Pack lighting profiles/,
+    );
     expect(revoke).toHaveBeenCalledOnce();
   });
 });
