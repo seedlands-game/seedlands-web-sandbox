@@ -1116,3 +1116,7 @@ Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据�
 冻结本地183f339d/远端dcb39a9e，CI416 Chromium自然运行，129夹具已本地修复未push。原route pulse JSON不包含128消费者已使用的nativeMovementInput，远端ZIP不可得时无法从原Node日志区分release缺失/旧epoch/非neutral/ACK未消费。仅将已有snapshot的nativeMovementInput复制到motion观测，不新增浏览器RPC、轮询、输入、计时或判定；原512样本上限、benchmark旁路、标签/错误返回保持。先用现有equipment-diagnostics-contract取得缺字段/复制隔离RED，再范围GREEN/types/lint；源码仅原Node诊断与现有测试/spec/新证据，Root独占、不委派，不据诊断声明性能或CI主路线通过。原生产Web产物不变，且CI416终态前不push取消。传统.03PD×120%=.036PD，AI6min×120%=7.2min，16:22UTC检查点；16:03实际产品UI周剩74%、重置4d11h、共享账户降24pp，约60%停止线保持，不另启额度验证或换算。
 
 16:17UTC130检查点：原Node诊断缺release字段RED1FAIL/5PASS，补仅两行复制后5files50PASS（含复制隔离与不制造firstSettled），Classic types、范围lint/diff PASS。生产Web/路线predicate/输入/等待/512cap不改，不重复build/Browser；本地129/130待CI416 Chromium自然终态后正常push，仍不得宣布全PR可合入。主对话实际16:03周74%、4d11h重置，共享账户下降24pp，约60%停止线保持，额度更新不另开验证。
+
+### CI416 终态诊断132（16:45UTC）
+
+精确dcb39a9e自然终态：architecture/build/deterministic/static SUCCESS，headless4FAIL/1026PASS（129原两文件RED后7files82PASS本地修复），Chromium1FAIL/1SKIP/2PASS32.4m，previewSKIP。两轮V1 PASS，V2原900000总限中断placeOneEach committedPointer/铁头盔Shiftclick，C4/C5 NOT_RUN；原visual含cold来源1.0m及普通native23.3s PASS，不能代替main。原日志两轮各57routes全部returned、合计866pulses；分段计时与260资源操作均只作diagnosticOnly，不相加包含项、不推断GPU或命令因果。完整raw1595197bytes/SHA20273a92d62a6f2306f7411d05f1033807491c8de621069682b5f6ac25839af6与解析私有保存，marker误名已纠正，ZIP仍不可得。132证据独立ci416-terminal-132-01.md；正常feature push交付129/130与本终态，再按当前来源注册有界诊断。周74%@16:03/约60停止线，PR不可合入。
