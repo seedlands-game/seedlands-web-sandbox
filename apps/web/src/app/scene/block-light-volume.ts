@@ -128,6 +128,7 @@ export const chunkBlockLightNeedsRefresh = (
 
 export type ChunkBlockLightSink = Readonly<{
   apply: (volume: BlockLightVolume) => void;
+  failDark: () => void;
 }>;
 
 type ChunkBlockLightEntry = {
@@ -212,12 +213,23 @@ export class ChunkBlockLightCache {
         Math.abs(entry.cz - cz) <= 1 &&
         chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz)
       )
-        if (!this.dirtySinceRebuild.has(entry.key)) this.dirtySinceRebuild.set(entry.key, this.rebuildCount);
+        this.invalidateEntry(entry);
+  }
+
+  invalidateStale(): void {
+    for (const entry of this.entries.values())
+      if (chunkBlockLightNeedsRefresh(entry.snapshot, this.reader, entry.cx, entry.cy, entry.cz))
+        this.invalidateEntry(entry);
+  }
+
+  private invalidateEntry(entry: ChunkBlockLightEntry): void {
+    if (this.dirtySinceRebuild.has(entry.key)) return;
+    if (entry.snapshot) entry.sink.failDark();
+    this.dirtySinceRebuild.set(entry.key, this.rebuildCount);
   }
 
   rebuildNearest(position: readonly [number, number, number]): boolean {
-    for (const entry of this.pendingEntries())
-      if (!this.dirtySinceRebuild.has(entry.key)) this.dirtySinceRebuild.set(entry.key, this.rebuildCount);
+    for (const entry of this.pendingEntries()) this.invalidateEntry(entry);
     let selected: ChunkBlockLightEntry | null = null;
     let selectedDistance = Number.POSITIVE_INFINITY;
     let selectedAge: number | null = null;

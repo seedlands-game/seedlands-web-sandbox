@@ -28,7 +28,7 @@ describe('浏览器方块光体积', () => {
         blockLightRevision: () => revision,
         voxelSemantics: classicContent.voxelSemantics,
       });
-      cache.register('0,0,0', 0, 0, 0, { apply: () => {} });
+      cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => {} });
       expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
       expect(cache.sample([0, 0, 0])).toBe(13);
       expect(cache.sample([0, 0, 0])).toBe(13);
@@ -84,14 +84,14 @@ describe('浏览器方块光体积', () => {
       blockLightRevision: () => revision,
       voxelSemantics: classicContent.voxelSemantics,
     });
-    const releaseOld = cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('old') });
+    const releaseOld = cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => applies.push('old') });
     cache.rebuildNearest([0, 0, 0]);
-    cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('replacement') });
+    cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => applies.push('replacement') });
     releaseOld();
     expect(applies).toEqual(['old', 'replacement']);
     expect(cache.snapshot).toMatchObject({ brickCount: 1, pendingBrickCount: 0, ready: true, rebuildCount: 1 });
     revision = 'resident:2';
-    cache.register('0,0,0', 0, 0, 0, { apply: () => applies.push('edited') });
+    cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => applies.push('edited') });
     expect(applies).toEqual(['old', 'replacement']);
     expect(cache.snapshot.ready).toBe(false);
     cache.rebuildNearest([0, 0, 0]);
@@ -105,10 +105,10 @@ describe('浏览器方块光体积', () => {
       blockLightRevision: () => revision,
       voxelSemantics: classicContent.voxelSemantics,
     });
-    cache.register('0,0,0', 0, 0, 0, { apply: () => applied.push('first') });
+    cache.register('0,0,0', 0, 0, 0, { failDark: () => {}, apply: () => applied.push('first') });
     cache.rebuildNearest([0, 0, 0]);
     expect(cache.snapshot.ready).toBe(true);
-    cache.register('1,0,0', 1, 0, 0, { apply: () => applied.push('neighbor') });
+    cache.register('1,0,0', 1, 0, 0, { failDark: () => {}, apply: () => applied.push('neighbor') });
     expect(cache.snapshot.pendingBrickCount).toBe(1);
     cache.rebuildNearest([0, 0, 0]);
     expect(applied).toEqual(['first', 'neighbor']);
@@ -128,8 +128,8 @@ describe('浏览器方块光体积', () => {
       blockLightRevision: (origin, _size) => (origin[0] < 0 ? `near:${nearRevision}` : `far:${farRevision}`),
       voxelSemantics: classicContent.voxelSemantics,
     });
-    cache.register('far', 4, 0, 0, { apply: () => applied.push('far') });
-    cache.register('near', 0, 0, 0, { apply: () => applied.push('near') });
+    cache.register('far', 4, 0, 0, { failDark: () => {}, apply: () => applied.push('far') });
+    cache.register('near', 0, 0, 0, { failDark: () => {}, apply: () => applied.push('near') });
 
     for (let round = 0; round < 8; round += 1) {
       expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
@@ -220,8 +220,8 @@ describe('浏览器方块光体积', () => {
       blockLightRevision: (origin) => (origin[0] < 0 ? revision : 'initial'),
       voxelSemantics: classicContent.voxelSemantics,
     });
-    cache.register('far', 4, 0, 0, { apply: () => applies.push('far') });
-    cache.register('near', 0, 0, 0, { apply: () => applies.push('near') });
+    cache.register('far', 4, 0, 0, { failDark: () => {}, apply: () => applies.push('far') });
+    cache.register('near', 0, 0, 0, { failDark: () => {}, apply: () => applies.push('near') });
 
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(applies).toEqual(['near']);
@@ -244,8 +244,14 @@ describe('浏览器方块光体积', () => {
     expect(cache.snapshot).toMatchObject({ pendingBrickCount: 1, ready: false });
     expect(cache.rebuildNearest([0, 0, 0])).toBe(true);
     expect(applies).toEqual(['near', 'far', 'near']);
-    const releaseNear = cache.register('near', 0, 0, 0, { apply: () => applies.push('replacement') });
-    const staleRelease = cache.register('near', 1, 0, 0, { apply: () => applies.push('replacement-new') });
+    const releaseNear = cache.register('near', 0, 0, 0, {
+      failDark: () => {},
+      apply: () => applies.push('replacement'),
+    });
+    const staleRelease = cache.register('near', 1, 0, 0, {
+      failDark: () => {},
+      apply: () => applies.push('replacement-new'),
+    });
     releaseNear();
     staleRelease();
     expect(cache.snapshot).toMatchObject({
