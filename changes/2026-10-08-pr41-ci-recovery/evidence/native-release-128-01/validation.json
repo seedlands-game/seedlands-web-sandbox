@@ -1,0 +1,101 @@
+{
+  "runId": "native-release-128-01",
+  "baselineSHA": "7aaf2951fba7a402e20f76a481a1b2e7f0c54ab5",
+  "resultSource": "此证据目录所在提交；先冻结源码提交后才构建浏览器产物",
+  "red": "实际Controller/InputCommandBuffer较早idle ACK不能代表新keyup已消费；旧行为RED 2FAIL/15PASS，producer字段后来按最终合同更名，主要队列反例仍有效",
+  "green": {
+    "routeAndController": "10files75PASS",
+    "finalController": "17PASS",
+    "harness": "2files14PASS",
+    "selection": "17PASS",
+    "classicTypes": "PASS",
+    "productionWebTypes": "PASS；Svelte 0error0warning",
+    "scopedLint": "PASS"
+  },
+  "browser128": "NOT_RUN at source freeze",
+  "build128": "NOT_RUN at source freeze",
+  "ci415": {
+    "sha": "308d2cc58e3c7c2059abedad24f04f6861be8b58",
+    "run": 38061412203,
+    "conclusion": "FAIL",
+    "nonBrowserRequiredJobs": "5 SUCCESS",
+    "V1": "PASS twice",
+    "V2": "FAIL; C4 NOT_RUN",
+    "visual": "FAIL original single-click; cold stage NOT_RUN",
+    "native": "PASS",
+    "modular": "SKIP",
+    "deployment": "SKIP"
+  },
+  "sky125Addendum": {
+    "sourceSHA": "7aaf2951fba7a402e20f76a481a1b2e7f0c54ab5",
+    "build": "PASS",
+    "sourceDigest": "6c43d4d96af52e29169f29347c6e5fab78e78dae3e73b35340d6d4f58b390767",
+    "artifactDigest": "0b9e6be8dbafa0b10fdf31ab396d4b017680e163f276b3e7f7f488ef153830fe",
+    "fileCount": 289,
+    "independentReview": "Luna frozen308d→7aaf；未发现可证实P0/P1/P2；不是merge批准",
+    "coldBrowser": "NOT_RUN on7aaf"
+  },
+  "budget": {
+    "lastActualUTC": "2026-10-10 14:25",
+    "lastActualRemainingPercent": 75,
+    "freshActualRead": "pending parent UI reply",
+    "stopRemainingPercent": 60
+  },
+  "logs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-red-128-01.log",
+      "bytes": 2434,
+      "sha256": "8d8fbc9a2da60c1e49dfa60aeea5d4bbe869ab66cbeb32231c2b4cd07366f065"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-green-128-02.log",
+      "bytes": 344,
+      "sha256": "2f3bad1f2d7c4495f99d0da153775a4ceffc07b26794d39ab41da03cc27a4a1d"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-green-128-03.log",
+      "bytes": 340,
+      "sha256": "ec4e1be7b9366eecaa95fa61933117fc3d7ba2aa9084831b1197e5f14fa075b9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-harness-green-128-01.log",
+      "bytes": 340,
+      "sha256": "5e8dec41df970c9fce05a271da574f0917311a72734bc06ca1c85652e8259fb1"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-classic-types-128-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-web-types-128-01.log",
+      "bytes": 265,
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-lint-128-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-lint-128-02.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/native-release-ci-selection-128-01.log",
+      "bytes": 3984,
+      "sha256": "e91cd4994fcfa58c84039a02a19210b6257ae0fca749f65ad9b77e92fe52a317"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/sky-superseded-build-125-01.log",
+      "bytes": 3771,
+      "sha256": "d501958a09d65d2e386b2c2ae45347bf5745bdb2cb966f694393da07266f338f"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci415-chromium-raw-127-01.log",
+      "bytes": 360907,
+      "sha256": "2a5af1e59cfac273fada85aa2f569cde5d06326c27eb5b0f78a2f92b43855374"
+    }
+  ]
+}

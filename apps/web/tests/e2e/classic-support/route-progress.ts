@@ -1,4 +1,5 @@
 import { bodyConfigFor } from '@seedlands/stdlib/physics';
+import type { NativeMovementInput } from '../../../src/app/player/native-movement-input';
 
 export type RouteDirection = 'KeyW' | 'KeyS';
 
@@ -33,14 +34,51 @@ export function routeInputSettled(
     player: readonly [number, number, number];
     serverPlayerPosition: readonly [number, number, number];
     serverPlayerVelocity: readonly [number, number, number];
+    authority?: Readonly<{ acknowledgedInputSequence: number }>;
   }>,
+  releasedSequence?: number,
 ): boolean {
   return (
+    (releasedSequence === undefined ||
+      (Number.isSafeInteger(releasedSequence) &&
+        releasedSequence >= 0 &&
+        (observation.authority?.acknowledgedInputSequence ?? -1) >= releasedSequence)) &&
     observation.serverPlayerVelocity.every((value) => Number.isFinite(value) && Math.abs(value) < 1e-6) &&
     observation.player.every(
       (value, axis) => Number.isFinite(value) && Math.abs(value - observation.serverPlayerPosition[axis]!) < 0.05,
     )
   );
+}
+
+/** A previous idle ACK cannot complete a pulse whose native release is still pending. */
+export function routePulseSettledPredicate(
+  before: Readonly<{
+    authority: Readonly<{ acknowledgedInputSequence: number }>;
+    nativeMovementInput?: NativeMovementInput | null;
+  }>,
+) {
+  const initial = before.nativeMovementInput;
+  return (
+    value: Parameters<typeof routeInputSettled>[0] &
+      Readonly<{
+        onGround: boolean;
+        colliding: boolean;
+        nativeMovementInput?: NativeMovementInput | null;
+      }>,
+  ): boolean => {
+    const current = value.nativeMovementInput,
+      release = current?.release;
+    return Boolean(
+      initial &&
+      current?.epoch === initial.epoch &&
+      release?.neutral &&
+      release.sequence > (initial.release?.sequence ?? -1) &&
+      (value.authority?.acknowledgedInputSequence ?? -1) > before.authority.acknowledgedInputSequence &&
+      value.onGround &&
+      !value.colliding &&
+      routeInputSettled(value, release.sequence),
+    );
+  };
 }
 
 export function reachedRouteTarget(

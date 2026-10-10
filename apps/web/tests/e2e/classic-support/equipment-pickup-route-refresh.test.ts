@@ -34,6 +34,8 @@ const routeSnapshot = (
     onGround: options.onGround ?? true,
     colliding: options.colliding ?? false,
     interactionAttempts: 39,
+    // Synthetic post-release protocol observation; not native browser evidence.
+    nativeMovementInput: { epoch: 'route-fixture', release: { code: 'KeyS', sequence: ack, neutral: true } },
     authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1, residency: null },
   }) as ClassicSnapshot;
 

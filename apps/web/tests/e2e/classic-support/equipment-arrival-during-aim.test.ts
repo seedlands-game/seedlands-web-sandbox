@@ -51,6 +51,8 @@ function snapshot(player: Point, tick: number, ack: number, server: Point, yaw: 
     onGround: true,
     colliding: false,
     interactionAttempts: 30,
+    // Synthetic post-release protocol observation; not native browser evidence.
+    nativeMovementInput: { epoch: 'route-fixture', release: { code: 'KeyS', sequence: ack, neutral: true } },
     authority: { physicsTick: tick, acknowledgedInputSequence: ack, commitSequence: 1 },
   } as unknown as ClassicSnapshot;
 }

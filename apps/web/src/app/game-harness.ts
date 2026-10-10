@@ -185,6 +185,7 @@ export function createHarnessSnapshot(context: SnapshotContext): HarnessSnapshot
     onGround: context.controller?.onGround ?? false,
     colliding: context.controller?.isColliding ?? false,
     interactionAttempts: context.controller?.interactionAttempts ?? 0,
+    nativeMovementInput: context.controller?.nativeMovementInput ?? null,
     mutationCount: context.world?.mutationCount ?? 0,
     worldRevision: transactions?.worldRevision ?? 0,
     structuralEventCount: transactions?.structuralEventCount ?? 0,

@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import { routeTargetPredicate, routeInputSettled, routePulseDurationMs } from './route-progress';
+import { routeTargetPredicate, routePulseSettledPredicate, routePulseDurationMs } from './route-progress';
 import type { RoutePulseDiagnostics } from './route-pulse-diagnostics';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
 import {
@@ -261,7 +261,7 @@ export async function walkTo(
     const segmentStart = current;
     const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
     const pulseMs = routePulseDurationMs(current.player, target, maximumPulseMs);
-    const sequenceBeforeInput = current.authority.acknowledgedInputSequence;
+    const settledPulse = routePulseSettledPredicate(current);
     options.diagnostics?.beforeInput(current, pulseMs, options.jump ? `${key}+Space` : key);
     try {
       // Native press releases input before tracing snapshots delay the API response.
@@ -275,11 +275,7 @@ export async function walkTo(
     current = await waitForSnapshot(
       page,
       (value) => {
-        const settled =
-          value.authority.acknowledgedInputSequence > sequenceBeforeInput &&
-          value.onGround &&
-          !value.colliding &&
-          routeInputSettled(value);
+        const settled = settledPulse(value);
         options.diagnostics?.observe(value, settled);
         return settled;
       },

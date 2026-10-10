@@ -1090,3 +1090,15 @@ Root独占新visual-stored-sky helper/原visual窄调用及spec/evidence；复�
 Root独占三处Sky生产入口、现有WorldSky/Worker测试及spec/新证据，不新增委派、浏览器full重跑或权限。范围测试、生产Web/Classic类型、lint/格式及正常hooks，原冷Browser仍FAIL/cold proof NOT_RUN，之后有实际新证据才重评。传统.15PD×120%=.18PD；AI16min×120%=19.2min，15:29UTC检查点。真实14:25产品UI剩75%，最新读数待主对话，约60%全PR停止线；credits/费率/API分母未知不换算。源码层GREEN不关闭原ledger117、不宣布可合入。
 
 15:15UTC125范围检查点：旧实际WorldSky及真实Sky解码RED2FAIL/20PASS；修复相关5files62PASS，最终坐标端口夹具类型修正后WorldSky27PASS、生产Web/Svelte0error0warning及tsc/tools、Classic types、范围lint/格式/diff PASS。第一次Classic类型FAIL保留，新增数据与缺失/损坏不轮询、save前后Host frontier、原epoch/key/释放/单pending保护均覆盖。sky-superseded-125-01独立证据绑定基线308d与原日志摘要；长期codemap更新局部失败传递合同。最新远端仍308d/main fba、Draft mergeable true，CI415自然运行，本片尚未push、build或真实冷Browser，不扩大任何门槛或宣布全PR可合入。实际额度仍14:25周75%，刷新待主对话，原约60%停止线保持。
+
+15:23UTC125补充：正常hooks后本地7aaf2951，独立Luna只读审查冻结308d→7aaf，未发现可证实P0/P1/P2，完整范围/未覆盖项在私有125报告。一次identified build PASS，source7aaf2951/sourceDigest6c43d4d96af52e29169f29347c6e5fab78e78dae3e73b35340d6d4f58b390767/artifactDigest0b9e6be8dbafa0b10fdf31ab396d4b017680e163f276b3e7f7f488ef153830fe/289files，旧999产物独立保留。没有重复冷Browser，不能把build或审查当冷场景通过。
+
+15:28UTC127检查点：CI415精确308d自然终态，五非Browser SUCCESS/Chromium FAIL；两轮V1 PASS，首次V2触及原900000总时限，retry在78.5,-0.5原45000路线超时，C4均NOT_RUN。两轮visual原单击目标0,61,17期望0实得3/5000ms，冷121阶段NOT_RUN；原普通native约36.6sPASS，Modular SKIP。完整raw日志360907bytes/sha256 2a5af1e59cfac273fada85aa2f569cde5d06326c27eb5b0f78a2f92b43855374，18route/45operation独立解析，失败输入计数为client lifetime而非阶段因果。Luna只读visual诊断没有确认生产缺陷；已有creative-one-click-input附件正文不在raw log，CI ZIP本地不可得，新传输域权限待答复，不猜改生产挖掘或再点一下。126只读首次网格postrender15946.2→first-visible15946.6ms一致，部分Worker completed spans回填时间，不构造跨线程因果或性能收益。当前PR不可合入，125未push。
+
+### 原生释放消费边界与已有单击诊断128（15:34UTC预注册）
+
+冻结7aaf2951，远端308d/main fba；先复核最新远端再编辑。待证伪假设：walkTo只用ACK>按键前值+静止，可能把较早neutral ACK当作本次原生keyup已消费，后续才开始移动；CI415若干zero-motion pulse后继续位移仅作诊断线索，不宣称原因已确认。先用实际PlayerController键盘捕获、PlayerInputStream/InputCommandBuffer及旧route消费者取得RED；只读暴露同Controller最后实际原生keyup发出的command epoch/code/sequence，不引入状态写口或另造输入。消费者需观察本次release版本，再等待Authority ACK消费该序列且原静止/ground/presentation条件成立；旧epoch、前次release、keydown或没有发出command不得当本次完成。不增脉冲、输入次数、时限/容差，不用计时近似替代释放回执。若RED不成立则不采用生产修改。
+
+独立第二项是将visual原finally已经采集的creative-one-click-input对象同时写Node诊断日志，不额外浏览器查询、点击或等待；原断言和附件保持，BENCHMARK旁路诊断输出。该诊断可在下一精确CI给出已存在的pointer/target/attempt/player/voxel实值，仍不凭attempt增长声称Authority成功。Root独占Controller局部观察、snapshot合同/producer、route消费者/相关现有测试与visual窄日志/spec/新证据；唯一Luna已完成127，本片不委派。范围类型/lint/format/选择合同、source冻结identified build与按实际新证据选Browser/完整CI，失败日志保留。传统.3PD×120%=.36PD，AI25min×120%=30min，16:04UTC检查点。真实14:25UI仍75%，刷新待主对话，约60%全PR停止线不变，credits/API/额度占比未知不推算。
+
+15:48UTC128范围检查点：原实际Controller/InputCommandBuffer旧空闲ACK反例RED成立；10files75PASS，生产Controller记录复制隔离/非neutral/换epoch反例补充后17PASS；Classic类型、生产Web/Svelte0error0warning及tsc/tools、范围lint PASS。原路线夹具显式升级合成post-release协议观察，物理模型只在keyboard.up记录；不作为真实浏览器证明。finally诊断仅复用同一次已有查询。128不委派，root逐文件复核输入与观察边界；等待额外Harness/选择检查后冻结一次build及原入口Browser。125独立review/build PASS不证明冷Sky已验收，127原CI失败保持。预算真实读数仍14:25的75%，刷新待回复；16:04检查点与约60%停止线保持。

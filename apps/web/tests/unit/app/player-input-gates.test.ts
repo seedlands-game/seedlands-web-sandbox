@@ -7,6 +7,8 @@ import { createVoxelGeometryRegistryV1 } from '../../../../../packages/stdlib/sr
 import type { World } from '../../../src/app/world/world-runtime';
 import { ready } from '../client/fixtures/browser-authority';
 import { InputCommandBuffer, type InputCommand } from '@seedlands/stdlib/runtime/session-protocol';
+import { routeInputSettled } from '../../e2e/classic-support/route-progress';
+import { stepBody, bodyConfigFor } from '@seedlands/stdlib/physics';
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -29,7 +31,9 @@ function installKeyboard(inputPhysicsTick?: () => number) {
     canvas,
     physicsHz: 60,
     authority: {
-      epoch: snapshot.epoch,
+      get epoch() {
+        return snapshot.epoch;
+      },
       snapshot: () => snapshot,
       inputPhysicsTick,
       sendInput: (command: InputCommand) => commands.push(command),
@@ -72,6 +76,63 @@ it('两帧之间的100ms真实键盘脉冲仍经正式输入队列持续移动�
   expect(input.consumeForTick(startTick + 8).state.moveZ).toBe(0);
   expect(controller.predictedPhysicsState).toBeNull();
   expect(controller.predictionDiagnostics.pendingFrames).toBe(0);
+});
+
+it('较早空闲ACK与零速度不能证明后来原生keyup已消费', () => {
+  const { snapshot, commands, keyDown, keyUp } = installKeyboard();
+  keyDown('KeyS');
+  keyUp('KeyS');
+  const beforeInputSequence = snapshot.acknowledgedInputSequence;
+  keyDown('KeyW');
+  keyUp('KeyW');
+  const buffer = new InputCommandBuffer(snapshot.epoch, 'player-input');
+  for (const command of commands) expect(buffer.push(command)).toBe('accepted');
+  const earlierIdle = buffer.consumeForTick(commands[1]!.targetPhysicsTick);
+  expect(earlierIdle.state.moveZ).toBe(0);
+  expect(buffer.acknowledgedSequence).toBeGreaterThan(beforeInputSequence);
+  const observation = {
+    player: [0, 0, 0] as const,
+    serverPlayerPosition: [0, 0, 0] as const,
+    serverPlayerVelocity: [0, 0, 0] as const,
+    authority: { acknowledgedInputSequence: buffer.acknowledgedSequence },
+  };
+  const stillPending = buffer.consumeForTick(commands[2]!.targetPhysicsTick);
+  const moved = stepBody({
+    state: { position: { x: 0, y: 0, z: 0 }, velocity: { x: 0, y: 0, z: 0 } },
+    config: bodyConfigFor('player'),
+    world: {
+      querySolids: () => [{ id: 'floor', aabb: { min: { x: -100, y: -1, z: -100 }, max: { x: 100, y: 0, z: 100 } } }],
+    },
+    dt: 1 / 60,
+    input: {
+      wish: { x: stillPending.state.moveX, z: stillPending.state.moveZ },
+      jumpPressed: false,
+      verticalIntent: 0,
+    },
+  }).state;
+  expect(moved.position.z).toBeLessThan(0);
+  expect(routeInputSettled(observation, commands[3]!.sequence)).toBe(false);
+});
+
+it('只读原生release记录绑定实际keyup发出的command，而非frame或keydown', () => {
+  const { controller, snapshot, commands, keyDown, keyUp } = installKeyboard();
+  keyDown('KeyW');
+  expect(controller.nativeMovementInput.release).toBeNull();
+  keyUp('KeyW');
+  expect(controller.nativeMovementInput).toEqual({
+    epoch: commands[1]!.epoch,
+    release: { code: 'KeyW', sequence: commands[1]!.sequence, neutral: true },
+  });
+  Reflect.set(controller.nativeMovementInput.release!, 'sequence', -1);
+  expect(controller.nativeMovementInput.release!.sequence).toBe(commands[1]!.sequence);
+  keyDown('KeyW');
+  keyDown('Space');
+  keyUp('KeyW');
+  expect(controller.nativeMovementInput.release!.neutral).toBe(false);
+  keyUp('Space');
+  expect(controller.nativeMovementInput.release!.neutral).toBe(true);
+  snapshot.epoch = 'new-session';
+  expect(controller.nativeMovementInput).toEqual({ epoch: 'new-session', release: null });
 });
 
 it('旧snapshot期间真实keydown/up与失焦neutral都采用同一投递时钟', () => {

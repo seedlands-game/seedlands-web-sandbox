@@ -324,10 +324,10 @@ export async function verifyVisualRebuild({ page }: { page: Page }, testInfo: Te
   try {
     await expect.poll(() => voxelAt(page, [0, 61, 17])).toBe(0);
   } finally {
-    await testInfo.attach('creative-one-click-input', {
-      body: JSON.stringify({ runId, beforeClick, afterRelease, afterPoll: await observeSingleClick(page) }),
-      contentType: 'application/json',
-    });
+    const diagnostic = JSON.stringify({ runId, beforeClick, afterRelease, afterPoll: await observeSingleClick(page) });
+    await testInfo.attach('creative-one-click-input', { body: diagnostic, contentType: 'application/json' });
+    if (process.env.SEEDLANDS_CLASSIC_BENCHMARK !== '1')
+      console.info('Classic creative one-click diagnostic:', diagnostic);
   }
   const breakTick = (await snapshot(page))!.authority.physicsTick;
   await waitForSnapshot(page, (s) => s.authority.physicsTick >= breakTick + 20);

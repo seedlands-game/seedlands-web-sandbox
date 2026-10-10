@@ -113,6 +113,7 @@ export type HarnessSnapshot = {
   onGround: boolean;
   colliding: boolean;
   interactionAttempts: number;
+  nativeMovementInput: import('./player/native-movement-input').NativeMovementInput | null;
   mutationCount: number;
   worldRevision: number;
   structuralEventCount: number;

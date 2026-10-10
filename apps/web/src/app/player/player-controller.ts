@@ -18,12 +18,16 @@ import { performPlayerSecondaryInteraction } from './secondary-interaction';
 import { PlayerMiningState, sameVoxelTarget } from './creative-break-cadence';
 import { createFluidAwareTargetPredicate } from './fluid-source-target';
 import { samplePlayerMovementInput, updatePlayerMovementKeys } from './player-movement-input';
+import { recordNativeRelease, readNativeInput } from './native-movement-input';
 import { samplePlayerWaterImmersion } from './player-water-immersion';
 import { HeldPointerAttackCadence } from './held-pointer-attack';
 
 export { PLAYER_FEET_OFFSET } from './player-view-offsets';
 
 export class PlayerController {
+  get nativeMovementInput() {
+    return readNativeInput(this, this.options.authority.epoch);
+  }
   readonly velocity = new pc.Vec3();
   private yaw = 0;
   private pitch = -16;
@@ -181,7 +185,8 @@ export class PlayerController {
     };
     window.onkeyup = (event) => {
       this.debugTimeKeys.handleKeyUp(event.code);
-      if (updatePlayerMovementKeys(this.keys, event.code, false)) this.captureKeyboardInput();
+      if (updatePlayerMovementKeys(this.keys, event.code, false))
+        recordNativeRelease(this, event.code, this.captureKeyboardInput());
     };
     canvas.oncontextmenu = (event) => event.preventDefault();
     canvas.onclick = () => {
@@ -301,13 +306,13 @@ export class PlayerController {
   }
 
   private captureKeyboardInput() {
-    if (this.spectator) return;
+    if (this.spectator) return null;
     if (this.interactionBlocked) {
       this.sendNeutralInput();
-      return;
+      return null;
     }
     const snapshot = this.latestSnapshot ?? this.options.authority.snapshot();
-    if (!snapshot) return;
+    if (!snapshot) return null;
     const camera = this.options.camera;
     camera.setEulerAngles(this.pitch, this.yaw, 0);
     const command = this.prediction.captureInput({
@@ -317,6 +322,7 @@ export class PlayerController {
       ...samplePlayerMovementInput(camera, this.keys),
     });
     if (command) this.options.authority.sendInput(command);
+    return command;
   }
 
   applyAuthoritySnapshot(snapshot: AuthoritySnapshot): void {
