@@ -40,8 +40,16 @@ export const classicItemInteractionModules = [
     permissions: [
       { resource: 'seedlands.block-voxel', operations: ['execute'] },
       { resource: 'seedlands.navigation-item', operations: ['execute'] },
+      { resource: 'seedlands.transport', operations: ['execute'] },
     ],
     definitions: [
+      {
+        id: 'seedlands:minecart-use',
+        selector: { itemId: 'seedlands:minecart' },
+        trigger: 'voxel',
+        operationId: 'seedlands:deploy-minecart',
+        presentationKey: 'seedlands:minecart',
+      },
       {
         id: 'seedlands:map-self-interaction',
         selector: { itemId: 'seedlands:map' },

@@ -33,6 +33,7 @@ import { classicStructureDefinitionModule } from './structures';
 import { classicStructureActionsModule } from './structure-actions';
 import { classicMedia } from './media';
 import { classicDeathInventoryPolicyModule } from './death-inventory-policy';
+import { classicTransportModules } from './transport';
 
 const namespaceId = (id: string) => `seedlands:${id}`;
 const namespaceStack = <Stack extends Readonly<{ itemId: string }>>(stack: Stack) => ({
@@ -47,6 +48,7 @@ export const pack = definePack({
   entry: 'overworld.mjs',
   resources: [
     'playbooks/classic/presentation.json',
+    'playbooks/classic/assets/transport/minecart.glb',
     'playbooks/classic/assets/audio/to-far-shores.mp3',
     'playbooks/classic/assets/crops/wheat-stage-0.svg',
     'playbooks/classic/assets/crops/wheat-stage-1.svg',
@@ -115,6 +117,7 @@ export const pack = definePack({
     classicStructureActionsModule,
     defineMediaPlaybackModuleV1({ moduleId: 'seedlands:overworld-media', definition: classicMedia }),
     classicDeathInventoryPolicyModule,
+    ...classicTransportModules,
     defineRecipeCraftingModule(),
     defineRulesetModule({ id: 'seedlands:overworld-rules', version: '1.0.0' }),
     defineInventoryModule({ playerLayout: { capacity: 36, hotbarSize: 9 } }),

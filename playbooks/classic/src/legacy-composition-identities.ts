@@ -6,6 +6,7 @@ import { classicPreCropPresentationV4CompositionIdentity } from './pre-crop-pres
 import { classicPreCropSupportV4CompositionIdentity } from './pre-crop-support-v4-composition-identity';
 import { classicPreNavigationV4CompositionIdentity } from './pre-navigation-v4-composition-identity';
 import { classicPreManualV4CompositionIdentity } from './pre-manual-v4-composition-identity';
+import { classicPreTransportV4CompositionIdentity } from './pre-transport-v4-composition-identity';
 
 // Exact production capture from c18a890. Keep this independent of current Pack assembly.
 const CAPTURED_KERNEL_MIGRATION_IDENTITY =
@@ -91,6 +92,7 @@ export const classicGameplaySnapshotPredecessors = defineGameplaySnapshotPredece
   },
   { gameplayVersions: [4], identity: classicPreNavigationV4CompositionIdentity },
   { gameplayVersions: [4], identity: classicPreManualV4CompositionIdentity },
+  { gameplayVersions: [4], identity: classicPreTransportV4CompositionIdentity },
 ]);
 
 export const classicKernelMigrationCompositionIdentity = classicGameplaySnapshotPredecessors[0]!.identity;

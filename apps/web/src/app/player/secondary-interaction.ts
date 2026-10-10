@@ -1,11 +1,42 @@
 import type { VoxelTarget } from '../../client/presentation/voxel-target';
+import type { PlayerControllerOptions } from './player-controller-types';
 import type {
   AuthorityAction,
   AuthorityGameplayView,
 } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 
-export type SecondaryInteractionResult = 'target' | 'held-item' | 'place' | 'out-of-range' | 'blocked';
+export type SecondaryInteractionResult = 'entity' | 'target' | 'held-item' | 'place' | 'out-of-range' | 'blocked';
 export type TargetInteractionResult = 'handled' | 'fallback';
+
+export function performPlayerSecondaryInteraction(
+  options: Pick<
+    PlayerControllerOptions,
+    'camera' | 'onUseEntityTarget' | 'onUseTarget' | 'onUseHeldItem' | 'onPlace' | 'onFeedback'
+  >,
+  target: VoxelTarget | null,
+  bypassTarget: boolean,
+): Promise<SecondaryInteractionResult> {
+  return performSecondaryInteraction({
+    target,
+    bypassTarget,
+    useEntity: options.onUseEntityTarget
+      ? (intent) => {
+          const origin = options.camera.getPosition(),
+            direction = options.camera.forward;
+          return options.onUseEntityTarget!(
+            [origin.x, origin.y, origin.z],
+            [direction.x, direction.y, direction.z],
+            Math.min(5, target?.distance ?? 5),
+            intent,
+          );
+        }
+      : undefined,
+    useTarget: options.onUseTarget,
+    useHeldItem: options.onUseHeldItem,
+    place: options.onPlace,
+    feedback: options.onFeedback,
+  });
+}
 
 export function itemInteractionSelection(gameplay: Pick<AuthorityGameplayView, 'inventory' | 'player'>) {
   const player = gameplay.player;
@@ -72,6 +103,7 @@ export async function performSecondaryInteraction(
   input: Readonly<{
     target: VoxelTarget | null;
     bypassTarget: boolean;
+    useEntity?: (intent: 'use' | 'alternate') => Promise<TargetInteractionResult>;
     useTarget: (
       target: Pick<VoxelTarget, 'position' | 'adjacent'>,
       intent: 'use' | 'alternate',
@@ -81,6 +113,7 @@ export async function performSecondaryInteraction(
     feedback: (message: string, tone: 'error') => void;
   }>,
 ): Promise<SecondaryInteractionResult> {
+  if ((await input.useEntity?.(input.bypassTarget ? 'alternate' : 'use')) === 'handled') return 'entity';
   if (input.target) {
     const target = await input.useTarget(input.target, input.bypassTarget ? 'alternate' : 'use');
     if (target === 'handled') return 'target';

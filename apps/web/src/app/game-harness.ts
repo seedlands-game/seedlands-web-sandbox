@@ -438,6 +438,7 @@ export function createRuntimeHarnessApi(bindings: RuntimeHarnessBindings): Harne
         : null;
     },
     presentedEntityPosition: (entityId) => bindings.gameplay()?.presentedEntityPosition(entityId) ?? null,
+    presentedEntityModelReady: (entityId) => bindings.gameplay()?.presentedEntityModelReady(entityId) ?? false,
     aimedVoxelTarget: () => bindings.gameplay()?.aimedVoxelTargetForHarness() ?? null,
     aimedEntityId: () => {
       const controller = bindings.controller();

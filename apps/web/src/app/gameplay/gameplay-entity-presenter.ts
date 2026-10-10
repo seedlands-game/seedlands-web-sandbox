@@ -1,6 +1,9 @@
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
 import * as pc from 'playcanvas';
-import type { GameplayEntityView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import type {
+  AuthorityGameplayView,
+  GameplayEntityView,
+} from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { damageFlash, movementPose } from '../../client/presentation/entity-presentation-motion';
 import type { AppearanceAnimationBinding, AppearanceProject } from '../../client/presentation/appearance-project';
 import { classicCreatureDefinition } from '../../client/presentation/classic-creature-definitions';
@@ -16,6 +19,8 @@ import { createDamageTintMaterial } from './damage-tint-material';
 import type { VoxelGeometryResolver } from '@seedlands/stdlib/world/voxel-model';
 
 const PRESENTATION_SETTLE_DISTANCE = 0.001;
+type TransportStateV2 = NonNullable<AuthorityGameplayView['transports']>[number];
+type TransportDefinitionV1 = NonNullable<AuthorityGameplayView['transportDefinitions']>[number];
 
 type AnimatedEntity = {
   abort: AbortController;
@@ -35,6 +40,7 @@ export type GameplayBlockLightSampler = (position: readonly [number, number, num
 export class GameplayEntityPresenter {
   private presentationTime = 0;
   private readonly presented = new Map<string, pc.Entity>();
+  private readonly transportPresentations = new Map<string, string>();
   private readonly previousPositions = new Map<string, [number, number, number]>();
   private readonly health = new Map<string, number>();
   private readonly hurtUntil = new Map<string, number>();
@@ -60,15 +66,30 @@ export class GameplayEntityPresenter {
     this.bindings = getAppearanceAnimationBindings(app);
   }
 
-  reconcile(entities: readonly GameplayEntityView[], renderDeltaSeconds = 0): void {
+  reconcile(
+    entities: readonly GameplayEntityView[],
+    renderDeltaSeconds = 0,
+    transports: readonly TransportStateV2[] = [],
+    definitions: readonly TransportDefinitionV1[] = [],
+  ): void {
     const dt = Number.isFinite(renderDeltaSeconds) ? Math.max(0, Math.min(0.1, renderDeltaSeconds)) : 0;
     this.presentationTime += dt;
-    const current = new Set(entities.map((entity) => entity.id));
+    const definitionsById = new Map(definitions.map((definition) => [definition.id, definition]));
+    const transportsById = new Map(transports.map((transport) => [transport.reference.entityId, transport]));
+    const accepted = entities.filter(
+      (entity) => entity.type !== 'transport' || definitionsById.has(transportsById.get(entity.id)?.definitionId ?? ''),
+    );
+    const current = new Set(accepted.map((entity) => entity.id));
     this.presented.forEach((node, id) => {
-      if (current.has(id)) return;
+      const transport = transportsById.get(id);
+      const signature = transport
+        ? JSON.stringify([transport.reference.lifetime, definitionsById.get(transport.definitionId)?.presentationId])
+        : undefined;
+      if (current.has(id) && this.transportPresentations.get(id) === signature) return;
       this.releaseDamageMaterials(node);
       node.destroy();
       this.presented.delete(id);
+      this.transportPresentations.delete(id);
       this.previousPositions.delete(id);
       this.health.delete(id);
       this.hurtUntil.delete(id);
@@ -76,8 +97,12 @@ export class GameplayEntityPresenter {
       this.shadowCasterRevisions.delete(id);
       this.releaseAnimated(id);
     });
-    entities.forEach((entity) => {
-      if (this.updateEntity(entity, this.presentationTime, dt))
+    accepted.forEach((entity) => {
+      const transport = entity.type === 'transport' ? transportsById.get(entity.id) : undefined;
+      const presentationId = transport ? definitionsById.get(transport.definitionId)?.presentationId : undefined;
+      if (transport)
+        this.transportPresentations.set(entity.id, JSON.stringify([transport.reference.lifetime, presentationId]));
+      if (this.updateEntity(entity, this.presentationTime, dt, transport, presentationId))
         this.shadowCasterRevisions.set(entity.id, (this.shadowCasterRevisions.get(entity.id) ?? 0) + 1);
     });
   }
@@ -88,6 +113,7 @@ export class GameplayEntityPresenter {
       entity.destroy();
     });
     this.presented.clear();
+    this.transportPresentations.clear();
     this.previousPositions.clear();
     this.health.clear();
     this.hurtUntil.clear();
@@ -106,6 +132,9 @@ export class GameplayEntityPresenter {
     const position = this.presented.get(id)?.getPosition();
     return position ? [position.x, position.y, position.z] : null;
   }
+  presentedModelReady(id: string): boolean {
+    return this.animated.get(id)?.lease !== null && this.animated.get(id)?.lease !== undefined;
+  }
 
   get shadowCasters(): readonly GameplayShadowCaster[] {
     return [...this.presented].map(([id, node]) => {
@@ -114,9 +143,15 @@ export class GameplayEntityPresenter {
     });
   }
 
-  private updateEntity(entity: GameplayEntityView, time: number, dt: number): boolean {
+  private updateEntity(
+    entity: GameplayEntityView,
+    time: number,
+    dt: number,
+    transport?: TransportStateV2,
+    presentationId?: string,
+  ): boolean {
     const existing = this.presented.get(entity.id);
-    const node = existing ?? this.create(entity);
+    const node = existing ?? this.create(entity, presentationId);
     const beforePosition = node.getPosition().clone();
     const beforeRotation = node.getEulerAngles().clone();
     const beforeScale = node.getLocalScale().clone();
@@ -133,7 +168,8 @@ export class GameplayEntityPresenter {
     )
       position = [...entity.position];
     const pose = movementPose(previous, position, time);
-    if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
+    if (transport) node.setEulerAngles(0, (transport.pose.yaw * 180) / Math.PI, 0);
+    else if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
     const oldHealth = this.health.get(entity.id);
     if (entity.health !== undefined) {
       if (oldHealth !== undefined && entity.health < oldHealth) {
@@ -181,11 +217,11 @@ export class GameplayEntityPresenter {
     );
   }
 
-  private create(entity: GameplayEntityView): pc.Entity {
+  private create(entity: GameplayEntityView, presentationId?: string): pc.Entity {
     const node = new pc.Entity(`gameplay:${entity.id}`);
     const visual = new pc.Entity(`${node.name}:visual`);
     // movementPose's yaw defines local -Z as forward. Keep authored facial layout independent of that shared contract.
-    if (entity.type !== 'world-item') visual.setLocalEulerAngles(0, 180, 0);
+    if (entity.type !== 'world-item' && entity.type !== 'transport') visual.setLocalEulerAngles(0, 180, 0);
     node.addChild(visual);
     if (entity.type === 'world-item')
       this.assets.addItem(
@@ -198,7 +234,8 @@ export class GameplayEntityPresenter {
     this.registerDamageMaterials(node);
     this.app.root.addChild(node);
     this.presented.set(entity.id, node);
-    if (entity.archetype) {
+    const modelTarget = presentationId ?? entity.archetype;
+    if (modelTarget) {
       const animated: AnimatedEntity = {
         abort: new AbortController(),
         lease: null,
@@ -206,14 +243,14 @@ export class GameplayEntityPresenter {
         hurtSequence: 0,
       };
       this.animated.set(entity.id, animated);
-      void this.attachAnimatedModel(entity.id, entity.archetype, visual, animated);
+      void this.attachAnimatedModel(entity.id, modelTarget, visual, animated);
     }
     return node;
   }
 
   private async attachAnimatedModel(
     entityId: string,
-    target: NonNullable<GameplayEntityView['archetype']>,
+    target: string,
     visual: pc.Entity,
     state: AnimatedEntity,
   ): Promise<void> {

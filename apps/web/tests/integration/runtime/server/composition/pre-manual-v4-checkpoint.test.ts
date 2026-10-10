@@ -65,6 +65,7 @@ describe('exact pre-manual Classic V4 checkpoint', () => {
     const restored = target.createSnapshot();
     expect(restored.entityStore).toEqual({
       ...old.entityStore,
+      transports: [],
       issuedIds: [...new Set([...issued, ...old.entityStore.issuedIds])].sort(),
     });
     for (const key of [
@@ -76,10 +77,20 @@ describe('exact pre-manual Classic V4 checkpoint', () => {
       'finalEntities',
       'progress',
       'ruleset',
-      'moduleSchedule',
       'media',
     ] as const)
       expect(restored[key]).toEqual(old[key]);
+    expect(restored.moduleSchedule).toMatchObject({
+      version: old.moduleSchedule!.version,
+      time: old.moduleSchedule!.time,
+    });
+    expect(restored.moduleSchedule!.systems.filter(({ id }) => id !== 'seedlands:minecart-motion')).toEqual(
+      old.moduleSchedule!.systems,
+    );
+    expect(restored.moduleSchedule!.systems.find(({ id }) => id === 'seedlands:minecart-motion')).toEqual({
+      id: 'seedlands:minecart-motion',
+      remainder: 0,
+    });
   });
 
   it.each(['entry', 'definition'] as const)('rejects an altered %s identity without replacing the owner', (kind) => {

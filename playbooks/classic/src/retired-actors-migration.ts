@@ -1,5 +1,10 @@
-import { matchesGameplaySnapshotPredecessorV1, type GameplaySnapshotMigration } from '@seedlands/stdlib/mod-api';
+import {
+  matchesGameplaySnapshotPredecessorV1,
+  type CompositionCheckpointIdentity,
+  type GameplaySnapshotMigration,
+} from '@seedlands/stdlib/mod-api';
 import { classicGameplaySnapshotPredecessors } from './legacy-composition-identities';
+import { classicPreTransportV4CompositionIdentity } from './pre-transport-v4-composition-identity';
 
 const RETIRED_ARCHETYPES = new Set(['grazer', 'night-stalker', 'settler']);
 const RETIRED_MELEE_DEFINITIONS = new Set(['night-stalker-claw']);
@@ -70,7 +75,9 @@ const isRetiredEntity = (value: RecordValue) =>
 
 const isPreMediaClassicSource = (snapshot: RecordValue, targetComposition: unknown) => {
   const source = record(snapshot.composition);
-  const target = record(targetComposition);
+  if (record(targetComposition)?.playbookId !== 'seedlands:overworld') return false;
+  // Freeze the already-published predecessor graph; future target modules must not rewrite its allowlist.
+  const target = record(classicPreTransportV4CompositionIdentity);
   const definitionMap = record(target?.definitionMap);
   const packLock = rows(target?.packLock);
   const modules = rows(definitionMap?.modules);
@@ -137,6 +144,37 @@ const cleanCharacter = (value: RecordValue, retiredIds: ReadonlySet<string>, ret
   return next;
 };
 
+/** An approved predecessor gains only the new manual cursor; existing clock phases stay exact. */
+const upgradeTransportSchedule = (snapshot: RecordValue, target: CompositionCheckpointIdentity) => {
+  const systemId = 'seedlands:minecart-motion';
+  if (!target.definitionMap.systems.some(({ definition }) => definition.id === systemId)) return;
+  const source = record(snapshot.composition);
+  const definitions = rows(record(source?.definitionMap)?.systems);
+  if (!definitions) return;
+  const sourceIds = definitions.map((entry) => record(entry.definition)?.id);
+  if (sourceIds.includes(systemId)) return;
+  const schedule = record(snapshot.moduleSchedule);
+  if (!schedule) return;
+  const systems = rows(schedule.systems);
+  if (
+    !systems ||
+    systems.length !== sourceIds.length ||
+    new Set(systems.map(({ id }) => id)).size !== sourceIds.length ||
+    systems.some(({ id }, index) => id !== sourceIds[index])
+  )
+    throw new TypeError('Classic predecessor module schedule systems are incomplete or unknown.');
+  const previous = new Map(systems.map((entry) => [entry.id, entry]));
+  snapshot.moduleSchedule = {
+    ...schedule,
+    systems: target.definitionMap.systems.map(({ definition }) => {
+      if (definition.id === systemId) return { id: systemId, remainder: 0 };
+      const entry = previous.get(definition.id);
+      if (!entry) throw new TypeError('Classic predecessor module schedule target is unsupported.');
+      return entry;
+    }),
+  };
+};
+
 /** Removes the retired Classic-only ecology without admitting arbitrary Pack snapshots. */
 export const classicRetiredActorsMigration: GameplaySnapshotMigration = Object.freeze({
   predecessors: classicGameplaySnapshotPredecessors,
@@ -155,6 +193,15 @@ export const classicRetiredActorsMigration: GameplaySnapshotMigration = Object.f
       )
         return { snapshot: raw, reports: [] };
     }
+    if (
+      context.targetComposition?.definitionMap.systems.some(
+        ({ definition }) => definition.id === 'seedlands:minecart-motion',
+      )
+    ) {
+      const legacy = record(snapshot.vehicles);
+      if (legacy?.version === 1 && Array.isArray(legacy.vehicles) && legacy.vehicles.length)
+        throw new TypeError('Classic nonempty legacy transport requires an explicit migration contract.');
+    }
     const entityStore = snapshot.version === 4 ? record(snapshot.entityStore) : null;
     const entities = rows(snapshot.version === 4 ? entityStore?.entities : snapshot.entities);
     const simulation = record(snapshot.simulation);
@@ -168,7 +215,10 @@ export const classicRetiredActorsMigration: GameplaySnapshotMigration = Object.f
       const id = actorIdOf(actor);
       if (id && typeof actor.archetype === 'string' && RETIRED_ARCHETYPES.has(actor.archetype)) retiredIds.add(id);
     });
-    if (snapshot.version === 4) snapshot.composition = context.targetComposition;
+    if (snapshot.version === 4 && context.targetComposition) {
+      upgradeTransportSchedule(snapshot, context.targetComposition);
+      snapshot.composition = context.targetComposition;
+    }
     if (entities) {
       const retained = entities.filter((entity) => !retiredIds.has(idOf(entity) ?? ''));
       if (snapshot.version === 4 && entityStore) entityStore.entities = retained;

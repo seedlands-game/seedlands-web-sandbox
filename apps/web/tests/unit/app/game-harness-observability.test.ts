@@ -177,6 +177,32 @@ const bindings = () => {
 };
 
 describe('BrowserProductHarness V1 read-only observability', () => {
+  it('transport snapshots detach and freeze nested poses and reject an obsolete rendered epoch', () => {
+    const current = bindings();
+    const gameplay = gameplayView();
+    gameplay.transports = [
+      {
+        version: 2,
+        reference: { entityId: 'cart', lifetime: 7 },
+        definitionId: 'sample:cart',
+        pose: { position: [1, 2, 3], yaw: 0 },
+        velocity: [0, 0, 0],
+        routeCursor: null,
+        rider: null,
+        fuel: null,
+        inventory: [],
+      },
+    ];
+    current.setAuthorityGameplay(gameplay);
+    const harness = createHarnessObservability(current),
+      result = harness.transportSnapshot()!;
+    expect(result.transports).toEqual(gameplay.transports);
+    expect(result.transports[0]).not.toBe(gameplay.transports[0]);
+    expect(Object.isFrozen(result.transports[0]!.pose.position)).toBe(true);
+    expect(Object.isFrozen(gameplay.transports[0]!.pose.position)).toBe(false);
+    current.setRenderedWorldEpoch('world:old');
+    expect(harness.transportSnapshot()).toBeNull();
+  });
   it('returns a detached frozen descriptor from the current Authority registry', () => {
     const current = bindings();
     const api = createHarnessObservability(current);

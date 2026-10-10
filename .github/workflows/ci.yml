@@ -192,9 +192,9 @@ jobs:
     needs: build
     if: ${{ always() }}
     runs-on: ubuntu-24.04
-    # Original main + visual tests with one diagnostic retry require up to 38min.
+    # Original main + visual + ordinary minecart with one diagnostic retry require up to 42min.
     # Keep a bounded setup/reporting margin without changing test acceptance.
-    timeout-minutes: 45
+    timeout-minutes: 47
     steps:
       - name: Require successful production build
         env:

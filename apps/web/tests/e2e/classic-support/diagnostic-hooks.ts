@@ -15,7 +15,7 @@ type DiagnosticState = Readonly<{
 
 async function finishOriginalEvidence(page: Page, info: TestInfo, state: DiagnosticState): Promise<void> {
   if (!page.isClosed()) await page.evaluate(() => document.exitPointerLock()).catch(() => {});
-  if (state.skip || info.title.startsWith('Classic 视觉')) return;
+  if (state.skip || info.title.startsWith('Classic 视觉') || info.title.startsWith('Classic 普通矿车')) return;
   await attachClassicFailureWithInput(page, info, state.stages, state.benchmark, state.restore);
 }
 

@@ -20,6 +20,7 @@ const overworldPermissions = Object.freeze([
   permission('seedlands.mode', ['read', 'write', 'execute']),
   permission('seedlands.media-playback', ['read', 'write', 'execute']),
   permission('seedlands.navigation-item', ['read', 'write', 'execute']),
+  permission('seedlands.transport', ['read', 'write', 'execute']),
 ]);
 
 const alternativePermissions = Object.freeze([
