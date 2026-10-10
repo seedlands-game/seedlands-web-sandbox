@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { afterEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { lockPointer } from './mouse-input';
 import { mineVoxel } from './harness';
 import type { ClassicSnapshot } from './harness';
@@ -13,7 +13,14 @@ const SAFE_AFTER_FIRST = [36.24327850341797, 32.599998474121094, 0.4921601712703
 const OUT_OF_RANGE_AFTER_SECOND = [33.54338073730469, 32.599998474121094, 0.5105381011962891] as const;
 const SAFE_HANDOFF = new Error('aim reached after the first settled mining approach pulse');
 
-afterEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(0);
+});
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
 
 function observed(
   player: readonly [number, number, number],
@@ -99,6 +106,7 @@ function browser64ObservationPage(
   const afterSecond = observed(OUT_OF_RANGE_AFTER_SECOND, 19_718, 2_435);
   let current = start;
   let pressIndex = 0;
+  let heldAt = 0;
   let postFirstSnapshotReads = 0;
   let pointerLocked = false;
   let mouseX = 0;
@@ -133,12 +141,15 @@ function browser64ObservationPage(
       up: vi.fn(),
     },
     keyboard: {
-      press: async (key: string, options?: { delay?: number }) => {
-        pulses.push({ key, delay: options?.delay });
+      down: async (key: string) => {
+        expect(key).toBe('KeyS');
+        heldAt = Date.now();
+      },
+      up: async (key: string) => {
+        expect(key).toBe('KeyS');
+        pulses.push({ key, delay: Date.now() - heldAt });
         current = pressIndex++ === 0 ? afterFirst : afterSecond;
       },
-      down: vi.fn(),
-      up: vi.fn(),
     },
     evaluate: async (callback: (argument?: unknown) => unknown, argument?: unknown) => {
       vi.stubGlobal('window', {
@@ -163,7 +174,9 @@ it('hands off mining approach at the first settled snapshot inside the original 
     throw SAFE_HANDOFF;
   });
 
-  await expect(mineVoxel(driver.page, TARGET, aim)).rejects.toBe(SAFE_HANDOFF);
+  const rejected = expect(mineVoxel(driver.page, TARGET, aim)).rejects.toBe(SAFE_HANDOFF);
+  await vi.runAllTimersAsync();
+  await rejected;
 
   expect(driver.pulses).toEqual([{ key: 'KeyS', delay: 100 }]);
   expect(driver.afterFirst.onGround).toBe(true);
@@ -183,7 +196,9 @@ it('does not hand off when the settled Authority endpoint is just inside the uns
   await lockPointer(driver.page);
   const aim = vi.fn(async () => undefined);
 
-  await expect(mineVoxel(driver.page, TARGET, aim)).rejects.toThrow(/remains out of range/i);
+  const rejected = expect(mineVoxel(driver.page, TARGET, aim)).rejects.toThrow(/remains out of range/i);
+  await vi.runAllTimersAsync();
+  await rejected;
 
   expect(driver.pulses).toEqual([
     { key: 'KeyS', delay: 100 },
@@ -198,7 +213,9 @@ it('uses the fresh range guard if a settled handoff snapshot drifts beyond five 
   await lockPointer(driver.page);
   const aim = vi.fn(async () => undefined);
 
-  await expect(mineVoxel(driver.page, TARGET, aim)).rejects.toThrow(/remains out of range/i);
+  const rejected = expect(mineVoxel(driver.page, TARGET, aim)).rejects.toThrow(/remains out of range/i);
+  await vi.runAllTimersAsync();
+  await rejected;
 
   expect(driver.pulses).toEqual([{ key: 'KeyS', delay: 100 }]);
   expect(aim).not.toHaveBeenCalled();

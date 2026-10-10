@@ -1358,3 +1358,17 @@ Root独占harness.ts、新native-movement-pulse.ts与test、minecart-journey.ts�
 新唯一轴是在新增脉冲之后、原库存/部署步骤之前，用现有walkTo/真实鼠标与KeyS回到原baseline水平坐标，arrival point/tolerance0.06，原300ms最大pulse、45sec路线/20secsettle/120sec整体不变；新增返回原高度与距离断言，保留第一次真实移动与ACK证据并附返回证据。不teleport/reset、不移动地形或目标、不忽略碰撞、不改原矿车断言，不修改生产helper。必要定向回归/types/lint/hooks后新commit/identified build，原普通Native171一次，严格PASS才原完整无观察器main172一次。失败须有新事实再决定下一单元。Root独占minecart/spec/新证据，无agent/权限，22:40UTC检查点保持。
 
 170定向交付：3files/32unique路由契约PASS、Classic类型与changed-file lint PASS。初始root Vitest选错project未找到文件exit1，保留日志并显式web project完成实际验证；不计为测试通过。生产source不变，原Native171/main172仍待验收。
+
+### 原Native171/主旅程172终态与headless观察夹具175
+
+Exact e308fcd6原普通Native171完整PASS44179ms，新pulse/neutral ACK/同地板、真实KeyS返回误差约.038m<.06及原部署/上车/轨道终点/下车/同存档身份全部通过。167+170正常push，CI424 exact38092118531自然运行。原完整无optional sampler main172 FAIL924580ms，C0–C3/Creative/V1完成；V2已到craftArmor/openWorkbench返回原78.5,-.5工作台路线，被原global900000ms中断于settle，C4/C5未到达。失败末尾pause/presentation差异是终态观察，不能单独归因。无受控时长收益，不直接重跑。
+
+175于22:44UTC在独立私有文档预注册，主旅程freeze期间仅准备候选，terminal后才编辑。CI424 headless3FAIL/1099PASS154files；同一mining-approach-handoff.test.ts观察夹具只在press推进快照，down/up为空，因此Native调用不能推进释放观察。原RED本地3FAIL/1PASS复现。唯一修复轴把相同Browser64观察、相同unsafe边界/漂移/PointerLock失败及mouse负断言迁移到nativeKeySdown/up，fake clock验证原精确100ms。4files36unique GREEN、Classic类型/lint PASS；不改产品/physics/路线/guard/timeout。没有新Browser重试；CI424自然terminal前不推新head取消它。Root独占一test/spec/新证据，无agent或新权限。
+
+### 当前Authority worker的有界CPU归因178（预注册）
+
+172新终态证据是在无optional sampler/原900sec下V2 craftArmor工作台返回中被global打断，Native pulse协议与V1已通过仍不能闭合主旅程。当前artifact Authority worker为assets/authority-worker-CKx6lt5d.js、SHA743154881ce50ace03ce28ce024fa3a05d537188056acf11efba71fcf49676f0。旧44真实worker profile属于5d91421e、assetSHA2a21deaf613c53836f83bcd0f85adfaf1a50772cb76f051a966b700439d8e73e；133 assetSHA55a4b364f37abdbb62665d15afade46e9df2eab388e7c73cf76b9508e4f259ff但NOT_STARTED，无实际profile。它们不覆盖142后当前worker，145 main线程idle也不能代替当前Authority采样。先复用并核对这些输出，不重跑旧采样。
+
+本片仅启用已有互斥Authority CPU sampler：同原唯一main，360sec延迟、20sec独占window、10ms采样；精确artifact asset/URL/hash匹配worker target，runtime/read receipt齐全才分析。无mainCPU/nativeTrace/keyboardTiming/benchmark、无额外输入runner/CDP输入/质量/Actor/路线/原900/45/20更改。175 test-only修复提交后新identified build177/verify，原main178一次diagnosticOnly/eligible=false；不是新的性能准入或产品PASS，不能从duration比较得出收益。capture失败/未开始则保留新失败与owner元数据；完整capture若没有新的可归因owner则终止此CPU归因单元，不盲重复。源/HEAD/文档从verify冻结到terminal；CI424自然结束前不推新head取消它。
+
+Root独占既有sampler执行与新证据，不修改sampler/生产owner、不委派、不新增模型/权限/域名。传统.12PD×120%=.144PD，AI22min×120%=26.4min，23:25UTC检查点；真实停止要求优先。完整需求矩阵/136与144/最终精确CI与审查仍开放。
