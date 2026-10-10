@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "runId": "pr41-route-shapes-save-135-01",
+  "recordedAtUTC": "2026-10-10T17:22:56.225677+00:00",
+  "preChangeSourceSha": "356ec528a19d574867631a5e5851284e2a206be1",
+  "baseSha": "fba4486e433c145db658f6b1598b70c47f759c8a",
+  "subject": "135 controlled working diff; frozen commit identity follows separately",
+  "eligibleForPerformanceClaim": false,
+  "productAcceptance": "NOT_RUN",
+  "remainingProductScope": [
+    "neighbor-aware track mesh",
+    "native corner/slope driving",
+    "other rails/carts/boat/fuel/container",
+    "older nonempty legacy",
+    "full Classic main journey"
+  ],
+  "checks": {
+    "targetedWeb": {
+      "status": "PASS",
+      "files": 5,
+      "tests": 56
+    },
+    "targetedStdlib": {
+      "status": "PASS",
+      "files": 6,
+      "tests": 94
+    },
+    "classicHeadless": {
+      "status": "PASS",
+      "files": 152,
+      "tests": 1072
+    },
+    "stdlibFull": {
+      "status": "PASS",
+      "files": 172,
+      "tests": 1274
+    },
+    "types": ["stdlib production PASS", "Classic Pack production PASS", "Classic tests PASS", "root test types PASS"],
+    "lint": "PASS",
+    "ciSelection": {
+      "status": "PASS",
+      "tests": 17
+    },
+    "formatAndDiff": "PASS"
+  },
+  "logs": [
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/straight-v4-capture-135-01.log",
+      "bytes": 1253,
+      "sha256": "cd6ac224e3355f564f3516712d28d05ba89e6a56a9d8beac4b69f10742cc4e75"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/straight-v4-capture-135-02.log",
+      "bytes": 217,
+      "sha256": "52903dd02efbd5795526bd4b20e73e9135b35565a507e925c5f121cbc11f377c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-save-lineage-red-135-01.log",
+      "bytes": 2956,
+      "sha256": "8b7abe88edc16a42023039281b7dc9f4d06319c624e7caea555ed26362dd6e6c"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-save-lineage-green-135-01.log",
+      "bytes": 1580,
+      "sha256": "4db6814511e0be2eeba63b4ee49a0491d1049cdc757042473c523fbde1deb264"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-save-lineage-green-135-02.log",
+      "bytes": 2160,
+      "sha256": "6926cbe0bf5abfee031a8c070e02a82a943d49c860a41b5ac7c10224b47aab41"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-save-lineage-green-135-03.log",
+      "bytes": 341,
+      "sha256": "e971fa716d8d7778fade8e3efe44b6611b930f2217bcd2106ec4b12eebc6ac8f"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-placement-red-135-01.log",
+      "bytes": 1629,
+      "sha256": "77493359bff15d6931012e5f498f34599e811221b1969687beb632b6235ebe8f"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-placement-green-135-01.log",
+      "bytes": 219,
+      "sha256": "ac9376123f2f45b5378bffe6a3582d6dc56028b27676e6110ceec7391491de61"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/transport-identity-red-135-01.log",
+      "bytes": 2131,
+      "sha256": "014d9a56933654c9f595a9ea92cdd93687e3eb12f581efa5e8338c9158147bba"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/transport-identity-green-135-01.log",
+      "bytes": 218,
+      "sha256": "f62e6a8ba9ecd8911800554846b8d6eb609bc4e2c5018c6c2e902187803962c7"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-deployment-projection-135-01.log",
+      "bytes": 340,
+      "sha256": "0920ea4a381d1c5105207c30b34d09e3fd426177e78f2194c36d2c0604c2fae9"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/route-save-regression-135-04.log",
+      "bytes": 342,
+      "sha256": "82e3f0ed391aa7cecfd4a2b89ae6feafbc8edadc322dc37e1376a1c1c35b1d20"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/transport-regression-135-02.log",
+      "bytes": 219,
+      "sha256": "5601b8c6e95d3eaa389f175f0f0e971d9a3bdeeddd58b1ba90ba2aac732613e6"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/types-stdlib-135-01.log",
+      "bytes": 32,
+      "sha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/types-pack-135-01.log",
+      "bytes": 32,
+      "sha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/types-classic-135-01.log",
+      "bytes": 46,
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/types-tests-135-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/lint-135-01.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/ci-selection-135-01.log",
+      "bytes": 3983,
+      "sha256": "5bf3dcfa1f2a6c938ef5c0c0f23daf4a45a5384246e30cd812c533bac6504e15"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/classic-headless-135-01.log",
+      "bytes": 22075,
+      "sha256": "1ceea7ca79d8a6eec78c73d0e6b05c8751fe2dacaa7433143172df5ffb5c6189"
+    },
+    {
+      "path": "/workspace/pr41-recovery-20261008-root-01/stdlib-full-135-01.log",
+      "bytes": 309,
+      "sha256": "4f314f9d41607392cb15abb7631b35dc017a05dd30cabde8ef5bafae9b9a6366"
+    },
+    {
+      "path": "/workspace/pr41-classic-route-config-135-luna-01/red.log",
+      "bytes": 15657,
+      "sha256": "da5a645c85c57820b5cfd94ea7bfc26cce19ce079cdf8f0a46ace2df8d034d8f"
+    },
+    {
+      "path": "/workspace/pr41-classic-route-config-135-luna-01/green.log",
+      "bytes": 470,
+      "sha256": "f3ccb1e4b8467d505a3e3926772608ccaf7358e21edfcc6d01f7c0cf812dbb28"
+    },
+    {
+      "path": "/workspace/pr41-classic-route-config-135-luna-01/final-checks.txt",
+      "bytes": 1491,
+      "sha256": "de4bc9a78a12be491233084234ebbb8d5656f0ed431d0845c32d782abdc13470"
+    }
+  ],
+  "budget": {
+    "observedAtUTC": "2026-10-10 16:55",
+    "weeklyRemainingPercent": 74,
+    "reset": "4d10h",
+    "source": "parent actual product UI, shared account",
+    "stopRemainingPercent": 60
+  }
+}
