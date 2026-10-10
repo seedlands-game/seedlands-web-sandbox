@@ -1,3 +1,4 @@
+import { inspectWorldColumnSource } from './world-column-inspection';
 import type { WorldModuleBinding } from '../commands/module-command';
 import type { ServerCommand } from '../commands/command-contract';
 import type { AuthorityRuntime } from '../authority/authority-runtime';
@@ -127,6 +128,8 @@ export class AuthorityWorldHarness implements WorldHarnessPort {
 
   inspect(request: WorldInspectRequest) {
     const captured = captureWorldInspectRequest(request);
+    if (captured.ok && captured.request.kind === 'column-source')
+      return inspectWorldColumnSource(captured, this.options.owner, (describe, execute) => this.run(describe, execute));
     return this.run(
       () => describeWorldInspect(captured),
       async () => executeWorldInspect(this.options.owner(), captured),

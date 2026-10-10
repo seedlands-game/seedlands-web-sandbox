@@ -1,3 +1,4 @@
+import { LOGIC_PROTOCOL_VERSION } from '../logic/logic-protocol';
 import { CHUNK_SIZE, chunkKey, Voxel, MAX_VOXEL_ID } from '../../world/voxel';
 import { GAME_SAVE_SCHEMA_VERSION, type FrozenGameSaveSnapshot } from '../persistence/game-save-snapshot';
 import type { VoxelSemanticsResolver } from '../../world/voxel-semantics';
@@ -116,6 +117,15 @@ export function validateWorldInspectRequest(value: unknown): WorldInspectRequest
     throw new TypeError('World inspect request is invalid.');
   const kind = Object.getOwnPropertyDescriptor(value, 'kind');
   if (!kind || !kind.enumerable || !('value' in kind)) throw new TypeError('World inspect request is invalid.');
+  if (kind.value === 'column-source') {
+    const request = exactDataRecord(value, ['kind', 'column'], 'Column source inspect request');
+    if (!Array.isArray(request.column) || request.column.length !== 2 || !request.column.every(Number.isSafeInteger))
+      throw new TypeError('Column coordinates must contain two safe integers.');
+    return Object.freeze({
+      kind: 'column-source',
+      column: Object.freeze([request.column[0], request.column[1]]) as readonly [number, number],
+    });
+  }
   if (kind.value !== 'entity-reference') return value as WorldInspectRequest;
   const request = exactDataRecord(value, ['kind', 'reference'], 'Entity reference inspect request');
   const reference = exactDataRecord(
@@ -157,7 +167,7 @@ export function validateWorldLogicRequest(value: unknown): asserts value is Worl
   const batch = record(request.batch);
   if (
     !batch ||
-    batch.protocolVersion !== 1 ||
+    batch.protocolVersion !== LOGIC_PROTOCOL_VERSION ||
     typeof batch.epoch !== 'string' ||
     !safeSequence(batch.observationSequence) ||
     !safeSequence(batch.expiresAtPhysicsTick) ||

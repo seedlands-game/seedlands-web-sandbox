@@ -110,6 +110,18 @@ describe('shared world harness', () => {
           expiresAtPhysicsTick: observation.physicsTick + 1,
           intents: [],
         },
+      } as never),
+    ).toMatchObject({ ok: false, error: { kind: 'validation' } });
+    expect(
+      await session.world.logic({
+        kind: 'submit',
+        batch: {
+          protocolVersion: observation.protocolVersion,
+          epoch: observation.epoch,
+          observationSequence: observation.observationSequence,
+          expiresAtPhysicsTick: observation.physicsTick + 1,
+          intents: [],
+        },
       }),
     ).toMatchObject({ ok: true, data: { accepted: true, mode: 'scripted' } });
   }, 20_000);

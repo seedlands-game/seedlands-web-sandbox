@@ -1004,3 +1004,13 @@ Root独占private blur105脚本/config/raw/window/spec/new证据，不委派、�
 08:57UTC106范围细化：GameServer新增窄接线触发原max-lines514>500，范围lint失败且后续types未执行，保留日志。不提高门槛/例外；将原isValidSnapshot上下文拼装原样收拢至既有game-server-restore helper，仍委托相同validServerChunkSnapshot与composition语义判定。不压缩格式凑行，真实load/save/legacy/residency回归核验保留行为。
 
 09:07UTC106结果：真实RED6FAIL→首6PASS，最终source20与邻近stdlib6files65PASS，Web restore/冻结/代理3files14PASS；production/test/Classic types及WebSvelte0error0warning+2tsc PASS，范围ESLint500lines PASS。原max-lines514/503/501失败保留，后续types在这些失败链未运行；原ensureNeighborhood完整async体也原样收拢至既有canonical-chunk-observation，GameServer直接返回其Promise，必要回归通过，不改变门槛。code-map更新实际owner与外层Worker/Sky消费仍待接线界限，server-column-source-106-01与源同提交。本组尚无最终精确SHA CI/identified/Browser，不把旧结果当新SHA产品证明。真实08:26周78%，09:10刷新请求待答，60停止线。
+
+### 授权异步列观察107（09:15:35UTC预注册）
+
+从84b9347b接既有World inspect列来源请求，复用world.chunk read世界范围，不添加授权资源。授权启动与重新授权发布分别占用现有宿主队列，持久化等待在队列外；外层epoch/worldId/runtime替换拒绝旧结果，Kernel worldRevision迟变unknown superseded。坐标严格二个safe integer且捕获防caller mutation。Root独占helper、Harness合同与窄接线、stdlib和原Browser代理/Harness会话测试；不修改输入推进、Sky/R8/shader或浏览器超时。18min×120%=21.6min，09:37:11UTC检查点，08:26实际周78%、60停止线。
+
+首轮stdlib12PASS/生产typesPASS；测试types发现provider字面量上下文收窄和it.each坐标数组展开，两项测试写法已改，后3files38PASS/根测试typesPASS。Web首轮16PASS/2FAIL：新增RPC测试把真实args数组误写object，已修；原未收集Harness有效Logic batch夹具使用旧v1而实际协议v2，改用真实observation.protocolVersion，保留accepted:true断言。两个既有文件加入原Classic CI/types名单及静态收集保护。不是更改生产协议或放松接受条件；完整原失败日志保留。
+
+09:22UTC107新证据纠正：仅将夹具更新v2后原Harness仍FAIL；validateWorldLogicRequest也硬编码v1，导致边界与真实runtime协议分裂。范围扩展为同文件引用既有LOGIC_PROTOCOL_VERSION，旧v1明确validation拒绝，保留当前v2 accepted:true。未新建协议/降低断言。首次Classic types揭示原未收集Browser FakeAuthorityWorker仅AuthorityResponse而真实port含pointer-attack；改复用既有fixtures/browser-authority正确同port FakeWorker，移除重复17行定义并保持max-lines500，不抬门槛。
+
+09:25UTC107完成：新增14例加原source20/authorization6，stdlib3files40PASS；Web原Harness/Browser代理+新列RPC3files18PASS；stdlib生产/root test/Classic/Web Svelte0error0warning+tsc/tools types、范围lint/格式/paths/freeze5/CI17PASS。原v1生产边界有效失败已修到共享LOGIC_PROTOCOL_VERSION，旧v1拒绝且当前v2 accepted:true，浏览器正确Fixture复用并单列新测试，不改500门槛。Worker世界RPC本来在外层hostOperation前分发，只读I/O不被另队列阻塞。纯residency和真实320000高处voxel edit两类查询期间反例都PASS。暂未identified/完整浏览器/新SHA CI，不作为Sky/完整玩法或性能PASS。
