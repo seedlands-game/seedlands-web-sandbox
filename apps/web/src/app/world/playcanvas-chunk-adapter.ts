@@ -174,7 +174,11 @@ export const createPlayCanvasChunkAdapter = (
     resource.meshes.push(mesh);
     resource.instances.push(instance);
     telemetry.endSpan(span);
-    telemetry.markTrace(task.traceId, 'mesh-part-commit', 'main');
+    telemetry.markTrace(task.traceId, 'mesh-part-commit', 'main', {
+      partsCommitted: resource.meshes.length,
+      taskId: task.taskId,
+      chunkRevision: task.chunkRevision,
+    });
   },
   attach: (resource, task, onPostrender) => {
     const span = telemetry.beginSpan('render', 'SceneAttach', 'main', task.traceId);

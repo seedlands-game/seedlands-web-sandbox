@@ -2,6 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { PerformanceTelemetry } from '../../../src/client/presentation/performance-telemetry';
 
 describe('客户端性能 telemetry', () => {
+  it('未完成网格trace保留采样时属性且不能伪造trace身份', () => {
+    const telemetry = new PerformanceTelemetry({ now: () => 5 });
+    const traceId = telemetry.beginTrace('chunk-request', '2,0,0', 'main');
+    const attributes = { priority: 'interactive', partsTotal: 7, traceId: 'forged', traceName: 'forged' };
+    telemetry.markTrace(traceId, 'commit-queued', 'main', attributes);
+    attributes.partsTotal = 99;
+    expect(telemetry.trace(traceId)?.complete).toBe(false);
+    expect(telemetry.exportChromeTrace().traceEvents).toContainEqual(
+      expect.objectContaining({
+        name: 'commit-queued',
+        ts: 5000,
+        dur: 0,
+        args: { priority: 'interactive', partsTotal: 7, traceId, traceName: '2,0,0' },
+      }),
+    );
+  });
   it('导出尚未完成的跨Worker链路标记及所属trace身份', () => {
     const telemetry = new PerformanceTelemetry({ now: () => 5 });
     const traceId = telemetry.beginTrace('chunk-request', '0,1,0', 'main');
