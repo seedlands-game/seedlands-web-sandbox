@@ -780,3 +780,7 @@ V2 trace 中453次 mouse.move 的调用耗时合计约180229ms，2088次完整 s
 03:22UTC当前world.identity绑定的原生用例类型PASS。保留e6d78失败trace/33.5s及当前body68ad有效运行到save局部证据；这项仅测试/spec修正待identified产物复验，不能先写PASS。没有生产epoch规则变更。
 
 03:30UTC checkpoint80预注册：source29a8/14285c69 native79-01为32.4s FAIL，真实old reference stale/new current均已通过，新增metadata断言错误混用runtimeEpoch与WorldHarness epoch；authority-worker.ts明确worldEpoch=`runtimeEpoch:world:restoreSequence`，身份/frontier归同一AuthorityWorldOwner。只按实际合同检查world.identity的非空epoch与自身及两条inspect的frontier一致，不把它同runtimeEpoch比较。仍保留ECS full-reference epoch+1与原position/rider/全部输入/时限；先保存原失败，不改生产规则。剩余AI6分钟×120%=7.2分钟，03:38检查点，传统0.05PD×120%=0.06PD；最新真实周81%/03:09，原约60%停止线。没有全量重试，下一运行针对已经冻结的测试合同修正。
+
+03:32UTC静态检查指出测试本地HarnessResult为unknown data/error分支无frontier。af301afa已本地提交但未构建/未推送，类型尚FAIL；立即按真实判别联合补成功分支与string守卫，不用any绕过。仅是类型/测试诊断修正，生产文件不改；下一提交及artifact在类型通过后执行。
+
+03:37UTC补判别联合/string守卫后的Classic类型检查80-03 exit0；80-02日志无错误但上次工具会话退出状态不可恢复，未将其单独声称PASS。只为取得丢失的退出证据执行同一静态检查，非浏览器重试。下一步提交并构建精确SHA，按03:38检查点继续有界6分钟×120%=7.2分钟至03:45；传统0.05PD×120%=0.06PD，周额度仍以03:09实际81%为最新、停止线约60%。
