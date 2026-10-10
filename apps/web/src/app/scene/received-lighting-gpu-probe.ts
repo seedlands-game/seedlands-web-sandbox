@@ -120,6 +120,10 @@ export function receivedLightingGpuProbe(
       material.name = `received-lighting-probe-${category}`;
       material.diffuse = pc.Color.WHITE;
       material.emissive = pc.Color.BLACK;
+      if (model) {
+        material.emissiveIntensity = 1;
+        material.emissiveMap = null;
+      }
       material.opacity = 1;
       material.blendType = pc.BLEND_NONE;
       material.cull = pc.CULLFACE_NONE;

@@ -1038,3 +1038,5 @@ Root独占World/cache/sampler、三个实际消费者接线与测试、GPUprobe/
 13:09UTC117检查：相关9files71PASS，正常范围lint发现Game504/BrowserGameplay506/World512有效行，保留FAIL。实际职责收拢至model-surface-lighting、world-surface-lighting与browser-gameplay-presentation，并移除已无消费者的旧数值block-only展示wrapper；Game世界时间同步收拢到已有runtime-controls的同类时钟职责，不抬门槛/压缩格式。新正式Classic types发现此前未收集的transport fixture缺epoch以及Null测试的显式类型适配，修为真实合同并保留原失败，不改变生产协议。
 
 13:14UTC117源码验证：旧消费者修正fixture后的有效RED2FAIL保留，最终9files73PASS；真实Web/Svelte0error0warning+tsc/tools、实际Classic tests types、范围ESLint500上限、格式/路径及原CI/freeze选择17PASS。新增actor受击/unknown/clone释放与当前world恢复闭包测试；Null仍非GPU。code-map更新实际展示owner路径，长期架构/安全政策与历史sealed evidence不改。接下来冻结源、正常提交、identified构建和原visual/native验收，尚不声明66GPU/产品矩阵PASS。
+
+13:21UTC117首GPU运行：6230b10b/source39e5ad39/artifact0a165895原visual34秒FAIL。原33像素PASS；新增模型received/unknown/invalidation等均符合固定值，但world-item/viewmodel的self-only和self-unknown实得0而期望64。原始66pixels/HTML/day PNG/失败receipt保留，非PASS。SDK实际getEmission为material_emissive×material_emissiveIntensity；控制面只设置颜色而继承非发光源的intensity0，属于probe设置缺项，不是确认生产自己发光缺陷。唯一修正模型probe clone的独立intensity=1并去除借用emissiveMap作为白色控制，生产材质字段不改，64/128/0断言与原输入/时限不变；须新身份构建和原visual再验。不把此失败冒充有效旧生产GPU RED。
