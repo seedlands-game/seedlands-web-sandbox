@@ -3,7 +3,7 @@ import { browserArtifact, browserPackLock, compositionIdentity } from './identit
 import { startClassicWorld } from './start';
 import { classicScenario } from './scenario';
 import { aimAtVoxelWithRealMouse } from './aim';
-import { clickCanvasCenter, closeInventory, moveMouseBy, snapshot, type ClassicWindow } from './harness';
+import { clickCanvasCenter, closeInventory, lockPointer, moveMouseBy, snapshot, type ClassicWindow } from './harness';
 import { observeBrowserRuntime, collectClassicFailureDiagnostics } from './evidence';
 import { mouseCorrectionToPoint } from './target-aim';
 import { modularPackSmokeEnabled } from './modular-pack-smoke';
@@ -205,6 +205,40 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
   expect(currentReferenceInspection.frontier?.epoch).toBe(worldEpoch);
   expect(restored.pose.position).toEqual(dismounted.pose.position);
   expect(restored.rider).toBeNull();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (id) => (window as unknown as ClassicWindow).__seedlandsHarness!.presentedEntityModelReady(id),
+        restored.reference.entityId,
+      ),
+    )
+    .toBe(true);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (id) => (window as unknown as ClassicWindow).__seedlandsHarness!.presentedEntityPosition(id),
+        restored.reference.entityId,
+      ),
+    )
+    .toEqual(restored.pose.position);
+  // Reload releases Pointer Lock; the first native left click only acquires it.
+  expect(await page.evaluate(() => document.pointerLockElement)).toBeNull();
+  await lockPointer(page);
+  await aimAtCart(page, restored.pose.position);
+  const restoredPresentation = await page.evaluate((id) => {
+    const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+    return {
+      modelReady: h.presentedEntityModelReady(id),
+      position: h.presentedEntityPosition(id),
+      viewAngles: h.snapshot().viewAngles,
+    };
+  }, restored.reference.entityId);
+  expect(restoredPresentation.modelReady).toBe(true);
+  expect(restoredPresentation.position).toEqual(restored.pose.position);
+  const afterPresentation = (await transportSnapshot(page))!.transports[0]!;
+  expect(afterPresentation.reference).toEqual(restored.reference);
+  expect(afterPresentation.pose).toEqual(restored.pose);
+  expect(afterPresentation.rider).toBeNull();
   expect(runtime.pageErrors).toEqual([]);
   expect(runtime.failedResponses).toEqual([]);
   await testInfo.attach('classic-minecart-native-input.json', {
@@ -221,6 +255,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
       staleReferenceInspection,
       currentReferenceInspection,
       currentWorldIdentity,
+      restoredPresentation,
     }),
   });
   await testInfo.attach('classic-minecart-restored.png', { contentType: 'image/png', body: await page.screenshot() });
