@@ -11,3 +11,7 @@ Classic默认makeChunk＋macroAt的静态公式：terrain≤44，树最高h+7≤
 Web composition首次6PASS/1FAIL：geometry fixture期望Y65，但实际Modular floor为32、接受cy2空区块。暂以407旧worldgen模块作对照，原严格断言同样64.995失败，候选源码原字节随后恢复；该失败不是新端口回归。独立fixture修复另登记，当前不把Web全量写PASS。旧CI/主旅程与完整lighting/运输/194矩阵仍未闭合。
 
 当前产物/真实浏览器尚未取得；后续固定完成源码SHA构建同一artifact并从唯一原Classic线路验证，不能以局部方法GREEN宣称Sky/GPU/存档来源完整。长期docs不改：这是既有批准生成proof合同的可选运行时能力，完整持久化列查询、directory revision与Authority修改合并仍待实现。
+
+07:14UTC补充闭合：source 2682a223e7dac6aa26c2553ce102ee13320d68c3（94 production与95 test fixture合并）identified build PASS。sourceDigest de88a861c63decfc63a78aef5fc92e0a37672c7c810bb30ae59683608d9d4e19，artifactDigest f21f681949b00a1b90ae8353d49ab41ade01ce2494f0d72c669f2bed7789b1c5，lockDigest 44db46fb0f159ebe6d88435c8cfb5d46127d1c7f363a50d19217d454c30e1169，289files，builtAt 2026-10-10T07:08:52.389Z。唯一原native矿车用例在默认真实核数/无故障注入下1.6m PASS，原120000/10000ms与真实输入保持；run pr41-generated-source-native-browser95-01为NON_MAIN、attempts空，不伪造main或Sky消费者证据。
+
+同次原始JSON 85639bytes，SHA256 ae64adaf3ad454be9c36531d13920ed52d810cadc7344b8992930656970c2fce；当前reference epoch2/current、原epoch1/stale，恢复pose[9,31,0.5]、rider=null、restoredPresentation.modelReady=true及位置一致。私有source-bound-build-95-01.log、source-bound-native-browser-95-01.log、browser95-source-native-01原始HTML/结果及browser95-native-extracted-01保留。只证明既有Worker/保存恢复/矿车原生线路回归，没有接通Browser Sky、完整运输或GPU光照。Root冻结范围复核不是独立批准；最新07:10实际产品周剩79%，约60%停止线不变。
