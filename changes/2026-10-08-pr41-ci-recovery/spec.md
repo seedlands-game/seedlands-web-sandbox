@@ -1533,3 +1533,7 @@ headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及�
 - 本次为具体恢复输入缺失修复，不以更快作为采用理由，不追加性能实验。源码冻结357已结束。长期docs不改：既有真实输入helper的入口修正，无协议或生产数据合同改变。预算按主对话UI实测累计规则，未增加预算。
 
 - 365结果：原入口2失败/5通过，修复后既有选中owner 7/7通过；Classic类型、改动文件lint、全库格式及5/5封存字节通过，新receipt另做格式检查。新精确SHA完整主旅程仍待运行；CI433和本地345/357失败保留，未宣称可合入。
+
+- 374预注册（2026-10-11 07:41 UTC）：67621f52原版369在V1保存前walkTo door.approach以432827ms真实离开支持表面失败，C4/C5未到，postverify通过。最后跳跃脉冲约207ms发出释放，但Space/KeyW原生确认分别约745/1342ms，Authority jumpPressed2945到neutral2953相隔91 tick约1.52s；实际低处落地，保留支持面断言，未归为全局超时或误判。唯一候选为在既有脉冲截止同时入队两键释放时方向键先于Space，减少方向受跳跃释放排队阻挡；不改脉冲时长、真实键/鼠标方式、地图、物理、ACK/epoch/neutral/停稳条件、超时或断言。先在既有native-movement-pulse选中owner用串行延迟原生回执的有界RED，并调用正式movement-key状态/Native release marker/routePulseSettledPredicate证明方向先停止而Space未释放时仍不能停稳、两键释放和新ACK后才可继续；中立最终事件允许Space已由Controller实际合同支持。实现后原时序/失败传播用例与route-progress回归必须通过；新精确SHA原版浏览器必需，局部单元不证明C5或产品，未作性能收益/benchmark声明。CI434 Chromium仍运行；原365sealed结果不改写。
+
+- 374结果：旧释放顺序RED 1失败/4通过；方向优先后native-pulse/route-progress/mining-handoff三owner 27/27通过，Classic类型、改动lint、5/5封存及改动格式通过。最终Space中立marker、未释放跳跃/旧ACK不能继续的断言保留；仅修改真实释放顺序，旧frozen benchmark输入不适用于该新顺序，不作性能声明。新SHA完整浏览器待跑。CI434仍运行；其concurrency取消旧运行，故下一正常推送须先保存CI434终态，不为快推丢失证据。
