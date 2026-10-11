@@ -1,0 +1,7 @@
+# 普通矿车夹具基线新鲜度218
+
+原onGround/!colliding条件允许旧位置、移动中或呈现尚未收敛的快照作为teleport后的pulse基线。新增predicate确认authoritative position到达真实夹具目标、velocity归零、presentation追上；原300ms输入、同高、返回、上下车、存档和timeout全部保留。
+
+实际RED4FAIL/10PASS；最终route/native pulse两文件最终19PASS（含真实floor-contact偏移正例），原duration回归另1PASS；Classic/Web类型、lint及选择合同PASS。基线21195781的原visual/native各一次PASS；同SHA远端main两次C4返程FAIL，local202 V2支持面FAIL，CPU209 V1上半门mesh FAIL均原样保留。静态和局部PASS不等于整条旅程或可合入。
+
+validation.json绑定真实原日志SHA-256及当时状态。新head构建/native尚未运行；该快照不追填未来结论，不复制sealed历史证据。

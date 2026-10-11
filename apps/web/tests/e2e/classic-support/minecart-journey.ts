@@ -18,7 +18,7 @@ import { mouseCorrectionToPoint } from './target-aim';
 import { modularPackSmokeEnabled } from './modular-pack-smoke';
 import { observePersistedChunkDirectory } from './persisted-directory-observation';
 import { sendNativeMovementPulse } from './native-movement-pulse';
-import { routePulseSettledPredicate } from './route-progress';
+import { routeFixtureSettledPredicate, routePulseSettledPredicate } from './route-progress';
 
 export function registerClassicMinecartJourney(test: typeof import('@playwright/test').test) {
   test('Classic 普通矿车以原生右键上车、键盘移动、Shift右键下车并恢复同一存档', async ({ page }, testInfo) => {
@@ -124,7 +124,7 @@ export async function verifyClassicMinecartJourney(page: Page, testInfo: TestInf
     if (!run.ok) throw new Error('Fixture clock resume failed.');
   });
   await lockPointer(page);
-  const pulseBaseline = await waitForSnapshot(page, (value) => value.onGround && !value.colliding);
+  const pulseBaseline = await waitForSnapshot(page, routeFixtureSettledPredicate([2.5, 32.6, 2.5]));
   await sendNativeMovementPulse(page, 'KeyW', 300, true);
   const pulseAfter = await waitForSnapshot(page, routePulseSettledPredicate(pulseBaseline));
   expect(

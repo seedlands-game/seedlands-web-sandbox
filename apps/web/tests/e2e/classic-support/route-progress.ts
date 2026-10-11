@@ -1,7 +1,22 @@
 import { bodyConfigFor } from '@seedlands/stdlib/physics';
+import { COLLISION_EPSILON } from '@seedlands/stdlib/physics/geometry';
 import type { NativeMovementInput } from '../../../src/app/player/native-movement-input';
 
 export type RouteDirection = 'KeyW' | 'KeyS';
+
+/** The native probe starts only after its prepared fixture has settled. */
+export function routeFixtureSettledPredicate(target: readonly [number, number, number]) {
+  return (
+    value: Parameters<typeof routeInputSettled>[0] & Readonly<{ onGround: boolean; colliding: boolean }>,
+  ): boolean =>
+    value.onGround &&
+    !value.colliding &&
+    target.every(
+      (position, axis) =>
+        Number.isFinite(position) && Math.abs(value.serverPlayerPosition[axis]! - position) <= COLLISION_EPSILON * 4,
+    ) &&
+    routeInputSettled(value);
+}
 
 export function routeTargetPredicate(
   target: readonly [number, number],
