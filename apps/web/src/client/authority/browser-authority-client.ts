@@ -18,7 +18,7 @@ import type { CharacterControlRequest, CharacterControlResult, ControlBinding } 
 import { AuthoritySnapshotGate } from './authority-snapshot-gate';
 import { AuthorityReceiveWallObserver as ReceiveWallObserver } from './authority-receive-wall-observer';
 import { BrowserInputSchedulingClock } from './input-scheduling-tick';
-import { deliverInputDecision } from './input-decision-diagnostics';
+import { deliverInputDecision, postInputCommand } from './input-decision-diagnostics';
 import { BrowserAuthorityRequestSender } from './browser-authority-request-sender';
 import {
   acceptPointerAttackReceipt,
@@ -230,7 +230,9 @@ export class BrowserAuthorityClient {
   }
 
   sendInput(command: InputCommand): void {
-    this.post({ ...command, epoch: this.epoch, runtimeEpoch: this.runtimeEpochValue });
+    postInputCommand(this, command, () =>
+      this.post({ ...command, epoch: this.epoch, runtimeEpoch: this.runtimeEpochValue }),
+    );
   }
 
   pause(): Promise<{ paused: true }> {

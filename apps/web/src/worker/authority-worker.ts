@@ -262,6 +262,10 @@ const handleCurrent = async (message: AuthorityRequest) => {
           sequence: message.sequence,
           decision: current.receiveInput({ ...transportInput, epoch: inputEpoch }),
           requiresResync: current.inputResyncRequired,
+          observation: {
+            authorityPhysicsTick: current.physicsTick,
+            receivedAtTimeOriginMs: performance.timeOrigin + performance.now(),
+          },
         });
       }
       break;

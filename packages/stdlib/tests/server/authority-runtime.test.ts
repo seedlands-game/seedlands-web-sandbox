@@ -29,8 +29,10 @@ describe('AuthorityRuntime', () => {
     });
 
     expect(runtime.ready().snapshot.physicsTick).toBe(0);
+    expect(runtime.physicsTick).toBe(0);
     nowMs += 20;
     expect(runtime.wake(nowMs).physicsTick).toBe(1);
+    expect(runtime.physicsTick).toBe(1);
   });
 
   it('ready 在宿主 tick 与暂停推进后只读当前快照，不重新采样启动时刻', async () => {

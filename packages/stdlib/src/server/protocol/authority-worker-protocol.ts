@@ -450,6 +450,8 @@ export type AuthorityResponse =
       sequence: number;
       decision: SequenceDecision;
       requiresResync: boolean;
+      /** Receive boundary only; this is not a consumed-input acknowledgement. */
+      observation?: Readonly<{ authorityPhysicsTick: number; receivedAtTimeOriginMs: number }>;
     }>
   | Readonly<{
       kind: 'authority-response';
