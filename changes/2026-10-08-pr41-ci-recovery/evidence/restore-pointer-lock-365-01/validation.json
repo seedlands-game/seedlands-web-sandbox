@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "baselineSha": "c739725bc647e7f7e8b8556c80519af21ba41fa4",
+  "change": "Reacquire actual canvas Pointer Lock before restored crop/navigation journey using existing ensurePointerLock",
+  "ciBaseline": {
+    "runId": 38118426060,
+    "fiveNonBrowserJobs": "PASS",
+    "chromium": "FAIL",
+    "mainFirst": "C4 outbound original 90s deadline",
+    "mainRetry": {
+      "outboundReturnedMs": 81115,
+      "returnReturnedMs": 87636,
+      "failure": "Pointer Lock missing at portable.verifyAfterRestore -> verifyCropAfterRestore -> real mouse movement"
+    },
+    "visual": "PASS once",
+    "ordinaryMinecart": "PASS once",
+    "pages": "SKIP"
+  },
+  "regression": {
+    "owner": "mining-approach-handoff.test.ts",
+    "red": {
+      "failed": 2,
+      "passed": 5
+    },
+    "green": {
+      "passed": 7,
+      "failed": 0
+    },
+    "newCases": [
+      "released lock acquired before crop/navigation movement",
+      "already locked: no additional canvas click",
+      "canvas acquisition error retained before journeys/movement"
+    ]
+  },
+  "checks": {
+    "classicTypes": "PASS",
+    "changedFileLint": "PASS",
+    "wholeFormat": "PASS; frozen 5/5 and whole existing tree, plus targeted new receipt/spec check"
+  },
+  "previousCanonicalLocal": {
+    "run": "345-01",
+    "status": "FAIL",
+    "durationMs": 919858,
+    "timeoutMs": 900000,
+    "postverify": "PASS",
+    "C4C5": "UNREACHED"
+  },
+  "rendererDiagnostic": {
+    "run": "357-01",
+    "status": "FAIL",
+    "durationMs": 924304,
+    "timeoutMs": 900000,
+    "postverify": "PASS",
+    "cpuSamples": 75451,
+    "strictTimeAnalysis": "FAIL: signed negative deltas -2us and -1us preserved; no clamping",
+    "sampleCountAnalysis": "DIAGNOSTIC ONLY; no time-weight or CPU utilization claim"
+  },
+  "newShaCanonicalMain": "PENDING",
+  "fullTransportProductAcceptance": "OPEN",
+  "performanceClaim": false,
+  "mergeReady": false,
+  "supportingPrivateLogs": {
+    "restore-lock-red-365-01.log": "8d56152bb92253e35f51940020c81137f9bfd1a4810d0f52c92c2e3311402722",
+    "restore-lock-green-366-01.log": "9aaf54d115cc1f5ec7c5a8282de768e3edabf157165dabcdd9898c73b18292ef",
+    "restore-lock-types-366-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "restore-lock-lint-366-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

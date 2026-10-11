@@ -1,6 +1,7 @@
 import { expect, test, type Page, type TestInfo } from '@playwright/test';
 import * as crops from './crop-journey';
 import * as navigation from './navigation-journey';
+import { ensurePointerLock } from './mouse-input';
 
 export async function completeBeforeSave(page: Page, info: TestInfo) {
   const crop = await test.step('Creative 正常作物输入与实际批次', () =>
@@ -22,6 +23,7 @@ export async function verifyAfterRestore(
   state: Awaited<ReturnType<typeof completeBeforeSave>>,
   before: Awaited<ReturnType<typeof expectForSave>>,
 ) {
+  await ensurePointerLock(page);
   const crop = await crops.verifyCropAfterRestore(page, info, state.crop, before.crop);
   const nav = await navigation.verifyNavigationAfterRestore(page, info, before.navigation);
   return { crop, navigation: nav };
