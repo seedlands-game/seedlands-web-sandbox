@@ -1,3 +1,4 @@
+import { canTargetFluidSurface } from '../../../src/app/gameplay/fluid-source-target-selection';
 import { describe, expect, it } from 'vitest';
 import type { AuthorityGameplayView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
 import { BrowserGameplay } from '../../../src/app/gameplay/browser-gameplay';
@@ -103,4 +104,21 @@ describe('BrowserGameplay fluid source target selection', () => {
     current = view({ mode: 'survival', survival: 'sample:bucket', items: [] });
     expect(gameplay.canTargetFluidSource()).toBe(false);
   });
+});
+
+it('表面瞄准只跟随已注册政策及当前生存或创造手持物品', () => {
+  const policies = [{ itemId: 'sample:boat', policy: 'fluid-surface' as const }];
+  expect(
+    canTargetFluidSurface({ ...view({ mode: 'survival', survival: 'sample:boat' }), fluidTargetItems: policies }),
+  ).toBe(true);
+  expect(
+    canTargetFluidSurface({ ...view({ mode: 'survival', survival: 'sample:bucket' }), fluidTargetItems: policies }),
+  ).toBe(false);
+  expect(
+    canTargetFluidSurface({
+      ...view({ mode: 'creative', survival: 'sample:bucket', creative: 'sample:boat' }),
+      fluidTargetItems: policies,
+    }),
+  ).toBe(true);
+  expect(canTargetFluidSurface(view({ mode: 'survival', survival: 'sample:boat' }))).toBe(false);
 });

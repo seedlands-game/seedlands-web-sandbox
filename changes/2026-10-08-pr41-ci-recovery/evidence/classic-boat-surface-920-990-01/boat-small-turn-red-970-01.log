@@ -1,0 +1,53 @@
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/transport-motion-geometry.test.ts (6 tests | 2 failed) 20ms
+   × 小角度转向支撑不包含整圈包围圆的空角落 Stone，真实足迹和 unknown 仍拒绝 6ms
+   × 小角度转向碰撞不使用整圈半径，真实船体和骑乘者范围仍阻挡 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-motion-geometry.test.ts > 小角度转向支撑不包含整圈包围圆的空角落 Stone，真实足迹和 unknown 仍拒绝
+AssertionError: expected 'left-surface' to be null
+
+- Expected:
+null
+
++ Received:
+"left-surface"
+
+ ❯ packages/stdlib/tests/server/transport-motion-geometry.test.ts:135:27
+    133|     projectSurfaceMotion({ ...options, state, frame, policy, callbacks…
+    134|   const free = candidate((p) => p?.[0]===2 && p[2]===2 ? 3 : 5);
+    135|   expect(free.stopReason).toBeNull();
+       |                           ^
+    136|   expect(free.next.pose.position[2]).toBeGreaterThan(state.pose.positi…
+    137|   expect(free.next.pose.yaw).toBeGreaterThan(state.pose.yaw);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-motion-geometry.test.ts > 小角度转向碰撞不使用整圈半径，真实船体和骑乘者范围仍阻挡
+AssertionError: expected 'world-collision' to be null
+
+- Expected:
+null
+
++ Received:
+"world-collision"
+
+ ❯ packages/stdlib/tests/server/transport-motion-geometry.test.ts:148:35
+    146|     frame: { ...options.frame, world: { querySolids: () => [{ id: 'sto…
+    147|       aabb: { min: { x: 2, y: 0, z }, max: { x: 3, y: 1, z: z + 1 } } …
+    148|   expect(candidate(2).stopReason).toBeNull();
+       |                                   ^
+    149|   expect(candidate(1).stopReason).toBe('world-collision');
+    150| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed (6)
+   Start at  22:38:46
+   Duration  1.48s (transform 1.13s, setup 0ms, import 1.33s, tests 20ms, environment 0ms)
+

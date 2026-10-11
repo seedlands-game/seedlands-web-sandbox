@@ -1,0 +1,33 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+9:50:41 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts [ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts ]
+TypeError: Item interaction voxel hit policy is invalid: seedlands:boat-use
+ ❯ snapshotDefinition packages/stdlib/src/server/gameplay/modules/item-interaction-module.ts:137:11
+    135|     throw new TypeError('Item interaction presentation key is invalid:…
+    136|   if (source.voxelHitPolicy !== undefined && source.voxelHitPolicy !==…
+    137|     throw new TypeError('Item interaction voxel hit policy is invalid:…
+       |           ^
+    138|   if (source.voxelHitPolicy !== undefined && source.trigger !== 'voxel…
+    139|     throw new TypeError('Item interaction voxel hit policy requires a …
+ ❯ defineItemInteractionModule packages/stdlib/src/server/gameplay/modules/item-interaction-module.ts:305:55
+ ❯ playbooks/classic/src/item-interactions.ts:38:3
+ ❯ playbooks/classic/src/pack.ts:30:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  21:50:41
+   Duration  3.02s (transform 2.31s, setup 0ms, import 0ms, tests 0ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

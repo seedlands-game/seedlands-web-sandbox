@@ -29,6 +29,7 @@ import {
   type VoxelSemanticsDefinition,
   type VoxelSemanticsRegistry,
 } from '../../world/voxel-semantics';
+import type { ItemInteractionRegistryV1 } from './modules/item-interaction-module';
 import type { TransportDefinitionRegistryV1 } from './modules/transport-model';
 
 export type GameplayContent = Readonly<{
@@ -41,6 +42,7 @@ export type GameplayContent = Readonly<{
   voxelGameplay: VoxelGameplayRegistry;
   voxelSemantics: VoxelSemanticsRegistry;
   transportDefinitions?: TransportDefinitionRegistryV1;
+  itemInteractions?: ItemInteractionRegistryV1;
 }>;
 
 export type GameplayContentInput = Readonly<{

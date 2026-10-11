@@ -15,8 +15,8 @@ const policy = {
   steeringRate: 0,
   fuelPerMeter: 0,
 };
-const setup = () => {
-  const definition = surfaceDefinition();
+const setup = (bodyAabb = surfaceDefinition().bodyAabb) => {
+  const definition = { ...surfaceDefinition(), bodyAabb };
   const config = freezeTransportInteractionConfig({
     moduleId: 'sample:transport',
     operationId: 'sample:deploy',
@@ -112,4 +112,61 @@ it('includes the mounted rider body when the vehicle itself clears an overhead o
   const candidate = projectSurfaceMotion({ ...options, state, frame });
   expect(candidate.stopReason).toBe('world-collision');
   expect(candidate.next.pose.position).toEqual(options.state.pose.position);
+});
+
+const smallTurnFixture = () => {
+  const options = setup({ min: { x: -0.75, y: 0, z: -0.75 }, max: { x: 0.75, y: 0.6, z: 0.75 } });
+  options.entities.spawn({ id: 'driver', type: 'player', position: [2.5, 0.45, 1.0143206512710505] });
+  const driver = options.entities.createReference('driver')!;
+  const state = {
+    ...options.state,
+    rider: driver,
+    pose: { position: [2.5, 0, 1.0143206512710505] as const, yaw: 0.00036449777217310397 },
+    velocity: [0, 0, 0.18854344123915154] as const,
+  };
+  const frame = {
+    ...options.frame,
+    seconds: 1 / 60,
+    playerReference: driver,
+    playerWish: { x: Math.SQRT1_2, z: Math.SQRT1_2 },
+    bodyConfigs: new Map([['driver', bodyConfigFor('player')]]),
+  };
+  const policy = { ...options.policy, acceleration: 2, drag: 0.8, maxSpeed: 5, steeringRate: Math.PI / 2 };
+  return { ...options, state, frame, policy };
+};
+
+it('小角度转向支撑不包含整圈包围圆的空角落 Stone，真实足迹和 unknown 仍拒绝', () => {
+  const options = smallTurnFixture();
+  const { state, frame, policy } = options;
+  const candidate = (read: (position?: readonly number[]) => number | undefined) =>
+    projectSurfaceMotion({
+      ...options,
+      state,
+      frame,
+      policy,
+      callbacks: { ...options.callbacks, getLoadedVoxel: read },
+    });
+  const free = candidate((p) => (p?.[0] === 2 && p[2] === 2 ? 3 : 5));
+  expect(free.stopReason).toBeNull();
+  expect(free.next.pose.position[2]).toBeGreaterThan(state.pose.position[2]);
+  expect(free.next.pose.yaw).toBeGreaterThan(state.pose.yaw);
+  expect(candidate((p) => (p?.[0] === 2 && p[2] === 1 ? 3 : 5)).stopReason).toBe('left-surface');
+  expect(candidate((p) => (p?.[0] === 2 && p[2] === 1 ? undefined : 5)).stopReason).toBe('surface-unknown');
+});
+
+it('小角度转向碰撞不使用整圈半径，真实船体和骑乘者范围仍阻挡', () => {
+  const options = smallTurnFixture();
+  const candidate = (z: number) =>
+    projectSurfaceMotion({
+      ...options,
+      callbacks: { ...options.callbacks, getLoadedVoxel: () => 5 },
+      frame: {
+        ...options.frame,
+        world: {
+          querySolids: () => [{ id: 'stone', aabb: { min: { x: 2, y: 0, z }, max: { x: 3, y: 1, z: z + 1 } } }],
+        },
+      },
+    });
+  expect(candidate(2).stopReason).toBeNull();
+  expect(candidate(1).stopReason).toBe('world-collision');
 });

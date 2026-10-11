@@ -24,6 +24,11 @@
       "id": "seedlands:minecart",
       "model": "playbooks/classic/assets/transport/minecart.glb",
       "texture": "playbooks/classic/assets/transport/minecart.glb"
+    },
+    {
+      "id": "seedlands:boat",
+      "model": "playbooks/classic/assets/transport/boat.glb",
+      "texture": "playbooks/classic/assets/transport/boat.glb"
     }
   ],
   "materials": [

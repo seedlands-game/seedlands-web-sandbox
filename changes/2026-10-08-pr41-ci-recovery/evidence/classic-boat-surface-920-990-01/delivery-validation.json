@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "4a9b47c9437ac395fc91b366c09a127550a6b5ff",
+  "dirtySource": true,
+  "sourceDigest": "28911f1b4f5b26d29ad26da9e583a238afe59a9d1cc63594d11f50ef51f18e40",
+  "artifactDigest": "4fbae523266ae0ee830ed18a87a2a600db9bb398db200bcd9df7521d08feb495",
+  "scope": "NON_MAIN_CLASSIC_BOAT",
+  "status": "PASS",
+  "browser990": {
+    "retries": 0,
+    "entry": "apps/web/tests/e2e/classic-runtime.spec.ts",
+    "nativeInput": true,
+    "actions": [
+      "deploy",
+      "mount",
+      "depart-startup-pad",
+      "forward",
+      "steer",
+      "reverse",
+      "return-to-shore",
+      "dismount",
+      "grounded"
+    ],
+    "postverify": {
+      "artifactMatch": true,
+      "sourceHashesMatch": 38,
+      "scope": "NON_MAIN",
+      "exitCode": 0
+    }
+  },
+  "headless978": {
+    "status": "PASS",
+    "files": 164,
+    "tests": 1289,
+    "identity": "freeze975; production source bytes preserved through freeze988"
+  },
+  "stdlib974": {
+    "status": "FAIL",
+    "passed": 1311,
+    "failed": 3,
+    "reason": "timeouts; default 2 workers"
+  },
+  "isolation976": {
+    "status": "PASS",
+    "files": 2,
+    "tests": 11,
+    "workers": 1,
+    "claim": "isolated files only"
+  },
+  "compatibility": {
+    "previousProductionIdentity": "build897, gameplay bytes compatible with head4a9",
+    "scope": "nonempty minecart gameplay state; full portable import NOT_PROVEN",
+    "syntheticCapture922": "WITHDRAWN"
+  },
+  "open": [
+    "current remote CI441 Chromium FAIL",
+    "canonical main899 FAIL",
+    "early water/terrain frame has black regions",
+    "lighting and audio acceptance remain open",
+    "full portable predecessor import not proven",
+    "nonempty retired VehicleRuntimeV1 intentionally rejected"
+  ],
+  "performanceClaim": false
+}

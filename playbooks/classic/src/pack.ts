@@ -49,6 +49,7 @@ export const pack = definePack({
   resources: [
     'playbooks/classic/presentation.json',
     'playbooks/classic/assets/transport/minecart.glb',
+    'playbooks/classic/assets/transport/boat.glb',
     'playbooks/classic/assets/audio/to-far-shores.mp3',
     'playbooks/classic/assets/crops/wheat-stage-0.svg',
     'playbooks/classic/assets/crops/wheat-stage-1.svg',

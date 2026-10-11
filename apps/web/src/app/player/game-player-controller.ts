@@ -1,3 +1,4 @@
+import { canTargetFluidSurface } from '../gameplay/fluid-source-target-selection';
 import type * as pc from 'playcanvas';
 import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
 import type { PerformanceTelemetry } from '../../client/presentation/performance-telemetry';
@@ -87,6 +88,7 @@ export function createGamePlayerController(options: Options): PlayerController {
       gameplay()?.heldAttackTarget(origin, direction, maxDistance) ?? false,
     onStopHeldAttack: () => gameplay()?.stopHeldAttack(),
     canTargetFluidSource: () => gameplay()?.canTargetFluidSource() ?? false,
+    canTargetFluidSurface: () => canTargetFluidSurface(options.authority.gameplay),
     isCreativeMode: () => options.authority.gameplay.player.mode?.value === 'creative',
     onAimTarget: (target) => gameplay()?.setAimTarget(target),
     onBeginBreak: (position) => gameplay()?.beginBreak(position),

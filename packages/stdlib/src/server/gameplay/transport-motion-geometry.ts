@@ -1,3 +1,4 @@
+import { surfaceYawBounds } from './surface-transport-bounds';
 import {
   bodyWorldAabb,
   sweepBodyThroughWorld,
@@ -61,6 +62,44 @@ export function compoundBody(
   return { ...config, localAabb: bounds };
 }
 
+function surfaceCompoundBody(
+  definition: TransportDefinitionV1,
+  state: TransportStateV2,
+  frame: AuthorityPhysicsFrame,
+  proposedYaw: number,
+  maxSpeed: number,
+): BodyConfig {
+  const config = transportBodyConfig(definition, state.pose.yaw, 0);
+  let bounds = surfaceYawBounds(definition.bodyAabb, state.pose.yaw, proposedYaw);
+  if (state.rider) {
+    const rider = frame.bodyConfigs.get(state.rider.entityId);
+    if (!rider) throw new Error('Transport rider has no current physics body.');
+    const [x, y, z] = definition.seatOffset;
+    const seat = surfaceYawBounds({ min: { x, y, z }, max: { x, y, z } }, state.pose.yaw, proposedYaw);
+    bounds = unionAabb(bounds, {
+      min: {
+        x: seat.min.x + rider.localAabb.min.x,
+        y: seat.min.y + rider.localAabb.min.y,
+        z: seat.min.z + rider.localAabb.min.z,
+      },
+      max: {
+        x: seat.max.x + rider.localAabb.max.x,
+        y: seat.max.y + rider.localAabb.max.y,
+        z: seat.max.z + rider.localAabb.max.z,
+      },
+    });
+  }
+  // An arc's centre deviates from its endpoint chord by no more than length * angle.
+  const pad = maxSpeed * frame.seconds * Math.abs(proposedYaw - state.pose.yaw);
+  return {
+    ...config,
+    localAabb: {
+      min: { x: bounds.min.x - pad, y: bounds.min.y, z: bounds.min.z - pad },
+      max: { x: bounds.max.x + pad, y: bounds.max.y, z: bounds.max.z + pad },
+    },
+  };
+}
+
 /** Actual inclined carrier and upright rider; the enclosing AABB remains broadphase only. */
 export function compoundBoxes(
   definition: TransportDefinitionV1,
@@ -121,21 +160,6 @@ export function projectSurfaceMotion(
     state.rider.epoch === frame.playerReference.epoch &&
     entities.resolveReference(frame.playerReference);
   const controls = transportControlFromWorldWish(state.pose.yaw, driven ? frame.playerWish : { x: 0, z: 0 });
-  const turning = controls.steering !== 0 && policy.steeringRate !== 0;
-  const compound = compoundBody(
-    definition,
-    state,
-    frame,
-    turning,
-    policy.maxSpeed * frame.seconds * policy.steeringRate * frame.seconds,
-  );
-  const supportBody = compoundBody(
-    definition,
-    { ...state, rider: null },
-    frame,
-    turning,
-    policy.maxSpeed * frame.seconds * policy.steeringRate * frame.seconds,
-  );
   const surface = config.surfaces.find((entry) => entry.id === definition.locomotion.providerId)!;
   const updates = new Map(frame.updates.map((entry) => [entry.id, entry.update]));
   const others = entities
@@ -181,7 +205,14 @@ export function projectSurfaceMotion(
     ...policy,
     ...controls,
     seconds: frame.seconds,
-    sampleSurface(position) {
+    sampleSurface(position, proposedYaw = state.pose.yaw) {
+      const supportBody = surfaceCompoundBody(
+        definition,
+        { ...state, rider: null },
+        frame,
+        proposedYaw,
+        policy.maxSpeed,
+      );
       const footprint = unionAabb(
         translateAabb(supportBody.localAabb, vector(state.pose.position)),
         translateAabb(supportBody.localAabb, vector(position)),
@@ -198,7 +229,8 @@ export function projectSurfaceMotion(
         }
       return 'supported';
     },
-    sweep(from, to) {
+    sweep(from, to, _bodyAabb, proposedYaw = state.pose.yaw) {
+      const compound = surfaceCompoundBody(definition, state, frame, proposedYaw, policy.maxSpeed);
       const start = { position: vector(from), velocity: zero };
       const delta = { x: to[0] - from[0], y: to[1] - from[1], z: to[2] - from[2] };
       const bounds = bodyWorldAabb(start, compound);

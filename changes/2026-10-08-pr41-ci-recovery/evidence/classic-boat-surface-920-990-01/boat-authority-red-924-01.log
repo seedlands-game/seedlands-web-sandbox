@@ -1,0 +1,62 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+9:45:14 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (2 tests | 2 failed) 605ms
+   × 正式 Classic 船仅在水面原子部署，地面拒绝保留库存与实体 357ms
+   × 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具 246ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式 Classic 船仅在水面原子部署，地面拒绝保留库存与实体
+AssertionError: expected { success: false, …(1) } to match object { success: true, handled: true }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "handled": true,
+-   "success": true,
++   "success": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:42:42
+     40|   expect((await deploy(runtime, [2, 31, 2])).result.success).toBe(fals…
+     41|   expect(runtime.exportPortableCheckpoint().gameplay).toEqual(before);
+     42|   expect((await deploy(runtime)).result).toMatchObject({ success: true…
+       |                                          ^
+     43|   expect(runtime.view().transports).toHaveLength(1);
+     44|   expect(runtime.view().transports![0]).toMatchObject({ definitionId: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:51:50
+     49| it('正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具', async () => {
+     50|   const { runtime, options } = await create();
+     51|   expect((await deploy(runtime)).result.success).toBe(true);
+       |                                                  ^
+     52|   const carrier = runtime.view().transports![0]!;
+     53|   expect((await runtime.performAction({ type: 'interact', intent: 'use…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  21:45:14
+   Duration  4.92s (transform 3.44s, setup 0ms, import 4.19s, tests 605ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

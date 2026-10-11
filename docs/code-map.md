@@ -202,7 +202,7 @@ Browser 的 `worker/pack-loader.ts` 在导入 ESM 前同时校验 Pack lock 与 
 
 ## 可组合玩法内容与执行
 
-Classic 的普通矿车入口由 `playbooks/classic/src/transport.ts` 声明直线轨道、部署、关系和移动模块；`scripts/generate-classic-minecart-glb.mjs` 生成其 Pack 资源。Web 的 `gameplay/transport-target-interaction.ts` 只从同份 accepted projection 取得旋转后的命中边界和 lifetime，再走原生右键/Shift+右键的 Authority 请求。`gameplay-entity-presenter.ts` 从运输定义的 presentation ID 取得模型并沿用实体资源释放路径。生产合同由 `classic-minecart-authority.test.ts`、`transport-target-interaction.test.ts` 和现有实体表现测试验证；这部分尚不包含完整运输变体和旧非空载具迁移。`fixtures/classic/pre-transport-schedule.ts` 让手工旧身份 fixture 同步移除新系统，真实捕获旧字节仍原样使用；`classic-support/minecart-journey.ts` 在既有唯一规范入口注册独立原生输入验收。
+Classic 的普通矿车与水面船入口由 `playbooks/classic/src/transport.ts` 声明直线轨道、部署、关系和移动模块；`scripts/generate-classic-minecart-glb.mjs` 与 `scripts/generate-classic-boat-glb.mjs` 生成其 Pack 资源。水面目标由注册 item-interaction 政策投影到浏览器，权威部署仍检查介质、范围与遮挡；surface 下车复用已加载碰撞与支撑查询。 `packages/stdlib/src/server/gameplay/surface-transport-bounds.ts` 包围本次 yaw 区间的中间极值；surface 支撑和完整载具/骑乘者 sweep 共用该实际范围，保留 unknown 与接触拒绝。Web 的 `gameplay/transport-target-interaction.ts` 只从同份 accepted projection 取得旋转后的命中边界和 lifetime，再走原生右键/Shift+右键的 Authority 请求。`gameplay-entity-presenter.ts` 从运输定义的 presentation ID 取得模型并沿用实体资源释放路径。生产合同由 `classic-minecart-authority.test.ts`、`transport-target-interaction.test.ts` 和现有实体表现测试验证；这部分尚不包含完整运输变体和旧非空载具迁移。`fixtures/classic/pre-transport-schedule.ts` 让手工旧身份 fixture 同步移除新系统，真实捕获旧字节仍原样使用；`classic-support/minecart-journey.ts` 在既有唯一规范入口注册独立原生输入验收。
 
 `server/gameplay/playbooks/overworld/` 保存默认 Playbook 的物品、配方、方块定义与版本化旧 ID 映射；只经 `mod-api` 消费标准机制。`server/gameplay/modules/` 保存可复用机制；`server/composition/` 的注册操作、状态提交与逻辑生命周期由宿主绑定权限后执行。旧自由函数在迁移期读取同一份第一方定义，不能另维护内容副本。
 
@@ -303,3 +303,5 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 `client/persistence/browser-persistence-source-reads.ts` 将列目录和单个持久快照的只读读取绑定到现有存档身份及保存/释放 fence；`browser-stored-sky-snapshot.ts` 复用存档解码返回精确 revision 的独占副本，不消费 prepared registry/cache。`worker/authority-renderer-source.ts` 复用短 Host frontier、队列外 IO、最终 owner/worldRevision/fence 复核，为当前 renderer 提供 `request-sky-source`；原 `request-collision-baseline` 仍只观察驻留区块。`client/authority/browser-authority-sky-chunk.ts` 的副本只供原有有界列证明，不插入碰撞/mesh cache、不生成区块。静态、行为、冷存档场景/像素和整矩阵分别验收。
 
 当前身份的 Sky 响应明确 `superseded` 时，客户端向 `WorldSkyLighting` 传递有类型的临时失效，列目录同原因也仅重新排队原有单任务证明；缺失、损坏、预算超限及已释放来源保持暗且不轮询。该恢复合同不改变碰撞可用性或上述存储/派生所有者。
+
+船的生产浏览器验收由 `apps/web/tests/e2e/classic-support/boat-journey.ts` 使用真实键鼠完成水面部署、驾驶、倒退、驶回岸边和安全下船；`transport-journeys.ts` 汇集矿车与船，统一从 `classic-runtime.spec.ts` 注册，复用同一产物与回执入口。

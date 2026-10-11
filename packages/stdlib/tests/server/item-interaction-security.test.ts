@@ -11,7 +11,7 @@ const selection: ItemInteractionExpectedSelectionV1 = {
   creativeCatalogRevision: 3,
   selectedSlot: 0,
 };
-const binding = (voxelHitPolicy?: 'fluid-source') => ({
+const binding = (voxelHitPolicy?: 'fluid-source' | 'fluid-surface') => ({
   definition: {
     id: 'test:binding',
     selector: { itemId: 'test:item' },
@@ -324,4 +324,27 @@ describe('item interaction target security', () => {
     expect(dispatchItemInteraction(context.value, 'player', target, selection)).toEqual({ success: false, reason });
     expect(context.invokeActor).not.toHaveBeenCalled();
   });
+});
+
+it.each([
+  ['flow', { level: 3, source: false }, true],
+  ['source', { level: 8, source: true }, true],
+  ['empty sidecar', { level: 0, source: false }, false],
+  ['absent sidecar', null, false],
+] as const)('fluid-surface 校验已加载单元：%s', (_name, cell, accepted) => {
+  const context = options(
+    ([x]) => (x === 2 ? 8 : 0),
+    [0.5, 0, 0.5],
+    () => false,
+    ([x]) => (x === 2 ? cell : null),
+    binding('fluid-surface'),
+  );
+  const result = dispatchItemInteraction(
+    context.value,
+    'player',
+    { kind: 'voxel', hit: [2, 1, 0], adjacent: [3, 1, 0] },
+    selection,
+  );
+  expect(result.success).toBe(accepted);
+  expect(context.invokeActor).toHaveBeenCalledTimes(accepted ? 1 : 0);
 });

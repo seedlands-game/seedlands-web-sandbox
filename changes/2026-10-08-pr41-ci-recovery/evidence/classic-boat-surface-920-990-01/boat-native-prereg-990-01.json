@@ -1,0 +1,23 @@
+{
+  "registeredAt": "2026-10-11T23:07:54.688018+00:00",
+  "scope": "NON_MAIN bounded real boat input and model acceptance; no canonical-main or performance claim",
+  "sourceSha": "4a9b47c9437ac395fc91b366c09a127550a6b5ff",
+  "sourceDigest": "28911f1b4f5b26d29ad26da9e583a238afe59a9d1cc63594d11f50ef51f18e40",
+  "artifactDigest": "4fbae523266ae0ee830ed18a87a2a600db9bb398db200bcd9df7521d08feb495",
+  "sourceFreeze": "975",
+  "test": "966 unchanged; previous real reverse FAIL; new geometry source verified",
+  "additionalAcceptance": "native KeyS 1200ms, unchanged 10s movement assertion and 120s case budget",
+  "retries": 0,
+  "timeoutMs": 120000,
+  "command": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic 船以原生输入",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/boat-native-results-990-01",
+    "--reporter",
+    "list,html,json,./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceSha": "4a9b47c9437ac395fc91b366c09a127550a6b5ff",
+  "dirtySource": true,
+  "files": {
+    "README.md": "67ddf2ac96d23ae523d25e6b50beb67d4714e8168f174e59292e5f4c97ddb78d",
+    "boat-ci-selection-997-01.log": "f0f020471d9408d6177ab3122cfd977b2f528917105d6d600cf5993249a07131",
+    "boat-delivery-selection-993-01.log": "f75132084d7f964fc82ea374c90c23f8722a79ccbd5b4a927e45f65db9aff926"
+  }
+}

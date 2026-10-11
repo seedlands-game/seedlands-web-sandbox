@@ -6,6 +6,7 @@ import { PlayerController } from '../../../src/app/player/player-controller';
 const target = (
   input: Readonly<{
     canTargetFluidSource: () => boolean;
+    canTargetFluidSurface?: () => boolean;
     voxelAt: (z: number) => number;
     fluidAt?: (z: number) => { level: number; source: boolean } | null;
     semantics?: (voxel: number) => { targetable: boolean } | undefined;
@@ -38,6 +39,7 @@ const target = (
       }) as never,
     getEnvironment: () => null,
     canTargetFluidSource: input.canTargetFluidSource,
+    canTargetFluidSurface: input.canTargetFluidSurface,
     isUiBlockingInput: () => false,
   } as never);
   controller.setView(0, 0);
@@ -87,4 +89,25 @@ describe('PlayerController fluid source target', () => {
       }),
     ).toMatchObject({ position: [0, 32, -1], voxel: Voxel.Stone });
   });
+});
+
+it('显式 surface 政策允许流动表面，关闭后拒绝，未知格与 Stone 遮挡保持有效', () => {
+  const read = (enabled: boolean, blocked = false) =>
+    target({
+      canTargetFluidSource: () => false,
+      canTargetFluidSurface: () => enabled,
+      voxelAt: (z) => (z === -2 ? Voxel.Water : blocked && z === -1 ? Voxel.Stone : Voxel.Air),
+      fluidAt: (z) => (z === -2 ? { source: false, level: 3 } : null),
+    });
+  expect(read(true)).toMatchObject({ position: [0, 32, -2], voxel: Voxel.Water });
+  expect(read(false)).toBeNull();
+  expect(read(true, true)).toMatchObject({ position: [0, 32, -1], voxel: Voxel.Stone });
+  expect(
+    target({
+      canTargetFluidSource: () => false,
+      canTargetFluidSurface: () => true,
+      voxelAt: (z) => (z === -2 ? Voxel.Water : Voxel.Air),
+      fluidAt: () => null,
+    }),
+  ).toBeNull();
 });

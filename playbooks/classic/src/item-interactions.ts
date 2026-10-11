@@ -51,6 +51,14 @@ export const classicItemInteractionModules = [
         presentationKey: 'seedlands:minecart',
       },
       {
+        id: 'seedlands:boat-use',
+        voxelHitPolicy: 'fluid-surface',
+        selector: { itemId: 'seedlands:boat' },
+        trigger: 'voxel',
+        operationId: 'seedlands:deploy-minecart',
+        presentationKey: 'seedlands:boat',
+      },
+      {
         id: 'seedlands:map-self-interaction',
         selector: { itemId: 'seedlands:map' },
         trigger: 'self',

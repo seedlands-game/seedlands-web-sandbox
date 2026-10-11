@@ -194,7 +194,7 @@ function projectPlacedRails(connected: readonly RouteEndpointV1[], unknown: read
       },
     },
     hit,
-  ).options[0]!;
+  ).options.find(({ definitionId }) => definitionId === 'seedlands:minecart')!;
 }
 
 describe('Classic deployment from actual loaded rail cells with all configured shapes', () => {
