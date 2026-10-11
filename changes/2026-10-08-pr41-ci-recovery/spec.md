@@ -1472,3 +1472,27 @@ Root独占authority-cpu-profile.ts、既有classic-authority-cpu-profile.test.ts
 验证后保存local commit/identified build。等CI431自然终态才正常推送、不取消当前CI。至多一次新身份原main诊断，显式30m/retries0、仅C4 Authority CPU原20s、其余samplers0、headless/SwiftShader与质量不变，全程source freeze。任何早期失败/未到达/target或capture失败保留实际状态，不盲重跑；输出始终diagnosticOnly/eligible=false，只用于函数归因，不作性能A/B或收益声明。传统.1PD×120%=.12PD，AI实现25min×120%=30min，加检查/build及单次至多30m浏览器连续65min×120%=78min；05:10UTC首检查点。模型/费用元数据和周分母不可读，不做百分比估算，依赖主对话真实产品UI及既定限制。
 
 300检查点05:01UTC：RED9FAIL/13PASS，最终相关4files62PASS，既有Authority owner23例（新增13），含并发C4初始化只分配一次CDP。Classic类型/相关lint/CI选择17PASS，原20s完整生命周期、所有既有target选择/清理/错误测试保持；最终冻结与格式待结束。CI431自然终态是main V1 5s streamCenter predicate失败与retry V2原900s全局超时，C4未到达；visual一次PASS、普通矿车首轮真实路线局部超时后retryPASS为FLAKY，Modular/Pages SKIP。293 trace证实混合C4准备与首批键盘输入，未作GPU/函数归因。公开独立回执仅记录诊断/检查，完整产品仍开放。
+
+### 2026-10-11 05:28 UTC：310 actor lifetime resolver 对照预注册
+
+- 需求仍为 PR41 可合入及真实输入主旅程；303 的 C4 Authority 20 秒真实采样完整但主旅程失败，不能以诊断或单测宣布可玩。
+- 假设：actorBindings 每个 facet getter 经 resolveReference 展开完整实体，重复投影对 C4 stepPhysics 有可观测成本。只复用同一 epoch / indexed entity / lifetime 检查返回 eid，不改变公开 resolveReference 的复制投影合同、类型验证、持有 inventory 句柄、销毁或恢复语义。
+- A 为 120c6ff5 的原 owner 单文件，B 为本次单文件候选；相同 Node、数据、getter 次数，预约独占窗口。先 12 对 A/A 估计噪声，再 20 对交错 AB/BA，各读取 96 个固定 actor 的 mode、lifecycle、hunger、inventoryRevision、health；原样保存样本。主指标总读取耗时，中位 B/A 至少改善 20%，且超过 A/A 中位相对差三倍；次指标校验和、复制投影数量及各类 actor 结果一致。
+- 否决：epoch/lifetime/销毁/重用 slot 拒绝回归、公开引用投影不隔离、功能测试失败、结果或校验和不同、计时收益不明确，或真实输入发生新的回归。计时失败不盲重试；无确定收益恢复生产现状。当前没有另一个待采用的生产优化；端到端 C4/CI 是最终消费者验证，局部计时不替代产品验收。
+- RED 为未修改 A 的实际投影数量/读取耗时观察；补充生命周期与公开复制合同测试（这些合同预期 A、B 均通过）。预算按主对话实际 UI 累计规则执行，计量不可从 token/API/时间换算；费率和本任务精确成本未知。长期 docs 暂不改：此为 owner 内部实现与诊断证据。
+
+### 2026-10-11 05:28 UTC：305 CI431 勘误
+
+120c6ff5 中 300 checkpoint 及 diagnostic-native-c4-293-01 对 CI431 main 首轮的“空间中心 / streamCenter”描述错误。原断言是 v1-slice.ts 的木门上下半块 renderedMaterialMesh thinAxis：实得 [-1,0]，期望 [0,0]，下半块网格未返回。独立勘误见 evidence/ci431-v1-mesh-correction-305-01；保留原封存记录，未修改断言、重跑或更改 CI 结果。CI431 重试仍为 V2 全局 900 秒超时；303 仍 C4 outbound 失败。
+
+### 2026-10-11 05:35 UTC：315 计时仪器校正
+
+310 的计时包含同样安装在 A/B 上的 project 调用计数 wrapper，但 A 调用次数更高，可能放大旧实现成本。保留原样数据并标明限制；在相同预注册数据、12对A/A及20对AB/BA、相同门槛下，315 将计数移到计时外的独立单轮，计时区间只执行未插桩生产 getter。待314串行功能运行终态后预约执行，避免并发负载；不因此重复浏览器或增加生产优化。315 是采用依据，310 不单独作为无仪器耗时收益。
+
+### 2026-10-11 05:36 UTC：310/315 局部候选 checkpoint
+
+315 无计数插桩计时满足预注册收益门槛，公开引用复制与actor生命周期拒绝合同保留；stdlib串行172文件1277例通过（保留首轮vegetation超时），全量类型与lint通过。继续真实输入与精确SHA CI；不以局部读取收益或静态通过宣布可合入。未修改长期docs baseline，未改production部署或原输入/玩法断言。
+
+### 2026-10-11 05:41 UTC：317 提交前 checkpoint
+
+headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及封存5文件检查通过；stdlib串行1277通过，首轮未改动vegetation5秒超时保留。310/315局部收益不是浏览器收益；与既有输入调度共存的联合端到端对照尚未完成，候选进入精确SHA真实输入及CI验证，不宣称可合入。305独立勘误不改原sealed evidence。PR预览部署仍为已有pr-41路径，生产仅main push；不合并或启用自动合并。

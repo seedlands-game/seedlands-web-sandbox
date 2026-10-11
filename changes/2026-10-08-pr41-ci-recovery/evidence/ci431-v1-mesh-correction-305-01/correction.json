@@ -1,0 +1,16 @@
+{
+  "status": "CORRECTION",
+  "sourceSha": "120c6ff5d3308015e75a7e4b5b4c84a5a1b40b88",
+  "ciHeadSha": "b62409cec031f870eb9b8764c5c87f94758ee60f",
+  "ciRunId": 38111336679,
+  "incorrect": "V1 streamCenter/spatial center predicate",
+  "correct": "V1 lower WoodenDoor rendered material mesh missing: thinAxis result [-1,0], expected [0,0]",
+  "assertion": "apps/web/tests/e2e/classic-support/v1-slice.ts:144",
+  "sealedOriginalsPreserved": true,
+  "ciOutcomesChanged": false,
+  "affected": [
+    "spec.md:300 checkpoint",
+    "evidence/diagnostic-native-c4-293-01/README.md",
+    "evidence/diagnostic-native-c4-293-01/result.json:ci431.mainFirst"
+  ]
+}

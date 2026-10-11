@@ -1,0 +1,177 @@
+{
+  "stage": "AA",
+  "node": "v22.23.3",
+  "actors": 96,
+  "loops": 100,
+  "gettersPerActor": 5,
+  "pairs": [
+    {
+      "index": 0,
+      "order": "AB",
+      "a": {
+        "ms": 16.914391000000023,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.922706999999946,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 1,
+      "order": "BA",
+      "a": {
+        "ms": 16.915325999999936,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 18.05583999999999,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 2,
+      "order": "AB",
+      "a": {
+        "ms": 16.780996999999957,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.91155500000002,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 3,
+      "order": "BA",
+      "a": {
+        "ms": 17.936614000000077,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 18.729808000000048,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 4,
+      "order": "AB",
+      "a": {
+        "ms": 16.77532599999995,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 18.38668599999994,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 5,
+      "order": "BA",
+      "a": {
+        "ms": 17.002669999999966,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 18.087920000000054,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 6,
+      "order": "AB",
+      "a": {
+        "ms": 16.716278999999986,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.868289000000004,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 7,
+      "order": "BA",
+      "a": {
+        "ms": 17.107121000000006,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.61173900000017,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 8,
+      "order": "AB",
+      "a": {
+        "ms": 17.093294999999898,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.8886379999999,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 9,
+      "order": "BA",
+      "a": {
+        "ms": 17.212621000000127,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 18.064566000000013,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 10,
+      "order": "AB",
+      "a": {
+        "ms": 16.751811999999973,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.65068199999996,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    },
+    {
+      "index": 11,
+      "order": "BA",
+      "a": {
+        "ms": 18.562038999999913,
+        "checksum": 230400,
+        "projections": 57600
+      },
+      "b": {
+        "ms": 17.702268000000004,
+        "checksum": 230400,
+        "projections": 57600
+      }
+    }
+  ]
+}

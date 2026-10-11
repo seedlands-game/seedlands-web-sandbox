@@ -97,4 +97,54 @@ describe('EcsEntityOwner', () => {
     expect(owner.query().map((value) => value.id)).toEqual(['first', 'third', 'fourth']);
     expect(owner.get('first')).toMatchObject({ position: [0, 8, 0], physicsVelocity: [0, 0, 0], health: 12 });
   });
+
+  it('rejects retained actor and inventory handles after removal and slot replacement', () => {
+    const owner = createOwner();
+    owner.create(entity('old'));
+    const actor = owner.actorStateAccess('old');
+    const inventory = actor.inventory;
+    owner.destroy('old');
+    owner.create(entity('replacement'));
+    const replacement = owner.actorStateAccess('replacement');
+
+    expect(() => actor.mode).toThrow(/Stale actor/);
+    expect(() => (actor.health = 0)).toThrow(/Stale actor/);
+    expect(() => inventory.add({ itemId: ItemIds.WoodBlock, count: 1 })).toThrow(/Stale actor/);
+    expect(replacement.health).toBe(12);
+    expect(replacement.inventory.slot(0)).toBeNull();
+    owner.dispose();
+  });
+
+  it('rejects disposed actor handles even when another epoch restores the same id and lifetime', () => {
+    const old = createOwner();
+    old.create(entity('shared'));
+    const reference = old.createReference('shared')!;
+    const actor = old.actorStateAccess('shared');
+    const inventory = actor.inventory;
+    old.dispose();
+    const restored = new EcsEntityOwner(2, items);
+    restored.createRestored(entity('shared'), reference.lifetime);
+
+    expect(restored.resolveReference(reference)).toBeNull();
+    expect(() => actor.mode).toThrow(/Stale actor/);
+    expect(() => inventory.slot(0)).toThrow(/Stale actor/);
+    expect(restored.actorStateAccess('shared').health).toBe(12);
+    restored.dispose();
+  });
+
+  it('keeps public lifetime projections copied while actor reads and writes remain live', () => {
+    const owner = createOwner();
+    owner.create(entity('actor'));
+    const reference = owner.createReference('actor')!;
+    const projection = owner.resolveReference(reference)!;
+    const actor = owner.actorStateAccess('actor');
+    projection.position[0] = 99;
+    projection.health = 0;
+    expect(actor.health).toBe(12);
+    actor.health = 9;
+    expect(owner.resolveReference(reference)).toMatchObject({ health: 9, position: [0, 8, 0] });
+    expect(owner.resolveReference({ ...reference, lifetime: reference.lifetime + 1 })).toBeNull();
+    expect(() => owner.actorStateAccess('missing')).toThrow();
+    owner.dispose();
+  });
 });

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "aaPairs": 12,
+  "abPairs": 20,
+  "aaMedianRelativeNoise": 0.05663549093561804,
+  "abMedianRatio": 0.22581287491645707,
+  "aMedianMs": 15.792487499999993,
+  "bMedianMs": 3.5697920000000636,
+  "aProjections": [57600],
+  "bProjections": [0],
+  "allChecksumsEqual": true,
+  "scope": "controlled owner facet read benchmark only; NOT browser product acceptance"
+}
