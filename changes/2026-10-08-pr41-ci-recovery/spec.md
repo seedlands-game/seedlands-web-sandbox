@@ -1458,3 +1458,17 @@ Root独占native-trace.ts、原main的阶段调用、独立native-trace.test.ts�
 至多一次另立新身份的原main诊断，显式30m/retries0、仅C4 native5s，其他samplers0/headless/SwiftShader与质量不变；全程source freeze，任何早期失败或capture missing/failed保留真实状态而不盲重跑。结果仅diagnosticOnly/eligible=false，不宣称性能收益或产品PASS。传统.15PD×120%=.18PD，AI实现30min×120%=36min，连同检查/build及单次至多30m旅程连续70min×120%=84min；04:25UTC首检查点。实际费用/会话型号元数据不可读，不做额度换算，依赖主对话真实UI的共享口径及既定预算限制；无需为额度另跑验证。
 
 290检查点04:20UTC：首轮RED5FAIL/4PASS；新增setup错误状态RED1FAIL/11PASS，最终相关3files39PASS（新owner12例），保持原5s采样与dataLoss拒绝。Classic/Web types、根lint、CI选择17和frozen5/5/全仓Prettier已通过，最后错误分支后的相关类型/lint待结束。setup已开始但失败保存FAILED与原错误，未初始化保存NOT_STARTED，不伪造raw trace。CI430已自然FAIL，两次main均V2完成后C4 outbound局部90s失败，76/74pulses后x200.8655/198.6828；visual首次单击5s predicate失败、retryPASS为FLAKY，普通矿车一次PASS、Modular/Pages SKIP。新诊断commit/build和单次C4 native尚未执行，完整产品验收仍未闭合。
+
+### C4 Authority函数归因300（预注册）
+
+290已正常提交/推送b62409ce；identified build292及postverify PASS，生产字节仍739ef065。精确CI431五非Browser PASS，Headless158files1192、新native owner12例真实执行，Kernel28/stdlib1274；Chromium待自然终态。单次293显式30m诊断实际1295294ms FAIL，61条V2 routes returned，随后C4 outbound原90s在92055ms失败，33pulses终点x135.9546；C4 return/C5未到达，后验产物核验通过。
+
+原生C4 trace COMPLETE，delay0、原5000ms采样实际5002.816ms，4,157,745 bytes/17,617events、dataLoss=false、errors为空。活动窗口X墙钟区间含Worker timer4731.9ms/171 TimerFire、50MinorGC，GPU交换缓冲及DevTools主线程长事件；嵌套耗时重叠且包括等待，不作CPU利用率或性能收益。末段before debt3653.2ms、失败后暂停读回8375.8ms，滚动physicsCost中位4.4ms、frameCpu中位25.75ms/间隙中位502.1ms；滚动窗口不是独占C4或受控性能证据。现有trace未含CPU函数栈、worker URL/tid绑定，不能直接归因GPU或某个ECS函数。未采用no-op ECS或同桶不重建：前者需完整生命周期/批次/transport证明，后者会改变queryNearby的Set插入顺序；没有生产改动或未经验证的性能声明。
+
+本片只给既有Authority CPU profile增加显式stage main/C4。默认main原6min延迟、20s采样、10,000us间隔及现有CDP/target/detach时限不变；显式C4 beforeEach只登记请求、不分配CDP/timer，到原C4入口才创建一次session、delay0采原20s。source/run与artifact-derived asset路径/sha全部保留、defer至C4身份变更拒绝、未知stage与benchmark/mainCPU/native互斥在defer前拒绝。未到达只NOT_STARTED metadata，初始化失败FAILED并保留错误，不制造profile；实际target仍要求该page/browser context内唯一精确Authority asset，未改生产模块或输入、断言、质量、900s/main与局部时限。
+
+Root独占authority-cpu-profile.ts、既有classic-authority-cpu-profile.test.ts、原main阶段调用、当前spec及独立新证据；复用既有owner行为/类型选择，不增job或新生产API、不添agent/权限/域名。先RED：C4前无session/timer及未到达metadata、唯一C4激活与实际delay/asset身份、默认6min且晚到C4 hook旁路、stage与冲突拒绝、defer identity变化、初始化失败状态/清理、完整既有20s profile生命周期。相关CPU/native/diagnostic tests、Classic类型、相关lint、选择17、冻结/格式后根有界STATE/LIFE/ERROR；新头实际CI仍须读取，局部通过不证明完整产品通过。长期docs baseline不改：既有可选诊断扩充阶段，正式合同不变。
+
+验证后保存local commit/identified build。等CI431自然终态才正常推送、不取消当前CI。至多一次新身份原main诊断，显式30m/retries0、仅C4 Authority CPU原20s、其余samplers0、headless/SwiftShader与质量不变，全程source freeze。任何早期失败/未到达/target或capture失败保留实际状态，不盲重跑；输出始终diagnosticOnly/eligible=false，只用于函数归因，不作性能A/B或收益声明。传统.1PD×120%=.12PD，AI实现25min×120%=30min，加检查/build及单次至多30m浏览器连续65min×120%=78min；05:10UTC首检查点。模型/费用元数据和周分母不可读，不做百分比估算，依赖主对话真实产品UI及既定限制。
+
+300检查点05:01UTC：RED9FAIL/13PASS，最终相关4files62PASS，既有Authority owner23例（新增13），含并发C4初始化只分配一次CDP。Classic类型/相关lint/CI选择17PASS，原20s完整生命周期、所有既有target选择/清理/错误测试保持；最终冻结与格式待结束。CI431自然终态是main V1 5s streamCenter predicate失败与retry V2原900s全局超时，C4未到达；visual一次PASS、普通矿车首轮真实路线局部超时后retryPASS为FLAKY，Modular/Pages SKIP。293 trace证实混合C4准备与首批键盘输入，未作GPU/函数归因。公开独立回执仅记录诊断/检查，完整产品仍开放。

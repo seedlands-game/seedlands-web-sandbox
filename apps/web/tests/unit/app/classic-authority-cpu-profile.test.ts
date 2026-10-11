@@ -112,6 +112,170 @@ function fixture(options: FakeOptions = {}) {
 
 afterEach(() => vi.useRealTimers());
 
+const c4Env = { ...enabledEnv, SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE_STAGE: 'C4' };
+const stageMetadata = (run: ReturnType<typeof fixture>) =>
+  JSON.parse(
+    String(
+      run.attach.mock.calls.find(([name]) => name === 'classic-authority-worker-cpu-profile-metadata.json')![1].body,
+    ),
+  );
+
+describe('Authority profile C4 stage boundary', () => {
+  it('defers without CDP or timers and records a missing capture once', async () => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env);
+    expect(run.newBrowserCDPSession).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(stageMetadata(run)).toMatchObject({
+      stage: 'C4',
+      delayMs: 0,
+      durationMs: 20000,
+      status: 'NOT_STARTED',
+      asset: workerAsset,
+      assetSha256: assetSha,
+      diagnosticOnly: true,
+      eligible: false,
+    });
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(run.attach.mock.calls.map(([name]) => name)).toEqual(['classic-authority-worker-cpu-profile-metadata.json']);
+  });
+
+  it('starts once at C4 and retains the complete twenty second worker profile lifecycle', async () => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env);
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env, 'C4');
+    expect(run.newBrowserCDPSession).toHaveBeenCalledTimes(1);
+    await expect(startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env, 'C4')).rejects.toThrow(
+      'already owns',
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    const methods = () =>
+      run.send.mock.calls
+        .filter(([method]) => method === 'Target.sendMessageToTarget')
+        .map(([, params]) => JSON.parse(String(params?.message)).method);
+    expect(methods()).toContain('Profiler.start');
+    await vi.advanceTimersByTimeAsync(19999);
+    expect(methods()).not.toContain('Profiler.stop');
+    await vi.advanceTimersByTimeAsync(1);
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(methods()).toEqual(['Profiler.enable', 'Profiler.setSamplingInterval', 'Profiler.start', 'Profiler.stop']);
+    expect(stageMetadata(run)).toMatchObject({
+      stage: 'C4',
+      delayMs: 0,
+      durationMs: 20000,
+      samplingIntervalUs: 10000,
+      status: 'COMPLETE',
+      sourceSha: enabledEnv.SEEDLANDS_SOURCE_SHA,
+      assetSha256: assetSha,
+    });
+    expect(run.send).toHaveBeenCalledWith('Target.detachFromTarget', { sessionId: 'attached-worker-session' });
+    expect(run.session.detach).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('retains the default main delay and bypasses the late C4 hook', async () => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, enabledEnv);
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, enabledEnv, 'C4');
+    expect(run.newBrowserCDPSession).toHaveBeenCalledTimes(1);
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(stageMetadata(run)).toMatchObject({ stage: 'main', delayMs: 360000, status: 'NOT_STARTED' });
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([
+    'SEEDLANDS_HARNESS_RUN_ID',
+    'SEEDLANDS_SOURCE_SHA',
+    'SEEDLANDS_AUTHORITY_CPU_PROFILE_ASSET',
+    'SEEDLANDS_AUTHORITY_CPU_PROFILE_ASSET_SHA256',
+  ] as const)('rejects deferred identity changes before allocation: %s', async (key) => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env);
+    const value = key.endsWith('SHA256')
+      ? 'b'.repeat(64)
+      : key.endsWith('ASSET')
+        ? 'assets/authority-worker-other.js'
+        : 'other';
+    await expect(
+      startClassicAuthorityCpuProfile(run.page, run.info, false, { ...c4Env, [key]: value }, 'C4'),
+    ).rejects.toThrow('identity changed');
+    expect(run.newBrowserCDPSession).not.toHaveBeenCalled();
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(stageMetadata(run)).toMatchObject({
+      status: 'NOT_STARTED',
+      sourceSha: enabledEnv.SEEDLANDS_SOURCE_SHA,
+      assetSha256: assetSha,
+    });
+  });
+
+  it('rejects unknown stages before allocation and bypasses the disabled flag', async () => {
+    const run = fixture();
+    const unknown = { ...enabledEnv, SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE_STAGE: 'unknown' };
+    await expect(startClassicAuthorityCpuProfile(run.page, run.info, false, unknown)).rejects.toThrow('stage');
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, {
+      ...unknown,
+      SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE: '0',
+    });
+    expect(run.newBrowserCDPSession).not.toHaveBeenCalled();
+  });
+
+  it.each(['SEEDLANDS_CLASSIC_BENCHMARK', 'SEEDLANDS_CLASSIC_CPU_PROFILE', 'SEEDLANDS_CLASSIC_NATIVE_TRACE'] as const)(
+    'rejects C4 conflicts before deferral: %s',
+    async (key) => {
+      const run = fixture();
+      await expect(
+        startClassicAuthorityCpuProfile(run.page, run.info, false, { ...c4Env, [key]: '1' }),
+      ).rejects.toThrow();
+      await stopClassicAuthorityCpuProfile(run.page, run.info);
+      expect(run.newBrowserCDPSession).not.toHaveBeenCalled();
+      expect(run.attach).not.toHaveBeenCalled();
+    },
+  );
+
+  it('records failed C4 CDP initialization without inventing a profile', async () => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env);
+    run.newBrowserCDPSession.mockRejectedValueOnce(new Error('CDP unavailable'));
+    await expect(startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env, 'C4')).rejects.toThrow(
+      'CDP unavailable',
+    );
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(stageMetadata(run)).toMatchObject({ stage: 'C4', status: 'FAILED' });
+    expect(stageMetadata(run).errors.join(' ')).toContain('CDP unavailable');
+    expect(run.attach.mock.calls.map(([name]) => name)).toEqual(['classic-authority-worker-cpu-profile-metadata.json']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('rejects a concurrent C4 activation while the first CDP allocation is pending', async () => {
+    vi.useFakeTimers();
+    const run = fixture();
+    await startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env);
+    let release!: (session: typeof run.session) => void;
+    run.newBrowserCDPSession.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    const first = startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env, 'C4');
+    await expect(startClassicAuthorityCpuProfile(run.page, run.info, false, c4Env, 'C4')).rejects.toThrow(
+      'already owns',
+    );
+    release(run.session);
+    await first;
+    await stopClassicAuthorityCpuProfile(run.page, run.info);
+    expect(run.newBrowserCDPSession).toHaveBeenCalledTimes(1);
+    expect(run.session.detach).toHaveBeenCalledTimes(1);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
 describe('optional Classic Authority worker CPU profile', () => {
   it('keeps profiling disabled unless explicitly enabled', async () => {
     const run = fixture();
