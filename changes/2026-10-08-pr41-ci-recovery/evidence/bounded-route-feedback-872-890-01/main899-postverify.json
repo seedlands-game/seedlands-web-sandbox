@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-11T21:22:13.695645+00:00",
+  "terminalExitCode": 1,
+  "artifactPostVerifyExit": 0,
+  "receiptStatus": "FAIL",
+  "selection": {
+    "mode": "CANONICAL_MAIN",
+    "canonicalMainSelected": true,
+    "canonicalMainMatches": 1,
+    "modularSmokeMatches": 0,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+        "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+        "test": "Classic \u751f\u4ea7\u65c5\u7a0b\u4ee5\u771f\u5b9e\u8f93\u5165\u5b8c\u6210 C0-C5\uff0c\u5e76\u590d\u7528\u540c\u4e00\u8fd0\u884c\u65f6\u6027\u80fd\u573a\u666f",
+        "project": "chromium"
+      }
+    ]
+  },
+  "sourceHashMismatches": []
+}

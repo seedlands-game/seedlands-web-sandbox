@@ -9,6 +9,7 @@ import { correctMouseUntilEntityAimed, mouseCorrectionToVoxel, voxelInteractionD
 import { queryEntity } from './combat-entity';
 import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
+import { createMiningApproachPulsePlanner } from './mining-approach-pulse';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type {
@@ -217,7 +218,7 @@ export async function mineVoxel(
       tolerance: 0.45,
       arrival: 'point',
       timeout: 15_000,
-      pulseMs: 100,
+      pulseMs: createMiningApproachPulsePlanner(target, approach),
       yieldAfterSettledPulse: (value) => {
         settledApproachPulses++;
         const distances = [value.player, value.serverPlayerPosition].map((position) =>

@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-11T21:17:41.482913+00:00",
+  "run": 882,
+  "scope": "Node trace API phase starts within C3; not real DOM generation gap, held duration, or CPU cause",
+  "events": []
+}

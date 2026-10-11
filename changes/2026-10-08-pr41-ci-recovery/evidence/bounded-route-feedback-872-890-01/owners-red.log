@@ -1,0 +1,38 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts
+9:04:30 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts (27 tests | 1 failed) 18ms
+     × grows refined input after the actual 882 undershoot instead of retaining 1ms indefinitely 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts > precision only after observed excess travel > grows refined input after the actual 882 undershoot instead of retaining 1ms indefinitely
+AssertionError: expected 1 to be 2 // Object.is equality
+
+- Expected
++ Received
+
+- 2
++ 1
+
+ ❯ apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts:112:55
+    110|     expect(plan(observed(65.51722712050838), 'KeyW')).toBe(80);
+    111|     expect(plan(observed(67.1672228733816), 'KeyW')).toBe(1);
+    112|     expect(plan(observed(67.18111176227049), 'KeyW')).toBe(2);
+       |                                                       ^
+    113|   });
+    114|   it('limits growing feedback by the original arrival margin and resta…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 26 passed (27)
+   Start at  21:04:30
+   Duration  360ms (transform 152ms, setup 0ms, import 181ms, tests 18ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts`
+Exit status 1

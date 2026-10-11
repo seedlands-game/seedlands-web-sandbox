@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceDigest": "e4ecc238c9af210fed0b212d729abba4084cf7e23f21906e45b572f6b45b7a8e",
+  "files": {
+    "README.md": "c0102ef19ec58c2cce5d2848c348f4c8cf33d37657a768b97ef9239aa43b8529",
+    "bounded-review.md": "687a2a3fa0daa9687b9ec72507f47b6afd57d478018163d428cd0217f04f212d",
+    "build.json": "76ed67820f08586fbfa860a11d0aa7af84a4504c6a3e0e37f8a9995a60ba3fdb",
+    "c3-phase-starts.json": "b6aced6e0788f1a75dad353d9b55d2e7e099ef49e7ad05fc586e1d7e1f44672d",
+    "creative-click-diagnosis.md": "de1d8ac75b8f4b5d63bdabd3450b7c69d0130cc67e6e53d70398518cca14652f",
+    "feedback-prereg.json": "96992654db381a7c1d4a1af9bd240dccd618103146fc6ddfb0fd123f8c5625db",
+    "format.log": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b",
+    "gates.json": "a51e7fb0e6362f07eb20ce31dc5aa6cbf7a149cfe637dae25ae35bf1278141bc",
+    "headless.json": "df9378c9caf0a0b946e2f6fd34506b769032ea5277c6dc7c556e4994413b8ef7",
+    "headless.log": "e43565c204782ca152e111114c3d4b76c0f00c2284a1b6e3ea44a032a30df71d",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "main882-failure.json": "bbdfe6aeb95e2b91df22f4c30f55f7849348d9c8cd02c974735f09b543c92bb9",
+    "main882-postverify.json": "7659013b022740757890a8e7fd0b289a771d78c444a587b58861f8468f6e35f6",
+    "main882.log": "ca954d373c79b741bb1dacb1d1a600755e541c93850e55c3909b1f9ad14993fd",
+    "main899-failure.json": "e78484d414709ab725f5d57a8a4d57191d7acbb57d10c3bc30aec4e361f0ffbb",
+    "main899-postverify.json": "e8a2bb3cb0a31970d97fe80aefdd306da9bbe3b2d34d6185936c60af1c0815b1",
+    "main899.log": "6787b8e0c7a178e10fc62477484aab747295bdbdf804668a2847d0bf18687d20",
+    "mining-activation-limit.json": "f39ce910c834ca0fd88065e723edc8b2bfc0f533ae5610258045cb7953143520",
+    "mining-gates.json": "a49c1330219a7260728e0bd9a0f169ee03167c1a6574fbf2bc27aadb4482dcfa",
+    "mining-prereg.json": "a94b41c01ac4e79743100ef400a88274dd71432937f476e8464e990db758b1d2",
+    "owners-red.log": "6dbe9808c6eb89400a7952e0b2924617750d314df4407a559843f8ac56f77b71",
+    "owners.log": "55a6d2f3025ed539bd8a6ad52b4d8eed3dc24eaeaca89a518ebcdb68b6f3d1db",
+    "phase-extraction-negative.json": "4d8051788070085c720cdc570a1e15ebce1493a54752cffb4445ae94f5a43c1c",
+    "selection.log": "15a9b03eec178ec1eef5d5840645245924f3466a5c579e4a87edcb4d48fa6b82",
+    "source-freeze.json": "77ccb44438ae0826cc45e1e7365d372ee603bffca7a4f0e0cc1e6b9a6d4d7e25",
+    "types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

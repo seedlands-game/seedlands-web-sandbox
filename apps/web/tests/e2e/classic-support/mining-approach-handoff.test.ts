@@ -1,6 +1,7 @@
 import { snapshot as readRouteSnapshot } from './snapshot-read';
 import type { Page, TestInfo } from '@playwright/test';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { createMiningApproachPulsePlanner } from './mining-approach-pulse';
 import { lockPointer, moveMouseBy } from './mouse-input';
 import { verifyAfterRestore } from './portable-item-journeys';
 import { mineVoxel } from './harness';
@@ -223,6 +224,79 @@ it('does not hand off when the settled Authority endpoint is just inside the uns
   ]);
   expect(aim).not.toHaveBeenCalled();
   expect(driver.leftMouseDown).not.toHaveBeenCalled();
+});
+
+it('narrows the next pulse after the actual C3 short pulse leaves both endpoints too close', async () => {
+  // The first observation is Browser859 translated by x-37 to this existing target.
+  // The following safe observation is synthetic logic input, not a physics or browser result.
+  const driver = browser64ObservationPage({
+    startPosition: [37.11028024024375, 32.60000006651901, 0.4981895174386723],
+    firstPlayerPosition: [36.43528747558594, 32.599998474121094, 0.4981895089149475],
+    firstServerPosition: [36.43528922031021, 32.60000006651901, 0.4981895174386723],
+    secondPlayerPosition: [36.2, 32.6, 0.4981895174386723],
+  });
+  await lockPointer(driver.page);
+  const aim = vi.fn(async () => {
+    throw SAFE_HANDOFF;
+  });
+  const rejected = expect(mineVoxel(driver.page, TARGET, aim)).rejects.toBe(SAFE_HANDOFF);
+  await vi.runAllTimersAsync();
+  await rejected;
+  expect(driver.pulses).toEqual([
+    { key: 'KeyS', delay: 100 },
+    { key: 'KeyS', delay: 1 },
+  ]);
+  expect(aim).toHaveBeenCalledOnce();
+  expect(driver.leftMouseDown).not.toHaveBeenCalled();
+});
+
+it('keeps ordinary close-range requests at100 without an observed excess', () => {
+  const plan = createMiningApproachPulsePlanner(TARGET, [35.2, 0.5]);
+  expect(plan(observed([37.11, 32.6, 0.5], 10, 10))).toBe(100);
+  expect(plan(observed([36.91, 32.6, 0.5], 11, 11))).toBe(100);
+});
+
+it.each<[string, (value: ClassicSnapshot) => ClassicSnapshot]>([
+  ['airborne', (v) => ({ ...v, onGround: false })],
+  ['colliding', (v) => ({ ...v, colliding: true })],
+  ['moving', (v) => ({ ...v, serverPlayerVelocity: [-4.5, 0, 0] })],
+  ['endpoint mismatch', (v) => ({ ...v, serverPlayerPosition: [36.8, 32.6, 0.5] })],
+  ['pending ACK', (v) => ({ ...v, authority: { ...v.authority, acknowledgedInputSequence: 0 } })],
+  [
+    'pending release',
+    (v) => ({
+      ...v,
+      nativeMovementInput: {
+        ...v.nativeMovementInput!,
+        release: { ...v.nativeMovementInput!.release!, neutral: false },
+      },
+    }),
+  ],
+  ['new epoch', (v) => ({ ...v, nativeMovementInput: { ...v.nativeMovementInput!, epoch: 'another-unit-epoch' } })],
+  ['asymmetric range', () => observed(SAFE_AFTER_FIRST, 11, 11, [36.28, 32.6, 0.4921601712703705])],
+  ['far range', () => observed(OUT_OF_RANGE_AFTER_SECOND, 11, 11)],
+])('does not refine an inadmissible close-range observation: %s', (_name, alter) => {
+  const plan = createMiningApproachPulsePlanner(TARGET, [35.2, 0.5]);
+  expect(plan(observed([37.11, 32.6, 0.5], 10, 10))).toBe(100);
+  expect(plan(alter(observed([36.435, 32.6, 0.5], 11, 11)))).toBe(100);
+});
+
+it('drops previous excess feedback after an unsettled observation', () => {
+  const plan = createMiningApproachPulsePlanner(TARGET, [35.2, 0.5]);
+  const before = observed([37.11, 32.6, 0.5], 10, 10);
+  const after = observed([36.435, 32.6, 0.5], 11, 11);
+  expect(plan(before)).toBe(100);
+  expect(plan(after)).toBe(1);
+  expect(plan({ ...after, onGround: false })).toBe(100);
+  expect(plan(after)).toBe(100);
+});
+
+it('copies the prior observed position rather than keeping a mutable caller array', () => {
+  const plan = createMiningApproachPulsePlanner(TARGET, [35.2, 0.5]);
+  const position: [number, number, number] = [37.11, 32.6, 0.5];
+  expect(plan(observed(position, 10, 10))).toBe(100);
+  position[0] = 36.435;
+  expect(plan(observed([36.435, 32.6, 0.5], 11, 11))).toBe(1);
 });
 
 it('uses the fresh range guard if a settled handoff snapshot drifts beyond five units', async () => {

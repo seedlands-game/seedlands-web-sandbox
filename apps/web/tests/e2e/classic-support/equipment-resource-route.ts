@@ -73,7 +73,8 @@ export function equipmentRoutePulseMs(
 
 /** Refine only a route which has actually exceeded its requested walking bound. */
 export function createEquipmentRoutePulsePlanner(target: RoutePoint) {
-  let previous: Readonly<{ position: Point; delayMs: number }> | null = null;
+  let previous: Readonly<{ position: Point; delayMs: number; precise: boolean; direction: RouteDirection }> | null =
+    null;
   let exceededRequestedTravel = false;
   return (current: EquipmentRouteSnapshot, direction: RouteDirection): number => {
     const ordinary = equipmentRoutePulseMs(current, target, direction);
@@ -86,15 +87,18 @@ export function createEquipmentRoutePulsePlanner(target: RoutePoint) {
       current.onGround &&
       !current.colliding &&
       routeInputSettled({ ...current, serverPlayerVelocity: velocity });
+    let travel = 0;
+    let renewedExcess = false;
     if (previous && settled && previous.delayMs <= EQUIPMENT_RESOURCE_ROUTE_OPTIONS.pulseMs) {
-      const travel = Math.hypot(
+      travel = Math.hypot(
         current.serverPlayerPosition[0] - previous.position[0],
         current.serverPlayerPosition[2] - previous.position[2],
       );
       const speed = bodyConfigFor('player').maxHorizontalSpeed;
       if (!speed) throw new Error('Equipment route requires a configured horizontal speed.');
       const bound = (speed * previous.delayMs) / 1000 + EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance;
-      if (travel > bound) exceededRequestedTravel = true;
+      renewedExcess = travel > bound;
+      if (renewedExcess) exceededRequestedTravel = true;
     }
     const precise =
       exceededRequestedTravel &&
@@ -104,8 +108,27 @@ export function createEquipmentRoutePulsePlanner(target: RoutePoint) {
         isInsideEquipmentRouteNeighborhood(position, target),
       ) &&
       Math.abs(horizontalMouseCorrectionToRoute(current.player, yaw!, target, direction, { wholeTurn: true })) < 1;
-    const delayMs = precise ? 1 : ordinary;
-    previous = settled ? { position: [...current.serverPlayerPosition], delayMs } : null;
+    let delayMs = precise ? 1 : ordinary;
+    if (
+      precise &&
+      previous?.precise &&
+      previous.direction === direction &&
+      !renewedExcess &&
+      travel > 0 &&
+      Math.abs(current.serverPlayerPosition[0] - target[0]) < Math.abs(previous.position[0] - target[0])
+    ) {
+      const remaining = Math.max(
+        0,
+        Math.min(
+          ...[current.player, current.serverPlayerPosition].map((position) => Math.abs(position[0] - target[0])),
+        ) - EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance,
+      );
+      delayMs = Math.max(
+        1,
+        Math.floor(Math.min(ordinary, previous.delayMs * 2, (remaining * previous.delayMs) / travel)),
+      );
+    }
+    previous = settled ? { position: [...current.serverPlayerPosition], delayMs, precise, direction } : null;
     return delayMs;
   };
 }
