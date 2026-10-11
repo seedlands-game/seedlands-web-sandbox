@@ -15,9 +15,10 @@ import type { HarnessCropStageSnapshot, HarnessApi } from './game-harness-contra
 import type { RenderedMaterialMeshSummary as WorldRenderedMaterialMeshSummary } from '../world/world-runtime';
 import type { BrowserAuthorityClient } from '../../client/authority/browser-authority-client';
 import type { AuthorityInventoryView } from '@seedlands/stdlib/server/protocol/authority-worker-protocol';
+import { projectHarnessPhysicsDiagnostics } from './harness-physics-diagnostics';
 
 type HarnessAuthority = Readonly<
-  Pick<BrowserAuthorityClient, 'isReady' | 'runtimeEpoch' | 'gameplay' | 'voxelGeometry'>
+  Pick<BrowserAuthorityClient, 'isReady' | 'runtimeEpoch' | 'gameplay' | 'voxelGeometry' | 'snapshot'>
 >;
 
 export type HarnessObservabilityBindings = Readonly<{
@@ -42,6 +43,7 @@ type HarnessObservabilityApi = Pick<
   | 'equipmentSnapshot'
   | 'cropStageSnapshot'
   | 'transportSnapshot'
+  | 'physicsDiagnostics'
 >;
 
 const cloneFrozenStack = (stack: AuthorityInventoryView['slots'][number]): AuthorityInventoryView['slots'][number] =>
@@ -136,6 +138,20 @@ function cloneHarnessMediaSnapshot(
 
 export function createHarnessObservability(bindings: HarnessObservabilityBindings): HarnessObservabilityApi {
   return Object.freeze({
+    physicsDiagnostics: () => {
+      const authority = bindings.authority();
+      if (!authority?.isReady) return null;
+      const epoch = authority.runtimeEpoch;
+      const snapshot = authority.snapshot;
+      if (!snapshot || !epoch || snapshot.epoch !== epoch) return null;
+      const result = projectHarnessPhysicsDiagnostics(snapshot);
+      return bindings.authority() === authority &&
+        authority.isReady &&
+        authority.runtimeEpoch === epoch &&
+        authority.snapshot === snapshot
+        ? result
+        : null;
+    },
     transportSnapshot: () => {
       const authority = bindings.authority();
       if (!authority?.isReady) return null;

@@ -1,0 +1,27 @@
+$ pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit && tsc -p tsconfig.classic-tests.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /workspace/seedlands-web-sandbox/apps/web
+Getting Svelte diagnostics...
+
+/workspace/seedlands-web-sandbox/apps/web/src/app/gameplay/harness-physics-diagnostics.ts:48:3
+Error: Type 'Readonly<{ schemaVersion: 1; diagnosticOnly: true; epoch: string; physicsTick: number; acknowledgedInputSequence: number; player: Readonly<{ id: string; position: Point; velocity: Point; grounded: boolean; contacts: Readonly<...>; }>; bodies: Readonly<...>; }>' is not assignable to type 'Readonly<{ schemaVersion: 1; diagnosticOnly: true; epoch: string; physicsTick: number; acknowledgedInputSequence: number; player: Readonly<{ id: string; position: Point; velocity: Point; grounded: boolean; contacts: Readonly<...>; }>; bodies: Readonly<...>; }>'. Two different types with this name exist, but they are unrelated.
+  The types of 'player.contacts.entries' are incompatible between these types.
+    Type 'readonly Readonly<{ colliderId: string | undefined; normal: Point; point: Point; }>[]' is not assignable to type 'readonly Readonly<{ colliderId: string; normal: Point; point: Point; }>[]'.
+      Type 'Readonly<{ colliderId: string | undefined; normal: Point; point: Point; }>' is not assignable to type 'Readonly<{ colliderId: string; normal: Point; point: Point; }>'.
+        Types of property 'colliderId' are incompatible.
+          Type 'string | undefined' is not assignable to type 'string'.
+            Type 'undefined' is not assignable to type 'string'. 
+  const scanTruncated = scanned.length < snapshot.entities.length;
+  return Object.freeze({
+    schemaVersion: 1,
+
+====================================
+svelte-check found 1 error and 0 warnings in 1 file
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 typecheck: `svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit`
+Exit status 1
+[ELIFECYCLE] Command failed with exit code 1.

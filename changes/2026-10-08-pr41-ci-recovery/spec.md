@@ -1606,3 +1606,18 @@ Web回归560为55 PASS/1 FAIL，完整headless561为1212 PASS/1 FAIL，均指向
 - 591 类型与 593 lint 报告新测试的未使用导入及 readonly 字段赋值；599 仅清理导入并通过替换 frame 对象设置夹具，断言和身体/障碍不变，后续检查独立记录。
 
 - 最终类型 602、lint 603、定向 604（3文件66例）、格式 605 均通过。607 构建与 608 原真实 Pack 坡轨复验 sourceDigest=`04caf75059858276460d6d83e98de7cfa2cf2c4a4c63950faf926768281e4c2a` 一致，冻结期间全受改文件哈希一致；含 585 骑手交接修复后仍从 `[2.5,31.5,2.5]` 到 `[4.1530386699887964,32,2.5]`。证据位于 `evidence/transport-inclination-532-01`。此身份为 D39 dirty candidate，不替代后续精确提交、CI 或浏览器验收。
+
+## 第 655 组：按需物理快照诊断（实施前冻结）
+
+精确前驱为 `5ac4bad19231f3f83ec886f117dbdfa64ad899f4`。CI437 五个非浏览器 job 成功（Kernel28、stdlib1303、Classic headless1214），Chromium 两次 C4 去程原90秒失败，最终 x171.747/200.312，C5未完成。私有648/649在原C0新会话、三坐标、原300ms W+Space下未复现半位移；649的512次发布仅见203条地面contact，实体1–2，不能代表CI27实体和V2历史。私有650原主旅程零重试在原900秒于V2最后铁材返程失败，C4未运行、x100–155观察0条，产物后验通过。不得从这些局部诊断宣布可玩或因果。
+
+目标是补齐已有Authority快照的观察链路。沿 BrowserProductHarness observability 增加按需 `physicsDiagnostics()`，只消费同一当前已接受快照；不新增WorldHarness权限、消息、查询、Worker监听、定时器或物理步骤。Headless已有Authority快照的同一body/contact数据，世界级端口保持。创建API和默认/benchmark快照不执行该投影；Classic非benchmark在已有同次page.evaluate中按需读取，并核对epoch/tick/ACK一致。
+
+输出为冻结数值副本，含来源epoch、physicsTick、acknowledgedInputSequence、player body坐标/速度及contact；contact最多16条，body最多扫描128条，在8格半径内按距离与id稳定排序返回8条。每层给出源数量、扫描数量和truncated，附近位置不证明接触。返回前核对当前authority实例、ready、epoch与同一snapshot，变化返回null。Node路线诊断只复制已有必需观察，不增加RPC/轮询，不改变输入、地图、质量、90/20/900秒及断言。记录是已发布快照，不能声称覆盖每个physics tick或所有correction。
+
+验收：有效source/contact身份、副本与冻结、限制及truncated、epoch/snapshot/ready/runtime替换拒绝；API创建和benchmark不投影；既有路线diagnosticOnly/eligible=false及原时限合同保持。新owner登记现有headless和测试类型选择，不删除旧项、不新增job或放宽门禁。范围类型、lint、格式、定向与必要既有回归、构建/身份和实际标准读取通过后才正常提交推送；精确新SHA CI与完整C0–C5仍须独立验收。性能收益不在本组准出范围。
+
+- 655 API合同先RED5（方法缺失），实现后GREEN5；657五个相关owner共41例通过。659 lint识别原harness.ts达到509有效行，保持500门禁并将同次快照读取移入同目录snapshot-read.ts，原snapshot入口导入并重导出。660初轮类型失败保留，按实际诊断修正；未加运行时等待或新RPC。
+
+- 660 实际类型显示公开 Contact 的 colliderId 可缺失；保留已有 ID，仅将缺失映射为 null，补匿名接触与快照/authority/epoch/ready 替换反例。最终 owner662 五文件44例、copy664 六例、类型665、lint666、时限合同667三例、格式668及CI选择670十七例通过；原 frozen evidence5/5身份保持。全 Classic headless669为160文件1228例通过。
+- 673 生产构建与672真实浏览器接口、674原普通矿车NON_MAIN旅程同一候选 sourceDigest=`862c43c40e70a3f48972a3a5212b5328b474876abb1d94d4541d225e1220d818`，artifactDigest=`fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547`。672验证实际同epoch/tick/ACK、冻结副本、数量限制、默认snapshot无投影字段及PointerLock/原300ms W+Space；674原右键/键盘/Shift右键/存档恢复通过，前后产物身份均通过。671有界独立审查未发现确认P0/P1/P2，root核对15路径冻结哈希。证据 `evidence/c4-physics-diagnostics-655-01` 封存dirty5ac候选身份，不冒充最终提交；不证明C4已修复、完整C0–C5或性能收益。

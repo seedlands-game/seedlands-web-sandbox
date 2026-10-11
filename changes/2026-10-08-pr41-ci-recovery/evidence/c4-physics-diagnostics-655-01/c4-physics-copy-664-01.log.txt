@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/e2e/classic-support/physics-diagnostics-read.test.ts
+2:26:29 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  14:26:29
+   Duration  3.61s (transform 731ms, setup 0ms, import 2.90s, tests 18ms, environment 0ms)
+

@@ -1,0 +1,10 @@
+{
+  "releasedAt": "2026-10-11T14:40:06.714328+00:00",
+  "browserStatus": "PASS",
+  "postverify": "PASS",
+  "matchedFiles": 15,
+  "sourceDigest": "862c43c40e70a3f48972a3a5212b5328b474876abb1d94d4541d225e1220d818",
+  "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547",
+  "diagnosticOnly": true,
+  "eligible": false
+}

@@ -1,3 +1,5 @@
+import { snapshot } from './snapshot-read';
+export { snapshot };
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
 import { routeTargetPredicate, routePulseSettledPredicate, routePulseDurationMs } from './route-progress';
@@ -64,6 +66,8 @@ export type HarnessApi = {
     import('../../../src/client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   blockLightDiagnostics(): import('../../../src/app/scene/block-light-volume').ChunkBlockLightCacheDiagnostics | null;
   snapshot(): ClassicSnapshot;
+  physicsDiagnostics?():
+    import('../../../src/app/gameplay/harness-physics-diagnostics').HarnessPhysicsDiagnostics | null;
   presentedEntityPosition(entityId: string): Point | null;
   presentedEntityModelReady(entityId: string): boolean;
   transportSnapshot(): import('../../../src/app/gameplay/game-harness-contract').HarnessTransportSnapshot | null;
@@ -104,9 +108,6 @@ export type ClassicWindow = Window & {
   __seedlandsHarness?: HarnessApi;
   __seedlandsAudio?: { snapshot(): ReturnType<GlobalAudio['snapshot']> };
 };
-
-export const snapshot = (page: Page) =>
-  page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.snapshot() ?? null);
 
 export const voxelAt = (page: Page, target: Point) =>
   page.evaluate(
