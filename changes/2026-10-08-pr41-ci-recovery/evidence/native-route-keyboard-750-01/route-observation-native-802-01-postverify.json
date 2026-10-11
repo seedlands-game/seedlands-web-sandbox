@@ -1,0 +1,20 @@
+{
+  "at": "2026-10-11T18:14:16.589249+00:00",
+  "artifactPostVerifyExit": 0,
+  "receiptStatus": "PASS",
+  "selection": {
+    "mode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "modularSmokeMatches": 0,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-27d114f1e02c8ee81d25",
+        "file": "apps/web/tests/e2e/classic-support/native-keyboard-journey.ts",
+        "test": "Classic \u539f\u751f\u8def\u7ebf\u952e\u76d8\u4fdd\u7559\u53ef\u4fe1 W/S/Space\u3001\u771f\u5b9e\u4f4d\u79fb\u4e0e\u4e2d\u6027 Authority ACK",
+        "project": "chromium"
+      }
+    ]
+  },
+  "sourceHashMismatches": []
+}

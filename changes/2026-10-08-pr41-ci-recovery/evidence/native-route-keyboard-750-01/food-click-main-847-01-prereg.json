@@ -1,0 +1,20 @@
+{
+  "scope": "Frozen dirty695+750+789+807+817+831+842 canonical production verification; selection and receipt determine actual acceptance scope; no performance claim",
+  "runId": "food-click-main-847-01",
+  "identity": {
+    "sourceSha": "d18966a48e5008835b0fa6aaf8b35f01e259971f",
+    "sourceDigest": "720c06a3df8bb347d2f66980debe1cc4d9f7b3a4dfa3b01df0a04f785470f091",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547"
+  },
+  "command": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic \u751f\u4ea7\u65c5\u7a0b",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/food-click-main-847-01/results"
+  ],
+  "frozenFiles": 28
+}

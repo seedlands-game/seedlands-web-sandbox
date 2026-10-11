@@ -1,0 +1,12 @@
+{
+  "scope": "Focused canonical minimal native input probe; planner activation/full C0-C5/performance not accepted",
+  "events": 36,
+  "trustedAll": true,
+  "repeatedAny": false,
+  "beforePosition": [0.5, 32.600001, 0.5],
+  "resultPosition": [0.749983064026661, 32.60000033871947, 0.5],
+  "finalPosition": [0.749983064026661, 32.60000033871947, 0.5],
+  "neutral": true,
+  "releaseSequence": 330,
+  "acknowledgedInputSequence": 339
+}

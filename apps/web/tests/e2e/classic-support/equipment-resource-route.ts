@@ -1,3 +1,4 @@
+import { bodyConfigFor } from '@seedlands/stdlib/physics';
 import { reachedRouteTarget, routeInputSettled, type RouteDirection } from './route-progress';
 import { horizontalMouseCorrectionToRoute, voxelInteractionDistance } from './target-aim';
 import type { Point, RoutePoint } from './scenario';
@@ -68,6 +69,45 @@ export function equipmentRoutePulseMs(
   )
     return fallback;
   return 300;
+}
+
+/** Refine only a route which has actually exceeded its requested walking bound. */
+export function createEquipmentRoutePulsePlanner(target: RoutePoint) {
+  let previous: Readonly<{ position: Point; delayMs: number }> | null = null;
+  let exceededRequestedTravel = false;
+  return (current: EquipmentRouteSnapshot, direction: RouteDirection): number => {
+    const ordinary = equipmentRoutePulseMs(current, target, direction);
+    const velocity = current.serverPlayerVelocity;
+    const yaw = current.viewAngles?.[0];
+    const settled =
+      velocity !== undefined &&
+      yaw !== undefined &&
+      [...current.player, ...current.serverPlayerPosition, ...velocity, yaw, ...target].every(Number.isFinite) &&
+      current.onGround &&
+      !current.colliding &&
+      routeInputSettled({ ...current, serverPlayerVelocity: velocity });
+    if (previous && settled && previous.delayMs <= EQUIPMENT_RESOURCE_ROUTE_OPTIONS.pulseMs) {
+      const travel = Math.hypot(
+        current.serverPlayerPosition[0] - previous.position[0],
+        current.serverPlayerPosition[2] - previous.position[2],
+      );
+      const speed = bodyConfigFor('player').maxHorizontalSpeed;
+      if (!speed) throw new Error('Equipment route requires a configured horizontal speed.');
+      const bound = (speed * previous.delayMs) / 1000 + EQUIPMENT_RESOURCE_ROUTE_OPTIONS.tolerance;
+      if (travel > bound) exceededRequestedTravel = true;
+    }
+    const precise =
+      exceededRequestedTravel &&
+      settled &&
+      ordinary === EQUIPMENT_RESOURCE_ROUTE_OPTIONS.pulseMs &&
+      [current.player, current.serverPlayerPosition].every((position) =>
+        isInsideEquipmentRouteNeighborhood(position, target),
+      ) &&
+      Math.abs(horizontalMouseCorrectionToRoute(current.player, yaw!, target, direction, { wholeTurn: true })) < 1;
+    const delayMs = precise ? 1 : ordinary;
+    previous = settled ? { position: [...current.serverPlayerPosition], delayMs } : null;
+    return delayMs;
+  };
 }
 
 function corridorCorrectionDirection(snapshot: EquipmentRouteSnapshot, target: RoutePoint): RouteDirection | null {

@@ -1621,3 +1621,127 @@ Web回归560为55 PASS/1 FAIL，完整headless561为1212 PASS/1 FAIL，均指向
 
 - 660 实际类型显示公开 Contact 的 colliderId 可缺失；保留已有 ID，仅将缺失映射为 null，补匿名接触与快照/authority/epoch/ready 替换反例。最终 owner662 五文件44例、copy664 六例、类型665、lint666、时限合同667三例、格式668及CI选择670十七例通过；原 frozen evidence5/5身份保持。全 Classic headless669为160文件1228例通过。
 - 673 生产构建与672真实浏览器接口、674原普通矿车NON_MAIN旅程同一候选 sourceDigest=`862c43c40e70a3f48972a3a5212b5328b474876abb1d94d4541d225e1220d818`，artifactDigest=`fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547`。672验证实际同epoch/tick/ACK、冻结副本、数量限制、默认snapshot无投影字段及PointerLock/原300ms W+Space；674原右键/键盘/Shift右键/存档恢复通过，前后产物身份均通过。671有界独立审查未发现确认P0/P1/P2，root核对15路径冻结哈希。证据 `evidence/c4-physics-diagnostics-655-01` 封存dirty5ac候选身份，不冒充最终提交；不证明C4已修复、完整C0–C5或性能收益。
+
+## 第 695 组：C4 自然动物顶推的原生路线恢复（实施前冻结）
+
+前驱为精确 `d18966a48e5008835b0fa6aaf8b35f01e259971f`。CI438运行中日志693原样另存，非终态结论：C4去程87971ms/84脉冲完成，返程90166ms/84脉冲失败，最终x93.537。返程65–67的同快照诊断中，玩家与同一自然羊 `natural-35-109_31_1` 同向移动2.375，X间距持续0.870（实际player半宽0.32加sheep0.55），羊发布速度为零、Z仍重叠；contact仅地面Y。现有character separation在step之后推离双方并重探terrain，故floor-only不能排除动物顶推。696只读审查支持此解释，尚须逐tick复现；不得宣布全部C4失败均由此造成。
+
+目标：保留自然动物、实际身体/碰撞/Stone/地图，修复C4驾驶器持续直线顶推动物的策略。只使用原生鼠标转向和原300ms W/S+Space；原目标、到达/支持面/输入ACK/静止与呈现同步断言、90/20/900秒及质量不变。恢复在同一个walkTo deadline内作有界侧向waypoint，再回原目标；不得递归新建路线时限或把waypoint当原目标已完成，不改world/actor位置，不清除actor、不teleport作为修复。655 physicsDiagnostics保持diagnosticOnly，不用它驱动控制；benchmark与正确性运行采用同一功能算法，不作性能收益声明。
+
+先以真实sheep配置、实际前驱姿态及原固定tick求解器复现顶推分摊位移，再选择仅依赖既有settled progress的有界恢复；若必须识别动物，则只在恢复时使用现有只读query-nearby功能端口，明确epoch/坐标/有界合同，不新增生产权限或轮询。保持默认非C4路线行为，C4显式启用恢复。harness行数门禁保持500；如需提取walkTo，则保留原导出入口与现有调用语义。
+
+验收包含原逐tick顶推RED与clear对照、有限恢复/重新瞄准原目标/时限及不改变诊断/benchmark合同、必要现有owner与类型/lint/格式/headless、真实生产浏览器原生输入绕过同一身体且原目标达成。最终精确SHA完整CI及C0–C5仍独立验收；旧sealed evidence不改写。
+
+### 695 候选验证 checkpoint 743–746（尚未准出）
+
+候选 owner 与原路线/copy 回归 707 为 28 例通过，类型 704、最终 owner lint 719、CI 选择 710 的 17 例、格式及原 frozen evidence 5/5通过；完整 headless 712 为162文件1235例通过。715 构建 sourceDigest=`188337f3957bde4eb72eea15f40a59edc8df21fed066d3ae34220a6639be9f8e`、artifactDigest=`fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547`，是 dirty695/d189身份，不是最终提交。
+
+743核对原场景发现新物理测试把返回目标误写为78.5，实际为72.5；修正后原85次物理脉冲到74.056755而失败，原失败保留。这个人工脉冲上限没有浏览器墙钟含义，不能用旧PASS声明原目标完成。746改为完整原目标的实际身体求解对照，防无限循环上限256；比较恢复的物理脉冲数不超过clear加2，且比持续顶推至少少10，同时检查两身体存在、原目标到达与实际AABB不重叠。7例通过仅证明此物理与功能合同，原90/20/900秒和原浏览器到达断言均未改动；不是浏览器或性能准出。
+
+714真实生产原生输入夹具在原90秒到x76.346而失败，未遇到羊且未触发恢复。721/724/728均在真实AI姿态或idle前置条件失败，路线未运行；不能当绕行动物成功。所有运行的产物前后验与当时源码冻结哈希保持。733原始主旅程零重试在900000ms于V2装备阶段超时：C0/C1/C2/C3通过，C4/C5未运行；receipt为FAIL，737产物后验通过。695仍未获得真实浏览器绕行验收，不提交为已完成修复。
+
+精确d189的CI438已终态：五项非浏览器成功，Chromium失败，Pages跳过。主旅程首轮C4去程完成、返程失败的部分日志仍是部分日志，不代表终态全部尝试。
+
+738源码检查确认native helper早已独立按deadline发起up，不等待down ACK。742六次真实可信键盘事件诊断显示ACK耗时与DOM处理keydown/up间隔不同，不能用keyboardWall当实际held时长。733末尾128帧样本主要长间隔在帧之间；这些诊断不能归因全部早先V2或CI失败，也不授权改质量、时限、输入或性能基线。后续需新的可证实原因与真实玩法验收。
+
+## 第750组：原生路线输入的trace观测干扰（实施前预注册）
+
+前驱仍为精确d189，695候选未准出。733原主旅程trace及安装Playwright1.62.1源码共同提供具体原因：keyboardUp调用call@4173于630509.261开始，input DOM snapshot到631827.202才返回，随后keyup派发到631838.046完成。apiDown/apiUp在发送Chromium输入协议之前await onBeforeInputAction；trace hook在此await DOM snapshot。因此该次keyup请求在派发前被观测链路延迟约1318ms，不能将其归为独立release timer未发起或全部物理/CI失败。call@4211也存在浏览器派发等待，故snapshot不是唯一原因。
+
+有界方案：仅为既有路线pulse增加公开Chromium CDPSession键盘port，按Playwright实际RawKeyboardImpl同一个Input.dispatchKeyEvent协议发送KeyW/KeyS/Space。保留既有helper独立deadline发起全部up、方向优先、全部ACK与首个错误传播；不模拟DOM KeyboardEvent，不改Authority/physics/world/actor/资产。每页session复用，原目标、PointerLock、键/300ms、90/20/900秒、质量、到达/支持面/neutral与fresh ACK保持，普通与benchmark同一功能入口。trace retain-on-failure和原截图/其它动作DOM snapshots保留；CDPSession原生发送必须可从trace及新增owner核对，不能把缺少键盘逐键DOM snapshot当缺少可信输入的豁免。
+
+实施前先RED缺port；GREEN需协议字段、每页生命周期/并发复用、非目标键拒绝、独立release与失败清理的现有owner回归；真实浏览器需同源构建、PointerLock、可信keydown/up、实际Authority位移/neutral ACK。诊断时序不得升格为性能收益；完整主旅程及精确新SHA CI仍独立验收。若无法保留上述输入与证据合同，则撤回port方案，不关闭trace或放宽门禁。
+
+### 750 原生port首轮759失败与修正前冻结
+
+759用原production build、canonical NON_MAIN选择及更强trace=on，原120秒在返回段内部超时，receipt FAIL；仅前进段完成，不声明可信事件或双向验收。760读trace确认prepareFixtureChunks及全部原初态分别38645/36296ms；这个新增的局部键盘合同不需要224格主旅程、120秒hunger advance及全部资源/hostile准备。后续仅将新增focused合同的初始夹具缩为现有普通矿车同类的局部Stone/air/初始pose；保留该用例原120秒、双向W/S+Space、到达和全部native断言。原主旅程的场景和全部初态均不变，不把局部夹具当C4重现。
+
+浏览器action trace未含CDP sends，但test.trace确有12条Send CDP command事件，method=Input.dispatchKeyEvent、params摘要为Object。记录尚不能单独识别逐键phase/code。后续port以Playwright公开test.step明确每次原生down/up和code；保留原trace配置与截图，仍在同一独立release timer和同一CDP协议中发送，不新增DOM snapshot到释放之前。需再核对trace标签、可信DOM和Authority结果。759原FAIL与原日志/trace保留，不增加时限，不改到达断言。
+
+### 750 当前生产输入验证与完整回归765
+
+764在canonical生产spec、局部明确Stone/air初始夹具、原120秒、原W/S+Space和真实PointerLock下PASS。8条DOM事件全部isTrusted=true、repeat=false，严格down方向/Space、up方向/Space；Authority x0.5→2.108332→0.725，均静止、neutral=true，ACK210/259覆盖释放198/247。保存trace对应8个phase/code标签，artifact后验PASS，全15路径冻结哈希一致；仍是NON_MAIN局部输入合同，非C4、C0–C5或性能结论。
+
+765完整headless为153文件1212例PASS、10文件30例FAIL，另3异步错误，原完整失败保留。新的CDP port在初始snapshot与route aim/terminal判断前建立，既在无需输入的旧合同中触碰fake Page缺少的context，又在需要脉冲的单元夹具中新增未显式mock的传输依赖。后续先将port初始化延至实际按键pulse，保留原deadline；终态/耗尽aim/deadline路径不建立port。需要真实脉冲的隔离单元仅显式mock新的传输port为其原fake keyboard，保留原所有位移/到达/失败清理/时间断言；port自身7例协议与真正Chromium合同继续独立保障。不得用runtime page-shape fallback或降低断言掩盖此依赖。
+
+766额外记录完整原目标物理对照实际计数：clear85、持续顶推108、恢复86，恢复≤clear+2断言通过；不是旧85脉冲到达或90秒浏览器结论。
+
+### 768–771 原生port回归修正与新验证
+
+765的完整失败不撤销。route-driver现仅在原snapshot、aim、terminal handoff和refresh截止判断完成后，实际需要发送脉冲时才取得CDP port；新增建立port后的截止检查仅适用于既有refreshAfterCorrection=true路径，保留omitted/false跨越correction截止的原合同。equipment-arrival-during-aim仍未mock port且原7例通过，确保无需移动时不触碰context。另9个实际脉冲的隔离路由夹具显式mock新传输依赖返回原fake keyboard；未删除或降低任何断言，实际CDP语义仍由独立port owner和canonical浏览器验证负责。
+
+768第一次fixture编辑因缺Page类型的断言中止，后续原12文件执行为9失败/3通过、17失败/66通过及4异步错误，保留日志；769补全9个明确依赖替身后，12文件83例全部PASS。770静态/格式/选择门禁、771完整headless尚待实际终态；不声明主旅程或C4浏览器验收。
+
+### 778 主旅程失败、787 排队时钟诊断与789观察port候选
+
+778原始main在原限制下FAIL：C0–C2通过，C3走向原stationApproach72.5,0.5超过路线截止，最终Authority x69.013890、速度0；V2/C4/C5未运行。产物后验PASS、24文件哈希一致。原300ms独立W请求对应accepted命令6704/6705，仅0.2ms、目标tick差1，最后位移0.013889；其他accepted脉冲间隔130.3/833.8ms。选定同tick有界诊断附近body0，不能归因为crowd。778失败与全部原断言保留。
+
+787为临时canonical NON_MAIN、局部Stone/air初态、显式1500ms主线程阻塞的只读时钟诊断：Node请求301ms，可信DOM event.timeStamp297.5ms，handler0.8ms、生成命令0.6ms，位移0.013888。仅RECORDED VALID，不是玩法/持键或性能PASS。其25文件postverify与哈希通过后，788精确恢复原24文件源码并移除仅本次新建的未sealed诊断模块，完整probe源码、产物身份及记录单独保留；当时dist属于临时sourceDigest，不能冒充恢复后的当前构建。只读复核支持先诊断、不改调度；产品Controller及input scheduling未改。
+
+778同时记录两个route snapshot前DOM捕获等待1344/1844ms；实际安装PW1.62.1的onBeforeCall明确await captureSnapshot后才evaluate。789候选只对已实际发出路线脉冲后的读取，经同一个公开page CDP session使用Runtime.evaluate(returnByValue)，执行与原Page.evaluate完全相同的导出浏览器snapshot函数；保留epoch/tick/ACK严格匹配、有界physicsDiagnostics、原neutral停稳/structuredClone、目标/质量/90/20/900秒和独立release。首次aim与无需输入的terminal判断仍使用原reader，CDP仍在真正需要发送脉冲时建立。实际input、其他动作DOM snapshots、周期trace截图及源码保留；每次正常route读取另附有界实际pose/frontier/neutral/physics证据，benchmark不投影physics或附诊断。浏览器异常及未按值返回均报错，不构造替代snapshot；不改世界、actor或产品时钟，不声明性能收益。
+
+790新增读值/空harness/异常3例RED、原7例PASS。791为13文件91PASS/1FAIL，新fixture一次性mock返回绕开自身calls记账；792改查实际CDP mock调用并补未按值返回与benchmark边界，13文件94例全部PASS，原路线断言未改。后续静态/完整headless、新sourceDigest构建、可信原生浏览器及原main均待本候选实际终态；695 crowd浏览器仍未验收。
+
+### 789 静态与完整headless checkpoint 793–798
+
+793 lint、format、CI选择均PASS；完整types仅新增port测试夹具的显式返回类型报TS2355，其余types阶段通过。794完整headless为163文件1247例PASS。796构建PASS（sourceDigest=`64d967417062e20e0a5ab7765eca8959591878b467ddb6affaf39d71bbba5afc`），不以构建覆盖该测试类型失败。795有界只读复核未发现P0/P1/P2，保留session detach及按poll增长的附件总量限制；不证明真实持键或玩法。797核对24文件冻结哈希并在全部运行终态后释放；夹具补`return undefined`，与原隐式undefined运行结果相同，794完整运行结果可复用，后续针对测试types/owner/lint/format检查该改动。源码字节已改变，浏览器前须重新构建；原main及695 crowd真实浏览器尚未验收。
+
+798测试types、12例port owner、夹具lint/format均PASS；与793其余types阶段合计覆盖完整types，未再运行不变完整headless。当前仍dirty候选，非最终提交或完整CI/玩法PASS。
+
+### 803 C1失败与807有界转向输入预注册
+
+789当前构建800为sourceDigest=`e3169c96f4b615db240335eac0c84ff6b792621ebb359a5affca7d745d329ef8`。802真实原生NON_MAIN为PASS，16可信事件，18路线附件均匹配epoch/tick/ACK、共16627bytes/单份最大1014bytes，trace保留148周期帧；实际x0.5→2.355554→-0.036111，终点neutral/fresh ACK/静止，产物后验及24文件哈希一致。不证明主旅程或性能。803原main FAIL：仅C0通过，C1支持面丢失，C2–C5未运行；产物后验PASS/冻结哈希一致。
+
+803 trace明确C1首段原Page keyboardDown于203602.881、keyboardUp于212332.153才请求，期间等待位移读取。首次位移采样Authority x11.699594/z2.584967、速度仍4.426/0.812；松键后turned及walkTo初始均x25.68/y24.6/z5.370818，已离开原走廊。后续route在x30.094930/y19.6/z1.681981按原支持面断言失败。不是crowd或789读值错误的证明；原FAIL保留，806全部终态哈希核对后释放。
+
+807候选仅替换C1转向后无期限held W：同页原生port、独立300ms release、每次最新snapshot与neutral/fresh-ACK停稳后才读取位移，原expect.poll 30秒、位移>1与横向变化>0.05断言保持，原鼠标转向/跨chunk目标33,0.5/支持面/质量/90/20/900秒保持。复用已有native pulse/port/settled owner，不增加镜像实现测试；必须重新验证Classic types/lint/格式/选择及实际原main。世界、floor、actor、physics和产品输入时钟不改，主旅程及695仍未准出。
+
+808 Classic types与既有native pulse/port/settled三文件32例PASS；main lint发现新增代码超过原max-lines500（502），不改上限，将同一个三维位移公式写成tuple逐轴差的Math.hypot，保留所有轴和>1断言。格式/选择与修正后main lint须实际复验；该门禁失败保留。
+
+809修正后的Classic types、main lint（原500上限）与变更文件格式均PASS；808原format/selection PASS，32项既有pulse/port/settled owner PASS。807只修改canonical main中首段输入流程及spec，headless产品/owner源码未改变，复用794的163文件1247例结果与802的既有port验证；当前main仍需新构建真实验收，未登记PASS。
+
+### 812 原main终态、817–820精确控制候选
+
+811构建sourceDigest=`d52dde60e64cd932143a3dd3d5b4f5b9e3a37f1b0a1c733898cac4fbb698401b`。812原main FAIL，C0–C3全部PASS（C1为31秒），Creative crop第二段目标67.5,-0.5原45秒失败；C4/C5未运行。产物后验PASS、24文件哈希一致。12个80ms或更短请求脉冲，实际停稳位移约0.014–2.175m，最后x66.57809/z-0.50446；native request大多保留约80ms，最后accepted movement9362/release9363 issuedAt差362ms、目标tick差19，不能用请求时间冒充实际持键。并未证明全部CPU/DOM因果或性能收益。
+
+817无条件邻域1ms候选，818新增两例RED、旧及边界22PASS；819原owner为15文件170PASS、3文件4项到达超时。物理夹具直接输入状态下极短脉冲可能发生在tick之间而没有位移，不改夹具/断言，将无条件策略撤回。819失败保留。收窄候选按当前路线实际Authority停稳位置反馈：只在前一≤80ms脉冲位移超过配置最大速度行程界加原0.06容差时记为excess；后续仅双方位置处在原0.45x/0.08z邻域、grounded/不colliding/停稳/对齐才请求1ms。其余原80/300策略保持，状态只活在本条45秒路线，不读diag或伪造事件/时钟/物理步。该反馈描述实际超界，不把它直接归为某个CPU原因。
+
+820收窄后原18文件175项owner全部PASS、lint/format/17项选择PASS；测试types发现核心配置maxHorizontalSpeed为optional，需要显式配置存在性检查，候选按原route-progress同类要求补guard，待实际复验。新增canonical NON_MAIN minimal-native probe只验证原生1ms请求能否在实际运行时保持0.06精度/neutral fresh ACK，不注入planner反馈、不保证持键或tick数，不替代原main。所有原到达/支持面/45/20/900秒与输入断言保持，真实probe及原main尚待当前构建验证；695仍未获C4浏览器验收。
+
+821速度配置guard后的Classic types、变更lint/format均PASS；已复用820有效175项owner与其它静态检查。新增probe保留真实deadline后验：即使末次观察到达，若已超过45秒仍FAIL。最新probe尚未运行；不将此前802的port结果当该新精确策略的浏览器PASS。
+
+### 825 probe、827 C2失败与831采矿point交接预注册
+
+824构建sourceDigest=`93e600d48c339b14c616e61c6c3fd3bffed064d414721575d726d0f9362aa601`。825最小原生NON_MAIN PASS：36条可信非重复DOM事件，Authority x0.5→0.749983，原目标0.8/0.06精度/neutral/fresh ACK/支持面/45秒成立；产物后验PASS/28文件冻结哈希一致。该probe不注入planner反馈，不能证明817完整场景激活、实际持键1ms/单tick或性能。
+
+827原main FAIL，仅C0/C1 PASS，C2矿点34,31,0 remains out of range，C3及Creative/V2/C4/C5未运行；后验PASS/冻结哈希一致。报告步骤结束时长不是阶段PASS，以terminal attachment的stage状态为准。失败当前x29.504594/y32.6/z0.487617，mining approach为31.2,0.5；原KeyS crossing接受任意x<=31.2，因此越过approach可提前返回且不满足原5m fresh guard。不能直接重跑827，也不能把825升格为该main修复。
+
+831候选将mining approach改为point判定，保持原31.2目标、0.45 tolerance、100ms/15秒、首个双方2.5–4.5 safe停稳即交接与fresh>5 guard。若至少两次停稳仍>5，则只交回原fresh guard报错，避免额外无界重试；不登记这种yield为safe arrival。原阴性owner的两脉冲与禁止aim合同保持。新owner重放827首次越过观测、后续safe为明确合成的逻辑输入，不冒充真实physics或浏览器。实际原main仍独立验收；不改世界/actor/physics/输入时钟/质量/截止，不放宽原断言。
+
+832新增mine交接用例为1项语义RED、旧7项PASS，失败matcher还报1个异步错误，原日志保留，不将额外错误说成产品bug。833 point修正后4文件48例PASS、无异步错误，原首safe handoff、unsafe Authority双脉冲/禁aim、fresh drift guard和PointerLock失败合同均保持。需当前静态/完整headless、新构建及原main实际终态；817在827未触发，不能声明完整场景精确控制通过。
+
+### 835–842 终态与非导航食用按钮候选
+
+835完整headless163文件1255项PASS；834 Classic types、范围lint、format和17项CI选择PASS，837构建sourceDigest=`0f64098a52ce62029700d674023f5601ac6885bd28a3ce8906acb247822b17df`。838原CANONICAL_MAIN终态FAIL，附件确认C0/C1/C2 PASS、C3食用按钮locator.click原10000ms超时；Creative/V2/C4/C5未运行。839产物后验PASS、28冻结文件哈希一致，841仅在所有运行终态后释放冻结。
+
+842 trace诊断：click开始416792.627、实际action done425583.664、导航/输入epilogue等待中427534.370超时；前一次生命读取14、after DOM快照生命18且浆果按钮消失，未记录导航事件。这证明本次进食生效，但原main/C3仍FAIL，不是CPU归因或性能证据。UI GameButton明确type=button；food onclick只提交useInventoryItem，未导航。候选仅该非导航命令click采用文档支持的noWaitAfter，保留locator actionability/可信原生pointer、原10000操作截止及紧随其后的原生命增长断言；不改产品、场景、actor、physics、时钟、trace/质量、目标或任何截止。noWaitAfter不证明交互有效，仍以生命实际增长作验收。当前候选未验证、未提交，817/695、精确新SHA CI和原需求其它缺口仍开放。
+
+843该候选Classic测试types、主旅程lint、全format与17项CI选择PASS。只改浏览器食用按钮的等待模式和spec，835完整headless163/1255结果复用；当前新的identified build及原main尚未运行，不声明全玩法通过。
+
+### 847–852 食用后主旅程终态与工作台只读观察
+
+846 identified build sourceDigest=`720c06a3df8bb347d2f66980debe1cc4d9f7b3a4dfa3b01df0a04f785470f091`；847原main终态FAIL，C0/C1/C2 PASS，C3食用后的原生命增长断言已越过，后续工作台目标75,31,0的原5秒expected11失败，Creative/V2/C4/C5未运行。848后验PASS、28文件哈希一致，851在终态后释放冻结。
+
+852 trace观察：原生右键678966.647–679353.680，voxelAt调用682816.045–689336.509返回实际11，after DOM690556.096也呈现75,31,0/voxel11。放置已生效，但观察返回超过原5秒，整C3仍FAIL；不把日志静默称为卡死或归因CPU。候选仅工作台此处只读轮询复用同页公开CDP会话，执行同一getVoxelAt公开读，保留原5000ms/expected11/原目标、输入、世界、actor、physics、质量和trace。增加零值/缺harness/异常/byvalue/非法坐标反例，不伪造值、不加RPC/缓存、不改产品或时钟；benchmark无额外诊断附件。新的源码与真实原main仍待验证，817/695与精确新SHA CI未准出。
+
+853新增voxel read owner为8项预期RED、旧12项PASS，854实现后相关4文件53项PASS。原Page voxelAt其它使用保持，只有C3工作台poll使用同页CDP read；测试执行序列化读函数并确认目标坐标传给真实公开API，0/null结果、异常、缺byvalue与非法坐标均保留为可拒绝条件。855当前types/lint PASS，format/selection及新冻结构建/完整headless/main仍待终态。
+
+855终态：Classic types、范围lint、全format与17项CI选择全部PASS。当前共享读port增加了方法与8项owner，故准备一次新完整headless；新build及原main仍待验证，不将835旧计数当作当前新用例总数。
+
+### 859–866 当前浏览器终态与有界交付
+
+859原main终态FAIL，附件C0/C1/C2 PASS，C3后续回收工作台矿点75,31,0 remains out of range，Creative/V2/C4/C5未运行。852新只读观察已真实触发，附件classic-voxel-observation-1/2分别为目标75,31,0/value0及11，原5秒expected11与工作台打开流程已越过；此前根据较早日志的“未触发”判断已更正。不能把这处局部通过登记为完整C3 PASS。860产物后验PASS/28文件哈希一致，866只在所有终态后释放冻结。
+
+最后三次S100请求间隔约102.210/100.182/99.724ms；accepted movement/release issuedAt差0.3/150.3/782.1ms，最后目标tick42230→42274（44tick），停稳73.435289→69.910336、速度0/grounded。命令处理时间不是实际可信DOM生成间隔或持键证明，不归因CPU/actor。第三次超出原5m guard仍被拒绝；不改physics/输入时钟/actor、不放宽guard或15秒接近限。后续采矿控制需独立新证据，不得直接重跑859。
+
+有界证据已发布到evidence/native-route-keyboard-750-01，46个格式化后封存payload加manifest。每次运行保留自己的dirty d189 sourceDigest；当前build858/source43dce609、headless861163文件1263项、owners85453与静态855PASS，main859FAIL；802/825只是不同source的NON_MAIN输入/观察合同，不替代817完整planner激活或695浏览器C4。只向既有feature分支正常提交/推送，PR继续Draft，精确新SHA CI与原始transport/lighting/contentmatrix/performance缺口仍开放。

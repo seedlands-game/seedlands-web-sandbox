@@ -1,5 +1,9 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
 import { registerClassicMinecartJourney } from './classic-support/minecart-journey';
+import { registerClassicNativeKeyboardJourney } from './classic-support/native-keyboard-journey';
+import { nativeMovementPage } from './classic-support/native-keyboard-port';
+import { sendNativeMovementPulse } from './classic-support/native-movement-pulse';
+import { routePulseSettledPredicate } from './classic-support/route-progress';
 import { walkC4Route } from './classic-support/route-pulse-diagnostics';
 import { startClassicNativeTrace } from './classic-support/native-trace';
 import { startClassicAuthorityCpuProfile } from './classic-support/authority-cpu-profile';
@@ -156,22 +160,21 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     await lockPointer(page);
     const beforeTurn = (await snapshot(page))!;
     await moveMouseBy(page, 80, 0);
-    await page.keyboard.down('KeyW');
+    const nativePage = await nativeMovementPage(page);
+    let turned = beforeTurn;
     await expect
       .poll(
         async () => {
-          const current = (await snapshot(page))!;
-          return Math.hypot(
-            current.player[0] - beforeTurn.player[0],
-            current.player[1] - beforeTurn.player[1],
-            current.player[2] - beforeTurn.player[2],
-          );
+          const beforePulse = await nativePage.snapshot();
+          if (!beforePulse) throw new Error('Classic snapshot is unavailable before turn movement.');
+          const settled = routePulseSettledPredicate(beforePulse);
+          await sendNativeMovementPulse(nativePage, 'KeyW', 300);
+          turned = await waitForSnapshot(page, settled, 20_000, nativePage.snapshot);
+          return Math.hypot(...turned.player.map((value, axis) => value - beforeTurn.player[axis]!));
         },
         { timeout: 30_000 },
       )
       .toBeGreaterThan(1);
-    await page.keyboard.up('KeyW');
-    const turned = (await snapshot(page))!;
     expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);
     const crossed = await walkTo(page, classicScenario.route.chunkCrossing, { jump: true, timeout: 90_000 });
     expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);
@@ -231,7 +234,8 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     const hungerBefore = Number(await page.getByRole('meter', { name: '生命' }).getAttribute('aria-valuenow'));
     expect(hungerBefore).toBeLessThan(20);
     await panel.getByRole('gridcell', { name: '浆果 × 1', exact: true }).hover();
-    await panel.getByRole('button', { name: '食用浆果', exact: true }).click();
+    // This inventory command never navigates; verify its effect with the existing health assertion below.
+    await panel.getByRole('button', { name: '食用浆果', exact: true }).click({ noWaitAfter: true });
     await expect
       .poll(async () => Number(await page.getByRole('meter', { name: '生命' }).getAttribute('aria-valuenow')))
       .toBeGreaterThan(hungerBefore);
@@ -256,7 +260,9 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     ];
     await adjustPitchToTarget(page, stationSupport);
     await clickCanvasCenter(page, 'right');
-    await expect.poll(() => voxelAt(page, classicScenario.route.stationTarget)).toBe(11);
+    await expect
+      .poll(async () => (await nativeMovementPage(page)).voxelAt(classicScenario.route.stationTarget))
+      .toBe(11);
     const afterStation = await waitForSnapshot(
       page,
       (value) => value.worldRevision > afterBuild.worldRevision && value.lastCommitMeshChunkCount > 0,
@@ -515,3 +521,4 @@ test(
 );
 
 registerClassicMinecartJourney(test);
+registerClassicNativeKeyboardJourney(test);

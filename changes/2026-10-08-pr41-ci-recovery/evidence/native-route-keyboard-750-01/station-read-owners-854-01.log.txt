@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/e2e/classic-support/native-keyboard-port.test.ts tests/e2e/classic-support/route-aim-contract.test.ts tests/e2e/classic-support/route-aim-render-independence.test.ts tests/e2e/classic-support/mining-approach-handoff.test.ts
+7:50:10 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  4 passed (4)
+      Tests  53 passed (53)
+   Start at  19:50:10
+   Duration  2.02s (transform 1.23s, setup 0ms, import 3.94s, tests 529ms, environment 0ms)
+

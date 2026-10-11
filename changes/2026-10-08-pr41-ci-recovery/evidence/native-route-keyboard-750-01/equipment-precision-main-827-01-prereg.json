@@ -1,0 +1,20 @@
+{
+  "scope": "Frozen dirty695+750+789+807+817 canonical production verification; selection and receipt determine actual acceptance scope; no performance claim",
+  "runId": "equipment-precision-main-827-01",
+  "identity": {
+    "sourceSha": "d18966a48e5008835b0fa6aaf8b35f01e259971f",
+    "sourceDigest": "93e600d48c339b14c616e61c6c3fd3bffed064d414721575d726d0f9362aa601",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547"
+  },
+  "command": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic \u751f\u4ea7\u65c5\u7a0b",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/equipment-precision-main-827-01/results"
+  ],
+  "frozenFiles": 28
+}

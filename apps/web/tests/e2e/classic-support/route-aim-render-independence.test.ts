@@ -1,8 +1,13 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
 import type { Page } from '@playwright/test';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { lockPointer, moveMouseBy } from './mouse-input';
 import { correctMouseToRoute } from './target-aim';
 import { walkTo } from './harness';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const BROWSER08_PLAYER = [Number('78.67385864257812'), 32.6, Number('-0.6099324226379395')] as const;
 

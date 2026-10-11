@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/e2e/classic-support/equipment-arrival-drift.test.ts tests/e2e/classic-support/equipment-arrival-during-aim.test.ts tests/e2e/classic-support/equipment-diagnostics-contract.test.ts tests/e2e/classic-support/equipment-diagonal-route-pulse.test.ts tests/e2e/classic-support/equipment-grounded-route.test.ts tests/e2e/classic-support/equipment-keyboard-pulse-duration.test.ts tests/e2e/classic-support/equipment-long-route-pulse.test.ts tests/e2e/classic-support/equipment-mining-aim.test.ts tests/e2e/classic-support/equipment-pickup-route-refresh.test.ts tests/e2e/classic-support/equipment-post-drift-direction.test.ts tests/e2e/classic-support/equipment-resource-route.test.ts tests/e2e/classic-support/equipment-restore-reference.test.ts tests/e2e/classic-support/equipment-route-corridor-correction.test.ts tests/e2e/classic-support/equipment-route-pulse-handoff.test.ts tests/e2e/classic-support/equipment-route-pulse-selection.test.ts tests/e2e/classic-support/native-keyboard-port.test.ts tests/e2e/classic-support/native-movement-pulse.test.ts tests/e2e/classic-support/route-progress.test.ts
+6:50:42 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  18 passed (18)
+      Tests  175 passed (175)
+   Start at  18:50:42
+   Duration  8.06s (transform 4.37s, setup 0ms, import 9.75s, tests 3.56s, environment 2ms)
+

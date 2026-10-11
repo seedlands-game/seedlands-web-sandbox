@@ -148,9 +148,9 @@ export async function withRoutePulseDiagnostics<T>(
   }
 }
 
-/** Original C4 options remain fixed; the wrapper only records existing observations. */
+/** The original C4 target/input/deadline remain; functional crowd recovery also applies to benchmark. */
 export function walkC4Route(page: Page, target: RoutePoint, key: RouteDirection = 'KeyW'): Promise<ClassicSnapshot> {
   return withRoutePulseDiagnostics(key === 'KeyW' ? 'C4-outbound' : 'C4-return', target, 90_000, (diagnostics) =>
-    walkTo(page, target, { key, jump: true, timeout: 90_000, diagnostics }),
+    walkTo(page, target, { key, jump: true, timeout: 90_000, recoverCrowd: true, diagnostics }),
   );
 }

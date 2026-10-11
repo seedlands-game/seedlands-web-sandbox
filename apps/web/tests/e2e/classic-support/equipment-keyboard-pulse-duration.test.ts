@@ -1,3 +1,5 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
+import type { Page } from '@playwright/test';
 import { describe, expect, it, vi } from 'vitest';
 import { walkEquipmentRoute } from './equipment-journey-support';
 import { lockPointer } from './mouse-input';
@@ -7,6 +9,10 @@ import {
   makeEquipmentRoutePhysicsModel,
   pumpUntilSettled,
 } from './equipment-route-physics-fixture';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 describe('Classic V2 near-route keyboard pulse duration', () => {
   it('holds movement for at most the 80ms pulse despite a slow keyboard API reply', async () => {

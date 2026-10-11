@@ -1,7 +1,13 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
+import type { Page } from '@playwright/test';
 import { expect, it, vi } from 'vitest';
 import { walkEquipmentRoute } from './equipment-journey-support';
 import { lockPointer } from './mouse-input';
 import { makeEquipmentRoutePhysicsModel, pumpUntilSettled } from './equipment-route-physics-fixture';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const DIAGONAL_START = [98.5, 32.6, 0.5] as const;
 const TARGET = [78.5, -0.5] as const;
