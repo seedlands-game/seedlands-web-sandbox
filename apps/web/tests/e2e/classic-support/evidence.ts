@@ -3,6 +3,7 @@ import { snapshot, type ChromeTrace, type ClassicSnapshot, type ClassicWindow } 
 import type { ArtifactReadback, CompositionIdentity, PackLockReadback, RuntimeEnvironment } from './identity';
 import type { ClassicLogicObservationEvidence } from './logic';
 import type { ClassicScenario } from './scenario';
+import type { ClassicMainExecutionBudget } from './settings';
 
 export type ClassicStage = `C${0 | 1 | 2 | 3 | 4 | 5}`;
 export type ClassicStageResult = Readonly<{ status: 'PASS' | 'FAIL'; observation: string }>;
@@ -22,10 +23,34 @@ export function observeBrowserRuntime(page: Page) {
   return { pageErrors, failedResponses, assets, workers };
 }
 
+export function requireClassicRuntimeBaseline(
+  baseline: ClassicSnapshot,
+  environment: RuntimeEnvironment,
+  assets: readonly string[],
+  workers: readonly string[],
+  generatorVersion: number,
+): void {
+  expect(baseline.generatorVersion).toBe(generatorVersion);
+  expect(baseline.runtime).toBe('authority-worker');
+  expect(baseline.renderPipeline.backend).toBe('webgl2');
+  expect(baseline.experiments.requested).toMatchObject({ renderer: 'webgl2', wasm: true, simd: true });
+  expect(baseline.experiments.renderer?.effectiveRenderer).toBe('webgl2');
+  expect(environment.webgl2).not.toBeNull();
+  expect(environment.userAgent).toContain('HeadlessChrome/');
+  expect(baseline.workers).toMatchObject({ authority: 1, logic: 1, persistence: 1 });
+  expect(baseline.workers.general).toBeGreaterThan(0);
+  expect(baseline.compute.failedTasks).toBe(0);
+  expect(baseline.gameplay.npcCount).toBe(0);
+  expect(assets.some((path) => path.endsWith('.wasm'))).toBe(true);
+  expect(workers.some((path) => /authority-worker-[\w-]+\.js$/.test(path))).toBe(true);
+  expect(workers.some((path) => /world-worker-[\w-]+\.js$/.test(path))).toBe(true);
+}
+
 type EvidenceData = Readonly<{
   scenario: ClassicScenario;
   stages: Partial<Record<ClassicStage, ClassicStageResult>>;
   benchmarkMode: boolean;
+  mainExecutionBudget?: ClassicMainExecutionBudget;
   runId: string;
   artifact: ArtifactReadback;
   packLock: PackLockReadback;
@@ -85,6 +110,7 @@ const measurementSample = (stage: ClassicStage, snapshot: ClassicSnapshot) => ({
 });
 
 export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceData): Promise<void> {
+  const diagnosticOnly = data.mainExecutionBudget?.diagnosticOnly === true;
   const status =
     Object.values(data.stages).length === 6 &&
     Object.values(data.stages).every((stage) => stage.status === 'PASS') &&
@@ -109,7 +135,16 @@ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceDa
   });
   const evidence = {
     schemaVersion: 1,
-    status,
+    status: diagnosticOnly ? 'DIAGNOSTIC_ONLY' : status,
+    ...(diagnosticOnly
+      ? {
+          assertionStatus: status,
+          diagnosticOnly: true,
+          eligible: false,
+          mainExecutionBudget: data.mainExecutionBudget,
+          note: 'Extended diagnostic execution cannot prove the unchanged canonical900s acceptance window.',
+        }
+      : {}),
     attempt: testInfo.retry,
     test: testInfo.title,
     project: testInfo.project.name,
@@ -177,7 +212,7 @@ export async function attachClassicEvidence(testInfo: TestInfo, data: EvidenceDa
     baseline: data.baseline,
     final: data.final,
   };
-  await testInfo.attach('classic-runtime-evidence.json', {
+  await testInfo.attach(diagnosticOnly ? 'classic-diagnostic-runtime-evidence.json' : 'classic-runtime-evidence.json', {
     body: JSON.stringify(evidence, null, 2),
     contentType: 'application/json',
   });

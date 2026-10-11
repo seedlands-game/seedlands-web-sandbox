@@ -6,6 +6,8 @@ import type { RouteDirection } from './route-progress';
 
 function motion(value: ClassicSnapshot) {
   const input = value.nativeMovementInput;
+  const finite = (field: unknown) => (typeof field === 'number' && Number.isFinite(field) ? field : null);
+  const source = value.authority;
   return {
     player: value.player,
     authorityPosition: value.serverPlayerPosition,
@@ -14,6 +16,21 @@ function motion(value: ClassicSnapshot) {
     colliding: value.colliding,
     physicsTick: value.authority.physicsTick,
     acknowledgedInputSequence: value.authority.acknowledgedInputSequence,
+    physicsClock: {
+      physicsHz: finite(source.physicsHz),
+      integratedPhysicsTimeMs: finite(source.integratedPhysicsTimeMs),
+      activeTimeMs: finite(source.activeTimeMs),
+      physicsDebtMs: finite(source.physicsDebtMs),
+      paused: typeof source.paused === 'boolean' ? source.paused : null,
+    },
+    bodyCounts: source.bodies
+      ? {
+          total: finite(source.bodies.total),
+          actors: finite(source.bodies.actors),
+          worldItems: finite(source.bodies.worldItems),
+          nearPlayer: finite(source.bodies.nearPlayer),
+        }
+      : null,
     nativeMovementInput: input ? { epoch: input.epoch, release: input.release ? { ...input.release } : null } : null,
   };
 }

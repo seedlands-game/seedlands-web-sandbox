@@ -34,6 +34,7 @@ import {
   attachClassicEvidence,
   observeBrowserRuntime,
   requireAllClassicStages,
+  requireClassicRuntimeBaseline,
   type ClassicStage as Stage,
   type ClassicStageResult as StageResult,
 } from './classic-support/evidence';
@@ -71,6 +72,7 @@ installClassicDiagnosticHooks(test, () => ({
 test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
   test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
   test.setTimeout(900_000);
+  const mainExecutionBudget = await settings.configureClassicMainExecutionBudget(testInfo);
   evidenceWritten = false;
   restoreEvidence = undefined;
   for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
@@ -113,20 +115,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   expect(authorityFloor.every((entry) => entry.ok && entry.voxel === 3)).toBe(true);
   await expect.poll(() => Promise.all(crossingFloor.map((position) => voxelAt(page, position)))).toEqual([3, 3]);
 
-  expect(baseline.generatorVersion).toBe(classicScenario.generatorVersion);
-  expect(baseline.runtime).toBe('authority-worker');
-  expect(baseline.renderPipeline.backend).toBe('webgl2');
-  expect(baseline.experiments.requested).toMatchObject({ renderer: 'webgl2', wasm: true, simd: true });
-  expect(baseline.experiments.renderer?.effectiveRenderer).toBe('webgl2');
-  expect(environment.webgl2).not.toBeNull();
-  expect(environment.userAgent).toContain('HeadlessChrome/');
-  expect(baseline.workers).toMatchObject({ authority: 1, logic: 1, persistence: 1 });
-  expect(baseline.workers.general).toBeGreaterThan(0);
-  expect(baseline.compute.failedTasks).toBe(0);
-  expect(baseline.gameplay.npcCount).toBe(0);
-  expect(assets.some((path) => path.endsWith('.wasm'))).toBe(true);
-  expect(workers.some((path) => /authority-worker-[\w-]+\.js$/.test(path))).toBe(true);
-  expect(workers.some((path) => /world-worker-[\w-]+\.js$/.test(path))).toBe(true);
+  requireClassicRuntimeBaseline(baseline, environment, assets, workers, classicScenario.generatorVersion);
   const loadedPack = assets.some((path) => path.endsWith(`/${classicScenario.runtime.packEntryPath}`));
   const artifactFiles = artifact.identity?.files ?? {};
   const loadedStampedBytes = assets
@@ -487,6 +476,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
     scenario: classicScenario,
     stages: stageResults,
     benchmarkMode,
+    mainExecutionBudget,
     stageSamples,
     runId,
     artifact,

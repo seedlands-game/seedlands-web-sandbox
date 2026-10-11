@@ -1420,3 +1420,17 @@ Root独占现有session/runtime与worker protocol/worker/client诊断接线、�
 先在既有failure-motion-diagnostics.test.ts执行RED：真实query调用、有限白名单/副本/64容量和query拒绝隔离；旧缺world端口、snapshot拒绝与原窄字段仍回归。相关web tests、Classic/Web类型、lint/format及选择合同必要验证后交付；当前CI428自然terminal前不推新head，后续只依赖正常精确SHA CI的原旅程获取新失败context，不另盲跑本地whole main。Root独占既有evidence/test/spec及新证据；无新agent/域名/权限。传统.10PD×120%=.12PD，AI20min×120%=24min，01:55UTC检查点；模型费率/分母不可读，不估算百分比。
 
 235实际进度：新增两例RED2FAIL/原4PASS；实现后既有同文件9PASS，包含默认查询关闭、query拒绝/异常隔离、非有限position与velocity及512扫描上限。初轮Classic types发现reply失败分支data访问和默认返回可选字段类型问题，修复后Classic/Web types PASS；lint及选择合同17PASS。查询沿原Authority RPC请求注册表的15秒超时，不增加timer或改变测试超时；原main失败前输入、motion/startup观察不受新增await影响。新头build和浏览器真实查询尚未执行；CI428仍待自然结束，不将本片诊断通过当成C4修复。
+
+### 仅诊断的主旅程执行窗口273（预注册）
+
+afd2490b已正常推送并identified build/verify PASS，生产artifactDigest与前头相同。CI429五项非Browser PASS：Headless156files1142例（235九例真实选择）、Kernel28/stdlib172files1274例。Chromium自然FAIL：两次均在V2工作台返程被原900000ms全局上限中断、最后pulse均polls=0，C4/C5未到达；visual/native一次PASS、Modular/preview SKIP、无FLAKY。235正式query两次OBSERVED，仅player且无截断、foot pose与同次Authority一致。CI428也两次V2全局超时；不能把这些当作局部settle失败。旧CI427 C4的同tick回放Y/velocity相容，X位移仍为实际两倍；窗口内模式revision固定，基线ACK之前且targetTick在未来的已接受旧命令数量为零，未确认生产根因。
+
+为取得此前C4真实上下文，本片新增显式SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET=30m，仅允许Cloud内私有诊断，CI/GITHUB_ACTIONS或benchmark拒绝该参数，未知值拒绝。默认仍900000ms、默认证据文件与schema不变；原输入、地形/内容、质量、断言、route45s/C490s/settle20s/mesh5s、CI重试及job47min上限不变。显式诊断才使用1800000ms主旅程执行上限，并附执行预算metadata。即使全部原断言通过，也仅输出独立classic-diagnostic-runtime-evidence.json，status=DIAGNOSTIC_ONLY、assertionStatus单独保留、diagnosticOnly=true/eligible=false，不生成标准classic-runtime-evidence.json，因此既有canonical receipt不能将其当作标准验收PASS。
+
+另在既有Node-side route诊断中，从已经必需的同次snapshot白名单记录physicsHz/integratedPhysicsTimeMs/activeTimeMs/physicsDebtMs/paused及已有bodies聚合的total/actors/worldItems/nearPlayer原值数值副本，缺失/非有限值为null；bodies聚合缺失时为null，不能制造零实体事实，不推断其空间半径。不增加page/RPC读、timer、physics observer或生产API。仅描述观察到的时钟/统计，不推断CPU/帧成本或收益；现有benchmark旁路仍完全保持。Clock status formal端口仅源码候选，本片不新增其调用。
+
+先在既有equipment-diagnostics-contract.test.ts取得RED：默认/CI默认900s保持；显式30m、CI与benchmark拒绝及未知值拒绝；诊断证据独立namespace与不可验收资格；已有快照时钟副本与缺失值不制造事实。默认标准证据、原诊断边界用例继续回归。必要验证包括这些相关Web tests、Classic/Web类型、lint、CI选择17例和冻结证据/格式；根有界STATE/LIFE/ERROR检查，相关receipt既有拒绝非标准证据合同复用，并在既有scripts/harness/classic-receipt.test.mjs追加明确的新namespace/DIAGNOSTIC_ONLY拒绝案例。
+
+验证后保存可恢复本地commit与identified产物；只跑原入口main一次、retries0、所有sampler/lowCore诊断0、SwiftShader/headless/WebGL2与既有质量不变，显式30m和独立runID、全程source freeze。输出仅诊断，不关闭原900s CI/main或产品验收；原局部失败仍作为实际失败保存，早期其他失败导致C4未到达则停止本次尝试而不盲重跑。Root独占既有settings/evidence/harness-snapshot/route诊断/main/test/spec及独立新证据；无新agent/域名/权限、未扩大用户周预算限制。传统.15PD×120%=.18PD，AI实现25min×120%=30min，加既有build/check与单次最多30min浏览器，连续墙钟70min×120%=84min；03:15UTC首检查点。费用/实际模型元数据和额度分母不可读，不估算百分比，依赖主对话实际UI与既有停止线。
+
+273实现检查点03:08UTC：RED7FAIL8PASS，最终相关2files25PASS、receipt9PASS、CI选择17PASS、Classic/Web types和根lint PASS。首轮入口行数和动态timeout选择失败、次轮新receipt行数失败均保留并修复；原14项启动断言原样移入evidence支持模块，入口900000字面量恢复。冻结5/5与全仓Prettier PASS；新回执另做目标格式检查。根有界STATE/LIFE/ERROR无已证实P0/P1/P2，不代表全PR批准。独立证据diagnostic-main-window-273-01，新头build和单次扩展诊断待执行，原产品/CI仍未通过。

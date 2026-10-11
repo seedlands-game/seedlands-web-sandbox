@@ -69,6 +69,35 @@ const event = ({ status = 'passed', retry = 0, attachments = [] } = {}) => ({
 const attachment = (name, payload) => ({ name, payload });
 const invalidFailurePayloads = [null, 'failure', 7, true, [], ['failure']];
 
+test('273 diagnostic-only execution cannot produce canonical acceptance even with passed assertions', () => {
+  for (const name of ['classic-diagnostic-runtime-evidence.json', 'classic-runtime-evidence.json']) {
+    const diagnostic = {
+      ...detailed(),
+      status: 'DIAGNOSTIC_ONLY',
+      assertionStatus: 'PASS',
+      diagnosticOnly: true,
+      eligible: false,
+      mainExecutionBudget: { timeoutMs: 1_800_000, diagnosticOnly: true },
+    };
+    const recorded = recordCanonicalTestEnd(
+      createClassicReceipt({ runId, sourceSha, selection: selection() }),
+      event({ attachments: [attachment(name, diagnostic)] }),
+    );
+    const receipt = finalizeClassicReceipt(recorded, 'passed');
+    assert.deepEqual([receipt.attempts[0].testOutcome, receipt.attempts[0].status], ['passed', 'FAIL']);
+    assert.equal(receipt.status, 'FAIL');
+    assert.throws(() =>
+      validateClassicRunReceipt(receipt, {
+        runId,
+        sourceSha,
+        processStatus: 0,
+        requireCanonicalMain: true,
+        benchmark: false,
+      }),
+    );
+  }
+});
+
 test('Browser23 failure and local PASS become one terminal FAIL in either attachment order', () => {
   for (const attachments of [
     [attachment('classic-runtime-failure.json', failure()), attachment('classic-runtime-evidence.json', detailed())],
