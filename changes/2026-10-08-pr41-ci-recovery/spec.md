@@ -1496,3 +1496,31 @@ Root独占authority-cpu-profile.ts、既有classic-authority-cpu-profile.test.ts
 ### 2026-10-11 05:41 UTC：317 提交前 checkpoint
 
 headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及封存5文件检查通过；stdlib串行1277通过，首轮未改动vegetation5秒超时保留。310/315局部收益不是浏览器收益；与既有输入调度共存的联合端到端对照尚未完成，候选进入精确SHA真实输入及CI验证，不宣称可合入。305独立勘误不改原sealed evidence。PR预览部署仍为已有pr-41路径，生产仅main push；不合并或启用自动合并。
+
+### 2026-10-11 06:05 UTC：330 actor access allocation 预注册
+
+- 318 原始900秒主旅程失败：61段V2返回，C4 outbound在39945ms/31脉冲被全局900秒中断，返回与C5未到达，产物后验通过。310/315局部收益不足以完成真实旅程，联合端到端A/B仍未完成，不宣称生产验收或可合入。
+- 独立假设：303 C4实际CPU采样中的 createActorStateAccess（Of）self约4.8%为每次读取重新构造冻结访问器及closures的成本。A为42cd635d owner；B仅owner内部按stable id复用无状态actor访问器，命中仍校验存活索引及needs组件，销毁/销毁world移除缓存。实际ECS数据、inventory指针每次操作经原resolver读取；不是独立状态owner，不缓存实体/组件值。
+- 合同：当前actor/health/hunger/inventory修改在连续获取访问器后立即可见；销毁后新获取及既有handle拒绝、slot替换不会继承数据、world dispose/epoch恢复保持原错误及公开引用复制。访问器对象identity不作为业务合同或测试断言。
+- 预约对照：先12对A/A，再20对交错AB/BA，相同96actor、每轮100遍，每次重新调用actorStateAccess后读取相同5getter（mode/lifecycle/hunger/inventoryRevision/health）。计时无插桩；次指标校验和相同、actorBindings创建次数单轮在计时外测量。主指标中位配对B/A≤0.8且改善超过3倍A/A相对差中位；保存全部失败和原样数据。与310为独立分项，联合真实旅程与最终消费者性能证据仍是后续门槛。
+- 否决：生命周期/组件值新鲜度/错误语义/数据结果回归、无法确认局部收益或新增原版玩法回归；不扩大缓存范围、改限时/断言/quality、shadow inventory或增加第二优化维度。未采用则恢复生产现状，保留诊断结论。串行窗口不得与构建/其他测试并发；UI预算按主对话实测累计规则，不以token/API/时间换算。
+
+### 2026-10-11 06:08 UTC：331 测量窗口修订（未改生产代码）
+
+330 A/A 12对相对差中位32.33%，单样本中位96.13ms，原样保留；不能支持采用。331仍相同96actor与相同5getter，将每样本100遍改为1000遍，平均更多分配/GC周期；其他轴不变。只补测一组12对A/A，若中位噪声仍≥25%则停止候选、不改生产。稳定后才做20对交错AB/BA，仍要求B/A≤0.8且改善超过3倍新A/A噪声。修订是新测量窗口的预注册，不把旧噪声或未运行B写成通过。新增当前值/restore句柄合同测试在A上7/7通过。
+
+### 2026-10-11 06:15 UTC：334 同轴 helper 提取
+
+331原型局部A/B通过，但owner lint508行超过500，stdlib1276通过/2个原限时超时保留，不能提交。把缓存factory移到现有ecs-actor-state helper（当前478非空行），owner保留存活/needs验证与销毁清除；不改500上限、不创建额外状态owner。命中路径增加lazy factory closure，因此334必须用同一42cd control、331 A/A与相同1000遍/20对AB-BA重新计时，校验和/否决门槛不变。原型源码与样本私有保留。先隔离2个超时和owner/restore合同，不盲重复全量。两秒只读进程观察未发现存活本地Chromium，不证明宿主无共享负载；未终止任何未知进程。
+
+### 2026-10-11 06:19 UTC：335 保留原 lookup 校验路径
+
+334提取后owner lint仍502/500，命令在lint失败终止，334 A/B未启动。335由helper每次获取调用原actorBindings；命中仅复用facet对象，binding创建/初始needs校验路径与A保持，getter仍使用最初冻结lifetime引用。owner缩为简短入口，保留销毁/clear。原型331绑定96次的结果不适用于此版本；335次指标如实计量actorBindings调用（预计不减少），主要复用facet构造。再次用同一331 A/A基准与相同20对AB/BA测量，原门槛不变。
+
+### 2026-10-11 06:27 UTC：335 final-source stdlib checkpoint
+
+最终helper版本stdlib172文件1278例全部通过、全类型和全lint通过，隔离22例通过；前原型2项超时/行数失败保留。开始原版headless全量，联合端到端与最终SHA Browser仍未通过，PR保持Draft。长期docs不改：内部派生访问器，无值/schema或外部写入合同变更。
+
+### 2026-10-11 06:32 UTC：344 提交前 checkpoint
+
+335最终版本stdlib1278、headless1205、全类型/lint/格式、CI选择17和封存5文件检查全部通过。局部复用A/B满足门槛，原lookup绑定校验每次保留；长期docs不改。仍缺新SHA原版主旅程/CI及联合端到端对照，完整transport未关闭。保留原型331/334行数FAIL、332两项超时FAIL，以及42cd local318/CI432全局900秒FAIL；不改断言、timeout或quality。正常推现有分支触发已有pr-41预览路径，生产仅main，保持Draft。

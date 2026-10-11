@@ -341,6 +341,24 @@ export type ActorAccessBindings = Readonly<{
   setHealth: (value: number) => void;
 }>;
 
+/** The owner validates each lookup and clears views on removal or disposal. Values stay in ECS. */
+export function createActorStateAccessCache(components: Components) {
+  const access = new Map<string, ActorComponentAccess>();
+  return {
+    get(id: string, bindings: () => ActorAccessBindings) {
+      const currentBindings = bindings();
+      let current = access.get(id);
+      if (!current) {
+        current = createActorStateAccess(components, currentBindings);
+        access.set(id, current);
+      }
+      return current;
+    },
+    delete: (id: string) => access.delete(id),
+    clear: () => access.clear(),
+  };
+}
+
 /** The bound resolver checks epoch and lifetime on each read/write, including retained inventory handles. */
 export function createActorStateAccess(components: Components, binding: ActorAccessBindings): ActorComponentAccess {
   const inventory = createInventoryAccess(() => {

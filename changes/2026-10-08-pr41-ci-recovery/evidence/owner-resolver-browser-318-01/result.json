@@ -1,0 +1,52 @@
+{
+  "status": "FAIL",
+  "sourceSha": "42cd635d6ac8ac9aa8ebf1af1e24fa136a204036",
+  "runId": "pr41-owner-resolver-main-318-01",
+  "diagnosticMainWindow": false,
+  "mainTimeoutMs": 900000,
+  "samplers": 0,
+  "retries": 0,
+  "playwrightDurationMs": 924756,
+  "cause": "global900000ms timeout during C4-outbound original90sec route",
+  "routeCounts": {
+    "returned": 61,
+    "threw": 1
+  },
+  "C4": {
+    "elapsedMs": 39945,
+    "pulseCount": 31,
+    "finalAuthorityPosition": [127.85534397931659, 33.51000017700565, -0.7657585994906525],
+    "target": [208.5, 0.5],
+    "finalCachedPhysicsClock": {
+      "physicsHz": 60,
+      "integratedPhysicsTimeMs": 982383.3333325109,
+      "activeTimeMs": 982390.4999999832,
+      "physicsDebtMs": 7.166667472338304,
+      "paused": false
+    },
+    "finalBodyCounts": {
+      "total": 27,
+      "actors": 27,
+      "worldItems": 0,
+      "nearPlayer": 5
+    }
+  },
+  "returnAndC5": "NOT_REACHED",
+  "artifactPostverify": "PASS",
+  "ci432": {
+    "runId": 38115675957,
+    "nonBrowser": "5 PASS",
+    "headlessTests": 1205,
+    "kernel": 28,
+    "stdlib": 1277,
+    "chromium": "FAIL",
+    "mainFirst": "V2 global900 timeout last[78.5,-0.5]",
+    "mainRetry": "V2 global900 timeout last[96.5,-0.5]",
+    "C4": "NOT_REACHED_BOTH",
+    "visual": "PASS once",
+    "ordinaryMinecart": "PASS once",
+    "modular": "SKIPPED",
+    "pages": "SKIPPED"
+  },
+  "performanceClaim": false
+}
