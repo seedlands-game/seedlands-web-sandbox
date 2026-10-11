@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "scope": "Optional existing Classic native trace C4 stage; no production behavior change",
+  "parentSourceSha": "160de2d141033777cf82d5ca729f6925b4d1c3ea",
+  "registeredSpec": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "red": {
+    "initial": {
+      "failed": 5,
+      "passed": 4
+    },
+    "setupFailure": {
+      "failed": 1,
+      "passed": 11
+    }
+  },
+  "green": {
+    "relatedFiles": 3,
+    "testsPassed": 39,
+    "newOwnerTests": 12
+  },
+  "checks": {
+    "classicTypes": "PASS",
+    "webTypes": "PASS",
+    "rootLint": "PASS",
+    "finalRelatedLint": "PASS",
+    "ciSelection": {
+      "status": "PASS",
+      "tests": 17
+    },
+    "frozenEvidence": {
+      "status": "PASS",
+      "exactIdentities": 5
+    },
+    "fullPrettier": "PASS"
+  },
+  "unchangedLimits": {
+    "defaultDelayMs": 360000,
+    "durationMs": 5000,
+    "completionTimeoutMs": 10000,
+    "maxBytes": 67108864,
+    "mainTimeoutMs": 900000,
+    "c4TimeoutMs": 90000
+  },
+  "rootBoundedReview": "STATE/LIFE/ERROR: no demonstrated P0/P1/P2 in changed scope; not whole PR approval",
+  "newBrowserTrace": "NOT_RUN",
+  "productAcceptance": "OPEN",
+  "ci430": {
+    "runId": 38109088961,
+    "sourceSha": "160de2d141033777cf82d5ca729f6925b4d1c3ea",
+    "nonBrowserJobs": "5 PASS",
+    "chromium": "FAIL",
+    "main": "Both attempts fail C4 outbound local 90s after V2 completes",
+    "visual": "FLAKY: initial single-click predicate failure, retry passes",
+    "nativeMinecart": "PASS once",
+    "modular": "SKIP",
+    "pages": "SKIP"
+  },
+  "localLogHashes": {
+    "native-stage-red-290-01.log": "f3b70d410c7c79d06d766a945c2afae42fb838bed8373d0a1d8bbfc8dceff082",
+    "native-stage-activation-red-290-01.log": "5e5cd2961542b9d0967f5a807b7e82a4d8aa168c6aab30faeb461c5be95ecd3a",
+    "native-stage-green-290-03.log": "2421b87f87e2431e58f75268889af0f58b15bbfc0ba41460b02048251f1ce762",
+    "native-stage-classic-types-290-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "native-stage-classic-types-final-290-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "native-stage-web-types-290-01.log": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50",
+    "native-stage-lint-290-01.log": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1",
+    "native-stage-lint-final-290-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-stage-selection-all-290-01.log": "eacff424760b0594525f9e07b03c43f844544e8088a5349918e57d0a6145b347",
+    "native-stage-format-290-01.log": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b"
+  }
+}

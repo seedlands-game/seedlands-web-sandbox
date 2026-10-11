@@ -44,7 +44,11 @@ test('Classic owner contracts remain in the explicit behavior and type selection
     'apps/web/tests/unit/worker/authority-column-source.test.ts',
     'apps/web/tests/unit/worker/authority-worker-persistence-column.test.ts',
   ];
-  for (const path of [...units, 'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts'])
+  for (const path of [
+    ...units,
+    'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts',
+    'apps/web/tests/e2e/classic-support/native-trace.test.ts',
+  ])
     assert.ok(script.split(/\s+/).includes(path), `${path} is absent from the existing headless selection`);
   for (const path of units) assert.ok(types.includes(path), `${path} is absent from Classic test types`);
   assert.ok(types.includes('apps/web/tests/e2e'), 'The original whole E2E directory must remain typed');

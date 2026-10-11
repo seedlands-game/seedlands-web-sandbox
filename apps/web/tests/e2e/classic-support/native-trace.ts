@@ -9,6 +9,8 @@ const optionalCategories = ['disabled-by-default-gpu.service', 'disabled-by-defa
 type Completion = { stream?: string; dataLossOccurred: boolean };
 type NativeRun = {
   session: CDPSession;
+  stage: 'main' | 'C4';
+  captureDelayMs: number;
   runId: string;
   sourceSha: string;
   categories: string[];
@@ -27,6 +29,11 @@ type NativeRun = {
   errors: unknown[];
 };
 const runs = new WeakMap<Page, NativeRun>();
+type DeferredRun = Pick<NativeRun, 'runId' | 'sourceSha' | 'createdAt'> & {
+  activationAttempted?: boolean;
+  errors?: string[];
+};
+const deferredRuns = new WeakMap<Page, DeferredRun>();
 
 async function bounded<T>(operation: Promise<T>, label: string, timeoutMs = completionTimeoutMs): Promise<T> {
   let timeout: ReturnType<typeof setTimeout> | undefined;
@@ -152,16 +159,31 @@ export async function startClassicNativeTrace(
   info: Pick<TestInfo, 'title'>,
   benchmark: boolean,
   env: Readonly<Record<string, string | undefined>> = process.env,
+  stage: 'main' | 'C4' = 'main',
 ): Promise<void> {
   if (env.SEEDLANDS_CLASSIC_NATIVE_TRACE !== '1' || !info.title.startsWith('Classic 生产旅程')) return;
   if (benchmark || env.SEEDLANDS_CLASSIC_BENCHMARK === '1')
     throw new Error('Native tracing cannot run in a benchmark.');
   if (env.SEEDLANDS_CLASSIC_CPU_PROFILE === '1')
     throw new Error('Native tracing and CPU profiling are mutually exclusive.');
+  const requestedStage = env.SEEDLANDS_CLASSIC_NATIVE_TRACE_STAGE ?? 'main';
+  if (requestedStage !== 'main' && requestedStage !== 'C4') throw new Error('Unknown native trace stage.');
   const runId = env.SEEDLANDS_HARNESS_RUN_ID;
   const sourceSha = env.SEEDLANDS_SOURCE_SHA;
   if (!runId || !sourceSha) throw new Error('Native trace needs SEEDLANDS_HARNESS_RUN_ID and SEEDLANDS_SOURCE_SHA.');
+  if (requestedStage === 'main' && stage === 'C4') return;
+  const deferred = deferredRuns.get(page);
+  if (deferred && (deferred.runId !== runId || deferred.sourceSha !== sourceSha))
+    throw new Error('Deferred native trace identity changed.');
+  if (requestedStage === 'C4' && stage === 'main') {
+    if (runs.has(page)) throw new Error('This page already owns a native trace.');
+    if (!deferred) deferredRuns.set(page, { runId, sourceSha, createdAt: new Date().toISOString() });
+    return;
+  }
+  if (requestedStage === 'C4' && !deferred && !runs.has(page))
+    throw new Error('C4 native trace requires a deferred request.');
   if (runs.has(page)) throw new Error('This page already owns a native trace.');
+  if (deferred) deferred.activationAttempted = true;
   const browser = page.context().browser();
   if (!browser) throw new Error('Native tracing requires a Chromium browser.');
   const session = await browser.newBrowserCDPSession();
@@ -171,6 +193,8 @@ export async function startClassicNativeTrace(
       if (!available.includes(category)) throw new Error(`Native tracing lacks required category ${category}.`);
     const run: NativeRun = {
       session,
+      stage: requestedStage,
+      captureDelayMs: requestedStage === 'C4' ? 0 : delayMs,
       runId,
       sourceSha,
       categories: [...coreCategories, ...optionalCategories.filter((category) => available.includes(category))],
@@ -185,12 +209,15 @@ export async function startClassicNativeTrace(
       run.capture = capture(run).catch((error: unknown) => {
         run.errors.push(error);
       });
-    }, delayMs);
+    }, run.captureDelayMs);
     runs.set(page, run);
+    deferredRuns.delete(page);
   } catch (error) {
+    if (deferred) deferred.errors = errorMessages(error);
     try {
       await bounded(session.detach(), 'setup detach');
     } catch (cleanupError) {
+      if (deferred) deferred.errors?.push(...errorMessages(cleanupError));
       throw new AggregateError([error, cleanupError], 'Native trace setup and detach failed.', { cause: cleanupError });
     }
     throw error;
@@ -221,10 +248,11 @@ async function finish(run: NativeRun, info: Pick<TestInfo, 'attach'>): Promise<v
         eligible: false,
         runId: run.runId,
         sourceSha: run.sourceSha,
+        stage: run.stage,
         status: run.errors.length ? 'FAILED' : run.capture ? 'COMPLETE' : 'NOT_STARTED',
         categories: run.categories,
         availableCategories: run.availableCategories,
-        delayMs,
+        delayMs: run.captureDelayMs,
         durationMs,
         traceBufferSizeInKb: 16_384,
         maxBytes,
@@ -247,7 +275,34 @@ async function finish(run: NativeRun, info: Pick<TestInfo, 'attach'>): Promise<v
 
 export async function stopClassicNativeTrace(page: Page, info: Pick<TestInfo, 'attach'>): Promise<void> {
   const run = runs.get(page);
-  if (!run) return;
+  if (!run) {
+    const deferred = deferredRuns.get(page);
+    if (!deferred) return;
+    deferredRuns.delete(page);
+    await info.attach('classic-native-trace-metadata.json', {
+      contentType: 'application/json',
+      body: JSON.stringify({
+        schemaVersion: 1,
+        diagnosticOnly: true,
+        eligible: false,
+        runId: deferred.runId,
+        sourceSha: deferred.sourceSha,
+        createdAt: deferred.createdAt,
+        stage: 'C4',
+        status: deferred.activationAttempted ? 'FAILED' : 'NOT_STARTED',
+        reason: deferred.activationAttempted ? 'C4 trace setup did not complete.' : 'C4 capture was not activated.',
+        delayMs: 0,
+        durationMs,
+        traceBufferSizeInKb: 16_384,
+        maxBytes,
+        completionTimeoutMs,
+        bytes: 0,
+        dataLossOccurred: null,
+        errors: deferred.errors ?? (deferred.activationAttempted ? ['See the C4 setup test failure.'] : []),
+      }),
+    });
+    return;
+  }
   run.stopping ??= finish(run, info).finally(() => runs.delete(page));
   await run.stopping;
 }
