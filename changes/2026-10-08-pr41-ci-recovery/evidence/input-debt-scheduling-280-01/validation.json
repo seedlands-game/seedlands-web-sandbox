@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "implementedBaseSha": "27a92d90a0d691c3d10fc3dc45b7b6e724337d3d",
+  "recordedAt": "2026-10-11T03:35:01.426169+00:00",
+  "change": "Input scheduling estimate includes valid existing physics debt plus snapshot age under unchanged combined2000ms cap",
+  "red": {
+    "failed": 10,
+    "passed": 17
+  },
+  "green": {
+    "clientFiles": 7,
+    "clientTests": 77,
+    "schedulingOwnerTests": 28,
+    "stdlibFiles": 2,
+    "stdlibTests": 23
+  },
+  "static": {
+    "classicTypes": "PASS including newly selected owner",
+    "webTypes": "PASS: zero errors/warnings",
+    "lint": "PASS",
+    "ciSelection": "17 PASS",
+    "format": "PASS: frozen5/5 and whole repository Prettier"
+  },
+  "ciOwnerRegistration": {
+    "behavior": "Existing single scheduling test added once to original Classic headless selection",
+    "types": "Same existing test added once",
+    "guard": "Existing ci-browser-time-budget owner contract expanded; no job/workflow change"
+  },
+  "review": "Bounded Root STATE/LIFE/ERROR, no evidenced P0/P1/P2 in changed scope; not whole PR approval",
+  "newHeadBuildAndBrowser": "NOT_RUN_AT_RECEIPT",
+  "mergeReadiness": "NOT_READY: existing900s main/C4 and full product acceptance remain open",
+  "docsBaseline": "UNCHANGED: existing accepted-snapshot input scheduling contract; specific scope preregistered in current spec",
+  "files": {
+    "input-debt-red-280-01.log": {
+      "sha256": "964f2a883aaf989420b5cc1a7a5f59ea7be5aa064e44c9938e0d388a1eba9364"
+    },
+    "input-debt-green-280-01.log": {
+      "sha256": "ea2fb730e7b220767b9b62894c48f9fe4b7c9f7e710b8a8af4d58bc2691de412"
+    },
+    "input-debt-client-280-01.log": {
+      "sha256": "854afaf0e05714a631b7ef8904441bdddaa0b26e26d2b0ef2d6f71eaac394d68"
+    },
+    "input-debt-stdlib-280-01.log": {
+      "sha256": "2f0652c5160ca8c65a736c420784fbc30b30697a020fe7b260ba61dbda7c3202"
+    },
+    "input-debt-classic-types-280-01.log": {
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "input-debt-web-types-280-01.log": {
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    "input-debt-lint-280-01.log": {
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    "input-debt-selection-280-01.log": {
+      "sha256": "a3fa6d2011937de5e1bb63a1b456d65c11cbbc4dfce5f26ff871d71d3ba00949"
+    },
+    "input-debt-review-280-01.md": {
+      "sha256": "f7d47149e6f7541c920d367391ae5f0176105b3c7facba970c84e223600f689b"
+    },
+    "input-debt-format-check-280-01.log": {
+      "sha256": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b"
+    }
+  },
+  "formatVerifiedAt": "2026-10-11T03:36:19.786909+00:00"
+}
