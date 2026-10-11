@@ -1,0 +1,7 @@
+# 235失败后邻近实体诊断
+
+本片仅扩充既有原main的失败证据。默认关闭；failed/timedOut且非benchmark时沿正式world.command查询radius8，最多扫描512条、输出64个角色/transport实体的白名单字段，数值tuple独立复制并记录后续查询自己的frontier与时钟。原motion/input/startup先捕获；拒绝或异常不抹掉原观察。
+
+RED新增2FAIL/原4PASS，最终同文件9PASS。Classic首轮类型失败保留，修复后Classic/Web types、lint和CI选择17例PASS。格式结果由本回执的validation记录。原输入、质量、断言、timeout、retry和生产路径未改；现有Authority RPC超时仍为15秒，无新增timer。
+
+Build223与native225的旧3b11e4cb证据、CI428五项非浏览器PASS仍按自己的身份保留；本片新头build和浏览器查询未执行。失败后读回不能证明同tick碰撞、旧运行根因或性能，不能关闭C4或完整194/transport/slopes验收，PR仍不可合入。长期docs baseline未更新：沿既有正式查询合同，不引入新产品行为。

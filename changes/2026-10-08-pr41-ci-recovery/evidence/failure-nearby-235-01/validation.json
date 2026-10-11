@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "implementedBaseSha": "3b11e4cb4df493a67539e806166235e29130d104",
+  "recordedAt": "2026-10-11T01:44:21.060328+00:00",
+  "change": "原main失败后追加有界正式邻近实体查询；无生产物理、输入或验收口径变更。",
+  "red": {
+    "testsFailed": 2,
+    "testsPassed": 4
+  },
+  "green": {
+    "filesPassed": 1,
+    "testsPassed": 9
+  },
+  "static": {
+    "classicTypes": "PASS after first-run type errors corrected",
+    "webTypes": "PASS",
+    "lint": "PASS",
+    "ciSelection": "17 PASS",
+    "format": "PASS: full frozen5/5 and Prettier after correcting new test file",
+    "finalTargetedLint": "PASS"
+  },
+  "newHeadBuildAndBrowserQuery": "NOT_RUN_AT_RECEIPT",
+  "ci428AtReceipt": "Five non-browser jobs PASS; Chromium RUNNING",
+  "mergeReadiness": "NOT_READY: C4 and wider product acceptance remain open",
+  "limits": "失败后正式查询不是同tick/contact或根因证明；静态与诊断测试不是产品PASS。",
+  "files": {
+    "failure-nearby-red-235-01.log": {
+      "sha256": "ae158a4ae30aca112bc00d8ba9324e2d3f1d40202c00cac4ed93216c7fd73f56"
+    },
+    "failure-nearby-green-235-03.log": {
+      "sha256": "8b534bcfe1e63b61f6c1edef6fa5b05d460a33c48bba48d6331575cd068c976c"
+    },
+    "failure-nearby-classic-types-235-01.log": {
+      "sha256": "28ac7f181068e3a21c60b31170d8ae3ece85e88882291a2259710b1c1908045e"
+    },
+    "failure-nearby-classic-types-235-02.log": {
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "failure-nearby-web-types-235-01.log": {
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    "failure-nearby-lint-235-01.log": {
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    "failure-nearby-selection-235-01.log": {
+      "sha256": "6d8c4c3db26b4aac280a8f882fb5b47a71cc650412b78cc87e2f56a061ce7d00"
+    },
+    "failure-nearby-review-235-01.md": {
+      "sha256": "91150eb8e42d2b8fd6999bffcffa8f48d052a8aaefb1dc37a666578e682c8279"
+    },
+    "failure-nearby-final-lint-235-01.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "failure-nearby-format-check-235-01.log": {
+      "sha256": "7f9d2840828023bf6f83c0b657e75a11fde545854b56e2eba48cecc01b758a1f"
+    },
+    "failure-nearby-targeted-format-235-01.log": {
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    "failure-nearby-format-check-235-02.log": {
+      "sha256": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b"
+    }
+  }
+}

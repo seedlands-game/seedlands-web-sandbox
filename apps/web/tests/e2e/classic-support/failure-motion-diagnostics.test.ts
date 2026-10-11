@@ -5,7 +5,7 @@ import { collectClassicFailureDiagnostics } from './evidence';
 afterEach(() => vi.unstubAllGlobals());
 
 const page = {
-  evaluate: async (callback: () => unknown) => callback(),
+  evaluate: async (callback: (includeNearby: boolean) => unknown, includeNearby: boolean) => callback(includeNearby),
 } as unknown as Page;
 
 function installWindow(snapshot: (() => unknown) | undefined) {
@@ -28,6 +28,102 @@ function installWindow(snapshot: (() => unknown) | undefined) {
 }
 
 describe('失败控制台同次运动观察', () => {
+  it('uses a later formal query and retains only bounded independent character poses', async () => {
+    const snapshot = vi.fn(() => ({ player: [90, 32.6, 0.5], authority: { physicsTick: 731 } }));
+    installWindow(snapshot);
+    const bodies = Array.from({ length: 65 }, (_, index) => ({
+      id: `actor-${index}`,
+      type: 'creature',
+      archetype: 'cow',
+      position: [90 + index / 100, 31, 0.5],
+      physicsVelocity: [0, 0, 0],
+      privateBrain: { goal: 'not in the diagnostic contract' },
+    }));
+    const command = vi.fn().mockResolvedValue({
+      ok: true,
+      data: {
+        success: true,
+        data: { entities: [{ id: 'drop', type: 'world-item', position: [90, 31, 0.5] }, ...bodies] },
+      },
+      frontier: { epoch: 'world-1', physicsTick: 734, worldRevision: 145, commitSequence: 800, internal: [1, 2] },
+    });
+    (window as unknown as { __seedlandsHarness: { world: unknown } }).__seedlandsHarness.world = { command };
+    const result = await collectClassicFailureDiagnostics(page, true);
+    expect(command).toHaveBeenCalledExactlyOnceWith({ type: 'query-nearby', radius: 8 });
+    expect(snapshot).toHaveBeenCalledTimes(1);
+    expect(result?.nearbyEntities).toMatchObject({
+      status: 'OBSERVED',
+      diagnosticOnly: true,
+      eligible: false,
+      observedNearbyCount: 66,
+      truncated: true,
+      frontier: { epoch: 'world-1', physicsTick: 734, worldRevision: 145, commitSequence: 800 },
+    });
+    const observed = result?.nearbyEntities as { entities: unknown[]; frontier: unknown };
+    expect(observed.entities).toHaveLength(64);
+    expect(observed.entities[0]).toEqual({
+      id: 'actor-0',
+      type: 'creature',
+      archetype: 'cow',
+      position: [90, 31, 0.5],
+      physicsVelocity: [0, 0, 0],
+    });
+    expect(observed.frontier).not.toHaveProperty('internal');
+    bodies[0]!.position[0] = 99;
+    expect(observed.entities[0]).toMatchObject({ position: [90, 31, 0.5] });
+  });
+
+  it('retains original motion/input evidence when the later query is rejected', async () => {
+    const snapshot = vi.fn(() => ({ player: [90, 32.6, 0.5], authority: { physicsTick: 731 } }));
+    const input = installWindow(snapshot);
+    const command = vi.fn().mockResolvedValue({ ok: false, error: { code: 'unavailable' } });
+    (window as unknown as { __seedlandsHarness: { world: unknown } }).__seedlandsHarness.world = { command };
+    const result = await collectClassicFailureDiagnostics(page, true);
+    expect(result?.nearbyEntities).toMatchObject({ status: 'QUERY_FAILED', reason: 'query-rejected' });
+    expect(result?.inputDecisions).toEqual(input);
+    expect(result?.presentation).toMatchObject({ motion: { authority: { physicsTick: 731 } } });
+  });
+
+  it('leaves the available query port untouched by default', async () => {
+    installWindow(() => ({ player: [90, 32.6, 0.5], authority: { physicsTick: 731 } }));
+    const command = vi.fn();
+    (window as unknown as { __seedlandsHarness: { world: unknown } }).__seedlandsHarness.world = { command };
+    const result = await collectClassicFailureDiagnostics(page);
+    expect(command).not.toHaveBeenCalled();
+    expect(result).not.toHaveProperty('nearbyEntities');
+  });
+
+  it('isolates a thrown query error from the captured original evidence', async () => {
+    const input = installWindow(() => ({ player: [90, 32.6, 0.5], authority: { physicsTick: 731 } }));
+    const command = vi.fn().mockRejectedValue(new Error('private query details'));
+    (window as unknown as { __seedlandsHarness: { world: unknown } }).__seedlandsHarness.world = { command };
+    const result = await collectClassicFailureDiagnostics(page, true);
+    expect(result?.nearbyEntities).toEqual({ status: 'QUERY_FAILED', reason: 'query-error' });
+    expect(result?.inputDecisions).toEqual(input);
+  });
+
+  it('rejects nonfinite poses and bounds scanning before a later valid actor', async () => {
+    installWindow(() => ({ player: [90, 32.6, 0.5], authority: { physicsTick: 731 } }));
+    const entities = [
+      { id: 'invalid', type: 'npc', position: [NaN, 31, 0.5] },
+      { id: 'valid', type: 'npc', position: [90, 31, 0.5], physicsVelocity: [Infinity, 0, 0] },
+      ...Array.from({ length: 510 }, () => null),
+      { id: 'beyond-scan', type: 'npc', position: [90, 31, 0.5] },
+    ];
+    const command = vi.fn().mockResolvedValue({
+      ok: true,
+      data: { success: true, data: { entities } },
+      frontier: { physicsTick: Infinity, epoch: 1 },
+    });
+    (window as unknown as { __seedlandsHarness: { world: unknown } }).__seedlandsHarness.world = { command };
+    const result = await collectClassicFailureDiagnostics(page, true);
+    expect(result?.nearbyEntities).toMatchObject({
+      truncated: true,
+      scanLimit: 512,
+      frontier: { epoch: null, physicsTick: null, worldRevision: null, commitSequence: null },
+      entities: [{ id: 'valid', type: 'npc', archetype: null, position: [90, 31, 0.5], physicsVelocity: null }],
+    });
+  });
   it('保留正式读回的玩家、Authority及停稳字段而不重复采样', async () => {
     const snapshot = vi.fn(() => ({
       player: [102.25, 31, -0.5],
