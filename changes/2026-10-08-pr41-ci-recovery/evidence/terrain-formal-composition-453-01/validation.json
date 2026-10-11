@@ -1,0 +1,112 @@
+{
+  "recordedAt": "2026-10-11T09:43:55.559912+00:00",
+  "sourceParent": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "measuredDirtySourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "window": "PASS",
+  "measurement": "RECORDED",
+  "formalContext": {
+    "verifiedArtifacts": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "integrity": {
+          "algorithm": "sha256",
+          "manifestDigest": "7aece081eb8c076aa2b2aa175fba973124dbf2cb02bf9533adf646dcb5c6e7e5",
+          "entryDigest": "4a95685755eb975c7fb502499e12a86223ba8d979a2796656f2d74ebadcf752b",
+          "resources": [
+            {
+              "path": "playbooks/classic/presentation.json",
+              "digest": "b098eb92743d9a70264ffa0c03fb7f1cbe1fbeb8f4147f0d61f7681b0bfa9447"
+            },
+            {
+              "path": "playbooks/classic/assets/transport/minecart.glb",
+              "digest": "44cecf89412ca38375ce8d20531043b985d1ef8ff8bebf3fcc7fc8efc6117b6b"
+            },
+            {
+              "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+              "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-0.svg",
+              "digest": "0508ad38578e916ca80378be958304444799ef4e18ebe2a088edb00eb4c03d48"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-1.svg",
+              "digest": "4a580265ab48364b869363777e6b8f8871ac3a6c441c170a8861765e25151d22"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-2.svg",
+              "digest": "a5975f5de62795d5a95aaa34118b17782010255520a951e8e29a86a37d47ea59"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-3.svg",
+              "digest": "16d0f4b712af3aed10286b35b41585fefa8b086e2af567b9c051634de563eae7"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-4.svg",
+              "digest": "d1a40312c1417a9a1d75d2e6df523961a728aaecfd1ff36a02be114532084131"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-5.svg",
+              "digest": "dc6ffcf93f03852ef32c735e9399b6fb2822ecd8bf794ab3b4bbb764c0c6ba9f"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-6.svg",
+              "digest": "3c04b03df47e17e016a3665231093e15044538a9ad49b8ae9653a2d1f952f5c8"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-7.svg",
+              "digest": "a93ea516eae82c31d04c4acaaed8ea05626c7930826af5aed27f1abf93b829b6"
+            }
+          ]
+        }
+      }
+    ],
+    "hasGameplayComposition": true,
+    "voxelSemanticsCount": 105,
+    "accessedPackFiles": [
+      "host-admissions.json",
+      "packs.lock.json",
+      "overworld.manifest.json",
+      "overworld.mjs",
+      "playbooks/classic/presentation.json",
+      "playbooks/classic/assets/transport/minecart.glb",
+      "playbooks/classic/assets/audio/to-far-shores.mp3",
+      "playbooks/classic/assets/crops/wheat-stage-0.svg",
+      "playbooks/classic/assets/crops/wheat-stage-1.svg",
+      "playbooks/classic/assets/crops/wheat-stage-2.svg",
+      "playbooks/classic/assets/crops/wheat-stage-3.svg",
+      "playbooks/classic/assets/crops/wheat-stage-4.svg",
+      "playbooks/classic/assets/crops/wheat-stage-5.svg",
+      "playbooks/classic/assets/crops/wheat-stage-6.svg",
+      "playbooks/classic/assets/crops/wheat-stage-7.svg"
+    ],
+    "adapter": "readonly local pack files + Node dataURL import; production digest/admission checks retained"
+  },
+  "workload": {
+    "chunks": 9,
+    "passes": 200,
+    "actors": 27,
+    "corpusFrames": 20,
+    "terrainCells": 29575,
+    "fluidPercent": 4
+  },
+  "AApairs": 12,
+  "ABpairs": 20,
+  "AAnoise": 0.004198429629784958,
+  "gain": 0.6234317858483579,
+  "aMedianMs": 987.5017484999989,
+  "bMedianMs": 366.8736949999984,
+  "aP95": 1092.8154480000012,
+  "bP95": 424.95955700000195,
+  "equality": "complete20frames and unknown/unload/reload/mixedrevision guards equal; all20paired checksums equal",
+  "scopeErratumFor445": "445 window and measurement are valid for default legacy-content fixed fixture; not formal composition proof. Its sealed files remain unchanged. 453 adds actual production composition, real loader-verified artifact integrity and actual105-definition voxelSemantics. Earlier413/417/429 remain INELIGIBLE window records.",
+  "functionalValidation": "same final production files as 445; stdlib1288, Classicheadless1209, owners36 including final loaded-wrong-key regression, alltypes,changedlint/format,frozen5,CIselection17 PASS; no production code changed between445 and453",
+  "NodeCompatibility": "readonly local fetch guarded to current pack directory and private loader changes only blob import URL to Node-supported dataURL; production digest/admission/module schema checks unchanged; no external network, fake integrity or changed permissions",
+  "notProved": [
+    "new exactSHA CI/browser",
+    "full simulation/render/combined end-user performance",
+    "transport variants/slopes/boat formal acceptance"
+  ],
+  "mergeReady": false
+}

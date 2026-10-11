@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-10-11T09:30:45.228971+00:00",
+  "runs": [
+    {
+      "runId": "pr41-known-chunk-production-429-01",
+      "receiptPath": "/workspace/seedlands-web-sandbox/harness/results/performance-windows/4e5e8700-fb46-4835-b866-2dec52914aed.json",
+      "windowStatus": "PASS",
+      "measurement": {
+        "status": "INVALID",
+        "error": "Declared performance measurement mismatches windowId."
+      },
+      "eligibility": "INELIGIBLE_WINDOW_RECORD_INVALID"
+    },
+    {
+      "runId": "pr41-known-chunk-read-413-01",
+      "receiptPath": "/workspace/seedlands-web-sandbox/harness/results/performance-windows/93240fb9-dbff-4b7c-a7fd-fccfe0b0c36f.json",
+      "windowStatus": "PASS",
+      "measurement": {
+        "status": "INVALID",
+        "error": "Declared performance measurement mismatches windowId."
+      },
+      "eligibility": "INELIGIBLE_WINDOW_RECORD_INVALID"
+    },
+    {
+      "runId": "pr41-known-chunk-consumer-417-01",
+      "receiptPath": "/workspace/seedlands-web-sandbox/harness/results/performance-windows/af5c8c20-e23a-4ccf-bac7-af9fda4560a9.json",
+      "windowStatus": "PASS",
+      "measurement": {
+        "status": "INVALID",
+        "error": "Declared performance measurement mismatches windowId."
+      },
+      "eligibility": "INELIGIBLE_WINDOW_RECORD_INVALID"
+    }
+  ],
+  "noProductionCommitOrPush": true
+}

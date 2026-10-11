@@ -1,4 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { buildLogicObservation } from '../../src/server/authority/logic-observation-builder';
+import { peekLoadedVoxel, peekLoadedVoxelInChunk } from '../../src/server/loaded-voxel-reader';
+import { GameServer } from '../../src/server/game-server';
+import { testWorldgenExecutableProvider } from '../support/worldgen';
+import { testCorePlatform } from '../support/core-platform';
+import { defaultItemDefinitionRegistry } from '../../src/server/gameplay/item-registry';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '../../src/world/voxel';
 import {
   compareNavigationPriority,
   LogicTerrain,
@@ -9,6 +16,138 @@ import {
   type NavigationPriority,
 } from '../../src/server/logic/logic-terrain';
 import type { LogicPosition, TerrainWindow } from '../../src/server/logic/logic-protocol';
+
+describe('terrain observation expected chunk reads', () => {
+  const fixture = () => {
+    const server = new GameServer({
+      worldgenProvider: testWorldgenExecutableProvider,
+      platform: testCorePlatform,
+      seedText: 'observation-keyed-read',
+    });
+    const chunks = new Map(
+      [
+        [-1, -1],
+        [-1, 0],
+        [0, -1],
+        [0, 0],
+      ].map(([cx, cz]) => {
+        const chunk = server.getChunk(cx!, 1, cz!);
+        return [chunk.key, chunk] as const;
+      }),
+    );
+    const options: Omit<Parameters<typeof buildLogicObservation>[0], 'getLoadedVoxel'> = {
+      clone: testCorePlatform.clone,
+      epoch: 'keyed-observation',
+      observationSequence: 1,
+      snapshot: {
+        kind: 'snapshot',
+        protocolVersion: 1,
+        epoch: 'keyed-observation',
+        physicsTick: 1,
+        commitSequence: 1,
+        worldMutationCount: 0,
+        acknowledgedInputSequence: 0,
+        inputResyncRequired: false,
+        activeTimeMs: 50,
+        integratedPhysicsTimeMs: 50,
+        physicsDebtMs: 0,
+        player: {
+          id: 'player',
+          type: 'player',
+          body: { position: { x: 0.5, y: 40, z: 0.5 }, velocity: { x: 0, y: 0, z: 0 } },
+          grounded: false,
+          contacts: [],
+        },
+        entities: [],
+        chunkRevisions: {},
+        worldRevision: 0,
+        worldTime: 8,
+        paused: false,
+      },
+      entities: [
+        {
+          id: 'grazer',
+          type: 'creature',
+          kind: 'creature',
+          lifecycle: 'active',
+          archetype: 'grazer',
+          position: [-0.5, 40, -0.5],
+        },
+      ],
+      simulation: {
+        actors: [
+          {
+            entityId: 'grazer',
+            archetype: 'grazer',
+            hunger: 0,
+            behavior: 'idle',
+            targetEntityId: null,
+            homePoiId: null,
+            workPoiId: null,
+            foodPoiId: null,
+            active: true,
+            wanderIndex: 0,
+          },
+        ],
+        pois: { version: 1, sequence: 0, pois: [] },
+        actions: { version: 1, sequence: 0, actions: [] },
+      },
+      items: defaultItemDefinitionRegistry,
+      identityRevision: () => 1,
+    };
+    const read = (x: number, y: number, z: number, key: string) => peekLoadedVoxelInChunk(chunks, key, x, y, z);
+    return { options, chunks, read };
+  };
+
+  it('passes each clipped window key and preserves complete positive/negative observations', () => {
+    const { options, chunks, read } = fixture(),
+      getLoadedVoxel = vi.fn(read);
+    const observation = buildLogicObservation({ ...options, getLoadedVoxel });
+    expect(observation).toEqual(
+      buildLogicObservation({ ...options, getLoadedVoxel: (x, y, z) => peekLoadedVoxel(chunks, x, y, z) }),
+    );
+    expect(observation.decisionContext.terrainWindows).toHaveLength(4);
+    for (const [x, y, z, key] of getLoadedVoxel.mock.calls)
+      expect(key).toBe(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
+  });
+
+  it('omits an unloaded window and accepts the current replacement revision', () => {
+    const { options, chunks, read } = fixture(),
+      original = chunks.get('-1,1,-1')!;
+    chunks.delete(original.key);
+    expect(
+      buildLogicObservation({ ...options, getLoadedVoxel: read }).decisionContext.terrainWindows.some(
+        (w) => w.key === original.key,
+      ),
+    ).toBe(false);
+    chunks.set(original.key, { ...original, revision: original.revision + 10 });
+    expect(
+      buildLogicObservation({ ...options, getLoadedVoxel: read }).decisionContext.terrainWindows.find(
+        (w) => w.key === original.key,
+      )?.chunkRevision,
+    ).toBe(original.revision + 10);
+  });
+
+  it.each(['mutation', 'replacement'])('rejects a mixed revision when a chunk changes between cells: %s', (change) => {
+    const { options, chunks, read } = fixture(),
+      original = chunks.get('-1,1,-1')!;
+    let cells = 0;
+    const getLoadedVoxel = (x: number, y: number, z: number, key: string) => {
+      const value = read(x, y, z, key);
+      if (key === original.key && ++cells === 1) {
+        if (change === 'mutation') original.revision += 1;
+        else chunks.set(key, { ...original, revision: original.revision + 1 });
+      }
+      return value;
+    };
+    expect(
+      buildLogicObservation({ ...options, getLoadedVoxel }).decisionContext.terrainWindows.some(
+        (w) => w.key === original.key,
+      ),
+    ).toBe(false);
+    expect(cells).toBe(2);
+  });
+});
 
 const window = (key: string, origin: LogicPosition, size: LogicPosition, chunkRevision = 1): TerrainWindow => ({
   key,

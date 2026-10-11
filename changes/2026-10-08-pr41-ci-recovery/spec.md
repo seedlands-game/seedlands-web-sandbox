@@ -1537,3 +1537,17 @@ headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及�
 - 374预注册（2026-10-11 07:41 UTC）：67621f52原版369在V1保存前walkTo door.approach以432827ms真实离开支持表面失败，C4/C5未到，postverify通过。最后跳跃脉冲约207ms发出释放，但Space/KeyW原生确认分别约745/1342ms，Authority jumpPressed2945到neutral2953相隔91 tick约1.52s；实际低处落地，保留支持面断言，未归为全局超时或误判。唯一候选为在既有脉冲截止同时入队两键释放时方向键先于Space，减少方向受跳跃释放排队阻挡；不改脉冲时长、真实键/鼠标方式、地图、物理、ACK/epoch/neutral/停稳条件、超时或断言。先在既有native-movement-pulse选中owner用串行延迟原生回执的有界RED，并调用正式movement-key状态/Native release marker/routePulseSettledPredicate证明方向先停止而Space未释放时仍不能停稳、两键释放和新ACK后才可继续；中立最终事件允许Space已由Controller实际合同支持。实现后原时序/失败传播用例与route-progress回归必须通过；新精确SHA原版浏览器必需，局部单元不证明C5或产品，未作性能收益/benchmark声明。CI434 Chromium仍运行；原365sealed结果不改写。
 
 - 374结果：旧释放顺序RED 1失败/4通过；方向优先后native-pulse/route-progress/mining-handoff三owner 27/27通过，Classic类型、改动lint、5/5封存及改动格式通过。最终Space中立marker、未释放跳跃/旧ACK不能继续的断言保留；仅修改真实释放顺序，旧frozen benchmark输入不适用于该新顺序，不作性能声明。新SHA完整浏览器待跑。CI434仍运行；其concurrency取消旧运行，故下一正常推送须先保存CI434终态，不为快推丢失证据。
+
+- 403预注册：当前32075d18 Worker main20s采样1535样本严格非负时间校验通过，createTerrainWindow自采样相对份额10.63%、builder3.72%，仅热点非CPU利用率。窗口只需voxel/chunkKey/revision，fluidCellInChunk纯读却逐格派生未使用fluid；候选仅新增canonical三字段读取器供观察窗口，原完整fluid读取器保持原样，逐格实时Map/unknown/chunkKey/revision和solid语义校验不缓存不省略。私有原型A/A12对1000遍每样4096格，噪声为配对相对差绝对值中位、上限25%；通过后平衡交错A/B20对，主指标配对B/A中位收益至少20%且大于3倍A/A噪声，B p95不得超过A1.10，canonical字段checksum完全相等。八chunk含正负坐标/air/solid/4%fluid，未知等价在计时外；无自动重试，失败不采用。组件不是消费者/可合入证明，317/335共存组合端到端对照仍待完成。原版379、trace-off389、Worker395原900000在V2失败均保留；CI435五成功/C4回程及重试去程原90s失败、C5未到，未放宽断言。私有plan403记预注册时间与边界。
+
+- 408 预注册更正：403 私有基准在 warmup 前因误设 CHUNK_SIZE=16 被断言拦截（实际32），无 AA/AB 样本、无生产修改；保留失败输出。408 使用真实32³ chunk 和16³逐格子窗口，4096 cells ×1000 passes；原12对 AA、20对 AB 与收益/噪声/p95/等价门槛不变，禁止自动重试。
+
+- 413 预注册独立候选：408省去流体计算收益6.71%被否决，不采纳。413仅复用 terrainBounds 已裁切的 chunk key；每格仍访问当前 Map、读取当前 revision/完整流体字段、校验坐标属于当前 chunk，无值缓存或 freshness 旁路。AA12/AB20、20%且大于噪声三倍、p95≤1.10门槛不变；组件通过后必须先验证实际 buildLogicObservation 消费者再考虑生产修改。
+
+- 417 消费者预注册：413组件噪声1.84%、收益79.37%通过，但尚未改生产。使用实际 Classic GameServer 的 player+27 sheep、真实 entities/items/simulation、正负坐标加载 chunk；20帧、每样本200次完整 buildLogicObservation。B为当前构建器私有副本，仅传已有chunk key第四参数；完整观察结果与未知/卸载/重载/mixed-revision拒绝必须一致。AA12/AB20及原门槛不变，无自动重试、无端到端收益声明。
+
+- 429 实现复验预注册：417私有完整构建器噪声1.29%、收益68.20%通过。新9例先RED，再现有2owner35/35通过；首轮GameServer lint502失败保留，现有gameplay-cell读取按原顺序移至读取模块并增加流体source/未知不读取回归，不放宽500行门槛。429以320精确原始构建器blob为A、当前实际生产构建器和keyed读取函数为B，保持417完整corpus/guard/AA12/AB20与原门槛，记录dirty source身份；不替代端到端验收。
+
+- 445 独占窗口记录更正预注册：413/417/429数值门槛通过，但原始测量遗漏windowId/evidencePath，回执measurement=INVALID，原件保留为INELIGIBLE，不作为最终采纳证据，未提交或推送候选。445仅修记录结构与精确窗口时间，使用最终实际生产函数、同corpus/AA12/AB20/全部原门槛；等待普通headless结束后独占运行，脚本检查measurementSummary=RECORDED且最终window=PASS。噪声失败不自动重试。
+
+- 453 正式composition上下文预注册：445窗口PASS/RECORDED、噪声6.07%及收益67.44%只覆盖包装器默认legacy content固定组件，证据原件保留，不作为正式主旅程消费者证明，仍未提交候选。453通过当前真实pack/lock/host-admissions和生产loader保留完整摘要/授权验证；Node适配仅本地只读fetch及blob→dataURL模块导入，无合成integrity/外网请求/权限绕过。接实际生产composition与voxelSemantics，要求hasGameplayComposition=true；原corpus/AA12/AB20/所有门槛及完整输出/未知/卸载/重载/mixed-revision检查不变，仍不替代浏览器验收。

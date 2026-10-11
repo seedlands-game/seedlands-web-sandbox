@@ -32,7 +32,7 @@ type BuildOptions = Readonly<{
   identityRevision: (entity: GameplayEntity) => number;
   controlSource?: (entityId: string) => ActorControlSource;
   configuredBodyAabb?: (entity: GameplayEntity) => WorldAabb;
-  getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
+  getLoadedVoxel: (x: number, y: number, z: number, key: string) => LoadedVoxel | null;
   voxelSemantics?: VoxelSemanticsResolver;
 }>;
 
@@ -101,7 +101,7 @@ const createTerrainWindow = (
   for (let y = bounds.minY; y <= bounds.maxY; y += 1)
     for (let z = bounds.minZ; z <= bounds.maxZ; z += 1)
       for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
-        const loaded = getLoadedVoxel(x, y, z);
+        const loaded = getLoadedVoxel(x, y, z, key);
         if (!loaded || loaded.chunkKey !== key) return null;
         if (chunkRevision !== null && chunkRevision !== loaded.revision) return null;
         chunkRevision = loaded.revision;
@@ -215,7 +215,7 @@ export class AuthorityLogicObservationBuilder {
       identityRevision: (entity) => this.identityRevision(entity),
       controlSource: (entityId) => this.server.getActorControlSource(entityId) ?? 'none',
       configuredBodyAabb: (entity) => authorityBodyConfig(this.server, entity).localAabb,
-      getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
+      getLoadedVoxel: (x, y, z, key) => this.server.peekLoadedVoxelInChunk(key, x, y, z),
       ...(this.server.hasGameplayComposition ? { voxelSemantics: this.server.voxelSemantics } : {}),
     });
   }

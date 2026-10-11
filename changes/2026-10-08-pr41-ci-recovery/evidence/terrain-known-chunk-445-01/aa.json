@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-known-chunk-window-445-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-receipt-447-01.json",
+  "sampleStartedAt": "2026-10-11T09:33:29.410Z",
+  "runId": "pr41-known-chunk-window-repair-445-01",
+  "owner": "stdlib-server",
+  "scenario": "known-chunk-production-consumer",
+  "sourceSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "sourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "dirtyFiles": [
+    "M changes/2026-10-08-pr41-ci-recovery/spec.md",
+    " M packages/stdlib/src/server/authority/logic-observation-builder.ts",
+    " M packages/stdlib/src/server/game-server.ts",
+    " M packages/stdlib/src/server/loaded-voxel-reader.ts",
+    " M packages/stdlib/tests/server/data-plane-navigation.test.ts",
+    " M packages/stdlib/tests/server/game-server.test.ts"
+  ],
+  "scriptSha256": "d77d47442e4031f71d884b58dd131d1c8322ecf50bc030358d805e02cde505af",
+  "workload": {
+    "chunks": 9,
+    "passes": 200,
+    "actors": 27,
+    "corpusFrames": 20,
+    "terrainCells": 29575,
+    "fluidPercent": 4
+  },
+  "equivalence": "complete observations equal20 frames; unknown/unload/reload/mixed-revision guards equal; actual production builder/reader; exact320 baseline source; declared dirty implementation",
+  "consumerPerformanceClaim": false,
+  "sampleCompletedAt": "2026-10-11T09:33:58.839Z",
+  "phase": "AA",
+  "raw": [
+    {
+      "pair": 0,
+      "a1": {
+        "elapsedMs": 964.4804540000005,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 937.9503830000003,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.027507111097971635
+    },
+    {
+      "pair": 1,
+      "a1": {
+        "elapsedMs": 933.793506,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 937.506461,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0039762056344820685
+    },
+    {
+      "pair": 2,
+      "a1": {
+        "elapsedMs": 1208.6858649999995,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1074.1366440000002,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.11131860220769552
+    },
+    {
+      "pair": 3,
+      "a1": {
+        "elapsedMs": 1353.042926,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1444.4876550000008,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.06758449953272268
+    },
+    {
+      "pair": 4,
+      "a1": {
+        "elapsedMs": 1560.7909940000009,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1284.0306869999986,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.17732054327832836
+    },
+    {
+      "pair": 5,
+      "a1": {
+        "elapsedMs": 1198.707282999998,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 951.6643330000006,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.20609113959975642
+    },
+    {
+      "pair": 6,
+      "a1": {
+        "elapsedMs": 927.1190210000022,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 934.0374520000005,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.007462290000841455
+    },
+    {
+      "pair": 7,
+      "a1": {
+        "elapsedMs": 1054.6244279999992,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1111.3743560000003,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.05381055709815318
+    },
+    {
+      "pair": 8,
+      "a1": {
+        "elapsedMs": 935.1339320000006,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 970.5404549999985,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.037862515505423675
+    },
+    {
+      "pair": 9,
+      "a1": {
+        "elapsedMs": 1172.5524299999997,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1409.1234100000001,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.2017572723805625
+    },
+    {
+      "pair": 10,
+      "a1": {
+        "elapsedMs": 1418.670997000001,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 1358.9856240000008,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.042071328113575446
+    },
+    {
+      "pair": 11,
+      "a1": {
+        "elapsedMs": 1005.7179859999997,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 923.5127599999978,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.08173785011736072
+    }
+  ],
+  "noise": 0.060697528315437926,
+  "status": "AA_NOISE_PASS"
+}

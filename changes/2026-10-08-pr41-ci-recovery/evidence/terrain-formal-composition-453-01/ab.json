@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-known-chunk-formal-453-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-formal-window-455-01.json",
+  "sampleStartedAt": "2026-10-11T09:41:26.140Z",
+  "runId": "pr41-known-chunk-formal-composition-453-01",
+  "owner": "stdlib-server",
+  "scenario": "known-chunk-formal-observation-consumer",
+  "sourceSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "sourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "dirtyFiles": [
+    "M changes/2026-10-08-pr41-ci-recovery/spec.md",
+    " M packages/stdlib/src/server/authority/logic-observation-builder.ts",
+    " M packages/stdlib/src/server/game-server.ts",
+    " M packages/stdlib/src/server/loaded-voxel-reader.ts",
+    " M packages/stdlib/tests/server/data-plane-navigation.test.ts",
+    " M packages/stdlib/tests/server/game-server.test.ts",
+    "?? changes/2026-10-08-pr41-ci-recovery/evidence/terrain-known-chunk-445-01/"
+  ],
+  "scriptSha256": "bf0fb64c2dc038f1a53f4bd9ca0d3acfdc5bfb76e2c69d8a9273bc0d9c33814e",
+  "formalComposition": {
+    "verifiedArtifacts": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "integrity": {
+          "algorithm": "sha256",
+          "manifestDigest": "7aece081eb8c076aa2b2aa175fba973124dbf2cb02bf9533adf646dcb5c6e7e5",
+          "entryDigest": "4a95685755eb975c7fb502499e12a86223ba8d979a2796656f2d74ebadcf752b",
+          "resources": [
+            {
+              "path": "playbooks/classic/presentation.json",
+              "digest": "b098eb92743d9a70264ffa0c03fb7f1cbe1fbeb8f4147f0d61f7681b0bfa9447"
+            },
+            {
+              "path": "playbooks/classic/assets/transport/minecart.glb",
+              "digest": "44cecf89412ca38375ce8d20531043b985d1ef8ff8bebf3fcc7fc8efc6117b6b"
+            },
+            {
+              "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+              "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-0.svg",
+              "digest": "0508ad38578e916ca80378be958304444799ef4e18ebe2a088edb00eb4c03d48"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-1.svg",
+              "digest": "4a580265ab48364b869363777e6b8f8871ac3a6c441c170a8861765e25151d22"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-2.svg",
+              "digest": "a5975f5de62795d5a95aaa34118b17782010255520a951e8e29a86a37d47ea59"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-3.svg",
+              "digest": "16d0f4b712af3aed10286b35b41585fefa8b086e2af567b9c051634de563eae7"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-4.svg",
+              "digest": "d1a40312c1417a9a1d75d2e6df523961a728aaecfd1ff36a02be114532084131"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-5.svg",
+              "digest": "dc6ffcf93f03852ef32c735e9399b6fb2822ecd8bf794ab3b4bbb764c0c6ba9f"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-6.svg",
+              "digest": "3c04b03df47e17e016a3665231093e15044538a9ad49b8ae9653a2d1f952f5c8"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-7.svg",
+              "digest": "a93ea516eae82c31d04c4acaaed8ea05626c7930826af5aed27f1abf93b829b6"
+            }
+          ]
+        }
+      }
+    ],
+    "hasGameplayComposition": true,
+    "voxelSemanticsCount": 105,
+    "accessedPackFiles": [
+      "host-admissions.json",
+      "packs.lock.json",
+      "overworld.manifest.json",
+      "overworld.mjs",
+      "playbooks/classic/presentation.json",
+      "playbooks/classic/assets/transport/minecart.glb",
+      "playbooks/classic/assets/audio/to-far-shores.mp3",
+      "playbooks/classic/assets/crops/wheat-stage-0.svg",
+      "playbooks/classic/assets/crops/wheat-stage-1.svg",
+      "playbooks/classic/assets/crops/wheat-stage-2.svg",
+      "playbooks/classic/assets/crops/wheat-stage-3.svg",
+      "playbooks/classic/assets/crops/wheat-stage-4.svg",
+      "playbooks/classic/assets/crops/wheat-stage-5.svg",
+      "playbooks/classic/assets/crops/wheat-stage-6.svg",
+      "playbooks/classic/assets/crops/wheat-stage-7.svg"
+    ],
+    "adapter": "readonly local pack files + Node dataURL import; production digest/admission checks retained"
+  },
+  "workload": {
+    "chunks": 9,
+    "passes": 200,
+    "actors": 27,
+    "corpusFrames": 20,
+    "terrainCells": 29575,
+    "fluidPercent": 4
+  },
+  "equivalence": "complete observations equal20 frames; unknown/unload/reload/mixed-revision guards equal; actual production builder/reader; exact320 baseline source; declared dirty implementation",
+  "consumerPerformanceClaim": false,
+  "phase": "AB",
+  "raw": [
+    {
+      "pair": 0,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 937.6878980000001,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 360.936146,
+        "checksum": 3608570
+      },
+      "ratio": 0.3849214080397569
+    },
+    {
+      "pair": 1,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 354.84177199999976,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 937.666033999998,
+        "checksum": 3608570
+      },
+      "ratio": 0.3784308689163849
+    },
+    {
+      "pair": 2,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 934.3979260000015,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 356.3237000000008,
+        "checksum": 3608570
+      },
+      "ratio": 0.3813404226241832
+    },
+    {
+      "pair": 3,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 354.36465600000156,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 945.733902,
+        "checksum": 3608570
+      },
+      "ratio": 0.37469805750920576
+    },
+    {
+      "pair": 4,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1048.8227039999983,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 392.9996979999996,
+        "checksum": 3608570
+      },
+      "ratio": 0.37470555938689926
+    },
+    {
+      "pair": 5,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 389.551026000001,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 987.1939859999984,
+        "checksum": 3608570
+      },
+      "ratio": 0.3946043346337825
+    },
+    {
+      "pair": 6,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 978.7536370000016,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 386.08103100000153,
+        "checksum": 3608570
+      },
+      "ratio": 0.3944619119714197
+    },
+    {
+      "pair": 7,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 379.06617600000027,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 948.9737610000011,
+        "checksum": 3608570
+      },
+      "ratio": 0.39944853227612037
+    },
+    {
+      "pair": 8,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1089.972971999996,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 389.60598200000095,
+        "checksum": 3608570
+      },
+      "ratio": 0.35744554407171336
+    },
+    {
+      "pair": 9,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 361.80575600000157,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1054.6903029999958,
+        "checksum": 3608570
+      },
+      "ratio": 0.34304454584523
+    },
+    {
+      "pair": 10,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 998.9630939999988,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 355.11151199999586,
+        "checksum": 3608570
+      },
+      "ratio": 0.3554801114604503
+    },
+    {
+      "pair": 11,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 371.9855280000047,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1092.8154480000012,
+        "checksum": 3608570
+      },
+      "ratio": 0.34039190119501705
+    },
+    {
+      "pair": 12,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1001.943134000001,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 402.76121799999964,
+        "checksum": 3608570
+      },
+      "ratio": 0.4019801167677838
+    },
+    {
+      "pair": 13,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 355.9649639999989,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 987.8095109999995,
+        "checksum": 3608570
+      },
+      "ratio": 0.36035790305323256
+    },
+    {
+      "pair": 14,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 964.0750999999946,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 371.94163399999525,
+        "checksum": 3608570
+      },
+      "ratio": 0.38580151484049047
+    },
+    {
+      "pair": 15,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 355.0327030000044,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 987.0577110000013,
+        "checksum": 3608570
+      },
+      "ratio": 0.3596878875910063
+    },
+    {
+      "pair": 16,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1064.2317380000022,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 424.95955700000195,
+        "checksum": 3608570
+      },
+      "ratio": 0.39931111037772965
+    },
+    {
+      "pair": 17,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 431.4731119999997,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1062.5840270000044,
+        "checksum": 3608570
+      },
+      "ratio": 0.40606022774328593
+    },
+    {
+      "pair": 18,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1092.929111999998,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 359.01340200000413,
+        "checksum": 3608570
+      },
+      "ratio": 0.32848736304867027
+    },
+    {
+      "pair": 19,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 355.71440599999914,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 963.6622689999931,
+        "checksum": 3608570
+      },
+      "ratio": 0.36912766790083973
+    }
+  ],
+  "noise": 0.004198429629784958,
+  "ratio": 0.3765682141516421,
+  "gain": 0.6234317858483579,
+  "aMedianMs": 987.5017484999989,
+  "bMedianMs": 366.8736949999984,
+  "aP95": 1092.8154480000012,
+  "bP95": 424.95955700000195,
+  "status": "COMPONENT_GATE_PASS",
+  "sampleCompletedAt": "2026-10-11T09:42:19.087Z"
+}
