@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "baselineSha": "67621f52d8c3cb4e9c087fa1a1d748b5859276b5",
+  "change": "Enqueue direction release before Space at the same native pulse deadline; await all acknowledgements and retain errors",
+  "regression": {
+    "owner": "native-movement-pulse.test.ts",
+    "red": {
+      "failed": 1,
+      "passed": 4
+    },
+    "green": {
+      "files": 3,
+      "passed": 27
+    },
+    "newCase": "Serial delayed native releases: direction stops before jump release; partial release and old ACK remain unsettled; final neutral ACK permits continuation"
+  },
+  "checks": {
+    "classicTypes": "PASS",
+    "changedLint": "PASS",
+    "frozenEvidence": "PASS 5/5",
+    "format": "PASS changed files; reuse preceding whole-tree format PASS for untouched files",
+    "selection": "UNCHANGED existing CI owner"
+  },
+  "originalDeadlinesMapPhysicsAckEpochPoseAndAssertions": "UNCHANGED",
+  "nativeInputChange": "Release order only; same real keys and same enqueue deadline. Final neutral marker may be Space, as supported by actual Controller. Not interchangeable with old frozen benchmark input records.",
+  "newShaBrowser": "PENDING",
+  "baselineCI434": "Five non-browser jobs PASS; Chromium RUNNING at registration",
+  "rootCause": "Full cause of baseline renderer/native input latency unresolved; this fixes release priority only",
+  "fullTransportAcceptance": "OPEN",
+  "performanceClaim": false,
+  "mergeReady": false,
+  "supportingLogSha256": {
+    "native-direction-priority-red-374-01.log": "13ca196c5af9d847c0555fed1574ff028c18d383e59ce3b6717da9f149dba2af",
+    "native-direction-priority-green-375-01.log": "048d3fd047701c3f765c66970b97f9a9a42e0f983319fdecdb3e4bce851fa2b4",
+    "native-direction-priority-types-375-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "native-direction-priority-lint-375-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "native-direction-priority-frozen-375-01.log": "81f797097bebff4ba4753bd641c3448c465bc8751d9a1053ccb9b39745024034",
+    "native-direction-priority-format-check-375-01.log": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+  }
+}

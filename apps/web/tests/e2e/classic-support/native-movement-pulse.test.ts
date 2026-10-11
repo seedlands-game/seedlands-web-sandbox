@@ -1,6 +1,9 @@
 import type { Page } from '@playwright/test';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { sendNativeMovementPulse } from './native-movement-pulse';
+import { updatePlayerMovementKeys } from '../../../src/app/player/player-movement-input';
+import { readNativeInput, recordNativeRelease } from '../../../src/app/player/native-movement-input';
+import { routePulseSettledPredicate } from './route-progress';
 
 type Command = { phase: 'down' | 'up'; key: string; at: number };
 
@@ -40,8 +43,8 @@ it('requests both releases at the pulse deadline while both down acknowledgement
   try {
     await vi.advanceTimersByTimeAsync(300);
     expect(commands.filter((command) => command.phase === 'up')).toEqual([
-      { phase: 'up', key: 'Space', at: 300 },
       { phase: 'up', key: 'KeyW', at: 300 },
+      { phase: 'up', key: 'Space', at: 300 },
     ]);
   } finally {
     await vi.runAllTimersAsync();
@@ -87,6 +90,76 @@ it('requests a single direction release on time but awaits the late acknowledgem
     expect(returned).toBe(false);
     await vi.advanceTimersByTimeAsync(700);
     expect(returned).toBe(true);
+  } finally {
+    await vi.runAllTimersAsync();
+    await pulse;
+  }
+});
+
+it('stops direction before a queued jump release but waits for the final neutral ACK', async () => {
+  const keys = new Set<string>();
+  const owner = {};
+  const epoch = 'native-release-priority';
+  let sequence = 0;
+  let queue = Promise.resolve();
+  let returned = false;
+  const page = {
+    keyboard: {
+      down: async (code: string) => {
+        updatePlayerMovementKeys(keys, code, true);
+      },
+      up: (code: string) => {
+        queue = queue.then(async () => {
+          await new Promise<void>((resolve) => setTimeout(resolve, 600));
+          updatePlayerMovementKeys(keys, code, false);
+          recordNativeRelease(owner, code, {
+            kind: 'input',
+            protocolVersion: 1,
+            epoch,
+            stream: 'player',
+            sequence: ++sequence,
+            targetPhysicsTick: sequence,
+            issuedAtMs: Date.now(),
+            state: {
+              moveX: keys.has('KeyW') ? 1 : 0,
+              moveZ: 0,
+              verticalIntent: 0,
+              jumpHeld: keys.has('Space'),
+            },
+            edges: { jumpPressed: false },
+          });
+        });
+        return queue;
+      },
+    },
+  } as unknown as Pick<Page, 'keyboard'>;
+  const settled = routePulseSettledPredicate({
+    authority: { acknowledgedInputSequence: 0 },
+    nativeMovementInput: readNativeInput(owner, epoch),
+  });
+  const observation = () => ({
+    player: [0, 32.6, 0] as const,
+    serverPlayerPosition: [0, 32.6, 0] as const,
+    serverPlayerVelocity: [0, 0, 0] as const,
+    onGround: true,
+    colliding: false,
+    authority: { acknowledgedInputSequence: sequence },
+    nativeMovementInput: readNativeInput(owner, epoch),
+  });
+  const pulse = sendNativeMovementPulse(page, 'KeyW', 300, true).then(() => {
+    returned = true;
+  });
+  try {
+    await vi.advanceTimersByTimeAsync(900);
+    expect(keys.has('KeyW')).toBe(false);
+    expect(keys.has('Space')).toBe(true);
+    expect(returned).toBe(false);
+    expect(settled(observation())).toBe(false);
+    await vi.advanceTimersByTimeAsync(600);
+    expect(keys.size).toBe(0);
+    expect(returned).toBe(true);
+    expect(settled(observation())).toBe(true);
+    expect(settled({ ...observation(), authority: { acknowledgedInputSequence: sequence - 1 } })).toBe(false);
   } finally {
     await vi.runAllTimersAsync();
     await pulse;

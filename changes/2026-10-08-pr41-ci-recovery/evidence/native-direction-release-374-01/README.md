@@ -1,0 +1,7 @@
+# Native direction release priority 374
+
+Canonical baseline369 failed before C4/C5 in the V1 door approach: the actual player left the supported surface and landed lower. The final native jump pulse requested both releases about207ms after key-down; Space acknowledgement took about745ms and direction acknowledgement about1342ms. Accepted jump to neutral input spanned91 physics ticks. Actual trace and input receipts support these timings; the broader source of latency remains unresolved.
+
+The pulse now queues direction release before Space at the same deadline. Both native acknowledgements remain required, all keys are released even on errors, and the final Space release records neutral input through the existing Controller contract. A regression with serial delayed native acknowledgements fails on original order and proves direction stops first, partial release remains unsettled, and final neutral still requires fresh Authority ACK. Existing deadlines, route support assertion, ground/velocity/pose and epoch checks remain intact.
+
+RED1 failed/4 passed; GREEN3 files27 passed. Classic types, changed lint, frozen5/5 and changed-file formatting pass. A new exact-SHA real-input browser run is still required. This change is release ordering, so old benchmark input records cannot prove its performance. No performance claim or merge readiness is asserted; complete transport acceptance remains open.

@@ -1,0 +1,43 @@
+{
+  "sourceSha": "67621f52d8c3cb4e9c087fa1a1d748b5859276b5",
+  "runId": "pr41-restore-lock-main-369-01",
+  "status": "FAIL",
+  "durationMs": 432827,
+  "timeoutMs": 900000,
+  "error": "Real input route left its supported surface before 67.5,0.5.",
+  "stage": "V1 before save at completeV1SliceBeforeSave -> walkTo",
+  "C4C5": "UNREACHED",
+  "postverify": "PASS",
+  "nativeTraceFacts": {
+    "downKeyWStartMs": 427033.62,
+    "downKeyWEndMs": 427054.739,
+    "upKeyWStartMs": 427244.982,
+    "upKeyWEndMs": 428587.196,
+    "upSpaceStartMs": 427240.547,
+    "upSpaceEndMs": 427985.463,
+    "lastAcceptedJump": {
+      "sequence": 2945,
+      "issuedAtMs": 422697.4,
+      "targetTick": 29489,
+      "receivedTick": 29486
+    },
+    "firstAcceptedNeutral": {
+      "sequence": 2953,
+      "issuedAtMs": 424224.5,
+      "targetTick": 29580,
+      "receivedTick": 29575
+    }
+  },
+  "beforeFinalPulse": {
+    "player": [67.0293960571289, 32.60000228881836, 1.1232051849365234],
+    "yawDeg": -397.06000000000006
+  },
+  "afterFailure": {
+    "player": [70.17156219482422, 19.600000381469727, -4.520901203155518],
+    "onGround": true,
+    "colliding": false
+  },
+  "rootCause": "UNRESOLVED: renderer input processing delay observed; source/harness/system contributions not separated",
+  "performanceClaim": false,
+  "assertionChange": "NONE"
+}
