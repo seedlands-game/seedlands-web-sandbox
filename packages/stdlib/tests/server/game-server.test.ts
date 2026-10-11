@@ -1,11 +1,84 @@
 import { testWorldgenExecutableProvider, testWorldgenProvider } from '../support/worldgen';
 import { testCorePlatform } from '../support/core-platform';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { GameServer } from '../../src/server/game-server';
 import type { ChunkPersistence, ChunkSnapshot } from '../../src/server/persistence/chunk-persistence';
 import { MemoryChunkPersistence } from '../../src/server/persistence/memory-chunk-persistence';
-import { Voxel, chunkKey } from '../../src/world/voxel';
+import { CHUNK_SIZE, Voxel, chunkKey, voxelIndex } from '../../src/world/voxel';
 import { createProceduralMeshInput, meshChunk, meshHaloIndex } from '../../src/world/mesh';
+import { peekLoadedVoxel, peekLoadedVoxelInChunk, readLoadedGameplayCell } from '../../src/server/loaded-voxel-reader';
+
+describe('loaded voxel reads with an expected terrain chunk', () => {
+  const fixture = () =>
+    new GameServer({
+      worldgenProvider: testWorldgenExecutableProvider,
+      platform: testCorePlatform,
+      seedText: 'terrain-keyed-read',
+    });
+
+  it('keeps gameplay cell source bits and does not query fluid for unknown canonical cells', () => {
+    const server = fixture(),
+      chunk = server.getChunk(0, 0, 0),
+      chunks = new Map([[chunk.key, chunk]]);
+    const cell = vi.fn(() => ({ level: 3, source: true }));
+    const readVoxel = vi.fn((x: number, y: number, z: number) => peekLoadedVoxel(chunks, x, y, z));
+    expect(readLoadedGameplayCell(readVoxel, { cell }, 0, 0, 0)).toEqual({ voxel: chunk.voxels[0], fluid: 0x83 });
+    expect(cell).toHaveBeenCalledWith(0, 0, 0, false);
+    expect(readVoxel.mock.invocationCallOrder[0]).toBeLessThan(cell.mock.invocationCallOrder[0]!);
+    chunks.clear();
+    cell.mockClear();
+    expect(readLoadedGameplayCell(readVoxel, { cell }, 0, 0, 0)).toBeNull();
+    expect(cell).not.toHaveBeenCalled();
+  });
+
+  it.each([-1, 0, 1])('preserves full voxel and fluid fields across chunk coordinate %s', (cx) => {
+    const server = fixture(),
+      chunk = server.getChunk(cx, -1, cx);
+    chunk.voxels[voxelIndex(31, 0, 7)] = Voxel.Water;
+    chunk.fluid[voxelIndex(31, 0, 7)] = 0x83;
+    const at = [cx * CHUNK_SIZE + 31, -CHUNK_SIZE, cx * CHUNK_SIZE + 7] as const;
+    expect(server.peekLoadedVoxelInChunk(chunk.key, ...at)).toEqual(server.peekLoadedVoxel(...at));
+    expect(server.peekLoadedVoxelInChunk(chunk.key, ...at)?.fluid).toEqual({ level: 3 });
+  });
+
+  it('rejects a wrong chunk, outside or fractional cells, and never materializes an unknown chunk', () => {
+    const server = fixture(),
+      chunk = server.getChunk(0, 0, 0);
+    expect(server.peekLoadedVoxelInChunk(chunk.key, -1, 0, 0)).toBeNull();
+    expect(server.peekLoadedVoxelInChunk(chunk.key, CHUNK_SIZE, 0, 0)).toBeNull();
+    expect(server.peekLoadedVoxelInChunk(chunk.key, 0, 0.5, 0)).toBeNull();
+    server.getChunk(1, 0, 0);
+    expect(server.peekLoadedVoxelInChunk('1,0,0', 0, 0, 0)).toBeNull();
+    expect(server.peekLoadedVoxelInChunk('2,0,0', 2 * CHUNK_SIZE, 0, 0)).toBeNull();
+    expect(server.peekLoadedVoxel(2 * CHUNK_SIZE, 0, 0)).toBeNull();
+  });
+
+  it('reads the current chunk, revision and fluid after mutation, unloading and replacement', () => {
+    const server = fixture(),
+      original = server.getChunk(0, 0, 0),
+      chunks = new Map([[original.key, original]]);
+    expect(peekLoadedVoxelInChunk(chunks, original.key, 0, 0, 0)?.revision).toBe(original.revision);
+    original.revision += 1;
+    expect(peekLoadedVoxelInChunk(chunks, original.key, 0, 0, 0)?.revision).toBe(original.revision);
+    chunks.delete(original.key);
+    expect(peekLoadedVoxelInChunk(chunks, original.key, 0, 0, 0)).toBeNull();
+    const replacement = {
+      ...original,
+      revision: original.revision + 10,
+      voxels: new Uint16Array(CHUNK_SIZE ** 3),
+      fluid: new Uint8Array(CHUNK_SIZE ** 3),
+    };
+    replacement.voxels[0] = Voxel.Lava;
+    replacement.fluid[0] = 7;
+    chunks.set(original.key, replacement);
+    expect(peekLoadedVoxelInChunk(chunks, original.key, 0, 0, 0)).toEqual({
+      voxel: Voxel.Lava,
+      chunkKey: original.key,
+      revision: replacement.revision,
+      fluid: { level: 7 },
+    });
+  });
+});
 
 describe('GameServer headless authority', () => {
   it('准备Mesh时pin完整27格并只让持久层读取未驻留坐标', async () => {

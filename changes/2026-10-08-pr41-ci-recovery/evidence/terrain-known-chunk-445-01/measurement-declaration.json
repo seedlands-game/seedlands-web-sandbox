@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-known-chunk-window-445-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-receipt-447-01.json",
+  "measurementPath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-ab-448-01.json",
+  "format": "local",
+  "runId": "pr41-known-chunk-window-repair-445-01",
+  "owner": "stdlib-server",
+  "scenario": "known-chunk-production-consumer"
+}

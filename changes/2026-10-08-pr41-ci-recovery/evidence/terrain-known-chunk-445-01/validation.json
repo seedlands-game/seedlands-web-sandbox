@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-11T09:35:41.294169+00:00",
+  "baseHead": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "measuredDirtySourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "implementation": "reuse clipped window key; live per-cell Map/chunk/revision/fluid; original reader and terrain reject checks retained",
+  "checks": {
+    "RED": "reader5FAIL/15PASS; observation4FAIL/11PASS before new path",
+    "finalOwners": "2files36PASS including loaded wrong-key assertion",
+    "stdlib": "172files1288PASS on final production code; final additive owner assertion rechecked separately",
+    "classicHeadless": "158files1209PASS",
+    "allTypes": "PASS; final additive owner assertions use existing numeric method signatures",
+    "changedLint": "PASS after extraction; first502line failure preserved",
+    "changedFormat": "PASS; final evidence formatting checked separately",
+    "frozen": "5/5PASS",
+    "ciSelection": "17/17PASS",
+    "boundedReview": "no changed-code P0/P1/P2 identified; not entire PR approval"
+  },
+  "performance": {
+    "window": "PASS",
+    "measurement": "RECORDED",
+    "AApairs": 12,
+    "ABpairs": 20,
+    "noise": 0.060697528315437926,
+    "gain": 0.6744271122715404,
+    "aMedianMs": 1074.2507729999961,
+    "bMedianMs": 365.7938445,
+    "aP95": 1376.7449760000018,
+    "bP95": 546.2748229999997,
+    "fullOutputAndGuards": "equivalent20frames plus unknown/unload/reload/mixedrevision; all paired checksums equal",
+    "scope": "fixed27actor full observation construction only; excludes whole simulation/render/E2E",
+    "prior413417429": "INELIGIBLE measurement INVALID; originals preserved"
+  },
+  "notRun": [
+    "new exactSHA CI",
+    "new original true-input browser main",
+    "full combined end-user performance acceptance"
+  ],
+  "remaining": [
+    "current320 CI435/local main failures",
+    "transport variants/supported slopes/boat formal support and full acceptance"
+  ],
+  "mergeReady": false,
+  "evidencePolicy": "new path, no sealed historical files rewritten; no production deployment or merge"
+}

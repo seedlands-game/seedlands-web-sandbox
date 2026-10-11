@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-known-chunk-window-445-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-receipt-447-01.json",
+  "sampleStartedAt": "2026-10-11T09:33:29.410Z",
+  "runId": "pr41-known-chunk-window-repair-445-01",
+  "owner": "stdlib-server",
+  "scenario": "known-chunk-production-consumer",
+  "sourceSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "sourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "dirtyFiles": [
+    "M changes/2026-10-08-pr41-ci-recovery/spec.md",
+    " M packages/stdlib/src/server/authority/logic-observation-builder.ts",
+    " M packages/stdlib/src/server/game-server.ts",
+    " M packages/stdlib/src/server/loaded-voxel-reader.ts",
+    " M packages/stdlib/tests/server/data-plane-navigation.test.ts",
+    " M packages/stdlib/tests/server/game-server.test.ts"
+  ],
+  "scriptSha256": "d77d47442e4031f71d884b58dd131d1c8322ecf50bc030358d805e02cde505af",
+  "workload": {
+    "chunks": 9,
+    "passes": 200,
+    "actors": 27,
+    "corpusFrames": 20,
+    "terrainCells": 29575,
+    "fluidPercent": 4
+  },
+  "equivalence": "complete observations equal20 frames; unknown/unload/reload/mixed-revision guards equal; actual production builder/reader; exact320 baseline source; declared dirty implementation",
+  "consumerPerformanceClaim": false,
+  "phase": "AB",
+  "raw": [
+    {
+      "pair": 0,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1039.4793800000007,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 578.6769309999981,
+        "checksum": 3608570
+      },
+      "ratio": 0.556698807243293
+    },
+    {
+      "pair": 1,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 316.31661700000404,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1096.8837740000017,
+        "checksum": 3608570
+      },
+      "ratio": 0.2883775150091732
+    },
+    {
+      "pair": 2,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1376.7449760000018,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 391.5854979999931,
+        "checksum": 3608570
+      },
+      "ratio": 0.2844284924414299
+    },
+    {
+      "pair": 3,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 499.1263029999973,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1273.0769340000043,
+        "checksum": 3608570
+      },
+      "ratio": 0.39206295367534766
+    },
+    {
+      "pair": 4,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1072.8822349999973,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 395.53070200000366,
+        "checksum": 3608570
+      },
+      "ratio": 0.3686618056454301
+    },
+    {
+      "pair": 5,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 351.8169199999975,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1416.1969769999996,
+        "checksum": 3608570
+      },
+      "ratio": 0.24842371909680866
+    },
+    {
+      "pair": 6,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 920.8708199999965,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 298.667469,
+        "checksum": 3608570
+      },
+      "ratio": 0.3243315593385847
+    },
+    {
+      "pair": 7,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 293.9457970000003,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 987.6873320000013,
+        "checksum": 3608570
+      },
+      "ratio": 0.2976101722442664
+    },
+    {
+      "pair": 8,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1075.619310999995,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 382.13458700000047,
+        "checksum": 3608570
+      },
+      "ratio": 0.35526936258213226
+    },
+    {
+      "pair": 9,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 307.5634199999986,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1063.283445000001,
+        "checksum": 3608570
+      },
+      "ratio": 0.2892581667158359
+    },
+    {
+      "pair": 10,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1216.3200230000002,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 422.0203959999999,
+        "checksum": 3608570
+      },
+      "ratio": 0.34696493358639696
+    },
+    {
+      "pair": 11,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 410.44845600000554,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1255.5598630000022,
+        "checksum": 3608570
+      },
+      "ratio": 0.32690472839685286
+    },
+    {
+      "pair": 12,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1221.4071509999994,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 321.14120399999956,
+        "checksum": 3608570
+      },
+      "ratio": 0.26292723416354036
+    },
+    {
+      "pair": 13,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 546.2748229999997,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 971.0747480000064,
+        "checksum": 3608570
+      },
+      "ratio": 0.562546625916377
+    },
+    {
+      "pair": 14,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 922.9300159999984,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 301.03662500000064,
+        "checksum": 3608570
+      },
+      "ratio": 0.32617492093788525
+    },
+    {
+      "pair": 15,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 299.07529200000135,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 920.3142000000007,
+        "checksum": 3608570
+      },
+      "ratio": 0.32497085451903396
+    },
+    {
+      "pair": 16,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 930.7610169999971,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 431.99441800000204,
+        "checksum": 3608570
+      },
+      "ratio": 0.46413033003078963
+    },
+    {
+      "pair": 17,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 329.16323900000134,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1046.1731870000003,
+        "checksum": 3608570
+      },
+      "ratio": 0.3146355145498498
+    },
+    {
+      "pair": 18,
+      "order": ["A", "B"],
+      "A": {
+        "elapsedMs": 1278.415599,
+        "checksum": 3608570
+      },
+      "B": {
+        "elapsedMs": 325.13792000000103,
+        "checksum": 3608570
+      },
+      "ratio": 0.25432881158078
+    },
+    {
+      "pair": 19,
+      "order": ["B", "A"],
+      "B": {
+        "elapsedMs": 379.7707690000025,
+        "checksum": 3608570
+      },
+      "A": {
+        "elapsedMs": 1151.4956710000042,
+        "checksum": 3608570
+      },
+      "ratio": 0.329806510405892
+    }
+  ],
+  "noise": 0.060697528315437926,
+  "ratio": 0.3255728877284596,
+  "gain": 0.6744271122715404,
+  "aMedianMs": 1074.2507729999961,
+  "bMedianMs": 365.7938445,
+  "aP95": 1376.7449760000018,
+  "bP95": 546.2748229999997,
+  "status": "COMPONENT_GATE_PASS",
+  "sampleCompletedAt": "2026-10-11T09:34:29.286Z"
+}

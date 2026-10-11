@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "windowId": "pr41-known-chunk-formal-453-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-formal-window-455-01.json",
+  "sampleStartedAt": "2026-10-11T09:41:26.140Z",
+  "runId": "pr41-known-chunk-formal-composition-453-01",
+  "owner": "stdlib-server",
+  "scenario": "known-chunk-formal-observation-consumer",
+  "sourceSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "sourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+  "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+  "dirtyFiles": [
+    "M changes/2026-10-08-pr41-ci-recovery/spec.md",
+    " M packages/stdlib/src/server/authority/logic-observation-builder.ts",
+    " M packages/stdlib/src/server/game-server.ts",
+    " M packages/stdlib/src/server/loaded-voxel-reader.ts",
+    " M packages/stdlib/tests/server/data-plane-navigation.test.ts",
+    " M packages/stdlib/tests/server/game-server.test.ts",
+    "?? changes/2026-10-08-pr41-ci-recovery/evidence/terrain-known-chunk-445-01/"
+  ],
+  "scriptSha256": "bf0fb64c2dc038f1a53f4bd9ca0d3acfdc5bfb76e2c69d8a9273bc0d9c33814e",
+  "formalComposition": {
+    "verifiedArtifacts": [
+      {
+        "id": "seedlands:overworld",
+        "version": "1.0.0",
+        "integrity": {
+          "algorithm": "sha256",
+          "manifestDigest": "7aece081eb8c076aa2b2aa175fba973124dbf2cb02bf9533adf646dcb5c6e7e5",
+          "entryDigest": "4a95685755eb975c7fb502499e12a86223ba8d979a2796656f2d74ebadcf752b",
+          "resources": [
+            {
+              "path": "playbooks/classic/presentation.json",
+              "digest": "b098eb92743d9a70264ffa0c03fb7f1cbe1fbeb8f4147f0d61f7681b0bfa9447"
+            },
+            {
+              "path": "playbooks/classic/assets/transport/minecart.glb",
+              "digest": "44cecf89412ca38375ce8d20531043b985d1ef8ff8bebf3fcc7fc8efc6117b6b"
+            },
+            {
+              "path": "playbooks/classic/assets/audio/to-far-shores.mp3",
+              "digest": "3c69ae745727607de266898ab68a92c7c75f7f08e27daf0c6cec463f7bd119c9"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-0.svg",
+              "digest": "0508ad38578e916ca80378be958304444799ef4e18ebe2a088edb00eb4c03d48"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-1.svg",
+              "digest": "4a580265ab48364b869363777e6b8f8871ac3a6c441c170a8861765e25151d22"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-2.svg",
+              "digest": "a5975f5de62795d5a95aaa34118b17782010255520a951e8e29a86a37d47ea59"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-3.svg",
+              "digest": "16d0f4b712af3aed10286b35b41585fefa8b086e2af567b9c051634de563eae7"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-4.svg",
+              "digest": "d1a40312c1417a9a1d75d2e6df523961a728aaecfd1ff36a02be114532084131"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-5.svg",
+              "digest": "dc6ffcf93f03852ef32c735e9399b6fb2822ecd8bf794ab3b4bbb764c0c6ba9f"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-6.svg",
+              "digest": "3c04b03df47e17e016a3665231093e15044538a9ad49b8ae9653a2d1f952f5c8"
+            },
+            {
+              "path": "playbooks/classic/assets/crops/wheat-stage-7.svg",
+              "digest": "a93ea516eae82c31d04c4acaaed8ea05626c7930826af5aed27f1abf93b829b6"
+            }
+          ]
+        }
+      }
+    ],
+    "hasGameplayComposition": true,
+    "voxelSemanticsCount": 105,
+    "accessedPackFiles": [
+      "host-admissions.json",
+      "packs.lock.json",
+      "overworld.manifest.json",
+      "overworld.mjs",
+      "playbooks/classic/presentation.json",
+      "playbooks/classic/assets/transport/minecart.glb",
+      "playbooks/classic/assets/audio/to-far-shores.mp3",
+      "playbooks/classic/assets/crops/wheat-stage-0.svg",
+      "playbooks/classic/assets/crops/wheat-stage-1.svg",
+      "playbooks/classic/assets/crops/wheat-stage-2.svg",
+      "playbooks/classic/assets/crops/wheat-stage-3.svg",
+      "playbooks/classic/assets/crops/wheat-stage-4.svg",
+      "playbooks/classic/assets/crops/wheat-stage-5.svg",
+      "playbooks/classic/assets/crops/wheat-stage-6.svg",
+      "playbooks/classic/assets/crops/wheat-stage-7.svg"
+    ],
+    "adapter": "readonly local pack files + Node dataURL import; production digest/admission checks retained"
+  },
+  "workload": {
+    "chunks": 9,
+    "passes": 200,
+    "actors": 27,
+    "corpusFrames": 20,
+    "terrainCells": 29575,
+    "fluidPercent": 4
+  },
+  "equivalence": "complete observations equal20 frames; unknown/unload/reload/mixed-revision guards equal; actual production builder/reader; exact320 baseline source; declared dirty implementation",
+  "consumerPerformanceClaim": false,
+  "sampleCompletedAt": "2026-10-11T09:41:50.756Z",
+  "phase": "AA",
+  "raw": [
+    {
+      "pair": 0,
+      "a1": {
+        "elapsedMs": 941.8845100000003,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 943.3467819999996,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0015524960698199632
+    },
+    {
+      "pair": 1,
+      "a1": {
+        "elapsedMs": 946.511418,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 943.2277290000002,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0034692545040168415
+    },
+    {
+      "pair": 2,
+      "a1": {
+        "elapsedMs": 956.5274369999997,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 969.8166369999999,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.013893171785724917
+    },
+    {
+      "pair": 3,
+      "a1": {
+        "elapsedMs": 948.1847460000008,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 943.0258239999985,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.005440840534258441
+    },
+    {
+      "pair": 4,
+      "a1": {
+        "elapsedMs": 946.9771380000002,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 948.2873670000008,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0013835909521192871
+    },
+    {
+      "pair": 5,
+      "a1": {
+        "elapsedMs": 951.3068980000007,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 946.6059299999997,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.00494158931243344
+    },
+    {
+      "pair": 6,
+      "a1": {
+        "elapsedMs": 975.5083089999989,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 942.7666970000009,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.033563642357451226
+    },
+    {
+      "pair": 7,
+      "a1": {
+        "elapsedMs": 937.9870440000013,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 939.0995889999976,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0011860984723753977
+    },
+    {
+      "pair": 8,
+      "a1": {
+        "elapsedMs": 939.1873379999997,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 937.8980260000026,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.001372795338939241
+    },
+    {
+      "pair": 9,
+      "a1": {
+        "elapsedMs": 937.2786259999993,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 936.940461000002,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0003607945285603782
+    },
+    {
+      "pair": 10,
+      "a1": {
+        "elapsedMs": 939.1063670000003,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 943.7339119999997,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.0049276047555530745
+    },
+    {
+      "pair": 11,
+      "a1": {
+        "elapsedMs": 934.6916590000001,
+        "checksum": 3608570
+      },
+      "a2": {
+        "elapsedMs": 942.4096639999989,
+        "checksum": 3608570
+      },
+      "relativeNoise": 0.00825727385676693
+    }
+  ],
+  "noise": 0.004198429629784958,
+  "status": "AA_NOISE_PASS"
+}

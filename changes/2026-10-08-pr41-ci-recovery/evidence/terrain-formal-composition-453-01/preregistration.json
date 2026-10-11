@@ -1,0 +1,32 @@
+{
+  "registeredAt": "2026-10-11T09:40:53.408170+00:00",
+  "baseSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+  "profileEvidence": "current-authority-hotspots402: current Vq createTerrainWindow self sampled delta10.63%; Bq builder3.72%; no CPU utilization/consumer gain claim",
+  "axis": "Same production key reuse; complete formal composition context using current actual built pack/lock/host-admissions verified by production loader. Node adapter only substitutes local readonly fetch and Node-compatible dataURL import for browser blob import. No synthetic integrity, no external fetch, no source/permission/checksum bypass.",
+  "A": "Exact32075d18 original builder blob + unchanged production full reader",
+  "B": "Actual implemented production builder + production keyed reader; no private optimized function. Same corpus, guard equivalence, AA/AB gates; dirty source identity declared.",
+  "workload": "Same27 actors/9chunks/20frames/200passes andAA12/AB20; require hasGameplayComposition=true and actual voxelSemantics resolver from that composition; identical complete output/unknown/unload/reload/mixedrevision guards.",
+  "AA": {
+    "pairs": 12,
+    "noise": "median absolute paired relative difference",
+    "vetoAbove": 0.25,
+    "noAutomaticRetry": true
+  },
+  "AB": {
+    "pairs": 20,
+    "order": "balanced alternating AB/BA",
+    "onlyIfAANoisePass": true,
+    "minimumPairedMedianGain": 0.2,
+    "mustExceedNoiseMultiple": 3,
+    "p95BToAMax": 1.1,
+    "canonicalFieldChecksums": "EXACT EQUAL"
+  },
+  "veto": "Any full-field mismatch, unknown/unload/reload/wrong-key/cell-outside/revision change; same AA/AB gates; no automatic retry",
+  "integrationIfPass": "Require same original gates plus valid matching window/measurement. This fixed formal observation component still does not prove browser gameplay, whole simulation/render or combined end-user performance.",
+  "product": "Current originalmain/CI435 stillFAILED, fulltransport/combined end-to-end AA/AB OPEN; component result never merge-ready or end-user benefit",
+  "supersedes": "403 preflight stopped before warmup: asserted chunk size16; actual source CHUNK_SIZE32; no AA/AB samples or production edits",
+  "actualChunkSize": 32,
+  "sampledWindowSize": 16,
+  "runId": "pr41-known-chunk-formal-composition-453-01",
+  "predecessor": "445 valid window/measure numericalPASS67.44%, noise6.07%; valid fixed legacy-content fixture only. Publication445 retained; formal production composition/semantics not proved, no commit/push."
+}

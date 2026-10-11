@@ -1,0 +1,96 @@
+import { strict as assert } from 'node:assert';
+import { existsSync, writeFileSync, readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { performance } from 'node:perf_hooks';
+import { GameServer } from '/workspace/seedlands-web-sandbox/apps/web/tests/fixtures/classic/content';
+import { testCorePlatform } from '/workspace/seedlands-web-sandbox/packages/stdlib/tests/support/core-platform';
+import { buildLogicObservation } from '/workspace/pr41-recovery-20261008-root-01/logic-observation-baseline-320-430-01';
+import { buildLogicObservation as buildKeyedObservation } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/authority/logic-observation-builder';
+import type { AuthoritySnapshot } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/authority/authority-session';
+import { peekLoadedVoxel, peekLoadedVoxelInChunk } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/loaded-voxel-reader';
+import { CHUNK_SIZE, Voxel, chunkKey, floorDiv, mod, voxelIndex } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel';
+import { fluidCellInChunk } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/fluid/fluid-cell-state';
+import type { ServerChunk } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/game-server-types';
+import { sourceIdentity } from '/workspace/seedlands-web-sandbox/scripts/harness/artifact.mjs';
+import { performanceWindowContext, writeMeasurementDeclaration, measurementSummary } from '/workspace/seedlands-web-sandbox/scripts/harness/performance-window-proof.mjs';
+
+const root = '/workspace/seedlands-web-sandbox';
+const [aaPath, abPath] = process.argv.slice(2);
+assert(aaPath && abPath && !existsSync(aaPath) && !existsSync(abPath));
+const reservation = performanceWindowContext();
+assert(reservation, 'Reserved machine window required');
+assert.equal(CHUNK_SIZE, 32);
+const passes = 200;
+const server = new GameServer({ platform: testCorePlatform, seedText: 'known-chunk-consumer-417' });
+server.spawnPlayer({ id: 'player', position: [8.5, 40, 8.5] });
+for (let i = 0; i < 27; i++) server.spawnAutonomousActor({ id: 'sheep-' + i, archetype: 'sheep', position: [-23.5 + (i % 3) * 24, 40, -23.5 + (Math.floor(i / 3) % 3) * 24] });
+const chunks = new Map<string, ServerChunk>();
+for (let cy = 1; cy <= 1; cy++) for (let cz = -1; cz <= 1; cz++) for (let cx = -1; cx <= 1; cx++) {
+ const chunk = server.getChunk(cx, cy, cz); chunks.set(chunk.key, chunk);
+ for (let i = 0; i < chunk.voxels.length; i++) { const code = i % 100; chunk.voxels[i] = code < 2 ? Voxel.Water : code < 4 ? Voxel.Lava : code < 65 ? Voxel.Stone : Voxel.Air; chunk.fluid[i] = code < 4 ? (i % 8 + 1) : 0; }
+}
+const simulation = server.simulationSnapshot(), entities = server.queryEntities();
+const body = (id: string, type: 'player' | 'creature', position: readonly number[]) => ({ id, type, body: { position: { x: position[0]!, y: position[1]!, z: position[2]! }, velocity: { x: 0, y: 0, z: 0 } }, grounded: false, contacts: [] });
+const corpus = Array.from({ length: 20 }, (_, index) => {
+ const current = entities.map(entity => entity.type === 'creature' ? { ...entity, position: [entity.position[0] + index * .04, 40, entity.position[2]] as [number,number,number] } : entity);
+ const snapshot: AuthoritySnapshot = { kind: 'snapshot', protocolVersion: 1, epoch: 'consumer-417', physicsTick: index + 1, commitSequence: index + 1, worldMutationCount: 0, acknowledgedInputSequence: 0, inputResyncRequired: false, activeTimeMs: index * 50, integratedPhysicsTimeMs: index * 50, physicsDebtMs: 0, player: body('player','player',[8.5,40,8.5]), entities: current.filter(e => e.type === 'creature').map(e => body(e.id,'creature',e.position)), chunkRevisions: Object.fromEntries([...chunks].map(([key,c])=>[key,c.revision])), worldRevision: server.worldRevision, worldTime: 8, paused: false };
+ return { clone: testCorePlatform.clone, epoch: 'consumer-417', observationSequence: index+1, snapshot, entities: current, simulation, items: server.itemDefinitions, identityRevision: () => 1, controlSource: (id: string) => server.getActorControlSource(id) ?? 'none' };
+});
+assert.equal(entities.filter(e => e.type === 'creature').length, 27);
+const keyed = (x: number, y: number, z: number, key: string) => peekLoadedVoxelInChunk(chunks, key, x, y, z);
+const A = (x: number, y: number, z: number) => peekLoadedVoxel(chunks,x,y,z);
+const B = keyed;
+const baseline = corpus.map(frame => buildLogicObservation({ ...frame, getLoadedVoxel: A }));
+for (let i=0;i<corpus.length;i++) assert.deepEqual(buildKeyedObservation({ ...corpus[i]!, getLoadedVoxel:B }),baseline[i]);
+assert(baseline[0]!.decisionContext.terrainWindows.length > 0);
+const key = baseline[0]!.decisionContext.terrainWindows[0]!.key, original = chunks.get(key)!;
+chunks.delete(key); assert.deepEqual(buildKeyedObservation({ ...corpus[0]!, getLoadedVoxel:B }), buildLogicObservation({ ...corpus[0]!, getLoadedVoxel:A }));
+assert(!buildKeyedObservation({ ...corpus[0]!, getLoadedVoxel:B }).decisionContext.terrainWindows.some(w => w.key === key));
+chunks.set(key,{ ...original,revision:original.revision+1000,voxels:new Uint16Array(original.voxels.length) });
+const reloaded = buildLogicObservation({ ...corpus[0]!,getLoadedVoxel:A });assert.deepEqual(buildKeyedObservation({ ...corpus[0]!,getLoadedVoxel:B }),reloaded);assert.notDeepEqual(reloaded,baseline[0]);chunks.set(key,original);
+const mixed = (reader: typeof A | typeof B) => { let count=0;return (x:number,y:number,z:number,expectedKey?:string) => { const loaded = reader(x,y,z,expectedKey!); if(loaded?.chunkKey===key && ++count===2) return { ...loaded,revision:loaded.revision+1 };return loaded; }; };
+const mixedA = buildLogicObservation({ ...corpus[0]!,getLoadedVoxel:mixed(A) });const mixedB = buildKeyedObservation({ ...corpus[0]!,getLoadedVoxel:mixed(B) });assert.deepEqual(mixedA,mixedB);assert(!mixedB.decisionContext.terrainWindows.some(w=>w.key===key));
+function sample(arm: 'A'|'B') {
+ const builder = arm==='A'?buildLogicObservation:buildKeyedObservation, reader = arm==='A'?A:B;
+ let checksum=0;const started=performance.now();
+ for(let pass=0;pass<passes;pass++) {const observation=builder({ ...corpus[pass%corpus.length]!,getLoadedVoxel:reader });
+  checksum=(checksum+observation.physicsTick+observation.entities.length)|0;
+  for(const w of observation.decisionContext.terrainWindows) { checksum=(checksum+w.chunkRevision+w.key.length)|0;for(const value of w.occupancy)checksum=(checksum+value)|0; }
+ }
+ return { elapsedMs:performance.now()-started,checksum };
+}
+const median = (values: number[]) => { const s = [...values].sort((a, b) => a - b); return (s[Math.floor((s.length - 1) / 2)]! + s[Math.floor(s.length / 2)]!) / 2; };
+const p95 = (values: number[]) => [...values].sort((a, b) => a - b)[Math.ceil(values.length * 0.95) - 1]!;
+const identity = sourceIdentity(root);
+const common = { schemaVersion: 1, windowId: reservation.windowId, evidencePath: reservation.evidencePath, sampleStartedAt: new Date().toISOString(), runId: 'pr41-known-chunk-window-repair-445-01', owner: 'stdlib-server', scenario: 'known-chunk-production-consumer', ...identity, dirtyFiles: execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim().split('\n'), scriptSha256: createHash('sha256').update(readFileSync('/workspace/pr41-recovery-20261008-root-01/known-chunk-window-repair-446-01.ts')).digest('hex'), workload: { chunks: chunks.size, passes, actors: 27, corpusFrames: 20, terrainCells: baseline[0]!.decisionContext.terrainWindows.reduce((sum,w)=>sum+w.occupancy.length,0), fluidPercent: 4 }, equivalence: 'complete observations equal20 frames; unknown/unload/reload/mixed-revision guards equal; actual production builder/reader; exact320 baseline source; declared dirty implementation', consumerPerformanceClaim: false };
+const warmA1 = sample('A'), warmA2 = sample('A'); assert.equal(warmA1.checksum, warmA2.checksum);
+const aa = [];
+for (let pair = 0; pair < 12; pair++) { const a1 = sample('A'), a2 = sample('A'); assert.equal(a1.checksum, a2.checksum); aa.push({ pair, a1, a2, relativeNoise: Math.abs(a2.elapsedMs - a1.elapsedMs) / a1.elapsedMs }); }
+const noise = median(aa.map(v => v.relativeNoise));
+writeFileSync(aaPath, JSON.stringify({ ...common, sampleCompletedAt: new Date().toISOString(), phase: 'AA', raw: aa, noise, status: noise <= 0.25 ? 'AA_NOISE_PASS' : 'AA_NOISE_FAIL' }, null, 2) + '\n', { flag: 'wx' });
+process.stdout.write(JSON.stringify({ phase: 'AA', noise, pass: noise <= 0.25 }) + '\n');
+let ab: object;
+if (noise > 0.25) ab = { ...common, phase: 'AB', status: 'NOT_RUN_AA_NOISE_FAIL', noise };
+else {
+  sample('B'); sample('B');
+  const raw = [];
+  for (let pair = 0; pair < 20; pair++) {
+    const order = pair % 2 ? ['B', 'A'] as const : ['A', 'B'] as const;
+    const measured = Object.fromEntries(order.map(arm => [arm, sample(arm)])) as Record<'A' | 'B', ReturnType<typeof sample>>;
+    assert.equal(measured.A.checksum, measured.B.checksum);
+    raw.push({ pair, order, ...measured, ratio: measured.B.elapsedMs / measured.A.elapsedMs });
+  }
+  const ratio = median(raw.map(v => v.ratio)), gain = 1 - ratio;
+  const aP95 = p95(raw.map(v => v.A.elapsedMs)), bP95 = p95(raw.map(v => v.B.elapsedMs));
+  const adoptedGate = gain >= 0.20 && gain > noise * 3 && bP95 <= aP95 * 1.10;
+  ab = { ...common, phase: 'AB', raw, noise, ratio, gain, aMedianMs: median(raw.map(v => v.A.elapsedMs)), bMedianMs: median(raw.map(v => v.B.elapsedMs)), aP95, bP95, status: adoptedGate ? 'COMPONENT_GATE_PASS' : 'COMPONENT_GATE_VETO' };
+  process.stdout.write(JSON.stringify({ phase: 'AB', noise, ratio, gain, aP95, bP95, gatePass: adoptedGate }) + '\n');
+}
+ab = { ...ab, sampleCompletedAt: new Date().toISOString() };
+writeFileSync(abPath, JSON.stringify(ab, null, 2) + '\n', { flag: 'wx' });
+writeMeasurementDeclaration(reservation, { measurementPath: abPath, format: 'local', runId: common.runId, owner: common.owner, scenario: common.scenario });
+
+const linkage = measurementSummary(reservation.declarationPath);
+assert.equal(linkage.status, "RECORDED");
+process.stdout.write(JSON.stringify({ measurementLinkage: linkage.status, windowId: reservation.windowId }) + "\n");

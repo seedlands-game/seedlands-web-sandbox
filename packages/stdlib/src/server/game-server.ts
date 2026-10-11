@@ -16,7 +16,7 @@ import { FluidChunkActivationQueue } from './fluid/fluid-chunk-activation-queue'
 import { isFluidVoxel } from './fluid/fluid-cell-state';
 import { FluidTransactionRuntime } from './fluid/fluid-transaction-runtime';
 import type { FluidCandidate } from './fluid/fluid-transaction';
-import { peekLoadedVoxel } from './loaded-voxel-reader';
+import { peekLoadedVoxel, peekLoadedVoxelInChunk, readLoadedGameplayCell } from './loaded-voxel-reader';
 import { validateServerStationCheckpoint, validLoadedServerChunkSnapshot } from './game-server-restore';
 import type { FrozenGameSaveSnapshot } from './persistence/game-save-snapshot';
 import { GameSaveRuntime } from './persistence/game-save-runtime';
@@ -360,6 +360,9 @@ class GameServerWorld {
 
   peekLoadedVoxel = (x: number, y: number, z: number) => peekLoadedVoxel(this.chunks, x, y, z);
 
+  peekLoadedVoxelInChunk = (key: string, x: number, y: number, z: number) =>
+    peekLoadedVoxelInChunk(this.chunks, key, x, y, z);
+
   readCollisionBaseline(key: string, minimumRevision: number) {
     return readLoadedCollisionBaseline(this.chunks, key, minimumRevision);
   }
@@ -369,10 +372,7 @@ class GameServerWorld {
   }
 
   private readLoadedGameplayCell(x: number, y: number, z: number) {
-    const loaded = this.peekLoadedVoxel(x, y, z);
-    if (!loaded) return null;
-    const fluid = this.fluidChunks.cell(x, y, z, false);
-    return { voxel: loaded.voxel, fluid: fluid ? fluid.level | (fluid.source ? 0x80 : 0) : 0 };
+    return readLoadedGameplayCell(this.peekLoadedVoxel, this.fluidChunks, x, y, z);
   }
 
   private readGameplayVoxel(x: number, y: number, z: number): number | undefined {

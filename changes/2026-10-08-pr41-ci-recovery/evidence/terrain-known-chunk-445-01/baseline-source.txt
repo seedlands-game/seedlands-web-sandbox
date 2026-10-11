@@ -1,0 +1,233 @@
+import { projectCombatAction } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/simulation/combat-action-snapshot';
+import { bodyKindForEntity } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/physics/body-registry';
+import type { WorldAabb } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/physics';
+import { authorityBodyConfig } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/authority/authority-body-config';
+import {
+  LOGIC_PROTOCOL_VERSION,
+  MAX_LOGIC_TERRAIN_CELLS,
+  type LogicObservation,
+  type TerrainWindow,
+} from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/logic/logic-protocol';
+import type { AuthoritySnapshot } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/authority/authority-session';
+import type { GameplayEntity } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/gameplay/entity-store';
+import type { ActorState, SimulationSnapshot } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/simulation/actor-state';
+import type { ItemDefinitionRegistry } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/gameplay/item-registry';
+import { CHUNK_SIZE, chunkKey, floorDiv } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel';
+import type { VoxelSemanticsResolver } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel-semantics';
+import { voxelIsSolid } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel-semantics';
+import type { CoreClone } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/runtime/platform-ports';
+import type { GameServer } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/game-server';
+import type { ActorControlSource } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/gameplay/ecs-actor-components';
+
+type LoadedVoxel = Readonly<{ voxel: number; chunkKey: string; revision: number }>;
+
+type BuildOptions = Readonly<{
+  clone: CoreClone;
+  epoch: string;
+  observationSequence: number;
+  snapshot: AuthoritySnapshot;
+  entities: readonly GameplayEntity[];
+  simulation: Pick<SimulationSnapshot, 'actors' | 'pois' | 'actions' | 'combat'>;
+  items: ItemDefinitionRegistry;
+  identityRevision: (entity: GameplayEntity) => number;
+  controlSource?: (entityId: string) => ActorControlSource;
+  configuredBodyAabb?: (entity: GameplayEntity) => WorldAabb;
+  getLoadedVoxel: (x: number, y: number, z: number) => LoadedVoxel | null;
+  voxelSemantics?: VoxelSemanticsResolver;
+}>;
+
+type Bounds = { minX: number; maxX: number; minY: number; maxY: number; minZ: number; maxZ: number };
+
+const activeActionFor = (simulation: BuildOptions['simulation'], actor: ActorState) => {
+  const action =
+    simulation.actions.actions.find(
+      (entry) => entry.actorId === actor.entityId && (entry.status === 'pending' || entry.status === 'running'),
+    ) ?? null;
+  const combat = simulation.combat?.combatants.find((entry) => entry.actorId === actor.entityId)?.combat;
+  return projectCombatAction(action, combat);
+};
+
+const terrainBounds = (entities: readonly GameplayEntity[]) => {
+  const byChunk = new Map<string, Bounds>();
+  entities.forEach((entity) => {
+    const x = Math.floor(entity.position[0]);
+    const y = Math.floor(entity.position[1]);
+    const z = Math.floor(entity.position[2]);
+    const extent = { minX: x - 8, maxX: x + 8, minY: y - 2, maxY: y + 4, minZ: z - 8, maxZ: z + 8 };
+    for (let cy = floorDiv(extent.minY, CHUNK_SIZE); cy <= floorDiv(extent.maxY, CHUNK_SIZE); cy += 1)
+      for (let cz = floorDiv(extent.minZ, CHUNK_SIZE); cz <= floorDiv(extent.maxZ, CHUNK_SIZE); cz += 1)
+        for (let cx = floorDiv(extent.minX, CHUNK_SIZE); cx <= floorDiv(extent.maxX, CHUNK_SIZE); cx += 1) {
+          const key = chunkKey(cx, cy, cz);
+          const next = {
+            minX: Math.max(cx * CHUNK_SIZE, extent.minX),
+            maxX: Math.min((cx + 1) * CHUNK_SIZE - 1, extent.maxX),
+            minY: Math.max(cy * CHUNK_SIZE, extent.minY),
+            maxY: Math.min((cy + 1) * CHUNK_SIZE - 1, extent.maxY),
+            minZ: Math.max(cz * CHUNK_SIZE, extent.minZ),
+            maxZ: Math.min((cz + 1) * CHUNK_SIZE - 1, extent.maxZ),
+          };
+          const current = byChunk.get(key);
+          byChunk.set(
+            key,
+            current
+              ? {
+                  minX: Math.min(current.minX, next.minX),
+                  maxX: Math.max(current.maxX, next.maxX),
+                  minY: Math.min(current.minY, next.minY),
+                  maxY: Math.max(current.maxY, next.maxY),
+                  minZ: Math.min(current.minZ, next.minZ),
+                  maxZ: Math.max(current.maxZ, next.maxZ),
+                }
+              : next,
+          );
+        }
+  });
+  return [...byChunk.entries()].sort(([left], [right]) => left.localeCompare(right));
+};
+
+const createTerrainWindow = (
+  key: string,
+  bounds: Bounds,
+  getLoadedVoxel: BuildOptions['getLoadedVoxel'],
+  voxelSemantics?: VoxelSemanticsResolver,
+): TerrainWindow | null => {
+  const size: [number, number, number] = [
+    bounds.maxX - bounds.minX + 1,
+    bounds.maxY - bounds.minY + 1,
+    bounds.maxZ - bounds.minZ + 1,
+  ];
+  const occupancy = new Uint8Array(size[0] * size[1] * size[2]);
+  let chunkRevision: number | null = null;
+  for (let y = bounds.minY; y <= bounds.maxY; y += 1)
+    for (let z = bounds.minZ; z <= bounds.maxZ; z += 1)
+      for (let x = bounds.minX; x <= bounds.maxX; x += 1) {
+        const loaded = getLoadedVoxel(x, y, z);
+        if (!loaded || loaded.chunkKey !== key) return null;
+        if (chunkRevision !== null && chunkRevision !== loaded.revision) return null;
+        chunkRevision = loaded.revision;
+        const localX = x - bounds.minX;
+        const localY = y - bounds.minY;
+        const localZ = z - bounds.minZ;
+        occupancy[localX + size[0] * (localZ + size[2] * localY)] = Number(voxelIsSolid(loaded.voxel, voxelSemantics));
+      }
+  return {
+    key,
+    chunkRevision: chunkRevision ?? 0,
+    origin: [bounds.minX, bounds.minY, bounds.minZ],
+    size,
+    occupancy,
+  };
+};
+
+function requireConfiguredBodyAabb(options: BuildOptions, entity: GameplayEntity): WorldAabb {
+  const bounds = options.configuredBodyAabb?.(entity);
+  if (!bounds) throw new Error('Logic configured body requires its current definition.');
+  return bounds;
+}
+
+export function buildLogicObservation(options: BuildOptions): LogicObservation {
+  const bodyById = new Map(options.snapshot.entities.map((entry) => [entry.id, entry] as const));
+  const identityById = new Map(
+    options.entities.map((entity) => [entity.id, options.identityRevision(entity)] as const),
+  );
+  const actorEntities = options.entities.filter((entity) =>
+    options.simulation.actors.some((actor) => actor.entityId === entity.id),
+  );
+  const terrainWindows: TerrainWindow[] = [];
+  let terrainCells = 0;
+  for (const [key, bounds] of terrainBounds(actorEntities)) {
+    const cells = (bounds.maxX - bounds.minX + 1) * (bounds.maxY - bounds.minY + 1) * (bounds.maxZ - bounds.minZ + 1);
+    if (terrainCells + cells > MAX_LOGIC_TERRAIN_CELLS) continue;
+    const terrainWindow = createTerrainWindow(key, bounds, options.getLoadedVoxel, options.voxelSemantics);
+    if (!terrainWindow) continue;
+    terrainWindows.push(terrainWindow);
+    terrainCells += cells;
+  }
+
+  return {
+    protocolVersion: LOGIC_PROTOCOL_VERSION,
+    epoch: options.epoch,
+    observationSequence: options.observationSequence,
+    physicsTick: options.snapshot.physicsTick,
+    activeTimeMs: options.snapshot.activeTimeMs,
+    worldTime: options.snapshot.worldTime,
+    entities: options.entities.map((entity) => {
+      const body = bodyById.get(entity.id);
+      const item = entity.stack ? options.items.get(entity.stack.itemId) : null;
+      return {
+        id: entity.id,
+        bodyKind: entity.type === 'transport' ? null : bodyKindForEntity(entity),
+        ...(entity.type === 'transport' ? { bodyAabb: options.clone(requireConfiguredBodyAabb(options, entity)) } : {}),
+        identityRevision: identityById.get(entity.id)!,
+        poseRevision: options.snapshot.physicsTick,
+        position: [...entity.position],
+        velocity: body
+          ? [body.body.velocity.x, body.body.velocity.y, body.body.velocity.z]
+          : [...(entity.physicsVelocity ?? [0, 0, 0])],
+        grounded: body?.grounded ?? false,
+        ...(entity.health === undefined ? {} : { health: entity.health }),
+        ...(entity.stack && item
+          ? {
+              stack: {
+                itemId: entity.stack.itemId,
+                count: entity.stack.count,
+                edible: item.itemType === 'food',
+                hungerRestore: item.hungerRestore ?? 0,
+              },
+            }
+          : {}),
+      };
+    }),
+    decisionContext: {
+      actors: options.simulation.actors.map((actor) => ({
+        state: options.clone(actor),
+        identityRevision: identityById.get(actor.entityId) ?? 0,
+        activeAction: activeActionFor(options.simulation, actor),
+        controlSource: options.controlSource?.(actor.entityId) ?? 'autonomous',
+      })),
+      pois: options.clone(options.simulation.pois),
+      terrainWindows,
+    },
+  };
+}
+
+/** Maintains identity revisions while building bounded, immutable Logic observations. */
+export class AuthorityLogicObservationBuilder {
+  private identityRevisionSequence = 0;
+  private readonly entityIdentities = new Map<string, { signature: string; revision: number }>();
+
+  constructor(
+    private readonly clone: CoreClone,
+    private readonly epoch: string,
+    private readonly server: GameServer,
+  ) {}
+
+  build(sequence: number, snapshot: AuthoritySnapshot): LogicObservation {
+    const entities = this.server.queryEntities();
+    return buildLogicObservation({
+      clone: this.clone,
+      epoch: this.epoch,
+      observationSequence: sequence,
+      snapshot,
+      entities,
+      simulation: this.server.simulationSnapshot(),
+      items: this.server.itemDefinitions,
+      identityRevision: (entity) => this.identityRevision(entity),
+      controlSource: (entityId) => this.server.getActorControlSource(entityId) ?? 'none',
+      configuredBodyAabb: (entity) => authorityBodyConfig(this.server, entity).localAabb,
+      getLoadedVoxel: (x, y, z) => this.server.peekLoadedVoxel(x, y, z),
+      ...(this.server.hasGameplayComposition ? { voxelSemantics: this.server.voxelSemantics } : {}),
+    });
+  }
+
+  identityRevision(entity: GameplayEntity): number {
+    const reference = this.server.createEntityReference(entity.id);
+    if (!reference) return 0;
+    const signature = `${reference.epoch}:${reference.lifetime}:${entity.type}:${entity.archetype ?? ''}:${entity.stack?.itemId ?? ''}`;
+    const current = this.entityIdentities.get(entity.id);
+    if (current?.signature === signature) return current.revision;
+    const revision = ++this.identityRevisionSequence;
+    this.entityIdentities.set(entity.id, { signature, revision });
+    return revision;
+  }
+}

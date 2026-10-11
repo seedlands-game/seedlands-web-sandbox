@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "kind": "seedlands-performance-window",
+  "status": "PASS",
+  "version": 2,
+  "ownerThread": "seedlands-performance-validator",
+  "runId": "pr41-known-chunk-window-445-01",
+  "pid": 501350,
+  "startedAt": "2026-10-11T09:33:28.016Z",
+  "windowId": "pr41-known-chunk-window-445-01",
+  "evidencePath": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-receipt-447-01.json",
+  "waitedMs": 3,
+  "endedAt": "2026-10-11T09:34:29.347Z",
+  "exitCode": 0,
+  "signal": null,
+  "measurement": {
+    "status": "RECORDED",
+    "path": "/workspace/pr41-recovery-20261008-root-01/known-chunk-window-ab-448-01.json",
+    "format": "local",
+    "digest": "09ff29cd65f22273e796d91cc20104d2f493284bb4f5e0ff7e5522b37fd058cc",
+    "runId": "pr41-known-chunk-window-repair-445-01",
+    "owner": "stdlib-server",
+    "scenario": "known-chunk-production-consumer",
+    "sampleStartedAt": "2026-10-11T09:33:29.410Z",
+    "sampleCompletedAt": "2026-10-11T09:34:29.286Z",
+    "sourceSha": "32075d18bcbc8681f1df69bb7601be8c027099db",
+    "sourceDigest": "ac869ea99893a9127fd9a0ec698e244247164c4251eae68ca3d9bb04a86c546e",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71"
+  },
+  "samples": [
+    {
+      "at": "2026-10-11T09:33:28.019Z",
+      "loadAverage": [0.56, 1.15, 1.01],
+      "freeMemoryBytes": 17800085504,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:33.025Z",
+      "loadAverage": [0.91, 1.22, 1.03],
+      "freeMemoryBytes": 17672445952,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:38.027Z",
+      "loadAverage": [0.92, 1.21, 1.03],
+      "freeMemoryBytes": 17655930880,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:43.029Z",
+      "loadAverage": [0.93, 1.21, 1.03],
+      "freeMemoryBytes": 17647415296,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:48.035Z",
+      "loadAverage": [0.93, 1.2, 1.03],
+      "freeMemoryBytes": 17639157760,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:53.041Z",
+      "loadAverage": [0.94, 1.2, 1.03],
+      "freeMemoryBytes": 17639157760,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:33:58.046Z",
+      "loadAverage": [0.94, 1.2, 1.03],
+      "freeMemoryBytes": 17639157760,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:03.051Z",
+      "loadAverage": [0.95, 1.19, 1.03],
+      "freeMemoryBytes": 17639288832,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:08.056Z",
+      "loadAverage": [0.95, 1.19, 1.03],
+      "freeMemoryBytes": 17639288832,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:13.061Z",
+      "loadAverage": [0.96, 1.19, 1.03],
+      "freeMemoryBytes": 17639288832,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:18.067Z",
+      "loadAverage": [0.96, 1.18, 1.03],
+      "freeMemoryBytes": 17626386432,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:23.071Z",
+      "loadAverage": [0.96, 1.18, 1.03],
+      "freeMemoryBytes": 17626398720,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:28.076Z",
+      "loadAverage": [0.97, 1.18, 1.03],
+      "freeMemoryBytes": 17626398720,
+      "totalMemoryBytes": 18882699264
+    },
+    {
+      "at": "2026-10-11T09:34:29.323Z",
+      "loadAverage": [0.97, 1.18, 1.03],
+      "freeMemoryBytes": 17789571072,
+      "totalMemoryBytes": 18882699264
+    }
+  ]
+}
