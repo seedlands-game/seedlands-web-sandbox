@@ -1,0 +1,22 @@
+[
+  {
+    "check": "classic-types",
+    "exitCode": 0,
+    "seconds": 13.98
+  },
+  {
+    "check": "changed-lint",
+    "exitCode": 0,
+    "seconds": 1.47
+  },
+  {
+    "check": "format",
+    "exitCode": 0,
+    "seconds": 25.61
+  },
+  {
+    "check": "selection",
+    "exitCode": 0,
+    "seconds": 0.9
+  }
+]

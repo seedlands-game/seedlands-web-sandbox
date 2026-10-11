@@ -1,0 +1,28 @@
+{
+  "at": "2026-10-11T20:30:58.735125+00:00",
+  "baseSha": "b9b1387e0b7896f4104d64596238ebba847baec4",
+  "hypothesis": "After an actualshortpulse exceeded configuredmaxtravel, both endpoints still too close to voxel can request1ms to approach the existing2.5 boundary before another100ms overshoot. Not a physics/clock/performance claim.",
+  "actual859": {
+    "target": [75, 31, 0],
+    "before": [74.11028024024375, 32.60000006651901, 0.4981895174386723],
+    "after": [73.43528922031021, 32.60000006651901, 0.4981895174386723],
+    "nextFailed": [69.91033611621282, 32.60000006651901, 0.4981895174386723],
+    "requestedPulseMs": 100,
+    "lastIssuedDeltaMs": 782.1
+  },
+  "candidate": "Per-mine local planner, ordinarymax100 retained. Refine only after observed horizontaltravel exceeds configured playermaxspeed*actualrequestedpulse+existingsettledalignment0.05 and CURRENTbothdistance<2.5, grounded,!colliding,neutralfreshACK/presentAuthoritysettled. Use1ms request, preserveoriginalhandoff2.5..4.5,pointtolerance0.45,15sapproach andfresh5mguard/twofarerror. No actor/world/clock/physics/deadline/assertion changes.",
+  "testPlan": [
+    "new integrationreplaysactualC3 firstobservation translated x-37 for existingtarget38; nextsafe input explicitlysyntheticlogic only",
+    "oldunsafeAuthority boundary muststillrequest100twiceandforbidaim",
+    "retain oldfreshdrift/PointerLock/pulse/timing assertions",
+    "pure negative cases for noexcess/moving/airborne/colliding/endpoint mismatch/pendingrelease/asymmetricrange",
+    "actual originalmain validation separate; no forcedobserver injection in browser"
+  ],
+  "paths": [
+    "apps/web/tests/e2e/classic-support/mining-approach-pulse.ts",
+    "apps/web/tests/e2e/classic-support/mining-approach-handoff.test.ts",
+    "apps/web/tests/e2e/classic-support/harness.ts",
+    "changes/2026-10-08-pr41-ci-recovery/spec.md"
+  ],
+  "native825": "36realtrusted/nonrepeat events; input-event span11796ms, not end-to-end15scontroller acceptance or performance proof"
+}

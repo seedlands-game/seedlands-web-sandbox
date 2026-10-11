@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-11T21:04:25.751727+00:00",
+  "sourceSha": "b9b1387e0b7896f4104d64596238ebba847baec4",
+  "candidate": 890,
+  "evidence": "882 FAIL after C0-C3 PASS:80ms travel1.649996, then seventeen1ms requests with settled travel about0.013889, total45170ms; exactcrop67.5,-.5 original45s",
+  "scope": ["equipment-resource-route.ts", "equipment-route-pulse-selection.test.ts", "recovery spec"],
+  "proposal": "Once existing excess-travel refinement is eligible, seed1ms. After same-direction refined settled progress, grow at most2x previous request and cap by remaining x distance minus original0.06 tolerance divided by observed travel/request. Direction reversal or newly excessive refined travel resets1ms. No growth from absent/zero/regressive/ineligible observations; original80/300, goals, native inputs, freshness/settling,45/20/900s/assertions unchanged.",
+  "limits": "Observed travel is feedback, not promised actual held time or linear physical law. Synthetic tests do not prove browser convergence; originalmain required."
+}

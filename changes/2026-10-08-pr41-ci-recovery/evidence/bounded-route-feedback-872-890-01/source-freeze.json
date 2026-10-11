@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-11T21:06:37.965855+00:00",
+  "sourceSha": "b9b1387e0b7896f4104d64596238ebba847baec4",
+  "scope": "Unpushed872 mining +890 equipment feedback; owners61/staticPASS; originalmain pending",
+  "files": {
+    "apps/web/tests/e2e/classic-support/mining-approach-pulse.ts": "e116cc06eb4b262e3192e1b2d052abf6724c4403b8b2f662e13342fb4f38c827",
+    "apps/web/tests/e2e/classic-support/mining-approach-handoff.test.ts": "c9480811190e24bf35d0c0aaf86cd15eed52e42af2eab925677d70482ca0db30",
+    "apps/web/tests/e2e/classic-support/harness.ts": "9fcbb84ce52db8ca646c7b1ac315248239fd6f0049f9962a2b6913f0701d03e1",
+    "apps/web/tests/e2e/classic-support/equipment-resource-route.ts": "f471a4f3d11b103923d611034bc7a66c4f2a73cd554315be22af9857210e17db",
+    "apps/web/tests/e2e/classic-support/equipment-route-pulse-selection.test.ts": "6b48c4fabc9ec4bdc5b89e846394275f31d6b26c059e882392457d111e35f29b",
+    "changes/2026-10-08-pr41-ci-recovery/spec.md": "2585fdce4bbf30ef7a51bd8378de9717c8aae410cff430e8212f16990857e997"
+  }
+}

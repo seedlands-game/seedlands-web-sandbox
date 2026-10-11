@@ -105,6 +105,25 @@ describe('precision only after observed excess travel', () => {
     expect(plan(observed(67.2), 'KeyW')).toBe(80);
     expect(plan(observed(67.3), 'KeyW')).toBe(80);
   });
+  it('grows refined input after the actual 882 undershoot instead of retaining 1ms indefinitely', () => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    expect(plan(observed(65.51722712050838), 'KeyW')).toBe(80);
+    expect(plan(observed(67.1672228733816), 'KeyW')).toBe(1);
+    expect(plan(observed(67.18111176227049), 'KeyW')).toBe(2);
+  });
+  it('limits growing feedback by the original arrival margin and restarts on reversal', () => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    plan(observed(66.578), 'KeyW');
+    expect(plan(observed(67.4), 'KeyW')).toBe(1);
+    expect(plan(observed(67.425), 'KeyW')).toBe(1);
+    expect(plan(observed(67.6), 'KeyS')).toBe(1);
+  });
+  it.each([67.167, 67.1, 67.3])('does not grow zero, regressive or newly excessive refined travel to %s', (next) => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    plan(observed(65.517), 'KeyW');
+    expect(plan(observed(67.167), 'KeyW')).toBe(1);
+    expect(plan(observed(next), 'KeyW')).toBe(1);
+  });
   it.each([
     { serverPlayerVelocity: [0.01, 0, 0] as const },
     { onGround: false },

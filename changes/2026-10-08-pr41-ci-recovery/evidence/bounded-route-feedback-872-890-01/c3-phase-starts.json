@@ -1,0 +1,278 @@
+{
+  "at": "2026-10-11T21:18:20.337579+00:00",
+  "run": 882,
+  "schemaCorrection": "905 failed to match because step title lives in event.title, not params.title; rawnegative preserved",
+  "scope": "Node trace API phase starts within C3; not real DOM generation gap, held duration, planner activation or CPU cause",
+  "events": [
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 261240.88,
+      "callId": "test.step@1434"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 261241.731,
+      "callId": "test.step@1436"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 261541.095,
+      "callId": "test.step@1438"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 261541.864,
+      "callId": "test.step@1440"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 262550.477,
+      "callId": "test.step@1460"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 262551.116,
+      "callId": "test.step@1462"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 262850.13,
+      "callId": "test.step@1464"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 262851.474,
+      "callId": "test.step@1466"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 263386.522,
+      "callId": "test.step@1477"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 263387.152,
+      "callId": "test.step@1479"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 263687.088,
+      "callId": "test.step@1481"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 263688.149,
+      "callId": "test.step@1483"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 265077.708,
+      "callId": "test.step@1504"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 265078.985,
+      "callId": "test.step@1506"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 265233.222,
+      "callId": "test.step@1508"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 265233.786,
+      "callId": "test.step@1510"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 272377.303,
+      "callId": "test.step@1550"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 272677.691,
+      "callId": "test.step@1552"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 274091.155,
+      "callId": "test.step@1567"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 274392.712,
+      "callId": "test.step@1569"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 274927.835,
+      "callId": "test.step@1580"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 275228.514,
+      "callId": "test.step@1582"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 275770.107,
+      "callId": "test.step@1593"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 276068.467,
+      "callId": "test.step@1595"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 276561.453,
+      "callId": "test.step@1606"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 276861.883,
+      "callId": "test.step@1608"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 277510.094,
+      "callId": "test.step@1619"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 277812.353,
+      "callId": "test.step@1621"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 278187.401,
+      "callId": "test.step@1632"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 278488.196,
+      "callId": "test.step@1634"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 278885.127,
+      "callId": "test.step@1645"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 279185.326,
+      "callId": "test.step@1647"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 279547.347,
+      "callId": "test.step@1658"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 279856.805,
+      "callId": "test.step@1660"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 280305.888,
+      "callId": "test.step@1671"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 280606.243,
+      "callId": "test.step@1673"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 281122.335,
+      "callId": "test.step@1684"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 281426.43,
+      "callId": "test.step@1686"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 282011.87,
+      "callId": "test.step@1697"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 282312.648,
+      "callId": "test.step@1699"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 282814.714,
+      "callId": "test.step@1710"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 283115.64,
+      "callId": "test.step@1712"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 283630.844,
+      "callId": "test.step@1723"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 283931.239,
+      "callId": "test.step@1725"
+    },
+    {
+      "title": "Observe Classic voxel",
+      "startTime": 299142.736,
+      "callId": "test.step@1756"
+    },
+    {
+      "title": "Observe Classic voxel",
+      "startTime": 299400.265,
+      "callId": "test.step@1759"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 320120.414,
+      "callId": "test.step@1800"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 320121.175,
+      "callId": "test.step@1802"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 320420.314,
+      "callId": "test.step@1804"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 320421.281,
+      "callId": "test.step@1806"
+    },
+    {
+      "title": "Native route keydown KeyW",
+      "startTime": 321271.369,
+      "callId": "test.step@1820"
+    },
+    {
+      "title": "Native route keydown Space",
+      "startTime": 321271.969,
+      "callId": "test.step@1822"
+    },
+    {
+      "title": "Native route keyup KeyW",
+      "startTime": 321571.895,
+      "callId": "test.step@1824"
+    },
+    {
+      "title": "Native route keyup Space",
+      "startTime": 321572.56,
+      "callId": "test.step@1826"
+    }
+  ]
+}
