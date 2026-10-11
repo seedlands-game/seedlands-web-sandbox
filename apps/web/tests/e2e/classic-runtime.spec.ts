@@ -2,6 +2,7 @@ import { verifyVisualRebuild } from './classic-support/visual-rebuild';
 import { registerClassicMinecartJourney } from './classic-support/minecart-journey';
 import { walkC4Route } from './classic-support/route-pulse-diagnostics';
 import { startClassicNativeTrace } from './classic-support/native-trace';
+import { startClassicAuthorityCpuProfile } from './classic-support/authority-cpu-profile';
 import * as crafting from './classic-support/crafting';
 import { expect, test } from '@playwright/test';
 import { expectPresentedDropOrPickup } from './classic-support/drops';
@@ -301,6 +302,7 @@ test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时
   let sampleCompletedAt!: string;
   await test.step('C4 离开并返回局部资源，验证 Worker 到可见网格链路', async () => {
     await startClassicNativeTrace(page, testInfo, benchmarkMode, process.env, 'C4');
+    await startClassicAuthorityCpuProfile(page, testInfo, benchmarkMode, process.env, 'C4');
     const beforeTraverse = (await snapshot(page))!;
     const returnChunkX = Math.floor(classicScenario.route.returnPoint[0] / 32);
     const returnChunkPattern = new RegExp(`^${returnChunkX},[01],0$`);

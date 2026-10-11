@@ -7,6 +7,8 @@ const samplingIntervalUs = 10_000;
 type TargetInfo = { targetId: string; type: string; url: string; browserContextId?: string };
 type Run = {
   browser: CDPSession;
+  stage: 'main' | 'C4';
+  captureDelayMs: number;
   page: Page;
   runId: string;
   sourceSha: string;
@@ -26,6 +28,11 @@ type Run = {
   errors: unknown[];
 };
 const runs = new WeakMap<Page, Run>();
+type DeferredRun = Pick<Run, 'runId' | 'sourceSha' | 'asset' | 'assetSha256' | 'createdAt'> & {
+  activationAttempted?: boolean;
+  errors?: string[];
+};
+const deferredRuns = new WeakMap<Page, DeferredRun>();
 
 async function capture(run: Run): Promise<void> {
   let worker: WorkerTargetSession | undefined;
@@ -97,12 +104,15 @@ export async function startClassicAuthorityCpuProfile(
   info: Pick<TestInfo, 'title'>,
   benchmark: boolean,
   env: Readonly<Record<string, string | undefined>> = process.env,
+  stage: 'main' | 'C4' = 'main',
 ): Promise<void> {
   if (env.SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE !== '1' || !info.title.startsWith('Classic 生产旅程')) return;
   if (benchmark || env.SEEDLANDS_CLASSIC_BENCHMARK === '1')
     throw new Error('Worker CPU profiling cannot run in a benchmark.');
   if (env.SEEDLANDS_CLASSIC_CPU_PROFILE === '1' || env.SEEDLANDS_CLASSIC_NATIVE_TRACE === '1')
     throw new Error('Worker CPU profiling is mutually exclusive with main CPU and native diagnostics.');
+  const requestedStage = env.SEEDLANDS_CLASSIC_AUTHORITY_CPU_PROFILE_STAGE ?? 'main';
+  if (requestedStage !== 'main' && requestedStage !== 'C4') throw new Error('Unknown worker CPU profile stage.');
   const runId = env.SEEDLANDS_HARNESS_RUN_ID;
   const sourceSha = env.SEEDLANDS_SOURCE_SHA;
   const asset = env.SEEDLANDS_AUTHORITY_CPU_PROFILE_ASSET;
@@ -111,12 +121,40 @@ export async function startClassicAuthorityCpuProfile(
     throw new Error('Worker CPU profile needs source/run and artifact-derived asset identity.');
   if (!/^assets\/authority-worker-[A-Za-z0-9_-]+\.js$/.test(asset) || !/^[0-9a-f]{64}$/.test(assetSha256))
     throw new Error('Worker CPU profile artifact identity is invalid.');
+  if (requestedStage === 'main' && stage === 'C4') return;
+  const deferred = deferredRuns.get(page);
+  if (
+    deferred &&
+    (deferred.runId !== runId ||
+      deferred.sourceSha !== sourceSha ||
+      deferred.asset !== asset ||
+      deferred.assetSha256 !== assetSha256)
+  )
+    throw new Error('Deferred worker CPU profile identity changed.');
+  if (requestedStage === 'C4' && stage === 'main') {
+    if (runs.has(page)) throw new Error('This page already owns a worker CPU profile.');
+    if (!deferred)
+      deferredRuns.set(page, { runId, sourceSha, asset, assetSha256, createdAt: new Date().toISOString() });
+    return;
+  }
+  if (requestedStage === 'C4' && !deferred && !runs.has(page))
+    throw new Error('C4 worker CPU profile requires a deferred request.');
   if (runs.has(page)) throw new Error('This page already owns a worker CPU profile.');
+  if (deferred?.activationAttempted) throw new Error('This page already owns a pending worker CPU profile.');
+  if (deferred) deferred.activationAttempted = true;
   const browser = page.context().browser();
   if (!browser) throw new Error('Worker profiling requires a Chromium browser.');
-  const session = await browser.newBrowserCDPSession();
+  let session: CDPSession;
+  try {
+    session = await browser.newBrowserCDPSession();
+  } catch (error) {
+    if (deferred) deferred.errors = errorMessages(error);
+    throw error;
+  }
   const run: Run = {
     browser: session,
+    stage: requestedStage,
+    captureDelayMs: requestedStage === 'C4' ? 0 : delayMs,
     page,
     runId,
     sourceSha,
@@ -131,8 +169,9 @@ export async function startClassicAuthorityCpuProfile(
     run.capture = capture(run).catch((error: unknown) => {
       run.errors.push(error);
     });
-  }, delayMs);
+  }, run.captureDelayMs);
   runs.set(page, run);
+  deferredRuns.delete(page);
 }
 
 function errorMessages(error: unknown): string[] {
@@ -158,6 +197,7 @@ async function finish(run: Run, info: Pick<TestInfo, 'attach'>): Promise<void> {
           eligible: false,
           sourceSha: run.sourceSha,
           runId: run.runId,
+          stage: run.stage,
           targetInfo: run.target,
           asset: run.asset,
           assetSha256: run.assetSha256,
@@ -178,10 +218,11 @@ async function finish(run: Run, info: Pick<TestInfo, 'attach'>): Promise<void> {
         eligible: false,
         sourceSha: run.sourceSha,
         runId: run.runId,
+        stage: run.stage,
         targetInfo: run.target ?? null,
         asset: run.asset,
         assetSha256: run.assetSha256,
-        delayMs,
+        delayMs: run.captureDelayMs,
         durationMs,
         samplingIntervalUs,
         status: run.errors.length ? 'FAILED' : run.capture ? 'COMPLETE' : 'NOT_STARTED',
@@ -201,7 +242,35 @@ async function finish(run: Run, info: Pick<TestInfo, 'attach'>): Promise<void> {
 
 export async function stopClassicAuthorityCpuProfile(page: Page, info: Pick<TestInfo, 'attach'>): Promise<void> {
   const run = runs.get(page);
-  if (!run) return;
+  if (!run) {
+    const deferred = deferredRuns.get(page);
+    if (!deferred) return;
+    deferredRuns.delete(page);
+    await info.attach('classic-authority-worker-cpu-profile-metadata.json', {
+      contentType: 'application/json',
+      body: JSON.stringify({
+        schemaVersion: 1,
+        diagnosticOnly: true,
+        eligible: false,
+        runId: deferred.runId,
+        sourceSha: deferred.sourceSha,
+        asset: deferred.asset,
+        assetSha256: deferred.assetSha256,
+        createdAt: deferred.createdAt,
+        stage: 'C4',
+        delayMs: 0,
+        durationMs,
+        samplingIntervalUs,
+        status: deferred.activationAttempted ? 'FAILED' : 'NOT_STARTED',
+        reason: deferred.activationAttempted
+          ? 'C4 worker setup did not complete.'
+          : 'C4 worker capture was not activated.',
+        targetInfo: null,
+        errors: deferred.errors ?? (deferred.activationAttempted ? ['See the C4 setup test failure.'] : []),
+      }),
+    });
+    return;
+  }
   run.stopping ??= finish(run, info).finally(() => runs.delete(page));
   await run.stopping;
 }

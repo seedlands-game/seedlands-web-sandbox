@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "b62409cec031f870eb9b8764c5c87f94758ee60f",
+  "runId": "pr41-native-stage-main-293-01",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "performanceClaim": false,
+  "test": {
+    "status": "FAIL",
+    "durationMs": 1295294,
+    "originalAssertions": "UNCHANGED",
+    "diagnosticMainBudgetMs": 1800000,
+    "routesReturned": 61,
+    "c4Outbound": {
+      "status": "threw",
+      "elapsedMs": 92055,
+      "pulseCount": 33,
+      "lastAuthorityPosition": [135.95459891946558, 32.600001, -0.7154568597563603]
+    },
+    "c4Return": "NOT_REACHED",
+    "c5": "NOT_REACHED"
+  },
+  "trace": {
+    "stage": "C4",
+    "status": "COMPLETE",
+    "delayMs": 0,
+    "durationMs": 5000,
+    "captureElapsedMs": 5002.8162700000685,
+    "startedAt": "2026-10-11T04:41:58.300Z",
+    "endedAt": "2026-10-11T04:42:03.303Z",
+    "dataLossOccurred": false,
+    "bytes": 4157745,
+    "errors": []
+  },
+  "traceSha256": "5d501188cd0e2408bdb7a0d35939c719c77702237d8619337259df167076ebb8",
+  "traceEvents": 17617,
+  "coverage": "Mixed C4 preparation and first real keyboard pulses; 4 keydown and 2 keyup EventDispatch records. Not an isolated movement window.",
+  "findings": {
+    "worker": "DedicatedWorker thread: X intervals union4731.902ms; 171 TimerFire, 50 MinorGC; URL/tid identity absent",
+    "gpu": "SwapBuffers long wall events; waits included",
+    "renderer": "Longest receive message is blink.mojom.DevToolsSession; diagnostic overhead possible",
+    "lateDebtBeforeMs": 3653.19999974058,
+    "postFailurePausedDebtMs": 8375.799999715062
+  },
+  "cause": "UNCONFIRMED; no GPU attribution or function attribution",
+  "postverify": "PASS",
+  "rawLogSha256": "c0309e910f678679053fc3d8c260ff23a283fc6b32eb654dd8b35f99d5cb396a",
+  "ci431": {
+    "sourceSha": "b62409cec031f870eb9b8764c5c87f94758ee60f",
+    "runId": 38111336679,
+    "nonBrowser": "5 PASS",
+    "chromium": "FAIL",
+    "mainFirst": "V1 streamCenter[-1,0] rather than[0,0], original5s predicate",
+    "mainRetry": "V2 original900s global timeout, C4/C5 unreached",
+    "visual": "PASS once",
+    "ordinaryMinecart": "FLAKY: first native walk target[2.5,2.5] times out, retry passes",
+    "modular": "SKIP",
+    "pages": "SKIP",
+    "summary": {
+      "failed": 1,
+      "flaky": 1,
+      "skipped": 1,
+      "passed": 1,
+      "durationMinutes": 24.0
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "parentSourceSha": "b62409cec031f870eb9b8764c5c87f94758ee60f",
+  "scope": "Optional existing Authority CPU profile C4 stage; no production behavior change",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "red": {
+    "failed": 9,
+    "passed": 13
+  },
+  "green": {
+    "files": 4,
+    "passed": 62,
+    "authorityOwnerTests": 23,
+    "newCases": 13
+  },
+  "checks": {
+    "classicTypes": "PASS",
+    "relatedLint": "PASS",
+    "ciSelection": {
+      "status": "PASS",
+      "tests": 17
+    },
+    "currentFinalFormat": "PASS",
+    "frozenEvidence": {
+      "status": "PASS",
+      "exactIdentities": 5
+    },
+    "webTypes": "NOT_RUN separately; no Web production source change"
+  },
+  "unchangedLimits": {
+    "defaultDelayMs": 360000,
+    "durationMs": 20000,
+    "samplingIntervalUs": 10000,
+    "mainTimeoutMs": 900000,
+    "c4TimeoutMs": 90000
+  },
+  "guards": "Exact page/context worker asset selection, source/run/asset identity, conflicts, deferred identity, single concurrent activation, cleanup and failures retained",
+  "newProfile": "NOT_RUN",
+  "productAcceptance": "OPEN",
+  "rawLogHashes": {
+    "authority-stage-red-300-01.log": "8a5a8de0ff2cff37cc625e8f04f47b21f52fa2a17cdb2383afcd2ed1a9c32f76",
+    "authority-stage-green-300-02.log": "44000e5153379c554cf39ee89c0d22c5729329816690e3157607f499429016ec",
+    "authority-stage-classic-types-final-300-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "authority-stage-lint-final-300-01.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "authority-stage-selection-300-01.log": "9d6a88a91effbb8e3edcf060be1e0b252217d9acf7b88029de57c500009979b0"
+  }
+}
