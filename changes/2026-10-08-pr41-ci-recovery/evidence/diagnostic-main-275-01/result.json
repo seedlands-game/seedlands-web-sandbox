@@ -1,0 +1,55 @@
+{
+  "recordedAt": "2026-10-11T03:29:08.899046+00:00",
+  "sourceSha": "27a92d90a0d691c3d10fc3dc45b7b6e724337d3d",
+  "runId": "pr41-diagnostic-main-275-01",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "playwrightStatus": "failed",
+  "durationMs": 755643,
+  "processStatus": 1,
+  "postverifyStatus": 0,
+  "failure": "Original supported-surface guard in V2 pickup [86.5,2.5]",
+  "routeCount": 33,
+  "returned": 32,
+  "threw": 1,
+  "c4c5": "NOT_REACHED",
+  "originalRequestedPulseMs": 80,
+  "lastKeyboardWallMs": 1154,
+  "beforeInputPhysicsDebtMs": 712.1666671045823,
+  "lateNeutralSequence": 6699,
+  "lateNeutralTargetTick": 48737,
+  "lateNeutralReceivedAtAuthorityTick": 48763,
+  "existingLateInputSafety": "invalidatePending already clears held state and queue; no evidence that motion waited for later accepted ACK",
+  "newFixCandidate": "Input scheduling ignores existing snapshot physicsDebt; deterministic RED required before fix",
+  "noRepeat": "Single diagnostic ended; no identical-source repeat",
+  "mergeReadiness": "NOT_READY",
+  "logSha256": "6f4c15c34150b3e9a31d4bb320d139f5ddae71641078302cb741b9c13e8da7c4",
+  "artifactDigest": "ed288a1390497f2424aa58dd059d5c382ed0d7fa6fb390ed43a65bba0d195b2a",
+  "stageAssertions": {
+    "C0": "PASS",
+    "C1": "PASS",
+    "C2": "PASS",
+    "C3": "PASS",
+    "C4": "NOT_REACHED",
+    "C5": "NOT_REACHED"
+  },
+  "receiptScope": "Private diagnostic30m; not canonical900s acceptance",
+  "nearbyQuery": "OBSERVED: player and one creeper; later separate frontier, not same-tick contact proof",
+  "files": {
+    "diagnostic-main-275-01.log": {
+      "sha256": "6f4c15c34150b3e9a31d4bb320d139f5ddae71641078302cb741b9c13e8da7c4"
+    },
+    "diagnostic-main-report-275-01.json": {
+      "sha256": "980e3de95fdf2a46298309f48750268856f95d3c1d43650ec802df528e049f0c"
+    },
+    "diagnostic-main-process-275-01.json": {
+      "sha256": "73f0633007b299209253a881ac74e10ad2100c27d099778c579afb1744fa389c"
+    },
+    "diagnostic-main-postverify-275-01.log": {
+      "sha256": "9ea78a282dbeb7d5e0aac91da950e9c95bf374654bc485a55c0c7d245f72534c"
+    },
+    "diagnostic-main-clock-domain-278-01.json": {
+      "sha256": "c44d94dbc5b22f348841f496bd5eedf2c90ae595a09ea2bd19b8697c3338966d"
+    }
+  }
+}

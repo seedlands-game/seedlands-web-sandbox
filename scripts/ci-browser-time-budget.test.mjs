@@ -19,6 +19,7 @@ test('Classic owner contracts remain in the explicit behavior and type selection
   const script = JSON.parse(read('package.json')).scripts['test:classic:headless'];
   const types = JSON.parse(read('tsconfig.classic-tests.json')).include;
   const units = [
+    'apps/web/tests/unit/client/input-scheduling-tick.test.ts',
     'apps/web/tests/unit/client/browser-chunk-persistence.test.ts',
     'apps/web/tests/unit/client/browser-stored-sky-snapshot.test.ts',
     'apps/web/tests/unit/worker/authority-renderer-sky-source.test.ts',

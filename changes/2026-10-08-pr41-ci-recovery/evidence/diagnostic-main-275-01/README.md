@@ -1,0 +1,5 @@
+# 275单次真实输入诊断终态
+
+来源为27a92d90的identified build274，原main一轮、retries0、samplers0、headless/SwiftShader、显式30m诊断。实际Playwright FAIL755643ms：V2 pickup[86.5,2.5]触发原supported-surface断言，33routes中32returned/1threw；C0–C3断言已PASS，C4/C5未到达。原80ms pulse的keyboard API用时1154ms，beforeInput物理积压712.166667ms，落点已离开原支撑面。产物postverify PASS；原日志、报告、附近query与输入附件按各自身份私有保存，不补跑。
+
+neutral6699的target48737小于收到时Authority48763，判late；后续neutral也late。已有input buffer late分支立即清当前输入与queue，不能凭后续accepted ACK推断直到同步才停。当前观察提示已有debt的排程估计缺口，尚未证明整个落点或旧C4根因。query稍后OBSERVED player与一creeper，不是同tick接触证据。新clock快照比值16.66667ms/tick只校验当前V2时钟域，不能当性能收益或产品PASS。原900s主旅程仍未通过，PR不可合入。

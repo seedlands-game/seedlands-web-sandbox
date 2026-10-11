@@ -1434,3 +1434,15 @@ afd2490b已正常推送并identified build/verify PASS，生产artifactDigest与
 验证后保存可恢复本地commit与identified产物；只跑原入口main一次、retries0、所有sampler/lowCore诊断0、SwiftShader/headless/WebGL2与既有质量不变，显式30m和独立runID、全程source freeze。输出仅诊断，不关闭原900s CI/main或产品验收；原局部失败仍作为实际失败保存，早期其他失败导致C4未到达则停止本次尝试而不盲重跑。Root独占既有settings/evidence/harness-snapshot/route诊断/main/test/spec及独立新证据；无新agent/域名/权限、未扩大用户周预算限制。传统.15PD×120%=.18PD，AI实现25min×120%=30min，加既有build/check与单次最多30min浏览器，连续墙钟70min×120%=84min；03:15UTC首检查点。费用/实际模型元数据和额度分母不可读，不估算百分比，依赖主对话实际UI与既有停止线。
 
 273实现检查点03:08UTC：RED7FAIL8PASS，最终相关2files25PASS、receipt9PASS、CI选择17PASS、Classic/Web types和根lint PASS。首轮入口行数和动态timeout选择失败、次轮新receipt行数失败均保留并修复；原14项启动断言原样移入evidence支持模块，入口900000字面量恢复。冻结5/5与全仓Prettier PASS；新回执另做目标格式检查。根有界STATE/LIFE/ERROR无已证实P0/P1/P2，不代表全PR批准。独立证据diagnostic-main-window-273-01，新头build和单次扩展诊断待执行，原产品/CI仍未通过。
+
+### 已有物理积压的输入调度280（预注册）
+
+273本地commit27a92d90与identified build274/verify PASS；生产字节ed288a13与前头一致。原main单次275显式30m诊断在755643ms由V2拾取[86.5,2.5] supported-surface原断言FAIL，C4/C5未到达，不重跑。33routes中32returned/1threw；末pulse原80ms、API1154ms，beforeInput physicsTick48683、physicsDebt712.166667ms，玩家由[86.3663,32.6,.3248]到[86.6552,19.6,5.4178]。正式失败query OBSERVED两条（player及距落点约7.35格creeper），查询较晚，不是接触证明。neutral6699 target48737于Authority48763收到并判late，后续6700–6702也late；6703未来状态48809才accepted。input buffer既有invalidatePending已经清空当前输入与queue，不能称其保持输入直到新ACK，未确认C4或全部本次落点的生产因果。新时钟数百组integrated/tick均16.66667ms，只校验当前V2时钟域，不证明旧C4。
+
+源码Browser inputSchedulingTick当前只取physicsTick+snapshot age，忽略同次AuthoritySnapshot已有physicsDebtMs。在Authority积压追赶时，这可能把刚产生的输入安排进早于其发生的欠账时间；确定性测试先验证该排程缺口，不伪造浏览器根因。Root独占既有input-scheduling-tick.ts及其既有unit test、当前spec和独立新证据，无agent/RPC/timer/API/域名/权限扩张。预计在仅用于输入排程的估计tick中加入有效非负physicsDebtMs，与age共同受原2000ms总上限；缺失兼容零， malformed/future/paused继续fail closed。真实snapshot/Authority physicsTick、physics消费、ACK、inputLead及late/resync/too-far-ahead/maxFuture240门禁均不改；不将预计tick充当物理状态。
+
+先RED：30/60/120Hz已有500ms debt对应欠账ticks，age与debt共同计入且总上限不增加；paused不推算；坏debt不产生调度事实；既有InputCommandBuffer消费积压ticks时新按键尚未生效，正确未来tick才生效，已有too-far gate保持。原17个边界用例与BrowserInputSchedulingClock接收门禁复用。GREEN后相关client/stdlib回归、Classic/Web类型、lint、CI选择/冻结格式与根STATE/LIFE/ERROR有界审查；保存commit与identified build，是否需要新的浏览器尝试由新代码/新证据决定，禁止同来源盲重跑。不得把确定性PASS当原main/C4或完整194/transport/slopes产品PASS。下一检查点03:45UTC；传统.2PD×120%=.24PD，AI实现30min×120%=36min，连同检查/build和至多一个另立新身份的有界实际输入诊断，连续墙钟70min×120%=84min。费用/实际模型元数据和产品额度分母不可读、不估算百分比；既有用户总限及真实UI停止线保持。
+
+280必要验证范围调整03:31UTC：确定性GREEN27例已通过。确认既有input-scheduling-tick.test.ts并未列入当前Classic headless行为与类型选择，不能把本地通过当CI回归。只登记这个既有owner文件到原package.json test:classic:headless和tsconfig.classic-tests.json，并在既有ci-browser-time-budget.test.mjs的owner选择合同追加它；不新增job/入口、不删除任何旧测试、不修改timeout或workflow权限。Root独占追加这三个验证配置文件；新的真实CI选择要在正常推送后核实。传统/AI估计不变，新增固定配置工作约5min，03:45检查点保持。
+
+280检查点03:36UTC：RED10FAIL17PASS，最终client7files77PASS（调度owner含额外clock集成28例）、stdlib2files23PASS、CI选择17PASS、Classic/Web types、根lint及冻结5/5/全仓Prettier PASS。选择登记一次，原所有测试与门禁保留。根有界STATE/LIFE/ERROR无已证实P0/P1/P2；回执input-debt-scheduling-280-01和275原失败诊断独立保存。即将本地commit与identified build，旧27a92d90的真实落点FAIL不算修好，原900s/旧C4及完整产品验收保持未关闭；长期docs baseline未改，原因是既有accepted-snapshot排程合同内的修复，无新API或架构。
