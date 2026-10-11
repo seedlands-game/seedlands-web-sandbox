@@ -1,0 +1,108 @@
+{
+  "version": 1,
+  "recordedAt": "2026-10-11T00:36:34.563262+00:00",
+  "implementationBaseSha": "dc6b816f8ec5543cb53404ba22b9916669afa293",
+  "scope": "bounded input receive observations; no scheduling, guard, action, input, route, quality, timeout changes",
+  "validation": {
+    "red": {
+      "files": 1,
+      "failed": 4,
+      "passed": 3
+    },
+    "clientGreen": {
+      "files": 8,
+      "passed": 69
+    },
+    "authorityAndProtocol": {
+      "files": 2,
+      "passed": 23
+    },
+    "classicTypes": "PASS_AFTER_RETAINED_FAILURE",
+    "stdlibTypes": "PASS",
+    "lint": "PASS_AFTER_RETAINED_FILE_SIZE_FAILURE",
+    "ciSelection": {
+      "passed": 17
+    },
+    "format": "PASS",
+    "webTypes": "PASS",
+    "identifiedBuild": "NOT_RUN_AT_RECEIPT",
+    "candidateBrowser": "NOT_RUN_AT_RECEIPT"
+  },
+  "previousExactHead": {
+    "sha": "dc6b816f8ec5543cb53404ba22b9916669afa293",
+    "localMain191": "FAIL916707ms; V2 stone [90,31,2] return interrupted by original global900000ms; C4/C5 not reached",
+    "ci426": {
+      "runId": 38096754492,
+      "url": "https://github.com/seedlands-game/seedlands-web-sandbox/actions/runs/38096754492",
+      "nonBrowser": "FIVE_SUCCESS",
+      "headlessPassed": 1125,
+      "kernelPassed": 28,
+      "stdlibPassed": 1274,
+      "chromium": "FAIL",
+      "main": "BOTH_ATTEMPTS_C4_RETURN_ORIGINAL_90000MS_ROUTE_FAILURE",
+      "visual": "PASS",
+      "native": "FLAKY_INITIAL_FAILURE_RETRY_PASS",
+      "modular": "SKIP",
+      "preview": "SKIP"
+    }
+  },
+  "boundary": "Authority receive tick/time is not consumed-input or DOM held-time proof. Recovery denotes first accepted receipt only. No performance claim, product PASS or merge-readiness.",
+  "privateRawLogs": [
+    {
+      "name": "input-causal-red-198-01.log",
+      "sha256": "5e7d8cb43676b92d8304189271841c5d3331c0a23644ff09f3034a873d9d1aea"
+    },
+    {
+      "name": "input-causal-related-198-02.log",
+      "sha256": "e5ddb63c91d840444199f9768914d3bc9ae6665707e2bb5c35890fea40647022"
+    },
+    {
+      "name": "input-causal-authority-198-01.log",
+      "sha256": "64cd282242bc661941b97284960c32fe29c64a76dbe269f07fdae9c731d01369"
+    },
+    {
+      "name": "input-causal-classic-types-198-01.log",
+      "sha256": "7a65db4a9128ab15b6663402059b36489aeed7252551ddb98cae391c8dca5edb"
+    },
+    {
+      "name": "input-causal-classic-types-198-03.log",
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    {
+      "name": "input-causal-stdlib-types-198-02.log",
+      "sha256": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630"
+    },
+    {
+      "name": "input-causal-lint-198-02.log",
+      "sha256": "4e715892fd185819a1ff0cd1e77b8b004a409f78d6b0ac20f043529a4411f975"
+    },
+    {
+      "name": "input-causal-lint-198-03.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "input-causal-selection-198-01.log",
+      "sha256": "a84ad409c8ade26934a7ebc7530a3c41f6f5e3e716db1ff8103b731def97541e"
+    },
+    {
+      "name": "input-causal-format-check-198-01.log",
+      "sha256": "17aa973d3f004560237d9a95171210b0671deff23d61628eecf7322ff5938f20"
+    },
+    {
+      "name": "ci426-chromium-raw-200-01.log",
+      "sha256": "b31e915b9d671aef7a33611c227ef6e4b83c27a56504eff15990bfce2d46aa7a"
+    },
+    {
+      "name": "media-gesture-main-result-191-01.json",
+      "sha256": "1f04c8ad9b7d5cdd35c6c5cfa4641e5c9eaecf345ebba77db92b191d9bf13390"
+    },
+    {
+      "name": "media-gesture-post-main-verify-191-01.log",
+      "sha256": "bff6c8dfc788c6b642ad16af1dfe8ab923572283a598602763c45ef16354b4a5"
+    },
+    {
+      "name": "input-causal-web-types-198-01.log",
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    }
+  ]
+}

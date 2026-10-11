@@ -245,6 +245,10 @@ export class AuthorityRuntime {
     return this.session.inputResyncRequired;
   }
 
+  get physicsTick(): number {
+    return this.session.laneTotals.physicsSteps;
+  }
+
   receiveLogicIntents(epoch: string, intents: readonly LogicIntent[]): boolean {
     return this.session.receiveLogicIntents(epoch, intents);
   }

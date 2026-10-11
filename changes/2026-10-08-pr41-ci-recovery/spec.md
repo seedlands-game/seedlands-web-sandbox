@@ -1386,3 +1386,15 @@ Root独占world-media-player.ts、新owner test、package/Classic类型选择、
 189实际RED2FAIL/1PASS：重复手势resolve三次；pending decode被第二次start替换。生产只增加当前loading generation及finally同generation清理、active/当前loading幂等guard；异步resume许可、代际新鲜度、pause/retire/lease仍沿原路径。加入一次resume许可false后再true的pending反例，6files46unique GREEN；选择合同17PASS、定向lint PASS。首次将原owner测试纳入Classic类型后真实发现既有fixture的ended变量被推断为`() => undefined`，不能接收正式`() => void`监听器；仅添加显式正式端口类型，不改观察或断言。该原fixture路径纳入本片独占编辑范围，类型失败日志保留，修后类型待确认。
 
 189修后Classic类型PASS，6files46unique/定向lint/17选择合同PASS；新evidence media-gesture-lifecycle-189-01绑定旧head实际183/CI425及本片RED/GREEN。下一步提交后identified构建190，只运行原完整无optional main191一次，原900000总限/路线/输入/断言/质量不变；不作duration收益比较，失败保留且不盲重跑。
+
+### 输入接收与恢复的有界因果诊断198（预注册）
+
+精确dc6b816f/identified190的原main191终态FAIL916707ms：C0–C3/Creative/V1完成，V2第三块石头[90,31,2]采后返程被原900000ms总限中断，C4/C5未到达，post-run artifact verify PASS。只读196确认现有615 late/622 resync只有lifetime计数，无法关联command、Authority接收tick或后续accepted恢复；195/197的API wall时间不能当CPU或实际heldTime。当前不存在已证实的输入调度修复候选。
+
+本片仅扩充现有只读input-decision诊断：在正常post之前按sequence记录命令target tick、issuedAt active time、movement revision及输入状态的独立副本；worker正常receive后附当时Authority physics tick与跨上下文timeOrigin wall时间。Authority tick直接读既有session state，不创建完整snapshot。旧receipt无此可选字段仍可交付原callback。客户端保留256条最近回执、128条最近拒绝及各拒绝后的首条accepted回执，pending命令最多256；读出深冻结独立副本，诊断只保存数值/状态，不存DOM、Worker、actor或世界引用。时间边界明确区分active time与timeOrigin wall time，不把receive当consumed/执行证明。
+
+先在既有input-decision-diagnostics.test.ts取得实际RED：send/post→late回执的命令与worker tick关联、下一accepted恢复关联、旧epoch/duplicate不污染、callback重入/修改不能污染、有界截断及旧receipt兼容。生产只新增诊断字段、只读tick端口与有界记录，不改输入target/lead/guard/resync/ACK/动作、路线、质量、trace、timeout。相关client/worker/Authority回归及Classic/Web/stdlib类型、lint/format/CI选择合同通过后交付；新identified artifact后只运行原唯一main一次以取得新增因果证据，失败仍完整保留，不能记为性能A/B或产品PASS。
+
+Root独占现有session/runtime与worker protocol/worker/client诊断接线、既有test、新证据及本spec，不委派、不新增权限/域名/模型。传统.15PD×120%=.18PD，AI25min×120%=30min，00:55UTC检查点；实际停止要求优先。长期docs baseline不更新：既有诊断边界的可选观测细化。远端CI426自然terminal前不推新head取消它；完整运输/坡道/194矩阵/最终CI与review仍开放。
+
+198实际交付：RED4FAIL/3PASS→最终客户端8files69PASS（新增5例），Authority/协议2files23PASS；Classic/Web/stdlib类型、lint、format及17选择合同PASS。首次movementRevision误用数字及readonly赋值类型失败、文件长度lint失败原日志均保留；按正式可选字符串合同修正、复用既有laneTotals及诊断post helper，不放宽门禁。CI426已自然FAIL，两次C4 outbound返回成功、return被原90秒路线时限打断；visualPASS，普通Native首次同高失败后retryPASS属FLAKY，previewSKIP。下一新identified构建201/原唯一无optional main202只取新增因果证据，无性能比较或盲重试。

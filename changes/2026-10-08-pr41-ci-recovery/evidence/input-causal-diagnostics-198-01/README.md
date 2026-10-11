@@ -1,0 +1,9 @@
+# 有界输入接收因果诊断198
+
+当前dc6b816f主旅程仍失败：本地191在V2返程触及原global时限；CI426两次在C4返程触及原90秒路线时限。五项非浏览器检查成功，视觉通过，普通矿车首次同高断言失败后重试通过，属于flaky；不证明可合入。
+
+本片保留实际send/post与回执的关联、Authority接收tick及timeOrigin时间、拒绝后的首条accepted回执。最多256条最近回执、128条拒绝、256条未回执命令；读出独立深冻结副本，旧receipt与原callback兼容。post失败清除未发送记录，同步回执/回调重入不能污染诊断。不改输入、调度、规则或产品门槛。
+
+实际RED4失败/3通过；最终客户端8files69通过，Authority/协议2files23通过。首次类型误用movementRevision与只读测试赋值失败保留，按正式可选字符串合同修正；文件长度lint失败保留，复用既有laneTotals及诊断post helper解决，不放宽规则。Classic/stdlib类型、lint、format及17项选择合同通过。Web类型亦通过；新identified构建及原唯一浏览器因果验收尚待完成，后续另记。
+
+validation.json绑定私有原始日志摘要，不复制历史sealed evidence。接收或accepted不等同consumed/实际执行；诊断不提供性能A/B或产品PASS。完整运输、坡道、194项矩阵、最终精确CI和review仍开放。长期docs baseline无需更新，现有诊断边界保持。
