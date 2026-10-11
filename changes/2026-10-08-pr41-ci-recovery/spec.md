@@ -1524,3 +1524,12 @@ headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及�
 ### 2026-10-11 06:32 UTC：344 提交前 checkpoint
 
 335最终版本stdlib1278、headless1205、全类型/lint/格式、CI选择17和封存5文件检查全部通过。局部复用A/B满足门槛，原lookup绑定校验每次保留；长期docs不改。仍缺新SHA原版主旅程/CI及联合端到端对照，完整transport未关闭。保留原型331/334行数FAIL、332两项超时FAIL，以及42cd local318/CI432全局900秒FAIL；不改断言、timeout或quality。正常推现有分支触发已有pr-41预览路径，生产仅main，保持Draft。
+
+### 2026-10-11 07:12 UTC：365 restore native pointer-lock RED 预注册
+
+- CI433同c739：首轮C4 outbound原90秒超时；重试C4 outbound81.115秒/return87.636秒返回后，portable.verifyAfterRestore→verifyCropAfterRestore首个真实移动报canvas无PointerLock。ContinueWorld后该入口未获取锁；旧鼠标baseline仍在，不代表新world持有锁。source365只在portable恢复输入入口复用现有ensurePointerLock，通过真实canvas点击及document.pointerLockElement检查恢复；不设姿态、不改movement/物理/ACK/断言、timeout或quality。
+- RED使用现有CI选择owner mining-approach-handoff.test.ts（不新增owner/selector）：初次lockPointer记录真实输入baseline，模拟ContinueWorld释放锁，portable.verifyAfterRestore作物callback调用实际moveMouseBy（无render等待，仅隔离输入边界），旧代码应抛原PointerLock错误。另验证已持锁不重复点击，获取锁失败原错误传播且作物/导航不执行。补丁后这三个合同通过，再验证原版新SHA完整旅程，单测不代替浏览器。
+- Renderer357已终态FAIL/产物后验PASS，实际profile1.80MB/75451samples，严格timeDelta分析FAIL（-2us、-1us），原样保留，不截零或声明时间收益。样本计数分析仅诊断，不作为CPU利用率或A/B收益；失败不导致同条件盲重试。C739 local345全局900在V2失败919858ms；完整transport及联合端到端对照继续开放。
+- 本次为具体恢复输入缺失修复，不以更快作为采用理由，不追加性能实验。源码冻结357已结束。长期docs不改：既有真实输入helper的入口修正，无协议或生产数据合同改变。预算按主对话UI实测累计规则，未增加预算。
+
+- 365结果：原入口2失败/5通过，修复后既有选中owner 7/7通过；Classic类型、改动文件lint、全库格式及5/5封存字节通过，新receipt另做格式检查。新精确SHA完整主旅程仍待运行；CI433和本地345/357失败保留，未宣称可合入。

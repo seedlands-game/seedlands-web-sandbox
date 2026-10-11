@@ -1,9 +1,14 @@
-import type { Page } from '@playwright/test';
+import type { Page, TestInfo } from '@playwright/test';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { lockPointer } from './mouse-input';
+import { lockPointer, moveMouseBy } from './mouse-input';
+import { verifyAfterRestore } from './portable-item-journeys';
 import { mineVoxel } from './harness';
 import type { ClassicSnapshot } from './harness';
 import type { Point } from './scenario';
+
+const restoreJourneys = vi.hoisted(() => ({ crop: vi.fn(), navigation: vi.fn() }));
+vi.mock('./crop-journey', () => ({ verifyCropAfterRestore: restoreJourneys.crop }));
+vi.mock('./navigation-journey', () => ({ verifyNavigationAfterRestore: restoreJourneys.navigation }));
 
 // These are the two settled Browser64 observations around the original 100ms KeyS pulses.
 // They are replayed as observations; this fixture does not simulate Authority physics.
@@ -232,4 +237,95 @@ it('propagates the real pointer-lock failure before aiming or mining', async () 
   expect(driver.pulses).toHaveLength(0);
   expect(aim).not.toHaveBeenCalled();
   expect(driver.leftMouseDown).not.toHaveBeenCalled();
+});
+
+function restoredInputPage() {
+  let locked = false;
+  let clickFailure: Error | undefined;
+  const click = vi.fn(async () => {
+    if (clickFailure) throw clickFailure;
+    locked = true;
+  });
+  const move = vi.fn(async () => {});
+  const page = {
+    locator: (selector: string) =>
+      selector === '#debug'
+        ? { isVisible: async () => false }
+        : { boundingBox: async () => ({ x: 0, y: 0, width: 1000, height: 800 }), click },
+    evaluate: async () => locked,
+    waitForFunction: async () => {
+      expect(locked).toBe(true);
+    },
+    mouse: { move },
+  } as unknown as Page;
+  return {
+    page,
+    click,
+    move,
+    release: () => {
+      locked = false;
+    },
+    rejectClick: (error: Error) => {
+      clickFailure = error;
+    },
+  };
+}
+
+async function verifyRestoredInput(page: Page) {
+  restoreJourneys.crop.mockReset();
+  restoreJourneys.navigation.mockReset();
+  restoreJourneys.crop.mockImplementation(async (currentPage: Page) => {
+    await moveMouseBy(currentPage, 1, 0, { waitForRender: false });
+    return 'crop verified';
+  });
+  restoreJourneys.navigation.mockImplementation(async (currentPage: Page) => {
+    await moveMouseBy(currentPage, 0, 1, { waitForRender: false });
+    return 'navigation verified';
+  });
+  return verifyAfterRestore(
+    page,
+    {} as TestInfo,
+    { crop: {}, navigation: {} } as Parameters<typeof verifyAfterRestore>[2],
+    { crop: {}, navigation: {} } as Parameters<typeof verifyAfterRestore>[3],
+  );
+}
+
+it('reacquires real canvas input before the first journey after world restore', async () => {
+  const input = restoredInputPage();
+  await lockPointer(input.page);
+  input.click.mockClear();
+  input.release();
+  await expect(verifyRestoredInput(input.page)).resolves.toEqual({
+    crop: 'crop verified',
+    navigation: 'navigation verified',
+  });
+  expect(input.click).toHaveBeenCalledTimes(1);
+  expect(input.move).toHaveBeenCalledTimes(2);
+  expect(restoreJourneys.crop.mock.invocationCallOrder[0]).toBeLessThan(
+    restoreJourneys.navigation.mock.invocationCallOrder[0],
+  );
+});
+
+it('retains existing Pointer Lock without clicking again during restore verification', async () => {
+  const input = restoredInputPage();
+  await lockPointer(input.page);
+  input.click.mockClear();
+  await expect(verifyRestoredInput(input.page)).resolves.toEqual({
+    crop: 'crop verified',
+    navigation: 'navigation verified',
+  });
+  expect(input.click).not.toHaveBeenCalled();
+  expect(input.move).toHaveBeenCalledTimes(2);
+});
+
+it('preserves canvas acquisition failure before any restored journey moves', async () => {
+  const input = restoredInputPage();
+  await lockPointer(input.page);
+  input.release();
+  const denied = new Error('restored canvas click denied');
+  input.rejectClick(denied);
+  await expect(verifyRestoredInput(input.page)).rejects.toBe(denied);
+  expect(restoreJourneys.crop).not.toHaveBeenCalled();
+  expect(restoreJourneys.navigation).not.toHaveBeenCalled();
+  expect(input.move).not.toHaveBeenCalled();
 });
