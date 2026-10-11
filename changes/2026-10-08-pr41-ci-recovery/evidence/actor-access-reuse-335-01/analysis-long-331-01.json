@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "aaMedianNoise": 0.176262682678493,
+  "abMedianRatio": 0.0555760578067194,
+  "aMedianMs": 1517.6524119999985,
+  "bMedianMs": 49.3382359999996,
+  "bindingCountsUntimed": {
+    "a": 96000,
+    "b": 96
+  },
+  "allChecksumsEqual": true,
+  "pairs": 20,
+  "scope": "repeated accessor acquisition only; NOT product acceptance"
+}

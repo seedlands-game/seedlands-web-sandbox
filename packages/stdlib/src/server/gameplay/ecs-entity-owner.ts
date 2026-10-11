@@ -27,7 +27,7 @@ import { createActorComponents } from './ecs-actor-components';
 import {
   initializeActorComponents,
   clearActorComponents,
-  createActorStateAccess,
+  createActorStateAccessCache,
   createPlayerStateAccess,
   installPreparedActorComponentSnapshot,
   prepareActorComponentSnapshot,
@@ -72,6 +72,7 @@ export class EcsEntityOwner {
   private readonly stations: EcsStationStateOwner;
   private readonly transports: EcsTransportStateOwner;
   private readonly ids = new Map<string, EntityId>();
+  private readonly actorAccess = createActorStateAccessCache(this.actors);
   private readonly issued = new Set<string>();
   private readonly usedLifetimes = new Set<number>();
   private lifetimeSequence = 0;
@@ -306,11 +307,12 @@ export class EcsEntityOwner {
     if (eid === null) return false;
     removeEntity(this.world, eid);
     this.ids.delete(id);
+    this.actorAccess.delete(id);
     this.clearSlot(eid);
     return true;
   }
 
-  actorStateAccess = (id: string) => createActorStateAccess(this.actors, this.actorBindings(id));
+  actorStateAccess = (id: string) => this.actorAccess.get(id, () => this.actorBindings(id));
 
   playerStateAccess(id: string) {
     if (this.get(id)?.type !== 'player') throw new RangeError(`Unknown player: ${id}`);
@@ -517,6 +519,7 @@ export class EcsEntityOwner {
     for (const eid of this.ids.values()) this.clearSlot(eid);
     deleteWorld(this.world);
     this.ids.clear();
+    this.actorAccess.clear();
     this.disposed = true;
   }
 

@@ -1,0 +1,70 @@
+{
+  "status": "LOCAL_ACCESSOR_BENCHMARK_PASS_PRODUCT_PENDING",
+  "controlSha": "42cd635d6ac8ac9aa8ebf1af1e24fa136a204036",
+  "sourceHashes": {
+    "packages/stdlib/src/server/gameplay/ecs-entity-owner.ts": "9be865a587859bb1d7a402de68a79f3f86f976e21c3687c09c7e12f1b22f1152",
+    "packages/stdlib/src/server/gameplay/ecs-actor-state.ts": "14e2139aee1615776bd2dacbbca56e51a0c201b2556d8e82bc09d7dab4f7d719"
+  },
+  "contractControl": "7 PASS",
+  "currentIsolated": {
+    "status": "PASS",
+    "files": 4,
+    "tests": 22,
+    "includesOriginalTimeoutFailures": true,
+    "timeoutsChanged": false
+  },
+  "originalPrototypeFull": {
+    "status": "FAIL",
+    "filesPassed": 170,
+    "filesFailed": 2,
+    "testsPassed": 1276,
+    "testsFailed": 2,
+    "failures": ["headless CLI original15000ms timeout", "mesh capacity original5000ms timeout"]
+  },
+  "prototype331Lint": "FAIL 508/500",
+  "extracted334Lint": "FAIL 502/500; AB NOT_STARTED",
+  "current335AllLint": "PASS",
+  "current335AllTypes": "PASS",
+  "currentStdlibFull": {
+    "status": "PASS",
+    "files": 172,
+    "tests": 1278,
+    "serial": true
+  },
+  "currentHeadless": {
+    "status": "PASS",
+    "files": 158,
+    "tests": 1205
+  },
+  "shortAA": "NOISY 32.33%, preserved; not adoption basis",
+  "longAA": "17.63%, passed preregistered25% pre-edit ceiling",
+  "currentAB": {
+    "status": "PASS",
+    "aaMedianNoise": 0.176262682678493,
+    "abMedianRatio": 0.07126965835958314,
+    "aMedianMs": 764.3170224999994,
+    "bMedianMs": 54.88489949999985,
+    "bindingCountsUntimed": {
+      "a": 96000,
+      "b": 96000
+    },
+    "allChecksumsEqual": true,
+    "pairs": 20,
+    "scope": "facet reuse only; original binding validation invoked each lookup; NOT product acceptance"
+  },
+  "reservation": "marker required; raw reservation receipts privately retained",
+  "originalBindingChecks": "called every lookup,96000 bothA/B; no reduced checks claim",
+  "prototypeBindingCount96": "not applicable to final335",
+  "browser": "NOT_RUN_NEW_CANDIDATE",
+  "combinedEndToEndAB": "PENDING",
+  "docsBaseline": "unchanged: owner-private derived accessor reuse, no value/schema changes",
+  "currentFormat": "PASS",
+  "frozenExactBytes": {
+    "status": "PASS",
+    "files": 5
+  },
+  "ciSelection": {
+    "status": "PASS",
+    "tests": 17
+  }
+}

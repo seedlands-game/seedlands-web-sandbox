@@ -110,6 +110,7 @@ describe('EcsEntityOwner', () => {
     expect(() => actor.mode).toThrow(/Stale actor/);
     expect(() => (actor.health = 0)).toThrow(/Stale actor/);
     expect(() => inventory.add({ itemId: ItemIds.WoodBlock, count: 1 })).toThrow(/Stale actor/);
+    expect(() => owner.actorStateAccess('old')).toThrow(/Unknown/);
     expect(replacement.health).toBe(12);
     expect(replacement.inventory.slot(0)).toBeNull();
     owner.dispose();
@@ -128,6 +129,7 @@ describe('EcsEntityOwner', () => {
     expect(restored.resolveReference(reference)).toBeNull();
     expect(() => actor.mode).toThrow(/Stale actor/);
     expect(() => inventory.slot(0)).toThrow(/Stale actor/);
+    expect(() => old.actorStateAccess('shared')).toThrow(/disposed/);
     expect(restored.actorStateAccess('shared').health).toBe(12);
     restored.dispose();
   });
@@ -145,6 +147,30 @@ describe('EcsEntityOwner', () => {
     expect(owner.resolveReference(reference)).toMatchObject({ health: 9, position: [0, 8, 0] });
     expect(owner.resolveReference({ ...reference, lifetime: reference.lifetime + 1 })).toBeNull();
     expect(() => owner.actorStateAccess('missing')).toThrow();
+    owner.dispose();
+  });
+
+  it('reads current component values through retained inventory handles after actor restoration', () => {
+    const owner = createOwner();
+    owner.create(entity('actor'));
+    const first = owner.actorStateAccess('actor');
+    const inventory = first.inventory;
+    first.health = 8;
+    first.hunger = 3;
+    inventory.add({ itemId: ItemIds.WoodBlock, count: 2 });
+    const second = owner.actorStateAccess('actor');
+    expect(second.health).toBe(8);
+    expect(second.hunger).toBe(3);
+    expect(second.inventory.slot(0)?.count).toBe(2);
+
+    const saved = owner.actorComponentSnapshot('actor');
+    owner.restoreActorComponentSnapshot({
+      ...saved,
+      inventory: saved.inventory.map((slot, index) => (index === 0 ? { itemId: ItemIds.WoodBlock, count: 7 } : slot)),
+    });
+    expect(inventory.slot(0)?.count).toBe(7);
+    expect(second.inventory.slot(0)?.count).toBe(7);
+    expect(owner.actorStateAccess('actor').inventory.slot(0)?.count).toBe(7);
     owner.dispose();
   });
 });

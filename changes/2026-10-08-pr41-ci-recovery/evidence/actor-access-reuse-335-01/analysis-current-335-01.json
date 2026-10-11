@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "aaMedianNoise": 0.176262682678493,
+  "abMedianRatio": 0.07126965835958314,
+  "aMedianMs": 764.3170224999994,
+  "bMedianMs": 54.88489949999985,
+  "bindingCountsUntimed": {
+    "a": 96000,
+    "b": 96000
+  },
+  "allChecksumsEqual": true,
+  "pairs": 20,
+  "scope": "facet reuse only; original binding validation invoked each lookup; NOT product acceptance"
+}
