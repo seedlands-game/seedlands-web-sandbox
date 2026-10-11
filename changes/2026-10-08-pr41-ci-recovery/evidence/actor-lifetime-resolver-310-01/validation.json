@@ -1,0 +1,93 @@
+{
+  "status": "LOCAL_CONTROLLED_BENCHMARK_PASS_PRODUCT_PENDING",
+  "controlSha": "120c6ff5d3308015e75a7e4b5b4c84a5a1b40b88",
+  "candidateOwnerSha256": "f88dd526445ac106d5452477a65420f35a79c7f6edd3f19ab1884a2ddc08a47a",
+  "aa": {
+    "pairs": 12,
+    "success": true
+  },
+  "ab": {
+    "pairs": 20,
+    "balanced": true,
+    "success": true
+  },
+  "reservation": {
+    "entry": "node scripts/benchmark-window.mjs --wait-timeout-ms 1000 -- pnpm exec vitest run --config <private config>",
+    "childRequiresMarker": true,
+    "runExitCodes": [0, 0],
+    "separateOwnerReceipt": "NOT_CAPTURED"
+  },
+  "functionalControl": "6/6 PASS",
+  "stdlibFull": {
+    "status": "FAIL",
+    "filesPassed": 171,
+    "filesFailed": 1,
+    "testsPassed": 1276,
+    "testsFailed": 1,
+    "failure": "unchanged vegetation.test.ts original 5000ms timeout"
+  },
+  "isolatedRecheck": {
+    "status": "PASS",
+    "files": 3,
+    "tests": 12,
+    "unchangedTimeout": true
+  },
+  "stdlibTypes": "PASS",
+  "targetLint": "PASS",
+  "allLint": "PASS",
+  "allTypes": "PASS",
+  "browserProduct": "NOT_RUN_NEW_CANDIDATE",
+  "ciProduct": "NOT_RUN_NEW_CANDIDATE",
+  "performanceScope": "owner facet reads only; no browser latency or gameplay improvement claim",
+  "docsBaseline": "unchanged: private owner implementation",
+  "serialStdlibRecheck": {
+    "status": "PASS",
+    "files": 172,
+    "tests": 1277,
+    "noConcurrentTypesLintBenchmark": true
+  },
+  "adoptionTimingEvidence": "315 uninstrumented (counter outside timing)",
+  "instrumented310Limitation": "project counting wrapper may increase old implementation time; original data retained, not sole adoption basis",
+  "uninstrumented315": {
+    "status": "PASS",
+    "aaPairs": 12,
+    "abPairs": 20,
+    "aaMedianRelativeNoise": 0.14081293987765114,
+    "abMedianRatio": 0.24265433189112595,
+    "aMedianMs": 16.37482849999992,
+    "bMedianMs": 3.963000999999963,
+    "projectionCountsUntimed": {
+      "a": 57600,
+      "b": 0
+    },
+    "allChecksumsEqual": true,
+    "timedInstrumentation": false,
+    "scope": "owner facet reads only; NOT browser product acceptance"
+  },
+  "uninstrumentedReservation": {
+    "receiptsCaptured": true,
+    "aaExit": 0,
+    "abExit": 0,
+    "childMarkerRequired": true
+  },
+  "headless": {
+    "status": "PASS",
+    "files": 158,
+    "tests": 1205
+  },
+  "kernel": {
+    "status": "PASS",
+    "files": 4,
+    "tests": 28
+  },
+  "ciSelection": {
+    "status": "PASS",
+    "tests": 17
+  },
+  "formatCheck": "PASS",
+  "frozenExactByteIdentities": {
+    "status": "PASS",
+    "files": 5
+  },
+  "combinedEndToEndAB": "PENDING: no browser performance improvement claim"
+}

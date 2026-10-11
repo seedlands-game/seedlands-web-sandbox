@@ -1,0 +1,6 @@
+{
+  "controlSha": "120c6ff5d3308015e75a7e4b5b4c84a5a1b40b88",
+  "file": "/workspace/seedlands-web-sandbox/packages/stdlib/src/server/gameplay/ecs-entity-owner.ts",
+  "rawSha256": "2e685526872f4313662d5854145c3d8720cd25e757d0f4762ab3a3e08eabe78f",
+  "transform": "relative imports made absolute only"
+}

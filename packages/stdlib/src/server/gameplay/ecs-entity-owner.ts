@@ -431,9 +431,9 @@ export class EcsEntityOwner {
     if (!reference || !hasComponent(this.world, this.require(id), this.actors.needs))
       throw new RangeError(`Unknown inventory actor: ${id}`);
     const resolve = () => {
-      if (this.disposed || !this.resolveReference(reference))
-        throw new Error('Stale actor lifetime or epoch reference.');
-      return this.require(id);
+      const eid = this.disposed ? null : this.resolveReferenceId(reference);
+      if (eid === null) throw new Error('Stale actor lifetime or epoch reference.');
+      return eid;
     };
     return {
       resolve,
@@ -455,10 +455,15 @@ export class EcsEntityOwner {
   }
 
   resolveReference(reference: EntityLifetimeReference): EcsOwnedEntity | null {
+    const eid = this.resolveReferenceId(reference);
+    return eid === null ? null : this.project(eid);
+  }
+
+  private resolveReferenceId(reference: EntityLifetimeReference): EntityId | null {
     if (reference.epoch !== this.worldEpoch) return null;
     const eid = this.resolve(reference.entityId);
     if (eid === null || this.components.identity.lifetime[eid] !== reference.lifetime) return null;
-    return this.project(eid);
+    return eid;
   }
 
   isIssued = (id: string): boolean => this.issued.has(id);

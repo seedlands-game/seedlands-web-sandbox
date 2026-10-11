@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "aaPairs": 12,
+  "abPairs": 20,
+  "aaMedianRelativeNoise": 0.14081293987765114,
+  "abMedianRatio": 0.24265433189112595,
+  "aMedianMs": 16.37482849999992,
+  "bMedianMs": 3.963000999999963,
+  "projectionCountsUntimed": {
+    "a": 57600,
+    "b": 0
+  },
+  "allChecksumsEqual": true,
+  "timedInstrumentation": false,
+  "scope": "owner facet reads only; NOT browser product acceptance"
+}

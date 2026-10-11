@@ -1,0 +1,40 @@
+{
+  "status": "FAIL",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "performanceClaim": false,
+  "sourceSha": "120c6ff5d3308015e75a7e4b5b4c84a5a1b40b88",
+  "runId": "pr41-authority-stage-main-303-01",
+  "mainDiagnosticTimeoutMs": 1800000,
+  "canonicalMainTimeoutMs": 900000,
+  "playwrightElapsedMs": 966983,
+  "routeCounts": {
+    "total": 62,
+    "returned": 61,
+    "threw": 1
+  },
+  "c4": {
+    "status": "threw",
+    "elapsedMs": 90694,
+    "originalTimeoutMs": 90000,
+    "pulseCount": 70,
+    "target": [208.5, 0.5],
+    "finalAuthorityPosition": [194.12931510389578, 32.600001, 0.24905189631379027]
+  },
+  "cpuProfile": {
+    "status": "COMPLETE",
+    "asset": "assets/authority-worker-CHFVvZ83.js",
+    "assetSha256": "6dc26931e26b179a5d6d16cd6c846c0246acdc8b701354eb7be2a46a9bcf9e30",
+    "profileSha256": "d9d5740f197ed7bfeb16e937d2d693ea774860030efa0895fc692b314b7eb1d2",
+    "fullEnvelopeSha256": "d9d5740f197ed7bfeb16e937d2d693ea774860030efa0895fc692b314b7eb1d2",
+    "sampleCount": 1722,
+    "deltaTotalMs": 20528.521,
+    "profileDurationMs": 20537.54,
+    "captureElapsedMs": 20066.492585,
+    "exactPageContextWorkerAssetGuard": "PASS",
+    "errorCount": 0,
+    "rawLocation": "private diagnostic-authority worker CPU profile 307-01"
+  },
+  "postArtifactVerify": "PASS",
+  "returnAndC5": "NOT_REACHED"
+}
