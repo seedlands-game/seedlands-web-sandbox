@@ -287,6 +287,15 @@ const endpointPosition = (endpoint: RouteEndpointV1): readonly [number, number, 
   return [0, endpoint.elevation, 0.5];
 };
 
+/** Inclination of a canonical directed route; derived rather than persisted as another pose field. */
+export function routeInclinationV1(entry: RouteEndpointV1, exit: RouteEndpointV1): number {
+  const from = endpointPosition(cloneEndpoint(entry, 'Route inclination entry'));
+  const to = endpointPosition(cloneEndpoint(exit, 'Route inclination exit'));
+  const horizontal = Math.hypot(to[0] - from[0], to[2] - from[2]);
+  if (horizontal === 0) throw new TypeError('Route inclination requires distinct horizontal endpoints.');
+  return Math.atan2(to[1] - from[1], horizontal);
+}
+
 const curveCenter = (entry: RouteSideV1, exit: RouteSideV1): readonly [number, number] => [
   entry === 'east' || exit === 'east' ? 1 : 0,
   entry === 'south' || exit === 'south' ? 1 : 0,

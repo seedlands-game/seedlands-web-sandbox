@@ -1,0 +1,10 @@
+$ pnpm --dir ../.. exec vitest run --config packages/stdlib/vitest.config.ts packages/stdlib/tests/server/transport-route-seat-handoff.test.ts packages/stdlib/tests/server/transport-route-motion-geometry.test.ts packages/stdlib/tests/server/transport-motion-model.test.ts
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  3 passed (3)
+      Tests  66 passed (66)
+   Start at  12:51:59
+   Duration  3.43s (transform 5.65s, setup 0ms, import 7.83s, tests 583ms, environment 7ms)
+

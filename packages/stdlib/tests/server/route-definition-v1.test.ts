@@ -3,6 +3,7 @@ import {
   advanceRouteSegmentV1,
   defineRouteDefinitionV1,
   resolveRouteSegmentV1,
+  routeInclinationV1,
   type RouteDefinitionV1,
   type RouteEndpointV1,
   type RouteNeighborStateV1,
@@ -10,6 +11,14 @@ import {
 } from '../../src/server/gameplay/modules/route-definition';
 
 const endpoint = (side: RouteSideV1, elevation: -1 | 0 | 1 = 0): RouteEndpointV1 => ({ side, elevation });
+
+it('derives inclination from the canonical directed endpoints without another persisted pose field', () => {
+  expect(routeInclinationV1(endpoint('west'), endpoint('east', 1))).toBeCloseTo(Math.PI / 4);
+  expect(routeInclinationV1(endpoint('east', 1), endpoint('west'))).toBeCloseTo(-Math.PI / 4);
+  expect(routeInclinationV1(endpoint('north'), endpoint('south', 1))).toBeCloseTo(Math.PI / 4);
+  expect(routeInclinationV1(endpoint('north'), endpoint('east'))).toBe(0);
+  expect(() => routeInclinationV1(endpoint('north'), endpoint('north'))).toThrow(/horizontal/i);
+});
 const edgePair = (entry: RouteEndpointV1, exit: RouteEndpointV1, curve: 'line' | 'quarter') => [
   { entry, exit, curve, slopeDelta: (exit.elevation - entry.elevation) as -1 | 0 | 1 },
   { entry: exit, exit: entry, curve, slopeDelta: (entry.elevation - exit.elevation) as -1 | 0 | 1 },

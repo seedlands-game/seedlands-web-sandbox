@@ -3,7 +3,7 @@ import type { GameplayContent } from './gameplay-content';
 import type { GameplayCallbacks } from './gameplay-runtime-contracts';
 import type { FrozenTransportInteractionConfig } from './modules/transport-interaction-config';
 import type { TransportRelationSite } from './modules/transport-relation-interaction';
-import { deriveMountedSeatConstraintV1 } from './modules/transport-motion-state';
+import { deriveMountedSeatConstraintV1, transportInclinationV1 } from './modules/transport-motion-state';
 import { bodyConfigFor } from '../../physics/body-registry';
 import { loadedTransportBodyRejection, loadedWorldBodyRejection } from './transport-deployment-geometry';
 import { transportBodyConfig } from './transport-body-config';
@@ -26,7 +26,7 @@ export function projectTransportRelationSite(options: Options, entityId: string)
   const rejection = (position: readonly [number, number, number], seat = false) =>
     loadedTransportBodyRejection(options, local, position, seat ? exclusion : [entityId]);
   const [x, y, z] = state.pose.position;
-  const body = transportBodyConfig(definition, state.pose.yaw).localAabb;
+  const body = transportBodyConfig(definition, state.pose.yaw, transportInclinationV1(state)).localAabb;
   const xMin = body.min.x - local.max.x - 0.05;
   const xMax = body.max.x - local.min.x + 0.05;
   const zMin = body.min.z - local.max.z - 0.05;

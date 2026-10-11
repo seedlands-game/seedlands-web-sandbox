@@ -94,7 +94,7 @@ it('rejects a different support provider and duplicate occupancy without partial
   expect(state(runtime)).toEqual(beforeOccupied);
 });
 
-it('deploys a registered sloped route cart between literal neighbors at different cell heights', async () => {
+it('rejects the inclined route body overlapping the retained generated Stone without consuming its kit', async () => {
   const runtime = await create(undefined, undefined, [], 1);
   for (const cell of [
     [0, 58, 0],
@@ -102,21 +102,47 @@ it('deploys a registered sloped route cart between literal neighbors at differen
     [2, 60, 0],
   ] as const)
     await putVoxel(runtime, cell, 6);
+  expect(runtime.server.peekLoadedVoxel(0, 59, 0)?.voxel).toBe(3);
+  runtime.server.giveItem(runtime.playerId, { itemId: 'sample:route-cart-kit', count: 1 });
+  runtime.takeCommits();
+  const before = state(runtime);
+  const rejected = await runtime.performAction(deploy(runtime, [1, 59, 0], [1, 60, 0]));
+  expect(rejected.result).toMatchObject({ success: false, reason: 'target-occupied' });
+  expect(rejected.commits).toEqual([]);
+  expect(state(runtime)).toEqual(before);
+  expect(runtime.view().transports).toHaveLength(0);
+});
+it('deploys a registered sloped route cart between literal neighbors at different cell heights', async () => {
+  const runtime = await create(undefined, undefined, [], 1);
+  // The generated Stone at [0,59,0] remains; build a supported slope above it.
+  for (const cell of [
+    [0, 60, 0],
+    [1, 61, 0],
+    [2, 62, 0],
+  ] as const)
+    await putVoxel(runtime, cell, 3);
+  for (const cell of [
+    [0, 61, 0],
+    [1, 62, 0],
+    [2, 63, 0],
+  ] as const)
+    await putVoxel(runtime, cell, 6);
   runtime.server.giveItem(runtime.playerId, { itemId: 'sample:route-cart-kit', count: 1 });
   runtime.takeCommits();
   const before = runtime.server.getInventoryPointerView(runtime.playerId);
   const operationSpy = vi.spyOn(runtime.server, 'invokeActorModuleOperation');
-  const deployed = await runtime.performAction(deploy(runtime, [1, 59, 0], [1, 60, 0]));
+  const deployed = await runtime.performAction(deploy(runtime, [1, 62, 0], [1, 63, 0]));
   expect(operationSpy).toHaveBeenCalledTimes(1);
+  expect(runtime.server.peekLoadedVoxel(0, 59, 0)?.voxel).toBe(3);
   expect(deployed.result).toMatchObject({ success: true, handled: true, bindingId: 'sample:route-cart-binding' });
   expect(runtime.server.getInventoryPointerView(runtime.playerId)).toMatchObject({ revision: before.revision + 1 });
   expect(runtime.server.getInventoryPointerView(runtime.playerId).slots[0]).toBeNull();
   expect(runtime.view().transports).toHaveLength(1);
   expect(runtime.view().transports![0]).toMatchObject({
     definitionId: 'sample:route-cart',
-    pose: { position: [1.5, 59.5, 0.5] },
+    pose: { position: [1.5, 62.5, 0.5] },
     routeCursor: {
-      cell: [1, 59, 0],
+      cell: [1, 62, 0],
       variant: 'sample:slope-east',
       entry: { side: 'west', elevation: 0 },
       exit: { side: 'east', elevation: 1 },
@@ -124,9 +150,9 @@ it('deploys a registered sloped route cart between literal neighbors at differen
   });
   expect(
     [
-      [0, 58, 0],
-      [1, 59, 0],
-      [2, 60, 0],
+      [0, 61, 0],
+      [1, 62, 0],
+      [2, 63, 0],
     ].map(([x, y, z]) => runtime.server.getVoxel(x, y, z)),
   ).toEqual([6, 6, 6]);
 });

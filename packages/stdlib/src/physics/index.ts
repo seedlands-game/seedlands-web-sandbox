@@ -20,3 +20,5 @@ export type {
   Vec3,
   WorldAabb,
 } from './types';
+export { orientedBox, orientedBoxBounds, rotateInclinedVector, sweepOrientedBox } from './oriented-box';
+export type { OrientedBox } from './oriented-box';

@@ -1,0 +1,15 @@
+{
+  "scope": "sweep existing upright rider from old directed-segment seat to next seat before canonical handoff; no interpolated carrier rotation",
+  "baseline": "532+569 sourceDigest a002a4de337f792029e6561748a9646d2ba37821745d0cadc2931856db3e3b99",
+  "counterexample": "legal seatOffset [0,2,0], tiny carrier, thin blocker between disjoint slope/flat seats",
+  "requirements": [
+    "world entity and unknown fail closed",
+    "retain old cursor on blocked handoff",
+    "clear path succeeds",
+    "real Classic formal slope remains pass"
+  ],
+  "exclusiveFiles": [
+    "packages/stdlib/src/server/gameplay/transport-route-motion-geometry.ts",
+    "packages/stdlib/tests/server/transport-route-motion-geometry.test.ts"
+  ]
+}

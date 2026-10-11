@@ -1,0 +1,33 @@
+11:54:27 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |pr41-inclination-negative554| apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts (9 tests | 4 failed) 3983ms
+   × Classic源码组合矿车沿真实Stone支撑的north坡段到达平轨且保留乘员 614ms
+   × Classic源码组合矿车沿真实Stone支撑的east坡段到达平轨且保留乘员 524ms
+   × Classic源码组合矿车沿真实Stone支撑的south坡段到达平轨且保留乘员 802ms
+   × Classic源码组合矿车沿真实Stone支撑的west坡段到达平轨且保留乘员 747ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |pr41-inclination-negative554| apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts > Classic源码组合矿车沿真实Stone支撑的north坡段到达平轨且保留乘员
+ FAIL  |pr41-inclination-negative554| apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts > Classic源码组合矿车沿真实Stone支撑的east坡段到达平轨且保留乘员
+ FAIL  |pr41-inclination-negative554| apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts > Classic源码组合矿车沿真实Stone支撑的south坡段到达平轨且保留乘员
+ FAIL  |pr41-inclination-negative554| apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts > Classic源码组合矿车沿真实Stone支撑的west坡段到达平轨且保留乘员
+AssertionError: expected 0.04991212248764354 to be greater than 0.7
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts:326:125
+    324|   runtime.advanceSession(1_500);
+    325|   const after = runtime.view().transports![0]!;
+    326|   expect((after.pose.position[0] - before.pose.position[0]) * dx + (af…
+       |                                                                                                                             ^
+    327|   expect(after.pose.position[1]).toBe(32);
+    328|   expect(after.routeCursor!.cell[1]).toBe(32);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 5 passed (9)
+   Start at  11:54:27
+   Duration  9.33s (transform 4.40s, setup 153ms, import 5.07s, tests 3.98s, environment 0ms)
+

@@ -1,3 +1,4 @@
+import { transportInclinationV1 } from '../gameplay/modules/transport-motion-state';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { transportBodyConfig } from '../gameplay/transport-body-config';
 import type { GameServer } from '../game-server';
@@ -12,5 +13,5 @@ export function authorityBodyConfig(
   const state = reference && server.transportState(reference);
   const definition = state && server.gameplayContent.transportDefinitions?.require(state.definitionId);
   if (!state || !definition) throw new Error('Authority transport body requires its current configured definition.');
-  return transportBodyConfig(definition, state.pose.yaw);
+  return transportBodyConfig(definition, state.pose.yaw, transportInclinationV1(state));
 }

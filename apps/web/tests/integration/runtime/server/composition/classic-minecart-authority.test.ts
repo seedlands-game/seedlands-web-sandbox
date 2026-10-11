@@ -278,3 +278,87 @@ it('已批准的旧身份仍不能补造缺失的旧system时钟', async () => {
   ).rejects.toThrow(/schedule.*(incomplete|unknown)/i);
   expect(persistence.loadGameplaySnapshot()).toEqual(before);
 });
+
+it.each([
+  ['north', 0, -1, 'seedlands:rail-north-south'],
+  ['east', 1, 0, 'seedlands:rail-east-west'],
+  ['south', 0, 1, 'seedlands:rail-north-south'],
+  ['west', -1, 0, 'seedlands:rail-east-west'],
+] as const)('Classic源码组合矿车沿真实Stone支撑的%s坡段到达平轨且保留乘员', async (side, dx, dz, flatVariant) => {
+  const runtime = await AuthorityRuntime.create({
+    ...classicOptions(),
+    worldgenProvider: classicWorldgenProvider,
+    platform: testCorePlatform,
+    epoch: `classic-supported-${side}`,
+    seedText: `classic-supported-${side}`,
+    initialWorldTime: 8,
+    startTimeMs: 0,
+    initialPlayerBodyPosition: [2.5, 32.6, 4.5],
+  });
+  const edits = [];
+  for (let x = -2; x <= 7; x++)
+    for (let z = -2; z <= 7; z++)
+      for (let y = 30; y <= 35; y++) edits.push({ x, y, z, value: y === 30 ? Voxel.Stone : Voxel.Air });
+  const rails: [number, number, number][] = [[2, 31, 2]];
+  for (let n = 1; n <= 3; n++) {
+    rails.push([2 - dx * n, 31, 2 - dz * n], [2 + dx * n, 32, 2 + dz * n]);
+  }
+  for (const [x, y, z] of rails) {
+    edits.push({ x, y: y - 1, z, value: Voxel.Stone });
+    edits.push({ x, y, z, value: Voxel.Rail });
+  }
+  expect(await runtime.editWorld('supported-classic-slope', edits)).toMatchObject({ committed: true });
+  runtime.server.giveItem(runtime.playerId, { itemId: 'minecart', count: 1 });
+  expect(
+    (
+      await runtime.performAction({
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'voxel', hit: [2, 31, 2], adjacent: [2, 32, 2] },
+        expectedSelection: itemInteractionSelection(runtime.view()),
+      })
+    ).result,
+  ).toMatchObject({ success: true });
+  const before = runtime.view().transports![0]!;
+  expect(before.routeCursor!.variant).toBe(`seedlands:rail-ascending-${side}`);
+  expect(
+    (
+      await runtime.performAction({
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'entity', reference: before.reference },
+        expectedSelection: itemInteractionSelection(runtime.view()),
+      })
+    ).result,
+  ).toMatchObject({ success: true });
+  const snapshot = runtime.snapshot();
+  expect(
+    runtime.receiveInput({
+      kind: 'input',
+      protocolVersion: 1,
+      epoch: snapshot.epoch,
+      stream: 'player-input',
+      sequence: 0,
+      targetPhysicsTick: snapshot.physicsTick + 1,
+      issuedAtMs: snapshot.activeTimeMs + 1,
+      movementRevision: snapshot.player.movement!.revision,
+      state: { moveX: dx, moveZ: dz, verticalIntent: 0, jumpHeld: false },
+      edges: { jumpPressed: false },
+    }),
+  ).toBe('accepted');
+  runtime.advanceSession(1_500);
+  const after = runtime.view().transports![0]!;
+  expect(
+    (after.pose.position[0] - before.pose.position[0]) * dx + (after.pose.position[2] - before.pose.position[2]) * dz,
+  ).toBeGreaterThan(0.7);
+  expect(after.pose.position[1]).toBe(32);
+  expect(after.routeCursor!.cell[1]).toBe(32);
+  expect(after.routeCursor!.variant).toBe(flatVariant);
+  expect(after.reference).toEqual(before.reference);
+  expect(after.rider).toEqual(runtime.server.createEntityReference(runtime.playerId));
+  expect(runtime.server.getEntity(runtime.playerId)!.position).toEqual([
+    after.pose.position[0],
+    after.pose.position[1] + 0.55,
+    after.pose.position[2],
+  ]);
+});

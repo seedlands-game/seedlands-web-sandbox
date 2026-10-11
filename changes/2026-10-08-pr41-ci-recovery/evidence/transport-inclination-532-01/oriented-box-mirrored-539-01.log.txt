@@ -1,0 +1,10 @@
+$ pnpm --dir ../.. exec vitest run --config packages/stdlib/vitest.config.ts packages/stdlib/tests/physics/oriented-box.test.ts
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  11:40:29
+   Duration  526ms (transform 210ms, setup 0ms, import 249ms, tests 7ms, environment 0ms)
+
