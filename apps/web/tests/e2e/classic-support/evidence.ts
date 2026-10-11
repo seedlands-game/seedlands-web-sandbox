@@ -227,7 +227,10 @@ export async function attachClassicFailureWithInput(
   const current = page.isClosed() ? null : await snapshot(page).catch(() => null);
   await attachClassicFailure(testInfo, stages, current, benchmarkMode, restoreEvidence);
   if (page.isClosed()) return;
-  const diagnostics = await collectClassicFailureDiagnostics(page);
+  const diagnostics = await collectClassicFailureDiagnostics(
+    page,
+    !benchmarkMode && (testInfo.status === 'failed' || testInfo.status === 'timedOut'),
+  );
   console.info('Classic failure input/startup diagnostics:', JSON.stringify(diagnostics));
   await testInfo.attach('input-decision-diagnostics.json', {
     contentType: 'application/json',
@@ -235,9 +238,9 @@ export async function attachClassicFailureWithInput(
   });
 }
 
-export async function collectClassicFailureDiagnostics(page: Page) {
+export async function collectClassicFailureDiagnostics(page: Page, includeNearbyEntities = false) {
   return page
-    .evaluate(() => {
+    .evaluate(async (includeNearbyEntities) => {
       const harness = (window as unknown as ClassicWindow).__seedlandsHarness;
       const card = document.querySelector('#start-card');
       let presentation;
@@ -299,7 +302,7 @@ export async function collectClassicFailureDiagnostics(page: Page) {
       } catch (error) {
         presentation = { error: error instanceof Error ? error.message : String(error) };
       }
-      return {
+      const diagnostic = {
         observedAtTimeOriginMs: performance.timeOrigin + performance.now(),
         inputDecisions: harness?.inputDecisionDiagnostics() ?? null,
         presentation,
@@ -321,6 +324,84 @@ export async function collectClassicFailureDiagnostics(page: Page) {
             })),
         },
       };
-    })
+      if (!includeNearbyEntities) return diagnostic as typeof diagnostic & { nearbyEntities?: unknown };
+      let nearbyEntities: unknown;
+      if (!harness?.world?.command) nearbyEntities = { status: 'UNAVAILABLE' };
+      else {
+        const queryRequestedAtTimeOriginMs = performance.timeOrigin + performance.now();
+        try {
+          const reply = await harness.world.command({ type: 'query-nearby', radius: 8 });
+          const payload = (reply.ok ? reply.data : undefined) as
+            { success?: boolean; data?: { entities?: unknown } } | undefined;
+          if (!reply.ok || payload?.success !== true || !Array.isArray(payload.data?.entities))
+            nearbyEntities = {
+              status: 'QUERY_FAILED',
+              reason: reply.ok ? 'invalid-entity-response' : 'query-rejected',
+            };
+          else {
+            const vector = (value: unknown): [number, number, number] | null =>
+              Array.isArray(value) &&
+              value.length === 3 &&
+              value.every((entry) => typeof entry === 'number' && Number.isFinite(entry))
+                ? [value[0], value[1], value[2]]
+                : null;
+            const entities = [];
+            let candidateCount = 0;
+            for (const value of payload.data.entities.slice(0, 512)) {
+              if (!value || typeof value !== 'object') continue;
+              const entity = value as {
+                id?: unknown;
+                type?: unknown;
+                archetype?: unknown;
+                position?: unknown;
+                physicsVelocity?: unknown;
+              };
+              const position = vector(entity.position);
+              if (
+                typeof entity.id !== 'string' ||
+                typeof entity.type !== 'string' ||
+                !position ||
+                !['player', 'creature', 'npc', 'transport'].includes(entity.type)
+              )
+                continue;
+              candidateCount++;
+              if (entities.length < 64)
+                entities.push({
+                  id: entity.id.slice(0, 128),
+                  type: entity.type,
+                  archetype: typeof entity.archetype === 'string' ? entity.archetype.slice(0, 128) : null,
+                  position,
+                  physicsVelocity: vector(entity.physicsVelocity),
+                });
+            }
+            const source = (reply as unknown as { frontier?: Readonly<Record<string, unknown>> }).frontier;
+            const numeric = (key: string) =>
+              typeof source?.[key] === 'number' && Number.isFinite(source[key]) ? source[key] : null;
+            nearbyEntities = {
+              status: 'OBSERVED',
+              diagnosticOnly: true,
+              eligible: false,
+              observationTiming:
+                'Separate read-only query after failure; ECS foot coordinates, not same-tick contact proof.',
+              queryRequestedAtTimeOriginMs,
+              queryObservedAtTimeOriginMs: performance.timeOrigin + performance.now(),
+              frontier: {
+                epoch: typeof source?.epoch === 'string' ? source.epoch.slice(0, 128) : null,
+                physicsTick: numeric('physicsTick'),
+                worldRevision: numeric('worldRevision'),
+                commitSequence: numeric('commitSequence'),
+              },
+              observedNearbyCount: payload.data.entities.length,
+              truncated: candidateCount > 64 || payload.data.entities.length > 512,
+              scanLimit: 512,
+              entities,
+            };
+          }
+        } catch {
+          nearbyEntities = { status: 'QUERY_FAILED', reason: 'query-error' };
+        }
+      }
+      return { ...diagnostic, nearbyEntities };
+    }, includeNearbyEntities)
     .catch(() => null);
 }

@@ -1410,3 +1410,13 @@ Root独占现有session/runtime与worker protocol/worker/client诊断接线、�
 218实际静态交付：旧predicate RED4FAIL/10PASS，修复后route/native两files18PASS及既有duration单例PASS；Classic/Web types、lint、CI选择合同PASS。首GREEN命令一个附加filter不存在，仅计实际两文件，正确duration随后独立执行。新head build/native待执行；CI427自然FAIL、原本地217两项PASS及202/209不同失败保留。新增冻结证据minecart-fixture-freshness-218-01不宣称解决C4或最终可合入。
 
 218最终接触容差核实：既有physics COLLISION_EPSILON×4内视为目标位置，增加实际floor-contact32.600001正例，旧32.7负例不变。最终route/native两files19PASS，原duration另1PASS；Classic types复核、最终targeted lint、full format frozen5/5及Prettier PASS。所有证据只说明本片夹具前置条件加强，不关闭原CI427的C4返程或全量验收缺口。
+
+### C4失败后邻近实体有界读回235（预注册）
+
+3b11e4cb的build/identified artifact及原native225一次无retry PASS，postverify PASS；CI428五项非Browser PASS，headless156files1137例、Kernel28/stdlib172files1274例，Chromium仍运行。21195781 CI427原两次C4末段pulse的movement/neutral accepted且ACK已消费；230原buffer/kernel、232原VoxelCollisionWorld及233正式Classic Authority/原ECS提交回放，在保留原relative receive/target ticks与input state时，预测的X位移均恰为实测两倍，Y/velocity及ACK相容。新实例提交位置与物理结果一致，未确认生产缺陷；真实旧运行的流体/角色/unknown/历史context仍未重现。
+
+本片仅在原main实际failed/timedOut且非benchmark的既有失败证据hook中，追加正式query-nearby radius8的失败后只读观察。沿既有world.command查询，不新增生产API、physics observer、timer或输入；从reply白名单提取最多64个player/creature/npc/transport的ID、type/archetype、foot position与physicsVelocity独立数值副本，保留查询自己frontier tick和wall时钟。原snapshot只读一次、原input/startup/motion诊断保持；query失败/不可用单独记录而不抹掉原错误。该查询晚于原失败，不当成同一tick、contact或根因证明，更不宣称性能/产品PASS。默认不开额外查询，visual/native/Modular及benchmark既有边界保留。
+
+先在既有failure-motion-diagnostics.test.ts执行RED：真实query调用、有限白名单/副本/64容量和query拒绝隔离；旧缺world端口、snapshot拒绝与原窄字段仍回归。相关web tests、Classic/Web类型、lint/format及选择合同必要验证后交付；当前CI428自然terminal前不推新head，后续只依赖正常精确SHA CI的原旅程获取新失败context，不另盲跑本地whole main。Root独占既有evidence/test/spec及新证据；无新agent/域名/权限。传统.10PD×120%=.12PD，AI20min×120%=24min，01:55UTC检查点；模型费率/分母不可读，不估算百分比。
+
+235实际进度：新增两例RED2FAIL/原4PASS；实现后既有同文件9PASS，包含默认查询关闭、query拒绝/异常隔离、非有限position与velocity及512扫描上限。初轮Classic types发现reply失败分支data访问和默认返回可选字段类型问题，修复后Classic/Web types PASS；lint及选择合同17PASS。查询沿原Authority RPC请求注册表的15秒超时，不增加timer或改变测试超时；原main失败前输入、motion/startup观察不受新增await影响。新头build和浏览器真实查询尚未执行；CI428仍待自然结束，不将本片诊断通过当成C4修复。
