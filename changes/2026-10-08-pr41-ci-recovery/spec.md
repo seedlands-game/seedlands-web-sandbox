@@ -1446,3 +1446,15 @@ afd2490b已正常推送并identified build/verify PASS，生产artifactDigest与
 280必要验证范围调整03:31UTC：确定性GREEN27例已通过。确认既有input-scheduling-tick.test.ts并未列入当前Classic headless行为与类型选择，不能把本地通过当CI回归。只登记这个既有owner文件到原package.json test:classic:headless和tsconfig.classic-tests.json，并在既有ci-browser-time-budget.test.mjs的owner选择合同追加它；不新增job/入口、不删除任何旧测试、不修改timeout或workflow权限。Root独占追加这三个验证配置文件；新的真实CI选择要在正常推送后核实。传统/AI估计不变，新增固定配置工作约5min，03:45检查点保持。
 
 280检查点03:36UTC：RED10FAIL17PASS，最终client7files77PASS（调度owner含额外clock集成28例）、stdlib2files23PASS、CI选择17PASS、Classic/Web types、根lint及冻结5/5/全仓Prettier PASS。选择登记一次，原所有测试与门禁保留。根有界STATE/LIFE/ERROR无已证实P0/P1/P2；回执input-debt-scheduling-280-01和275原失败诊断独立保存。即将本地commit与identified build，旧27a92d90的真实落点FAIL不算修好，原900s/旧C4及完整产品验收保持未关闭；长期docs baseline未改，原因是既有accepted-snapshot排程合同内的修复，无新API或架构。
+
+### C4有界native窗口290（预注册）
+
+160de2d1已正常推送；本地identified build281/verify PASS（artifact739ef065、289files），精确CI430五非Browser PASS，Headless157files1180例、新input排程28例实际选择，Kernel28/stdlib1274通过。新产物单次30m诊断282在1004550ms FAIL：61条V2 routes均returned，包括前头失败pickup[86.5,2.5]；随后C4 outbound原90s局部上限在90919ms触发，70pulses后Authority[194.051622,32.600001,.187467]未到[208.5,.5]，return/C5未到达，postverify PASS。末pulse原300/API341ms，三个末段缓存快照nearPlayer32=0、Hz60，正式失败query稍后仅player。不能把这些当旧C4接触证明，不能闭合原900s或完整产品验收。
+
+本次失败滚动frame窗口中位约295.8ms、CPU末tick1.5ms及物理样本中位3.4ms；这些窗口是失败后暂停读回，非独占C4/受控性能证据，尚不能归因GPU。现有native-trace仅5s、64MiB、10s completion、原6min delay，缺乏C4特定采样。本片只给既有NativeTrace增加显式阶段main/C4，默认main保持原6min延迟；显式NativeTrace=1且stage=C4时beforeEach只登记请求，不创建CDP/timer，原C4 step开始才创建一次CDP并0ms delay抓原5s窗口。未到C4必须独立metadata NOT_STARTED，不伪造trace；原source/run身份、category、size/duration/completion、dataLoss与detach guard保持，benchmark/CPU冲突在defer前拒绝，未知stage拒绝。无新生产API、域名、agent或权限，帧间隙解释前不修改GPU质量/材质/物理/no-op ECS。
+
+Root独占native-trace.ts、原main的阶段调用、独立native-trace.test.ts、package单owner选择、原CI选择合同、当前spec及独立新证据。新test在原e2e目录，已有全e2e类型选择保持。先RED：C4前无session/timer且未到达metadata；C4阶段只初始化一次、实际delay0与metadata身份；默认6min不变并正常清timer/detach；benchmark/CPU冲突和未知stage拒绝；关闭时旁路。相关类型、lint、owner选择及冻结格式、有界STATE/LIFE/ERROR后保存local commit/build，等CI430自然终态才正常推送，不取消当前CI。
+
+至多一次另立新身份的原main诊断，显式30m/retries0、仅C4 native5s，其他samplers0/headless/SwiftShader与质量不变；全程source freeze，任何早期失败或capture missing/failed保留真实状态而不盲重跑。结果仅diagnosticOnly/eligible=false，不宣称性能收益或产品PASS。传统.15PD×120%=.18PD，AI实现30min×120%=36min，连同检查/build及单次至多30m旅程连续70min×120%=84min；04:25UTC首检查点。实际费用/会话型号元数据不可读，不做额度换算，依赖主对话真实UI的共享口径及既定预算限制；无需为额度另跑验证。
+
+290检查点04:20UTC：首轮RED5FAIL/4PASS；新增setup错误状态RED1FAIL/11PASS，最终相关3files39PASS（新owner12例），保持原5s采样与dataLoss拒绝。Classic/Web types、根lint、CI选择17和frozen5/5/全仓Prettier已通过，最后错误分支后的相关类型/lint待结束。setup已开始但失败保存FAILED与原错误，未初始化保存NOT_STARTED，不伪造raw trace。CI430已自然FAIL，两次main均V2完成后C4 outbound局部90s失败，76/74pulses后x200.8655/198.6828；visual首次单击5s predicate失败、retryPASS为FLAKY，普通矿车一次PASS、Modular/Pages SKIP。新诊断commit/build和单次C4 native尚未执行，完整产品验收仍未闭合。
