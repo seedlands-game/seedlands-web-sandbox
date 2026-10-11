@@ -1,4 +1,6 @@
 import type { TransportDefinitionV1, TransportStateV2 } from './transport-model';
+import { routeInclinationV1 } from './route-definition';
+import { rotateInclinedVector } from '../../../physics';
 import {
   expected,
   pose,
@@ -9,6 +11,9 @@ import {
 } from './transport-motion-model';
 
 const EPSILON = 1e-9;
+
+export const transportInclinationV1 = (state: Pick<TransportStateV2, 'routeCursor'>): number =>
+  state.routeCursor ? routeInclinationV1(state.routeCursor.entry, state.routeCursor.exit) : 0;
 
 export function commitTransportMotionCandidateV1(
   state: TransportStateV2,
@@ -42,14 +47,9 @@ export function deriveMountedSeatConstraintV1(
   if (!state.rider) return null;
   const transportPose = pose(state.pose);
   const [x, y, z] = definition.seatOffset;
-  const cosine = Math.cos(transportPose.yaw);
-  const sine = Math.sin(transportPose.yaw);
+  const seat = rotateInclinedVector({ x, y, z }, transportPose.yaw, transportInclinationV1(state));
   const seatPosition = tuple(
-    [
-      transportPose.position[0] + x * cosine + z * sine,
-      transportPose.position[1] + y,
-      transportPose.position[2] - x * sine + z * cosine,
-    ],
+    [transportPose.position[0] + seat.x, transportPose.position[1] + seat.y, transportPose.position[2] + seat.z],
     'Transport seat position',
   );
   if (![...seatPosition, transportPose.yaw].every(Number.isFinite))

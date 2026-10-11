@@ -1,6 +1,7 @@
 import { ModelSurfaceLighting } from '../scene/model-surface-lighting';
 import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { ItemDefinition } from '@seedlands/stdlib/server/gameplay/item-registry';
+import { transportInclinationV1 } from '@seedlands/stdlib/mod-api';
 import * as pc from 'playcanvas';
 import type {
   AuthorityGameplayView,
@@ -165,7 +166,12 @@ export class GameplayEntityPresenter {
     )
       position = [...entity.position];
     const pose = movementPose(previous, position, time);
-    if (transport) node.setEulerAngles(0, (transport.pose.yaw * 180) / Math.PI, 0);
+    if (transport)
+      node.setEulerAngles(
+        (-transportInclinationV1(transport) * 180) / Math.PI,
+        (transport.pose.yaw * 180) / Math.PI,
+        0,
+      );
     else if (pose.yaw !== null) node.setEulerAngles(0, pose.yaw, 0);
     const oldHealth = this.health.get(entity.id);
     if (entity.health !== undefined) {

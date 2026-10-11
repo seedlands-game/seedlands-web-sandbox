@@ -1,0 +1,26 @@
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ ../pr41-recovery-20261008-root-01/formal-supported-slope-475-01.test.ts (1 test | 1 failed) 1384ms
+   × records the first real east-supported-slope sweep contact while replaying the original Authority input 1379ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  ../pr41-recovery-20261008-root-01/formal-supported-slope-475-01.test.ts > records the first real east-supported-slope sweep contact while replaying the original Authority input
+AssertionError: expected 0.04991212248764354 to be greater than 0.7
+ ❯ ../pr41-recovery-20261008-root-01/formal-supported-slope-475-01.test.ts:75:62
+     73|   expect(runtime.server.getEntity(runtime.playerId)!.position).toEqual…
+     74|   expect(before.routeCursor!.variant).toBe('seedlands:rail-ascending-e…
+     75|   expect((after.pose.position[0] - before.pose.position[0])).toBeGreat…
+       |                                                              ^
+     76|   expect(after.pose.position[1]).toBe(32);
+     77|   expect(after.routeCursor!.cell[1]).toBe(32);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  10:06:29
+   Duration  4.39s (transform 2.36s, setup 0ms, import 2.85s, tests 1.38s, environment 0ms)
+

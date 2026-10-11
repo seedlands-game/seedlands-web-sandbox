@@ -236,6 +236,7 @@ export type { TransportMotionConfig, TransportMotionPolicy } from '../gameplay/m
 export {
   commitTransportMotionCandidateV1,
   deriveMountedSeatConstraintV1,
+  transportInclinationV1,
 } from '../gameplay/modules/transport-motion-state';
 export type {
   MountedSeatConstraintV1,
@@ -352,3 +353,4 @@ export { defineTransportInteractionModule } from '../gameplay/modules/transport-
 export type { TransportInteractionConfig } from '../gameplay/modules/transport-interaction-config';
 export { defineTransportRelationModule } from '../gameplay/modules/transport-relation-module';
 export type { TransportRelationConfig } from '../gameplay/modules/transport-relation-interaction';
+export { routeInclinationV1 } from '../gameplay/modules/route-definition';

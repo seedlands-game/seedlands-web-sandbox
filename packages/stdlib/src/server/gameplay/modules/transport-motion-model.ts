@@ -401,6 +401,9 @@ export function buildRouteTransportMotionCandidateV1(
     const currentExit = worldRoutePosition(cell, advanceRouteSegmentV1(segment, 0, segment.length).position);
     const nextEntry = worldRoutePosition(nextCell, advanceRouteSegmentV1(next.segment, 0, 0).position);
     if (!samePosition(currentExit, nextEntry)) throw new TypeError('Next route segment is not spatially continuous.');
+    const handoffCollision = stopForCollision(input.sweep(nextEntry, nextEntry, definition.bodyAabb));
+    if (handoffCollision)
+      return stoppedCandidate(state, nextPose, cursor, traveled, traveled * input.fuelPerMeter, handoffCollision);
     segment = next.segment;
     cell = nextCell;
     cursor = Object.freeze({

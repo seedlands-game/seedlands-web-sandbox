@@ -1,4 +1,12 @@
-import { bodyWorldAabb, sweepBodyThroughWorld, type BodyConfig, type WorldAabb } from '../../physics';
+import {
+  bodyWorldAabb,
+  sweepBodyThroughWorld,
+  orientedBox,
+  rotateInclinedVector,
+  type BodyConfig,
+  type WorldAabb,
+  type OrientedBox,
+} from '../../physics';
 import { colliderMatches, overlapDepth, translateAabb, unionAabb } from '../../physics/geometry';
 import type { AuthorityPhysicsFrame } from '../authority/authority-physics-frame';
 import type { EntityStore } from './entity-store';
@@ -12,6 +20,7 @@ import {
 } from './modules/transport-motion-model';
 import { transportControlFromWorldWish } from './transport-motion-control';
 import { transportBodyConfig } from './transport-body-config';
+import { transportInclinationV1 } from './modules/transport-motion-state';
 
 type Position = readonly [number, number, number];
 const vector = (p: Position) => ({ x: p[0], y: p[1], z: p[2] });
@@ -32,18 +41,15 @@ export function compoundBody(
   turning: boolean,
   arcPad: number,
 ): BodyConfig {
-  const config = transportBodyConfig(definition, state.pose.yaw);
+  const inclination = transportInclinationV1(state);
+  const config = transportBodyConfig(definition, state.pose.yaw, inclination);
   let bounds = config.localAabb;
   if (state.rider) {
     const rider = frame.bodyConfigs.get(state.rider.entityId);
     if (!rider) throw new Error('Transport rider has no current physics body.');
     const [x, y, z] = definition.seatOffset;
-    const cosine = Math.cos(state.pose.yaw),
-      sine = Math.sin(state.pose.yaw);
-    bounds = unionAabb(
-      bounds,
-      translateAabb(rider.localAabb, { x: x * cosine + z * sine, y, z: -x * sine + z * cosine }),
-    );
+    const seat = rotateInclinedVector({ x, y, z }, state.pose.yaw, inclination);
+    bounds = unionAabb(bounds, translateAabb(rider.localAabb, seat));
   }
   if (turning) {
     const radius =
@@ -53,6 +59,27 @@ export function compoundBody(
     bounds = { min: { x: -radius, y: bounds.min.y, z: -radius }, max: { x: radius, y: bounds.max.y, z: radius } };
   }
   return { ...config, localAabb: bounds };
+}
+
+/** Actual inclined carrier and upright rider; the enclosing AABB remains broadphase only. */
+export function compoundBoxes(
+  definition: TransportDefinitionV1,
+  state: TransportStateV2,
+  frame: AuthorityPhysicsFrame,
+): readonly OrientedBox[] {
+  const inclination = transportInclinationV1(state);
+  const position = vector(state.pose.position);
+  const boxes = [orientedBox(definition.bodyAabb, position, state.pose.yaw, inclination)];
+  if (state.rider) {
+    const rider = frame.bodyConfigs.get(state.rider.entityId);
+    if (!rider) throw new Error('Transport rider has no current physics body.');
+    const [x, y, z] = definition.seatOffset;
+    const seat = rotateInclinedVector({ x, y, z }, state.pose.yaw, inclination);
+    boxes.push(
+      orientedBox(rider.localAabb, { x: position.x + seat.x, y: position.y + seat.y, z: position.z + seat.z }),
+    );
+  }
+  return boxes;
 }
 
 /** Bounds another carrier's arbitrary path around its endpoint chord for this frame only. */

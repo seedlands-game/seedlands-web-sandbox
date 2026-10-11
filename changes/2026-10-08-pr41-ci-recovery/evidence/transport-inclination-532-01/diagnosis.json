@@ -1,0 +1,52 @@
+{
+  "scope": "532+569+585 当前工作树功能修复，非最终 PR SHA 或完整产品验收",
+  "identity": {
+    "sourceSha": "d39f8f3d8c36c5c0bad22d24157f4689b7ebc99c",
+    "sourceDigest": "04caf75059858276460d6d83e98de7cfa2cf2c4a4c63950faf926768281e4c2a",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71"
+  },
+  "artifact": {
+    "sourceSha": "d39f8f3d8c36c5c0bad22d24157f4689b7ebc99c",
+    "sourceDigest": "04caf75059858276460d6d83e98de7cfa2cf2c4a4c63950faf926768281e4c2a",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "07d7452a34c21afbbab972a297d11f0bfd2483ee9cc450e522e15ab6801c5f72",
+    "builtAt": "2026-10-11T12:54:18.388Z"
+  },
+  "formalSlope": {
+    "status": "PASS",
+    "baseline475": "RED 0.049912 displacement",
+    "before": {
+      "position": [2.5, 31.5, 2.5],
+      "yaw": 1.5707963267948966
+    },
+    "after": {
+      "position": [4.1530386699887964, 32, 2.5],
+      "yaw": 1.5707963267948966
+    },
+    "fixture": "原475真实 Pack/Stone/input/1500ms/断言不变；Node loader adapter 仅替换 Blob 导入机制，保留生产 digest/admission",
+    "spies": "委托真实 sweep，仅诊断记录"
+  },
+  "checks": {
+    "headless595": "PASS 158文件1214例",
+    "stdlib594": "FAIL 173文件通过1失败；1302例通过1个CLI超时；与headless并行",
+    "CLI600": "原超时隔离运行7例PASS，不覆写stdlib594失败",
+    "owner604": "3文件66例PASS",
+    "types602": "PASS",
+    "lint603": "PASS",
+    "format605": "PASS；既有frozen5/5原字节身份",
+    "build607": "PASS"
+  },
+  "semantics": [
+    "从现有canonical route cursor推导inclination，不改pose位置/save协议",
+    "实际inclined carrier与upright rider分体窄相检测，保留真实Stone/体积",
+    "新段静态检查及骑手旧到新座位sweep先于cursor切换，受阻保留旧cursor",
+    "world/entity/unknown、layer/mask及4096格边界保留"
+  ],
+  "notProven": [
+    "当前SHA必需CI",
+    "真实浏览器坡轨视觉及完整旅程",
+    "轨道网格坡/角变体",
+    "其他原需求中的载具与完整持久化验收",
+    "性能收益"
+  ]
+}

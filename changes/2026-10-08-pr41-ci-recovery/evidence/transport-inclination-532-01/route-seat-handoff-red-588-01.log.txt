@@ -1,0 +1,77 @@
+$ pnpm --dir ../.. exec vitest run --config packages/stdlib/vitest.config.ts packages/stdlib/tests/server/transport-route-seat-handoff.test.ts
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/transport-route-seat-handoff.test.ts (4 tests | 3 failed) 27ms
+     × checks the old-to-new seat path against world 14ms
+     × checks the old-to-new seat path against unknown 2ms
+     × checks the old-to-new seat path against entity 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-route-seat-handoff.test.ts > mounted rider segment handoff sweep > checks the old-to-new seat path against world
+AssertionError: expected null to be 'world-collision' // Object.is equality
+
+- Expected:
+"world-collision"
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/transport-route-seat-handoff.test.ts:145:36
+    143|       expect(candidate.next.routeCursor!.cell).toEqual([1, 1, 0]);
+    144|     } else {
+    145|       expect(candidate.stopReason).toBe(kind === 'unknown' ? 'frontier…
+       |                                    ^
+    146|       expect(candidate.next.routeCursor!.cell).toEqual([0, 0, 0]);
+    147|       expect(candidate.next.routeCursor!.progress).toBeCloseTo(segment…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-route-seat-handoff.test.ts > mounted rider segment handoff sweep > checks the old-to-new seat path against unknown
+AssertionError: expected null to be 'frontier-unknown' // Object.is equality
+
+- Expected:
+"frontier-unknown"
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/transport-route-seat-handoff.test.ts:145:36
+    143|       expect(candidate.next.routeCursor!.cell).toEqual([1, 1, 0]);
+    144|     } else {
+    145|       expect(candidate.stopReason).toBe(kind === 'unknown' ? 'frontier…
+       |                                    ^
+    146|       expect(candidate.next.routeCursor!.cell).toEqual([0, 0, 0]);
+    147|       expect(candidate.next.routeCursor!.progress).toBeCloseTo(segment…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-route-seat-handoff.test.ts > mounted rider segment handoff sweep > checks the old-to-new seat path against entity
+AssertionError: expected null to be 'entity-collision' // Object.is equality
+
+- Expected:
+"entity-collision"
+
++ Received:
+null
+
+ ❯ packages/stdlib/tests/server/transport-route-seat-handoff.test.ts:145:36
+    143|       expect(candidate.next.routeCursor!.cell).toEqual([1, 1, 0]);
+    144|     } else {
+    145|       expect(candidate.stopReason).toBe(kind === 'unknown' ? 'frontier…
+       |                                    ^
+    146|       expect(candidate.next.routeCursor!.cell).toEqual([0, 0, 0]);
+    147|       expect(candidate.next.routeCursor!.progress).toBeCloseTo(segment…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  12:44:40
+   Duration  2.57s (transform 1.94s, setup 0ms, import 2.28s, tests 27ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 test: `pnpm --dir ../.. exec vitest run --config packages/stdlib/vitest.config.ts packages/stdlib/tests/server/transport-route-seat-handoff.test.ts`
+Exit status 1

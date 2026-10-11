@@ -116,6 +116,31 @@ describe('transport motion candidates', () => {
     ).toThrow(/family/i);
   });
 
+  it.each(['world-collision', 'entity-collision', 'unknown'] as const)(
+    'keeps the accepted slope cursor when next-edge geometry returns %s at its shared endpoint',
+    (collision) => {
+      const current = directedCases.find(
+        (segment) => segment.edge.entry.side === 'west' && segment.edge.slopeDelta === 1,
+      )!;
+      const source = routeState(current, current.length - 0.1);
+      const stopped = buildRouteTransportMotionCandidateV1(guideway(), routeTransport(), source, {
+        ...policy,
+        segment: current,
+        resolveNext: () => ({ status: 'segment', cell: [1, 1, 0], segment: straight() }),
+        sweep: (from) => (from[1] === 1 ? collision : 'clear'),
+      });
+      expect(stopped.stopReason).toBe(collision === 'unknown' ? 'frontier-unknown' : collision);
+      expect(stopped.next.pose.position).toEqual([1, 1, 0.5]);
+      expect(stopped.next.routeCursor).toMatchObject({
+        variant: current.variant,
+        cell: [0, 0, 0],
+        progress: current.length,
+      });
+      expect(stopped.next.velocity).toEqual([0, 0, 0]);
+      expect(stopped.traveledDistance).toBeCloseTo(0.1);
+    },
+  );
+
   it('carries overshoot across more than two segments and bounds cyclic route traversal', () => {
     const segment = straight();
     const source = routeState(segment, 0.75, { velocity: [4, 0, 0] });
@@ -288,6 +313,27 @@ describe('transport motion candidates', () => {
     expect(seat?.pose.position[2]).toBeCloseTo(19.5);
     expect(source.rider).toEqual(rider);
     expect(deriveMountedSeatConstraintV1(surfaceDefinition(), surfaceState())).toBeNull();
+  });
+
+  it('keeps a slope rider upright at the inclined carrier seat in both directed elevations', () => {
+    const rider = reference('actor-a', 30);
+    for (const segment of directedCases.filter((segment) => segment.edge.slopeDelta !== 0)) {
+      const source = routeState(segment, segment.length / 2, { rider });
+      const definition = routeTransport();
+      const seat = deriveMountedSeatConstraintV1(definition, source)!;
+      const height = definition.seatOffset[1];
+      const lateral = definition.seatOffset[0];
+      const slope = segment.edge.slopeDelta;
+      expect(seat.pose.position[0] - source.pose.position[0]).toBeCloseTo(
+        Math.cos(source.pose.yaw) * lateral - Math.sin(source.pose.yaw) * slope * height * Math.SQRT1_2,
+      );
+      expect(seat.pose.position[1] - source.pose.position[1]).toBeCloseTo(height * Math.SQRT1_2);
+      expect(seat.pose.position[2] - source.pose.position[2]).toBeCloseTo(
+        -Math.sin(source.pose.yaw) * lateral - Math.cos(source.pose.yaw) * slope * height * Math.SQRT1_2,
+      );
+      expect(seat.pose.yaw).toBe(source.pose.yaw);
+      expect(seat.walkingEnabled).toBe(false);
+    }
   });
 
   it('is step-slicing equivalent for constant surface inputs and rejects non-finite motion inputs', () => {

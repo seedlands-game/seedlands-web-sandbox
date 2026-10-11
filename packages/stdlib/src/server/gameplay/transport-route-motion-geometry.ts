@@ -1,4 +1,11 @@
-import { bodyWorldAabb, sweepBodyThroughWorld } from '../../physics';
+import {
+  bodyWorldAabb,
+  sweepBodyThroughWorld,
+  sweepOrientedBox,
+  orientedBoxBounds,
+  type Vec3,
+  type Collider,
+} from '../../physics';
 import { colliderMatches, overlapDepth, translateAabb, unionAabb } from '../../physics/geometry';
 import { advanceRouteSegmentV1, resolveRouteSegmentV1, validateRouteSegmentV1 } from './modules/route-definition';
 import {
@@ -7,7 +14,12 @@ import {
   type RouteNextSegmentV1,
 } from './modules/transport-motion-model';
 import { loadedRouteConnections, projectLoadedRouteNeighbors } from './transport-route-neighbors';
-import { compoundBody, compoundMotionPathBody, type projectSurfaceMotion } from './transport-motion-geometry';
+import {
+  compoundBody,
+  compoundBoxes,
+  compoundMotionPathBody,
+  type projectSurfaceMotion,
+} from './transport-motion-geometry';
 
 type Options = Parameters<typeof projectSurfaceMotion>[0];
 type Cell = readonly [number, number, number];
@@ -30,6 +42,7 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
     edge,
     length: cursor.segmentLength,
   });
+  let previousSegment: typeof segment | null = null;
   const read = (cell: Cell) => {
     frame.world.querySolids({ min: vector(cell), max: { x: cell[0] + 1, y: cell[1] + 1, z: cell[2] + 1 } });
     return callbacks.getLoadedVoxel?.([...cell]);
@@ -97,6 +110,7 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
       });
       if (resolution.status !== 'segment') return { status: resolution.status };
       if (neighborhood.ambiguous) return { status: 'ambiguous' };
+      previousSegment = segment;
       segment = resolution.segment;
       return { status: 'segment', cell: next.cell, segment };
     },
@@ -105,16 +119,71 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
       const tangent = advanceRouteSegmentV1(segment, 0, 0).tangent;
       // A radius-0.5 quarter arc is at most 0.5*(1-cos(pi/4)) from its chord.
       // The full yaw envelope includes the carrier and mounted rider at every arc pose.
-      const body = compoundBody(
-        definition,
-        { ...state, pose: { position: from, yaw: Math.atan2(tangent[0], tangent[2]) } },
-        frame,
-        turning,
-        turning ? 0.5 * (1 - Math.SQRT1_2) : 0,
-      );
+      const routeState = {
+        ...state,
+        pose: { position: from, yaw: Math.atan2(tangent[0], tangent[2]) },
+        routeCursor: { ...cursor, entry: segment.edge.entry, exit: segment.edge.exit },
+      };
+      const body = compoundBody(definition, routeState, frame, turning, turning ? 0.5 * (1 - Math.SQRT1_2) : 0);
+      // The rider remains upright, so a changed seat offset has a translational path
+      // even though the carrier orientation is selected discretely by its cursor.
+      if (previousSegment && state.rider) {
+        const oldTangent = advanceRouteSegmentV1(previousSegment, previousSegment.length, 0).tangent;
+        const oldState = {
+          ...routeState,
+          pose: { position: from, yaw: Math.atan2(oldTangent[0], oldTangent[2]) },
+          routeCursor: { ...cursor, entry: previousSegment.edge.entry, exit: previousSegment.edge.exit },
+        };
+        const oldRider = compoundBoxes(definition, oldState, frame)[1]!;
+        const nextRider = compoundBoxes(definition, routeState, frame)[1]!;
+        const movement = {
+          x: nextRider.center.x - oldRider.center.x,
+          y: nextRider.center.y - oldRider.center.y,
+          z: nextRider.center.z - oldRider.center.z,
+        };
+        previousSegment = null;
+        const oldBounds = orientedBoxBounds(oldRider);
+        const seatPath = unionAabb(oldBounds, translateAabb(oldBounds, movement));
+        const cells = (['x', 'y', 'z'] as const).reduce(
+          (n, axis) => n * (Math.floor(seatPath.max[axis] - 1e-8) - Math.floor(seatPath.min[axis] + 1e-8) + 1),
+          1,
+        );
+        if (!Number.isSafeInteger(cells) || cells <= 0 || cells > 4096) return 'unknown';
+        const hits = frame.world
+          .querySolids(seatPath)
+          .filter(
+            (collider) =>
+              !collider.sensor &&
+              colliderMatches(body, collider) &&
+              sweepOrientedBox(oldRider, collider.aabb, movement) !== null,
+          );
+        if (hits.length) return hits.some((hit) => hit.id?.startsWith('unknown:')) ? 'unknown' : 'world-collision';
+        for (const { entity, body: otherBody, next } of others) {
+          const collider = {
+            aabb: bodyWorldAabb({ position: vector(entity.position), velocity: zero }, otherBody),
+            layer: otherBody.collisionLayer,
+            mask: otherBody.collisionMask,
+          };
+          const relative = {
+            x: movement.x - (next[0] - entity.position[0]),
+            y: movement.y - (next[1] - entity.position[1]),
+            z: movement.z - (next[2] - entity.position[2]),
+          };
+          if (colliderMatches(body, collider) && sweepOrientedBox(oldRider, collider.aabb, relative) !== null)
+            return 'entity-collision';
+        }
+      }
       const start = { position: vector(from), velocity: zero };
       const delta = { x: to[0] - from[0], y: to[1] - from[1], z: to[2] - from[2] };
       const bounds = bodyWorldAabb(start, body);
+      const boxes = !turning && segment.edge.slopeDelta !== 0 ? compoundBoxes(definition, routeState, frame) : null;
+      const collides = (collider: Collider, movement: Vec3) =>
+        boxes
+          ? boxes.some((box) => sweepOrientedBox(box, collider.aabb, movement) !== null)
+          : Boolean(
+              overlapDepth(bounds, collider.aabb) ||
+              sweepBodyThroughWorld(start, body, { querySolids: () => [collider] }, movement).contacts.length,
+            );
       const swept = unionAabb(bounds, translateAabb(bounds, delta));
       const count = (['x', 'y', 'z'] as const).reduce(
         (n, axis) => n * (Math.floor(swept.max[axis] - 1e-8) - Math.floor(swept.min[axis] + 1e-8) + 1),
@@ -122,17 +191,25 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
       );
       if (!Number.isSafeInteger(count) || count <= 0 || count > 4096) return 'unknown';
       const blockers = frame.world.querySolids(swept);
-      if (
-        blockers.some(
-          (collider) => !collider.sensor && colliderMatches(body, collider) && overlapDepth(bounds, collider.aabb),
+      if (boxes) {
+        const collisions = blockers.filter(
+          (collider) => !collider.sensor && colliderMatches(body, collider) && collides(collider, delta),
+        );
+        if (collisions.length)
+          return collisions.some((collider) => collider.id?.startsWith('unknown:')) ? 'unknown' : 'world-collision';
+      } else {
+        if (
+          blockers.some(
+            (collider) => !collider.sensor && colliderMatches(body, collider) && overlapDepth(bounds, collider.aabb),
+          )
         )
-      )
-        return blockers.some((collider) => collider.id?.startsWith('unknown:')) ? 'unknown' : 'world-collision';
-      const collision = sweepBodyThroughWorld(start, body, { querySolids: () => blockers }, delta);
-      if (collision.contacts.length)
-        return collision.contacts.some(({ collider }) => collider.id?.startsWith('unknown:'))
-          ? 'unknown'
-          : 'world-collision';
+          return blockers.some((collider) => collider.id?.startsWith('unknown:')) ? 'unknown' : 'world-collision';
+        const collision = sweepBodyThroughWorld(start, body, { querySolids: () => blockers }, delta);
+        if (collision.contacts.length)
+          return collision.contacts.some(({ collider }) => collider.id?.startsWith('unknown:'))
+            ? 'unknown'
+            : 'world-collision';
+      }
       for (const { entity, body: otherBody, next } of others) {
         const collider = {
           id: entity.id,
@@ -146,11 +223,7 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
           y: delta.y - (next[1] - entity.position[1]),
           z: delta.z - (next[2] - entity.position[2]),
         };
-        if (
-          overlapDepth(bounds, collider.aabb) ||
-          sweepBodyThroughWorld(start, body, { querySolids: () => [collider] }, relative).contacts.length
-        )
-          return 'entity-collision';
+        if (collides(collider, relative)) return 'entity-collision';
       }
       return 'clear';
     },

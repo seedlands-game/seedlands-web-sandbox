@@ -1551,3 +1551,58 @@ headless158文件1205例、Kernel28、CI选择17、全类型、lint、格式及�
 - 445 独占窗口记录更正预注册：413/417/429数值门槛通过，但原始测量遗漏windowId/evidencePath，回执measurement=INVALID，原件保留为INELIGIBLE，不作为最终采纳证据，未提交或推送候选。445仅修记录结构与精确窗口时间，使用最终实际生产函数、同corpus/AA12/AB20/全部原门槛；等待普通headless结束后独占运行，脚本检查measurementSummary=RECORDED且最终window=PASS。噪声失败不自动重试。
 
 - 453 正式composition上下文预注册：445窗口PASS/RECORDED、噪声6.07%及收益67.44%只覆盖包装器默认legacy content固定组件，证据原件保留，不作为正式主旅程消费者证明，仍未提交候选。453通过当前真实pack/lock/host-admissions和生产loader保留完整摘要/授权验证；Node适配仅本地只读fetch及blob→dataURL模块导入，无合成integrity/外网请求/权限绕过。接实际生产composition与voxelSemantics，要求hasGameplayComposition=true；原corpus/AA12/AB20/所有门槛及完整输出/未知/卸载/重载/mixed-revision检查不变，仍不替代浏览器验收。
+
+## 490 当前配方可用性候选（预注册，未采用）
+
+479 当前 d39f8f3 Authority20秒诊断的原始1733样本与非负时间差、实际worker摘要通过核验；Ct 异常构造调用链来自正式 registered listCraftable → Authority view。仅作当前热点归因，不作为CPU利用率、浏览器或端到端性能结论。
+
+候选增加无异常的配方可用性探针，仍由原 actor/input validator、每次当前库存的 detached candidate 与同一 applyCraftingMatch/provider 判断。Registered producer 保留composition capability门禁、原顺序、当前actor读与异常catch-false；直接buildInventoryActionCandidate及真正craft事务的失败理由/异常、权限、prepare/commit新鲜度不变。不得缓存旧actor/provider/库存或绕过freshness。
+
+先在既有被选择owner覆盖缺材料、容量/消耗释放空间、dead actor、自定义/禁用matcher、异常拒绝、当前状态变化及输入不变；再在真实pack/lock/host-admissions的正式GameServer消费端，用精确d39 class/model旧方法与生产新入口、固定三库存corpus比较完整有序recipe IDs与actor前后态。窗口必须绑定真实windowId/evidencePath与来源；独占CPU，A/A12对噪声≤15%，A/B20对收益≥20%且>3倍噪声，平衡顺序，无自动重试，A/A失败则A/B不跑，不达线不采用。只声明固定正式配方枚举组件，不声明整tick/帧率/完整主旅程。
+
+复用有效检查并做相应定向回归、类型、lint、格式与封存校验；不改变源码门禁、原900s/5s等时限、输入、地图、质量或断言。当前CI436与本地468仍FAIL，475正式坡道RED，完整运输和最终玩法验收仍OPEN。
+
+### 519 配方候选不采用（原件保留）
+
+有效owner RED6FAIL/25PASS；首次GREEN中新增容量测试误用inventory-full，按未改动原builder实际no-output-capacity纠正，日志保留，最终33PASS（含player/creature/npc）。类型、改动lint、格式/封存5PASS。491错误根配置未选到测试，不作RED。
+
+501/506均在计时前退出，A/A与A/B未运行：公开InventoryView不是owner InventoryAccess；GameServer聚合层没有entities字段。512按实际公开GameplayRuntime.entities纠正并核实与registered runtime同一owner；artifact/proof原ESM模块保留真实URL与CLI guard，不修改生产校验。511确定性preflight通过，真实Pack134recipes/36slots，三corpus完整有序IDs和actor非突变，排序四个armor配方实际为diamond，固定组件场景不冒充V2铁甲或端到端。
+
+514窗口完整，关联RECORDED；515 A/A12对噪声24.063533%超过原15%线，516 A/B NOT_RUN。NO_ADOPTION，没有噪声自动重试、没有放宽门槛、没有收益声明。两份生产文件及两份owner测试已精确恢复d39字节，候选patch与原始失败/测量保留。该撤回不解决当前主旅程、门发布或正式坡道失败。
+
+### Prepared mutation 固定快照表示候选（520，预登记）
+
+当前 D39 Authority profile 的 assertFresh 归因仅用于候选定位。仅将已分离的捕获 entity/actor 转成固定 JSON 表示，每次 validate/apply 仍读取当前 ECS 并序列化比较，保持全部 owner/epoch/sequence/lifetime/allocator/容量/station/transport 检查。station 来自组件存储，比较不改。正式组合真实 GameServer 批提交计入准备与应用全部成本；固定 28 actor、每样本 1200 批、各 arm 4 次预热、AA 12 对噪声上限 15%、AB 20 对交错顺序、收益至少 20% 且大于三倍噪声、p95 比不超过 1.10；噪声失败不跑 AB、不重试、不采用。仅声明固定批提交成本，不声明整 tick、浏览器或端到端收益。
+
+### 520 候选撤回结果（530）
+
+Web prepared mutation owner 13/13、stdlib transport owner 6/6、变更文件 lint 通过；正式 Pack 与真实 GameServer 28 actor 完整批提交预检 523 通过。唯一窗口 526 为 PASS、measurement RECORDED；AA 527 中位噪声 17.6500538% 超过预登记 15%，AB 528 为 NOT_RUN_AA_NOISE_FAIL。无收益结论、不重试、不采用。候选源码及新增测试完整保存在私有 patch529 后逐字恢复 D39，原始窗口/日志与检查点530保留。完整浏览器与正式 slope 验收继续 OPEN。
+
+### 正式 transport 坡度几何修复（532，功能预登记）
+
+当前正式组合 slope475 为 RED：真实 Stone 支撑与仅 yaw 的水平 carrier/rider AABB 相撞。采用现有 route cursor 的端点高差派生倾角，统一 carrier 几何、座位偏移和 presentation；路线世界位置与存档格式不改。直线 slope 使用保持真实模型体积的 oriented box 对真实 world AABB 做连续 SAT，rider 保持直立；保留 quarter arc 保守路径、bounded broadphase 和未知地形 fail-closed。deployment、motion、mount/exit/current body 与显示按同一派生 owner 接线。禁止忽略 Stone、缩车体、移走支撑或降低验收断言，不声明性能收益。按纯几何反例、既有 owner、原正式 slope 断言、实际倾斜显示与完整静态检查分层验证；当前完整浏览器与其他 transport 需求仍 OPEN。
+
+### 532 功能检查点（566）
+
+新增纯几何 owner 533 因入口尚未实现为零测试失败，不能算语义 RED；原正式 slope475 的真实支撑碰撞为语义 RED。534/539 oriented box owner 6/6、相关 stdlib owner546 56/56、Web owner538 18/18、types552 与 lint548 通过。构建543因构建期间测试文件修改触发身份保护而 BLOCKED，不能采用；冻结构建549 PASS，sourceDigest `28f40b84bc04abec86116899d30f78dbe5e1aba2bf7c18d38e88552e7d167264`。545 正式 Pack 沿原475地形/输入/1500ms/全部断言 PASS，east位移1.65303867、到达y32平轨、inclined sweep真实调用552次；仅证明此候选坡段运动，后续平轨调用恢复为原单次批量 sweep。
+
+永久 Classic 源码组合四向真实支撑回归551为9/9；源码组合夹具的占位校验不承担正式 Pack digest admission 证明。反例553的配置合并追加默认 include，误选更广Web测试，已停止自有进程并保留日志，结果不采用。直接覆盖include后的554仅选原owner，倾角强制零导致新增四向坡段4 FAIL、原5 PASS，正常实现9/9。完整stdlib556为173文件1296 PASS；格式/frozen557 PASS，sealed五文件逐字一致。
+
+Web回归560为55 PASS/1 FAIL，完整headless561为1212 PASS/1 FAIL，均指向sample斜坡部署。诊断562/563确认保留的生成Stone `[0,59,0]` 与倾斜车体真实相交，下层轨原放在 `[0,58,0]`。原地形保留为target-occupied/零提交/库存与owner不变反例；成功部署在保留地形上方搭3层真实支撑，不删除原Stone。564新增反例错误调用不存在的读API，8 PASS/1 FAIL日志保留；改用既有peekLoadedVoxel后565为9/9。最终完整回归、精确提交产物、浏览器与其他transport需求仍待完成，不声明可合入或性能收益。
+
+### 坡段交接边界（569–572）
+
+坡段到平轨/转弯段的倾角变化由现有cursor派生。原模型先改next cursor，再遇到新段初始几何拒绝，可能停止在携带未经几何准入方向的cursor。570针对world-collision/entity-collision/unknown为3语义RED、30 PASS；共享端点的目标方向必须先执行零位移几何检查，拒绝时保留上一段获准cursor、位置、真实已行距离与零速度。571相关owner 59/59 GREEN，lint572 PASS。直线段按固定方向连续SAT，转弯段使用原保守包络，不声明连续旋转插值。完整headless568在此小修复前158文件1214 PASS；最终精确源码回归及正式Pack proof待重核。
+
+### 坡段交接的骑手位移（585–590）
+
+只读风险检查指出：合法自定义载具的 seatOffset 可令坡段与水平段的骑手身体在切换前后均 clear，但中间座位位移穿过薄障碍。现有发布逻辑把这一座位变化计入骑手速度，因此按身体平移路径检查；不增加载具角度插值或持久化字段。
+
+- 585 在修改源码前冻结有界计划。586 夹具的完整 guideway 多向高度造成 route-ambiguous，587 修正为合法 straight/slope-east 组合但正例误用了 undefined；这两次不计语义 RED。588 保持障碍与真实身体体积不变，world、unknown、entity 三个反例均因漏检失败，clear 正例通过。
+- 路段共享端点检查在切换 canonical cursor 前，额外 sweep 当前 upright 骑手的旧座位到新座位；继续使用真实世界 collider、实体相对位移、layer/mask 和最多 4096 格的失败关闭边界。590 的新四例及现有 route geometry 共 33 例通过。
+- 该数字反例使用合法自定义 seatOffset=[0,2,0]，不宣称 Classic seatOffset=0.55 已实测同样的漏检。532 的真实 Classic Pack 坡轨复验 583 使用冻结构建 581，通过原场景、输入、1500 ms 和原断言；后续交接修复仍需新的当前产物复验。
+
+- 585 后完整 stdlib 594 为 174 文件中 173 通过、1 失败，1302 例通过、1 例失败；唯一失败是既有 `server-headless-cli.test.ts` 15 秒用例超时（15734 ms）。该轮与完整 Classic headless 并行，595 的 158 文件、1214 例通过。保留整组失败；等两组结束后 600 单独运行原 CLI 文件，原超时下 7 例通过，不把隔离通过改写为整组通过。
+- 591 类型与 593 lint 报告新测试的未使用导入及 readonly 字段赋值；599 仅清理导入并通过替换 frame 对象设置夹具，断言和身体/障碍不变，后续检查独立记录。
+
+- 最终类型 602、lint 603、定向 604（3文件66例）、格式 605 均通过。607 构建与 608 原真实 Pack 坡轨复验 sourceDigest=`04caf75059858276460d6d83e98de7cfa2cf2c4a4c63950faf926768281e4c2a` 一致，冻结期间全受改文件哈希一致；含 585 骑手交接修复后仍从 `[2.5,31.5,2.5]` 到 `[4.1530386699887964,32,2.5]`。证据位于 `evidence/transport-inclination-532-01`。此身份为 D39 dirty candidate，不替代后续精确提交、CI 或浏览器验收。

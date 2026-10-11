@@ -1,0 +1,10 @@
+$ pnpm --dir ../.. exec vitest run --config packages/stdlib/vitest.config.ts packages/stdlib/tests/server/server-headless-cli.test.ts
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  12:50:58
+   Duration  41.16s (transform 63ms, setup 0ms, import 79ms, tests 40.92s, environment 0ms)
+

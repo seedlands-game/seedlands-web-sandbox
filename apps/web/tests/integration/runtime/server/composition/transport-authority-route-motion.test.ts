@@ -102,8 +102,8 @@ it('advances a normally mounted slope with matching world height, cursor and rid
   expect(after.routeCursor!.cell[1]).toBe(after.routeCursor!.cell[0] + 58);
   expect(after.reference).toEqual(before.reference);
   expect(runtime.server.getEntity(runtime.playerId)!.position).toEqual([
-    after.pose.position[0],
-    after.pose.position[1] + 0.55,
+    after.pose.position[0] - 0.55 * Math.SQRT1_2,
+    after.pose.position[1] + 0.55 * Math.SQRT1_2,
     0.5,
   ]);
   expect(runtime.server.getEntity(runtime.playerId)!.physicsVelocity).toEqual(after.velocity);

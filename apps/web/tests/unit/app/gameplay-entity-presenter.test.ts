@@ -125,6 +125,33 @@ describe('玩法实体的独立表现时钟', () => {
     expect(animationState.addGlbModel.mock.calls[0]![2]).toBe('pack:test:carrier-model');
     expect(animationState.addGlbModel.mock.calls[0]![6]).toBe('blob:verified-carrier');
     expect(root.findByName('gameplay:carrier')!.getEulerAngles().y).toBeCloseTo(90);
+    const inclined = {
+      ...transport,
+      pose: { ...transport.pose, position: [2.5, 31.5, 0.5] as const },
+      routeCursor: {
+        family: 'test:rail',
+        cell: [2, 31, 0] as const,
+        variant: 'test:ascending-east',
+        entry: { side: 'west' as const, elevation: 0 as const },
+        exit: { side: 'east' as const, elevation: 1 as const },
+        progress: Math.SQRT1_2,
+        segmentLength: Math.SQRT2,
+      },
+    };
+    presenter.reconcile([{ ...entity, position: [...inclined.pose.position] }], 0, [inclined], [definition]);
+    const forward = root
+      .findByName('gameplay:carrier')!
+      .getRotation()
+      .transformVector(new pc.Vec3(0, 0, 1));
+    expect(forward.x).toBeCloseTo(Math.SQRT1_2);
+    expect(forward.y).toBeCloseTo(Math.SQRT1_2);
+    expect(forward.z).toBeCloseTo(0);
+    presenter.reconcile([entity], 0, [transport], [definition]);
+    const flat = root
+      .findByName('gameplay:carrier')!
+      .getRotation()
+      .transformVector(new pc.Vec3(0, 0, 1));
+    expect(flat.y).toBeCloseTo(0);
     const lease = await animationState.addGlbModel.mock.results[0]!.value;
     presenter.reconcile(
       [entity],

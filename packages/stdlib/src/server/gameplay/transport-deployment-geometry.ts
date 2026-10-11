@@ -4,8 +4,10 @@ import type { GameplayContent } from './gameplay-content';
 import { bodyConfigFor, bodyKindForEntity } from '../../physics/body-registry';
 import { overlapDepth, translateAabb } from '../../physics/geometry';
 import type { WorldAabb } from '../../physics/types';
+import { orientedBox, sweepOrientedBox, type OrientedBox } from '../../physics';
 import { collisionBoxesForVoxel } from '../../world/voxel-model';
 import { transportBodyConfig } from './transport-body-config';
+import { transportInclinationV1 } from './modules/transport-motion-state';
 import { advanceRouteSegmentV1, resolveRouteSegmentV1 } from './modules/route-definition';
 import { projectLoadedRouteNeighbors, routeEndpoints } from './transport-route-neighbors';
 import type { TransportDefinitionV1 } from './modules/transport-model';
@@ -75,7 +77,16 @@ function placement(options: Options, definition: TransportDefinitionV1, hit: Pos
 
 function collisionRejection(options: Options, option: TransportDeploymentOptionV1): string | null {
   const definition = options.config.definitions.require(option.definitionId);
-  return loadedTransportBodyRejection(options, transportBodyConfig(definition, option.yaw).localAabb, option.position);
+  const inclination = transportInclinationV1(option);
+  return loadedTransportBodyRejection(
+    options,
+    transportBodyConfig(definition, option.yaw, inclination).localAabb,
+    option.position,
+    [],
+    inclination === 0
+      ? undefined
+      : [orientedBox(definition.bodyAabb, offset(option.position), option.yaw, inclination)],
+  );
 }
 
 export function loadedTransportBodyRejection(
@@ -83,17 +94,28 @@ export function loadedTransportBodyRejection(
   localAabb: WorldAabb,
   position: Position,
   excludedEntities: readonly string[] = [],
+  boxes?: readonly OrientedBox[],
 ): string | null {
-  const worldRejection = loadedWorldBodyRejection(options, localAabb, position);
+  const worldRejection = loadedWorldBodyRejection(options, localAabb, position, boxes);
   if (worldRejection) return worldRejection;
   const bounds = translateAabb(localAabb, offset(position));
   for (const entity of options.entities.query()) {
     if (entity.type === 'station' || excludedEntities.includes(entity.id)) continue;
     const transport = entity.type === 'transport' ? options.entities.transportComponentSnapshot(entity.id) : null;
     const local = transport
-      ? transportBodyConfig(options.config.definitions.require(transport.definitionId), transport.yaw).localAabb
+      ? transportBodyConfig(
+          options.config.definitions.require(transport.definitionId),
+          transport.yaw,
+          transportInclinationV1(transport),
+        ).localAabb
       : bodyConfigFor(bodyKindForEntity(entity)).localAabb;
-    if (overlapDepth(bounds, translateAabb(local, offset(entity.position)))) return 'target-occupied';
+    const other = translateAabb(local, offset(entity.position));
+    if (
+      boxes
+        ? boxes.some((box) => sweepOrientedBox(box, other, { x: 0, y: 0, z: 0 }) !== null)
+        : overlapDepth(bounds, other)
+    )
+      return 'target-occupied';
   }
   return null;
 }
@@ -105,6 +127,7 @@ export function loadedWorldBodyRejection(
   }>,
   localAabb: WorldAabb,
   position: Position,
+  oriented?: readonly OrientedBox[],
 ): string | null {
   const bounds = translateAabb(localAabb, offset(position));
   if (
@@ -133,14 +156,18 @@ export function loadedWorldBodyRejection(
             : semantics.meshKind === 'model'
               ? collisionBoxesForVoxel(voxel)
               : [{ min: [0, 0, 0] as const, max: [1, 1, 1] as const }];
-        for (const box of boxes)
+        for (const box of boxes) {
+          const collider = {
+            min: { x: x + box.min[0], y: y + box.min[1], z: z + box.min[2] },
+            max: { x: x + box.max[0], y: y + box.max[1], z: z + box.max[2] },
+          };
           if (
-            overlapDepth(bounds, {
-              min: { x: x + box.min[0], y: y + box.min[1], z: z + box.min[2] },
-              max: { x: x + box.max[0], y: y + box.max[1], z: z + box.max[2] },
-            })
+            oriented
+              ? oriented.some((body) => sweepOrientedBox(body, collider, { x: 0, y: 0, z: 0 }) !== null)
+              : overlapDepth(bounds, collider)
           )
             occupied = true;
+        }
       }
   return occupied ? 'target-occupied' : null;
 }

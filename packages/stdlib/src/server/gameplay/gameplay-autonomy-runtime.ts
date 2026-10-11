@@ -1,3 +1,4 @@
+import { transportInclinationV1 } from './modules/transport-motion-state';
 import type { GameplayCallbacks } from './gameplay-runtime-contracts';
 import type { GameplayContent } from './gameplay-content';
 import type { EntityStore } from './entity-store';
@@ -49,7 +50,7 @@ export function createGameplayAutonomyRuntime(
       const definition = state && options.content.transportDefinitions?.require(state.definitionId);
       if (!state || !definition)
         throw new Error('Navigation transport body requires its current configured definition.');
-      return transportBodyConfig(definition, state.pose.yaw);
+      return transportBodyConfig(definition, state.pose.yaw, transportInclinationV1(state));
     },
     registeredNeeds: !!callbacks.composition,
     registeredCombat: !!callbacks.composition,

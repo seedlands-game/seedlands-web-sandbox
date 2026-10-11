@@ -1,0 +1,88 @@
+import { expect, it, vi } from '/workspace/seedlands-web-sandbox/node_modules/vitest/dist/index.js';
+import * as physics from '/workspace/seedlands-web-sandbox/packages/stdlib/src/physics/index.ts';
+import { Voxel } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/world/voxel.ts';
+import { AuthorityRuntime } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/authority/authority-runtime.ts';
+import { testCorePlatform } from '/workspace/seedlands-web-sandbox/packages/stdlib/tests/support/core-platform.ts';
+import { createBrowserAuthorityComposition } from '/workspace/seedlands-web-sandbox/apps/web/src/worker/authority-worker-runtime-lifecycle';
+import { worldgenProviderForComposition } from '/workspace/seedlands-web-sandbox/packages/stdlib/src/server/composition/host-api';
+import { loadBrowserProductAssembly } from '/workspace/pr41-recovery-20261008-root-01/pack-loader-node-454-01';
+import { readFile } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { itemInteractionSelection } from '/workspace/seedlands-web-sandbox/apps/web/src/app/player/secondary-interaction.ts';
+import { writeFileSync, readFileSync } from 'node:fs';
+import { sourceIdentity } from '/workspace/seedlands-web-sandbox/scripts/harness/artifact.mjs';
+
+const output = '/workspace/pr41-recovery-20261008-root-01/formal-supported-slope-608-01.json';
+type Cell = readonly [number, number, number];
+const hit: Cell = [2, 31, 2];
+const side = { north: [0, -1], east: [1, 0], south: [0, 1], west: [-1, 0] } as const;
+const railArm = (which: keyof typeof side, raised = false): Cell[] => [1, 2, 3].map((n) => [hit[0] + side[which][0] * n, hit[1] + Number(raised), hit[2] + side[which][1] * n]);
+const sweepCalls: unknown[] = [];
+const inclinedCalls: unknown[] = [];
+let inclinedCallCount = 0;
+
+it('advances the unchanged real supported-slope Authority fixture and original input through inclined carrier collision', async () => {
+  const actualInclined = physics.sweepOrientedBox;
+  vi.spyOn(physics, 'sweepOrientedBox').mockImplementation((box, bounds, delta) => {
+    const contact = actualInclined(box, bounds, delta);
+    if (delta.y > 0) { inclinedCallCount++; if (inclinedCalls.length < 256) inclinedCalls.push({ box, bounds, delta, contact }); }
+    return contact;
+  });
+  const actual = physics.sweepBodyThroughWorld;
+  vi.spyOn(physics, 'sweepBodyThroughWorld').mockImplementation((state, body, world, delta) => {
+    const queries: unknown[] = [];
+    const wrapped = {
+      ...world,
+      querySolids(bounds) {
+        const colliders = world.querySolids(bounds);
+        if (delta.y > 0 && delta.x >= 0) queries.push({ bounds, colliders: colliders.map((c) => ({ id: c.id, aabb: c.aabb, sensor: c.sensor ?? false })) });
+        return colliders;
+      },
+    };
+    const result = actual(state, body, wrapped, delta);
+    if (delta.y > 0 && delta.x >= 0)
+      sweepCalls.push({ state, localAabb: body.localAabb, delta, queries, contacts: result.contacts.map((c) => ({ colliderId: c.collider.id, aabb: c.collider.aabb, normal: c.normal, position: c.position })) });
+    return result;
+  });
+
+  expect(execFileSync('git',['rev-parse','HEAD'],{cwd:'/workspace/seedlands-web-sandbox',encoding:'utf8'}).trim()).toBe('d39f8f3d8c36c5c0bad22d24157f4689b7ebc99c');
+  const packRoot='/workspace/seedlands-web-sandbox/apps/web/public/packs';
+  const packOrigin='https://seedlands-pack-benchmark.invalid';
+  Object.defineProperty(globalThis,'location',{value:{origin:packOrigin},configurable:true});
+  globalThis.fetch=async(input)=>{
+    const url=new URL(String(input)); expect(url.origin).toBe(packOrigin);expect(url.pathname.startsWith('/packs/')).toBe(true);
+    const path=resolve(packRoot,url.pathname.slice('/packs/'.length));expect(path.startsWith(packRoot+sep)).toBe(true);
+    const bytes=await readFile(path);return new Response(bytes,{status:200,headers:{'content-length':String(bytes.length)}});
+  };
+  const product=await loadBrowserProductAssembly(new URL('/packs/',packOrigin));
+  const assembly=createBrowserAuthorityComposition(product.artifacts,product.approvedPlaybook,product.approvedExtensions,undefined);
+  const runtime = await AuthorityRuntime.create({
+    ...assembly, worldgenProvider: worldgenProviderForComposition(assembly.composition), platform: testCorePlatform,
+    epoch: 'classic-formal-supported-slope-475', seedText: 'classic-formal-supported-slope-475',
+    initialWorldTime: 8, startTimeMs: 0, initialPlayerBodyPosition: [2.5, 32.6, 4.5],
+  });
+  const edits = [];
+  for (let x = -2; x <= 7; x++) for (let z = -2; z <= 7; z++) for (let y = 30; y <= 35; y++) edits.push({ x, y, z, value: y === 30 ? Voxel.Stone : Voxel.Air });
+  const rails = [hit, ...railArm('west'), ...railArm('east', true)];
+  for (const [x, y, z] of rails) { edits.push({ x, y: y - 1, z, value: Voxel.Stone }); edits.push({ x, y, z, value: Voxel.Rail }); }
+  expect(await runtime.editWorld('classic-rail-shape-loaded-supported-fixture', edits)).toMatchObject({ committed: true });
+  runtime.server.giveItem(runtime.playerId, { itemId: 'minecart', count: 1 });
+  expect((await runtime.performAction({ type: 'interact', intent: 'use', target: { kind: 'voxel', hit: [...hit], adjacent: [2, 32, 2] }, expectedSelection: itemInteractionSelection(runtime.view()) })).result).toMatchObject({ success: true });
+  const reference = runtime.view().transports![0]!.reference;
+  expect((await runtime.performAction({ type: 'interact', intent: 'use', target: { kind: 'entity', reference }, expectedSelection: itemInteractionSelection(runtime.view()) })).result).toMatchObject({ success: true });
+  const before = runtime.view().transports![0]!;
+  const s = runtime.snapshot();
+  expect(runtime.receiveInput({ kind: 'input', protocolVersion: 1, epoch: s.epoch, stream: 'player-input', sequence: 0, targetPhysicsTick: s.physicsTick + 1, issuedAtMs: s.activeTimeMs + 1, movementRevision: s.player.movement!.revision, state: { moveX: 1, moveZ: 0, verticalIntent: 0, jumpHeld: false }, edges: { jumpPressed: false } })).toBe('accepted');
+  runtime.advanceSession(1_500);
+  const after = runtime.view().transports![0]!;
+  writeFileSync(output, JSON.stringify({ source: sourceIdentity('/workspace/seedlands-web-sandbox'), candidate: '532+569+585', publishedArtifact: JSON.parse(readFileSync('/workspace/seedlands-web-sandbox/apps/web/dist/harness-artifact.json', 'utf8')), verifiedArtifacts: product.artifacts.map(a=>({id:a.manifest.id,integrity:a.integrity})), hasGameplayComposition: runtime.server.hasGameplayComposition, runKind: 'unchanged 475 formal fixture/input/time/assertions; diagnostic spies delegate original axis/oriented sweep implementations', before, after, inclinedCallCount, inclinedCalls, sweepCalls }, null, 2) + '\n');
+  expect(after.reference).toEqual(before.reference);
+  expect(after.rider).toEqual(runtime.server.createEntityReference(runtime.playerId));
+  expect(runtime.server.getEntity(runtime.playerId)!.position).toEqual([after.pose.position[0], after.pose.position[1] + 0.55, after.pose.position[2]]);
+  expect(before.routeCursor!.variant).toBe('seedlands:rail-ascending-east');
+  expect((after.pose.position[0] - before.pose.position[0])).toBeGreaterThan(0.7);
+  expect(after.pose.position[1]).toBe(32);
+  expect(after.routeCursor!.cell[1]).toBe(32);
+  expect(after.routeCursor!.variant).toBe('seedlands:rail-east-west');
+});

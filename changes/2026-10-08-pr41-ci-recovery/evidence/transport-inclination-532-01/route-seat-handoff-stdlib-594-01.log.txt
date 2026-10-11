@@ -1,0 +1,29 @@
+$ pnpm exec vitest run --config packages/stdlib/vitest.config.ts --maxWorkers=1
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/server-headless-cli.test.ts (7 tests | 1 failed) 91894ms
+     × runs a JSON-line command workflow without browser globals and survives invalid input 15734ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/server-headless-cli.test.ts > headless server command CLI > runs a JSON-line command workflow without browser globals and survives invalid input
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/stdlib/tests/server/server-headless-cli.test.ts:121:3
+    119|   }, 20_000);
+    120|
+    121|   it('runs a JSON-line command workflow without browser globals and su…
+       |   ^
+    122|     const run = spawnSync('pnpm', ['--silent', 'server:headless', '--'…
+    123|       cwd: new URL('../../../../', import.meta.url),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 173 passed (174)
+      Tests  1 failed | 1302 passed (1303)
+   Start at  12:46:07
+   Duration  206.63s (transform 9.13s, setup 0ms, import 31.94s, tests 149.46s, environment 16ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

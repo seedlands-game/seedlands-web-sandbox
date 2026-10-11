@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceDigest": "04caf75059858276460d6d83e98de7cfa2cf2c4a4c63950faf926768281e4c2a",
+  "files": {
+    "README.md": "e4e6d34a06aa73d44a4d12c6ca4d4a38a05a69f9788577d58ad656bdad1ddacc",
+    "diagnosis.json": "baf9de9a935f908455a8ae352e6eb735ff0709b71a2b370df5b5ab32b1268942",
+    "formal-supported-slope-475-01.json.txt": "8b8cfb71709348c721d2b36474e75bbca091748f16588cf360183631e072490d",
+    "formal-supported-slope-475-01.raw.log.txt": "01c7687eeee480f0e7e1e3ef2f9a4c4b81463f473d9c5b2bd68317e51dbac438",
+    "formal-supported-slope-608-01.json.txt": "b9100656333352604138831355914d52008e01f1c7b37559ac3d068309683be3",
+    "formal-supported-slope-608-01.log.txt": "f860dbc93d2228ae8faf9fc76278309f7025809bcdcc929185a49f0415ecd46c",
+    "formal-supported-slope-608-01.test.ts.txt": "e7cca8010e70093b507881226b0a1ffa75150b7c155bd8d932754dafaba6884d",
+    "oriented-box-mirrored-539-01.log.txt": "4c892abf54590d416da91c7e8186a6a323c611958d6cf35a77c9fdfadd9b1185",
+    "route-seat-handoff-cli-isolated-600-01.log.txt": "583f7036f5f378f14e51db733ee005232728f01b354c30fb8e3f63bcabc4a5e4",
+    "route-seat-handoff-final-owner-604-01.log.txt": "35fe17b0e96c3ec0a0c5a2d7b2cbf2e6436161e2b3ee2e5d474c51da123065ca",
+    "route-seat-handoff-headless-595-01.log.txt": "9521974e0080c20b5de0f7fb572a60696327a5f65073f13faf5a4ad4ec727bf4",
+    "route-seat-handoff-plan-585-01.json.txt": "8b2fbda3d9ffea36397fdf796e407b469e8ea6e622eedf7c066fbaad401f3dd3",
+    "route-seat-handoff-red-588-01.log.txt": "a9c0dd5956a5a03fca2d55df527dc7f30c491d4ca793231bf9fbc597de474c05",
+    "route-seat-handoff-stdlib-594-01.log.txt": "605c9f036cc8be2ec6aafc1cd4492f9319b7f6b6ad2be77be7734428836a7fbc",
+    "transport-inclination-final-build-607-01.log.txt": "6d2f5edd1f6646fe72b519ab520198a7848d8be096db60f80f3dcf94b604e20c",
+    "transport-inclination-final-format-605-01.log.txt": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b",
+    "transport-inclination-final-types-602-01.log.txt": "ea40c660cb40d13c55f5fb039fde645a7c9155048be18b0111ba7534c1c6c0c4",
+    "transport-inclination-negative-554-01.log.txt": "d85a030316c24e1bd641b2334b6d2c5df187082d1bd62b1f009afe0e5e0f8a14",
+    "transport-inclination-plan-532-01.json.txt": "4ab07f4ec6e47f99ad43ac7bb0148e577a1aab8bf0569bd5a2ff98f6dd77f380"
+  }
+}

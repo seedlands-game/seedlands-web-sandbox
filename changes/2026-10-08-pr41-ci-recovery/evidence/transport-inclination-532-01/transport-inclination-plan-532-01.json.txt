@@ -1,0 +1,38 @@
+{
+  "registeredAt": "2026-10-11T11:33:03.956079+00:00",
+  "headSha": "d39f8f3d8c36c5c0bad22d24157f4689b7ebc99c",
+  "functionalEvidence": "475 actual current formal Authority with true Stone support RED, route ascends while body/presentation only yaw. 481/478 verified actual GLB bounds and canonical route position contract. Door531 does not prove publication defect; no speculative barrier fix.",
+  "design": "Derive inclination from existing canonical route endpoint elevations; no pose/cursor position shift, no save format/version change. Shared orientation applies actual carrier AABB as oriented box, seat offset and presentation; rider remains upright. Generic continuous SAT between fixed-orientation box and true world AABB for linear slope portions; broadphase remains bounded and unknown remains fail-closed. Preserve existing conservative quarter-arc path and flat/surface behavior. Current snapshots/revisions/identity/transaction guards unchanged.",
+  "boundaries": [
+    "Do not ignore/shrink Stone or carrier/rider geometry",
+    "No fixture corridor removal",
+    "No assertion/timeout relaxation",
+    "No performance gain claim",
+    "No sealed evidence changes",
+    "No unsafe dismount or occupied deployment bypass"
+  ],
+  "validation": [
+    "Pure geometric collision RED: support touch clear, penetrating/support-wall/ceiling/unknown collision retained, mirrored ascent/descent",
+    "Existing route/seat/deployment/restore owner regressions",
+    "Exact current formal supported slope assertion unchanged",
+    "Presentation actual tilt and upright rider tests",
+    "Static/types/build and scoped product proof only after actual code changes"
+  ],
+  "potentialWritePaths": [
+    "packages/stdlib/src/physics/oriented-box.ts",
+    "packages/stdlib/src/physics/index.ts",
+    "packages/stdlib/src/server/gameplay/modules/route-definition.ts",
+    "packages/stdlib/src/server/composition/mod-api.ts",
+    "packages/stdlib/src/server/gameplay/modules/transport-motion-state.ts",
+    "packages/stdlib/src/server/gameplay/transport-body-config.ts",
+    "packages/stdlib/src/server/gameplay/transport-motion-geometry.ts",
+    "packages/stdlib/src/server/gameplay/transport-route-motion-geometry.ts",
+    "packages/stdlib/src/server/gameplay/transport-deployment-geometry.ts",
+    "packages/stdlib/src/server/gameplay/transport-relation-geometry.ts",
+    "packages/stdlib/src/server/gameplay/gameplay-autonomy-runtime.ts",
+    "apps/web/src/app/gameplay/gameplay-entity-presenter.ts",
+    "related existing owner tests and new pure geometry tests",
+    "docs/code-map.md",
+    "changes/2026-10-08-pr41-ci-recovery/spec.md"
+  ]
+}
