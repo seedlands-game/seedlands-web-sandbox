@@ -1,0 +1,20 @@
+{
+  "scope": "Frozen dirty695+750+789+807+817+831+842+852 canonical production verification; selection and receipt determine actual acceptance scope; no performance claim",
+  "runId": "station-read-main-859-01",
+  "identity": {
+    "sourceSha": "d18966a48e5008835b0fa6aaf8b35f01e259971f",
+    "sourceDigest": "43dce60936913a9dee0f628a2c867f6ce410b3e49cc2596e3b2e385240d94df5",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547"
+  },
+  "command": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic \u751f\u4ea7\u65c5\u7a0b",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/station-read-main-859-01/results"
+  ],
+  "frozenFiles": 28
+}

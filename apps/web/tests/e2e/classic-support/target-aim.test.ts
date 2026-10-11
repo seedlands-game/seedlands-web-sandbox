@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { snapshot as readRouteSnapshot } from './snapshot-read';
+import { describe, expect, it, vi } from 'vitest';
 import type { Page } from '@playwright/test';
 import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './aim';
 import { playerOccupiesVoxelShape } from '../../../../../packages/stdlib/src/server/gameplay/player-occupancy';
@@ -15,6 +16,10 @@ import {
   voxelInteractionDistance,
 } from './target-aim';
 import type { Point } from './scenario';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const directionForView = ([yaw, pitch]: readonly [number, number]): [number, number, number] => {
   const yawRadians = (yaw * Math.PI) / 180;

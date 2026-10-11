@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { equipmentRoutePulseMs, type EquipmentRouteSnapshot } from './equipment-resource-route';
+import {
+  equipmentRoutePulseMs,
+  createEquipmentRoutePulsePlanner,
+  type EquipmentRouteSnapshot,
+} from './equipment-resource-route';
 
 const target = [78.5, -0.5] as const;
 const settled: EquipmentRouteSnapshot = {
@@ -78,5 +82,37 @@ describe('bounded equipment route pulse planning', () => {
     expect(equipmentRoutePulseMs(withoutView, target, 'KeyS')).toBe(80);
     expect(equipmentRoutePulseMs(settled, [NaN, -0.5], 'KeyS')).toBe(80);
     expect(equipmentRoutePulseMs(settled, target, 'KeyW')).toBe(80);
+  });
+});
+
+describe('precision only after observed excess travel', () => {
+  const observed = (x: number, patch: Partial<EquipmentRouteSnapshot> = {}): EquipmentRouteSnapshot => ({
+    ...settled,
+    player: [x, 32.6, -0.5],
+    serverPlayerPosition: [x, 32.6, -0.5],
+    ...patch,
+  });
+  it.each([
+    ['KeyW', 66.5781864716425, 67.40308241917914],
+    ['KeyS', 68.67789265453928, 67.92801620397519],
+  ] as const)('refines %s after actual 812 travel exceeds the 80ms bound', (direction, before, after) => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    expect(plan(observed(before), direction)).toBe(80);
+    expect(plan(observed(after), direction)).toBe(1);
+  });
+  it('retains ordinary pulses when observed travel stays within its bound', () => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    expect(plan(observed(67.2), 'KeyW')).toBe(80);
+    expect(plan(observed(67.3), 'KeyW')).toBe(80);
+  });
+  it.each([
+    { serverPlayerVelocity: [0.01, 0, 0] as const },
+    { onGround: false },
+    { colliding: true },
+    { serverPlayerPosition: [67.403, 32.6, -0.4] as const },
+  ])('does not refine an ineligible observation', (patch) => {
+    const plan = createEquipmentRoutePulsePlanner([67.5, -0.5]);
+    expect(plan(observed(66.578), 'KeyW')).toBe(80);
+    expect(plan(observed(67.403, patch), 'KeyW')).toBe(80);
   });
 });

@@ -1,7 +1,9 @@
 import type { Page } from '@playwright/test';
 
+export type NativeMovementPage = Readonly<{ keyboard: Pick<Page['keyboard'], 'down' | 'up'> }>;
+
 export async function sendNativeMovementPulse(
-  page: Pick<Page, 'keyboard'>,
+  page: NativeMovementPage,
   key: 'KeyW' | 'KeyS',
   pulseMs: number,
   jump = false,

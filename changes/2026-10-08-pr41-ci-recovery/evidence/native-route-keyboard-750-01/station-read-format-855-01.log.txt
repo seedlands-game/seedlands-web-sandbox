@@ -1,0 +1,4 @@
+$ node scripts/check-frozen-evidence.mjs && prettier --check .
+Frozen evidence: 5/5 exact byte identities verified.
+Checking formatting...
+All matched files use Prettier code style!

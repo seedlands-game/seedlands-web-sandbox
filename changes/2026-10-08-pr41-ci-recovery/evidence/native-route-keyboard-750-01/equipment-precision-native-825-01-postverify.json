@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-11T18:57:14.296013+00:00",
+  "terminalExitCode": 0,
+  "artifactPostVerifyExit": 0,
+  "receiptStatus": "PASS",
+  "selection": {
+    "mode": "NON_MAIN",
+    "canonicalMainSelected": false,
+    "canonicalMainMatches": 0,
+    "modularSmokeMatches": 0,
+    "selectedTests": [
+      {
+        "testId": "c1221f8f363362ddeabe-24f557e2270e25741560",
+        "file": "apps/web/tests/e2e/classic-support/equipment-precision-journey.ts",
+        "test": "Classic \u7cbe\u786e\u8def\u7ebf\u4ee5\u53ef\u4fe1\u539f\u751f\u8109\u51b2\u4fdd\u6301\u539f\u5230\u8fbe\u7cbe\u5ea6\u4e0e\u4e2d\u6027 ACK",
+        "project": "chromium"
+      }
+    ]
+  },
+  "sourceHashMismatches": []
+}

@@ -49,6 +49,9 @@ test('Classic owner contracts remain in the explicit behavior and type selection
     ...units,
     'apps/web/tests/e2e/classic-support/equipment-diagnostics-contract.test.ts',
     'apps/web/tests/e2e/classic-support/physics-diagnostics-read.test.ts',
+    'apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts',
+    'apps/web/tests/e2e/classic-support/route-crowd-recovery.test.ts',
+    'apps/web/tests/e2e/classic-support/route-crowd-c4-contract.test.ts',
     'apps/web/tests/e2e/classic-support/native-trace.test.ts',
   ])
     assert.ok(script.split(/\s+/).includes(path), `${path} is absent from the existing headless selection`);

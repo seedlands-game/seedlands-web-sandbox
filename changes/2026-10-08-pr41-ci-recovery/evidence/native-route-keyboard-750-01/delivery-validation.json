@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "identity": {
+    "sourceSha": "d18966a48e5008835b0fa6aaf8b35f01e259971f",
+    "sourceDigest": "43dce60936913a9dee0f628a2c867f6ce410b3e49cc2596e3b2e385240d94df5",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547"
+  },
+  "gates855": [
+    {
+      "check": "classic-types",
+      "exitCode": 0,
+      "seconds": 24.59
+    },
+    {
+      "check": "changed-lint",
+      "exitCode": 0,
+      "seconds": 2.24
+    },
+    {
+      "check": "format",
+      "exitCode": 0,
+      "seconds": 37.77
+    },
+    {
+      "check": "selection",
+      "exitCode": 0,
+      "seconds": 1.02
+    }
+  ],
+  "owners854": "4files53PASS",
+  "fullHeadless861": {
+    "exitCode": 0,
+    "seconds": 287.155,
+    "summary": ["Test Files  163 passed (163)", "Tests  1263 passed (1263)"]
+  },
+  "currentMain": {
+    "at": "2026-10-11T20:10:14.654860+00:00",
+    "terminalExitCode": 1,
+    "artifactPostVerifyExit": 0,
+    "receiptStatus": "FAIL",
+    "selection": {
+      "mode": "CANONICAL_MAIN",
+      "canonicalMainSelected": true,
+      "canonicalMainMatches": 1,
+      "modularSmokeMatches": 0,
+      "selectedTests": [
+        {
+          "testId": "c1221f8f363362ddeabe-684679c2f0f617936171",
+          "file": "apps/web/tests/e2e/classic-runtime.spec.ts",
+          "test": "Classic \u751f\u4ea7\u65c5\u7a0b\u4ee5\u771f\u5b9e\u8f93\u5165\u5b8c\u6210 C0-C5\uff0c\u5e76\u590d\u7528\u540c\u4e00\u8fd0\u884c\u65f6\u6027\u80fd\u573a\u666f",
+          "project": "chromium"
+        }
+      ]
+    },
+    "sourceHashMismatches": []
+  },
+  "status": "PARTIAL; NOT_MERGE_READY"
+}

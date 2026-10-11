@@ -19,7 +19,7 @@ import { withRoutePulseDiagnostics } from './route-pulse-diagnostics';
 import { observeEquipmentOperation } from './equipment-operation-diagnostics';
 import {
   equipmentResourcePickup,
-  equipmentRoutePulseMs,
+  createEquipmentRoutePulsePlanner,
   classifyEquipmentRouteWait,
   followEquipmentRoute,
   equipmentWorkbenchCorridor,
@@ -196,6 +196,7 @@ async function switchToSurvival(page: Page): Promise<void> {
 }
 
 export async function walkEquipmentRoute(page: Page, target: readonly [number, number]) {
+  const planPulse = createEquipmentRoutePulsePlanner(target);
   return withRoutePulseDiagnostics('V2-equipment', target, EQUIPMENT_ROUTE_TIMEOUT_MS, (diagnostics) =>
     followEquipmentRoute(target, {
       now: Date.now,
@@ -206,7 +207,7 @@ export async function walkEquipmentRoute(page: Page, target: readonly [number, n
           timeout,
           ...EQUIPMENT_RESOURCE_WALK_OPTIONS,
           diagnostics,
-          pulseMs: (current) => equipmentRoutePulseMs(current, target, key),
+          pulseMs: (current) => planPulse(current, key),
           yieldAfterSettledPulse: (current) => shouldYieldEquipmentRoutePulse(current, target, key),
         }),
       waitForProgress: async (baseline, key, timeout) => {

@@ -1,0 +1,79 @@
+{
+  "scope": "Focused canonical production input contract; not full C0-C5 or performance acceptance",
+  "events": 16,
+  "trustedAll": true,
+  "traceNativeLabels": [
+    "Native route keydown KeyW",
+    "Native route keydown Space",
+    "Native route keyup KeyW",
+    "Native route keyup Space",
+    "Native route keydown KeyW",
+    "Native route keydown Space",
+    "Native route keyup KeyW",
+    "Native route keyup Space",
+    "Native route keydown KeyS",
+    "Native route keydown Space",
+    "Native route keyup KeyS",
+    "Native route keyup Space",
+    "Native route keydown KeyS",
+    "Native route keydown Space",
+    "Native route keyup KeyS",
+    "Native route keyup Space"
+  ],
+  "routeObservationAttachments": 18,
+  "periodicFrames": 148,
+  "poses": {
+    "before": {
+      "position": [0.5, 32.600001, 0.5],
+      "velocity": [0, 0, 0],
+      "nativeMovementInput": {
+        "epoch": "seedlands:classic-canonical-runtime-v11:1",
+        "release": null
+      },
+      "physicsTick": 635,
+      "acknowledgedInputSequence": 154
+    },
+    "forward": {
+      "position": [2.3555536737807303, 32.600001, 0.5],
+      "velocity": [0, 0, 0],
+      "nativeMovementInput": {
+        "epoch": "seedlands:classic-canonical-runtime-v11:1",
+        "release": {
+          "code": "Space",
+          "sequence": 225,
+          "neutral": true
+        }
+      },
+      "physicsTick": 1121,
+      "acknowledgedInputSequence": 231
+    },
+    "backward": {
+      "position": [-0.03611111111111135, 32.600001, 0.5],
+      "velocity": [0, 0, 0],
+      "nativeMovementInput": {
+        "epoch": "seedlands:classic-canonical-runtime-v11:1",
+        "release": {
+          "code": "Space",
+          "sequence": 287,
+          "neutral": true
+        }
+      },
+      "physicsTick": 1376,
+      "acknowledgedInputSequence": 302
+    },
+    "final": {
+      "position": [-0.03611111111111135, 32.600001, 0.5],
+      "velocity": [0, 0, 0],
+      "nativeMovementInput": {
+        "epoch": "seedlands:classic-canonical-runtime-v11:1",
+        "release": {
+          "code": "Space",
+          "sequence": 287,
+          "neutral": true
+        }
+      },
+      "physicsTick": 1563,
+      "acknowledgedInputSequence": 323
+    }
+  }
+}

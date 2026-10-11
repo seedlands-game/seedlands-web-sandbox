@@ -1,0 +1,100 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/e2e/classic-support/native-keyboard-port.test.ts
+7:49:10 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts (20 tests | 8 failed) 25ms
+   × preserves the actual by-value voxel result 0 3ms
+   × preserves the actual by-value voxel result 11 1ms
+   × preserves the actual by-value voxel result null 0ms
+   × executes the public voxel reader against the supplied browser target 1ms
+   × propagates voxel evaluation errors without a success substitute 0ms
+   × rejects a voxel result that was not returned by value 0ms
+   × rejects nonfinite voxel coordinates before sending a protocol read 0ms
+   × keeps benchmark voxel reads free of diagnostic attachments 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > preserves the actual by-value voxel result 0
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > preserves the actual by-value voxel result 11
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > preserves the actual by-value voxel result null
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:170:21
+    168|     port = await nativeMovementPage(f.page);
+    169|   f.session.send.mockResolvedValueOnce({ result: { value } });
+    170|   expect(await port.voxelAt([75, 31, 0])).toBe(value);
+       |                     ^
+    171|   expect(f.session.send).toHaveBeenCalledWith(
+    172|     'Runtime.evaluate',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > executes the public voxel reader against the supplied browser target
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:186:21
+    184|     result: { value: Function(`return ${params.expression}`)() },
+    185|   }));
+    186|   expect(await port.voxelAt([75, 31, 0])).toBe(11);
+       |                     ^
+    187|   expect(getVoxelAt).toHaveBeenCalledExactlyOnceWith(75, 31, 0);
+    188| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > propagates voxel evaluation errors without a success substitute
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:194:21
+    192|     port = await nativeMovementPage(f.page);
+    193|   f.session.send.mockResolvedValueOnce({ result: {}, exceptionDetails:…
+    194|   await expect(port.voxelAt([75, 31, 0])).rejects.toThrow('voxel read …
+       |                     ^
+    195| });
+    196|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > rejects a voxel result that was not returned by value
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:201:21
+    199|     port = await nativeMovementPage(f.page);
+    200|   f.session.send.mockResolvedValueOnce({ result: { objectId: 'remote-o…
+    201|   await expect(port.voxelAt([75, 31, 0])).rejects.toThrow('did not ret…
+       |                     ^
+    202| });
+    203|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > rejects nonfinite voxel coordinates before sending a protocol read
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:207:21
+    205|   const f = fixture(),
+    206|     port = await nativeMovementPage(f.page);
+    207|   await expect(port.voxelAt([NaN, 31, 0])).rejects.toThrow('finite');
+       |                     ^
+    208|   expect(f.session.send).not.toHaveBeenCalled();
+    209| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts > keeps benchmark voxel reads free of diagnostic attachments
+TypeError: port.voxelAt is not a function
+ ❯ apps/web/tests/e2e/classic-support/native-keyboard-port.test.ts:216:21
+    214|     port = await nativeMovementPage(f.page);
+    215|   f.session.send.mockResolvedValueOnce({ result: { value: 11 } });
+    216|   expect(await port.voxelAt([75, 31, 0])).toBe(11);
+       |                     ^
+    217|   expect(capture.attach).not.toHaveBeenCalled();
+    218| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed | 12 passed (20)
+   Start at  19:49:10
+   Duration  507ms (transform 125ms, setup 0ms, import 239ms, tests 25ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/e2e/classic-support/native-keyboard-port.test.ts`
+Exit status 1

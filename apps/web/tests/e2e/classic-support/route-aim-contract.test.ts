@@ -1,3 +1,4 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
 import type { Page } from '@playwright/test';
 import { describe, expect, it, vi } from 'vitest';
 import { walkTo, type ClassicSnapshot } from './harness';
@@ -6,6 +7,10 @@ import { correctMouseToRoute, horizontalMouseCorrectionToRoute } from './target-
 import type { Point, RoutePoint } from './scenario';
 import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
 import { assessClosedDoorProbe, createClosedDoorProbePlan } from './door-collision-oracle';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const SENSITIVITY = 0.13;
 

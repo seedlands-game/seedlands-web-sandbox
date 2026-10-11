@@ -1,3 +1,4 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
 import type { Page, TestInfo } from '@playwright/test';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { lockPointer, moveMouseBy } from './mouse-input';
@@ -5,6 +6,10 @@ import { verifyAfterRestore } from './portable-item-journeys';
 import { mineVoxel } from './harness';
 import type { ClassicSnapshot } from './harness';
 import type { Point } from './scenario';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const restoreJourneys = vi.hoisted(() => ({ crop: vi.fn(), navigation: vi.fn() }));
 vi.mock('./crop-journey', () => ({ verifyCropAfterRestore: restoreJourneys.crop }));
@@ -101,14 +106,21 @@ function observed(
 function browser64ObservationPage(
   options: {
     firstServerPosition?: readonly [number, number, number];
+    firstPlayerPosition?: readonly [number, number, number];
+    secondPlayerPosition?: readonly [number, number, number];
     driftAfterFirst?: boolean;
     startPosition?: readonly [number, number, number];
     rejectCanvasClick?: Error;
   } = {},
 ) {
   const start = observed(options.startPosition ?? START, 18_645, 2_347);
-  const afterFirst = observed(SAFE_AFTER_FIRST, 18_996, 2_379, options.firstServerPosition);
-  const afterSecond = observed(OUT_OF_RANGE_AFTER_SECOND, 19_718, 2_435);
+  const afterFirst = observed(
+    options.firstPlayerPosition ?? SAFE_AFTER_FIRST,
+    18_996,
+    2_379,
+    options.firstServerPosition,
+  );
+  const afterSecond = observed(options.secondPlayerPosition ?? OUT_OF_RANGE_AFTER_SECOND, 19_718, 2_435);
   let current = start;
   let pressIndex = 0;
   let heldAt = 0;
@@ -328,4 +340,27 @@ it('preserves canvas acquisition failure before any restored journey moves', asy
   expect(restoreJourneys.crop).not.toHaveBeenCalled();
   expect(restoreJourneys.navigation).not.toHaveBeenCalled();
   expect(input.move).not.toHaveBeenCalled();
+});
+
+it('does not accept a crossed approach outside range and hands off the subsequent safe observation', async () => {
+  // First position is the 827 failure observation; the subsequent position and
+  // release metadata are synthetic logic inputs, not browser/physics evidence.
+  const driver = browser64ObservationPage({
+    startPosition: [33.9, 32.6, 0.5],
+    firstPlayerPosition: [29.504593960022707, 32.60000006651901, 0.4876173861788878],
+    secondPlayerPosition: [31.4, 32.6, 0.5],
+  });
+  await lockPointer(driver.page);
+  const aim = vi.fn(async () => {
+    throw SAFE_HANDOFF;
+  });
+  const rejected = expect(mineVoxel(driver.page, [34, 31, 0], aim)).rejects.toBe(SAFE_HANDOFF);
+  await vi.runAllTimersAsync();
+  await rejected;
+  expect(driver.pulses).toEqual([
+    { key: 'KeyS', delay: 100 },
+    { key: 'KeyS', delay: 100 },
+  ]);
+  expect(aim).toHaveBeenCalledOnce();
+  expect(driver.leftMouseDown).not.toHaveBeenCalled();
 });

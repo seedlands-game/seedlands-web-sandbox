@@ -1,20 +1,14 @@
-import { snapshot } from './snapshot-read';
-export { snapshot };
+import { snapshot, waitForSnapshot } from './snapshot-read';
+export { snapshot, waitForSnapshot };
+import { walkTo } from './route-driver';
+export { walkTo };
 import { expect, type Page } from '@playwright/test';
 import type { ClassicSnapshot } from './harness-snapshot';
-import { routeTargetPredicate, routePulseSettledPredicate, routePulseDurationMs } from './route-progress';
-import type { RoutePulseDiagnostics } from './route-pulse-diagnostics';
 import type { ClassicScenario, Point, RoutePoint } from './scenario';
-import {
-  correctMouseToRoute,
-  correctMouseUntilEntityAimed,
-  mouseCorrectionToVoxel,
-  voxelInteractionDistance,
-} from './target-aim';
+import { correctMouseUntilEntityAimed, mouseCorrectionToVoxel, voxelInteractionDistance } from './target-aim';
 import { queryEntity } from './combat-entity';
 import { prepareFixtureChunks, type HarnessResult, type WorldCommitProjection } from './world-commit';
 import { ensurePointerLock, lockPointer, moveMouseBy } from './mouse-input';
-import { sendNativeMovementPulse } from './native-movement-pulse';
 import type { VoxelGeometryDefinitionV1 } from '@seedlands/stdlib/mod-api';
 import type { FaceMaterialId } from '@seedlands/stdlib/world/voxel';
 import type {
@@ -115,26 +109,6 @@ export const voxelAt = (page: Page, target: Point) =>
     target,
   );
 
-export async function waitForSnapshot(
-  page: Page,
-  predicate: (value: ClassicSnapshot) => boolean,
-  timeout = 20_000,
-): Promise<ClassicSnapshot> {
-  let matched: ClassicSnapshot | null = null;
-  await expect
-    .poll(
-      async () => {
-        const current = await snapshot(page);
-        if (!current || !predicate(current)) return false;
-        matched = structuredClone(current);
-        return true;
-      },
-      { timeout, intervals: [16, 32, 64, 100] },
-    )
-    .toBe(true);
-  return matched!;
-}
-
 export const performanceTrace = (page: Page): Promise<ChromeTrace> => page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.exportPerformanceTrace()); // prettier-ignore
 
 export async function prepareInitialState(
@@ -203,91 +177,6 @@ export async function prepareInitialState(
   }, scenario);
 }
 
-export async function walkTo(
-  page: Page,
-  target: RoutePoint,
-  options: Readonly<{
-    key?: 'KeyW' | 'KeyS';
-    jump?: boolean;
-    tolerance?: number;
-    corridorTolerance?: number;
-    arrival?: 'crossing' | 'point';
-    timeout?: number;
-    pulseMs?: number | ((snapshot: ClassicSnapshot) => number);
-    refreshAfterCorrection?: boolean;
-    yieldAfterSettledPulse?: (snapshot: ClassicSnapshot) => boolean;
-    diagnostics?: RoutePulseDiagnostics;
-  }> = {},
-): Promise<ClassicSnapshot> {
-  const { key = 'KeyW', tolerance = 0.65, corridorTolerance = 1.5 } = options;
-  const reached = routeTargetPredicate(target, key, tolerance, corridorTolerance, options.arrival);
-  const deadline = Date.now() + (options.timeout ?? 45_000);
-  let current = await snapshot(page);
-  if (!current) throw new Error('Classic snapshot is unavailable before route movement.');
-  while (!reached(current)) {
-    if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-    options.diagnostics?.begin(current);
-    const correction = options.refreshAfterCorrection
-      ? await correctMouseToRoute({
-          wholeTurn: true,
-          target,
-          direction: key,
-          observe: async () => {
-            const observed = await snapshot(page);
-            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-            return observed;
-          },
-          move: async (dx, dy) => {
-            if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-            await moveMouseBy(page, dx, dy, { waitForRender: false });
-          },
-          routeReached: reached,
-        })
-      : await correctMouseToRoute({
-          wholeTurn: true,
-          target,
-          direction: key,
-          observe: () => snapshot(page),
-          move: (dx, dy) => moveMouseBy(page, dx, dy, { waitForRender: false }),
-          routeReached: reached,
-        });
-    if (!options.refreshAfterCorrection && correction.kind === 'route-reached') return correction.observation;
-    if (options.refreshAfterCorrection) {
-      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-      if (correction.kind === 'route-reached') return correction.observation;
-      if ((current = await snapshot(page)) === null)
-        throw new Error('Classic snapshot is unavailable after route correction.');
-      if (Date.now() >= deadline) throw new Error('Real input route timed out before ' + target.join(',') + '.');
-      if (reached(current)) return current;
-    }
-    const segmentStart = current;
-    const maximumPulseMs = typeof options.pulseMs === 'function' ? options.pulseMs(current) : (options.pulseMs ?? 300);
-    const pulseMs = routePulseDurationMs(current.player, target, maximumPulseMs);
-    const settledPulse = routePulseSettledPredicate(current);
-    options.diagnostics?.beforeInput(current, pulseMs, options.jump ? `${key}+Space` : key);
-    try {
-      await sendNativeMovementPulse(page, key, pulseMs, options.jump);
-      options.diagnostics?.inputFinished('returned');
-    } catch (error) {
-      options.diagnostics?.inputFinished('threw');
-      throw error;
-    }
-    current = await waitForSnapshot(
-      page,
-      (value) => {
-        const settled = settledPulse(value);
-        options.diagnostics?.observe(value, settled);
-        return settled;
-      },
-      20_000,
-    );
-    if (current.player[1] < segmentStart.player[1] - 2)
-      throw new Error(`Real input route left its supported surface before ${target.join(',')}.`);
-    if (options.yieldAfterSettledPulse?.(current)) return current;
-  }
-  return current;
-}
-
 export async function adjustPitchToTarget(page: Page, target: Point): Promise<void> {
   const history: Array<string | null> = [];
   for (let attempt = 0; attempt < 180; attempt += 1) {
@@ -322,16 +211,23 @@ export async function mineVoxel(
   const distance = voxelInteractionDistance(current.player, target);
   if (distance < 2.5 || distance > 4.5) {
     const approach: RoutePoint = [target[0] - 2.8, target[2] + 0.5];
+    let settledApproachPulses = 0;
     await walkTo(page, approach, {
       key: current.player[0] <= approach[0] ? 'KeyW' : 'KeyS',
       tolerance: 0.45,
+      arrival: 'point',
       timeout: 15_000,
       pulseMs: 100,
-      yieldAfterSettledPulse: (value) =>
-        [value.player, value.serverPlayerPosition].every((position) => {
-          const distance = voxelInteractionDistance(position, target);
-          return distance >= 2.5 && distance <= 4.5;
-        }),
+      yieldAfterSettledPulse: (value) => {
+        settledApproachPulses++;
+        const distances = [value.player, value.serverPlayerPosition].map((position) =>
+          voxelInteractionDistance(position, target),
+        );
+        return (
+          distances.every((distance) => distance >= 2.5 && distance <= 4.5) ||
+          (settledApproachPulses >= 2 && distances.every((distance) => distance > 5))
+        );
+      },
     });
     current = await snapshot(page);
     if (!current || voxelInteractionDistance(current.player, target) > 5)

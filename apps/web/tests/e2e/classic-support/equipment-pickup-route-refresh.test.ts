@@ -1,3 +1,4 @@
+import { snapshot as readRouteSnapshot } from './snapshot-read';
 import type { Page } from '@playwright/test';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -9,6 +10,10 @@ import {
 } from './equipment-resource-route';
 import { walkTo, type ClassicSnapshot } from './harness';
 import type { Point, RoutePoint } from './scenario';
+
+vi.mock('./native-keyboard-port', () => ({
+  nativeMovementPage: async (page: Page) => ({ keyboard: page.keyboard, snapshot: () => readRouteSnapshot(page) }),
+}));
 
 const TARGET: RoutePoint = [92.5, 2.5];
 const BROWSER19_CURRENT: Point = [92.49510192871094, 32.599998474121094, 2.2007970809936523];
