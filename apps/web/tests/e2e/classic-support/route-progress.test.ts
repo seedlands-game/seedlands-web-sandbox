@@ -4,6 +4,7 @@ import {
   routeInputSettled,
   routePulseDurationMs,
   routePulseSettledPredicate,
+  routeFixtureSettledPredicate,
 } from './route-progress';
 import { bodyConfigFor, stepBody, type BodyState, type PhysicsWorld } from '@seedlands/stdlib/physics';
 
@@ -11,6 +12,53 @@ const floor: PhysicsWorld = {
   querySolids: () => [{ id: 'floor', aabb: { min: { x: -1000, y: -1, z: -1000 }, max: { x: 1000, y: 0, z: 1000 } } }],
 };
 const corridorTarget = [78.5, -0.5] as const;
+
+describe('prepared native fixture baseline', () => {
+  const target = [2.5, 32.6, 2.5] as const;
+  const matches = routeFixtureSettledPredicate(target);
+  const settled = {
+    player: target,
+    serverPlayerPosition: target,
+    serverPlayerVelocity: [0, 0, 0] as const,
+    onGround: true,
+    colliding: false,
+  };
+
+  it('accepts the grounded stationary fixture after presentation catches up', () => {
+    expect(matches(settled)).toBe(true);
+  });
+
+  it('accepts the actual floor-contact epsilon offset without accepting an old height', () => {
+    const contact = [2.5, 32.600001, 2.5] as const;
+    expect(matches({ ...settled, player: contact, serverPlayerPosition: contact })).toBe(true);
+  });
+
+  it('rejects a grounded old height before the teleport snapshot arrives', () => {
+    const old = [2.5, 32.7, 2.5] as const;
+    expect(matches({ ...settled, player: old, serverPlayerPosition: old })).toBe(false);
+  });
+
+  it('requires all authoritative position axes to match the prepared target', () => {
+    for (const axis of [0, 1, 2]) {
+      const old: [number, number, number] = [...target];
+      old[axis]! += 0.1;
+      expect(matches({ ...settled, player: old, serverPlayerPosition: old })).toBe(false);
+    }
+  });
+
+  it('rejects a still-moving actor at the prepared position', () => {
+    expect(matches({ ...settled, serverPlayerVelocity: [0, -0.1, 0] })).toBe(false);
+  });
+
+  it('rejects presentation that has not caught up with the authoritative target', () => {
+    expect(matches({ ...settled, player: [2.5, 32.7, 2.5] })).toBe(false);
+  });
+
+  it('still requires grounded collision-free state', () => {
+    expect(matches({ ...settled, onGround: false })).toBe(false);
+    expect(matches({ ...settled, colliding: true })).toBe(false);
+  });
+});
 const failedPosition = { x: 78.49967344193138, y: 0, z: -0.6361418276453821 };
 
 function pulse(body: BodyState, milliseconds: number, physicsHz: number): BodyState {

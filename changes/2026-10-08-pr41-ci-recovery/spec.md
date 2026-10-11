@@ -1391,10 +1391,22 @@ Root独占world-media-player.ts、新owner test、package/Classic类型选择、
 
 精确dc6b816f/identified190的原main191终态FAIL916707ms：C0–C3/Creative/V1完成，V2第三块石头[90,31,2]采后返程被原900000ms总限中断，C4/C5未到达，post-run artifact verify PASS。只读196确认现有615 late/622 resync只有lifetime计数，无法关联command、Authority接收tick或后续accepted恢复；195/197的API wall时间不能当CPU或实际heldTime。当前不存在已证实的输入调度修复候选。
 
-本片仅扩充现有只读input-decision诊断：在正常post之前按sequence记录命令target tick、issuedAt active time、movement revision及输入状态的独立副本；worker正常receive后附当时Authority physics tick与跨上下文timeOrigin wall时间。Authority tick直接读既有session state，不创建完整snapshot。旧receipt无此可选字段仍可交付原callback。客户端保留256条最近回执、128条最近拒绝及各拒绝后的首条accepted回执，pending命令最多256；读出深冻结独立副本，诊断只保存数值/状态，不存DOM、Worker、actor或世界引用。时间边界明确区分active time与timeOrigin wall time，不把receive当consumed/执行证明。
+本片仅扩充现有只读input-decision诊断：在正常post之前按sequence记录命令target tick、原始issuedAtMs（Browser为producer的performance.now，Headless可能使用active time）、movement revision及输入状态的独立副本；worker正常receive后附当时Authority physics tick与跨上下文timeOrigin wall时间。Authority tick直接读既有session state，不创建完整snapshot。旧receipt无此可选字段仍可交付原callback。客户端保留256条最近回执、128条最近拒绝及各拒绝后的首条accepted回执，pending命令最多256；读出深冻结独立副本，诊断只保存数值/状态，不存DOM、Worker、actor或世界引用。时间边界明确区分原始producer clock、Authority active time与timeOrigin wall time，不把receive当consumed/执行证明。
 
 先在既有input-decision-diagnostics.test.ts取得实际RED：send/post→late回执的命令与worker tick关联、下一accepted恢复关联、旧epoch/duplicate不污染、callback重入/修改不能污染、有界截断及旧receipt兼容。生产只新增诊断字段、只读tick端口与有界记录，不改输入target/lead/guard/resync/ACK/动作、路线、质量、trace、timeout。相关client/worker/Authority回归及Classic/Web/stdlib类型、lint/format/CI选择合同通过后交付；新identified artifact后只运行原唯一main一次以取得新增因果证据，失败仍完整保留，不能记为性能A/B或产品PASS。
 
 Root独占现有session/runtime与worker protocol/worker/client诊断接线、既有test、新证据及本spec，不委派、不新增权限/域名/模型。传统.15PD×120%=.18PD，AI25min×120%=30min，00:55UTC检查点；实际停止要求优先。长期docs baseline不更新：既有诊断边界的可选观测细化。远端CI426自然terminal前不推新head取消它；完整运输/坡道/194矩阵/最终CI与review仍开放。
 
 198实际交付：RED4FAIL/3PASS→最终客户端8files69PASS（新增5例），Authority/协议2files23PASS；Classic/Web/stdlib类型、lint、format及17选择合同PASS。首次movementRevision误用数字及readonly赋值类型失败、文件长度lint失败原日志均保留；按正式可选字符串合同修正、复用既有laneTotals及诊断post helper，不放宽门禁。CI426已自然FAIL，两次C4 outbound返回成功、return被原90秒路线时限打断；visualPASS，普通Native首次同高失败后retryPASS属FLAKY，previewSKIP。下一新identified构建201/原唯一无optional main202只取新增因果证据，无性能比较或盲重试。
+
+### 普通矿车夹具基线新鲜度218（预注册）
+
+冻结21195781的CI427自然terminal：五项非Browser PASS；原main两次在C4返程[72.5,.5]前被原90秒route限打断，visual/native各PASS，Modular SKIP。identified201的原无optional本地202在V2 supported-surface失败；既有CPU209在V1木门上半Chunk material mesh原5秒poll失败，V2/C4/C5未到达。CPU实际附件idle47.21%、program19%、GC1.86%，仅诊断，无exclusive GPU/真实heldTime/性能收益结论。原visual/native217各一次无retry PASS，postartifact verify一致；这些均不替代整条旅程。
+
+普通矿车夹具teleport到[2.5,32.6,2.5]后原基线仅要求onGround&&!colliding，允许旧位置/移动中/呈现未收敛的快照。CI426首attempt同高断言Expected32.7/Received32.600001，retry PASS属FLAKY；旧快照是源码候选而非已捕获的根因证明。本片加强夹具前置事实：在原pulse前等待authoritative position到达夹具目标、velocity归零且presentation追上，并保留onGround/!colliding。原输入、300ms pulse、同高/返回/部署/上下车/存档断言及所有timeout不变；不修改生产输入、physics、guards、render或质量。
+
+先以既有route-progress测试取得可执行RED：旧grounded位置32.7、不同轴位置、移动状态、呈现落后均不能作为基线；目标32.6 stationary/grounded/无碰撞且呈现收敛可用。新增纯predicate放既有helper，在既有minecart旅程唯一fixture baseline接线；相关route/native pulse、类型、lint/format和选择合同验证后，新identified产物只跑原native一次。完整main、最终CI/transport/194矩阵仍开放，不宣布可合入。Root独占，未启用新agent/域名/权限；传统.10PD×120%=.12PD，AI20min×120%=24min，01:35UTC检查点；实际额度分母/模型费率不可读，不进行百分比换算。
+
+218实际静态交付：旧predicate RED4FAIL/10PASS，修复后route/native两files18PASS及既有duration单例PASS；Classic/Web types、lint、CI选择合同PASS。首GREEN命令一个附加filter不存在，仅计实际两文件，正确duration随后独立执行。新head build/native待执行；CI427自然FAIL、原本地217两项PASS及202/209不同失败保留。新增冻结证据minecart-fixture-freshness-218-01不宣称解决C4或最终可合入。
+
+218最终接触容差核实：既有physics COLLISION_EPSILON×4内视为目标位置，增加实际floor-contact32.600001正例，旧32.7负例不变。最终route/native两files19PASS，原duration另1PASS；Classic types复核、最终targeted lint、full format frozen5/5及Prettier PASS。所有证据只说明本片夹具前置条件加强，不关闭原CI427的C4返程或全量验收缺口。

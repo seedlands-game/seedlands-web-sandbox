@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "implementedBaseSha": "21195781baf95c23b27c6709f278838566b686fa",
+  "recordedAt": "2026-10-11T01:14:30.921358+00:00",
+  "change": "Strengthen native minecart prepared-fixture baseline; no production change or relaxed assertion. Correct diagnostic issuedAtMs clock documentation.",
+  "red": {
+    "filesFailed": 1,
+    "testsFailed": 4,
+    "testsPassed": 10
+  },
+  "green": {
+    "routeAndNativePulseFiles": 2,
+    "routeAndNativePulseTestsPassed": 19,
+    "originalDurationTestsPassed": 1
+  },
+  "static": {
+    "classicTypes": "PASS",
+    "webTypes": "PASS",
+    "lint": "PASS",
+    "ciSelection": "PASS",
+    "classicTypesFinal": "PASS",
+    "finalTargetedLint": "PASS",
+    "format": "PASS full frozen5/5 and Prettier, followed by final targeted formatting"
+  },
+  "productAtBase": {
+    "local217Visual": "PASS once",
+    "local217Native": "PASS once",
+    "local202Main": "FAIL V2 supported surface",
+    "diagnostic209Main": "FAIL V1 door upper mesh; V2/C4/C5 not reached",
+    "ci427": "FAIL C4 return twice; visual/native PASS; modular SKIP; preview SKIP"
+  },
+  "newHeadBuildAndNative": "NOT_RUN_AT_RECEIPT",
+  "mergeReadiness": "NOT_READY: final exact-SHA CI, full main and wider acceptance remain open",
+  "files": {
+    "minecart-fixture-red-218-01.log": {
+      "sha256": "99d51de7eb0536e615a0b1ae1e225de76c7005db8cf7f8c2c082f065c3daf342"
+    },
+    "minecart-fixture-green-218-01.log": {
+      "sha256": "7e5e23fb87d0c4b7e2116d027fa0f8d9bba3b616d8a8865b96d17da5c730edbe"
+    },
+    "minecart-fixture-duration-218-01.log": {
+      "sha256": "4ccc22157f99e362f02271e8d865a0e4cf5ac54510957be26ab2677c5cefc00e"
+    },
+    "minecart-fixture-classic-types-218-01.log": {
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "minecart-fixture-web-types-218-01.log": {
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    "minecart-fixture-lint-218-01.log": {
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    "minecart-fixture-selection-218-01.log": {
+      "sha256": "0d5dec52e55bc8fa4d182ae324f5cf8bb06b9c0c85fdb6de0de796cd0f43f8df"
+    },
+    "visual-native-217-01.log": {
+      "sha256": "fd177297678680f2a60317128db6fd309b477431c63e734958d2831cf8ec49e3"
+    },
+    "visual-native-post-verify-217-01.log": {
+      "sha256": "f44e105f3b15a5c71cfb0e943149ffd55a20c40e3c152102518605736c4e6d59"
+    },
+    "input-gap-cpu-terminal-215-01.json": {
+      "sha256": "91383b0b16907b16894395f83a2317aad76706af36c09e567a22c1752ac88119"
+    },
+    "ci427-terminal-219-01.json": {
+      "sha256": "3abe8aecd905eda1ddd04f977dc614252be3afffa24a2554b884c52e0e29ca3b"
+    },
+    "minecart-fixture-green-218-02.log": {
+      "sha256": "ffa3fcbce49fec00a5ab64c07f873b4ed1d0c72cd8398cd9731847128405d535"
+    },
+    "minecart-fixture-contact-lint-218-01.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "minecart-fixture-classic-types-218-02.log": {
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "minecart-fixture-format-check-218-01.log": {
+      "sha256": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b"
+    },
+    "minecart-fixture-review-218-01.md": {
+      "sha256": "b4dce641f7091d401d66a77a831e04845b0a40845bf93d141832622520413ccf"
+    }
+  },
+  "limits": "Stale snapshot is a source-level fixture defect; not proven root cause of CI426 observed height failure. Synthetic predicate RED strengthens setup, not product acceptance. First green command included an unmatched extra filter; only the two actual files/18 cases are counted. Correct existing duration test then ran separately.",
+  "contactTolerance": "Existing physics COLLISION_EPSILON*4; actual32.600001 accepted; old32.7 rejected."
+}
