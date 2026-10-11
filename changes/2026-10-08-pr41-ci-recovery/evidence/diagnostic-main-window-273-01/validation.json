@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "implementedBaseSha": "afd2490ba8845f04fc4131a63d47ba190c47f20c",
+  "recordedAt": "2026-10-11T03:08:20.165396+00:00",
+  "change": "原900s保持；显式本地30m仅用于诊断且不可验收；已有snapshot时钟/body计数投影。",
+  "red": {
+    "testsFailed": 7,
+    "testsPassed": 8
+  },
+  "green": {
+    "filesPassed": 2,
+    "testsPassed": 25
+  },
+  "receiptTests": {
+    "testsPassed": 9,
+    "newCase": "诊断namespace及误置标准namespace均拒绝，passed不能产生canonical PASS。"
+  },
+  "static": {
+    "classicTypes": "PASS",
+    "webTypes": "PASS: zero errors/warnings",
+    "lint": "PASS after max-lines corrections",
+    "ciSelection": "17 PASS after restoring original numeric timeout literal",
+    "format": "PASS: frozen 5/5 and whole-repository Prettier before receipt; new receipt files checked separately"
+  },
+  "newHeadBuildAndDiagnosticMain": "NOT_RUN_AT_RECEIPT",
+  "diagnosticOnly": true,
+  "eligible": false,
+  "originalCanonicalTimeoutMs": 900000,
+  "explicitDiagnosticTimeoutMs": 1800000,
+  "review": "Root bounded STATE/LIFE/ERROR; no evidenced P0/P1/P2 in changed scope; not whole PR approval",
+  "mergeReadiness": "NOT_READY: V2/C4 and wider original product acceptance remain open",
+  "docsBaseline": "UNCHANGED: existing Harness and formal snapshot contracts",
+  "files": {
+    "diagnostic-window-red-273-02.log": {
+      "sha256": "c8535d58c012d1e0edf3ab396c2b587b7d37bf9dc934f46cdd68e20b31f3562c"
+    },
+    "diagnostic-window-unit-273-02.log": {
+      "sha256": "df978453f75b06179e5b0af3baebd8126453a3e64d146f811c1df2d3c12559e3"
+    },
+    "diagnostic-window-receipt-273-02.log": {
+      "sha256": "829d999653d526e9e68ee7efdbfff3a00ef5f89b577936711275a8840d952d57"
+    },
+    "diagnostic-window-selection-273-02.log": {
+      "sha256": "3631d159583668e9058869bf62c9fcc33968140d38dfd8b41016ea10f1f007ba"
+    },
+    "diagnostic-window-classic-types-273-02.log": {
+      "sha256": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc"
+    },
+    "diagnostic-window-web-types-273-03.log": {
+      "sha256": "d6d501b3af66ae685c0bdaff2c484dba3b7910a56cc53e24a3cd81e53a08ed50"
+    },
+    "diagnostic-window-lint-273-03.log": {
+      "sha256": "050c69da23536758722729aeda55a8d0fb9d557495ef6d33d70873a3b64a71c1"
+    },
+    "diagnostic-window-format-check-273-01.log": {
+      "sha256": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b"
+    },
+    "diagnostic-window-review-273-01.md": {
+      "sha256": "29be9a71c5d4d9eb50b284908ab33d17498cfdd9524b49befb792ba77f548440"
+    }
+  }
+}

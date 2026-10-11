@@ -1,0 +1,7 @@
+# 273仅诊断主旅程窗口
+
+原main默认900000ms、CI job/重试和全部输入、内容、质量、局部timeout及断言保持。仅显式30m且非CI/benchmark使用1800000ms；独立预算附件和classic-diagnostic-runtime-evidence.json永久标DIAGNOSTIC_ONLY、eligible=false。收据9例通过，包括即使测试passed也拒绝诊断namespace及误置标准namespace的新案例。
+
+RED新增7FAIL/原8PASS；最终相关2files25PASS、CI选择17PASS、Classic/Web types和根lint PASS。原14项启动断言逐条原样移入已有evidence支持模块，位置与输入不变；入口保留原900000字面量，满足原CI超时合同和文件行数规则。首轮类型与格式日志按validation列明，失败日志私有保留。
+
+route诊断仅复制已有必需snapshot的物理时钟和body计数；缺失/非有限值为null，无新增timer/RPC/observer。benchmark原旁路保持。新头build和单次30m main诊断尚未执行；该窗口与任何新断言结果不能关闭原900s验收或证明性能收益。长期docs baseline未改；PR仍不可合入。

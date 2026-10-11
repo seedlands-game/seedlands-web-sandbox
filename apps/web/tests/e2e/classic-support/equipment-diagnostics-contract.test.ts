@@ -2,6 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { observeEquipmentOperation } from './equipment-operation-diagnostics';
 import { withRoutePulseDiagnostics } from './route-pulse-diagnostics';
 import type { ClassicSnapshot } from './harness-snapshot';
+import type { TestInfo } from '@playwright/test';
+import { configureClassicMainExecutionBudget, readClassicMainExecutionBudget } from './settings';
+import { attachClassicEvidence } from './evidence';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -17,7 +20,153 @@ const snapshot = {
   authority: { physicsTick: 1, acknowledgedInputSequence: 1 },
 } as unknown as ClassicSnapshot;
 
+function evidenceFixture(diagnosticOnly: boolean) {
+  return {
+    stages: Object.fromEntries(['C0', 'C1', 'C2', 'C3', 'C4', 'C5'].map((stage) => [stage, { status: 'PASS' }])),
+    pageErrors: [],
+    failedResponses: [],
+    stageSamples: {},
+    benchmarkMode: false,
+    artifact: { identity: {} },
+    trace: { traceEvents: [] },
+    scenario: { scenarioId: 'synthetic-unit-only', schemaVersion: 1 },
+    mainExecutionBudget: { timeoutMs: diagnosticOnly ? 1_800_000 : 900_000, diagnosticOnly },
+  } as unknown as Parameters<typeof attachClassicEvidence>[1];
+}
+
+describe('显式诊断执行窗口与验收资格', () => {
+  it('实际诊断配置写入预算metadata，CI拒绝发生在任何配置和附件之前', async () => {
+    vi.stubEnv('CI', undefined);
+    vi.stubEnv('GITHUB_ACTIONS', undefined);
+    vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', undefined);
+    vi.stubEnv('SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET', '30m');
+    const info = { setTimeout: vi.fn(), attach: vi.fn() };
+    await expect(configureClassicMainExecutionBudget(info as unknown as TestInfo)).resolves.toEqual({
+      timeoutMs: 1_800_000,
+      diagnosticOnly: true,
+    });
+    expect(info.setTimeout).toHaveBeenCalledWith(1_800_000);
+    expect(info.attach.mock.calls[0]![0]).toBe('classic-main-execution-budget.json');
+    expect(JSON.parse(info.attach.mock.calls[0]![1].body)).toMatchObject({
+      eligible: false,
+      diagnosticOnly: true,
+      canonicalTimeoutMs: 900_000,
+    });
+    info.setTimeout.mockClear();
+    info.attach.mockClear();
+    vi.stubEnv('CI', 'true');
+    await expect(configureClassicMainExecutionBudget(info as unknown as TestInfo)).rejects.toThrow('disabled in CI');
+    expect(info.setTimeout).not.toHaveBeenCalled();
+    expect(info.attach).not.toHaveBeenCalled();
+  });
+  it('默认以及普通CI仍使用原900秒窗口', () => {
+    expect(readClassicMainExecutionBudget({})).toEqual({ timeoutMs: 900_000, diagnosticOnly: false });
+    expect(readClassicMainExecutionBudget({ CI: 'true' })).toEqual({ timeoutMs: 900_000, diagnosticOnly: false });
+  });
+  it('仅显式30m成为不可验收的扩展诊断', () => {
+    expect(readClassicMainExecutionBudget({ SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET: '30m' })).toEqual({
+      timeoutMs: 1_800_000,
+      diagnosticOnly: true,
+    });
+  });
+  it('CI和GitHub Actions拒绝扩展窗口', () => {
+    for (const environment of [{ CI: 'true' }, { CI: '0' }, { GITHUB_ACTIONS: 'true' }])
+      expect(() =>
+        readClassicMainExecutionBudget({ ...environment, SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET: '30m' }),
+      ).toThrow('disabled in CI');
+  });
+  it('benchmark拒绝扩展窗口', () => {
+    expect(() =>
+      readClassicMainExecutionBudget({
+        SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET: '30m',
+        SEEDLANDS_CLASSIC_BENCHMARK: '1',
+      }),
+    ).toThrow('benchmark');
+  });
+  it('未知参数值失败而不会创建任意长的窗口', () => {
+    for (const value of ['', '29m', '1800000', 'infinity'])
+      expect(() => readClassicMainExecutionBudget({ SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET: value })).toThrow(
+        'Unsupported diagnostic',
+      );
+  });
+  it('默认仍生成原标准证据namespace', async () => {
+    const attach = vi.fn();
+    const info = { attach, retry: 0, title: 'synthetic unit', project: { name: 'chromium' } } as unknown as TestInfo;
+    await attachClassicEvidence(info, evidenceFixture(false));
+    expect(attach.mock.calls[0]![0]).toBe('classic-runtime-evidence.json');
+    expect(JSON.parse(attach.mock.calls[0]![1].body)).toMatchObject({ status: 'PASS' });
+  });
+  it('全部合成断言PASS仍只生成DIAGNOSTIC_ONLY，不能成为标准PASS', async () => {
+    const attach = vi.fn();
+    const info = { attach, retry: 0, title: 'synthetic unit', project: { name: 'chromium' } } as unknown as TestInfo;
+    await attachClassicEvidence(info, evidenceFixture(true));
+    expect(attach).toHaveBeenCalledTimes(1);
+    expect(attach.mock.calls[0]![0]).toBe('classic-diagnostic-runtime-evidence.json');
+    expect(JSON.parse(attach.mock.calls[0]![1].body)).toMatchObject({
+      status: 'DIAGNOSTIC_ONLY',
+      assertionStatus: 'PASS',
+      diagnosticOnly: true,
+      eligible: false,
+      mainExecutionBudget: { timeoutMs: 1_800_000, diagnosticOnly: true },
+    });
+  });
+});
+
 describe('V2 diagnostic callback and evidence boundaries', () => {
+  it('时钟和body统计仅复制已有同次快照，后续源变化不改证据', async () => {
+    vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', '0');
+    const log = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    const authority = {
+      ...snapshot.authority,
+      physicsHz: 60,
+      integratedPhysicsTimeMs: 1000,
+      activeTimeMs: 1010,
+      physicsDebtMs: 0,
+      paused: false,
+      bodies: { total: 1, actors: 0, worldItems: 0, nearPlayer: 0 },
+    };
+    await withRoutePulseDiagnostics('C4-return', [3, 0], 90_000, async (diagnostic) => {
+      const current = { ...snapshot, authority };
+      diagnostic!.begin(current);
+      diagnostic!.observe(current, false);
+      authority.integratedPhysicsTimeMs = 9000;
+      authority.bodies.total = 2;
+    });
+    const observed = JSON.parse(log.mock.calls[0]![1] as string).pulses[0].lastObservation;
+    expect(observed.physicsClock).toEqual({
+      physicsHz: 60,
+      integratedPhysicsTimeMs: 1000,
+      activeTimeMs: 1010,
+      physicsDebtMs: 0,
+      paused: false,
+    });
+    expect(observed.bodyCounts).toEqual({ total: 1, actors: 0, worldItems: 0, nearPlayer: 0 });
+  });
+  it('缺失或非有限时钟/统计保持null而不是伪造零状态', async () => {
+    vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', '0');
+    const log = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+    await withRoutePulseDiagnostics('C4-return', [3, 0], 90_000, async (diagnostic) => {
+      diagnostic!.begin(snapshot);
+      diagnostic!.observe(
+        {
+          ...snapshot,
+          authority: { ...snapshot.authority, integratedPhysicsTimeMs: NaN, bodies: { total: Infinity } },
+        } as unknown as ClassicSnapshot,
+        false,
+      );
+    });
+    const pulse = JSON.parse(log.mock.calls[0]![1] as string).pulses[0];
+    expect(pulse.before.physicsClock).toEqual({
+      physicsHz: null,
+      integratedPhysicsTimeMs: null,
+      activeTimeMs: null,
+      physicsDebtMs: null,
+      paused: null,
+    });
+    expect(pulse.before.bodyCounts).toBeNull();
+    expect(pulse.lastObservation.physicsClock.integratedPhysicsTimeMs).toBeNull();
+    expect(pulse.lastObservation.bodyCounts.total).toBeNull();
+  });
   it('原operation只执行一次并保留返回对象，耗时只记diagnostic', async () => {
     vi.stubEnv('SEEDLANDS_CLASSIC_BENCHMARK', '0');
     const log = vi.spyOn(console, 'info').mockImplementation(() => undefined);

@@ -1,4 +1,4 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Page, type TestInfo } from '@playwright/test';
 
 export const classicBenchmark = {
   enabled: process.env.SEEDLANDS_CLASSIC_BENCHMARK === '1',
@@ -9,6 +9,38 @@ export const classicBenchmark = {
         ? 2
         : undefined,
 } as const;
+
+export type ClassicMainExecutionBudget = Readonly<{ timeoutMs: 900_000 | 1_800_000; diagnosticOnly: boolean }>;
+
+export function readClassicMainExecutionBudget(
+  environment: Readonly<Record<string, string | undefined>>,
+): ClassicMainExecutionBudget {
+  const requested = environment.SEEDLANDS_CLASSIC_DIAGNOSTIC_MAIN_BUDGET;
+  if (requested === undefined) return { timeoutMs: 900_000, diagnosticOnly: false };
+  if (requested !== '30m') throw new Error('Unsupported diagnostic main execution window.');
+  if (environment.CI || environment.GITHUB_ACTIONS) throw new Error('Extended main execution is disabled in CI.');
+  if (environment.SEEDLANDS_CLASSIC_BENCHMARK === '1')
+    throw new Error('Extended main execution cannot be combined with benchmark.');
+  return { timeoutMs: 1_800_000, diagnosticOnly: true };
+}
+
+export async function configureClassicMainExecutionBudget(testInfo: TestInfo): Promise<ClassicMainExecutionBudget> {
+  const budget = readClassicMainExecutionBudget(process.env);
+  if (budget.diagnosticOnly) {
+    testInfo.setTimeout(budget.timeoutMs);
+    await testInfo.attach('classic-main-execution-budget.json', {
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ...budget,
+        eligible: false,
+        canonicalTimeoutMs: 900_000,
+        sourceSha: process.env.SEEDLANDS_SOURCE_SHA ?? null,
+        note: 'Private diagnostic only; all original local timeouts and assertions remain in effect.',
+      }),
+    });
+  }
+  return budget;
+}
 
 export function requireHeadlessClassic(headless: boolean, launchOptions: Readonly<{ headless?: boolean }>): void {
   if (!headless || launchOptions.headless === false)

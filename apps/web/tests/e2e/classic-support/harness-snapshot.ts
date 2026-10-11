@@ -21,6 +21,12 @@ export type ClassicSnapshot = Readonly<{
   runtime: 'authority-worker';
   workers: Readonly<{ authority: number; logic: number; persistence: number; fluid: number; general: number }>;
   authority: Readonly<{
+    physicsHz?: number;
+    integratedPhysicsTimeMs?: number;
+    activeTimeMs?: number;
+    physicsDebtMs?: number;
+    paused?: boolean;
+    bodies?: Readonly<{ total: number; actors: number; worldItems: number; nearPlayer: number }>;
     physicsTick: number;
     acknowledgedInputSequence: number;
     commitSequence: number;
