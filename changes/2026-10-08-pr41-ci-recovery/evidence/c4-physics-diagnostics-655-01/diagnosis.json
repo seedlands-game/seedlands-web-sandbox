@@ -1,0 +1,40 @@
+{
+  "scope": "655 diagnostic candidate on dirty 5ac; not a final commit, C4 fix, full product acceptance, or performance result",
+  "identity": {
+    "sourceSha": "5ac4bad19231f3f83ec886f117dbdfa64ad899f4",
+    "sourceDigest": "862c43c40e70a3f48972a3a5212b5328b474876abb1d94d4541d225e1220d818",
+    "lockDigest": "882341009384ae16f18f58723d04656da8564759dc8386d871268c5b5521aa71",
+    "artifactDigest": "fdd24c0bf3414c13c8a939224059fcf6ff40baf92701ff3207276094ff325547",
+    "builtAt": "2026-10-11T14:39:19.712Z"
+  },
+  "checks": {
+    "RED655": "FAIL 5, missing API",
+    "lint659": "FAIL existing harness 500-line cap; extracted same-call reader without changing gate",
+    "types660": "FAIL optional public contact colliderId; preserve existing id and map absent id to null",
+    "owners662": "PASS 5 files 44 tests",
+    "copy664": "PASS 6 tests",
+    "types665": "PASS",
+    "lint666": "PASS",
+    "timeBudget667": "PASS 3 tests",
+    "format668": "PASS; frozen historical evidence 5/5 original bytes",
+    "headless669": "PASS 160 files 1228 tests",
+    "ciSelection670": "PASS 17 tests",
+    "build673": "PASS",
+    "productionApi672": "PASS 1; real PointerLock and original 300ms W+Space",
+    "native674": "PASS 1 original ordinary cart; NON_MAIN selection",
+    "artifactPostverify672And674": "PASS"
+  },
+  "review": "Bounded independent source review found no confirmed P0/P1/P2; root verified all 15 frozen file hashes. Not full PR approval.",
+  "diagnosticContract": "One current accepted snapshot; epoch/tick/ACK match; bounded frozen copies; no new world capability/message/timer/physics step; benchmark does not project.",
+  "knownFailures": {
+    "exact5acCI437": "5 non-browser jobs PASS; Chromium main twice C4 outbound original 90 seconds FAIL, final x171.747/200.312; C5 incomplete",
+    "private650": "Unmodified original main zero retry global 900 seconds FAIL in V2; C4 not reached, observed x100-155 publications zero"
+  },
+  "notProven": [
+    "C4 cause or repair",
+    "final exact SHA required CI",
+    "complete C0-C5",
+    "remaining rail/vehicle/persistence/presentation acceptance",
+    "performance improvement"
+  ]
+}

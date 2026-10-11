@@ -13,6 +13,7 @@ export type ClassicSnapshot = Readonly<{
   colliding: boolean;
   interactionAttempts: number;
   nativeMovementInput?: import('../../../src/app/player/native-movement-input').NativeMovementInput | null;
+  physicsDiagnostics?: import('../../../src/app/gameplay/harness-physics-diagnostics').HarnessPhysicsDiagnostics | null;
   mutationCount: number;
   worldRevision: number;
   remeshSchedulingCount: number;

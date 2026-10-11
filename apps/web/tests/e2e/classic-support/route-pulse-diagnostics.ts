@@ -31,6 +31,7 @@ function motion(value: ClassicSnapshot) {
           nearPlayer: finite(source.bodies.nearPlayer),
         }
       : null,
+    physicsDiagnostics: value.physicsDiagnostics ? structuredClone(value.physicsDiagnostics) : null,
     nativeMovementInput: input ? { epoch: input.epoch, release: input.release ? { ...input.release } : null } : null,
   };
 }

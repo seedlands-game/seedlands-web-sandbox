@@ -1,0 +1,49 @@
+import { test, expect } from '/workspace/seedlands-web-sandbox/node_modules/@playwright/test/index.mjs';
+import { writeFileSync } from 'node:fs';
+import { startClassicWorld } from '/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/start.ts';
+import { classicScenario } from '/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/scenario.ts';
+import { snapshot, waitForSnapshot, type ClassicWindow } from '/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/harness.ts';
+import { lockPointer } from '/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/mouse-input.ts';
+import { sendNativeMovementPulse } from '/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/native-movement-pulse.ts';
+
+test('diagnostic API: production snapshot identity and real native input', async ({ page }) => {
+  const records: unknown[] = [];
+  try {
+    await startClassicWorld(page, classicScenario);
+    const before = await waitForSnapshot(page, s => Boolean(s.physicsDiagnostics), 20_000);
+    const d = before.physicsDiagnostics!;
+    expect(d.epoch).toBe(before.nativeMovementInput!.epoch);
+    expect(d.physicsTick).toBe(before.authority.physicsTick);
+    expect(d.acknowledgedInputSequence).toBe(before.authority.acknowledgedInputSequence);
+    expect(d.player.contacts.entries.length).toBeLessThanOrEqual(16);
+    expect(d.bodies.scannedCount).toBeLessThanOrEqual(128);
+    expect(d.bodies.entries.length).toBeLessThanOrEqual(8);
+    const frozen = await page.evaluate(() => {
+      const h = (window as unknown as ClassicWindow).__seedlandsHarness!;
+      const defaultSnapshot = h.snapshot();
+      const value = h.physicsDiagnostics!();
+      return {
+        defaultHasDiagnostics: Object.hasOwn(defaultSnapshot, 'physicsDiagnostics'),
+        ready: Boolean(value),
+        deeplyFrozen: Boolean(value && Object.isFrozen(value) && Object.isFrozen(value.player.position) &&
+          Object.isFrozen(value.player.contacts.entries) && Object.isFrozen(value.bodies.entries) &&
+          value.player.contacts.entries.every(c => Object.isFrozen(c) && Object.isFrozen(c.normal) && Object.isFrozen(c.point)) &&
+          value.bodies.entries.every(b => Object.isFrozen(b) && Object.isFrozen(b.position) && Object.isFrozen(b.velocity))),
+      };
+    });
+    expect(frozen).toEqual({ defaultHasDiagnostics: false, ready: true, deeplyFrozen: true });
+    await lockPointer(page);
+    expect(await page.evaluate(() => Boolean(document.pointerLockElement))).toBe(true);
+    await sendNativeMovementPulse(page, 'KeyW', 300, true);
+    const after = await waitForSnapshot(page, s => Boolean(s.physicsDiagnostics &&
+      s.authority.physicsTick > before.authority.physicsTick &&
+      s.authority.acknowledgedInputSequence > before.authority.acknowledgedInputSequence), 20_000);
+    records.push({ before, after, frozen, finalRead: await snapshot(page) });
+  } finally {
+    writeFileSync('/workspace/pr41-recovery-20261008-root-01/c4-physics-browser-672-01.json', JSON.stringify({
+      diagnosticOnly: true, eligible: false,
+      scope: 'Production API snapshot identity, bounded frozen copies and real PointerLock/300ms W+Space; not C4, C0-C5, or performance acceptance',
+      records,
+    }, null, 2) + '\n');
+  }
+});

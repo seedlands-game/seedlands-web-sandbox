@@ -1,0 +1,13 @@
+[WebServer] (node:532234) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ vite preview --host 127.0.0.1 --port 4273 --strictPort
+[WebServer] (node:532247) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:532273) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [chromium] › ../pr41-recovery-20261008-root-01/c4-physics-browser-672-01/physics.spec.ts:9:1 › diagnostic API: production snapshot identity and real native input (9.1s)
+
+  1 passed (12.6s)

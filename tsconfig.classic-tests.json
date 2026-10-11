@@ -145,6 +145,7 @@
     "apps/web/tests/integration/runtime/server/composition/classic-rail-route-definition.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-route-save-lineage.test.ts",
     "apps/web/tests/unit/app/world-media-player.test.ts",
-    "apps/web/tests/unit/app/world-media-gesture-lifecycle.test.ts"
+    "apps/web/tests/unit/app/world-media-gesture-lifecycle.test.ts",
+    "apps/web/tests/unit/app/harness-physics-diagnostics.test.ts"
   ]
 }

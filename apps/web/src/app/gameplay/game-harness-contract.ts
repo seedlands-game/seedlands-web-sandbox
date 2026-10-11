@@ -35,6 +35,7 @@ export type HarnessTransportSnapshot = Readonly<{
 type HarnessWorldCommit = Awaited<ReturnType<World['edit']>> | undefined;
 
 export type HarnessApi = {
+  physicsDiagnostics: () => import('./harness-physics-diagnostics').HarnessPhysicsDiagnostics | null;
   inputDecisionDiagnostics: () =>
     import('../../client/authority/input-decision-diagnostics').InputDecisionDiagnostics | null;
   skyVisibilityDiagnostics: () => ReturnType<World['getSkyVisibilityDiagnostics']> | null;

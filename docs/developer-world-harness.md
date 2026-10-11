@@ -79,3 +79,9 @@ F3 打开分类仪表板并释放 Pointer Lock，世界继续正常运行；单�
 面板以 4 Hz 投影已有诊断。Authority、Logic、Compute 和嵌套 Persistence 是 Web Worker；不把 Worker 数当作 OS 线程。每个计算槽位展示任务状态与耗时；Wasm 计数、同步核耗时与实际线性内存随任务 ACK 更新，实例重建后归零。正在执行任务的年龄是主线程经历时间，不能叫 Worker CPU 时间。
 
 观测、配置、估算和未知分开标记。JS heap 的非标准估计、网格字节估计、Wasm 线性内存、持久化大小有不同范围，不能相加冒充进程总内存。OS 线程数、CPU 使用率、GPU/跨 Worker 堆没有可用测量时明确未提供。本轮没有性能优化或加速倍率结论。
+
+## BrowserProductHarness 的按需物理诊断
+
+`window.__seedlandsHarness.physicsDiagnostics()` 只读当前已接受的 Authority 快照，返回冻结数值副本与来源 epoch、physicsTick、ACK。该方法在调用时投影；默认快照与 benchmark 不调用。它没有新增世界查询或权限，Headless 可直接读取已有 Authority body/contact。
+
+当前 contact 最多16条；body最多扫描128条，在8格半径内按距离与id排序返回8条，提供数量、扫描截断及输出截断。body坐标取同一 Authority body 坐标系。实例、ready、epoch或snapshot在读取中变化返回null。附近位置不证明碰撞，已发布快照不保证覆盖每个physics tick或全部correction。Classic非benchmark诊断在原有同次页面读取中取该数据，核对epoch/tick/ACK再记入原路线观察；时限、输入和断言保持。

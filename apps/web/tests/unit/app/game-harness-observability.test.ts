@@ -129,6 +129,7 @@ const bindings = () => {
   let renderedWorldEpoch: string | null = 'world:2';
   let authorityGeometry = geometry;
   const authority = {
+    snapshot: null,
     get isReady() {
       return authorityReady;
     },

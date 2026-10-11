@@ -1,0 +1,78 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/harness-physics-diagnostics.test.ts
+2:14:48 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts (5 tests | 5 failed) 9ms
+     × does not project during API creation and returns same-frontier detached frozen data 5ms
+     × bounds contacts and body scanning/output and reports each truncation 1ms
+     × rejects a snapshot from another epoch and a non-ready authority 0ms
+     × rejects same-epoch snapshot replacement while reading 1ms
+     × rejects authority instance replacement while reading 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts > on-demand accepted Authority physics diagnostics > does not project during API creation and returns same-frontier detached frozen data
+TypeError: f.api.physicsDiagnostics is not a function
+ ❯ apps/web/tests/unit/app/harness-physics-diagnostics.test.ts:36:26
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts > on-demand accepted Authority physics diagnostics > bounds contacts and body scanning/output and reports each truncation
+TypeError: fixture(...).api.physicsDiagnostics is not a function
+ ❯ apps/web/tests/unit/app/harness-physics-diagnostics.test.ts:51:35
+     49|     s.player.contacts = Array.from({ length: 20 }, (_, i) => ({ collid…
+     50|     s.entities = [s.player, ...Array.from({ length: 140 }, (_, i) => b…
+     51|     const result = fixture(s).api.physicsDiagnostics()!;
+       |                                   ^
+     52|     expect(result.player.contacts).toMatchObject({ count: 20, truncate…
+     53|     expect(result.player.contacts.entries).toHaveLength(16);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts > on-demand accepted Authority physics diagnostics > rejects a snapshot from another epoch and a non-ready authority
+TypeError: f.api.physicsDiagnostics is not a function
+ ❯ apps/web/tests/unit/app/harness-physics-diagnostics.test.ts:60:62
+     58|
+     59|   it('rejects a snapshot from another epoch and a non-ready authority'…
+     60|     const f = fixture(); f.setEpoch('world:3'); expect(f.api.physicsDi…
+       |                                                              ^
+     61|     f.setEpoch('world:2'); f.setReady(false); expect(f.api.physicsDiag…
+     62|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts > on-demand accepted Authority physics diagnostics > rejects same-epoch snapshot replacement while reading
+TypeError: f.api.physicsDiagnostics is not a function
+ ❯ apps/web/tests/unit/app/harness-physics-diagnostics.test.ts:67:18
+     65|     const f = fixture();
+     66|     f.read.mockImplementationOnce(() => { f.setSnapshot(source()); ret…
+     67|     expect(f.api.physicsDiagnostics()).toBeNull();
+       |                  ^
+     68|   });
+     69|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/harness-physics-diagnostics.test.ts > on-demand accepted Authority physics diagnostics > rejects authority instance replacement while reading
+TypeError: f.api.physicsDiagnostics is not a function
+ ❯ apps/web/tests/unit/app/harness-physics-diagnostics.test.ts:73:18
+     71|     const f = fixture();
+     72|     f.read.mockImplementationOnce(() => { f.replace(); return f.initia…
+     73|     expect(f.api.physicsDiagnostics()).toBeNull();
+       |                  ^
+     74|   });
+     75| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed (5)
+   Start at  14:14:48
+   Duration  1.40s (transform 1.05s, setup 0ms, import 1.25s, tests 9ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/unit/app/harness-physics-diagnostics.test.ts`
+Exit status 1

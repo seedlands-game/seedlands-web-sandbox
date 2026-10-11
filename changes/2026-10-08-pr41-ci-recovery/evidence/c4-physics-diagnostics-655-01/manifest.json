@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceDigest": "862c43c40e70a3f48972a3a5212b5328b474876abb1d94d4541d225e1220d818",
+  "files": {
+    "README.md": "ee25c97acb1fbd937ca46e526b13a686675acf991e49340076dcf63f3656dca8",
+    "c4-physics-artifact-postverify-672-01.log.txt": "d4117ac67ee5c25ee52807f324670446bed708181abbe9318b58f3ece3da3535",
+    "c4-physics-artifact-postverify-674-01.log.txt": "d4117ac67ee5c25ee52807f324670446bed708181abbe9318b58f3ece3da3535",
+    "c4-physics-browser-672-01.log.txt": "3875dbcd133f6fa0adbe9484792da304090a889dda6bdb0cdae4180a3c5a9937",
+    "c4-physics-build-673-01.log.txt": "0c8d69dc1dd649d17da6b6e645283abb596622b80f9fcd0f112649b8617637be",
+    "c4-physics-ci-selection-670-01.log.txt": "43a4c020060ab0f5af22b60b3eaf4cd3ee704434a42ecc3c20f3273a1f381d94",
+    "c4-physics-copy-664-01.log.txt": "1cbfa0b9fb5655ee5a7d8bf62963c96ff0aaeccfa7f9ad3c0b3b93bd9fcdaab4",
+    "c4-physics-format-check-668-01.log.txt": "e1099392f8e5763f977a093bab443a9c58f33edba10cfb6f16488d5df27cfc5b",
+    "c4-physics-headless-669-01.log.txt": "85b55766d3d4b0256e4205987ad316b4ec900f379c275fba95e184d7fd7cd1cf",
+    "c4-physics-lint-659-01.log.txt": "9d39431fcd0db0741d2b5e71f05daca52ab36448626fcb3253b7e1b7dc4453ee",
+    "c4-physics-lint-666-01.log.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "c4-physics-native-674-01.log.txt": "2cce0d0a69947266a282b253c33a4b2e965d7c1f598be66309174adcce620a3c",
+    "c4-physics-owners-662-01.log.txt": "40c3b298e4c9ef7be94ad07591d9ccfce8ab56f80e6b173ddbd2a7c11e0e41e3",
+    "c4-physics-red-655-01.log.txt": "4265ebf3ad4f5a7dcb61ba0b59678ba5993e09113c604c93a1477158b2fcf4ac",
+    "c4-physics-selection-667-01.log.txt": "1d45a39d819fbdee3110cd81cf753f58ca8315a217a994152621ea8b142ebc75",
+    "c4-physics-types-660-01.log.txt": "9a934070e8cbb4fecfcf5d0d07cd0b66e7a8686e96d4a51edc1900446d80870e",
+    "c4-physics-types-665-01.log.txt": "ea40c660cb40d13c55f5fb039fde645a7c9155048be18b0111ba7534c1c6c0c4",
+    "diagnosis.json": "05f96d89fcaa35bfdaf9dc0bf99b0b6e501de75001ba18eb2563641d5269d21a",
+    "production-api-browser-672-01.json.txt": "e86545d0a69fec7b2b6dba5d968e4320d7190c88040ef1851590e582085bf1ad",
+    "production-api-browser-672-01.release.json.txt": "3981f58a16012e003d09f714c860c62dea0c0fd095de4b1de7a4840e9971890a",
+    "production-api-browser-672-01.spec.ts.txt": "a61271f7b3cb37ee08989def184c995a9f651fe80e8ef455e3d92cae005b66cb"
+  }
+}
