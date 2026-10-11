@@ -111,7 +111,7 @@ export class RegisteredTransportRuntime {
           assertActorResourceExecution(options.composition, execution.authorizer, context, TRANSPORT_RESOURCE);
           assertActorResourceExecution(options.composition, execution.authorizer, context, 'seedlands.inventory');
           options.assertCanChange();
-          this.assertTarget(actorId, candidate.target);
+          this.assertTarget(actorId, candidate.target, candidate.deployment.definitionId);
         };
         assertAuthorized();
         const entity = options.entities.resolveReference(actor.reference)!;
@@ -179,6 +179,7 @@ export class RegisteredTransportRuntime {
   private assertTarget(
     actorId: string,
     target: Readonly<{ hit: readonly [number, number, number]; adjacent: readonly [number, number, number] }>,
+    definitionId: string,
   ) {
     const actor = this.actor(actorId);
     const origin = playerInteractionOrigin(actor.position);
@@ -192,7 +193,14 @@ export class RegisteredTransportRuntime {
     const hit = get(...target.hit),
       adjacent = get(...target.adjacent);
     if (hit === undefined || adjacent === undefined) throw new Error('chunk-unavailable');
-    if (!this.options.content.voxelSemantics.get(hit)?.targetable) throw new Error('transport-target-invalid');
+    const definition = this.config.definitions.require(definitionId);
+    const acceptsSurface =
+      definition.locomotion.provider === 'surface' &&
+      this.config.surfaces.some(
+        (surface) => surface.id === definition.locomotion.providerId && surface.voxels.includes(hit),
+      );
+    if (!this.options.content.voxelSemantics.get(hit)?.targetable && !acceptsSurface)
+      throw new Error('transport-target-invalid');
     for (const end of [voxelAdjacentFacePoint(target.hit, target.adjacent), voxelCenter([...target.adjacent])]) {
       const status = traceVoxelRay(end, origin, get, solid);
       if (status !== 'clear')

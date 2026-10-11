@@ -1,0 +1,43 @@
+[WebServer] (node:584494) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] $ vite preview --host 127.0.0.1 --port 4273 --strictPort
+[WebServer] (node:584507) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:584532) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 [chromium] › ../pr41-recovery-20261008-root-01/boat-native-966-01.spec.ts:19:1 › NON_MAIN Classic 船真实水面部署、模型、骑乘与输入 (25.4s)
+
+
+  1) [chromium] › ../pr41-recovery-20261008-root-01/boat-native-966-01.spec.ts:19:1 › NON_MAIN Classic 船真实水面部署、模型、骑乘与输入 
+
+    Error: expect(received).toBeNull()
+
+    Received: {"entityId": "player-1", "epoch": 1, "lifetime": 1}
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      74 |   const reversed=(await transport(page))!.transports[0]!;
+      75 |   await page.keyboard.down('ShiftLeft');try{await clickCanvasCenter(page,'right');}finally{await page.keyboard.up('ShiftLeft');}
+    > 76 |   await expect.poll(async()=>(await transport(page))?.transports[0]?.rider).toBeNull();
+         |                                                                             ^
+      77 |   const final=(await transport(page))!.transports[0]!;expect(final.reference).toEqual(deployed.reference);
+      78 |   await info.attach('boat-final.png',{body:await page.screenshot(),contentType:'image/png'});
+      79 |   await info.attach('boat-native-result.json',{body:JSON.stringify({scope:'NON_MAIN',artifact,packLock,composition,deployed,mounted,moved,reverseStart,reversed,final,finalSnapshot:await snapshot(page)}),contentType:'application/json'});
+        at /workspace/pr41-recovery-20261008-root-01/boat-native-966-01.spec.ts:76:77
+
+    Error Context: ../pr41-recovery-20261008-root-01/boat-native-results-979-01/boat-native-966-01-NON-MAIN-Classic-船真实水面部署、模型、骑乘与输入-chromium/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../pr41-recovery-20261008-root-01/boat-native-results-979-01/boat-native-966-01-NON-MAIN-Classic-船真实水面部署、模型、骑乘与输入-chromium/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace ../pr41-recovery-20261008-root-01/boat-native-results-979-01/boat-native-966-01-NON-MAIN-Classic-船真实水面部署、模型、骑乘与输入-chromium/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › ../pr41-recovery-20261008-root-01/boat-native-966-01.spec.ts:19:1 › NON_MAIN Classic 船真实水面部署、模型、骑乘与输入 

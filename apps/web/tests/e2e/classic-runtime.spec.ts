@@ -1,5 +1,5 @@
 import { verifyVisualRebuild } from './classic-support/visual-rebuild';
-import { registerClassicMinecartJourney } from './classic-support/minecart-journey';
+import { registerClassicTransportJourneys } from './classic-support/transport-journeys';
 import { registerClassicNativeKeyboardJourney } from './classic-support/native-keyboard-journey';
 import { nativeMovementPage } from './classic-support/native-keyboard-port';
 import { sendNativeMovementPulse } from './classic-support/native-movement-pulse';
@@ -520,5 +520,5 @@ test(
   verifyModularPackSmoke,
 );
 
-registerClassicMinecartJourney(test);
+registerClassicTransportJourneys(test);
 registerClassicNativeKeyboardJourney(test);

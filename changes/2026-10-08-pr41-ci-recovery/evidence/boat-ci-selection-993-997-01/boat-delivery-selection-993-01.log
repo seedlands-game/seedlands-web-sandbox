@@ -1,0 +1,869 @@
+$ node --test scripts/ci-deterministic-scope.test.mjs scripts/check-frozen-evidence.test.mjs scripts/ci-sparse-checkout.test.mjs scripts/harness/artifact-source-identity.test.mjs scripts/ci-browser-time-budget.test.mjs
+TAP version 13
+# fatal: not a git repository (or any parent up to mount point /)
+# Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+# Subtest: original historical bytes pass in full and sparse checkouts
+ok 1 - original historical bytes pass in full and sparse checkouts
+  ---
+  duration_ms: 69.985911
+  type: 'test'
+  ...
+# Subtest: formatting or modifying any excluded evidence still fails the gate
+ok 2 - formatting or modifying any excluded evidence still fails the gate
+  ---
+  duration_ms: 60.654342
+  type: 'test'
+  ...
+# Subtest: missing evidence and symlink substitutions fail closed
+ok 3 - missing evidence and symlink substitutions fail closed
+  ---
+  duration_ms: 21.716011
+  type: 'test'
+  ...
+# Subtest: a dangling symlink cannot masquerade as an absent sparse file
+ok 4 - a dangling symlink cannot masquerade as an absent sparse file
+  ---
+  duration_ms: 42.276827
+  type: 'test'
+  ...
+# Subtest: Classic owner contracts remain in the explicit behavior and type selections
+ok 5 - Classic owner contracts remain in the explicit behavior and type selections
+  ---
+  duration_ms: 2.501179
+  type: 'test'
+  ...
+# Subtest: Chromium job covers the original complete journey and diagnostic retry
+not ok 6 - Chromium job covers the original complete journey and diagnostic retry
+  ---
+  duration_ms: 2.080135
+  type: 'test'
+  location: '/workspace/seedlands-web-sandbox/scripts/ci-browser-time-budget.test.mjs:62:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The input did not match the regular expression /registerClassicMinecartJourney\(test\)/. Input:
+    
+    "import { verifyVisualRebuild } from './classic-support/visual-rebuild';\n" +
+      "import { registerClassicTransportJourneys } from './classic-support/transport-journeys';\n" +
+      "import { registerClassicNativeKeyboardJourney } from './classic-support/native-keyboard-journey';\n" +
+      "import { nativeMovementPage } from './classic-support/native-keyboard-port';\n" +
+      "import { sendNativeMovementPulse } from './classic-support/native-movement-pulse';\n" +
+      "import { routePulseSettledPredicate } from './classic-support/route-progress';\n" +
+      "import { walkC4Route } from './classic-support/route-pulse-diagnostics';\n" +
+      "import { startClassicNativeTrace } from './classic-support/native-trace';\n" +
+      "import { startClassicAuthorityCpuProfile } from './classic-support/authority-cpu-profile';\n" +
+      "import * as crafting from './classic-support/crafting';\n" +
+      "import { expect, test } from '@playwright/test';\n" +
+      "import { expectPresentedDropOrPickup } from './classic-support/drops';\n" +
+      'import {\n' +
+      '  adjustPitchToTarget,\n' +
+      '  attackWithRealMouse,\n' +
+      '  clickCanvasCenter,\n' +
+      '  closeInventory,\n' +
+      '  inventory,\n' +
+      '  kernelCalls,\n' +
+      '  lockPointer,\n' +
+      '  mineVoxel,\n' +
+      '  moveMouseBy,\n' +
+      '  performanceTrace,\n' +
+      '  playerState,\n' +
+      '  prepareInitialState,\n' +
+      '  snapshot,\n' +
+      '  voxelAt,\n' +
+      '  waitForSnapshot,\n' +
+      '  walkTo,\n' +
+      '  type ChromeTrace,\n' +
+      '  type ClassicWindow,\n' +
+      '  type ClassicSnapshot,\n' +
+      "} from './classic-support/harness';\n" +
+      "import * as settings from './classic-support/settings';\n" +
+      "import { clearNaturalFixtureEntities } from './classic-support/fixture-entities';\n" +
+      "import { startClassicWorld } from './classic-support/start';\n" +
+      "import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';\n" +
+      "import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './classic-support/aim';\n" +
+      'import {\n' +
+      '  attachClassicEvidence,\n' +
+      '  observeBrowserRuntime,\n' +
+      '  requireAllClassicStages,\n' +
+      '  requireClassicRuntimeBaseline,\n' +
+      '  type ClassicStage as Stage,\n' +
+      '  type ClassicStageResult as StageResult,\n' +
+      "} from './classic-support/evidence';\n" +
+      "import { installClassicDiagnosticHooks } from './classic-support/diagnostic-hooks';\n" +
+      "import { classicPersistedPositions, classicScenario, type Point } from './classic-support/scenario';\n" +
+      "import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';\n" +
+      "import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';\n" +
+      "import * as v1 from './classic-support/v1-slice';\n" +
+      "import * as equipment from './classic-support/equipment-journey';\n" +
+      "import * as portable from './classic-support/portable-item-journeys';\n" +
+      'import {\n' +
+      '  equipFromInventory,\n' +
+      '  inventorySignature,\n' +
+      '  itemCount,\n' +
+      '  mergeRestoreEvidence,\n' +
+      '  observedVoxel,\n' +
+      '  traceEpoch,\n' +
+      "} from './classic-support/journey';\n" +
+      '\n' +
+      '// prettier-ignore\n' +
+      'const stageResults: Partial<Record<Stage, StageResult>> = {};\n' +
+      'const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};\n' +
+      '// prettier-ignore\n' +
+      'const benchmarkMode = settings.classicBenchmark.enabled;\n' +
+      'let evidenceWritten = false;\n' +
+      'let restoreEvidence: Readonly<Record<string, unknown>> | undefined;\n' +
+      '\n' +
+      'installClassicDiagnosticHooks(test, () => ({\n' +
+      '  stages: stageResults,\n' +
+      '  benchmark: benchmarkMode,\n' +
+      '  restore: restoreEvidence,\n' +
+      '  skip: evidenceWritten || modularPackSmokeEnabled,\n' +
+      '}));\n' +
+      '\n' +
+      "test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {\n" +
+      "  test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');\n" +
+      '  test.setTimeout(900_000);\n' +
+      '  const mainExecutionBudget = await settings.configureClassicMainExecutionBudget(testInfo);\n' +
+      '  evidenceWritten = false;\n' +
+      '  restoreEvidence = undefined;\n' +
+      '  for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];\n' +
+      '  for (const stage of Object.keys(stageSamples) as Stage[]) delete stageSamples[stage];\n' +
+      '\n' +
+      '  const { pageErrors, failedResponses, assets, workers } = observeBrowserRuntime(page);\n' +
+      "  await test.step('C0 启动固定 Classic 生产世界并冻结初态', async () => {\n" +
+      '    await startClassicWorld(page, classicScenario, settings.classicBenchmark.generalWorkers);\n' +
+      '  });\n' +
+      '  // prettier-ignore\n' +
+      '  const prepared = await prepareInitialState(page, classicScenario);\n' +
+      '  await clearNaturalFixtureEntities(page);\n' +
+      '  // prettier-ignore\n' +
+      '  const artifact = await browserArtifact(page);\n' +
+      '  const packLock = await browserPackLock(page);\n' +
+      '  const composition = await compositionIdentity(page);\n' +
+      '  const environment = await runtimeEnvironment(page);\n' +
+      '  const telemetryRunId = benchmarkMode\n' +
+      '    ? await page.evaluate(\n' +
+      '        (name) => (window as unknown as ClassicWindow).__seedlandsHarness!.beginPerformanceScenario(name),\n' +
+      '        classicScenario.scenarioId,\n' +
+      '      )\n' +
+      '    : `${classicScenario.scenarioId}:correctness`;\n' +
+      '  const sampleStartedAt = new Date().toISOString();\n' +
+      '  const runId = process.env.SEEDLANDS_HARNESS_RUN_ID ?? telemetryRunId;\n' +
+      '  const baseline = await waitForSnapshot(\n' +
+      '    page,\n' +
+      '    (value) =>\n' +
+      '      value.loadedChunks > 0 &&\n' +
+      '      value.renderedChunks > 0 &&\n' +
+      '      value.performance.frame.count >= 1 &&\n' +
+      '      (!benchmarkMode || value.performance.scenarioId === telemetryRunId),\n' +
+      '    30_000,\n' +
+      '  );\n' +
+      '  const crossingFloor = [\n' +
+      '    [31, 30, 0],\n' +
+      '    [32, 30, 0],\n' +
+      '  ] as const;\n' +
+      '  const authorityFloor = await waitForAuthorityVoxels(page, crossingFloor);\n' +
+      '  expect(authorityFloor.every((entry) => entry.ok && entry.voxel === 3)).toBe(true);\n' +
+      '  await expect.poll(() => Promise.all(crossingFloor.map((position) => voxelAt(page, position)))).toEqual([3, 3]);\n' +
+      '\n' +
+      '  requireClassicRuntimeBaseline(baseline, environment, assets, workers, classicScenario.generatorVersion);\n' +
+      '  const loadedPack = assets.some((path) => path.endsWith(`/${classicScenario.runtime.packEntryPath}`));\n' +
+      '  const artifactFiles = artifact.identity?.files ?? {};\n' +
+      '  const loadedStampedBytes = assets\n' +
+      "    .filter((path) => path.endsWith('.wasm') || path === `/${classicScenario.runtime.packEntryPath}`)\n" +
+      '    .every((path) => {\n' +
+      '      const relative = path.match(/(?:^|\\/)((?:assets|packs)\\/.*)$/)?.[1];\n' +
+      '      return Boolean(relative && artifactFiles[relative]);\n' +
+      '    });\n' +
+      '  const classicIdentity =\n' +
+      '    composition?.playbookId === classicScenario.playbookId &&\n' +
+      '    composition.packLock.some(\n' +
+      '      ({ id, version }) => id === classicScenario.playbookId && version === classicScenario.playbookVersion,\n' +
+      '    );\n' +
+      '  const admittedPack = packLock.lock?.packs.find(\n' +
+      '    ({ id, version }) => id === classicScenario.playbookId && version === classicScenario.playbookVersion,\n' +
+      '  );\n' +
+      '  const packEntryIdentity =\n' +
+      '    packLock.ok &&\n' +
+      "    admittedPack?.entry.path === classicScenario.runtime.packEntryPath.replace(/^packs\\//, '') &&\n" +
+      '    artifactFiles[classicScenario.runtime.packEntryPath] === admittedPack.entry.sha256 &&\n' +
+      '    artifactFiles[`packs/${admittedPack.manifest.path}`] === admittedPack.manifest.sha256;\n' +
+      '  expect.soft(artifact.ok, `Production stamp unavailable: ${JSON.stringify(artifact)}`).toBe(true);\n' +
+      "  expect.soft(loadedPack, `Loaded Pack assets: ${assets.join(', ')}`).toBe(true);\n" +
+      "  expect.soft(loadedStampedBytes, 'Loaded Classic/Wasm bytes are absent from the production stamp.').toBe(true);\n" +
+      '  expect.soft(packEntryIdentity, `Pack admission identity: ${JSON.stringify(packLock)}`).toBe(true);\n' +
+      '  expect.soft(classicIdentity, `Runtime composition: ${JSON.stringify(composition)}`).toBe(true);\n' +
+      '  stageResults.C0 = {\n' +
+      "    status: artifact.ok && loadedPack && loadedStampedBytes && packEntryIdentity && classicIdentity ? 'PASS' : 'FAIL',\n" +
+      '    observation:\n' +
+      "      'Production preview loaded the fixed seed with a stamped Classic composition, Authority/logic/persistence/compute Workers, consumed Wasm bytes and an actual WebGL2 context.',\n" +
+      '  };\n' +
+      '  stageSamples.C0 = baseline;\n' +
+      '\n' +
+      '  await settings.configureClassicSettings(page);\n' +
+      "  await test.step('C1 Pointer Lock、真实转向/移动/跳跃并跨越 Chunk', async () => {\n" +
+      '    await lockPointer(page);\n' +
+      '    const beforeTurn = (await snapshot(page))!;\n' +
+      '    await moveMouseBy(page, 80, 0);\n' +
+      '    const nativePage = await nativeMovementPage(page);\n' +
+      '    let turned = beforeTurn;\n' +
+      '    await expect\n' +
+      '      .poll(\n' +
+      '        async () => {\n' +
+      '          const beforePulse = await nativePage.snapshot();\n' +
+      "          if (!beforePulse) throw new Error('Classic snapshot is unavailable before turn movement.');\n" +
+      '          const settled = routePulseSettledPredicate(beforePulse);\n' +
+      "          await sendNativeMovementPulse(nativePage, 'KeyW', 300);\n" +
+      '          turned = await waitForSnapshot(page, settled, 20_000, nativePage.snapshot);\n' +
+      '          return Math.hypot(...turned.player.map((value, axis) => value - beforeTurn.player[axis]!));\n' +
+      '        },\n' +
+      '        { timeout: 30_000 },\n' +
+      '      )\n' +
+      '      .toBeGreaterThan(1);\n' +
+      '    expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);\n' +
+      '    const crossed = await walkTo(page, classicScenario.route.chunkCrossing, { jump: true, timeout: 90_000 });\n' +
+      '    expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);\n' +
+      '    expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);\n' +
+      '    expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);\n' +
+      '    expect(crossed.player[1]).toBeGreaterThan(32);\n' +
+      '    expect(crossed.onGround).toBe(true);\n' +
+      '    expect(crossed.colliding).toBe(false);\n' +
+      '    stageResults.C1 = {\n' +
+      "      status: 'PASS',\n" +
+      '      observation:\n' +
+      "        'Pointer Lock mouse movement changed the route, then held W+Space crossed from Chunk 0 to Chunk 1 and Authority acknowledged it.',\n" +
+      '    };\n' +
+      '    stageSamples.C1 = crossed;\n' +
+      '  });\n' +
+      '\n' +
+      '  let minedMeshEvidence!: ClassicSnapshot;\n' +
+      "  await test.step('C2 真实采集、掉落拾取、背包与配方', async () => {\n" +
+      '    for (const resource of classicScenario.initialState.resourceVoxels) {\n' +
+      '      const countBefore = itemCount(await playerState(page), resource.itemId);\n' +
+      '      await mineVoxel(page, resource.position);\n' +
+      '      const current = await waitForSnapshot(\n' +
+      '        page,\n' +
+      '        (value) => value.worldRevision > baseline.worldRevision && value.lastCommitMeshChunkCount > 0,\n' +
+      '      );\n' +
+      '      minedMeshEvidence = current;\n' +
+      '      await expectPresentedDropOrPickup(page, resource.itemId, countBefore);\n' +
+      '      await testInfo.attach(`drop-${resource.position[0]}`, {\n' +
+      '        body: await page.screenshot(),\n' +
+      "        contentType: 'image/png',\n" +
+      '      });\n' +
+      '      awa'... 16347 more characters
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+  actual: |-
+    import { verifyVisualRebuild } from './classic-support/visual-rebuild';
+    import { registerClassicTransportJourneys } from './classic-support/transport-journeys';
+    import { registerClassicNativeKeyboardJourney } from './classic-support/native-keyboard-journey';
+    import { nativeMovementPage } from './classic-support/native-keyboard-port';
+    import { sendNativeMovementPulse } from './classic-support/native-movement-pulse';
+    import { routePulseSettledPredicate } from './classic-support/route-progress';
+    import { walkC4Route } from './classic-support/route-pulse-diagnostics';
+    import { startClassicNativeTrace } from './classic-support/native-trace';
+    import { startClassicAuthorityCpuProfile } from './classic-support/authority-cpu-profile';
+    import * as crafting from './classic-support/crafting';
+    import { expect, test } from '@playwright/test';
+    import { expectPresentedDropOrPickup } from './classic-support/drops';
+    import {
+      adjustPitchToTarget,
+      attackWithRealMouse,
+      clickCanvasCenter,
+      closeInventory,
+      inventory,
+      kernelCalls,
+      lockPointer,
+      mineVoxel,
+      moveMouseBy,
+      performanceTrace,
+      playerState,
+      prepareInitialState,
+      snapshot,
+      voxelAt,
+      waitForSnapshot,
+      walkTo,
+      type ChromeTrace,
+      type ClassicWindow,
+      type ClassicSnapshot,
+    } from './classic-support/harness';
+    import * as settings from './classic-support/settings';
+    import { clearNaturalFixtureEntities } from './classic-support/fixture-entities';
+    import { startClassicWorld } from './classic-support/start';
+    import { browserArtifact, browserPackLock, compositionIdentity, runtimeEnvironment } from './classic-support/identity';
+    import { aimAtVoxelWithRealMouse, prepareBuildingTargetWithRealMouse } from './classic-support/aim';
+    import {
+      attachClassicEvidence,
+      observeBrowserRuntime,
+      requireAllClassicStages,
+      requireClassicRuntimeBaseline,
+      type ClassicStage as Stage,
+      type ClassicStageResult as StageResult,
+    } from './classic-support/evidence';
+    import { installClassicDiagnosticHooks } from './classic-support/diagnostic-hooks';
+    import { classicPersistedPositions, classicScenario, type Point } from './classic-support/scenario';
+    import { checkpointVoxels, waitForAuthorityVoxels } from './classic-support/restore';
+    import { modularPackSmokeEnabled, verifyModularPackSmoke } from './classic-support/modular-pack-smoke';
+    import * as v1 from './classic-support/v1-slice';
+    import * as equipment from './classic-support/equipment-journey';
+    import * as portable from './classic-support/portable-item-journeys';
+    import {
+      equipFromInventory,
+      inventorySignature,
+      itemCount,
+      mergeRestoreEvidence,
+      observedVoxel,
+      traceEpoch,
+    } from './classic-support/journey';
+    
+    // prettier-ignore
+    const stageResults: Partial<Record<Stage, StageResult>> = {};
+    const stageSamples: Partial<Record<Stage, ClassicSnapshot>> = {};
+    // prettier-ignore
+    const benchmarkMode = settings.classicBenchmark.enabled;
+    let evidenceWritten = false;
+    let restoreEvidence: Readonly<Record<string, unknown>> | undefined;
+    
+    installClassicDiagnosticHooks(test, () => ({
+      stages: stageResults,
+      benchmark: benchmarkMode,
+      restore: restoreEvidence,
+      skip: evidenceWritten || modularPackSmokeEnabled,
+    }));
+    
+    test('Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景', async ({ page }, testInfo) => {
+      test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
+      test.setTimeout(900_000);
+      const mainExecutionBudget = await settings.configureClassicMainExecutionBudget(testInfo);
+      evidenceWritten = false;
+      restoreEvidence = undefined;
+      for (const stage of Object.keys(stageResults) as Stage[]) delete stageResults[stage];
+      for (const stage of Object.keys(stageSamples) as Stage[]) delete stageSamples[stage];
+    
+      const { pageErrors, failedResponses, assets, workers } = observeBrowserRuntime(page);
+      await test.step('C0 启动固定 Classic 生产世界并冻结初态', async () => {
+        await startClassicWorld(page, classicScenario, settings.classicBenchmark.generalWorkers);
+      });
+      // prettier-ignore
+      const prepared = await prepareInitialState(page, classicScenario);
+      await clearNaturalFixtureEntities(page);
+      // prettier-ignore
+      const artifact = await browserArtifact(page);
+      const packLock = await browserPackLock(page);
+      const composition = await compositionIdentity(page);
+      const environment = await runtimeEnvironment(page);
+      const telemetryRunId = benchmarkMode
+        ? await page.evaluate(
+            (name) => (window as unknown as ClassicWindow).__seedlandsHarness!.beginPerformanceScenario(name),
+            classicScenario.scenarioId,
+          )
+        : `${classicScenario.scenarioId}:correctness`;
+      const sampleStartedAt = new Date().toISOString();
+      const runId = process.env.SEEDLANDS_HARNESS_RUN_ID ?? telemetryRunId;
+      const baseline = await waitForSnapshot(
+        page,
+        (value) =>
+          value.loadedChunks > 0 &&
+          value.renderedChunks > 0 &&
+          value.performance.frame.count >= 1 &&
+          (!benchmarkMode || value.performance.scenarioId === telemetryRunId),
+        30_000,
+      );
+      const crossingFloor = [
+        [31, 30, 0],
+        [32, 30, 0],
+      ] as const;
+      const authorityFloor = await waitForAuthorityVoxels(page, crossingFloor);
+      expect(authorityFloor.every((entry) => entry.ok && entry.voxel === 3)).toBe(true);
+      await expect.poll(() => Promise.all(crossingFloor.map((position) => voxelAt(page, position)))).toEqual([3, 3]);
+    
+      requireClassicRuntimeBaseline(baseline, environment, assets, workers, classicScenario.generatorVersion);
+      const loadedPack = assets.some((path) => path.endsWith(`/${classicScenario.runtime.packEntryPath}`));
+      const artifactFiles = artifact.identity?.files ?? {};
+      const loadedStampedBytes = assets
+        .filter((path) => path.endsWith('.wasm') || path === `/${classicScenario.runtime.packEntryPath}`)
+        .every((path) => {
+          const relative = path.match(/(?:^|\/)((?:assets|packs)\/.*)$/)?.[1];
+          return Boolean(relative && artifactFiles[relative]);
+        });
+      const classicIdentity =
+        composition?.playbookId === classicScenario.playbookId &&
+        composition.packLock.some(
+          ({ id, version }) => id === classicScenario.playbookId && version === classicScenario.playbookVersion,
+        );
+      const admittedPack = packLock.lock?.packs.find(
+        ({ id, version }) => id === classicScenario.playbookId && version === classicScenario.playbookVersion,
+      );
+      const packEntryIdentity =
+        packLock.ok &&
+        admittedPack?.entry.path === classicScenario.runtime.packEntryPath.replace(/^packs\//, '') &&
+        artifactFiles[classicScenario.runtime.packEntryPath] === admittedPack.entry.sha256 &&
+        artifactFiles[`packs/${admittedPack.manifest.path}`] === admittedPack.manifest.sha256;
+      expect.soft(artifact.ok, `Production stamp unavailable: ${JSON.stringify(artifact)}`).toBe(true);
+      expect.soft(loadedPack, `Loaded Pack assets: ${assets.join(', ')}`).toBe(true);
+      expect.soft(loadedStampedBytes, 'Loaded Classic/Wasm bytes are absent from the production stamp.').toBe(true);
+      expect.soft(packEntryIdentity, `Pack admission identity: ${JSON.stringify(packLock)}`).toBe(true);
+      expect.soft(classicIdentity, `Runtime composition: ${JSON.stringify(composition)}`).toBe(true);
+      stageResults.C0 = {
+        status: artifact.ok && loadedPack && loadedStampedBytes && packEntryIdentity && classicIdentity ? 'PASS' : 'FAIL',
+        observation:
+          'Production preview loaded the fixed seed with a stamped Classic composition, Authority/logic/persistence/compute Workers, consumed Wasm bytes and an actual WebGL2 context.',
+      };
+      stageSamples.C0 = baseline;
+    
+      await settings.configureClassicSettings(page);
+      await test.step('C1 Pointer Lock、真实转向/移动/跳跃并跨越 Chunk', async () => {
+        await lockPointer(page);
+        const beforeTurn = (await snapshot(page))!;
+        await moveMouseBy(page, 80, 0);
+        const nativePage = await nativeMovementPage(page);
+        let turned = beforeTurn;
+        await expect
+          .poll(
+            async () => {
+              const beforePulse = await nativePage.snapshot();
+              if (!beforePulse) throw new Error('Classic snapshot is unavailable before turn movement.');
+              const settled = routePulseSettledPredicate(beforePulse);
+              await sendNativeMovementPulse(nativePage, 'KeyW', 300);
+              turned = await waitForSnapshot(page, settled, 20_000, nativePage.snapshot);
+              return Math.hypot(...turned.player.map((value, axis) => value - beforeTurn.player[axis]!));
+            },
+            { timeout: 30_000 },
+          )
+          .toBeGreaterThan(1);
+        expect(Math.abs(turned.player[2] - beforeTurn.player[2])).toBeGreaterThan(0.05);
+        const crossed = await walkTo(page, classicScenario.route.chunkCrossing, { jump: true, timeout: 90_000 });
+        expect(crossed.streamCenter[0]).toBeGreaterThanOrEqual(1);
+        expect(crossed.authority.acknowledgedInputSequence).toBeGreaterThan(baseline.authority.acknowledgedInputSequence);
+        expect(crossed.authority.physicsTick).toBeGreaterThan(baseline.authority.physicsTick);
+        expect(crossed.player[1]).toBeGreaterThan(32);
+        expect(crossed.onGround).toBe(true);
+        expect(crossed.colliding).toBe(false);
+        stageResults.C1 = {
+          status: 'PASS',
+          observation:
+            'Pointer Lock mouse movement changed the route, then held W+Space crossed from Chunk 0 to Chunk 1 and Authority acknowledged it.',
+        };
+        stageSamples.C1 = crossed;
+      });
+    
+      let minedMeshEvidence!: ClassicSnapshot;
+      await test.step('C2 真实采集、掉落拾取、背包与配方', async () => {
+        for (const resource of classicScenario.initialState.resourceVoxels) {
+          const countBefore = itemCount(await playerState(page), resource.itemId);
+          await mineVoxel(page, resource.position);
+          const current = await waitForSnapshot(
+            page,
+            (value) => value.worldRevision > baseline.worldRevision && value.lastCommitMeshChunkCount > 0,
+          );
+          minedMeshEvidence = current;
+          await expectPresentedDropOrPickup(page, resource.itemId, countBefore);
+          await testInfo.attach(`drop-${resource.position[0]}`, {
+            body: await page.screenshot(),
+            contentType: 'image/png',
+          });
+          await walkTo(page, [resource.position[0] + 1.5, 0.5], { jump: true });
+          await expect.poll(async () => itemCount(await playerState(page), resource.itemId)).toBeGreaterThan(countBefore);
+        }
+        await crafting.craftAndEquipBuildingPlanks(page);
+        expect(minedMeshEvidence.remeshSchedulingCount).toBeGreaterThan(baseline.remeshSchedulingCount);
+        expect(minedMeshEvidence.renderPipeline.backend).toBe('webgl2');
+        stageResults.C2 = {
+          status: 'PASS',
+          observation:
+            'Mouse mining produced visible drops; movement picked them up; E opened inventory and real 2x2 pointer interactions produced planks, sticks, a wood sword and a workbench.',
+        };
+        stageSamples.C2 = (await snapshot(page))!;
+      });
+    
+      await test.step('C3 真实建造、进食和现有战斗', async () => {
+        await prepareBuildingTargetWithRealMouse(page, classicScenario.route.buildTarget);
+        await clickCanvasCenter(page, 'right');
+        await expect.poll(() => voxelAt(page, classicScenario.route.buildTarget)).toBe(16);
+        const afterBuild = await waitForSnapshot(
+          page,
+          (value) => value.worldRevision > minedMeshEvidence.worldRevision && value.lastCommitMeshChunkCount > 0,
+        );
+        expect(afterBuild.remeshSchedulingCount).toBeGreaterThan(minedMeshEvidence.remeshSchedulingCount);
+    
+        const panel = await inventory(page);
+        const hungerBefore = Number(await page.getByRole('meter', { name: '生命' }).getAttribute('aria-valuenow'));
+        expect(hungerBefore).toBeLessThan(20);
+        await panel.getByRole('gridcell', { name: '浆果 × 1', exact: true }).hover();
+        // This inventory command never navigates; verify its effect with the existing health assertion below.
+        await panel.getByRole('button', { name: '食用浆果', exact: true }).click({ noWaitAfter: true });
+        await expect
+          .poll(async () => Number(await page.getByRole('meter', { name: '生命' }).getAttribute('aria-valuenow')))
+          .toBeGreaterThan(hungerBefore);
+        await equipFromInventory(page, '木剑');
+        await closeInventory(page);
+        await page.keyboard.press('Digit1');
+        await walkTo(page, classicScenario.route.hostileApproach, { jump: true });
+        await attackWithRealMouse(page, prepared.hostileId);
+        await expect(page.locator(`[data-entity-id="${prepared.hostileId}"]`)).toHaveCount(0);
+    
+        await walkTo(page, classicScenario.route.stationApproach);
+        const stationInventory = await inventory(page);
+        await expect(stationInventory.getByRole('gridcell', { name: '工作台 × 1', exact: true })).toBeVisible();
+        await equipFromInventory(page, '工作台');
+        await closeInventory(page);
+        await page.keyboard.press('Digit1');
+        await walkTo(page, classicScenario.route.stationApproach, { jump: true });
+        const stationSupport: Point = [
+          classicScenario.route.stationTarget[0],
+          classicScenario.route.stationTarget[1] - 1,
+          classicScenario.route.stationTarget[2],
+        ];
+        await adjustPitchToTarget(page, stationSupport);
+        await clickCanvasCenter(page, 'right');
+        await expect
+          .poll(async () => (await nativeMovementPage(page)).voxelAt(classicScenario.route.stationTarget))
+          .toBe(11);
+        const afterStation = await waitForSnapshot(
+          page,
+          (value) => value.worldRevision > afterBuild.worldRevision && value.lastCommitMeshChunkCount > 0,
+        );
+        expect(afterStation.remeshSchedulingCount).toBeGreaterThan(afterBuild.remeshSchedulingCount);
+        await adjustPitchToTarget(page, classicScenario.route.stationTarget);
+        await clickCanvasCenter(page, 'right');
+        await expect(page.getByRole('dialog', { name: '工作台' })).toBeVisible();
+        await expect(page.getByRole('grid', { name: '工作台槽位' })).toBeVisible();
+        await page.getByRole('dialog', { name: '工作台' }).getByText('配方手册', { exact: false }).click();
+        await expect(page.getByRole('dialog', { name: '工作台' }).locator('[data-recipe="planks"]')).toBeAttached();
+        await expect(page.getByRole('dialog', { name: '工作台' }).locator('[data-recipe="wood-pickaxe"]')).toBeAttached();
+        await closeInventory(page);
+        const workbenchBeforePickup = itemCount(await playerState(page), 'workbench');
+        await mineVoxel(page, classicScenario.route.stationTarget);
+        await expectPresentedDropOrPickup(page, 'workbench', workbenchBeforePickup);
+        await walkTo(page, [classicScenario.route.stationTarget[0] + 1.5, 0.5], { jump: true });
+        await expect
+          .poll(async () => itemCount(await playerState(page), 'workbench'))
+          .toBeGreaterThan(workbenchBeforePickup);
+        stageResults.C3 = {
+          status: 'PASS',
+          observation:
+            'Right click placed crafted planks with a consumed mesh commit; inventory food restored health; held real mouse input buffered and completed the wood-sword second combo hit before defeating the fixed creature; a crafted workbench was placed, opened through the station runtime, then dismantled and recovered through real actions.',
+        };
+        stageSamples.C3 = (await snapshot(page))!;
+      });
+    
+      const portableJourney = await test.step('Creative 作物与导航通过正式玩家输入', () =>
+        portable.completeBeforeSave(page, testInfo));
+    
+      let v1SliceState!: v1.V1SliceState;
+      await test.step('V1 水桶、跨 Chunk 木门与唱片机均通过正式玩家输入', async () => {
+        await v1.expectV1AudioSettings(page);
+        v1SliceState = await v1.completeV1SliceBeforeSave(page);
+      });
+      const equipmentJourney = await test.step('V2 真实资源链与背包手势完成四槽装备矩阵', () =>
+        equipment.completeEquipmentJourneyBeforeSave(page, (value) => {
+          restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', { v2Equipment: value });
+        }));
+    
+      let routeTrace!: ChromeTrace;
+      let sampleCompletedAt!: string;
+      await test.step('C4 离开并返回局部资源，验证 Worker 到可见网格链路', async () => {
+        await startClassicNativeTrace(page, testInfo, benchmarkMode, process.env, 'C4');
+        await startClassicAuthorityCpuProfile(page, testInfo, benchmarkMode, process.env, 'C4');
+        const beforeTraverse = (await snapshot(page))!;
+        const returnChunkX = Math.floor(classicScenario.route.returnPoint[0] / 32);
+        const returnChunkPattern = new RegExp(`^${returnChunkX},[01],0$`);
+        const traceBeforeTraverse = await performanceTrace(page);
+        const traceIdsBeforeTraverse = new Set(
+          traceBeforeTraverse.traceEvents.flatMap((event) => (event.args?.traceId ? [event.args.traceId] : [])),
+        );
+        const returnChunkNamesBeforeTraverse = new Set(
+          traceBeforeTraverse.traceEvents.flatMap((event) =>
+            event.args?.traceName && returnChunkPattern.test(event.args.traceName) ? [event.args.traceName] : [],
+          ),
+        );
+        expect(returnChunkNamesBeforeTraverse.size).toBeGreaterThan(0);
+        await walkC4Route(page, classicScenario.route.farTurnaround);
+        const far = await waitForSnapshot(
+          page,
+          (value) => value.streamCenter[0] - beforeTraverse.streamCenter[0] >= 4 && value.renderedChunks > 0,
+          30_000,
+        );
+        expect(far.authority.residency).not.toBeNull();
+        expect(far.loadedChunks).toBeLessThanOrEqual(beforeTraverse.loadedChunks + 8);
+        expect(far.renderedChunks).toBeLessThanOrEqual(beforeTraverse.renderedChunks + 8);
+        await walkC4Route(page, classicScenario.route.returnPoint, 'KeyS');
+        const returned = await waitForSnapshot(
+          page,
+          (value) => value.streamCenter[0] === returnChunkX && value.renderedChunks > 0,
+          30_000,
+        );
+        expect(returned.compute.completedTasks).toBeGreaterThan(baseline.compute.completedTasks);
+        expect(returned.performance.completedChunkTraces).toBeGreaterThan(baseline.performance.completedChunkTraces);
+        expect(kernelCalls(returned)).toBeGreaterThan(kernelCalls(baseline));
+        expect(
+          returned.experiments.workers.some(
+            ({ lane, status, effectiveArtifact, artifactSha256 }) =>
+              lane === 'general' && status === 'matched' && effectiveArtifact !== 'typescript' && Boolean(artifactSha256),
+          ),
+        ).toBe(true);
+        routeTrace = await performanceTrace(page);
+        const marksByTrace = new Map<string, { traceName: string; marks: Set<string> }>();
+        for (const event of routeTrace.traceEvents) {
+          const traceId = event.args?.traceId;
+          const traceName = event.args?.traceName;
+          if (!traceId || !traceName || traceIdsBeforeTraverse.has(traceId)) continue;
+          const trace = marksByTrace.get(traceId) ?? { traceName, marks: new Set<string>() };
+          trace.marks.add(event.name);
+          marksByTrace.set(traceId, trace);
+        }
+        expect(
+          [...marksByTrace.values()].some(
+            ({ traceName, marks }) =>
+              returnChunkNamesBeforeTraverse.has(traceName) &&
+              ['worker-start', 'worker-complete', 'commit-queued', 'visible-postrender'].every((mark) => marks.has(mark)),
+          ),
+        ).toBe(true);
+        stageResults.C4 = {
+          status: 'PASS',
+          observation:
+            'Real traversal shifted four Chunk centers while client resources stayed bounded, and returning produced a new trace ID for the same Chunk key through Worker completion, mesh commit and postrender visibility.',
+        };
+        stageSamples.C4 = returned;
+      });
+    
+      await test.step('C5 正式保存返回、同上下文继续并再次交互', async () => {
+        const persistedPositions = classicPersistedPositions;
+        const stateBeforeSave = await playerState(page);
+        const portableBeforeSave = await portable.expectForSave(page, portableJourney);
+        const equipmentBeforeSave = await equipment.expectEquipmentReadyForSave(page, equipmentJourney);
+        const authorityBefore = await waitForAuthorityVoxels(page, persistedPositions);
+        const checkpointBefore = await checkpointVoxels(page, persistedPositions);
+        const derivedBefore = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'before', {
+          authority: authorityBefore,
+          checkpoint: checkpointBefore,
+          derived: derivedBefore,
+          v2EquipmentPreSave: equipmentBeforeSave,
+          portableBeforeSave,
+        });
+        expect(observedVoxel(authorityBefore, classicScenario.route.buildTarget)).toBe(16);
+        expect(observedVoxel(checkpointBefore, classicScenario.route.buildTarget)).toBe(16);
+        v1.expectV1DoorEvidence(authorityBefore, v1SliceState.door);
+        v1.expectV1DoorEvidence(checkpointBefore, v1SliceState.door);
+        const developerEpochBefore = await equipment.developerWorldEpoch(page);
+        await page.keyboard.press('Escape');
+        await expect(page.getByRole('dialog', { name: '暂停游戏' })).toBeVisible();
+        await page.getByRole('button', { name: '保存并返回主菜单', exact: true }).click();
+        await page.getByRole('button', { name: '继续世界', exact: true }).click();
+        const restored = await waitForSnapshot(
+          page,
+          (value) => value.onGround && !value.colliding && value.workers.authority === 1,
+          30_000,
+        );
+        const developerEpochAfter = await equipment.developerWorldEpoch(page);
+        expect(developerEpochAfter).not.toBe(developerEpochBefore);
+        const restoredPortable = await portable.verifyAfterRestore(page, testInfo, portableJourney, portableBeforeSave);
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { restoredPortable });
+        await v1.verifyV1SliceAfterRestore(page, v1SliceState);
+        const restoredEquipment = await equipment.verifyEquipmentJourneyAfterRestore(page, equipmentBeforeSave, (value) => {
+          const { referenceStatus, ...v2Equipment } = value;
+          restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+            v2Equipment,
+            ...(referenceStatus ? { referenceStatus } : {}),
+          });
+        });
+        const authorityAfter = await waitForAuthorityVoxels(page, persistedPositions);
+        const derivedAfterInitial = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+          authority: authorityAfter,
+          derivedInitial: derivedAfterInitial,
+          v2Equipment: restoredEquipment,
+        });
+        expect(observedVoxel(authorityAfter, classicScenario.route.buildTarget)).toBe(16);
+        v1.expectV1DoorEvidence(authorityAfter, v1SliceState.door);
+        await expect.poll(() => voxelAt(page, classicScenario.route.buildTarget)).toBe(16);
+        const derivedAfterSynchronized = await Promise.all(persistedPositions.map((position) => voxelAt(page, position)));
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+          derivedSynchronized: derivedAfterSynchronized,
+        });
+        expect(derivedAfterSynchronized[0]).toBe(16);
+        expect(await voxelAt(page, classicScenario.route.stationTarget)).toBe(0);
+        expect(inventorySignature(await playerState(page))).toEqual(inventorySignature(stateBeforeSave));
+        const restoredInventory = await inventory(page);
+        await expect(restoredInventory.getByRole('gridcell', { name: '工作台 × 1', exact: true })).toBeVisible();
+        await equipFromInventory(page, '工作台');
+        await closeInventory(page);
+        await page.keyboard.press('Digit1');
+        const stationSupport: Point = [
+          classicScenario.route.stationTarget[0],
+          classicScenario.route.stationTarget[1] - 1,
+          classicScenario.route.stationTarget[2],
+        ];
+        const supportAim = await aimAtVoxelWithRealMouse(page, stationSupport, classicScenario.route.stationTarget);
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', { realMouseAim: { support: supportAim } });
+        await clickCanvasCenter(page, 'right');
+        await expect.poll(() => voxelAt(page, classicScenario.route.stationTarget)).toBe(11);
+        const stationAim = await aimAtVoxelWithRealMouse(page, classicScenario.route.stationTarget);
+        restoreEvidence = mergeRestoreEvidence(restoreEvidence, 'after', {
+          realMouseAim: { support: supportAim, station: stationAim },
+        });
+        await clickCanvasCenter(page, 'right');
+        await expect(page.getByRole('dialog', { name: '工作台' })).toBeVisible();
+        await expect(page.getByRole('grid', { name: '工作台槽位' })).toBeVisible();
+        await closeInventory(page);
+        const ackBefore = restored.authority.acknowledgedInputSequence;
+        const positionBefore = restored.player;
+        await page.keyboard.down('KeyW');
+        try {
+          await waitForSnapshot(
+            page,
+            (value) =>
+              value.authority.acknowledgedInputSequence > ackBefore &&
+              Math.hypot(value.player[0] - positionBefore[0], value.player[2] - positionBefore[2]) > 0.5,
+          );
+        } finally {
+          await page.keyboard.up('KeyW');
+        }
+        stageResults.C5 = {
+          status: 'PASS',
+          observation:
+            'Save and return created a fresh epoch, restored build/workbench/inventory state, reacquired and reopened the station through visible target-card readback plus real mouse input, and accepted a new real movement input.',
+        };
+        stageSamples.C5 = (await snapshot(page))!;
+        const preRestoreTrace = traceEpoch(routeTrace, developerEpochBefore, 'C0-C4');
+        const postRestoreTrace = traceEpoch(await performanceTrace(page), developerEpochAfter, 'C5');
+        routeTrace = { traceEvents: [...preRestoreTrace.traceEvents, ...postRestoreTrace.traceEvents] };
+        sampleCompletedAt = new Date().toISOString();
+      });
+    
+      await test.step('重开后真实创造目录放置玻璃并保留画面', () => crafting.placeGlassAfterRestore(page, testInfo));
+      await test.step('V5金钻资源目录与真实钻石块建造', () => crafting.replaceGlassWithDiamondBlock(page, testInfo));
+    
+      const final = (await snapshot(page))!;
+      await settings.deleteClassicWorld(page, classicScenario.seed, classicScenario.generatorVersion);
+      await v1.expectWorldAudioReleased(page);
+      await attachClassicEvidence(testInfo, {
+        scenario: classicScenario,
+        stages: stageResults,
+        benchmarkMode,
+        mainExecutionBudget,
+        stageSamples,
+        runId,
+        artifact,
+        packLock,
+        composition,
+        environment,
+        assets: [...new Set(assets)],
+        workers: [...new Set(workers)],
+        baseline,
+        final,
+        trace: routeTrace,
+        pageErrors,
+        failedResponses,
+        restoreEvidence,
+        sampleStartedAt,
+        sampleCompletedAt,
+      });
+      evidenceWritten = true;
+      requireAllClassicStages(stageResults);
+      expect(pageErrors).toEqual([]);
+      expect(failedResponses).toEqual([]);
+    });
+    
+    test('Classic 视觉 v3 生产素材、连续帧与单击破坏回归', async ({ page }, testInfo) => {
+      test.skip(modularPackSmokeEnabled, 'The modular Pack artifact has its own bounded smoke in this same spec.');
+      await verifyVisualRebuild({ page }, testInfo);
+    });
+    
+    test(
+      '非 Classic Playbook 从锁定 production artifact 启动并消费自定义 worldgen/voxel/presentation',
+      verifyModularPackSmoke,
+    );
+    
+    registerClassicTransportJourneys(test);
+    registerClassicNativeKeyboardJourney(test);
+    
+  operator: 'match'
+  stack: |-
+    TestContext.<anonymous> (file:///workspace/seedlands-web-sandbox/scripts/ci-browser-time-budget.test.mjs:67:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+ok 7 - Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+  ---
+  duration_ms: 1.565558
+  type: 'test'
+  ...
+# Subtest: Kernel changes also select downstream stdlib behavior
+ok 8 - Kernel changes also select downstream stdlib behavior
+  ---
+  duration_ms: 2.734053
+  type: 'test'
+  ...
+# Subtest: stdlib-only changes do not select upstream Kernel behavior
+ok 9 - stdlib-only changes do not select upstream Kernel behavior
+  ---
+  duration_ms: 0.304192
+  type: 'test'
+  ...
+# Subtest: shared changes, main push, and an empty PR diff run both owners
+ok 10 - shared changes, main push, and an empty PR diff run both owners
+  ---
+  duration_ms: 0.311276
+  type: 'test'
+  ...
+# Subtest: unrelated changes omit behavior tests without affecting the separate static job
+ok 11 - unrelated changes omit behavior tests without affecting the separate static job
+  ---
+  duration_ms: 0.336961
+  type: 'test'
+  ...
+# Subtest: unknown source paths conservatively select both owners
+ok 12 - unknown source paths conservatively select both owners
+  ---
+  duration_ms: 0.212746
+  type: 'test'
+  ...
+# Subtest: invalid path input fails instead of selecting no tests
+ok 13 - invalid path input fails instead of selecting no tests
+  ---
+  duration_ms: 0.398889
+  type: 'test'
+  ...
+# Subtest: CLI accepts NUL-separated paths and emits stable GitHub outputs
+ok 14 - CLI accepts NUL-separated paths and emits stable GitHub outputs
+  ---
+  duration_ms: 51.934847
+  type: 'test'
+  ...
+# Subtest: CLI rejects malformed NUL input
+ok 15 - CLI rejects malformed NUL input
+  ---
+  duration_ms: 53.684237
+  type: 'test'
+  ...
+# Subtest: every CI checkout keeps exact source and specs without materializing sealed artifact trees
+ok 16 - every CI checkout keeps exact source and specs without materializing sealed artifact trees
+  ---
+  duration_ms: 490.288203
+  type: 'test'
+  ...
+# Subtest: artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+ok 17 - artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+  ---
+  duration_ms: 59.117811
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 16
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 651.298716
+[ELIFECYCLE] Command failed with exit code 1.

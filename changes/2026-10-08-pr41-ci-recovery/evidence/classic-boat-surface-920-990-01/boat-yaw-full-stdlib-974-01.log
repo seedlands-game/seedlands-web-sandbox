@@ -1,0 +1,58 @@
+$ pnpm exec vitest run --config packages/stdlib/vitest.config.ts --maxWorkers=2
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts (4 tests | 2 failed) 13290ms
+     × 批量拼接超过函数参数上限的 TypedArray 时保持所有顶点和索引 5649ms
+     × 融合打包保持分步 batch + compact 的所有输出字节与索引宽度 6463ms
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/server-headless-cli.test.ts (7 tests | 1 failed) 85687ms
+     × exports typed arrays over JSONL, restores them and continues after a damaged checkpoint 20020ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/server-headless-cli.test.ts > headless server command CLI > exports typed arrays over JSONL, restores them and continues after a damaged checkpoint
+Error: Test timed out in 20000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/stdlib/tests/server/server-headless-cli.test.ts:36:3
+     34|
+     35| describe('headless server command CLI', () => {
+     36|   it('exports typed arrays over JSONL, restores them and continues aft…
+       |   ^
+     37|     await withInteractiveCli('jsonl-checkpoint', async (send) => {
+     38|       let sequence = 0;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts > 大网格数据平面容量 > 批量拼接超过函数参数上限的 TypedArray 时保持所有顶点和索引
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts:17:3
+     15|
+     16| describe('大网格数据平面容量', () => {
+     17|   it('批量拼接超过函数参数上限的 TypedArray 时保持所有顶点和索引', () => {
+       |   ^
+     18|     const source = oversizedPart(70_000, 210_000);
+     19|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts > 大网格数据平面容量 > 融合打包保持分步 batch + compact 的所有输出字节与索引宽度
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ packages/stdlib/tests/world/data-plane-mesh-capacity.test.ts:37:3
+     35|   });
+     36|
+     37|   it('融合打包保持分步 batch + compact 的所有输出字节与索引宽度', () => {
+       |   ^
+     38|     const source = [oversizedPart(70_000, 210_000), { ...oversizedPart…
+     39|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed | 173 passed (175)
+      Tests  3 failed | 1311 passed (1314)
+   Start at  22:43:05
+   Duration  119.19s (transform 12.55s, setup 0ms, import 45.32s, tests 157.93s, environment 23ms)
+
+[ELIFECYCLE] Command failed with exit code 1.

@@ -1,0 +1,152 @@
+{
+  "head": "4a9b47c9437ac395fc91b366c09a127550a6b5ff",
+  "frozenAt": "2026-10-11T23:06:15.436494+00:00",
+  "files": [
+    {
+      "path": "apps/web/src/app/gameplay/fluid-source-target-selection.ts",
+      "sha256": "6a14c84ca19f709a32297470d18e04aee6e823204d990793ed1815612276b6cb"
+    },
+    {
+      "path": "apps/web/src/app/player/fluid-source-target.ts",
+      "sha256": "8e19d19dc3502532ef0801c4be5cd865fe89d32bd862d9f312d8736a095b177e"
+    },
+    {
+      "path": "apps/web/src/app/player/game-player-controller.ts",
+      "sha256": "8f1ca1689024d0dbcbb9fa2976ca644d1c7952abf73c8ef8aa8940aad249047e"
+    },
+    {
+      "path": "apps/web/src/app/player/player-controller-types.ts",
+      "sha256": "ca2b704b5ceec658d7e0eb0c17ad3696b1d8a957a788c71deb6ffcb09cccf9e7"
+    },
+    {
+      "path": "apps/web/src/app/player/player-controller.ts",
+      "sha256": "843cad4bb9b1de0a74de516c10109215c55c2d35eaae0f90d73cb8c0f4bce78a"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-runtime.spec.ts",
+      "sha256": "ddd8d8f922b52df0de8b8ffd559d27ac958490d4cbe5f019f546b6277a3204ff"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-support/boat-journey.ts",
+      "sha256": "ce64154707033c4b3ace2f8e328e8a1da940ddbc165e6ec5bbc6938ba589fffd"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-support/transport-journeys.ts",
+      "sha256": "b65a2e169d43adf3ae9ff3a76bf7e287b2e0bba2265e7e5cbd06b63703033336"
+    },
+    {
+      "path": "apps/web/tests/fixtures/classic/pre-boat-production-v4.json",
+      "sha256": "cde4e4a3ed8b72d689e71bceb3c64a6a2fc76c41425cc6bdda003503237df140"
+    },
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts",
+      "sha256": "f76bde42a367220e01f0ca954b9e0975d7b239de1c4cd65408b9519b9641029b"
+    },
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/classic-rail-route-definition.test.ts",
+      "sha256": "26892b424a9e212d542fa3bf15f29e3e8a5a1acea93ecf1d195107da2717cf1f"
+    },
+    {
+      "path": "apps/web/tests/unit/app/browser-gameplay-fluid-target.test.ts",
+      "sha256": "ca8278da5d93f86593ecb7fa2003584ebe640d27b90a4421c681268b7b46e36a"
+    },
+    {
+      "path": "apps/web/tests/unit/app/player-fluid-target.test.ts",
+      "sha256": "eed006e1735caeb4262a3f38487da67953858e8ab26e66d0eafd9e200be63080"
+    },
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "422c6ba6bbc8ebc48fad4c263120e1aefd232f8d24493e76fc6edd21e58964ea"
+    },
+    { "path": "docs/code-map.md", "sha256": "21a8c522590e2d6a6f34e44cb09d47b636e020632aa00c991dcc277d50ed2eb9" },
+    { "path": "package.json", "sha256": "2e5daf680b76982022f6ba16bffc27e62732a09bc469bb759d0eb5acad3d577a" },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-gameplay-view.ts",
+      "sha256": "105ecd0cc02e67d2724867cbfd9f92da10833564e69f8c970c57d273d7b70e56"
+    },
+    {
+      "path": "packages/stdlib/src/server/composition/gameplay-composition.ts",
+      "sha256": "a0fc7c656028db1f086f32aa6d7aa11dfe7d5ca75837f6401a5d172484495866"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/gameplay-content.ts",
+      "sha256": "57c3f485a0db882a9e4553f09db9eece9d381301db333c7c4ea419398cd5b21d"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/item-interaction-module.ts",
+      "sha256": "b24852aecbe3f34a7c6ba62d3dc4872487ca1176d17dfb48524f866ba38c073b"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/registered-transport-runtime.ts",
+      "sha256": "bd27bde8802035e123ed5124c4c7b2b97ed22417df139c87adabfb8c0d1fe72e"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-motion-model.ts",
+      "sha256": "f443de6aa1be7fd7d500f561df603a356799a10835d99425ef08f00e367e7f2c"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/surface-transport-bounds.ts",
+      "sha256": "55520ed7449b3a6996fe85176b8bb832cce15807377d0dc1ba1c8024dfb78cc9"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/transport-motion-geometry.ts",
+      "sha256": "e555e2e31f6e3251c3f711dfb0a143b383d8c98695ff8208cb74df346a728e0f"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/transport-relation-geometry.ts",
+      "sha256": "f1c78b7317ef6b830a05b0cfe5a1fd2d103cbefb0bb56859b9d1ee75612a52c8"
+    },
+    {
+      "path": "packages/stdlib/src/server/protocol/authority-worker-protocol.ts",
+      "sha256": "cb8466b2b4324126ce65c7a3a86f363f5fcd900dd9ae7e02d0dbce6651480051"
+    },
+    {
+      "path": "packages/stdlib/tests/server/item-interaction-security.test.ts",
+      "sha256": "345c2029b8e9312a24dc3648a134124ba2864ca39366a2b85753451f0a2324de"
+    },
+    {
+      "path": "packages/stdlib/tests/server/surface-transport-bounds.test.ts",
+      "sha256": "f4767a44520ea4ddb141a1e1f352f6e36357b1d283096c13f4b25afeb6435fd6"
+    },
+    {
+      "path": "packages/stdlib/tests/server/transport-motion-geometry.test.ts",
+      "sha256": "61a278aa4233673854b9fe8b526df4bb05d40168b110d52952a54a5dfb38d9c4"
+    },
+    {
+      "path": "playbooks/classic/assets/transport/boat.glb",
+      "sha256": "cc95adf8fe33ea340a4cf159bc7de92d9207d7dfe75111f8ea937e3f07da90e3"
+    },
+    {
+      "path": "playbooks/classic/presentation.json",
+      "sha256": "9a3dcc5613669572f3900b9aea69c13ddaf8fe4066dabcd6292df2d727f01aaf"
+    },
+    {
+      "path": "playbooks/classic/src/item-interactions.ts",
+      "sha256": "d74e4ad4772e214293e7ac751822b74b0fdafc01762bec30123f99df1612386b"
+    },
+    {
+      "path": "playbooks/classic/src/legacy-composition-identities.ts",
+      "sha256": "52ee4c409c0e69c36e2335c0c00d945f77902830032484cc8a8b9a2cd49a5bb1"
+    },
+    {
+      "path": "playbooks/classic/src/pack.ts",
+      "sha256": "d4383b8789cdc0567f799c7cfdf0a0b46cb01d5fb774e8772a755e786976917c"
+    },
+    {
+      "path": "playbooks/classic/src/pre-boat-v4-composition-identity.ts",
+      "sha256": "112f11385c73ac29800cf08ab9649188b052268b4d83eafa9f23bcba9421bc50"
+    },
+    {
+      "path": "playbooks/classic/src/transport.ts",
+      "sha256": "eca2806441a203b5ecdf98162088bfae576b8d80582a688f752259ab16328681"
+    },
+    {
+      "path": "scripts/generate-classic-boat-glb.mjs",
+      "sha256": "a3215d822dd40d7d220a8a0eab3595f21da93cd3d9b3c75c1cf9c9f907c52009"
+    },
+    {
+      "path": "tsconfig.classic-tests.json",
+      "sha256": "f591d012677e13a4f885fc0a2afbc5e2714d40553e29ed6a7eb53fd02901ada0"
+    }
+  ]
+}

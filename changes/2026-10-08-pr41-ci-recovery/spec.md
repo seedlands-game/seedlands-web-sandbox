@@ -1754,10 +1754,52 @@ Web回归560为55 PASS/1 FAIL，完整headless561为1212 PASS/1 FAIL，均指向
 
 873新integration为1项预期RED、旧8项PASS；874实现后9项PASS。新增停稳/ACK/epoch/范围/历史拷贝反例后875受影响5文件87项PASS；876 Classic types、范围lint、全format与17项选择PASS。CI440已核实head b9b1387e，五个非Chromium job SUCCESS，Chromium仍运行；878保存其首次运行中partial log，只表明当时V2运行，不是终态或C4/C5通过。当前872候选还需新完整headless/build/原main；旧sealed750证据未改写。
 
-### 2026-10-11 candidate 890: bounded precision feedback
+### 2026-10-11 候选 890：有界精度反馈
 
-882 terminated FAIL after actual C0–C3 PASS; Creative crop route 67.5,-0.5 exceeded the unchanged 45-second deadline. The first 80 ms request traveled about 1.65 m, then eligible precision remained at 1 ms and advanced about 0.013889 m per settled request. Freeze 879 matches four files and artifact postverification PASS; C4/C5 NOT_RUN. Candidate 890 keeps the existing precision admission and seeds 1 ms, then uses same-direction actual settled displacement to grow by at most twice the previous refined request, bounded by remaining x distance minus the original 0.06 arrival tolerance and the original 80 ms maximum. Reversal or renewed excess resets 1 ms; absent, zero, regressive or ineligible feedback cannot grow. This is feedback, not a claim about actual held duration or linear physics. Original inputs, world, actors, quality, targets, freshness, settling and 45/20/900-second limits remain. Synthetic RED/GREEN and original real-input main acceptance are required; no performance claim.
+882 在真实 C0–C3 PASS 后终态 FAIL；Creative crop 的 67.5,-0.5 路线超过原 45 秒期限。首个 80ms 请求移动约 1.65 米，随后合格的精调请求保持 1ms，每次 settled 请求约推进 0.013889 米。冻结 879 的四文件与产物后验 PASS，C4/C5 NOT_RUN。890 保留原精调准入，先使用 1ms，再按同方向实际 settled 位移逐步增长；每次最多为前次精调请求的两倍，同时受剩余 x 距离减原 0.06 到达容差和原 80ms 最大值约束。方向反转或再次过量移动时重置 1ms；缺失、零、退步或不合格反馈不能增长。这只描述反馈规则，不证明真实按键持续时长或线性物理。保留原输入、世界、角色、质量、目标、新鲜度、settling 与 45/20/900 秒期限。要求合成 RED/GREEN 与原真实输入 main 验收，不作性能声明。
 
-### 2026-10-11 terminal checkpoint 899–912
+### 2026-10-11 终态 checkpoint 899–912
 
-Candidate 890: 891 RED one new undershoot assertion failed and old26 passed; 893 eightfiles61 PASS; 894 types/lint/format/selection PASS; 897 identified build PASS (dirty sourceDigest e4ecc238c9af210fed0b212d729abba4084cf7e23f21906e45b572f6b45b7a8e); 898 fullheadless163files1281 PASS. Original zero-retry main899 FAIL: exact C0–C3 PASS, Creative wood-hoe role/name click exhausted original10000ms before attempting click, so crop67.5 and new890 feedback were NOT_REACHED; C4/C5 NOT_RUN. 900 artifactpostverify PASS and freeze895 sixhashes match, released909. Existing882 C3 gameplay PASS does not prove conditional1ms mining branch activation (907); do not infer causal repair or fullmain PASS. New bounded review found no confirmed blocker; browser feedback acceptance remains pending. Trace wood-hoe click494578.335–505255.278, resolved497995.213, no attemptingclick/actionability/pointer logs; before snapshot495133.678 collection2.7ms. Installed Playwright awaits element handle after resolution; renderer/handle wait is an inference, root cause unconfirmed. No force/noWaitAfter/deadline/quality/physics changes for this failure. Current remote b9 CI440 fivechecksPASS/ChromiumFAIL/PagesSKIP; complete remote attemptmatrix remains blocked by logTransport and missinglocalZIP. Draft push preserves these failures and is not adoption/merge approval.
+890：891 新增 undershoot 断言 RED，旧 26 例 PASS；893 八文件 61 例 PASS；894 types/lint/format/selection PASS；897 标识构建 PASS，dirty sourceDigest 为 e4ecc238c9af210fed0b212d729abba4084cf7e23f21906e45b572f6b45b7a8e；898 完整 headless 163 文件 1281 例 PASS。原零重试 main899 FAIL：精确 C0–C3 PASS，Creative 木锄 role/name 点击在尝试 pointer action 前耗尽原 10000ms，所以 crop67.5 与 890 反馈 NOT_REACHED，C4/C5 NOT_RUN。900 产物后验 PASS，冻结 895 六项 hash 匹配，于 909 解除。882 的 C3 玩法 PASS 不证明条件 1ms 采矿分支激活，907 已记录限制；不能据此推断因果修复或完整 main PASS。有界复核未发现确认的阻塞，浏览器反馈验收仍待完成。trace 木锄点击 494578.335–505255.278，于 497995.213 resolved，没有 attemptingclick/actionability/pointer 日志；前置 snapshot 在 495133.678、采集 2.7ms。已安装 Playwright 在 resolution 后等待 element handle；renderer/handle 等待只是推断，根因未确认。对此失败不使用 force/noWaitAfter 或更改期限、质量、物理。此 checkpoint 的远端 b9 CI440 五项 PASS、Chromium FAIL、Pages SKIP；完整远端尝试矩阵仍受日志传输与本地 ZIP 缺失阻塞。Draft 推送保留负证据，不代表采纳或合入批准。
+
+## 920：Classic 船的通用载具接入合同
+
+本片只补齐现有物品 boat 到通用 Transport Authority 的正式接入，复用已有 surface locomotion、relation、输入和保存机制，不启用旧 VehicleRuntime 路径。保留已发布 module/operation/system ID。船定义为 seedlands:boat，水面 provider 为 seedlands:water-surface；部署复用已有 fluid-source 瞄准政策，仅已加载的 Water(8) 水源格允许部署；支撑检查允许已加载 Water 格，surfaceOffset 为 0.8。船体 AABB 为 x/z ±0.75、y 0–0.6，座位 [0,0.45,0]，没有燃料或容器容量。运动策略冻结为加速度 2、阻力 0.8、最大速度 5、转向率 π/2、燃料消耗 0；这是当前产品配置，不声称复刻旧版物理参数。原始 GLB 只提供表现，不改变权威几何。
+
+实现前先记录已校验生产构建 897 的组合身份与非空矿车 checkpoint；其 packages/playbooks 在 b9 至 4a9 间无差异，新增精确 predecessor 合同，保留所有历史捕获与拒绝未知 identity 的检查。已观察到的旧 VehicleRuntime 非空载具拒绝仍单列，不能将它当作 Generic 保存兼容完成。
+
+RED 必须证明当前正式 boat use 缺失；随后验证合法水面部署、错误地面拒绝且库存与实体不变、真实 Authority 输入推进和转向、未知/非水支撑停止、实体与方块碰撞、安全下车、保存重开，以及前一组合的非空矿车恢复。配置与映射通过不代替实际浏览器船模型、键鼠驾驶和完整主旅程验收。所有测试保持原目标、断言、真实输入与既有期限；不改变质量、角色、地图或 CI 门禁。
+
+### 933：流体表面目标的通用交互政策
+
+现有 fluid-source 专属空流体容器且只接受 source=true、level=8，保持其拒绝非空桶、非容器物品及非水源目标的合同。新增显式 fluid-surface 仅允许 voxel trigger；客户端选择已注册且匹配手持物品的该政策时，瞄准已加载流体格；Authority 要求对应已加载流体单元存在且 level>0，继续使用同一 5 米范围、相邻格、遮挡、选择版本与 actor operation 权限检查。最终表面介质仍由 transport provider 的已注册 voxel 清单拒绝，因此船不能部署于 Lava、Air、未知 chunk 或隔墙流体。定义/投影/瞄准政策采用同一个版本化枚举；不得通过给船伪造空桶能力、全局 targetable Water 或绕过校验来实现。
+
+当前 fluid-source 船配置触发模块加载 TypeError，是已保存的负证据。先验证新政策尚被拒绝的 RED，再实现 owner 与真实客户端消费者，并保留原水桶回归。
+
+### 940：水面载具到岸边的安全下车候选
+
+939 的正式船测试已到达前进/转向后的 alternate self，下车拒绝 no-safe-exit。当前四个候选只使用船体基准 y=31.8；岸边方块顶 y=32 无法通过，不能降低支撑/碰撞检查。surface 载具保留四个原高度候选，额外检查同一水平位置的 ceil(y) 高度，最多抬升不足 1 格；整数高度不重复。route 载具候选不变。每个额外候选仍使用真实已加载世界的玩家体积、实体排除、脚下支撑与 unknown 检查；未找到安全位置继续拒绝。使用原 no-safe-exit RED 和矿车回归核验，再补封闭出口负例。
+
+### 955：轨道测试选择正式矿车定义
+
+950 完整 headless 164 文件、1289 例终态 FAIL：18 个轨道形状用例错误地取 site.options[0]，新增 boat 后该项按定义排序变为 boat，故读取到 transport-surface-invalid。其余 163 文件及 1271 例 PASS。修复测试夹具为按 definitionId=seedlands:minecart 查询，保留 44 个轨道用例的形状、rejection、坡向和 unknown 原断言，不固定排序、不移除船、不改变 provider 行为。先用这份明确 RED 修正 fixture，再定向验证；全量原失败日志保留。冻结 948 在终态及 29 摘要核验后解除。
+
+### 969：水面小角度转向的实际支撑范围
+
+964 真实前进/转向/下车 PASS；966 S 倒车位移 FAIL，967 在更早的转向 FAIL、倒车观测 NOT_REACHED。968 新增每个脉冲的只读 before/during/after：physics tick 1227→1245→1252，ACK 180→186→187，附近 Water 格保持，但载具在 z=1.049167、yaw=0.000364 停止。当前 compoundBody(turning=true) 将支撑范围扩成完整转向半径；在 z=1.014321 时，半径约 1.061 已包含 Stone(2,31,2)，而当前船体最大 z 约 1.765，本次小角度的实际范围尚未触及该格。这是需 RED 验证的支撑拒绝候选，不把零速当作输入未送达。
+
+SurfaceSupportPortV1 新增可选第二参数 proposedYaw；单参数消费者继续有效。模型传入实际积分后 yaw。支撑 broadphase 由本次起止实际载具体积范围并加保守曲线偏移计算，保留已加载完整足迹、unknown/非介质拒绝及所有碰撞 sweep；不借完整整圈半径扩大本次接触范围。跨过旋转角度内极值时仍保守包围中间体积，不能漏查真实转向路径。用精确小角度角落 Stone RED、相同位置真实非水足迹和 unknown 负例、原完整载具/骑乘者碰撞回归及真实 W/S 复验。原地图、角色、质量、目标、120 秒 case 和 10 秒位移/转向断言保持。
+
+支撑后的 Surface collision sweep 也使用同一整圈 compound 包围圆，需同步改为本次 actual yaw 区间的保守完整 compound 范围。TransportSweepPortV1 增加可选第四参数 proposedYaw，route 调用不变。范围覆盖起止及区间内所有旋转角度极值，骑乘者保持直立但座位偏移旋转，另保守扩张中心曲线偏移。未知/实际 Stone 相交继续阻挡；不是用缩小船体或排除骑乘者实现。额外 RED 区分足迹外 Stone 与足迹内 Stone，以及跨中间旋转极值的完整范围。
+
+### 981：船倒退后返回岸边的统一浏览器验收
+
+979 原始 W/转向/S 断言全部通过，下船 FAIL；980 只读观测船位于 [2.3072,31.8,-1.8528]，岸边仅 x=4、z=-1..5，原起步石台 z=2，当前四个水平候选没有支撑。保留两次失败，不能放宽安全下船拒绝。正式用例保留原地图、演员、W/S 位移和转向断言、120 秒总预算与各断言截止，新增真实鼠标/键盘驶回水岸接合处，再检查原生 Shift 右键解除骑乘及实际落脚支撑。新增只读阶段观测使失败位置可审计；不瞬移船或玩家，不改地形来通过。用例通过 classic-runtime.spec.ts 唯一入口注册，非主旅程功能证据不得宣称主旅程或性能通过。
+
+### 986：先用原生输入驶离起步石台
+
+985 统一入口在转向 FAIL，船 z=1.24898、yaw=0.000399，当前转向包围体接触 z=2 起步石台，倒退和返岸未运行。979 同源码几何已通过转向，差异由起步后惯性位置揭示；不能弱化碰撞或扩大当前脚印。正式流程在原 W/转向/S 检查前新增真实 S 驶离石台，再用只读速度收敛条件等待，不瞬移、不改地图、玩家或输入截止；保留全部原断言及 120 秒总预算。
+
+### 996：统一载具注册链与 CI 截止合同
+
+993 格式与路径 PASS，CI selection FAIL：旧检查要求 entry 直接调用 registerClassicMinecartJourney，未识别新增汇总模块。保留原矿车 timeout、完整主旅程与重试/flaky 检查，新增入口→transport-journeys→矿车及船的注册断言、船 120 秒截止与 skip policy。原主旅程900秒、视觉240秒、矿车120秒和船120秒，乘现有两次上限为46分钟，保留原5分钟报告余量，Chromium job 从47调至51分钟；无新增重试、无单项超时扩张、无部署或权限变更。

@@ -1,3 +1,7 @@
+import {
+  ITEM_INTERACTION_CAPABILITY,
+  type ItemInteractionRegistryV1,
+} from '../gameplay/modules/item-interaction-module';
 import type { ModulePermission, WorldComposition, VerifiedPackArtifact } from './contracts';
 import { assembleWorldPacks } from './assembly';
 import { resolveGameplayContent, type GameplayContent } from '../gameplay/gameplay-content';
@@ -30,6 +34,9 @@ export const gameplayContentForComposition = (composition: WorldComposition): Ga
   const content = Object.freeze({
     ...base,
     voxelGameplay: createVoxelGameplayRegistry(blockRules?.definitions),
+    ...(composition.definitionMap.capabilities.some(({ id }) => id === ITEM_INTERACTION_CAPABILITY)
+      ? { itemInteractions: composition.capability<ItemInteractionRegistryV1>(ITEM_INTERACTION_CAPABILITY) }
+      : {}),
     ...(composition.definitionMap.capabilities.some(({ id }) => id === TRANSPORT_INTERACTION_CAPABILITY)
       ? {
           transportDefinitions: composition.capability<FrozenTransportInteractionConfig>(

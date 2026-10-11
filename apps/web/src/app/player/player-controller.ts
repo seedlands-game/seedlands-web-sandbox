@@ -137,7 +137,7 @@ export class PlayerController {
       [position.x, position.y, position.z],
       [direction.x, direction.y, direction.z],
       (x, y, z) => world.getVoxel(x, y, z),
-      createFluidAwareTargetPredicate(world, this.options.canTargetFluidSource),
+      createFluidAwareTargetPredicate(world, this.options.canTargetFluidSource, this.options.canTargetFluidSurface),
     );
   }
 

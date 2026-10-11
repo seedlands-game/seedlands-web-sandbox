@@ -39,7 +39,7 @@ export type ItemInteractionDefinition = Readonly<{
   trigger: ItemInteractionTrigger;
   operationId: string;
   presentationKey: string;
-  voxelHitPolicy?: 'fluid-source';
+  voxelHitPolicy?: 'fluid-source' | 'fluid-surface';
 }>;
 export type ResolvedItemInteraction = Readonly<{
   definition: ItemInteractionDefinition;
@@ -133,7 +133,11 @@ function snapshotDefinition(raw: ItemInteractionDefinition): ItemInteractionDefi
     throw new TypeError('Item interaction operation is invalid: ' + source.id);
   if (typeof source.presentationKey !== 'string' || !PRESENTATION_KEY.test(source.presentationKey))
     throw new TypeError('Item interaction presentation key is invalid: ' + source.id);
-  if (source.voxelHitPolicy !== undefined && source.voxelHitPolicy !== 'fluid-source')
+  if (
+    source.voxelHitPolicy !== undefined &&
+    source.voxelHitPolicy !== 'fluid-source' &&
+    source.voxelHitPolicy !== 'fluid-surface'
+  )
     throw new TypeError('Item interaction voxel hit policy is invalid: ' + source.id);
   if (source.voxelHitPolicy !== undefined && source.trigger !== 'voxel')
     throw new TypeError('Item interaction voxel hit policy requires a voxel trigger: ' + source.id);
@@ -357,9 +361,12 @@ export function dispatchItemInteraction(
       return { success: false as const, reason: 'chunk-unavailable' };
     const semantics = options.getVoxelSemantics(hitVoxel);
     if (!semantics) return { success: false as const, reason: 'invalid-target' };
-    const fluid = binding.definition.voxelHitPolicy === 'fluid-source' ? options.getFluidCell([...target.hit]) : null;
-    if (!semantics.targetable && !(fluid?.source === true && fluid.level === 8))
-      return { success: false as const, reason: 'invalid-target' };
+    const fluid = binding.definition.voxelHitPolicy ? options.getFluidCell([...target.hit]) : null;
+    const acceptsFluid =
+      binding.definition.voxelHitPolicy === 'fluid-surface'
+        ? Boolean(fluid && fluid.level > 0)
+        : fluid?.source === true && fluid.level === 8;
+    if (!semantics.targetable && !acceptsFluid) return { success: false as const, reason: 'invalid-target' };
     const visibility = traceVoxelRay(
       voxelAdjacentFacePoint(target.hit, target.adjacent),
       origin,

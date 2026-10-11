@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/transport-motion-geometry.test.ts (5 tests | 1 failed) 20ms
+   × 小角度转向支撑不包含整圈包围圆的空角落 Stone，真实足迹和 unknown 仍拒绝 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-motion-geometry.test.ts > 小角度转向支撑不包含整圈包围圆的空角落 Stone，真实足迹和 unknown 仍拒绝
+AssertionError: expected 'left-surface' to be null
+
+- Expected:
+null
+
++ Received:
+"left-surface"
+
+ ❯ packages/stdlib/tests/server/transport-motion-geometry.test.ts:129:27
+    127|     projectSurfaceMotion({ ...options, state, frame, policy, callbacks…
+    128|   const free = candidate((p) => p?.[0]===2 && p[2]===2 ? 3 : 5);
+    129|   expect(free.stopReason).toBeNull();
+       |                           ^
+    130|   expect(free.next.pose.position[2]).toBeGreaterThan(state.pose.positi…
+    131|   expect(free.next.pose.yaw).toBeGreaterThan(state.pose.yaw);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  22:35:20
+   Duration  1.41s (transform 1.06s, setup 0ms, import 1.26s, tests 20ms, environment 0ms)
+

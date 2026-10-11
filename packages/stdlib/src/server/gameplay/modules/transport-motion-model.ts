@@ -53,10 +53,12 @@ export type TransportSweepPortV1 = (
   from: readonly [number, number, number],
   to: readonly [number, number, number],
   bodyAabb: TransportDefinitionV1['bodyAabb'],
+  proposedYaw?: number,
 ) => TransportCollisionV1;
 
 export type SurfaceSupportPortV1 = (
   position: readonly [number, number, number],
+  proposedYaw?: number,
 ) => 'supported' | 'unsupported' | 'unknown';
 
 export type MountedSeatConstraintV1 = Readonly<{
@@ -500,12 +502,14 @@ export function buildSurfaceTransportMotionCandidateV1(
     fueled.distance,
     input.steering * input.steeringRate * input.seconds * fraction * Math.sign(fueled.distance),
   );
-  const support = input.sampleSurface(advanced.position);
+  const support = input.sampleSurface(advanced.position, advanced.yaw);
   if (support !== 'supported' && support !== 'unsupported' && support !== 'unknown')
     throw new TypeError('Surface support result is invalid.');
   if (support === 'unknown') return stoppedCandidate(state, currentPose, null, 0, 0, 'surface-unknown');
   if (support === 'unsupported') return stoppedCandidate(state, currentPose, null, 0, 0, 'left-surface');
-  const collision = stopForCollision(input.sweep(currentPose.position, advanced.position, definition.bodyAabb));
+  const collision = stopForCollision(
+    input.sweep(currentPose.position, advanced.position, definition.bodyAabb, advanced.yaw),
+  );
   if (collision) return stoppedCandidate(state, currentPose, null, 0, 0, collision);
   const stopReason = fueled.exhausted ? 'fuel-empty' : null;
   return Object.freeze({

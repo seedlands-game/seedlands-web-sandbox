@@ -173,10 +173,23 @@ export const classicTransportModules = [
         inventoryCapacity: null,
         presentationId: 'seedlands:minecart',
       },
+      {
+        version: 1,
+        id: 'seedlands:boat',
+        locomotion: { provider: 'surface', providerId: 'seedlands:water-surface' },
+        bodyAabb: { min: { x: -0.75, y: 0, z: -0.75 }, max: { x: 0.75, y: 0.6, z: 0.75 } },
+        seatOffset: [0, 0.45, 0],
+        fuelCapacity: null,
+        inventoryCapacity: null,
+        presentationId: 'seedlands:boat',
+      },
     ],
-    deployments: [{ itemId: 'minecart', definitionId: 'seedlands:minecart' }],
+    deployments: [
+      { itemId: 'minecart', definitionId: 'seedlands:minecart' },
+      { itemId: 'boat', definitionId: 'seedlands:boat' },
+    ],
     routes: [{ definition: classicMinecartRoute, voxels: [39] }],
-    surfaces: [],
+    surfaces: [{ id: 'seedlands:water-surface', voxels: [8], surfaceOffset: 0.8 }],
   }),
   defineTransportRelationModule({
     moduleId: 'seedlands:overworld-transport-relations',
@@ -188,6 +201,14 @@ export const classicTransportModules = [
     systemId: 'seedlands:minecart-motion',
     policies: [
       { definitionId: 'seedlands:minecart', acceleration: 2, drag: 0.4, maxSpeed: 8, steeringRate: 0, fuelPerMeter: 0 },
+      {
+        definitionId: 'seedlands:boat',
+        acceleration: 2,
+        drag: 0.8,
+        maxSpeed: 5,
+        steeringRate: Math.PI / 2,
+        fuelPerMeter: 0,
+      },
     ],
   }),
 ] as const;

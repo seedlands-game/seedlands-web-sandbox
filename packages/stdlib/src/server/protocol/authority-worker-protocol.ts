@@ -124,6 +124,7 @@ export type AuthorityGameplayView = Readonly<{
   cropStages?: readonly AuthorityCropStageProjection[];
   navigation?: import('../gameplay/navigation-items-runtime').NavigationHeldProjectionV1 | null;
   transports?: readonly import('../gameplay/modules/transport-model').TransportStateV2[];
+  fluidTargetItems?: readonly Readonly<{ itemId: string; policy: 'fluid-source' | 'fluid-surface' }>[];
   transportDefinitions?: readonly import('../gameplay/modules/transport-model').TransportDefinitionV1[];
   metrics: AuthorityGameplayMetrics;
 }>;

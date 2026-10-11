@@ -37,7 +37,12 @@ export function projectTransportRelationSite(options: Options, entityId: string)
     [x, y, z + zMin],
     [x, y, z + zMax],
   ];
-  const exits = positions.map((position) => {
+  const surfaceTop = Math.ceil(y);
+  const exitPositions =
+    definition.locomotion.provider === 'surface' && surfaceTop > y
+      ? [...positions, ...positions.map(([exitX, , exitZ]) => [exitX, surfaceTop, exitZ] as const)]
+      : positions;
+  const exits = exitPositions.map((position) => {
     const failed = rejection(position);
     const support = loadedWorldBodyRejection(
       options,

@@ -17,6 +17,17 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     entities,
     actors: server.simulationSnapshot().actors,
     items: server.itemDefinitions.list(),
+    ...(server.gameplayContent.itemInteractions
+      ? {
+          fluidTargetItems: Object.freeze(
+            server.gameplayContent.itemInteractions
+              .list()
+              .flatMap(({ itemId, definition }) =>
+                definition.voxelHitPolicy ? [Object.freeze({ itemId, policy: definition.voxelHitPolicy })] : [],
+              ),
+          ),
+        }
+      : {}),
     nearbyStations: server.getNearbyStations(playerId),
     stationRecipes: server.listStationRecipes(),
     recipes: server.listRecipes(),
