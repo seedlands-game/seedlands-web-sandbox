@@ -305,3 +305,9 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 当前身份的 Sky 响应明确 `superseded` 时，客户端向 `WorldSkyLighting` 传递有类型的临时失效，列目录同原因也仅重新排队原有单任务证明；缺失、损坏、预算超限及已释放来源保持暗且不轮询。该恢复合同不改变碰撞可用性或上述存储/派生所有者。
 
 船的生产浏览器验收由 `apps/web/tests/e2e/classic-support/boat-journey.ts` 使用真实键鼠完成水面部署、驾驶、倒退、驶回岸边和安全下船；`transport-journeys.ts` 汇集矿车与船，统一从 `classic-runtime.spec.ts` 注册，复用同一产物与回执入口。
+
+`classic-support/creative-click-diagnostics.ts` 仅在显式本地诊断开关下观测原木锄目录点击前/期间/结束的 CDP 响应、DOM 状态与长任务；保留原 Locator 输入与截止，不属于 CI 或性能样本。
+
+AuthorityPresentationSync.receive 经 PlayerController.applyAuthoritySnapshot 在接收时同步 collision-safe presentedBody(0) 的相机坐标；帧内 presentation 继续负责平滑时间推进。单测 player-authority-presentation 保证消息消费者无需 rAF，并保持 spectator 与世界缺失分支。
+
+`player/player-collision-world.ts` 原样承载 PlayerController 的已加载 voxel/revision/fluid/semantics/geometry 到 VoxelCollisionWorld 适配；不改变碰撞政策，只让 Controller 保持既有行数边界。

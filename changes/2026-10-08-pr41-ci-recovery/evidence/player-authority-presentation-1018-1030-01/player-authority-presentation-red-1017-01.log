@@ -1,0 +1,68 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/unit/app/player-authority-presentation.test.ts
+11:59:49 PM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+stderr | apps/web/tests/unit/app/player-authority-presentation.test.ts > Authority player presentation without a render update > publishes reconciled position to the camera immediately on receipt
+ASSERT FAILED:  Could not find current application
+
+stderr | apps/web/tests/unit/app/player-authority-presentation.test.ts > Authority player presentation without a render update > does not publish a position after the world has disappeared
+ASSERT FAILED:  Could not find current application
+
+ ❯ |@seedlands/web| apps/web/tests/unit/app/player-authority-presentation.test.ts (3 tests | 2 failed) 17ms
+     × publishes reconciled position to the camera immediately on receipt 11ms
+     × does not publish a position after the world has disappeared 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/player-authority-presentation.test.ts > Authority player presentation without a render update > publishes reconciled position to the camera immediately on receipt
+AssertionError: expected +0 to be 4 // Object.is equality
+
+- Expected
++ Received
+
+- 4
++ 0
+
+ ❯ apps/web/tests/unit/app/player-authority-presentation.test.ts:64:36
+     62|     controller.applyAuthoritySnapshot(snapshot());
+     63|     expect(controller.predictedPhysicsState?.state.position).toEqual({…
+     64|     expect(camera.getPosition().x).toBe(4);
+       |                                    ^
+     65|     expect(camera.getPosition().y).toBeCloseTo(5 + PLAYER_FEET_OFFSET);
+     66|     expect(camera.getPosition().z).toBe(1);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/unit/app/player-authority-presentation.test.ts > Authority player presentation without a render update > does not publish a position after the world has disappeared
+AssertionError: expected [ +0, 1.600000023841858, +0 ] to deeply equal [ +0, 1.6, +0 ]
+
+- Expected
++ Received
+
+  [
+    0,
+-   1.6,
++   1.600000023841858,
+    0,
+  ]
+
+ ❯ apps/web/tests/unit/app/player-authority-presentation.test.ts:79:44
+     77|     const { controller, camera } = fixture(false);
+     78|     controller.applyAuthoritySnapshot(snapshot());
+     79|     expect(camera.getPosition().toArray()).toEqual([0, PLAYER_FEET_OFF…
+       |                                            ^
+     80|   });
+     81| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  23:59:49
+   Duration  1.32s (transform 648ms, setup 0ms, import 1.18s, tests 17ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/unit/app/player-authority-presentation.test.ts`
+Exit status 1

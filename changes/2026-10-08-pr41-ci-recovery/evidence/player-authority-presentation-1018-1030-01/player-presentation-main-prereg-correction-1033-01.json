@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-10-12T00:26:04.375037+00:00",
+  "correctionOf": "player-presentation-main-prereg-1030-01.json",
+  "reason": "Runner inherited stale boat-only descriptive fields. Those scope/test/additionalAcceptance/timeoutMs fields are withdrawn; actual captured argv selects the unchanged canonical main. Original record is preserved.",
+  "actualScope": "Canonical Classic production main journey; original 900000ms case timeout; zero retries; no performance claim.",
+  "actualArgv": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic 生产旅程",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/player-presentation-main-results-1030-01",
+    "--reporter",
+    "list,html,json,./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ],
+  "verificationBasis": "Captured process argv and unchanged canonical Playwright entry. No main timeout override in command.",
+  "instrumentation": "Read-only bounded creative-click CDP diagnostics; source freeze1027 remains active."
+}

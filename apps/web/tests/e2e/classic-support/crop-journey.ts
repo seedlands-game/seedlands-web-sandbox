@@ -1,3 +1,4 @@
+import { observeCreativeClick } from './creative-click-diagnostics';
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import type { HarnessCropStageSnapshot } from '../../../src/app/gameplay/game-harness-contract';
 import { aimAtVoxelWithRealMouse } from './aim';
@@ -21,14 +22,17 @@ export type CropJourneyState = Readonly<{ position: Point }>;
 export const observeCrops = (page: Page): Promise<HarnessCropStageSnapshot | null> =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness?.cropStageSnapshot() ?? null);
 
-async function selectCreative(page: Page, itemId: keyof typeof names) {
+async function selectCreative(page: Page, itemId: keyof typeof names, info: TestInfo) {
   await page.keyboard.press('KeyE');
   const survival = page.getByRole('dialog', { name: '背包与合成' });
   if (await survival.isVisible()) await survival.getByRole('button', { name: '切换创造模式', exact: true }).click();
   const catalog = page.getByRole('dialog', { name: '创造内容目录' });
   await expect(catalog).toBeVisible();
   await catalog.locator('#creative-item-filter').fill(names[itemId]);
-  await catalog.getByRole('button', { name: new RegExp(`^将${names[itemId]}放入创造快捷栏 `) }).click();
+  const choice = catalog.getByRole('button', { name: new RegExp(`^将${names[itemId]}放入创造快捷栏 `) });
+  if (itemId === 'wood-hoe' && process.env.SEEDLANDS_CLASSIC_CREATIVE_CLICK_DIAGNOSTIC === '1')
+    await observeCreativeClick(page, info, () => choice.click());
+  else await choice.click();
   await closeInventory(page);
   await expect(page.locator('#hotbar button[aria-pressed="true"]')).toHaveAttribute('data-item', itemId);
 }
@@ -85,24 +89,24 @@ async function capture(page: Page, info: TestInfo, name: string, value: HarnessC
 export async function completeCropJourneyBeforeSave(page: Page, info: TestInfo): Promise<CropJourneyState> {
   const inventoryBefore = (await playerState(page)).inventory;
   for (const [index, position] of plots.entries()) {
-    await selectCreative(page, 'dirt-block');
+    await selectCreative(page, 'dirt-block', info);
     expect(await voxelAt(page, position)).toBe(0);
     expect(await voxelAt(page, [position[0], position[1] - 1, position[2]])).toBe(3);
     await walkEquipmentRoute(page, [position[0] - 1.5, position[2] + 1.5]);
     await aimAtVoxelWithRealMouse(page, [position[0], position[1] - 1, position[2]], position);
     await clickCanvasCenter(page, 'right');
     await expect.poll(() => voxelAt(page, position)).toBe(2);
-    await selectCreative(page, 'wood-hoe');
+    await selectCreative(page, 'wood-hoe', info);
     await interact(page, position);
     await expect.poll(() => voxelAt(page, position)).toBe(26);
-    await selectCreative(page, 'wheat-seeds');
+    await selectCreative(page, 'wheat-seeds', info);
     await interact(page, position);
     await capture(page, info, `crop-creative-${index}-stage-0`, await expectCrop(page, position, 0));
-    await selectCreative(page, 'white-dye');
+    await selectCreative(page, 'white-dye', info);
     await interact(page, position);
     await capture(page, info, `crop-creative-${index}-stage-7`, await expectCrop(page, position, 7));
     if (index === 0) {
-      await selectCreative(page, 'dirt-block');
+      await selectCreative(page, 'dirt-block', info);
       await interact(page, position);
       await capture(page, info, 'crop-creative-harvested', await expectCrop(page, position, null));
       await expect.poll(() => voxelAt(page, position)).toBe(26);
@@ -127,7 +131,7 @@ export async function verifyCropAfterRestore(
   expect(restored.cropStages).toEqual(before.cropStages);
   await capture(page, info, 'crop-restored', restored);
   const inventoryBefore = (await playerState(page)).inventory;
-  await selectCreative(page, 'dirt-block');
+  await selectCreative(page, 'dirt-block', info);
   await interact(page, state.position);
   await capture(page, info, 'crop-restored-harvested', await expectCrop(page, state.position, null));
   await expect.poll(() => voxelAt(page, state.position)).toBe(26);
