@@ -1,6 +1,8 @@
 name: Experimental PR 41 preview
 
 on:
+  push:
+    branches: [feat/classic-beta173-playable]
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -15,9 +17,11 @@ jobs:
   preview:
     name: Build, play and publish experimental preview
     if: >-
-      ${{ github.event.pull_request.number == 41 &&
-          github.event.pull_request.head.repo.full_name == github.repository &&
-          github.event.pull_request.head.ref == 'feat/classic-beta173-playable' }}
+      ${{ github.repository == 'seedlands-game/seedlands-web-sandbox' &&
+          ((github.event_name == 'push' && github.ref == 'refs/heads/feat/classic-beta173-playable') ||
+           (github.event.pull_request.number == 41 &&
+            github.event.pull_request.head.repo.full_name == github.repository &&
+            github.event.pull_request.head.ref == 'feat/classic-beta173-playable')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
@@ -25,12 +29,12 @@ jobs:
       deployments: write
     env:
       CI: true
-      VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+      VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Check out exact preview source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /*
@@ -54,7 +58,7 @@ jobs:
         run: pnpm harness:classic --grep 'Classic 储运 v1' --retries=0
       - name: Label the independent experimental preview
         env:
-          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           node --input-type=module <<'JS'
           import { writeFileSync } from 'node:fs';

@@ -1951,3 +1951,5 @@ e678通用控制已正常推送，1178完整static/stdlib1343/headless1313/build
 云环境仅检查既有凭据存在性：Cloudflare变量缺失，未读secret值或.env。直接发布不可用，尝试通过现有GitHub Actions凭据；若凭据/权限不存在即明确阻塞，不创建密钥/扩大网络或收费服务。最后实际访问部署URL及源码标识后才宣称成功。
 
 1243提交被max-lines拒绝（运动模型504/500）；仅提取原转向乘积到局部turn变量并压缩重复调用行，保留计算顺序和fallback行为。不跳过hook、不调整门槛；1241/1242封存保持原字节，新定向检查与构建另记1245。
+
+1248确认正常push1ae2305成功，但PR41已closed、base更新9539dea，pull_request-only预览未触发。尊重关闭状态，不重开/合并/改PR metadata；独立实验预览增加仅当前仓库指定功能分支push触发，source SHA统一为PR head或push github.sha，原CI/main生产触发不变。仅workflow/spec变更，不重复运行生产代码全量验收；已有1245最终代码构建及1242原生储运结果保留，独立新push job仍必须新精确SHA build/native smoke后才部署。
