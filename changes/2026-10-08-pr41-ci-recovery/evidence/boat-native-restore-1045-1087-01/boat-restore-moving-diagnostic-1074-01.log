@@ -1,0 +1,31 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+1:23:58 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (9 tests | 1 failed) 6083ms
+   × restores a moving boat before normal physics resumes across a chunk boundary 704ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > restores a moving boat before normal physics resumes across a chunk boundary
+AssertionError: {"before":{"version":2,"reference":{"entityId":"transport-2","epoch":2,"lifetime":2},"definitionId":"seedlands:boat","pose":{"position":[2.5,31.8,0.7197501438613709],"yaw":0},"velocity":[0,0,0.8241998849109029],"routeCursor":null,"rider":{"entityId":"player-1","lifetime":1,"epoch":2},"fuel":null,"inventory":[]},"after":{"version":2,"reference":{"entityId":"transport-2","epoch":2,"lifetime":2},"definitionId":"seedlands:boat","pose":{"position":[2.5,31.649999,0.7197501438613709],"yaw":0},"velocity":[0,0,0],"routeCursor":null,"rider":{"entityId":"player-1","lifetime":1,"epoch":2},"fuel":null,"inventory":[]},"paused":false}: expected 0.7197501438613709 to be greater than 0.7197501438613709
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:107:103
+    105|   expect(advanced.lanes.physicsSteps).toBeGreaterThan(0);
+    106|   const after = restored.view().transports![0]!;
+    107|   expect(after.pose.position[2], JSON.stringify({ before, after, pause…
+       |                                                                                                       ^
+    108|     before.pose.position[2],
+    109|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  01:23:58
+   Duration  11.05s (transform 4.04s, setup 0ms, import 4.85s, tests 6.08s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

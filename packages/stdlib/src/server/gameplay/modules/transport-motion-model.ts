@@ -62,6 +62,7 @@ export type SurfaceSupportPortV1 = (
 ) => 'supported' | 'unsupported' | 'unknown';
 
 export type MountedSeatConstraintV1 = Readonly<{
+  carrier: TransportStateV2['reference'];
   rider: NonNullable<TransportStateV2['rider']>;
   walkingEnabled: false;
   pose: TransportStateV2['pose'];

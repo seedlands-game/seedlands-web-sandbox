@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-12T01:37:54.319849+00:00",
+  "scope": "NON_MAIN_NATIVE_BOAT_SAVE_REOPEN; no canonical-main, old-world-import, lighting or performance claim",
+  "sourceSha": "a5bcdd4ff5e1fa2042bf6ca3b213450913fd239a",
+  "sourceDigest": "6924b303e34c7658921118908e2f2d0f63c180748e8c28c8169e65f5cd0ae154",
+  "artifactDigest": "fe6ec375b82c57baab35ecc78d4ace5d9011d6dc96c828d21aac75cebd743016",
+  "argv": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic 船",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/boat-persistence-native-results-1087-01",
+    "--reporter",
+    "list,html,json,./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ],
+  "timeoutMs": 120000,
+  "retries": 0,
+  "acceptance": "Original native deployment/W/turn/S/return/exit assertions, followed by actual pause/save-exit/reload/reopen of same seed; epoch and stale/current reference plus fixed-state and natural saved-momentum coast guards; no transport-state mutation."
+}

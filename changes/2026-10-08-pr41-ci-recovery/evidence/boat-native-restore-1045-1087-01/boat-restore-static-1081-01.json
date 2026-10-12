@@ -1,0 +1,40 @@
+[
+  {
+    "name": "format",
+    "argv": ["pnpm", "format:check"],
+    "exitCode": 0
+  },
+  {
+    "name": "types",
+    "argv": ["pnpm", "exec", "tsc", "-p", "tsconfig.classic-tests.json", "--noEmit"],
+    "exitCode": 0
+  },
+  {
+    "name": "lint",
+    "argv": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "packages/stdlib/src/server/game-server-restore-candidate.ts",
+      "packages/stdlib/src/server/game-server.ts",
+      "packages/stdlib/src/server/authority/authority-transport-collision-world.ts",
+      "packages/stdlib/src/server/gameplay/modules/transport-motion-model.ts",
+      "packages/stdlib/src/server/gameplay/modules/transport-motion-state.ts",
+      "packages/stdlib/tests/server/authority-transport-collision-world.test.ts",
+      "apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts",
+      "apps/web/tests/e2e/classic-support/boat-persistence-journey.ts",
+      "apps/web/tests/e2e/classic-support/boat-journey.ts"
+    ],
+    "exitCode": 0
+  },
+  {
+    "name": "paths",
+    "argv": ["pnpm", "lint:paths"],
+    "exitCode": 0
+  },
+  {
+    "name": "selection",
+    "argv": ["pnpm", "test:ci-selection"],
+    "exitCode": 0
+  }
+]

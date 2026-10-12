@@ -1,0 +1,70 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts
+1:26:00 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (9 tests | 4 failed) 3963ms
+   × restores a moving boat before normal physics resumes across a chunk boundary 504ms
+   × 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具 327ms
+   × 正式船遇非水支撑停止，反向输入仍经过同一水面验证 302ms
+   × 正式船与骑乘者前进时由 Stone 墙共同阻挡而不穿墙 807ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > restores a moving boat before normal physics resumes across a chunk boundary
+AssertionError: expected 0 to be greater than 0
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:98:60
+     96|   input(runtime, 0, 1, 0);
+     97|   const saved = runtime.view().transports![0]!;
+     98|   expect(Math.hypot(saved.velocity[0], saved.velocity[2])).toBeGreater…
+       |                                                            ^
+     99|   await runtime.persistPortableCheckpoint(runtime.exportPortableCheckp…
+    100|   const restored = await AuthorityRuntime.create({ ...options, epoch: …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具
+AssertionError: expected 0.5 to be greater than 0.55
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:155:36
+    153|   input(runtime, 0, 1, 0);
+    154|   const forward = runtime.view().transports![0]!;
+    155|   expect(forward.pose.position[2]).toBeGreaterThan(carrier.pose.positi…
+       |                                    ^
+    156|   input(runtime, 1, 1, 1);
+    157|   const steered = runtime.view().transports![0]!;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船遇非水支撑停止，反向输入仍经过同一水面验证
+AssertionError: expected 0.5 to be less than 0.45
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:233:59
+    231|   ).toMatchObject({ success: true });
+    232|   input(runtime, 0, -1, 0);
+    233|   expect(runtime.view().transports![0]!.pose.position[2]).toBeLessThan…
+       |                                                           ^
+    234|   const before = runtime.view().transports![0]!.pose;
+    235|   const edits = [];
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船与骑乘者前进时由 Stone 墙共同阻挡而不穿墙
+AssertionError: expected 0.5 to be greater than 0.5
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:261:36
+    259|   for (let sequence = 0; sequence < 10; sequence++) input(runtime, 0, …
+    260|   const blocked = runtime.view().transports![0]!;
+    261|   expect(blocked.pose.position[2]).toBeGreaterThan(carrier.pose.positi…
+       |                                    ^
+    262|   expect(blocked.pose.position[2] + 0.75).toBeLessThanOrEqual(2 + 1e-7…
+    263|   expect(runtime.server.getEntity(runtime.playerId)!.position[2] + 0.3…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 18 passed (22)
+   Start at  01:26:00
+   Duration  9.17s (transform 7.12s, setup 0ms, import 9.17s, tests 4.68s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts`
+Exit status 1

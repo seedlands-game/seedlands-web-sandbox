@@ -1,0 +1,1194 @@
+{
+  "saved": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 1, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.8341054351002466, 31.8, 0.5967333683835339], "yaw": 0.1508614520510539 },
+    "velocity": [0, 0, 0],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "restored": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 2, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.8341054351002466, 31.8, 0.5967333683835339], "yaw": 0.1508614520510539 },
+    "velocity": [0, 0, 0],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "savedIdentity": {
+    "ok": true,
+    "data": {
+      "protocolVersion": 1,
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "seed": 3463384863,
+      "seedText": "classic-native-boat-952",
+      "generatorVersion": 11,
+      "playerId": "player-1",
+      "runtime": "authority",
+      "supported": { "player": true, "scriptedLogic": true, "existingNpcSimulation": true }
+    },
+    "frontier": {
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "worldRevision": 47,
+      "commitSequence": 5858,
+      "physicsTick": 2179,
+      "fluidWorkSequence": 144,
+      "logicObservationSequence": 637
+    }
+  },
+  "terrain": [
+    {
+      "position": [1, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [1, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [1, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [2, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [2, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [2, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [3, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [3, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [3, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [4, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, -1], "voxel": 3, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [4, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, 0], "voxel": 3, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    },
+    {
+      "position": [4, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, 1], "voxel": 3, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 47,
+          "commitSequence": 6383,
+          "physicsTick": 2379,
+          "fluidWorkSequence": 9,
+          "logicObservationSequence": 41
+        }
+      }
+    }
+  ],
+  "snapshot": {
+    "frameMs": 351.60000002384186,
+    "player": [2.8269500732421875, 33.599998474121094, 1.7738621234893799],
+    "viewAngles": [0, -16],
+    "streamCenter": [0, 0],
+    "loadedChunks": 2,
+    "renderedChunks": 2,
+    "generationQueue": 14,
+    "meshingQueue": 0,
+    "deferredRemeshes": 0,
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 0,
+    "nativeMovementInput": { "epoch": "seedlands:classic-native-boat-952:1", "release": null },
+    "mutationCount": 0,
+    "worldRevision": 47,
+    "structuralEventCount": 0,
+    "remeshSchedulingCount": 0,
+    "lastCommitMutationCount": 0,
+    "lastCommitMeshChunkCount": 0,
+    "storageBytes": 0,
+    "worldTime": 11.086000000001555,
+    "timePaused": false,
+    "quality": "low",
+    "triangles": 7440,
+    "drawCalls": 6,
+    "blockLightBricks": 2,
+    "blockLightAllocatedBytes": 524288,
+    "blockLightRebuildCount": 2,
+    "collisionDebug": {
+      "enabled": false,
+      "entityCount": 0,
+      "meshCount": 0,
+      "materialCount": 0,
+      "visibleBatchCount": 0,
+      "vertexCapacity": 0,
+      "buildCount": 0,
+      "authorityRequestCount": 0
+    },
+    "runtime": "authority-worker",
+    "workers": { "total": 5, "authority": 1, "logic": 1, "persistence": 1, "fluid": 1, "general": 1 },
+    "authority": {
+      "physicsHz": 60,
+      "paused": false,
+      "physicsTick": 2383,
+      "integratedPhysicsTimeMs": 39716.66666666661,
+      "acknowledgedInputSequence": 33,
+      "physicsDebtMs": 0.6333332857029745,
+      "activeTimeMs": 39717.299999952316,
+      "commitSequence": 6394,
+      "physicsCost": {
+        "count": 204,
+        "capacity": 256,
+        "samplesMs": [
+          42.60000002384186, 5.600000023841858, 3.700000047683716, 2.400000035762787, 3.699999988079071,
+          2.599999964237213, 2, 2.199999988079071, 1.899999976158142, 2.100000023841858, 1.800000011920929,
+          1.899999976158142, 1.9000000357627869, 4.199999988079071, 1.9000000357627869, 1.699999988079071,
+          1.7999999523162842, 1.600000023841858, 6.400000035762787, 17.19999998807907, 3.399999976158142,
+          11.800000011920929, 52.39999997615814, 4.699999988079071, 11.199999988079071, 27.200000047683716, 2,
+          1.600000023841858, 1.7999999523162842, 1.800000011920929, 1, 1, 0.8999999761581421, 1, 1.600000023841858,
+          0.9000000357627869, 0.800000011920929, 0.7999999523162842, 1, 0.9000000357627869, 0.800000011920929,
+          1.0999999642372131, 1.0999999642372131, 1.100000023841858, 1, 1, 2.600000023841858, 1.699999988079071,
+          1.0999999642372131, 1.5, 1.2999999523162842, 1.800000011920929, 3.800000011920929, 78.40000003576279, 1.5,
+          1.7000000476837158, 1.699999988079071, 1.399999976158142, 1.4000000357627869, 1.600000023841858, 1.5,
+          1.5999999642372131, 1.699999988079071, 2, 1.5999999642372131, 1.699999988079071, 1.5999999642372131,
+          1.899999976158142, 27.799999952316284, 1.5999999642372131, 2.199999988079071, 6.199999988079071,
+          3.899999976158142, 1.7000000476837158, 1.699999988079071, 1.600000023841858, 91.39999997615814,
+          13.099999964237213, 1.7000000476837158, 22, 1.399999976158142, 1.5, 2.199999988079071, 1.9000000357627869,
+          1.5, 1.199999988079071, 0.9000000357627869, 2.599999964237213, 0.9000000357627869, 1.800000011920929,
+          1.399999976158142, 1.5, 1.800000011920929, 1.5999999642372131, 1.899999976158142, 1.5, 1.699999988079071, 1.5,
+          1, 113.5, 0.800000011920929, 1.300000011920929, 0.800000011920929, 0.800000011920929, 1, 0.8999999761581421,
+          4.099999964237213, 1, 0.800000011920929, 0.9000000357627869, 1.100000023841858, 1.600000023841858, 1,
+          2.800000011920929, 0.8999999761581421, 2.5, 0.800000011920929, 1.0999999642372131, 0.8999999761581421, 1,
+          1.399999976158142, 0.9000000357627869, 1.0999999642372131, 0.7000000476837158, 1, 0.7999999523162842, 1, 1,
+          0.800000011920929, 0.800000011920929, 1.100000023841858, 1, 1.4000000357627869, 1.0999999642372131,
+          0.9000000357627869, 0.5999999642372131, 0.9000000357627869, 0.7999999523162842, 0.800000011920929,
+          0.7999999523162842, 0.800000011920929, 1.100000023841858, 1, 1, 0.9000000357627869, 0.9000000357627869,
+          0.800000011920929, 0.9000000357627869, 0.800000011920929, 0.9000000357627869, 1, 0.8999999761581421, 1,
+          1.100000023841858, 14.099999964237213, 2, 1.0999999642372131, 1.0999999642372131, 1.300000011920929,
+          0.8999999761581421, 1.5999999642372131, 1.300000011920929, 1.699999988079071, 1.300000011920929,
+          1.4000000357627869, 1, 1.399999976158142, 1.0999999642372131, 1.5, 26.5, 8.900000035762787, 4.599999964237213,
+          1.300000011920929, 1.5, 1.399999976158142, 1.4000000357627869, 1.300000011920929, 1.2999999523162842,
+          1.5999999642372131, 0.8999999761581421, 1.300000011920929, 1.399999976158142, 1.300000011920929, 1.5,
+          1.300000011920929, 4.899999976158142, 1.600000023841858, 1.199999988079071, 2, 1.4000000357627869,
+          0.8999999761581421, 0.7000000476837158, 0.8999999761581421, 0.8999999761581421, 1.100000023841858,
+          0.699999988079071, 0.6000000238418579, 0.699999988079071, 1.300000011920929, 1, 1.5999999642372131,
+          0.800000011920929, 2.800000011920929, 1.7999999523162842
+        ]
+      },
+      "fluid": {
+        "pendingCellCount": 128,
+        "inFlightLeaseCount": 1,
+        "acceptedCandidateCount": 9,
+        "rejectedCandidateCount": 0,
+        "returnedLeaseCount": 0,
+        "issuedLeaseCount": 10,
+        "settledLeaseCount": 9
+      },
+      "residency": {
+        "residentCount": 13,
+        "target": 256,
+        "hardLimit": 2048,
+        "pinnedCount": 8,
+        "dirtyCount": 0,
+        "evictableCleanCount": 5,
+        "evictionCount": 0,
+        "rejectedAdmissionCount": 0,
+        "oversubscribed": false,
+        "autoSaveInFlight": false,
+        "autoSaveFailureCount": 0,
+        "nextRetryActiveTimeMs": 0,
+        "lastSaveError": null
+      },
+      "bodies": { "total": 1, "actors": 0, "worldItems": 0, "nearPlayer": 1 },
+      "snapshotRejections": {
+        "wrong-epoch": 0,
+        "duplicate": 0,
+        "physics-tick-regressed": 0,
+        "commit-regressed": 0,
+        "ack-regressed": 0
+      }
+    },
+    "logic": {
+      "blockStartedCount": 0,
+      "blockCompletedCount": 0,
+      "observationInFlight": true,
+      "pendingObservationCount": 0,
+      "submittedObservationCount": 41,
+      "receivedBatchCount": 40,
+      "completedBatchCount": 40,
+      "rejectedBatchCount": 0,
+      "lastRoundTripMs": 8.300000011920929
+    },
+    "trajectory": [
+      {
+        "physicsTick": 2181,
+        "activeTimeMs": 36362.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2185,
+        "activeTimeMs": 36773.89999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2189,
+        "activeTimeMs": 36801.699999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2197,
+        "activeTimeMs": 36828.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2205,
+        "activeTimeMs": 36884.799999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2209,
+        "activeTimeMs": 36993.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2213,
+        "activeTimeMs": 37014.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2222,
+        "activeTimeMs": 37033.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2223,
+        "activeTimeMs": 37058.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2224,
+        "activeTimeMs": 37081.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2226,
+        "activeTimeMs": 37106.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2227,
+        "activeTimeMs": 37130.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2229,
+        "activeTimeMs": 37153.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2230,
+        "activeTimeMs": 37177.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2232,
+        "activeTimeMs": 37201.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2234,
+        "activeTimeMs": 37237.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2238,
+        "activeTimeMs": 37336.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2241,
+        "activeTimeMs": 37361.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2242,
+        "activeTimeMs": 37378.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2244,
+        "activeTimeMs": 37401.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2245,
+        "activeTimeMs": 37419.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2246,
+        "activeTimeMs": 37442.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2247,
+        "activeTimeMs": 37465.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2250,
+        "activeTimeMs": 37504.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2251,
+        "activeTimeMs": 37523.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2252,
+        "activeTimeMs": 37545.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2253,
+        "activeTimeMs": 37562.699999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2256,
+        "activeTimeMs": 37608.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2260,
+        "activeTimeMs": 37770.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2264,
+        "activeTimeMs": 37838.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2271,
+        "activeTimeMs": 37860.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2272,
+        "activeTimeMs": 37879.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2274,
+        "activeTimeMs": 37902.299999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2275,
+        "activeTimeMs": 37922.89999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2276,
+        "activeTimeMs": 37946.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2281,
+        "activeTimeMs": 38045.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2285,
+        "activeTimeMs": 38174.699999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2291,
+        "activeTimeMs": 38199.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2293,
+        "activeTimeMs": 38217.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2294,
+        "activeTimeMs": 38241.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2295,
+        "activeTimeMs": 38266.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2296,
+        "activeTimeMs": 38282.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2298,
+        "activeTimeMs": 38305.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2299,
+        "activeTimeMs": 38330.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2301,
+        "activeTimeMs": 38353.89999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2305,
+        "activeTimeMs": 38633.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2313,
+        "activeTimeMs": 38652.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2320,
+        "activeTimeMs": 38673.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2321,
+        "activeTimeMs": 38697.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2323,
+        "activeTimeMs": 38721.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2324,
+        "activeTimeMs": 38745.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2326,
+        "activeTimeMs": 38770.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2327,
+        "activeTimeMs": 38793.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2329,
+        "activeTimeMs": 38817.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2330,
+        "activeTimeMs": 38841.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2331,
+        "activeTimeMs": 38865.89999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2333,
+        "activeTimeMs": 38889.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2335,
+        "activeTimeMs": 38928.89999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2336,
+        "activeTimeMs": 38946.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2338,
+        "activeTimeMs": 38970.09999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2339,
+        "activeTimeMs": 38994.299999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2341,
+        "activeTimeMs": 39018.499999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2342,
+        "activeTimeMs": 39038.39999997616,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2343,
+        "activeTimeMs": 39057.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2344,
+        "activeTimeMs": 39075.59999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2345,
+        "activeTimeMs": 39097.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2347,
+        "activeTimeMs": 39118.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2348,
+        "activeTimeMs": 39137.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2349,
+        "activeTimeMs": 39165.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2353,
+        "activeTimeMs": 39262.299999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2357,
+        "activeTimeMs": 39288.799999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2358,
+        "activeTimeMs": 39305.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2359,
+        "activeTimeMs": 39329.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2361,
+        "activeTimeMs": 39353.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2362,
+        "activeTimeMs": 39378.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2364,
+        "activeTimeMs": 39401.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2365,
+        "activeTimeMs": 39425.59999996424,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2369,
+        "activeTimeMs": 39638.199999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2377,
+        "activeTimeMs": 39657.999999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2380,
+        "activeTimeMs": 39681.499999940395,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2381,
+        "activeTimeMs": 39699.699999928474,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      },
+      {
+        "physicsTick": 2383,
+        "activeTimeMs": 39717.299999952316,
+        "position": [2.8269500109473413, 33.6, 1.7738621821700646]
+      }
+    ],
+    "generatorVersion": 11,
+    "renderPipeline": {
+      "drawUnit": "chunk-render-category",
+      "batchMode": "category",
+      "vertexLayout": "float16-uv-uint16-index",
+      "shaderMode": "voxel-array-chunks",
+      "backend": "webgl2"
+    },
+    "experiments": {
+      "requested": { "renderer": "webgl2", "wasm": true, "simd": true },
+      "kernels": ["w02", "w03", "w04", "w05", "w06"],
+      "renderer": { "requestedRenderer": "webgl2", "effectiveRenderer": "webgl2", "rendererStatus": "matched" },
+      "workers": [
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "fluid",
+          "index": 0,
+          "status": "off",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "off",
+          "selected": [],
+          "reason": "no-selected-kernel"
+        },
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "general",
+          "index": 1,
+          "status": "matched",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "simd",
+          "selected": ["w02", "w03", "w04", "w05", "w06"],
+          "artifactSha256": "c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c"
+        }
+      ]
+    },
+    "serverRevision": 42,
+    "voxelAtOrigin": 42,
+    "serverPlayerPosition": [2.8269500109473413, 33.6, 1.7738621821700646],
+    "serverPlayerVelocity": [0, 0, 0],
+    "prediction": {
+      "pendingFrames": 2,
+      "lastResetReason": "input-interrupted",
+      "resetCounts": { "authority-resync": 58, "input-interrupted": 1 },
+      "presentationOffset": { "x": 0, "y": 0, "z": 0 }
+    },
+    "serverWorldTime": 11.088000000001557,
+    "performance": {
+      "scenarioId": "default",
+      "frame": {
+        "count": 13,
+        "p50Ms": 222.60000002384186,
+        "p95Ms": 3369.5,
+        "p99Ms": 3369.5,
+        "maxMs": 3369.5,
+        "longFrameCount": 12,
+        "lastLongFrameMs": 351.60000002384186
+      },
+      "chunkVisible": {
+        "count": 2,
+        "p50Ms": 2581.5,
+        "p95Ms": 3297.300000011921,
+        "p99Ms": 3297.300000011921,
+        "maxMs": 3297.300000011921
+      },
+      "completedChunkTraces": 2,
+      "traceEventCount": 85,
+      "maxMeshCommitsInFrame": 1,
+      "maxMeshPartsInFrame": 2,
+      "visibleAfterPostrender": true,
+      "incidents": 14,
+      "droppedEvents": 0,
+      "uploadQueueDepth": 2,
+      "estimatedMeshBytes": 520800
+    },
+    "frameCpu": {
+      "sampleCount": 12,
+      "samples": [
+        {
+          "frameSequence": 1,
+          "updateWallMs": 142.39999997615814,
+          "renderWallMs": 6.199999988079071,
+          "renderEnvelopeWallMs": 6.300000011920929,
+          "renderTailWallMs": 0,
+          "tickWallMs": 148.69999998807907,
+          "interTickGapWallMs": null,
+          "receiveGapWallMs": null,
+          "receiveGapCount": null
+        },
+        {
+          "frameSequence": 2,
+          "updateWallMs": 7.399999976158142,
+          "renderWallMs": 23.100000023841858,
+          "renderEnvelopeWallMs": 23.100000023841858,
+          "renderTailWallMs": 0,
+          "tickWallMs": 30.5,
+          "interTickGapWallMs": 107.40000003576279,
+          "receiveGapWallMs": 47.39999997615814,
+          "receiveGapCount": 1
+        },
+        {
+          "frameSequence": 3,
+          "updateWallMs": 9.800000011920929,
+          "renderWallMs": 2.099999964237213,
+          "renderEnvelopeWallMs": 2.099999964237213,
+          "renderTailWallMs": 0,
+          "tickWallMs": 11.899999976158142,
+          "interTickGapWallMs": 112.39999997615814,
+          "receiveGapWallMs": 59.200000047683716,
+          "receiveGapCount": 24
+        },
+        {
+          "frameSequence": 4,
+          "updateWallMs": 9.300000011920929,
+          "renderWallMs": 0.699999988079071,
+          "renderEnvelopeWallMs": 0.699999988079071,
+          "renderTailWallMs": 0,
+          "tickWallMs": 10,
+          "interTickGapWallMs": 183.30000001192093,
+          "receiveGapWallMs": 115.70000004768372,
+          "receiveGapCount": 1
+        },
+        {
+          "frameSequence": 5,
+          "updateWallMs": 6.200000047683716,
+          "renderWallMs": 0.699999988079071,
+          "renderEnvelopeWallMs": 0.699999988079071,
+          "renderTailWallMs": 0,
+          "tickWallMs": 6.900000035762787,
+          "interTickGapWallMs": 101.19999998807907,
+          "receiveGapWallMs": 41.80000001192093,
+          "receiveGapCount": 24
+        },
+        {
+          "frameSequence": 6,
+          "updateWallMs": 10.399999976158142,
+          "renderWallMs": 0.5999999642372131,
+          "renderEnvelopeWallMs": 0.699999988079071,
+          "renderTailWallMs": 0,
+          "tickWallMs": 11.099999964237213,
+          "interTickGapWallMs": 44.80000001192093,
+          "receiveGapWallMs": 13.399999976158142,
+          "receiveGapCount": 19
+        },
+        {
+          "frameSequence": 7,
+          "updateWallMs": 22,
+          "renderWallMs": 0.699999988079071,
+          "renderEnvelopeWallMs": 0.699999988079071,
+          "renderTailWallMs": 0,
+          "tickWallMs": 22.69999998807907,
+          "interTickGapWallMs": 211.30000001192093,
+          "receiveGapWallMs": 3.199999988079071,
+          "receiveGapCount": 8
+        },
+        {
+          "frameSequence": 8,
+          "updateWallMs": 9.100000023841858,
+          "renderWallMs": 393.80000001192093,
+          "renderEnvelopeWallMs": 394.5999999642372,
+          "renderTailWallMs": 0.7999999523162842,
+          "tickWallMs": 403.69999998807907,
+          "interTickGapWallMs": 3,
+          "receiveGapWallMs": 0,
+          "receiveGapCount": 0
+        },
+        {
+          "frameSequence": 9,
+          "updateWallMs": 6.099999964237213,
+          "renderWallMs": 0.699999988079071,
+          "renderEnvelopeWallMs": 0.699999988079071,
+          "renderTailWallMs": 0,
+          "tickWallMs": 6.799999952316284,
+          "interTickGapWallMs": 89.20000004768372,
+          "receiveGapWallMs": 21.20000010728836,
+          "receiveGapCount": 26
+        },
+        {
+          "frameSequence": 10,
+          "updateWallMs": 3.5,
+          "renderWallMs": 0.8999999761581421,
+          "renderEnvelopeWallMs": 1,
+          "renderTailWallMs": 0,
+          "tickWallMs": 4.5,
+          "interTickGapWallMs": 224,
+          "receiveGapWallMs": 18.300000071525574,
+          "receiveGapCount": 11
+        },
+        {
+          "frameSequence": 11,
+          "updateWallMs": 13.099999964237213,
+          "renderWallMs": 0.40000003576278687,
+          "renderEnvelopeWallMs": 0.40000003576278687,
+          "renderTailWallMs": 0,
+          "tickWallMs": 13.5,
+          "interTickGapWallMs": 29.900000035762787,
+          "receiveGapWallMs": 5.199999928474426,
+          "receiveGapCount": 12
+        },
+        {
+          "frameSequence": 12,
+          "updateWallMs": 8.900000035762787,
+          "renderWallMs": 1.0999999642372131,
+          "renderEnvelopeWallMs": 1.199999988079071,
+          "renderTailWallMs": 0.10000002384185791,
+          "tickWallMs": 10.100000023841858,
+          "interTickGapWallMs": 338.0999999642372,
+          "receiveGapWallMs": 20.100000083446503,
+          "receiveGapCount": 31
+        }
+      ]
+    },
+    "compute": {
+      "workerCount": 2,
+      "fluidWorkerCount": 1,
+      "generalWorkerCount": 1,
+      "running": 0,
+      "queued": 0,
+      "queuedBytes": 0,
+      "cancellationRequests": 0,
+      "staleResults": 0,
+      "failedTasks": 0,
+      "completedTasks": 14,
+      "submittedTasks": 14,
+      "submittedBytes": 10027008,
+      "maxQueued": 0,
+      "maxQueuedBytes": 0,
+      "workerTaskDuration": {
+        "fluid": {
+          "count": 10,
+          "capacity": 256,
+          "samplesMs": [
+            8.799999952316284, 1.5999999642372131, 0.5, 0.5, 0.3999999761581421, 0.19999998807907104,
+            0.30000001192092896, 0.699999988079071, 0.3999999761581421, 0.800000011920929
+          ]
+        },
+        "general": {
+          "count": 4,
+          "capacity": 256,
+          "samplesMs": [335.39999997615814, 88.30000001192093, 93.70000004768372, 39.5]
+        }
+      },
+      "workerKernelStates": [
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "fluid",
+          "index": 0,
+          "status": "off",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "off",
+          "selected": [],
+          "reason": "no-selected-kernel"
+        },
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "general",
+          "index": 1,
+          "status": "matched",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "simd",
+          "selected": ["w02", "w03", "w04", "w05", "w06"],
+          "artifactSha256": "c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c"
+        }
+      ],
+      "workerActivity": [
+        {
+          "lane": "fluid",
+          "index": 0,
+          "status": "idle",
+          "taskId": null,
+          "taskCategory": null,
+          "taskAgeMs": null,
+          "sampledAtMs": 8270.5,
+          "completedTasks": 10,
+          "lastTaskDurationMs": 0.800000011920929,
+          "kernel": null
+        },
+        {
+          "lane": "general",
+          "index": 1,
+          "status": "idle",
+          "taskId": null,
+          "taskCategory": null,
+          "taskAgeMs": null,
+          "sampledAtMs": 8270.300000011921,
+          "completedTasks": 4,
+          "lastTaskDurationMs": 39.5,
+          "kernel": {
+            "calls": 97,
+            "failures": 0,
+            "memoryBytes": 18874368,
+            "durationMs": 139.70000010728836,
+            "failed": false
+          }
+        }
+      ]
+    },
+    "fluidFeedback": {
+      "count": 0,
+      "pending": false,
+      "pendingSample": null,
+      "p50Ms": 0,
+      "p95Ms": 0,
+      "p99Ms": 0,
+      "maxMs": 0,
+      "samples": []
+    },
+    "waterTransitions": { "activeCount": 0, "active": [], "recent": [] },
+    "ui": {
+      "runtime": "svelte5",
+      "shellPublishCount": 4,
+      "hudPublishCount": 6,
+      "interactionPublishCount": 1,
+      "debugProjectionCount": 8,
+      "debugPublishCount": 9,
+      "staleUpdateCount": 0,
+      "coalescedUpdateCount": 144,
+      "domCommitCount": 14,
+      "projectionDurationMs": 10.600000083446503,
+      "publishDurationMs": 3.099999964237213,
+      "domCommitDurationMs": 1155.0000000596046,
+      "debugProjectionRate": 3,
+      "totalPublishRate": 4
+    },
+    "gameplay": {
+      "entityCount": 2,
+      "worldItemCount": 0,
+      "creatureCount": 0,
+      "npcCount": 0,
+      "nearbyVisitedBucketCount": 0,
+      "nearbyCandidateCount": 0,
+      "nearbyReturnedCount": 0,
+      "inventoryOperationCount": 0,
+      "gameplayEventCount": 3,
+      "snapshotBytes": 54994,
+      "retainedActorCount": 0,
+      "activeActorCount": 0,
+      "behaviorEvaluationCount": 0,
+      "navigationPlanCount": 0,
+      "navigationExpandedNodeCount": 0,
+      "pathRecomputeCount": 0,
+      "actionCompletionCount": 0,
+      "actionFailureCount": 0,
+      "actionInterruptionCount": 0,
+      "perceptionLineOfSightCheckCount": 0,
+      "simulationTime": 39.6,
+      "presentedEntityCount": 1
+    },
+    "breakingOverlay": null,
+    "viewmodel": { "isolatedLayer": true },
+    "visualEffects": {
+      "activeLocalLights": 0,
+      "shadowedLocalLights": 0,
+      "localLightLimit": 0,
+      "localShadowLimit": 0,
+      "sunShadows": false,
+      "sunShadowResolution": 0,
+      "reflectionEnabled": false,
+      "reflectionActive": false,
+      "reflectionResolution": 0,
+      "reflectionFrameInterval": 0,
+      "reflectionRenderCount": 0,
+      "waterPlaneY": null,
+      "postProcessing": false,
+      "shadowUpdateCount": 0,
+      "shadowStableFrameCount": 13,
+      "blockLightReady": false,
+      "blockLightSourceRevision": null,
+      "blockLightRebuildCount": 2
+    },
+    "water": {
+      "bodyFraction": 0,
+      "wading": false,
+      "swimming": false,
+      "cameraSubmerged": false,
+      "cameraDepth": -1.7249984741210938,
+      "waterSurfaceY": 31.875,
+      "underwaterBlend": 0
+    },
+    "physicsDiagnostics": {
+      "schemaVersion": 1,
+      "diagnosticOnly": true,
+      "epoch": "seedlands:classic-native-boat-952:1",
+      "physicsTick": 2383,
+      "acknowledgedInputSequence": 33,
+      "player": {
+        "id": "player-1",
+        "position": [2.8269500109473413, 32, 1.7738621821700646],
+        "velocity": [0, 0, 0],
+        "grounded": true,
+        "contacts": { "count": 0, "truncated": false, "entries": [] }
+      },
+      "bodies": {
+        "sourceCount": 2,
+        "scannedCount": 2,
+        "scanTruncated": false,
+        "nearbyCount": 1,
+        "truncated": false,
+        "entries": [
+          {
+            "id": "transport-2",
+            "type": "transport",
+            "position": [2.8341054351002466, 31.8, 0.5967333683835339],
+            "velocity": [0, 0, 0]
+          }
+        ]
+      }
+    }
+  }
+}

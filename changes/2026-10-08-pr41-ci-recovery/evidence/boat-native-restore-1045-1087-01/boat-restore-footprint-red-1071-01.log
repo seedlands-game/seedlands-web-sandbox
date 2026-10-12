@@ -1,0 +1,38 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+1:13:50 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (8 tests | 1 failed) 3927ms
+   × restores persisted terrain across the configured boat footprint before its first physics tick 626ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > restores persisted terrain across the configured boat footprint before its first physics tick
+AssertionError: expected undefined to be 8 // Object.is equality
+
+- Expected:
+8
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:61:61
+     59|   const restored = await AuthorityRuntime.create({ ...options, epoch: …
+     60|   expect(restored.view().transports![0]!.pose).toEqual(saved.pose);
+     61|   expect(restored.server.peekLoadedVoxel(2, 31, -1)?.voxel).toBe(Voxel…
+       |                                                             ^
+     62|   expect(restored.server.peekLoadedVoxel(2, 31, 0)?.voxel).toBe(Voxel.…
+     63| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  01:13:50
+   Duration  9.33s (transform 4.21s, setup 0ms, import 5.15s, tests 3.93s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

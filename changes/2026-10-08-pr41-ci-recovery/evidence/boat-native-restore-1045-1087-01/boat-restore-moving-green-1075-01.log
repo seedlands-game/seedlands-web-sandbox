@@ -1,0 +1,45 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+1:25:13 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (9 tests | 4 failed) 2688ms
+   × restores a moving boat before normal physics resumes across a chunk boundary 406ms
+   × 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具 241ms
+   × 正式船遇非水支撑停止，反向输入仍经过同一水面验证 226ms
+   × 正式船与骑乘者前进时由 Stone 墙共同阻挡而不穿墙 238ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > restores a moving boat before normal physics resumes across a chunk boundary
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船使用 Authority 输入前进和转向，安全下车及保存重开保持载具
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船遇非水支撑停止，反向输入仍经过同一水面验证
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > 正式船与骑乘者前进时由 Stone 墙共同阻挡而不穿墙
+TypeError: Cannot read properties of undefined (reading 'entityId')
+ ❯ packages/stdlib/src/server/authority/authority-transport-collision-world.ts:45:67
+     43|         });
+     44|   const all = wrap(colliders);
+     45|   const riders = new Map(mountedSeats.map((seat) => [seat.carrier.enti…
+       |                                                                   ^
+     46|
+     47|   return Object.freeze({
+ ❯ createAuthorityTransportCollisionWorlds packages/stdlib/src/server/authority/authority-transport-collision-world.ts:45:39
+ ❯ AuthoritySession.stepPhysics packages/stdlib/src/server/authority/authority-session.ts:298:20
+ ❯ AuthoritySession.advanceToActiveTime packages/stdlib/src/server/authority/authority-session.ts:189:12
+ ❯ AuthoritySession.wake packages/stdlib/src/server/authority/authority-session.ts:159:17
+ ❯ AuthorityRuntime.wake packages/stdlib/src/server/authority/authority-runtime.ts:184:35
+ ❯ Object.wake packages/stdlib/src/server/authority/authority-runtime.ts:204:29
+ ❯ advanceAuthoritySession packages/stdlib/src/server/authority/authority-session-advance.ts:37:24
+ ❯ AuthorityRuntime.advanceSession packages/stdlib/src/server/authority/authority-runtime.ts:199:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 5 passed (9)
+   Start at  01:25:13
+   Duration  7.82s (transform 4.01s, setup 0ms, import 4.92s, tests 2.69s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

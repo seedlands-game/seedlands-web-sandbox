@@ -49,6 +49,18 @@ const deploy = async (runtime: AuthorityRuntime, hit: readonly [number, number, 
     invocation.mockRestore();
   }
 };
+
+it('restores persisted terrain across the configured boat footprint before its first physics tick', async () => {
+  const { runtime, options } = await create();
+  await deploy(runtime);
+  const saved = runtime.view().transports![0]!;
+  expect(runtime.server.peekLoadedVoxel(2, 31, -1)?.voxel).toBe(Voxel.Water);
+  await runtime.persistPortableCheckpoint(runtime.exportPortableCheckpoint());
+  const restored = await AuthorityRuntime.create({ ...options, epoch: 'boat-footprint-ready' });
+  expect(restored.view().transports![0]!.pose).toEqual(saved.pose);
+  expect(restored.server.peekLoadedVoxel(2, 31, -1)?.voxel).toBe(Voxel.Water);
+  expect(restored.server.peekLoadedVoxel(2, 31, 0)?.voxel).toBe(Voxel.Water);
+});
 const input = (runtime: AuthorityRuntime, moveX: number, moveZ: number, sequence: number) => {
   const snapshot = runtime.snapshot();
   expect(
@@ -67,6 +79,36 @@ const input = (runtime: AuthorityRuntime, moveX: number, moveZ: number, sequence
   ).toBe('accepted');
   runtime.advanceSession(500);
 };
+it('restores a moving boat before normal physics resumes across a chunk boundary', async () => {
+  const { runtime, options } = await create();
+  await deploy(runtime);
+  const carrier = runtime.view().transports![0]!;
+  expect(
+    (
+      await runtime.performAction({
+        type: 'interact',
+        intent: 'use',
+        target: { kind: 'entity', reference: carrier.reference },
+        expectedSelection: itemInteractionSelection(runtime.view()),
+      })
+    ).result,
+  ).toMatchObject({ success: true });
+  input(runtime, 0, 1, 0);
+  const saved = runtime.view().transports![0]!;
+  expect(Math.hypot(saved.velocity[0], saved.velocity[2])).toBeGreaterThan(0);
+  await runtime.persistPortableCheckpoint(runtime.exportPortableCheckpoint());
+  const restored = await AuthorityRuntime.create({ ...options, epoch: 'moving-boat-restored' });
+  const before = restored.view().transports![0]!;
+  expect(before.velocity).toEqual(saved.velocity);
+  expect(before.pose).toEqual(saved.pose);
+  const advanced = restored.advanceSession(100);
+  expect(advanced.lanes.physicsSteps).toBeGreaterThan(0);
+  const after = restored.view().transports![0]!;
+  expect(after.pose.position[2], JSON.stringify({ before, after, paused: advanced.snapshot.paused })).toBeGreaterThan(
+    before.pose.position[2],
+  );
+  expect(Math.hypot(after.velocity[0], after.velocity[2])).toBeGreaterThan(0);
+});
 it('正式 Classic 船仅在水面原子部署，地面拒绝保留库存与实体', async () => {
   const { runtime } = await create();
   expect(runtime.view().fluidTargetItems).toContainEqual({ itemId: 'boat', policy: 'fluid-surface' });

@@ -179,7 +179,8 @@ Persistence Worker 保留消息和串行任务入口；[persistence-seed-corpus.
 - `transport-relation-module.ts` / `transport-relation-interaction.ts` 声明显式上下车注册操作与只读候选；`registered-transport-relation-runtime.ts` 用同一prepared participant发布乘员与actor transform，`transport-relation-geometry.ts` 使用加载的实际AABB/支撑。`transport-actor-projection.ts` 复用部署与关系的选中物投影。`authority-transport-interaction.ts` 接正常interact入口，`authority-mounted-body.ts` 从ECS派生座位约束，`authority-character-separation.ts` 保留未骑乘角色的原分离算法；无第二份位置/关系owner。
 - `physics/oriented-box.ts` 保留纯几何固定倾角 box 的连续 SAT 与包围盒；route 端点高差在 `route-definition.ts` 派生倾角，`transport-motion-state.ts` 将同一旋转应用到座位。transport 的 deployment、route collision、Authority/navigation body 和 presentation 消费该派生方向；不新增权威位置或存档姿态字段，转弯段保留既有保守包络。
 - `authority-body-config.ts` 让Authority physics与方块提交后的身体恢复统一解析当前世界transport definition，不为未注册实体猜身体；station实体由其World voxel形状承担碰撞。
-- `authority-transport-collision-world.ts` 从当前ECS transport pose与definition body派生单次physics/recovery的碰撞体；同时派生current mounted rider身体；正常身体、角色分离与恢复复用原连续碰撞求解，排除自体且无跨tick/world缓存。`transport-body-config.ts` 的canonical yaw保守AABB也用于部署占位和上下车出口。
+- `authority-transport-collision-world.ts` 从当前ECS transport pose与definition body派生单次physics/recovery的碰撞体；同时派生current mounted rider身体；座位携带复制冻结的carrier lifetime reference，载具自身恢复查询排除其自身乘员，保留其他乘员和未知地形。正常身体、角色分离与恢复复用原连续碰撞求解，无跨tick/world缓存。`transport-body-config.ts` 的canonical yaw保守AABB也用于部署占位和上下车出口。
+- `game-server-restore-candidate.ts` 在交换gameplay owner之前准备station/media及候选载具配置身体覆盖的地形；载具沿yaw/倾角及既有一格活跃边界派生查询，单船和合计4096块上限，失败保留旧owner。`classic-boat-authority.test.ts` 检查首个tick前跨块水面就绪及非零保存速度恢复后的普通physics推进。
 - `transport-motion-module.ts` 定义可选surface策略与manual系统，`registered-transport-motion-runtime.ts` 重推导候选并将所有普通physics更新、transport组件与seat放入同一prepared series。`authority-physics-frame.ts` / `gameplay-transport-motion-tick.ts` 只持有本tick Host帧，`authority-session-snapshot.ts` 纯投影原session/body owner，`transport-motion-control.ts` 投影world-space输入，`transport-motion-geometry.ts` 解析沿程loaded支持、compound旋转包围体及相对扫掠。veto保持载具canonical pose；stale保持当前owner等待下一tick重算，普通transport body不自行积分运动。
 - `gameplay-snapshot.ts` 的 V4 组件 codec 保存稳定 ID/lifetime；`simulation/action-identity.ts` 将动作和战斗引用绑定到当前 epoch。Authority 在观察、接收与执行前复核身份，恢复后不能使用旧组件访问器或旧控制输入。旧 V1/V2/V3 由显式迁移保留。
 
@@ -311,3 +312,5 @@ Authority消息同步wall观察由 `client/authority/authority-receive-wall-obse
 AuthorityPresentationSync.receive 经 PlayerController.applyAuthoritySnapshot 在接收时同步 collision-safe presentedBody(0) 的相机坐标；帧内 presentation 继续负责平滑时间推进。单测 player-authority-presentation 保证消息消费者无需 rAF，并保持 spectator 与世界缺失分支。
 
 `player/player-collision-world.ts` 原样承载 PlayerController 的已加载 voxel/revision/fluid/semantics/geometry 到 VoxelCollisionWorld 适配；不改变碰撞政策，只让 Controller 保持既有行数边界。
+
+`classic-support/boat-persistence-journey.ts` 在既有船原生驾驶验收之后，通过真实暂停/保存退出按钮重开同一 seed，核对实体 epoch、陈旧引用、固定状态和保存动量的有限滑行边界；不写入或归零船状态。

@@ -8,6 +8,7 @@ import { mouseCorrectionToPoint } from './target-aim';
 import { sendNativeMovementPulse } from './native-movement-pulse';
 import { browserArtifact, browserPackLock, compositionIdentity } from './identity';
 import { collectClassicFailureDiagnostics } from './evidence';
+import { saveAndReopenBoat } from './boat-persistence-journey';
 const transport = (page: Page) =>
   page.evaluate(() => (window as unknown as ClassicWindow).__seedlandsHarness!.transportSnapshot());
 async function aimBoat(page: Page, position: readonly number[]) {
@@ -25,7 +26,7 @@ async function aimBoat(page: Page, position: readonly number[]) {
   throw Error('boat native mouse aim did not converge');
 }
 export function registerClassicBoatJourney(test: typeof import('@playwright/test').test) {
-  test('Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船', async ({ page }, info) => {
+  test('Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开', async ({ page }, info) => {
     test.skip(modularPackSmokeEnabled, 'Boat belongs to the Classic production Pack.');
     test.setTimeout(120_000);
     try {
@@ -173,6 +174,7 @@ export function registerClassicBoatJourney(test: typeof import('@playwright/test
       const final = (await transport(page))!.transports[0]!;
       expect(final.reference).toEqual(deployed.reference);
       await info.attach('boat-final.png', { body: await page.screenshot(), contentType: 'image/png' });
+      const persistence = await saveAndReopenBoat(page, 'classic-native-boat-952', info);
       await info.attach('boat-native-result.json', {
         body: JSON.stringify({
           scope: 'NON_MAIN',
@@ -187,6 +189,7 @@ export function registerClassicBoatJourney(test: typeof import('@playwright/test
           reversed,
           returned,
           final,
+          persistence,
           finalSnapshot: await snapshot(page),
         }),
         contentType: 'application/json',

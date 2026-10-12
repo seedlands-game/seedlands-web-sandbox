@@ -66,6 +66,7 @@ describe('current Authority transport collision projection', () => {
 it('blocks a normal body crossing the derived mounted rider above the carrier body', () => {
   const rider: AuthorityEntity = { id: 'rider', type: 'player', position: [3, 0.55, 0] };
   const seat = {
+    carrier: { entityId: 'cart', epoch: 1, lifetime: 1 },
     rider: { entityId: 'rider', epoch: 1, lifetime: 1 },
     walkingEnabled: false as const,
     pose: { position: [3, 0.55, 0] as const, yaw: 0 },
@@ -86,6 +87,13 @@ it('blocks a normal body crossing the derived mounted rider above the carrier bo
   expect(crossing.position.x).toBeLessThan(3);
   expect(collider).toBeDefined();
   expect(collider!.aabb.min.y).toBe(0.55);
+  expect(worlds.forEntity('cart').querySolids(bounds)).toEqual([]);
+  expect(
+    worlds
+      .forEntity('other')
+      .querySolids(bounds)
+      .some(({ id }) => id === 'mounted:rider'),
+  ).toBe(true);
   expect(crossing.contacts.some(({ collider }) => collider.id === 'mounted:rider')).toBe(true);
   expect(
     worlds

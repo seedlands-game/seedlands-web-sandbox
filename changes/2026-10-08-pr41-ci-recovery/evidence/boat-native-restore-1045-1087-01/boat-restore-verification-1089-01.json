@@ -1,0 +1,15 @@
+[
+  {
+    "name": "stdlib",
+    "log": "boat-restore-stdlib-1083-01.log",
+    "status": "PASS",
+    "files": 175,
+    "tests": 1314,
+    "workers": 1
+  },
+  {
+    "name": "static",
+    "receipt": "boat-restore-static-1081-01.json",
+    "status": "PASS"
+  }
+]
