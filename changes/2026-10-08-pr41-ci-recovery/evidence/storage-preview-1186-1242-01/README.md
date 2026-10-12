@@ -1,0 +1,11 @@
+# 最新储运实验预览交付证据
+
+本组提交完整储运玩家UI、两种正式载具及独立实验预览。源码以e678f04父提交加1241/1242冻结的46路径绑定；CI的新精确提交另行产生，不将dirty验证冒充精确远端CI。
+
+1241生产构建及1242正式唯一Browser spec中的真实原生储运旅程通过，零重试；build包含两新GLB与生成器真实verify。1231旧44路径的完整static/stdlib/headless结果仅证明当时源码。1232普通车与储运通过、船原120秒超时，完整失败日志保留；1235有效边缘回驶RED、1237相关43例通过，不替代新原生船验收。1234无效rider夹具及1236未越界负例失败明确保留。
+
+完整旧生产portable fixture在正式Headless world restore入口通过，精确两旧身份及所有原始chunk、EntityStore和时钟受检查；negative拒绝保持owner。fixture使用显式V1类型数组重建，原JSON解压SHA保持，不能宣称Browser完整旧存档通过。
+
+独立workflow只在同仓PR41指定分支使用既有Cloudflare凭据发布pr-41-experimental，并要求生产build与原生储运smoke。原CI、正式预览及production门槛不变。此时部署尚未执行；当前FAIL与完整Main/lighting、动力/检测铁轨和货车联挂等开放项见validation.json。
+
+原始输出以mtime0 gzip逐字保存，validation记录解压前原件SHA/字节数；派生中文报告和manifest在seal前格式化，sealed历史组保持不变。大型trace继续保存在原私有run目录，未展开/复制历史8.77GB。

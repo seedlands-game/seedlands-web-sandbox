@@ -8,6 +8,7 @@
   import InventorySlot from './primitives/inventory-slot.svelte';
   import EquipmentPanel from './equipment-panel.svelte';
   import StationPanel from './station-panel.svelte';
+  import TransportStoragePanel from './transport-storage-panel.svelte';
   import CreativeCatalog from './creative-catalog.svelte';
   import {
     InventoryPointerGestures,
@@ -28,7 +29,9 @@
   let pointer = $state({ x: 0, y: 0 });
   let closing = $state(false);
   const cursor = $derived(gameplay.cursor ?? null);
-  const usesInventoryPointer = $derived(gameplay.mode === 'survival' || Boolean(gameplay.station));
+  const usesInventoryPointer = $derived(
+    !gameplay.transportStorage && (gameplay.mode === 'survival' || Boolean(gameplay.station)),
+  );
   const food = $derived(foodSlot === null ? null : gameplay.inventory[foodSlot]);
   const gestures = new InventoryPointerGestures(
     () => Boolean(gameplay.cursor?.itemId),
@@ -210,127 +213,134 @@
 
 <GameOverlay
   id="inventory-crafting"
-  label={gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成')}
+  label={gameplay.transportStorage?.name ??
+    gameplay.station?.name ??
+    (gameplay.mode === 'creative' ? '创造内容目录' : '背包与合成')}
   open={gameplay.inventoryOpen}
 >
-  <div
-    class="inventory-dialog"
-    class:holding={Boolean(cursor)}
-    aria-busy={closing}
-    style:--inventory-columns={hotbarSize}
-  >
-    <header>
-      <div>
-        <small id="actor-mode-status" role="status">{gameplay.mode === 'creative' ? '创造模式' : '生存模式'}</small>
-        <h2>{gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包')}</h2>
-      </div>
-      <div class="mode-actions">
-        {#if gameplay.mode === 'creative'}
-          <GameButton
-            label={gameplay.flightEnabled ? '关闭飞行' : '开启飞行'}
-            onclick={() => actions.setFlight(!gameplay.flightEnabled)}
-            >{gameplay.flightEnabled ? '关闭飞行' : '开启飞行'}</GameButton
-          >
-          <GameButton label="切换生存模式" disabled={closing} onclick={() => mode('survival')}>切换生存</GameButton>
-        {:else}<GameButton label="切换创造模式" disabled={closing} onclick={() => mode('creative')}>切换创造</GameButton
-          >{/if}
-        <GameButton label="关闭背包" disabled={closing} onclick={close}>关闭 <kbd>E</kbd></GameButton>
-      </div>
-    </header>
-    {#if gameplay.mode === 'creative' && !gameplay.station}
-      <CreativeCatalog {gameplay} {actions} />
-    {:else}
-      <div class="survival-layout">
-        <main class="inventory-main">
-          <div class="inventory-workspace">
-            <EquipmentPanel
-              equipment={gameplay.equipment}
-              onpress={press}
-              onenter={enter}
-              onactivate={(address) => gestures.command({ kind: 'click', slot: address, button: 0 })}
-            />
-            {#if gameplay.station}
-              <StationPanel
-                station={gameplay.station}
-                {cursor}
-                {previews}
-                onpress={press}
-                onenter={enter}
-                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
-              />
-            {:else}
-              <PersonalCrafting
-                slots={gameplay.personalCrafting.slots}
-                recipes={gameplay.personalCrafting.recipes}
-                {cursor}
-                {previews}
-                onpress={press}
-                onenter={enter}
-                onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-                oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
-              />
-            {/if}
-          </div>
-          <div role="grid" aria-label="背包槽位" class="bag-slots">
-            <h3>背包</h3>
-            <div class="slot-grid">
-              {#each gameplay.inventory.slice(hotbarSize) as item (item.slot)}
-                <InventorySlot
-                  {item}
-                  address={{ kind: 'inventory', slot: item.slot }}
-                  preview={previews.get(`inventory:${item.slot}`)}
-                  previewItem={cursor}
-                  onpress={press}
-                  onenter={enter}
-                  onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-                />
-              {/each}
-            </div>
-            <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–{hotbarSize} 交换</span></h3>
-            <div class="slot-grid hotbar-grid">
-              {#each gameplay.inventory.slice(0, hotbarSize) as item (item.slot)}
-                <InventorySlot
-                  {item}
-                  address={{ kind: 'inventory', slot: item.slot }}
-                  active={item.slot === gameplay.selectedHotbarSlot}
-                  shortcut={item.slot + 1}
-                  preview={previews.get(`inventory:${item.slot}`)}
-                  previewItem={cursor}
-                  onpress={press}
-                  onenter={enter}
-                  onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
-                />
-              {/each}
-            </div>
-          </div>
-          <div class="item-description" role="status" aria-label="背包操作提示">
-            <span
-              >{cursor
-                ? `手持 ${cursor.name} × ${cursor.count}`
-                : hovered
-                  ? (itemAt(hovered)?.name ?? '空槽位')
-                  : '鼠标悬停查看物品，点击拿起'}{!cursor && hovered && itemAt(hovered)?.durability
-                ? ` · 耐久 ${itemAt(hovered)!.durability!.current}/${itemAt(hovered)!.durability!.max}`
-                : ''}</span
+  {#if gameplay.transportStorage}
+    <TransportStoragePanel site={gameplay.transportStorage} inventory={gameplay.inventory} {actions} />
+  {:else}
+    <div
+      class="inventory-dialog"
+      class:holding={Boolean(cursor)}
+      aria-busy={closing}
+      style:--inventory-columns={hotbarSize}
+    >
+      <header>
+        <div>
+          <small id="actor-mode-status" role="status">{gameplay.mode === 'creative' ? '创造模式' : '生存模式'}</small>
+          <h2>{gameplay.station?.name ?? (gameplay.mode === 'creative' ? '创造内容目录' : '背包')}</h2>
+        </div>
+        <div class="mode-actions">
+          {#if gameplay.mode === 'creative'}
+            <GameButton
+              label={gameplay.flightEnabled ? '关闭飞行' : '开启飞行'}
+              onclick={() => actions.setFlight(!gameplay.flightEnabled)}
+              >{gameplay.flightEnabled ? '关闭飞行' : '开启飞行'}</GameButton
             >
-            {#if food?.edible}<GameButton
-                label={`食用${food.name}`}
-                disabled={Boolean(cursor)}
-                onclick={() => {
-                  if (foodSlot !== null) actions.useInventoryItem(foodSlot);
-                }}>食用</GameButton
-              >{/if}
-          </div>
-        </main>
-      </div>
-      <footer class="inventory-help">
-        <span><b>左键</b> 整组拿放 / 拖拽均分</span><span><b>右键</b> 拆半 / 拖拽单放</span><span
-          ><b>Shift + 点击</b> 快速转移</span
-        ><span><b>双击</b> 收集同类</span><small>持物点击窗口外丢弃 · 关闭时自动归还</small>
-      </footer>
-    {/if}
-  </div>
+            <GameButton label="切换生存模式" disabled={closing} onclick={() => mode('survival')}>切换生存</GameButton>
+          {:else}<GameButton label="切换创造模式" disabled={closing} onclick={() => mode('creative')}
+              >切换创造</GameButton
+            >{/if}
+          <GameButton label="关闭背包" disabled={closing} onclick={close}>关闭 <kbd>E</kbd></GameButton>
+        </div>
+      </header>
+      {#if gameplay.mode === 'creative' && !gameplay.station}
+        <CreativeCatalog {gameplay} {actions} />
+      {:else}
+        <div class="survival-layout">
+          <main class="inventory-main">
+            <div class="inventory-workspace">
+              <EquipmentPanel
+                equipment={gameplay.equipment}
+                onpress={press}
+                onenter={enter}
+                onactivate={(address) => gestures.command({ kind: 'click', slot: address, button: 0 })}
+              />
+              {#if gameplay.station}
+                <StationPanel
+                  station={gameplay.station}
+                  {cursor}
+                  {previews}
+                  onpress={press}
+                  onenter={enter}
+                  onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                  oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+                />
+              {:else}
+                <PersonalCrafting
+                  slots={gameplay.personalCrafting.slots}
+                  recipes={gameplay.personalCrafting.recipes}
+                  {cursor}
+                  {previews}
+                  onpress={press}
+                  onenter={enter}
+                  onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                  oncraft={(batch) => gestures.command({ kind: 'craft', batch })}
+                />
+              {/if}
+            </div>
+            <div role="grid" aria-label="背包槽位" class="bag-slots">
+              <h3>背包</h3>
+              <div class="slot-grid">
+                {#each gameplay.inventory.slice(hotbarSize) as item (item.slot)}
+                  <InventorySlot
+                    {item}
+                    address={{ kind: 'inventory', slot: item.slot }}
+                    preview={previews.get(`inventory:${item.slot}`)}
+                    previewItem={cursor}
+                    onpress={press}
+                    onenter={enter}
+                    onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                  />
+                {/each}
+              </div>
+              <h3 class="hotbar-label">快捷栏 <span>悬停格子按 1–{hotbarSize} 交换</span></h3>
+              <div class="slot-grid hotbar-grid">
+                {#each gameplay.inventory.slice(0, hotbarSize) as item (item.slot)}
+                  <InventorySlot
+                    {item}
+                    address={{ kind: 'inventory', slot: item.slot }}
+                    active={item.slot === gameplay.selectedHotbarSlot}
+                    shortcut={item.slot + 1}
+                    preview={previews.get(`inventory:${item.slot}`)}
+                    previewItem={cursor}
+                    onpress={press}
+                    onenter={enter}
+                    onactivate={(slot) => gestures.command({ kind: 'click', slot, button: 0 })}
+                  />
+                {/each}
+              </div>
+            </div>
+            <div class="item-description" role="status" aria-label="背包操作提示">
+              <span
+                >{cursor
+                  ? `手持 ${cursor.name} × ${cursor.count}`
+                  : hovered
+                    ? (itemAt(hovered)?.name ?? '空槽位')
+                    : '鼠标悬停查看物品，点击拿起'}{!cursor && hovered && itemAt(hovered)?.durability
+                  ? ` · 耐久 ${itemAt(hovered)!.durability!.current}/${itemAt(hovered)!.durability!.max}`
+                  : ''}</span
+              >
+              {#if food?.edible}<GameButton
+                  label={`食用${food.name}`}
+                  disabled={Boolean(cursor)}
+                  onclick={() => {
+                    if (foodSlot !== null) actions.useInventoryItem(foodSlot);
+                  }}>食用</GameButton
+                >{/if}
+            </div>
+          </main>
+        </div>
+        <footer class="inventory-help">
+          <span><b>左键</b> 整组拿放 / 拖拽均分</span><span><b>右键</b> 拆半 / 拖拽单放</span><span
+            ><b>Shift + 点击</b> 快速转移</span
+          ><span><b>双击</b> 收集同类</span><small>持物点击窗口外丢弃 · 关闭时自动归还</small>
+        </footer>
+      {/if}
+    </div>
+  {/if}
 </GameOverlay>
 {#if gameplay.inventoryOpen && usesInventoryPointer && cursor}
   <div

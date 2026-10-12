@@ -84,6 +84,7 @@ export async function initializeSeedlands(options: SeedlandsInitializationOption
       toggleInventory: () => game.toggleInventory(),
       closeInventory: () => game.closeInventory(),
       inventoryPointer: (command) => game.inventoryPointer(command),
+      transportStorage: (request) => game.transportStorage(request),
       useInventoryItem: (slot) => game.useInventoryItem(slot),
       respawn: () => game.respawn(),
       toggleMap: () => game.toggleMap(),

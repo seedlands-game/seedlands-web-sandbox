@@ -116,6 +116,7 @@
     "apps/web/tests/unit/app/block-light-invalidation.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-minecart-authority.test.ts",
     "apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-storage-carriers.test.ts",
     "apps/web/tests/unit/client/authority-worker-deterministic-advance.test.ts",
     "apps/web/tests/unit/client/authority-worker-configured-body-preload.test.ts",
     "apps/web/tests/unit/worker/game-logic-worker.test.ts",
@@ -150,6 +151,10 @@
     "apps/web/tests/unit/app/world-media-player.test.ts",
     "apps/web/tests/unit/app/world-media-gesture-lifecycle.test.ts",
     "apps/web/tests/unit/app/harness-physics-diagnostics.test.ts",
-    "apps/web/tests/unit/app/player-authority-presentation.test.ts"
+    "apps/web/tests/unit/app/player-authority-presentation.test.ts",
+    "apps/web/tests/unit/client/browser-transport-storage.test.ts",
+    "apps/web/tests/unit/app/transport-target-interaction.test.ts",
+    "apps/web/tests/unit/client/inventory-crafting-ui.test.ts",
+    "apps/web/tests/integration/runtime/server/composition/classic-production-portable-migration.test.ts"
   ]
 }

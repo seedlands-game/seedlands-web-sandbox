@@ -4,6 +4,8 @@ import { BrowserInventoryPointer } from './browser-inventory-pointer';
 import { useGameplayHeldItem } from './held-item-interaction';
 import type { InventoryUiCommand } from '../ui/inventory-pointer-gestures';
 import { BrowserStations } from './browser-stations';
+import { BrowserTransportStorage } from './browser-transport-storage';
+import { browserGameplayUiSource } from './browser-gameplay-ui-source';
 import type { SurfaceLightingSampler } from '../scene/surface-lighting';
 import type { FirstPersonViewmodel } from '../player/first-person-viewmodel';
 import { VoxelTargetOutline } from './voxel-target-outline';
@@ -85,6 +87,7 @@ export class BrowserGameplay {
   private inventoryOpen = false;
   private inventoryClosing = false;
   readonly stations: BrowserStations;
+  readonly transportStorage: BrowserTransportStorage;
   private readonly inventoryPointerClient: BrowserInventoryPointer;
   // prettier-ignore
   private previousProjection: GameplayUiProjection | undefined;
@@ -94,6 +97,13 @@ export class BrowserGameplay {
 
   constructor(private readonly options: Options) {
     this.stations = new BrowserStations(() => options.authority.gameplay);
+    this.transportStorage = new BrowserTransportStorage({
+      view: () => options.authority.gameplay,
+      perform: (action) => options.authority.performAction(action),
+      refresh: () => this.refresh(),
+      changed: options.queueSave,
+      failed: (message) => this.feedback(message, 'error'),
+    });
     this.inventoryPointerClient = new BrowserInventoryPointer({
       view: () => options.authority.gameplay,
       station: () => this.stations.current(),
@@ -236,34 +246,13 @@ export class BrowserGameplay {
         : currentBreaking;
     if (breaking !== previousBreaking || forceBreakProjection) this.breakProjectionElapsedSeconds = 0;
     const projection = projectGameplayUi(
-      {
-        revision: view.gameplayRevision,
-        navigation: view.navigation,
-        inventoryView: view.inventory,
-        player: {
-          combat: player.combat,
-          lifecycle: player.lifecycle,
-          health: player.health,
-          hunger: player.hunger,
-          selectedHotbarSlot: player.selectedSlot,
-          hotbarSize: player.hotbarSize,
-          inventory: player.inventory,
-          mode: player.mode,
-          creativeCatalog: player.creativeCatalog,
-          flight: player.flight,
-        },
+      browserGameplayUiSource(view, {
         station: this.inventoryOpen ? this.stations.current() : null,
-        stationRecipes: view.stationRecipes,
-        items: view.items,
-        recipes: view.recipes,
+        transportStorage: this.inventoryOpen ? this.transportStorage.current() : null,
         inventoryOpen: this.inventoryOpen,
-        craftableRecipeIds: view.craftableRecipeIds,
-        progress: view.progress,
-        armorPoints: view.armorPoints,
-        oxygen: { value: 20, max: 20, visible: false },
         target: projectVoxelInteractionTarget(this.aimTarget, this.blocksInput),
         breaking,
-      },
+      }),
       this.previousProjection,
     );
     this.previousProjection = projection;
@@ -336,6 +325,7 @@ export class BrowserGameplay {
       return;
     }
     this.stations.clear();
+    this.transportStorage.clear();
     this.inventoryOpen = true;
     if (this.inventoryOpen) this.options.releaseInput();
     this.refresh();
@@ -348,6 +338,7 @@ export class BrowserGameplay {
       if (!(await this.inventoryPointerClient.send({ kind: 'close' }))) return;
       this.inventoryOpen = false;
       this.stations.clear();
+      this.transportStorage.clear();
       this.refresh();
     } finally {
       this.inventoryClosing = false;
@@ -423,11 +414,21 @@ export class BrowserGameplay {
     });
   }
 
+  openTransportStorage(reference: Parameters<BrowserTransportStorage['open']>[0]): boolean {
+    if (!this.transportStorage.open(reference)) return false;
+    this.stations.clear();
+    this.inventoryOpen = true;
+    this.options.releaseInput();
+    this.refresh();
+    return true;
+  }
+
   // prettier-ignore
   async useTarget(target: Pick<VoxelTarget, 'position' | 'adjacent'>, intent: 'use' | 'alternate'): Promise<'handled' | 'fallback'> {
     return performVoxelTargetInteraction({
       gameplay: this.options.authority.gameplay, target, intent,
       openStation: (position) => { if (!this.stations.open(position)) return false;
+        this.transportStorage.clear();
         this.inventoryOpen = true; this.options.releaseInput(); this.refresh(); return true;
       },
       perform: (action) => this.options.authority.performAction(action), refresh: () => this.refresh(),
@@ -467,6 +468,7 @@ export class BrowserGameplay {
   presentedEntityModelReady = (id: string): boolean => this.presenter.presentedModelReady(id);
 
   dispose(): void {
+    this.transportStorage.dispose();
     this.inventoryPointerClient.dispose();
     this.presenter.dispose();
     this.breakOverlay.destroy();

@@ -5,7 +5,7 @@ import {
   cloneCompositionCheckpointIdentity,
 } from '../composition/checkpoint-identity';
 
-const MAX_GAMEPLAY_SNAPSHOT_PREDECESSORS = 16;
+const MAX_GAMEPLAY_SNAPSHOT_PREDECESSORS = 17;
 export type LegacyGameplaySnapshotVersion = 1 | 2 | 3 | 4;
 export type GameplaySnapshotPredecessorV1 = Readonly<{
   gameplayVersions: readonly LegacyGameplaySnapshotVersion[];

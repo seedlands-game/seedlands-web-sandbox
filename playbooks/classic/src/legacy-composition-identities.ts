@@ -10,6 +10,8 @@ import { classicPreTransportV4CompositionIdentity } from './pre-transport-v4-com
 import { classicPreRouteShapesV4CompositionIdentity } from './pre-route-shapes-v4-composition-identity';
 import { classicPreRouteTransitionsV4CompositionIdentity } from './pre-route-transitions-v4-composition-identity';
 import { classicPreBoatV4CompositionIdentity } from './pre-boat-v4-composition-identity';
+import { classicPreStorageAuthorityV4CompositionIdentity } from './pre-storage-authority-v4-composition-identity';
+import { classicPreStorageControlsV4CompositionIdentity } from './pre-storage-controls-v4-composition-identity';
 
 // Exact production capture from c18a890. Keep this independent of current Pack assembly.
 const CAPTURED_KERNEL_MIGRATION_IDENTITY =
@@ -99,6 +101,8 @@ export const classicGameplaySnapshotPredecessors = defineGameplaySnapshotPredece
   { gameplayVersions: [4], identity: classicPreRouteShapesV4CompositionIdentity },
   { gameplayVersions: [4], identity: classicPreRouteTransitionsV4CompositionIdentity },
   { gameplayVersions: [4], identity: classicPreBoatV4CompositionIdentity },
+  { gameplayVersions: [4], identity: classicPreStorageAuthorityV4CompositionIdentity },
+  { gameplayVersions: [4], identity: classicPreStorageControlsV4CompositionIdentity },
 ]);
 
 export const classicKernelMigrationCompositionIdentity = classicGameplaySnapshotPredecessors[0]!.identity;

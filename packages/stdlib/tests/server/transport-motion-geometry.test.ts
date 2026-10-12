@@ -170,3 +170,93 @@ it('小角度转向碰撞不使用整圈半径，真实船体和骑乘者范围�
   expect(candidate(2).stopReason).toBeNull();
   expect(candidate(1).stopReason).toBe('world-collision');
 });
+
+const edgeTurnFixture = () => {
+  const options = setup({ min: { x: -0.75, y: 0, z: -0.75 }, max: { x: 0.75, y: 0.6, z: 0.75 } });
+  const position = [2.5191052179800844, 1, -2.1937033771890095] as [number, number, number];
+  const yaw = 0.07767804022306946;
+  const rider = options.entities.spawn({ id: 'rider', type: 'player', position: [position[0], 2, position[2]] });
+  const riderReference = options.entities.createReference(rider.id)!;
+  const carrier = options.entities.spawn({
+    id: 'edge-carrier',
+    type: 'transport',
+    position,
+    physicsVelocity: [0, 0, 0],
+    transport: {
+      definitionId: options.definition.id,
+      yaw,
+      routeCursor: null,
+      rider: { entityId: riderReference.entityId, lifetime: riderReference.lifetime },
+      fuel: 10,
+      inventory: [],
+    },
+  });
+  const state = options.entities.transportState(options.entities.createReference(carrier.id)!)!;
+  const movingPolicy = { ...policy, acceleration: 2, drag: 0.4, maxSpeed: 4, steeringRate: 4 };
+  return {
+    ...options,
+    state,
+    policy: movingPolicy,
+    policies: [movingPolicy],
+    frame: {
+      ...options.frame,
+      seconds: 1 / 60,
+      playerReference: riderReference,
+      playerWish: { x: Math.sin(0.14), z: Math.cos(0.14) },
+      bodyConfigs: new Map([[rider.id, bodyConfigFor('player')]]),
+    },
+    callbacks: { getLoadedVoxel: ([x, , z]: readonly number[]) => (x >= -3 && x <= 8 && z >= -3 && z <= 8 ? 5 : 0) },
+  };
+};
+
+it('moves safely back onto the loaded surface when an outward turn is blocked at its edge', () => {
+  const options = edgeTurnFixture();
+  const candidate = projectSurfaceMotion(options);
+  const { state } = options;
+  expect(candidate.stopReason).toBeNull();
+  expect(candidate.traveledDistance).toBeGreaterThan(0);
+  expect(candidate.next.pose.position[2]).toBeGreaterThan(state.pose.position[2]);
+  expect(candidate.next.pose.yaw).toBe(state.pose.yaw);
+});
+
+it('keeps an unknown outward turn fail closed', () => {
+  const options = edgeTurnFixture();
+  const candidate = projectSurfaceMotion({
+    ...options,
+    callbacks: { getLoadedVoxel: ([, , z]) => (z < -3 ? undefined : 5) },
+  });
+  expect(candidate.stopReason).toBe('surface-unknown');
+  expect(candidate.next.pose).toEqual(options.state.pose);
+  expect(candidate.fuelCost).toBe(0);
+});
+
+it('cannot translate farther off the surface when its turn is blocked', () => {
+  const options = edgeTurnFixture();
+  const candidate = projectSurfaceMotion({
+    ...options,
+    frame: {
+      ...options.frame,
+      seconds: 0.1,
+      playerWish: { x: -Math.sin(options.state.pose.yaw), z: -Math.cos(options.state.pose.yaw) },
+    },
+  });
+  expect(candidate.stopReason).toBe('left-surface');
+  expect(candidate.next.pose).toEqual(options.state.pose);
+  expect(candidate.traveledDistance).toBe(0);
+});
+
+it('still sweeps collisions on the translation after blocking an outward turn', () => {
+  const options = edgeTurnFixture();
+  const candidate = projectSurfaceMotion({
+    ...options,
+    frame: {
+      ...options.frame,
+      world: {
+        querySolids: () => [{ id: 'obstacle', aabb: { min: { x: 2, y: 1, z: -2 }, max: { x: 3, y: 2, z: -1 } } }],
+      },
+    },
+  });
+  expect(candidate.stopReason).toBe('world-collision');
+  expect(candidate.next.pose).toEqual(options.state.pose);
+  expect(candidate.traveledDistance).toBe(0);
+});

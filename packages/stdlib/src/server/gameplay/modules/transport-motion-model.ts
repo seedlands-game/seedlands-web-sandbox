@@ -430,7 +430,7 @@ export function buildRouteTransportMotionCandidateV1(
         stopReason ? [0, 0, 0] : nextTangent.map((component) => component * integration.speed),
         'Route candidate velocity',
       ),
-      routeCursor: cursor,
+      routeCursor: routeCursor(cursor),
     }),
     traveledDistance: traveled,
     fuelCost: fueled.cost,
@@ -497,13 +497,14 @@ export function buildSurfaceTransportMotionCandidateV1(
   const integration = integrateSpeed(surfaceSpeed(state), input, -input.maxSpeed);
   const fueled = fuelLimit(state, integration.distance, input.fuelPerMeter);
   const fraction = Math.abs(integration.distance) <= EPSILON ? 0 : fueled.distance / integration.distance;
-  const advanced = integrateSurfacePosition(
-    currentPose.position,
-    currentPose.yaw,
-    fueled.distance,
-    input.steering * input.steeringRate * input.seconds * fraction * Math.sign(fueled.distance),
-  );
-  const support = input.sampleSurface(advanced.position, advanced.yaw);
+  const turn = input.steering * input.steeringRate * input.seconds * fraction * Math.sign(fueled.distance);
+  let advanced = integrateSurfacePosition(currentPose.position, currentPose.yaw, fueled.distance, turn);
+  let support = input.sampleSurface(advanced.position, advanced.yaw);
+  if (support === 'unsupported' && advanced.yaw !== currentPose.yaw) {
+    // A blocked turn can still leave a safe translation back onto the surface.
+    advanced = integrateSurfacePosition(currentPose.position, currentPose.yaw, fueled.distance, 0);
+    support = input.sampleSurface(advanced.position, advanced.yaw);
+  }
   if (support !== 'supported' && support !== 'unsupported' && support !== 'unknown')
     throw new TypeError('Surface support result is invalid.');
   if (support === 'unknown') return stoppedCandidate(state, currentPose, null, 0, 0, 'surface-unknown');

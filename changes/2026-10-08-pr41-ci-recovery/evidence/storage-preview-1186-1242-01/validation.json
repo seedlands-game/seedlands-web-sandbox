@@ -1,0 +1,170 @@
+{
+  "sourceSha": "e678f04eefe7edad8cebbf3c11d9bbf4927e72c8",
+  "dirtySource": true,
+  "sourcePaths": 46,
+  "purpose": "独立实验性预览，不是可合入声明",
+  "currentValidation": {
+    "build": "PASS，1241冻结46路径，包含真实重新生成模型及只读verify",
+    "nativeStorage": "PASS，1242同源，原assert/deadline，零重试",
+    "targetedMotion": "43 PASS，1237",
+    "fullStaticStdlibHeadless": "1231旧44路径分别PASS/1344PASS/1338PASS；不是46路径全量PASS"
+  },
+  "knownFailuresAndGaps": [
+    "e678 CI447 Chromium FAILURE；正式部署SKIPPED",
+    "1232船120秒超时，失败保留；边缘修复尚未跑新版原生船",
+    "完整Main/lighting/audio及全PR独立审阅仍开放",
+    "动力/检测铁轨与货车推行联挂仍开放"
+  ],
+  "deployment": {
+    "project": "seedlands-web-sandbox",
+    "branch": "pr-41-experimental",
+    "status": "尚未执行，待正常功能分支push触发；不推main，不替换production"
+  },
+  "rawCompressedArtifacts": {
+    "classic-storage-migration-freeze-1241-01.json.gz": {
+      "originalName": "classic-storage-migration-freeze-1241-01.json",
+      "originalSha256": "10098af753478dec233f9257a63a169b535313f35f1ff3b05c4453c891470374",
+      "originalBytes": 7755
+    },
+    "classic-storage-migration-build-1241-01.log.gz": {
+      "originalName": "classic-storage-migration-build-1241-01.log",
+      "originalSha256": "e8de38cfa40d629abbcc729da0870fe51746cf099f296b963303ca4b8d19d93c",
+      "originalBytes": 3970
+    },
+    "classic-storage-migration-build-1241-01.receipt.json.gz": {
+      "originalName": "classic-storage-migration-build-1241-01.receipt.json",
+      "originalSha256": "7e43cdb89128669f900c03c7a6abd9773d7f541b1899986081b7888815ada9a7",
+      "originalBytes": 515
+    },
+    "storage-carrier-native-freeze-1242-01.json.gz": {
+      "originalName": "storage-carrier-native-freeze-1242-01.json",
+      "originalSha256": "10098af753478dec233f9257a63a169b535313f35f1ff3b05c4453c891470374",
+      "originalBytes": 7755
+    },
+    "storage-carrier-native-prereg-1242-01.json.gz": {
+      "originalName": "storage-carrier-native-prereg-1242-01.json",
+      "originalSha256": "ebc7b4f024b62ab726d70a5ed19b9965ea62456e8966ce5797e41cb6baaf4f8b",
+      "originalBytes": 1110
+    },
+    "storage-carrier-native-1242-01.log.gz": {
+      "originalName": "storage-carrier-native-1242-01.log",
+      "originalSha256": "2825a960dff88408536ef0f4636b9cad41fb6edef4fc662678500b42b0cf7aab",
+      "originalBytes": 65124
+    },
+    "storage-carrier-native-1242-01.receipt.json.gz": {
+      "originalName": "storage-carrier-native-1242-01.receipt.json",
+      "originalSha256": "cec7c8ca237703045106c47e1e304bf10ad50509a3bfbaaeccf69df6087c7904",
+      "originalBytes": 671
+    },
+    "storage-carrier-native-1242-01-report.json.gz": {
+      "originalName": "storage-carrier-native-1242-01-report.json",
+      "originalSha256": "b30edad3ecfbec28990f59b4191e5ef7927612935a8b029544b558720faed009",
+      "originalBytes": 2028876
+    },
+    "boat-edge-red-1234-01.log.gz": {
+      "originalName": "boat-edge-red-1234-01.log",
+      "originalSha256": "4b7c6eb5bbc788aeac702427f56560c1fd7ae6d52d7b2eb2b49baaf3da7840a2",
+      "originalBytes": 2233
+    },
+    "boat-edge-red-1235-01.log.gz": {
+      "originalName": "boat-edge-red-1235-01.log",
+      "originalSha256": "5644a11585de7611b8982688e001f17676699650d01127a8bbfeba3fe02adc99",
+      "originalBytes": 1651
+    },
+    "boat-edge-green-1236-01.log.gz": {
+      "originalName": "boat-edge-green-1236-01.log",
+      "originalSha256": "fe35994b6fb46e4d40543b7fac2b2031e1adf804c950723952f5b06650b101f2",
+      "originalBytes": 1721
+    },
+    "boat-edge-green-1237-01.log.gz": {
+      "originalName": "boat-edge-green-1237-01.log",
+      "originalSha256": "526709eac98fc894d58b74f07a9554523fd525c8527f89aadc29fe41eb0e453f",
+      "originalBytes": 386
+    },
+    "storage-migration-portable-green-1228-01.log.gz": {
+      "originalName": "storage-migration-portable-green-1228-01.log",
+      "originalSha256": "3a486589a5da8235186a1868de165060358cdda0076746b432ac59dc5d38ca74",
+      "originalBytes": 511
+    },
+    "storage-ui-review-1219-luna-01.md.gz": {
+      "originalName": "storage-ui-review-1219-luna-01.md",
+      "originalSha256": "e4ade0b08de147c68c44969e034db463bd76420c70886a26a7e3ad61c56e9308",
+      "originalBytes": 8574
+    },
+    "storage-model-regeneration-1233-01.json.gz": {
+      "originalName": "storage-model-regeneration-1233-01.json",
+      "originalSha256": "a83fe76e5fb3cc54f95ef9a825f0485ec38d4ff715b21bd4b6b554ca53519987",
+      "originalBytes": 687
+    },
+    "storage-model-regenerate-1233-01.log.gz": {
+      "originalName": "storage-model-regenerate-1233-01.log",
+      "originalSha256": "705e3fbbb5b0332db83fc80296fc8d50a02eccc83c01162bf44d9935f0a3110d",
+      "originalBytes": 132
+    },
+    "storage-model-verify-1233-01.log.gz": {
+      "originalName": "storage-model-verify-1233-01.log",
+      "originalSha256": "705e3fbbb5b0332db83fc80296fc8d50a02eccc83c01162bf44d9935f0a3110d",
+      "originalBytes": 132
+    },
+    "storage-carrier-native-1232-01.log.gz": {
+      "originalName": "storage-carrier-native-1232-01.log",
+      "originalSha256": "e545dd4efc7b5d3a443cf1b4599032a0be410873d2cd8b10b7c267171b7c4bc6",
+      "originalBytes": 226884
+    },
+    "storage-carrier-native-1232-01.receipt.json.gz": {
+      "originalName": "storage-carrier-native-1232-01.receipt.json",
+      "originalSha256": "e3454101f7aa598fc34a1b3954ff058b21da168affd396ca016a466537fb5835",
+      "originalBytes": 699
+    },
+    "storage-carrier-native-freeze-1232-01.json.gz": {
+      "originalName": "storage-carrier-native-freeze-1232-01.json",
+      "originalSha256": "3f7c76e938fc4a0ff392522e0d8c0b555593d51a5507f8b11178460ca2e6117f",
+      "originalBytes": 7423
+    },
+    "classic-storage-migration-static-1231-01.log.gz": {
+      "originalName": "classic-storage-migration-static-1231-01.log",
+      "originalSha256": "aa1a62a40f0e24c54e7cd88021af5f9ab73ecd84d04bb1ea70d8e6cef6895f15",
+      "originalBytes": 5467
+    },
+    "classic-storage-migration-static-1231-01.receipt.json.gz": {
+      "originalName": "classic-storage-migration-static-1231-01.receipt.json",
+      "originalSha256": "08953c62344c642101e28e7b87822bef6f3ce89c581750c3fcc474d1893b036b",
+      "originalBytes": 527
+    },
+    "classic-storage-migration-stdlib-1231-01.log.gz": {
+      "originalName": "classic-storage-migration-stdlib-1231-01.log",
+      "originalSha256": "7f267acb81ccc3e65695168c97bca42c6074f26aa2cd21733917d47b9709b800",
+      "originalBytes": 312
+    },
+    "classic-storage-migration-stdlib-1231-01.receipt.json.gz": {
+      "originalName": "classic-storage-migration-stdlib-1231-01.receipt.json",
+      "originalSha256": "e7ebd1408ca6fa879462a7ac59150dc877c58a21b3db5ccca3fc24dc374e6e6c",
+      "originalBytes": 526
+    },
+    "classic-storage-migration-headless-1231-01.log.gz": {
+      "originalName": "classic-storage-migration-headless-1231-01.log",
+      "originalSha256": "3c65961d630535ebaade8dcac50e70209a0dc5742eb3746c97b9b2b4621ac591",
+      "originalBytes": 24666
+    },
+    "classic-storage-migration-headless-1231-01.receipt.json.gz": {
+      "originalName": "classic-storage-migration-headless-1231-01.receipt.json",
+      "originalSha256": "18d6d0433212cca22aae591287f2e41f89e4ef3da6b482f2a15289f023c19e47",
+      "originalBytes": 534
+    },
+    "classic-storage-migration-build-1231-01.log.gz": {
+      "originalName": "classic-storage-migration-build-1231-01.log",
+      "originalSha256": "6fd06bab821465942431928f68df66cec746da39631d63c6d22c3b6225b2baeb",
+      "originalBytes": 3771
+    },
+    "classic-storage-migration-build-1231-01.receipt.json.gz": {
+      "originalName": "classic-storage-migration-build-1231-01.receipt.json",
+      "originalSha256": "7465c153f387f34de5489fdee9ed3155b3128e8ad7925cb2201624eaa8722140",
+      "originalBytes": 515
+    },
+    "classic-storage-migration-freeze-1231-01.json.gz": {
+      "originalName": "classic-storage-migration-freeze-1231-01.json",
+      "originalSha256": "3f7c76e938fc4a0ff392522e0d8c0b555593d51a5507f8b11178460ca2e6117f",
+      "originalBytes": 7423
+    }
+  }
+}

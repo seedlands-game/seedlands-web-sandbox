@@ -10,7 +10,7 @@ import { PERFORMANCE_PROFILES, type PerformanceProfile } from '../client/present
 // prettier-ignore
 import type { CommandExecutorPort, SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 // prettier-ignore
-import { ALL_COMMAND_CAPABILITIES, type CommandSource, type ServerCommand } from '@seedlands/stdlib/server/commands/command-contract';
+import { ALL_COMMAND_CAPABILITIES, type CommandSource } from '@seedlands/stdlib/server/commands/command-contract';
 import type { LifecycleSnapshot, RestoredSession } from './app-contracts';
 import { BrowserGameplay } from './gameplay/browser-gameplay';
 import { BrowserWorldStore } from './world/browser-world-store';
@@ -495,6 +495,8 @@ export class Game {
   setCollisionDebugSensors = (enabled: boolean) => this.collisionDebug?.setDetails({ sensors: enabled });
 
   closeInventory = () => this.gameplayClient?.closeInventory();
+  transportStorage = (request: Parameters<BrowserGameplay['transportStorage']['send']>[0]) =>
+    this.gameplayClient?.transportStorage.send(request) ?? Promise.resolve(false);
 
   inventoryPointer = (command: InventoryControl) =>
     this.gameplayClient?.inventoryPointer(command) ?? Promise.resolve(false);
@@ -510,14 +512,11 @@ export class Game {
 
   setMapLayer = (layer: MapLayer) => runtimeControls.setMapLayer(this.uiBridge, layer);
 
-  private async executeGameplayCommand(command: ServerCommand) {
-    return runtimeControls.executeBrowserCommand(
-      this.commandExecutor,
-      this.commandSource,
-      command,
-      this.commandConsumer,
-    );
-  }
+  private readonly executeGameplayCommand = runtimeControls.createBrowserCommandInvoker(
+    () => this.commandExecutor,
+    () => this.commandSource,
+    this.commandConsumer,
+  );
 
   private publishDebugVisibility = (visible: boolean) =>
     runtimeControls.publishDebugVisibility(this.uiBridge, this.controller, visible);

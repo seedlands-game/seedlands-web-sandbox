@@ -51,6 +51,20 @@ export const classicItemInteractionModules = [
         presentationKey: 'seedlands:minecart',
       },
       {
+        id: 'seedlands:chest-minecart-use',
+        selector: { itemId: 'seedlands:chest-minecart' },
+        trigger: 'voxel',
+        operationId: 'seedlands:deploy-minecart',
+        presentationKey: 'seedlands:chest-minecart',
+      },
+      {
+        id: 'seedlands:furnace-minecart-use',
+        selector: { itemId: 'seedlands:furnace-minecart' },
+        trigger: 'voxel',
+        operationId: 'seedlands:deploy-minecart',
+        presentationKey: 'seedlands:furnace-minecart',
+      },
+      {
         id: 'seedlands:boat-use',
         voxelHitPolicy: 'fluid-surface',
         selector: { itemId: 'seedlands:boat' },

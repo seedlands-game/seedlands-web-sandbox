@@ -72,10 +72,13 @@ export async function performTransportTargetInteraction(
     refresh(): void;
     succeeded(): void;
     failed(reason: string): void;
+    openStorage?(reference: TransportStateReference): boolean;
   }>,
 ): Promise<'handled' | 'fallback'> {
   const action = transportTargetAction(input.gameplay, input.origin, input.direction, input.maxDistance, input.intent);
   if (!action) return 'fallback';
+  if (action.intent === 'use' && action.target.kind === 'entity' && input.openStorage?.(action.target.reference))
+    return 'handled';
   try {
     const response = await input.perform(action);
     const result = response.result as { success?: boolean; reason?: string };

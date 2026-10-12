@@ -29,6 +29,16 @@
       "id": "seedlands:boat",
       "model": "playbooks/classic/assets/transport/boat.glb",
       "texture": "playbooks/classic/assets/transport/boat.glb"
+    },
+    {
+      "id": "seedlands:chest-minecart",
+      "model": "playbooks/classic/assets/transport/chest-minecart.glb",
+      "texture": "playbooks/classic/assets/transport/chest-minecart.glb"
+    },
+    {
+      "id": "seedlands:furnace-minecart",
+      "model": "playbooks/classic/assets/transport/furnace-minecart.glb",
+      "texture": "playbooks/classic/assets/transport/furnace-minecart.glb"
     }
   ],
   "materials": [

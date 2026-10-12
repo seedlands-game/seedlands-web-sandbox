@@ -3,6 +3,7 @@ import {
   defineTransportInteractionModule,
   defineTransportRelationModule,
   defineTransportMotionModule,
+  defineTransportStorageModule,
 } from '@seedlands/stdlib/mod-api';
 
 const ordinaryRailVariants = [
@@ -175,6 +176,26 @@ export const classicTransportModules = [
       },
       {
         version: 1,
+        id: 'seedlands:chest-minecart',
+        locomotion: { provider: 'route', providerId: classicMinecartRoute.family },
+        bodyAabb: { min: { x: -0.45, y: 0, z: -0.45 }, max: { x: 0.45, y: 0.7, z: 0.45 } },
+        seatOffset: [0, 0.55, 0],
+        fuelCapacity: null,
+        inventoryCapacity: 27,
+        presentationId: 'seedlands:chest-minecart',
+      },
+      {
+        version: 1,
+        id: 'seedlands:furnace-minecart',
+        locomotion: { provider: 'route', providerId: classicMinecartRoute.family },
+        bodyAabb: { min: { x: -0.45, y: 0, z: -0.45 }, max: { x: 0.45, y: 0.7, z: 0.45 } },
+        seatOffset: [0, 0.55, 0],
+        fuelCapacity: 1440,
+        inventoryCapacity: null,
+        presentationId: 'seedlands:furnace-minecart',
+      },
+      {
+        version: 1,
         id: 'seedlands:boat',
         locomotion: { provider: 'surface', providerId: 'seedlands:water-surface' },
         bodyAabb: { min: { x: -0.75, y: 0, z: -0.75 }, max: { x: 0.75, y: 0.6, z: 0.75 } },
@@ -186,6 +207,8 @@ export const classicTransportModules = [
     ],
     deployments: [
       { itemId: 'minecart', definitionId: 'seedlands:minecart' },
+      { itemId: 'chest-minecart', definitionId: 'seedlands:chest-minecart' },
+      { itemId: 'furnace-minecart', definitionId: 'seedlands:furnace-minecart' },
       { itemId: 'boat', definitionId: 'seedlands:boat' },
     ],
     routes: [{ definition: classicMinecartRoute, voxels: [39] }],
@@ -194,6 +217,7 @@ export const classicTransportModules = [
   defineTransportRelationModule({
     moduleId: 'seedlands:overworld-transport-relations',
     operationId: 'seedlands:mount-minecart',
+    mountableDefinitions: ['seedlands:minecart', 'seedlands:boat'],
   }),
   defineTransportMotionModule({
     moduleId: 'seedlands:overworld-transport-motion',
@@ -201,6 +225,23 @@ export const classicTransportModules = [
     systemId: 'seedlands:minecart-motion',
     policies: [
       { definitionId: 'seedlands:minecart', acceleration: 2, drag: 0.4, maxSpeed: 8, steeringRate: 0, fuelPerMeter: 0 },
+      {
+        definitionId: 'seedlands:chest-minecart',
+        acceleration: 2,
+        drag: 0.4,
+        maxSpeed: 8,
+        steeringRate: 0,
+        fuelPerMeter: 0,
+      },
+      {
+        definitionId: 'seedlands:furnace-minecart',
+        acceleration: 2,
+        drag: 0.4,
+        maxSpeed: 4,
+        steeringRate: 0,
+        fuelPerMeter: 1,
+        throttleSource: 'fuel',
+      },
       {
         definitionId: 'seedlands:boat',
         acceleration: 2,
@@ -210,5 +251,10 @@ export const classicTransportModules = [
         fuelPerMeter: 0,
       },
     ],
+  }),
+  defineTransportStorageModule({
+    moduleId: 'seedlands:overworld-transport-storage',
+    operationId: 'seedlands:store-transport',
+    fuels: [{ definitionId: 'seedlands:furnace-minecart', itemId: 'coal', units: 720 }],
   }),
 ] as const;

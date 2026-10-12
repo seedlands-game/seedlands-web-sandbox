@@ -9,6 +9,9 @@ import { createTransportDefinitionRegistryV1 } from '../../src/server/gameplay/m
 import { projectRouteMotion } from '../../src/server/gameplay/transport-route-motion-geometry';
 import { transportBodyConfig } from '../../src/server/gameplay/transport-body-config';
 import { guideway, routeState, segmentFor } from './transport-motion-test-fixtures';
+import { snapshotInvocationInput } from '../../src/server/composition/authorized-execution';
+import type { ModuleInvocationValue } from '../../src/server/composition/contracts';
+import { testCorePlatform } from '../support/core-platform';
 
 const policy = {
   definitionId: 'sample:route-pod',
@@ -177,6 +180,9 @@ describe('registered route motion geometry projection', () => {
     expect(candidate.next.velocity).toEqual([0, 0, 0]);
     expect(candidate.next.routeCursor).toEqual(options.state.routeCursor);
     expect(candidate.traveledDistance).toBe(0);
+    expect(() =>
+      snapshotInvocationInput({ state: options.state, candidate } as ModuleInvocationValue, testCorePlatform.clone),
+    ).not.toThrow();
     expect(options.queries.length).toBeGreaterThan(0);
   });
 

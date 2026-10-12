@@ -58,6 +58,28 @@ describe('Gameplay snapshot predecessor declarations', () => {
     expect(Object.isFrozen(frozen[0]!.identity.definitionMap.modules[0])).toBe(true);
   });
 
+  it('accepts seventeen distinct exact predecessor identities', () => {
+    const declarations = Array.from({ length: 17 }, (_, index) => {
+      const value = identity('a');
+      return {
+        gameplayVersions: [4] as const,
+        identity: {
+          ...value,
+          packLock: [
+            {
+              ...value.packLock[0]!,
+              integrity: {
+                ...value.packLock[0]!.integrity!,
+                manifestDigest: index.toString(16).padStart(64, '0'),
+              },
+            },
+          ],
+        },
+      };
+    });
+    expect(defineGameplaySnapshotPredecessorsV1(declarations)).toHaveLength(17);
+  });
+
   it.each([
     ['empty versions', [{ gameplayVersions: [], identity: identity('a') }]],
     ['duplicate versions', [{ gameplayVersions: [1, 1], identity: identity('a') }]],
@@ -71,7 +93,24 @@ describe('Gameplay snapshot predecessor declarations', () => {
     ],
     [
       'too many predecessors',
-      Array.from({ length: 17 }, (_, index) => ({ gameplayVersions: [1], identity: identity(String(index % 10)) })),
+      Array.from({ length: 18 }, (_, index) => {
+        const value = identity('a');
+        return {
+          gameplayVersions: [1],
+          identity: {
+            ...value,
+            packLock: [
+              {
+                ...value.packLock[0]!,
+                integrity: {
+                  ...value.packLock[0]!.integrity!,
+                  manifestDigest: index.toString(16).padStart(64, '0'),
+                },
+              },
+            ],
+          },
+        };
+      }),
     ],
   ])('rejects %s', (_label, value) => {
     expect(() => defineGameplaySnapshotPredecessorsV1(value as GameplaySnapshotPredecessorV1[])).toThrow();

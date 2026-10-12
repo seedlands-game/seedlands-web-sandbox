@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceSha": "e678f04eefe7edad8cebbf3c11d9bbf4927e72c8",
+  "dirtySource": true,
+  "files": {
+    "README.md": "d26df6ef6425bcede2fc3276a66c011086890a7e4b3c8f5662900e99ca285aeb",
+    "preview-commit-1243-01.log.gz": "6cf6a10fc72532e09e3ce3e76a4b8f40291405b473180c3d933786f544628ba8",
+    "preview-final-build-1245-01.log.gz": "5f99ba6d44f0f90cf38250cab25f0aa6d58a8eec142ced27d8368644e3951bd7",
+    "preview-final-build-1245-01.receipt.json.gz": "db18f1b5ec6b09899fa69b0e6efa31727832c11b764bfb5c565af3e649a596ac",
+    "preview-final-freeze-1245-01.json.gz": "7f6833a5798c98a899cba999283a82d4b10e83c73f37cc2453649d86b9034c3f",
+    "preview-line-limit-lint-1245-01.log.gz": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+    "preview-motion-green-1245-01.log.gz": "f8c974162d200d77e0447ad54339d5c55b4cceb48c3c8bc2bf09720c2e36a1b5"
+  }
+}

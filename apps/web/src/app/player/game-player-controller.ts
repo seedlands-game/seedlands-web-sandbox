@@ -102,6 +102,7 @@ export function createGamePlayerController(options: Options): PlayerController {
         direction,
         maxDistance,
         intent,
+        openStorage: (reference) => gameplay()?.openTransportStorage(reference) ?? false,
         perform: (action) => options.authority.performAction(action),
         refresh: () => gameplay()?.refresh(),
         succeeded: () => {

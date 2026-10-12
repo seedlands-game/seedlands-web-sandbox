@@ -1,4 +1,5 @@
 import { projectStationUi, type StationUiPresentation } from './station-ui-projector';
+import { projectTransportStorageUi, type TransportStorageUiPresentation } from './transport-storage-ui-projector';
 import type {
   AuthorityInventoryView,
   AuthorityGameplayView,
@@ -30,6 +31,8 @@ export type GameplayEquipmentPresentation = Readonly<Record<ArmorSlot, Equipment
 export type GameplayUiSource = Readonly<{
   navigation?: AuthorityGameplayView['navigation'];
   station?: AuthorityStationView | null;
+  transportStorage?: NonNullable<AuthorityGameplayView['transportStorage']>[number] | null;
+  storageInventoryRevision?: number;
   stationRecipes?: readonly StationRecipe[];
   revision: number;
   inventoryView: Pick<AuthorityInventoryView, 'actor' | 'armor' | 'cursor' | 'matchedCraftingRecipeIds'>;
@@ -85,6 +88,7 @@ export type GameplayUiProjection = Readonly<{
   shell: Readonly<{
     gameplay: Readonly<{
       station: StationUiPresentation | null;
+      transportStorage: TransportStorageUiPresentation | null;
       inventoryOpen: boolean;
       cursor: GameplayItemPresentation | null;
       personalCrafting: Readonly<{
@@ -274,6 +278,12 @@ export function projectGameplayUi(source: GameplayUiSource, previous?: GameplayU
           source.stationRecipes ?? [],
           (input, length) => projectInventory(input, length, items.require),
           (id) => items.require(id).name,
+        ),
+        transportStorage: projectTransportStorageUi(
+          source.transportStorage,
+          source.inventoryView.actor,
+          source.storageInventoryRevision ?? 0,
+          (input, length) => projectInventory(input, length, items.require),
         ),
         inventoryOpen: source.inventoryOpen,
         inventoryIdentity: JSON.stringify(source.inventoryView.actor),

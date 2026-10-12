@@ -1,5 +1,7 @@
 import type { InventoryUiCommand } from './inventory-pointer-gestures';
 import type { StationUiPresentation } from './station-ui-projector';
+import type { TransportStorageUiPresentation } from './transport-storage-ui-projector';
+import type { TransportStorageUiRequest } from '../gameplay/browser-transport-storage';
 import type { CombatUiProjection } from './combat-ui-projector';
 import type { SlashCommandExecution } from '@seedlands/stdlib/server/commands/slash-command-parser';
 import type { QualityLevel } from '../scene/quality-profile';
@@ -39,6 +41,7 @@ export type ShellState = Readonly<{
   experience: 'melee-showcase' | null;
   gameplay: Readonly<{
     station?: StationUiPresentation | null;
+    transportStorage?: TransportStorageUiPresentation | null;
     inventoryOpen: boolean;
     cursor?: GameplayItemPresentation | null;
     personalCrafting: Readonly<{
@@ -154,6 +157,7 @@ export type UiActionPort = {
   toggleInventory: () => void;
   closeInventory: () => void;
   inventoryPointer: (command: InventoryUiCommand) => Promise<boolean>;
+  transportStorage?: (request: TransportStorageUiRequest) => Promise<boolean>;
   useInventoryItem: (slot: number) => void;
   respawn: () => void;
   toggleMap: () => void;

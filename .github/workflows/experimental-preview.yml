@@ -1,0 +1,78 @@
+name: Experimental PR 41 preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: experimental-preview-pr-41
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Build, play and publish experimental preview
+    if: >-
+      ${{ github.event.pull_request.number == 41 &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.event.pull_request.head.ref == 'feat/classic-beta173-playable' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    env:
+      CI: true
+      VITE_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Check out exact preview source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/archives/
+            !/reports/
+            !/harness/
+            !/changes/**/evidence/**
+      - name: Set up existing Node and pnpm toolchain
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
+        with:
+          runtime: node@22.23.3
+          cache: true
+          require-lockfile: true
+      - name: Build identified production bytes
+        run: pnpm build
+      - name: Install matching Chromium
+        run: pnpm harness:browser:install --with-deps
+      - name: Exercise native storage gameplay before preview publication
+        env:
+          SEEDLANDS_E2E_SWIFTSHADER: '1'
+        run: pnpm harness:classic --grep 'Classic 储运 v1' --retries=0
+      - name: Label the independent experimental preview
+        env:
+          PREVIEW_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          node --input-type=module <<'JS'
+          import { writeFileSync } from 'node:fs';
+          writeFileSync('apps/web/dist/experimental-preview.json', JSON.stringify({
+            experimental: true,
+            sourceSha: process.env.PREVIEW_SHA,
+            acceptance: 'Build and native storage smoke only; full PR CI is a separate gate.',
+            knownGaps: ['Full Classic main and lighting acceptance remain open', 'Boat edge fix has deterministic coverage; new native boat acceptance remains open', 'Powered/detector rails and cargo pushing/coupling remain open'],
+          }, null, 2) + '\n');
+          JS
+      - name: Publish independent preview using existing Cloudflare credentials
+        uses: cloudflare/wrangler-action@ebbaa1584979971c8614a24965b4405ff95890e0 # v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.136.3'
+          command: >-
+            pages deploy apps/web/dist
+            --project-name=seedlands-web-sandbox
+            --branch=pr-41-experimental
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

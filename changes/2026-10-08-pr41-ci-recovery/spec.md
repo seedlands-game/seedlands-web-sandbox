@@ -1891,3 +1891,63 @@ a99287d1已推送；1154完整静态/stdlib1343/headless1306/build PASS，1160�
 1170乘坐白名单有效RED（1 FAIL/13 PASS），1171同组14 PASS。1172正常Authority加燃料后无人载具仍静止的有效RED（1 FAIL），1173燃料油门接入后1 PASS。1174新增碰撞反例1 FAIL/19 PASS：夹具墙位于y58，未绑定实际车体高度；后续以当前pose高度布墙并保留原碰撞断言与失败日志。配置非法surface/cost0拒绝反例通过，正式内容、浏览器及旧完整档验收仍未运行。
 
 1175碰撞夹具修正后20 PASS；1176扩充白名单用例因it.each数组展开传参得到2 FAIL/33 PASS，1177改为对象行参数。完整验证前冻结源码；运行时不再编辑，串行原static、stdlib、Classic headless与build，不改超时/断言/worker。本组不宣称浏览器或正式三车内容验收完成，长期code-map仅补实际职责，产品行为基线不放宽。
+
+### 1186：正式箱车与动力车内容接线
+
+e678通用控制已正常推送，1178完整static/stdlib1343/headless1313/build PASS。1185干净生产Pack捕获完整非空portable（普通矿车、船），与1168的a992身份不同；均保留精确原件，不放宽任意旧档准入。
+
+先用正式Classic正常物品use得到部署RED，再配置chest-minecart（27槽、无燃料）及furnace-minecart（燃料容量1440、coal每个720单位、fuelPerMeter=1、acceleration=2、drag=.4、maxSpeed=4、显式fuel油门）。这些是本Pack公开的距离消耗参数，不声称等价于原版固定燃烧秒数。普通车/船保持原控制；箱车/动力车不挂rider，通用白名单只允许普通车与船。正常storage动作守恒装卸/消耗煤一次，动力车无人沿现有普通轨推进，空油箱静止。
+
+必须使用独立原创几何呈现，资源/模型与正式definition一致。正常玩家UI、箱车推动/联动、三类轨动力探测、完整旧portable迁移、原生真实输入及Main仍独立开放；本组headless不代替这些验收。旧15个predecessor加两个已发布身份超过当前16上限的事实需单独最小兼容合同和有界测试处理，不在本组偷偷扩大或跳过守卫。
+
+1186正式部署2例RED。1187配置后仍2 FAIL；1188补物品use绑定后仍2 FAIL。1190确认公开拒绝interaction-rejected，1191通过原invoke端口观察确定OPERATION_FAILED原因是共享对象alias：三个route definition候选共用segment.edge.entry/exit。1192只复制派生cursor端点，不关闭Kernel输入alias门禁。1189两原创GLB已生成并--verify逐字节PASS；原普通矿车/船asset未改。
+
+### 1196：真实玩家储运面板
+
+1192部署端点copy后正式三车/船20 PASS，1193完整存档重开2 FAIL/22 PASS仅因库存actor新epoch未写入期望；1194明确新epoch且全库存保持精确后24 PASS，1195类型/lint PASS。旧精确生产portable迁移仍开放。
+
+右键原实体ray命中可达storage载具时打开本地面板，普通车/船仍走原mount，alternate仍安全dismount。UI只保存选中lifetime，不缓存货物/燃料/revision；每个请求从当前Authority view组成既有transport-storage action，服务器继续选operationId。货箱面板显示玩家与载具槽，先点有物品源槽再点另一侧目标槽；每次1个，Shift整堆。燃料面板显示余量并从允许物品槽正常消耗1个或Shift整堆。UI不借用Authority cursor，不自动给物品/改state。选择跨epoch/库存或载具revision变化清除；死亡、不可达、缺cap与恢复均关闭选中引用。与既有背包/站点互斥，正常关闭/键盘/PointerLock规则保留。
+
+先给原实体交互函数加入storage-open端口的有效RED，再实现local引用选择、正常动作与面板；故障反例覆盖陈旧view、缺cap/cursor以及正常动作字段，不增加管理员旁路。只有sole browser中正常放置、右键、槽点击、加煤与保存重开通过，才计原生产品验收；单元和headless不替代。
+
+1196实体storage-open有效RED 1 FAIL/7 PASS，1197同组8 PASS与Svelte初查0错误。1198本地选择7 FAIL揭示空cursor是stack:null结构；修正后1199三组18 PASS。新增在途dispose/epoch与SSR27槽反例后1201共21 PASS。新面板禁用既有inventory pointer手势，仍共享正常关闭/键盘边界。入口max-lines超出及遗留unused import/type错误均保留日志；UI源汇集与当前command invoker移到对应邻近职责，未改Lint规则。UI请求显式绑定用户所见库存/载具revision，陈旧请求本地拒绝且服务器再校验。
+
+1202纳入Classic类型检查发现旧transport-target测试缺epoch；1203修正fixture后类型/lint PASS。1199/1201空cursor结构、陈旧revision、dispose与epoch期间在途完成回调、SSR专用货箱共21 PASS。1204 sole入口新增120秒独立储运用例（原Main900、其他用例不变），固定初始普通轨/地形/Survival库存后仅真实鼠标与DOM操作：箱车Shift全堆存入、单个取出；动力车消耗煤1个，无rider推进；轨尽头停下后正常菜单保存并重新进入，精确cargo/fuel/pose/velocity与新epoch匹配。固定供给与terrain均在native开始前，之后无管理员补给、移动或修state。只宣称当前档重开，不替代旧完整portable导入和移动首tick恢复。类型初查1204误传TestInfo给diagnostics参数，修正并保留原日志。下一native绑定独立freeze/产物，失败不自动重试。
+
+1206冻结32路径生产build PASS，sole储运native FAIL（22.837s）：初始夹具对已在Survival的actor重复set-mode，被正常规则拒绝，正式玩家储运未开始。日志/trace/freeze保留。1207移除无效切换并明确检查初始query-player-state.mode.value=survival；不修改服务器规则，不将此失败计为玩法通过。新freeze与产物后才重跑。
+
+1207冻结32路径build PASS，native真实右键货箱装入5/取出1、燃料点击正常消耗1煤并获得720燃料已通过；随后无人动力车位置5.5保持不变，fuel720/velocity0，游戏revision继续推进，整体native FAIL。1208复用同一生产Pack的双载具正常Authority诊断复现全部motion操作OPERATION_FAILED（共享对象alias），1209定位静止车state.routeCursor与candidate.next.routeCursor复用同一对象。1211新增双车集成有效RED（1 FAIL/6 PASS），1212复制候选cursor后7 PASS；早期route-unknown/disconnected停止投影同样使用既有expected/pose/routeCursor复制函数，不削弱Kernel校验、不跳过静止车、不改变输入/断言/时限。截图中的标题换行和按钮过宽另作局部样式修正。下一次Native需重新冻结并构建，保持真实输入与完整保存重开验收。
+
+1213运动39 PASS，Classic类型2 FAIL仅新增集成断言未收窄unknown；改用与原测试一致的toMatchObject({success:true})，保留日志。1214新冻结34路径build PASS；Native加煤后trace明确记录x5.504405→5.513402、速度0.131571→0.227973、fuel719.995595→719.986598，证明原静止缺陷已修。但截图期间移动载具离开可达范围，正常storage投影消失，后续查找已脱离DOM的关闭按钮超时，整体FAIL（47.894s），不计保存重开PASS。下一用例用真实Escape关闭同一#inventory-crafting并断言隐藏，保留移动/燃料/终点/保存精确检查；不修改可达范围或服务器行为。
+
+### 1223：局部呈现与精确旧生产存档准入
+
+1218冻结35路径原生储运完整PASS（test53.6s/retries0），1220同源static PASS、stdlib176文件1343 PASS、Classic170文件1334 PASS。原始PNG人工查看发现新容器被高车斗遮挡、移动截图只见天空；这些不计为模型视觉运动PASS。只降低两新模型车斗并把可见容器保持在现有body的y≤0.7内，原普通车/船asset不改。关闭按钮用现有id提高局部CSS特异性，不改全局样式。移动截图前用同一真实mouse aim指向已观察的位置，新增空燃料动力车部署原始帧。
+
+旧生产完整portable验收只准入1168精确a992与1185精确e678生产Pack身份（两份完整world JSON已有source/资源SHA核验，非空普通车/船；原件不修改）。保留原15条已声明前身，加两条仅version4的精确身份，共17；通用列表上限最小修为17，独立合法17成功/合法18拒绝/重复拒绝覆盖，不将旧数量反例中的重复身份当上限证据。不增加通配、跳过资源或composition guard、删旧前身或放宽任意旧档准入。新压缩fixture以mtime0产生且解压SHA精确等于原始JSON。用现有Headless世界checkpoint restore入口验证全世界/非空载具/库存/时钟/新引用及拒绝未声明和篡改档时owner保持；不从仅gameplay JSON通过推导完整portable通过。
+
+1224合法17独立前身RED 1 FAIL/14 PASS；1225最小17上限后15 PASS（合法18/重复/无效身份仍拒绝）。1226完整生产portable两恢复RED/两未声明篡改拒绝PASS；1227公开原因确认为composition不兼容且owner未交换。原JSON捕获的chunk typed array按V1明确schema（Uint16 voxels/Uint8 fluid）逐索引/范围验证后恢复类型，数值/地形/其余字段不修改；解压raw SHA仍与原件完全一致。1228登记两精确身份后完整正常世界restore4 PASS：全部chunk/EntityStore（含3实体、两载具与actor库存）精确保持，gameplay/world/module/Authority时钟保持且入口正常暂停，transport引用epoch2；未声明manifest和篡改resource仍拒绝且整个live owner快照精确不变。其证明Headless共享入口和完整world恢复，不声称Browser旧档导入/全PR或性能PASS。
+
+1229既有composition/manual checkpoint回归12 PASS。1230冻结44路径fullstatic在新fixture测试的可选composition读取处类型FAIL；stdlib/headless/build未运行。预先停止尝试没有杀死任何进程（首次未枚举到child，第二次validator已经退出），保留正常FAIL receipt，源前后匹配。1231补显式捕获身份存在性前置条件，不把缺字段断言为非空；恢复新freeze后再执行。
+
+1231冻结44路径static PASS、stdlib176文件1344 PASS、Classic171文件1338 PASS、build PASS；1232同源三运输原生回归普通矿车PASS51.6s、储运PASS约72s、船原120s超时（shore navigation循环，PointerLock错误出现在结束阶段，未确认根因），整体FAIL，原日志/trace保留。未降低assert、提高deadline或以旧船PASS覆盖本次失败。
+
+1233发现1223原始模型生成EEXIST/verify mismatch日志被末尾Prettier成功掩盖：生成器wx保护使新几何未写入；旧字节与1231 freeze一致。先对两本轮自建且未跟踪的GLB逐SHA核对、私有备份，再重新生成；新两资产--verify真实PASS。生产build新增只读生成器--verify前置，防止同类不一致被构建通过掩盖；不改旧车/船资源或全局安全策略。1231代码验证可复用的边界明确为未改的源码；新GLB/构建入口/spec差异需新freeze/build/native与原始帧验收。
+
+### 1235：船边缘阻挡转向后的安全回驶
+
+1232原生船在水域z=-3边缘停于[2.5191052179800844,31.8,-2.1937033771890095]、yaw0.07767804022306946，向岸边目标的真实输入循环不能再移动。1234夹具rider字段无效，不能算运动RED；1235修正为正式组件lifetime引用后，同尺寸/水平位置/yaw、60Hz输入的生产geometry路径有效RED：向水域内前进返回left-surface。
+
+仅当组合转向支撑已知unsupported且yaw发生变化时，尝试同距离、当前yaw的平移；仍须重新检查完整支撑走廊和原碰撞sweep。fallback unknown拒绝，向外或障碍仍停；已知supported转向、原unknown转向不改变。保留燃料、权威frame、引用新鲜度和提交边界；不修改原生旅程目标、键鼠输入、assert或120秒deadline。先用确定性边缘回驶/unknown/向外/碰撞反例验证，再冻结新源码构建并运行唯一正式Browser船旅程。1232失败保留，当前未宣称修复PASS或可合入。
+
+1236初次GREEN中的向外负例位移尚未越界，不能算该负例PASS；1237用0.1s直向外位移明确跨越边缘，完整geometry+motion-model43例PASS。回驶保留原yaw，unknown和障碍仍拒绝。新的生产构建和原生三运输验收尚未运行。
+
+### 1241：用户授权的独立实验性体验预览
+
+用户当轮要求部署最新版体验预览，优先最新未提交储运/呈现/边缘回驶；本次仅构建、最小真实启动和独立部署，不继续完整验收扩展。09:43UTC真实周剩余90%，既定87%停止线，账户共享不能归因。
+
+现有正式Cloudflare job仍依赖完整static/headless/Chromium门槛，当前e678 Chromium失败，不绕过、不弱化。新增独立实验预览workflow仅允许同仓PR41指定功能分支，复用现有Node/pnpm、精确checkout、生产build、唯一Classic spec的原生储运旅程（原assert/deadline、零重试）和已有Cloudflare secrets/action/project；仅发布pr-41-experimental分支，绝不main/production。实验标识及精确SHA以独立experimental-preview.json发布，明确完整PR验收、船新原生回归、全lighting及动力/检测铁轨/货车推行联挂缺口，不计为可合入。
+
+云环境仅检查既有凭据存在性：Cloudflare变量缺失，未读secret值或.env。直接发布不可用，尝试通过现有GitHub Actions凭据；若凭据/权限不存在即明确阻塞，不创建密钥/扩大网络或收费服务。最后实际访问部署URL及源码标识后才宣称成功。
+
+1243提交被max-lines拒绝（运动模型504/500）；仅提取原转向乘积到局部turn变量并压缩重复调用行，保留计算顺序和fallback行为。不跳过hook、不调整门槛；1241/1242封存保持原字节，新定向检查与构建另记1245。

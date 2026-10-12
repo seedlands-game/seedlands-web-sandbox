@@ -10,6 +10,9 @@ import { colliderMatches, overlapDepth, translateAabb, unionAabb } from '../../p
 import { advanceRouteSegmentV1, resolveRouteSegmentV1, validateRouteSegmentV1 } from './modules/route-definition';
 import {
   buildRouteTransportMotionCandidateV1,
+  expected,
+  pose,
+  routeCursor,
   type TransportMotionCandidateV1,
   type RouteNextSegmentV1,
 } from './modules/transport-motion-model';
@@ -50,14 +53,8 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
   const stopped = (reason: 'route-unknown' | 'route-disconnected'): TransportMotionCandidateV1 =>
     Object.freeze({
       version: 1,
-      expected: {
-        reference: state.reference,
-        pose: state.pose,
-        velocity: state.velocity,
-        routeCursor: cursor,
-        fuel: state.fuel,
-      },
-      next: { pose: state.pose, velocity: [0, 0, 0] as const, routeCursor: cursor },
+      expected: expected(state),
+      next: { pose: pose(state.pose), velocity: [0, 0, 0] as const, routeCursor: routeCursor(cursor) },
       traveledDistance: 0,
       fuelCost: 0,
       stopReason: reason,

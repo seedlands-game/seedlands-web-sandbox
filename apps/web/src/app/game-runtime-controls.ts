@@ -170,3 +170,12 @@ export function reportSnapshotMigration(
     durationMs: 8_000,
   });
 }
+
+export function createBrowserCommandInvoker(
+  executor: () => Parameters<typeof executeBrowserCommand>[0],
+  source: () => Parameters<typeof executeBrowserCommand>[1],
+  consumer: Parameters<typeof executeBrowserCommand>[3],
+) {
+  return (command: Parameters<typeof executeBrowserCommand>[2]) =>
+    executeBrowserCommand(executor(), source(), command, consumer);
+}

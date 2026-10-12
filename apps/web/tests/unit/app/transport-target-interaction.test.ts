@@ -22,7 +22,7 @@ const definition = defineTransportV1({
 });
 const cart: TransportStateV2 = {
   version: 2,
-  reference: { entityId: 'cart', lifetime: 7 },
+  reference: { entityId: 'cart', lifetime: 7, epoch: 1 },
   definitionId: definition.id,
   pose: { position: [0, 0, -3], yaw: Math.PI / 2 },
   velocity: [0, 0, 0],
@@ -96,7 +96,7 @@ it('yaw, voxel occlusion, reach, invalid rays and missing accepted definition re
 });
 it('alternate while mounted submits self even without an aimed cart', () => {
   const view = gameplay();
-  view.transports = [{ ...cart, rider: { entityId: view.player.entityId, lifetime: 1 } }];
+  view.transports = [{ ...cart, rider: { entityId: view.player.entityId, lifetime: 1, epoch: 1 } }];
   expect(transportTargetAction(view, [0, 0, 0], [0, 1, 0], 0, 'alternate')).toMatchObject({
     type: 'interact',
     intent: 'alternate',
@@ -118,4 +118,24 @@ it('rejected authority action remains handled, shows the failure and never saves
   expect(await performTransportTargetInteraction(input)).toBe('handled');
   expect(input.failed).toHaveBeenCalledWith('stale-lifetime');
   expect(input.succeeded).not.toHaveBeenCalled();
+});
+
+it('opens reachable carrier storage through the native target port before mounting', async () => {
+  const openStorage = vi.fn(() => true);
+  const perform = vi.fn(async () => ({ result: { success: true } }));
+  const input = {
+    gameplay: gameplay(),
+    origin: [0, 0.3, 0] as const,
+    direction: [0, 0, -1] as const,
+    maxDistance: 5,
+    intent: 'use' as const,
+    openStorage,
+    perform,
+    refresh: vi.fn(),
+    succeeded: vi.fn(),
+    failed: vi.fn(),
+  };
+  expect(await performTransportTargetInteraction(input)).toBe('handled');
+  expect(openStorage).toHaveBeenCalledWith(cart.reference);
+  expect(perform).not.toHaveBeenCalled();
 });

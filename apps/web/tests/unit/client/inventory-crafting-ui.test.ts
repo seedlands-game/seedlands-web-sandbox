@@ -94,3 +94,28 @@ describe('personal crafting inventory UI', () => {
     expect(source).toContain('object-fit: contain');
   });
 });
+
+it('renders a dedicated carrier panel with 27 cargo slots and the current actor inventory', () => {
+  const { body } = render(InventoryCrafting, {
+    props: {
+      gameplay: {
+        ...gameplay,
+        transportStorage: {
+          identity: 'carrier-epoch1',
+          name: '载具货箱',
+          slots: Array.from({ length: 27 }, (_, slot) => empty(slot)),
+          fuel: null,
+          fuelCapacity: null,
+          fuelItemIds: [],
+          inventoryRevision: 3,
+          revision: 4,
+        },
+      },
+      actions,
+    },
+  });
+  expect(body).toContain('transport-cargo-slot-26');
+  expect(body).toContain('transport-actor-slot-0');
+  expect(body).toContain('载具货箱槽位');
+  expect(body).not.toContain('personal-crafting');
+});

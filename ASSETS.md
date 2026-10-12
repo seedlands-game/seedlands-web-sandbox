@@ -66,3 +66,7 @@ Classic art direction is documented in [Classic visual style](docs/classic-visua
 ## Classic ordinary minecart
 
 `playbooks/classic/assets/transport/minecart.glb` is original repository-authored cuboid geometry and two solid-color materials, offered under Apache-2.0. It contains no external textures or third-party media. `scripts/generate-classic-minecart-glb.mjs` reproduces the asset; `--verify` compares its bytes with the deterministic source. The Classic Pack locks the resource and declares its body bounds and presentation ID.
+
+## Classic storage carriers
+
+`playbooks/classic/assets/transport/chest-minecart.glb` and `furnace-minecart.glb` are original repository-authored cuboid geometry with solid-color iron, dark trim and wood/stone materials, offered under Apache-2.0. They contain no third-party media or external textures. `scripts/generate-classic-storage-carriers-glb.mjs` reproduces both assets; `--verify` checks their exact bytes. Their container geometry stays inside the declared Classic carrier body bounds.

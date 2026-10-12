@@ -1,0 +1,48 @@
+[
+  {
+    "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+    "captureFile": "pre-storage-production-checkpoint-1168-01.json",
+    "fixtureFile": "production-a99287d.json.gz",
+    "rawSha256": "09eedc67e4291e9c1fb5f4c473c4034f40b586b5a636f34304286d1626389479",
+    "gzipSha256": "c584d4f454e3278f412e0010e4cf4898d157411520b73c5aff76b19ec19d2c89",
+    "rawBytes": 5139795,
+    "gzipBytes": 1211677,
+    "rootVersion": 1,
+    "gameplayVersion": 4,
+    "chunks": 8,
+    "entityStoreKeys": [
+      "version",
+      "sequence",
+      "lifetimeHighWater",
+      "issuedIds",
+      "entities",
+      "identities",
+      "actors",
+      "stations",
+      "transports"
+    ]
+  },
+  {
+    "sourceSha": "e678f04eefe7edad8cebbf3c11d9bbf4927e72c8",
+    "captureFile": "pre-storage-production-checkpoint-1185-01.json",
+    "fixtureFile": "production-e678f04.json.gz",
+    "rawSha256": "5a127c2312edfb71aa18fafec746aa4b1634c11c9fd6d572de129ca3d65201e4",
+    "gzipSha256": "575e4062e07e240f7133628f808499a4b1ef967b6c9700693ac7f4032dc9ba38",
+    "rawBytes": 5137994,
+    "gzipBytes": 1207075,
+    "rootVersion": 1,
+    "gameplayVersion": 4,
+    "chunks": 8,
+    "entityStoreKeys": [
+      "version",
+      "sequence",
+      "lifetimeHighWater",
+      "issuedIds",
+      "entities",
+      "identities",
+      "actors",
+      "stations",
+      "transports"
+    ]
+  }
+]
