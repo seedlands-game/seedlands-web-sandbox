@@ -24,6 +24,8 @@ import { RegisteredTransportRuntime } from './modules/registered-transport-runti
 import { TRANSPORT_INTERACTION_CAPABILITY } from './modules/transport-interaction-config';
 import { TRANSPORT_RELATION_CAPABILITY } from './modules/transport-relation-interaction';
 import { RegisteredTransportRelationRuntime } from './modules/registered-transport-relation-runtime';
+import { RegisteredTransportStorageRuntime } from './modules/registered-transport-storage-runtime';
+import { TRANSPORT_STORAGE_CAPABILITY } from './modules/transport-storage-module';
 
 type Options = Omit<
   ConstructorParameters<typeof RegisteredInventoryRuntime>[0] &
@@ -139,6 +141,16 @@ export function createGameplayRegisteredRuntimes(
   });
   return Object.freeze({
     ...registered,
+    transportStorage: callbacks.composition?.definitionMap.capabilities.some(
+      ({ id }) => id === TRANSPORT_STORAGE_CAPABILITY,
+    )
+      ? new RegisteredTransportStorageRuntime({
+          ...options,
+          callbacks,
+          composition: callbacks.composition,
+          revision: () => options.kernelState.gameplayRevision,
+        })
+      : null,
     transportMotion: callbacks.composition?.definitionMap.capabilities.some(
       ({ id }) => id === TRANSPORT_MOTION_CAPABILITY,
     )

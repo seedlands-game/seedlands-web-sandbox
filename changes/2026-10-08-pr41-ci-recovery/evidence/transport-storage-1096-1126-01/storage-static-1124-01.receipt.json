@@ -1,0 +1,8 @@
+{
+  "command": ["pnpm", "verify:static:ci"],
+  "exitCode": 0,
+  "durationSeconds": 365.5695683956146,
+  "sourceSha": "326f77131eb69c7a2da99f820b4fb69110c6a61a",
+  "dirtySource": true,
+  "freeze": "storage-freeze-1121-01.json"
+}

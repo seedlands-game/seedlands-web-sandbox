@@ -1,0 +1,6 @@
+
+/workspace/seedlands-web-sandbox/apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+  183:13  error  Unexpected aliasing of 'this' to local variable  @typescript-eslint/no-this-alias
+
+✖ 1 problem (1 error, 0 warnings)
+

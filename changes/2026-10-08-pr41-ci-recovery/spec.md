@@ -1845,3 +1845,19 @@ SurfaceSupportPortV1 新增可选第二参数 proposedYaw；单参数消费者�
 1069 正式原生船旅程及真实保存/刷新/重开通过，但本次保存速度为零，只证明静止分支。1071 新语义测试在恢复后的首个物理 tick 之前读取船体跨 z=0 的已保存水面，得到 undefined 而失败；原恢复准备仅包含 station/media 地形。恢复候选现按当前正式载具定义、yaw/倾角派生船体包围盒，并沿既有物理活跃区规则加一格边界，预加载候选载具地形后才原子交换 owner。坐标必须为安全整数，单船及整组载具地形查询均有4096块上限，失败保留原 owner，不把未知体素当空气。
 
 1073/1074 运动保存速度精确恢复，但正常 physics 确实推进后，船体 y 从31.8被初始化脱嵌移至31.649999、速度清零。初始化碰撞投影将自己的 mounted rider 作为外部障碍。座位派生现在携带复制并冻结的当前 carrier lifetime reference；查询该载具自身碰撞体时排除自身乘员，其他载具、乘员、世界和未知地形仍保留。1075 首版读取尚不存在的 carrier 字段失败，1076 首版共享 reference 对象使正式运动提交被拒绝，原失败日志保留；1078 独立复制后正式船与载具关系22例通过，包括保存非零速度、恢复后普通 physics 继续运动，以及墙阻挡断言。该语义证据不替代浏览器运动分支验收，1057 仍需新产物复验，不宣称完整主旅程或性能通过。
+
+### 1096：箱车与燃料的单一所有者候选合同
+
+原验收要求三类矿车、箱车/燃料与恢复，当前正式定义只有普通矿车和船，不能由1087船运动重开PASS替代。首片先提供通用只读storage候选：绑定玩家与载具的当前lifetime reference、玩家inventory revision及载具component revision；明确指定装入/取出的双方槽和整数数量，或按Pack配置的合法item→fuel单位加油。当前游标持物、死亡、任一侧陈旧引用/revision、槽越界、空源、数量不足、不同item instance、容量溢出、非法/过量燃料及revision耗尽全部拒绝，输入零写；成功总量守恒、双方revision各增加一次，候选复制物品instance，不新增权威Map。
+
+后续正式registered operation必须重读授权、距离/LOS/未知地形与双方owner，以同一个prepared actor+transport mutation发布，并在apply前重检freshness；重放、死亡、restore或owner替换后不部分提交。再接Classic箱车/动力车配置、显式燃料政策和正常Authority motion、真实玩家UI、非空货物/燃料保存恢复及死亡保护。首片候选与单元测试不计作玩家可玩、完整运输或旧portable world导入验收，不新增网络权限或性能声明。
+
+### 1118：通用仓储操作与所有者验证 checkpoint
+
+新增可选 registered storage module 与 Host state port，复用现有 transport/inventory 授权；玩家与载具作为同一个 EntityStore prepared mutation 发布。距离、LOS、未知地形、双方观察 receipt、lifetime/revision 与 selected-tool cancellation 在 apply 前重检；没有新增权威 Map。为保持 GameplayRuntime 既有500行限制，将原有运输 state ports 与新 port 通过同一个 bundle 传入，不放宽 lint。
+
+只读候选1098共28 PASS；1097首次4个成功用例失败是夹具缺合法 routeCursor，修正夹具后检查具体拒绝原因，不计作生产 RED。真实注册 owner 用例1118共9 PASS：装入/取出守恒、双方revision各加一次、燃料消费、陈旧重放、距离/遮挡、玩家库存并发变化、载具移动、health归零、真实死亡、ECS owner替换、载具销毁、非空货物/燃料 portable checkpoint恢复。owner替换注入仅替换ECS，不宣称完整世界导入；当前正式Classic没有接入这个可选模块与玩家界面。
+
+夹具/诊断失败保留：1101在内容注册完成前读取items，改为Host初始化校验；1103–1105在prepared commit内调用checkpoint/view触发既有drain guard，改用直接只读owner查询。1106–1111死亡诊断最初错误推断Creative免疫，后由实际返回 death-inventory-policy-unavailable 证伪：样例Pack缺死亡policy，1112显式提供既有policy后真实死亡测试通过。1113 ECS替换注入器this绑定错误，1115修正后9 PASS；1117类型与lint发现测试把V2投影视作带revision及this alias，1118修正为checkpoint组件读取和lexical callback，没有变更生产投影或规则。原始失败不替代语义反例。
+
+远端精确326f7713的CI444五项非浏览器检查PASS、Chromium FAIL、Pages SKIPPED；1115读取Chromium job日志返回 Transport closed，未获得远端具体失败矩阵。旧主旅程1030仍FAIL、C4/C5未完成，不能据本checkpoint宣称可合入。未运行本仓储组的全量headless/build/native；预算实际UI最新读数未更新，继续依赖主对话真实读数，无百分比估算。

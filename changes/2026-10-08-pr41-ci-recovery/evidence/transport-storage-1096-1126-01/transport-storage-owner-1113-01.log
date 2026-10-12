@@ -1,0 +1,31 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+2:17:06 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (9 tests | 1 failed) 247ms
+   × rejects entity-owner-replace after preparation without partially applying the proposed transfer 19ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects entity-owner-replace after preparation without partially applying the proposed transfer
+AssertionError: {"ok":false,"code":"OPERATION_FAILED","message":"this.exportComponentSnapshot is not a function"}: expected undefined to be defined
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:190:48
+    188|       const result = runtime.server.invokeActorModuleOperation(runtime…
+    189|       expect(result, JSON.stringify({ fault, external })).toMatchObjec…
+    190|       expect(external, JSON.stringify(result)).toBeDefined();
+       |                                                ^
+    191|       expect(sides(runtime)).toEqual(external);
+    192|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  02:17:06
+   Duration  4.01s (transform 2.99s, setup 0ms, import 3.62s, tests 247ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

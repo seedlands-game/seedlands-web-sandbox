@@ -1,0 +1,144 @@
+$ pnpm format:check && pnpm lint:paths && pnpm lint && pnpm typecheck && pnpm test:eslint && pnpm test:ci-selection
+$ node scripts/check-frozen-evidence.mjs && prettier --check .
+Frozen evidence: 5/5 exact byte identities verified.
+Checking formatting...
+All matched files use Prettier code style!
+$ ls-lint
+$ eslint .
+$ pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit && tsc -p tsconfig.classic-tests.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ svelte-check --tsconfig ./tsconfig.json && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.tools.json --noEmit
+Loading svelte-check in workspace: /workspace/seedlands-web-sandbox/apps/web
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings
+$ tsc -p tsconfig.json --noEmit
+$ pnpm --filter @seedlands/eslint-plugin test
+$ vitest run --config vitest.config.ts
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox/packages/eslint-plugin
+
+
+ Test Files  11 passed (11)
+      Tests  66 passed (66)
+   Start at  02:34:12
+   Duration  11.36s (transform 846ms, setup 0ms, import 22.16s, tests 5.91s, environment 1ms)
+
+$ node --test scripts/ci-deterministic-scope.test.mjs scripts/check-frozen-evidence.test.mjs scripts/ci-sparse-checkout.test.mjs scripts/harness/artifact-source-identity.test.mjs scripts/ci-browser-time-budget.test.mjs
+TAP version 13
+# fatal: not a git repository (or any parent up to mount point /)
+# Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+# Subtest: original historical bytes pass in full and sparse checkouts
+ok 1 - original historical bytes pass in full and sparse checkouts
+  ---
+  duration_ms: 79.81643
+  type: 'test'
+  ...
+# Subtest: formatting or modifying any excluded evidence still fails the gate
+ok 2 - formatting or modifying any excluded evidence still fails the gate
+  ---
+  duration_ms: 24.810493
+  type: 'test'
+  ...
+# Subtest: missing evidence and symlink substitutions fail closed
+ok 3 - missing evidence and symlink substitutions fail closed
+  ---
+  duration_ms: 29.965661
+  type: 'test'
+  ...
+# Subtest: a dangling symlink cannot masquerade as an absent sparse file
+ok 4 - a dangling symlink cannot masquerade as an absent sparse file
+  ---
+  duration_ms: 52.302519
+  type: 'test'
+  ...
+# Subtest: Classic owner contracts remain in the explicit behavior and type selections
+ok 5 - Classic owner contracts remain in the explicit behavior and type selections
+  ---
+  duration_ms: 3.335643
+  type: 'test'
+  ...
+# Subtest: Chromium job covers the original complete journey and diagnostic retry
+ok 6 - Chromium job covers the original complete journey and diagnostic retry
+  ---
+  duration_ms: 0.807801
+  type: 'test'
+  ...
+# Subtest: Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+ok 7 - Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+  ---
+  duration_ms: 1.153855
+  type: 'test'
+  ...
+# Subtest: Kernel changes also select downstream stdlib behavior
+ok 8 - Kernel changes also select downstream stdlib behavior
+  ---
+  duration_ms: 2.469811
+  type: 'test'
+  ...
+# Subtest: stdlib-only changes do not select upstream Kernel behavior
+ok 9 - stdlib-only changes do not select upstream Kernel behavior
+  ---
+  duration_ms: 0.195145
+  type: 'test'
+  ...
+# Subtest: shared changes, main push, and an empty PR diff run both owners
+ok 10 - shared changes, main push, and an empty PR diff run both owners
+  ---
+  duration_ms: 0.19874
+  type: 'test'
+  ...
+# Subtest: unrelated changes omit behavior tests without affecting the separate static job
+ok 11 - unrelated changes omit behavior tests without affecting the separate static job
+  ---
+  duration_ms: 0.22916
+  type: 'test'
+  ...
+# Subtest: unknown source paths conservatively select both owners
+ok 12 - unknown source paths conservatively select both owners
+  ---
+  duration_ms: 0.115198
+  type: 'test'
+  ...
+# Subtest: invalid path input fails instead of selecting no tests
+ok 13 - invalid path input fails instead of selecting no tests
+  ---
+  duration_ms: 0.263232
+  type: 'test'
+  ...
+# Subtest: CLI accepts NUL-separated paths and emits stable GitHub outputs
+ok 14 - CLI accepts NUL-separated paths and emits stable GitHub outputs
+  ---
+  duration_ms: 58.668178
+  type: 'test'
+  ...
+# Subtest: CLI rejects malformed NUL input
+ok 15 - CLI rejects malformed NUL input
+  ---
+  duration_ms: 53.468374
+  type: 'test'
+  ...
+# Subtest: every CI checkout keeps exact source and specs without materializing sealed artifact trees
+ok 16 - every CI checkout keeps exact source and specs without materializing sealed artifact trees
+  ---
+  duration_ms: 450.882893
+  type: 'test'
+  ...
+# Subtest: artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+ok 17 - artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+  ---
+  duration_ms: 73.482685
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 809.929875

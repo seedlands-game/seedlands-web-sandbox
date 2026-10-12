@@ -1,0 +1,41 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+2:12:37 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (7 tests | 1 failed) 217ms
+   × rejects actor-death after preparation without partially applying the proposed transfer 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-death after preparation without partially applying the proposed transfer
+AssertionError: {"ok":false,"code":"OPERATION_FAILED","message":"Actor is already in the requested mode."}: expected { ok: false, …(2) } to match object { ok: true }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "ok": true,
++   "ok": false,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:137:42
+    135|         input: { mode: 'survival' },
+    136|       });
+    137|       expect(mode, JSON.stringify(mode)).toMatchObject({ ok: true });
+       |                                          ^
+    138|     }
+    139|     const command = request(runtime, {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 6 passed (7)
+   Start at  02:12:37
+   Duration  3.62s (transform 2.65s, setup 0ms, import 3.21s, tests 217ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

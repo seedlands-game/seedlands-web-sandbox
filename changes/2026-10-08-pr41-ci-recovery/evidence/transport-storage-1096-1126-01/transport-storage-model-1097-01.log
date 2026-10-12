@@ -1,0 +1,81 @@
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/transport-storage-model.test.ts (28 tests | 4 failed) 23ms
+     × conserves items on deposit and advances both revisions exactly once without editing the input 9ms
+     × withdraws into an existing compatible stack and retires an empty cargo slot 1ms
+     × copies and freezes a durable item instance without sharing caller-owned references 1ms
+     × consumes only configured whole fuel items and preserves fractional residual fuel 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-storage-model.test.ts > transport storage candidate contract > conserves items on deposit and advances both revisions exactly once without editing the input
+TypeError: Route transport requires a route cursor.
+ ❯ routeCursor packages/stdlib/src/server/gameplay/modules/transport-model.ts:248:11
+    246|   }
+    247|   if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    248|     throw new TypeError('Route transport requires a route cursor.');
+       |           ^
+    249|   const value = raw as Record<string, unknown>;
+    250|   if (
+ ❯ validateTransportComponentV1 packages/stdlib/src/server/gameplay/modules/transport-model.ts:373:18
+ ❯ buildTransportStorageCandidateV1 packages/stdlib/src/server/gameplay/modules/transport-storage-model.ts:118:21
+ ❯ build packages/stdlib/tests/server/transport-storage-model.test.ts:73:31
+ ❯ packages/stdlib/tests/server/transport-storage-model.test.ts:83:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-storage-model.test.ts > transport storage candidate contract > withdraws into an existing compatible stack and retires an empty cargo slot
+TypeError: Route transport requires a route cursor.
+ ❯ routeCursor packages/stdlib/src/server/gameplay/modules/transport-model.ts:248:11
+    246|   }
+    247|   if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    248|     throw new TypeError('Route transport requires a route cursor.');
+       |           ^
+    249|   const value = raw as Record<string, unknown>;
+    250|   if (
+ ❯ validateTransportComponentV1 packages/stdlib/src/server/gameplay/modules/transport-model.ts:373:18
+ ❯ buildTransportStorageCandidateV1 packages/stdlib/src/server/gameplay/modules/transport-storage-model.ts:118:21
+ ❯ build packages/stdlib/tests/server/transport-storage-model.test.ts:73:31
+ ❯ packages/stdlib/tests/server/transport-storage-model.test.ts:93:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-storage-model.test.ts > transport storage candidate contract > copies and freezes a durable item instance without sharing caller-owned references
+TypeError: Route transport requires a route cursor.
+ ❯ routeCursor packages/stdlib/src/server/gameplay/modules/transport-model.ts:248:11
+    246|   }
+    247|   if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    248|     throw new TypeError('Route transport requires a route cursor.');
+       |           ^
+    249|   const value = raw as Record<string, unknown>;
+    250|   if (
+ ❯ validateTransportComponentV1 packages/stdlib/src/server/gameplay/modules/transport-model.ts:373:18
+ ❯ buildTransportStorageCandidateV1 packages/stdlib/src/server/gameplay/modules/transport-storage-model.ts:118:21
+ ❯ build packages/stdlib/tests/server/transport-storage-model.test.ts:73:31
+ ❯ packages/stdlib/tests/server/transport-storage-model.test.ts:100:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/transport-storage-model.test.ts > transport storage candidate contract > consumes only configured whole fuel items and preserves fractional residual fuel
+TypeError: Route transport requires a route cursor.
+ ❯ routeCursor packages/stdlib/src/server/gameplay/modules/transport-model.ts:248:11
+    246|   }
+    247|   if (!raw || typeof raw !== 'object' || Array.isArray(raw))
+    248|     throw new TypeError('Route transport requires a route cursor.');
+       |           ^
+    249|   const value = raw as Record<string, unknown>;
+    250|   if (
+ ❯ validateTransportComponentV1 packages/stdlib/src/server/gameplay/modules/transport-model.ts:373:18
+ ❯ buildTransportStorageCandidateV1 packages/stdlib/src/server/gameplay/modules/transport-storage-model.ts:118:21
+ ❯ build packages/stdlib/tests/server/transport-storage-model.test.ts:73:31
+ ❯ packages/stdlib/tests/server/transport-storage-model.test.ts:112:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 24 passed (28)
+   Start at  01:50:01
+   Duration  1.44s (transform 1.13s, setup 0ms, import 1.27s, tests 23ms, environment 0ms)
+

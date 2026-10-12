@@ -352,5 +352,8 @@ export type { ForageModuleConfiguration } from '../gameplay/modules/forage-model
 export { defineTransportInteractionModule } from '../gameplay/modules/transport-interaction-module';
 export type { TransportInteractionConfig } from '../gameplay/modules/transport-interaction-config';
 export { defineTransportRelationModule } from '../gameplay/modules/transport-relation-module';
+export { defineTransportStorageModule } from '../gameplay/modules/transport-storage-module';
+export type { TransportStorageConfigV1 } from '../gameplay/modules/transport-storage-module';
+export type { TransportStorageInputV1, TransportStorageCommandV1 } from '../gameplay/modules/transport-storage-model';
 export type { TransportRelationConfig } from '../gameplay/modules/transport-relation-interaction';
 export { routeInclinationV1 } from '../gameplay/modules/route-definition';
