@@ -14,3 +14,14 @@ changes/*/experiments/*.wasm
 crates/target/
 
 apps/web/public/packs/
+
+# Runtime evidence belongs in artifact/object storage, not Git ZIP shards.
+**/*trace*.zip
+**/*.zip.part-*
+**/*.zip.[0-9]*
+changes/*/evidence/**/*.zip
+changes/*/evidence/**/*.mp4
+changes/*/evidence/**/*.webm
+reports/**/*.zip
+reports/**/*.mp4
+reports/**/*.webm

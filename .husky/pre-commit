@@ -1,2 +1,5 @@
+set -e
+
+pnpm check:git-artifacts --staged
 pnpm exec lint-staged
 pnpm run lint:paths
