@@ -1,0 +1,9 @@
+{
+  "command": ["pnpm", "verify:static:ci"],
+  "exitCode": 2,
+  "durationSeconds": 72.60525631904602,
+  "sourceSha": "7c7b6379ad8f940a9f52644aa0cafc13af4a6ee0",
+  "dirtySource": true,
+  "freeze": "storage-authority-freeze-1149-01.json",
+  "context": "Serial root validation; original commands and assertions/timeouts."
+}

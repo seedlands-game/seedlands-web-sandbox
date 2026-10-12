@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/network-action-reference.test.ts
+3:10:12 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  03:10:12
+   Duration  4.51s (transform 5.51s, setup 0ms, import 7.41s, tests 904ms, environment 0ms)
+

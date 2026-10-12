@@ -1,0 +1,20 @@
+$ pnpm format:check && pnpm lint:paths && pnpm lint && pnpm typecheck && pnpm test:eslint && pnpm test:ci-selection
+$ node scripts/check-frozen-evidence.mjs && prettier --check .
+Frozen evidence: 5/5 exact byte identities verified.
+Checking formatting...
+All matched files use Prettier code style!
+$ ls-lint
+$ eslint .
+$ pnpm --filter @seedlands/kernel typecheck && pnpm --filter @seedlands/stdlib typecheck && pnpm --filter @seedlands/playbook-classic typecheck && pnpm --filter @seedlands/eslint-plugin typecheck && pnpm --filter @seedlands/web typecheck && pnpm --filter @seedlands/agent-server typecheck && tsc -p tsconfig.test.json --noEmit && tsc -p tsconfig.tools.json --noEmit && tsc -p tsconfig.classic-tests.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+$ tsc -p tsconfig.json --noEmit
+src/server/protocol/network-action-reference.ts(58,12): error TS1360: Type '{ readonly 'inventory-pointer': readonly ["actor-reference-stale", "actor-dead", "stale-inventory-revision", "stale-station-reference", "stale-station-revision", "station-context-required", ... 21 more ..., "inventory-rejected"]; ... 11 more ...; readonly 'set-difficulty': readonly [...]; }' does not satisfy the expected type 'Record<"place" | "station" | "attack" | "craft" | "interact" | "respawn" | "inventory-pointer" | "transport-storage" | "select-hotbar" | "begin-break" | "cancel-break" | "move-inventory" | "use-inventory" | "set-difficulty", readonly string[]>'.
+  Property '"transport-storage"' is missing in type '{ readonly 'inventory-pointer': readonly ["actor-reference-stale", "actor-dead", "stale-inventory-revision", "stale-station-reference", "stale-station-revision", "station-context-required", ... 21 more ..., "inventory-rejected"]; ... 11 more ...; readonly 'set-difficulty': readonly [...]; }' but required in type 'Record<"place" | "station" | "attack" | "craft" | "interact" | "respawn" | "inventory-pointer" | "transport-storage" | "select-hotbar" | "begin-break" | "cancel-break" | "move-inventory" | "use-inventory" | "set-difficulty", readonly string[]>'.
+src/server/protocol/network-action-reference.ts(59,53): error TS2339: Property 'transport-storage' does not exist on type '{ readonly 'inventory-pointer': readonly ["actor-reference-stale", "actor-dead", "stale-inventory-revision", "stale-station-reference", "stale-station-revision", "station-context-required", ... 21 more ..., "inventory-rejected"]; ... 11 more ...; readonly 'set-difficulty': readonly [...]; }'.
+src/server/protocol/network-action-reference.ts(109,11): error TS7053: Element implicitly has an 'any' type because expression of type '"place" | "station" | "attack" | "craft" | "interact" | "respawn" | "inventory-pointer" | "transport-storage" | "select-hotbar" | "begin-break" | "cancel-break" | "move-inventory" | "use-inventory" | "set-difficulty"' can't be used to index type '{ readonly 'inventory-pointer': readonly ["actor-reference-stale", "actor-dead", "stale-inventory-revision", "stale-station-reference", "stale-station-revision", "station-context-required", ... 21 more ..., "inventory-rejected"]; ... 11 more ...; readonly 'set-difficulty': readonly [...]; }'.
+  Property 'transport-storage' does not exist on type '{ readonly 'inventory-pointer': readonly ["actor-reference-stale", "actor-dead", "stale-inventory-revision", "stale-station-reference", "stale-station-revision", "station-context-required", ... 21 more ..., "inventory-rejected"]; ... 11 more ...; readonly 'set-difficulty': readonly [...]; }'.
+/workspace/seedlands-web-sandbox/packages/stdlib:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/stdlib@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2
+[ELIFECYCLE] Command failed with exit code 2.
+[ELIFECYCLE] Command failed with exit code 2.

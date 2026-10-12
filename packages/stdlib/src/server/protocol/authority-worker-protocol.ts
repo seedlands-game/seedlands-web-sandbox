@@ -124,6 +124,7 @@ export type AuthorityGameplayView = Readonly<{
   cropStages?: readonly AuthorityCropStageProjection[];
   navigation?: import('../gameplay/navigation-items-runtime').NavigationHeldProjectionV1 | null;
   transports?: readonly import('../gameplay/modules/transport-model').TransportStateV2[];
+  transportStorage?: readonly import('../gameplay/transport-storage-access').TransportStorageViewV1[];
   fluidTargetItems?: readonly Readonly<{ itemId: string; policy: 'fluid-source' | 'fluid-surface' }>[];
   transportDefinitions?: readonly import('../gameplay/modules/transport-model').TransportDefinitionV1[];
   metrics: AuthorityGameplayMetrics;
@@ -197,6 +198,8 @@ export type AuthorityBootstrapGeneration = Readonly<{
 export type AuthorityAction =
   | AuthorityStationAction
   | AuthorityInventoryPointerAction
+  | (Readonly<{ type: 'transport-storage' }> &
+      import('../gameplay/modules/transport-storage-model').TransportStorageInputV1)
   | Readonly<{ type: 'select-hotbar'; slot: number }>
   | Readonly<{ type: 'craft'; recipeId: string }>
   | Readonly<{ type: 'attack'; targetId: string }>

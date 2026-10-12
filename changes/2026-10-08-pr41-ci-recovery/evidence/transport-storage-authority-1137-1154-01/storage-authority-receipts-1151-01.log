@@ -1,0 +1,33 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/network-action-reference.test.ts
+3:09:01 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (12 tests | 1 failed) 324ms
+   × uses the normal Authority action and readonly current carrier revision without client-selected operations 110ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > uses the normal Authority action and readonly current carrier revision without client-selected operations
+TypeError: Unsupported public action.
+ ❯ outcome packages/stdlib/src/server/protocol/network-action-reference.ts:149:13
+    147|       return { success: true };
+    148|     default:
+    149|       throw new TypeError('Unsupported public action.');
+       |             ^
+    150|   }
+    151| }
+ ❯ projectActionReceiptReference packages/stdlib/src/server/protocol/network-action-reference.ts:189:25
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:104:10
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 19 passed (20)
+   Start at  03:09:01
+   Duration  3.27s (transform 3.89s, setup 0ms, import 5.24s, tests 575ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/network-action-reference.test.ts`
+Exit status 1

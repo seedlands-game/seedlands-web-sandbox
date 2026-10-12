@@ -35,6 +35,63 @@ const actions: readonly AuthorityAction[] = [
 const interactionSelection = { inventoryRevision: 2, modeRevision: 1, creativeCatalogRevision: 1, selectedSlot: 0 };
 
 describe('动作请求参考投影', () => {
+  it('copies the versioned storage actor, carrier and exact command and rejects extra command fields', () => {
+    const action = {
+      type: 'transport-storage',
+      version: 1,
+      actor: { entityId: 'player-1', epoch: 2, lifetime: 3 },
+      transport: { entityId: 'carrier-1', epoch: 2, lifetime: 4 },
+      expectedInventoryRevision: 5,
+      expectedTransportRevision: 6,
+      command: { kind: 'transfer', direction: 'deposit', actorSlot: 0, transportSlot: 0, count: 2 },
+    };
+    const copy = projectActionRequestReference(action as unknown as AuthorityAction, 7)
+      .action as unknown as typeof action;
+    expect(copy).toEqual(action);
+    expect(copy.actor).not.toBe(action.actor);
+    expect(copy.transport).not.toBe(action.transport);
+    expect(copy.command).not.toBe(action.command);
+    action.actor.epoch = 20;
+    action.command.count = 9;
+    expect(copy.actor.epoch).toBe(2);
+    expect(copy.command.count).toBe(2);
+    expect(() =>
+      projectActionRequestReference(
+        { ...action, command: { ...action.command, injected: true } } as unknown as AuthorityAction,
+        8,
+      ),
+    ).toThrow();
+    expect(() =>
+      projectActionRequestReference({ ...action, operationId: 'foreign:operation' } as unknown as AuthorityAction, 8),
+    ).toThrow();
+    for (const count of [0, -1, 0.5, Number.MAX_SAFE_INTEGER + 1])
+      expect(() =>
+        projectActionRequestReference(
+          { ...action, command: { ...action.command, count } } as unknown as AuthorityAction,
+          8,
+        ),
+      ).toThrow();
+    expect(() =>
+      projectActionRequestReference(
+        { ...action, actor: { ...action.actor, epoch: 0 } } as unknown as AuthorityAction,
+        8,
+      ),
+    ).toThrow();
+    const zero = projectActionRequestReference(
+      {
+        ...action,
+        expectedInventoryRevision: -0,
+        command: { ...action.command, actorSlot: -0, transportSlot: -0 },
+      } as unknown as AuthorityAction,
+      8,
+    ).action;
+    expect(zero.type).toBe('transport-storage');
+    if (zero.type !== 'transport-storage' || zero.command.kind !== 'transfer')
+      throw Error('Expected storage transfer.');
+    expect(Object.is(zero.expectedInventoryRevision, -0)).toBe(false);
+    expect(Object.is(zero.command.actorSlot, -0)).toBe(false);
+    expect(Object.is(zero.command.transportSlot, -0)).toBe(false);
+  });
   it('投影十三种真实 Host 参数，复制动作且不携带客户端身份', () => {
     for (const [sequence, action] of actions.entries()) {
       const projected = projectActionRequestReference(action, sequence);

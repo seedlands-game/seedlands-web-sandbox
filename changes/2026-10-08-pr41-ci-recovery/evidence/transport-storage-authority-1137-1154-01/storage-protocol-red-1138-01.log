@@ -1,0 +1,28 @@
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/stdlib| packages/stdlib/tests/server/network-action-request-reference.test.ts (3 tests | 1 failed) 15ms
+     × copies the versioned storage actor, carrier and exact command and rejects extra command fields 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/stdlib| packages/stdlib/tests/server/network-action-request-reference.test.ts > 动作请求参考投影 > copies the versioned storage actor, carrier and exact command and rejects extra command fields
+TypeError: Unsupported public action.
+ ❯ copyAuthorityActionReference packages/stdlib/src/server/protocol/network-action-reference-copy.ts:88:71
+     86|   const source = record(value);
+     87|   const type = source.type;
+     88|   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw …
+       |                                                                       ^
+     89|   switch (type) {
+     90|     case 'inventory-pointer': {
+ ❯ projectActionRequestReference packages/stdlib/src/server/protocol/network-action-request-reference.ts:23:13
+ ❯ packages/stdlib/tests/server/network-action-request-reference.test.ts:40:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  02:46:24
+   Duration  394ms (transform 217ms, setup 0ms, import 259ms, tests 15ms, environment 0ms)
+

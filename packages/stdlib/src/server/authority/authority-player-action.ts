@@ -14,6 +14,7 @@ import {
 import type { MediaTargetPortV1 } from '../gameplay/gameplay-media-target-runtime';
 import { dispatchAuthorityCropTarget } from './authority-crop-runtime';
 import { dispatchAuthorityTransportTarget } from './authority-transport-interaction';
+import { dispatchAuthorityTransportStorage } from './authority-transport-storage';
 
 export type AuthorityStructureTargetPort = Pick<StructureTargetPortV1, 'resolve' | 'invoke'>;
 export type AuthorityMediaTargetPort = Pick<MediaTargetPortV1, 'resolve' | 'invoke'>;
@@ -38,6 +39,8 @@ export function applyAuthorityPlayerAction(
     return result;
   };
   switch (action.type) {
+    case 'transport-storage':
+      return dispatchAuthorityTransportStorage(server, playerId, action);
     case 'inventory-pointer': {
       const actor = server.resolveEntityReference(action.actor);
       if (!actor || actor.id !== playerId) return { success: false, reason: 'actor-reference-stale' };

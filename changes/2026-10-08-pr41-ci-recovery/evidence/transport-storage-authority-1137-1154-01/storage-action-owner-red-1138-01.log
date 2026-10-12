@@ -1,0 +1,75 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+2:46:25 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (11 tests | 2 failed) 259ms
+   × uses the normal Authority action and readonly current carrier revision without client-selected operations 69ms
+   × does not project or accept storage actions without the optional capability 22ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > uses the normal Authority action and readonly current carrier revision without client-selected operations
+AssertionError: expected undefined to deeply equal [ ObjectContaining{…} ]
+
+- Expected:
+[
+  ObjectContaining {
+    "fuel": 0,
+    "fuels": [
+      {
+        "definitionId": "sample:surface-cart",
+        "itemId": "sample:stone",
+        "units": 4,
+      },
+    ],
+    "inventory": [
+      null,
+    ],
+    "reference": {
+      "entityId": "transport-2",
+      "epoch": 1,
+      "lifetime": 2,
+    },
+    "revision": 0,
+  },
+]
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:82:33
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > does not project or accept storage actions without the optional capability
+AssertionError: expected undefined to match object { success: false }
+
+- Expected:
+{
+  "success": false,
+}
+
++ Received:
+undefined
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:103:119
+    101|   const before = sides(runtime);
+    102|   const input = readTransportStorageInputV1(request(runtime, { kind: '…
+    103|   expect((await runtime.performAction({ type: 'transport-storage', ...…
+       |                                                                                                                       ^
+    104|   expect(sides(runtime)).toEqual(before);
+    105| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 9 passed (11)
+   Start at  02:46:25
+   Duration  3.09s (transform 2.25s, setup 0ms, import 2.72s, tests 259ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

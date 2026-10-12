@@ -1861,3 +1861,21 @@ SurfaceSupportPortV1 新增可选第二参数 proposedYaw；单参数消费者�
 夹具/诊断失败保留：1101在内容注册完成前读取items，改为Host初始化校验；1103–1105在prepared commit内调用checkpoint/view触发既有drain guard，改用直接只读owner查询。1106–1111死亡诊断最初错误推断Creative免疫，后由实际返回 death-inventory-policy-unavailable 证伪：样例Pack缺死亡policy，1112显式提供既有policy后真实死亡测试通过。1113 ECS替换注入器this绑定错误，1115修正后9 PASS；1117类型与lint发现测试把V2投影视作带revision及this alias，1118修正为checkpoint组件读取和lexical callback，没有变更生产投影或规则。原始失败不替代语义反例。
 
 远端精确326f7713的CI444五项非浏览器检查PASS、Chromium FAIL、Pages SKIPPED；1115读取Chromium job日志返回 Transport closed，未获得远端具体失败矩阵。旧主旅程1030仍FAIL、C4/C5未完成，不能据本checkpoint宣称可合入。未运行本仓储组的全量headless/build/native；预算实际UI最新读数未更新，继续依赖主对话真实读数，无百分比估算。
+
+### 1137：仓储正常Authority协议与只读视图合同
+
+1118后续完整验证和失败均以已封存transport-storage-1096-1126-01为准：stdlib1342 PASS、完整静态与build PASS；headless首次1301 PASS/2个原5000ms timeout，单独作物12 PASS后，原源码/完整命令/断言/worker/timeout且无其他root验证的完整1303 PASS。已提交推送7c7b6379；本片没有native验收，不代表正式Classic可玩。
+
+下一片将可选storage capability接入正常Authority action与派生view。新增transport-storage动作只携带版本化玩家/载具reference、双方期望revision、明确槽/数量命令，由Authority选择已注册的operationId，不接受客户端指定模块operation。action copy深复制、规范化安全整数reference并拒绝非法命令/额外字段；玩家必须匹配会话actor。派生view只在capability存在时提供可达载具的当前component revision、fuel、inventory及Pack fuel binding；距离/LOS/未知地形沿用owner同一访问函数，只有readonly复制，不新增owner或改V2运动codec。
+
+先增加正常Authority行为与协议copy反例：view提供可用revision，正常performAction守恒且双方各一次，陈旧重放零写；无capability不出现view且拒绝动作；陌生actor与非法消息零写。此片仍不声明Classic内容、玩家UI、native重开或主旅程通过。后续正式配置变更前必须保存精确当前composition predecessor，再验证非空transport组件迁移，不扩大旧档接受范围。
+
+1138有效RED：协议1 FAIL/2 PASS（不支持storage action）；Authority 2 FAIL/9 PASS（缺view及动作）。1139协议3 PASS，但新view getter漏装显式GameServer API，11个owner失败；1140补齐安装表与已有reference segment预加载后11 PASS。1143补revision、隐藏不可达view、异常计量/-0规范化和实际loaded-world读取unknown反例后，协议3 PASS、owner12 PASS。
+
+1142类型两组PASS，lint指出GameplayHost509行。1144运输查询拆分行为21 PASS，但class/interface合并被既有lint拒绝且Host501行；没有添加豁免。1146改为普通只读查询基类，类型/lint PASS，每次查询当前gameplay owner。基类只保存getter，不缓存ECS或添加owner。最终静态、完整回归/build/native尚待执行，不把候选过程中的PASS当最终完成。
+
+冻结前补正常时序反例：静止载具在view与动作之间推进50ms正常Authority时间，若货物/燃料未被改变，界面中的本次快照应仍可提交；不通过重新读取期望revision掩盖陈旧。该测试只验证静止场景，不据此放宽移动载具或实际存储并发的freshness。1147定向协议/投影/准备25 PASS，仓储/船/关系34 PASS。
+
+1148正常50ms时序owner12 PASS。1149冻结15路径后完整静态在stdlib生产类型检查发现network收据的合法失败表未列新action，exit2，后续stdlib/headless/build均未启动；旧freeze与日志保留。1150补合法失败原因表后stdlib生产typecheck PASS，再补实际executeTransaction成功/重复去重/陈旧拒绝与public收据投影，验证正常端口之外的收据接线。
+
+1151事务收据定向19 PASS/1 FAIL：实际成功收据仍在success switch中不支持storage，补齐后1153共20 PASS。包含同一事务返回同一receipt且不再次执行、新事务陈旧请求业务拒绝、正常结果与拒绝结果合法public投影；1152最新类型/lint PASS。下一完整验证绑定新的16文件freeze，不改写1149旧freeze、不把20 PASS替代完整回归。
