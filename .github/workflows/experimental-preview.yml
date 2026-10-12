@@ -61,7 +61,9 @@ jobs:
           PREVIEW_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           node --input-type=module <<'JS'
-          import { writeFileSync } from 'node:fs';
+          import { mkdirSync, writeFileSync } from 'node:fs';
+          mkdirSync('.preview-deploy-tools', { recursive: true });
+          writeFileSync('.preview-deploy-tools/package.json', JSON.stringify({ private: true }) + '\n');
           writeFileSync('apps/web/dist/experimental-preview.json', JSON.stringify({
             experimental: true,
             sourceSha: process.env.PREVIEW_SHA,
@@ -75,8 +77,10 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4.136.3'
+          packageManager: npm
+          workingDirectory: .preview-deploy-tools
           command: >-
-            pages deploy apps/web/dist
+            pages deploy ../apps/web/dist
             --project-name=seedlands-web-sandbox
             --branch=pr-41-experimental
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}

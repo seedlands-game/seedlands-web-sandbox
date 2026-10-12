@@ -1953,3 +1953,7 @@ e678通用控制已正常推送，1178完整static/stdlib1343/headless1313/build
 1243提交被max-lines拒绝（运动模型504/500）；仅提取原转向乘积到局部turn变量并压缩重复调用行，保留计算顺序和fallback行为。不跳过hook、不调整门槛；1241/1242封存保持原字节，新定向检查与构建另记1245。
 
 1248确认正常push1ae2305成功，但PR41已closed、base更新9539dea，pull_request-only预览未触发。尊重关闭状态，不重开/合并/改PR metadata；独立实验预览增加仅当前仓库指定功能分支push触发，source SHA统一为PR head或push github.sha，原CI/main生产触发不变。仅workflow/spec变更，不重复运行生产代码全量验收；已有1245最终代码构建及1242原生储运结果保留，独立新push job仍必须新精确SHA build/native smoke后才部署。
+
+1252精确b6719aac实验预览run38232934099：build和原生储运smoke均SUCCESS；发布在action自装Wrangler时pnpm ADDING_TO_ROOT失败，尚未触及Cloudflare身份验证。按固定action.yml实际声明的packageManager输入，仅在独立预览action明确npm安装/运行Wrangler，保留版本/action pin/Cloudflare项目/预览branch；不改仓库依赖、原CI或安全门槛。新push重跑产生新精确SHA证据，不原样盲重试。
+
+1253根package有workspace:*依赖，npm不能在根目录安装；仅在runner中新建私有临时.preview-deploy-tools/package.json，action workingDirectory指向该独立工具目录、部署路径../apps/web/dist。源码及已构建玩法字节不改，repo依赖/锁文件不改，新的精确SHA build/smoke仍先于此临时工具创建。
