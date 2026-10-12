@@ -1,0 +1,9 @@
+{
+  "command": ["pnpm", "build"],
+  "exitCode": 0,
+  "durationSeconds": 44.140166997909546,
+  "sourceSha": "326f77131eb69c7a2da99f820b4fb69110c6a61a",
+  "dirtySource": true,
+  "freeze": "storage-freeze-1121-01.json",
+  "context": "No other root validation task running; source, command, assertions and timeouts unchanged."
+}

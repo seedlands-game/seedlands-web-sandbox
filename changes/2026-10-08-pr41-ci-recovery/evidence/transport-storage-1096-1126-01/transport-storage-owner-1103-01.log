@@ -1,0 +1,35 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts
+2:03:39 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (6 tests | 3 failed) 232ms
+   × rejects inventory-change after preparation without partially applying the proposed transfer 22ms
+   × rejects carrier-move after preparation without partially applying the proposed transfer 21ms
+   × rejects actor-death after preparation without partially applying the proposed transfer 16ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects inventory-change after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects carrier-move after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-death after preparation without partially applying the proposed transfer
+AssertionError: expected undefined to be defined
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:162:24
+    160|     try {
+    161|       expect(runtime.server.invokeActorModuleOperation(runtime.playerI…
+    162|       expect(external).toBeDefined();
+       |                        ^
+    163|       expect(sides(runtime)).toEqual(external);
+    164|     } finally {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 25 passed (28)
+   Start at  02:03:39
+   Duration  7.53s (transform 6.61s, setup 0ms, import 8.90s, tests 4.72s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts`
+Exit status 1

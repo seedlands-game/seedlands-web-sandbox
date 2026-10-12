@@ -1,0 +1,58 @@
+{
+  "sourceSha": "326f77131eb69c7a2da99f820b4fb69110c6a61a",
+  "dirtySource": true,
+  "files": [
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "e9e63895f7a727d143ed6b9d73a4ed425a26e60a21775eadab54b8048c2ac262"
+    },
+    {
+      "path": "docs/code-map.md",
+      "sha256": "3fdf10a04f7e75d9ad176dbeefbcabcd12c8cdbfad7e1913cb4c8cc9e57e9e4b"
+    },
+    {
+      "path": "package.json",
+      "sha256": "470bd85506647ab008f256dd468eed2207c8ef002446f57604d7a19184677ede"
+    },
+    {
+      "path": "packages/stdlib/src/server/composition/mod-api.ts",
+      "sha256": "21ba8e6af5b6376ab952b548487960962245c16dfaf04f4b18b53fe8765e373a"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/gameplay-registered-adapters.ts",
+      "sha256": "286255c20a4cbb1241138e94b97bff0faf0294df1ffc563ce6e1f09c7335c8a6"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/gameplay-runtime.ts",
+      "sha256": "c5263f73b5a975b1ca169543ae67f1fffb1793c041fc3e39b58b593a0c7a5915"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/gameplay-module-runtime.ts",
+      "sha256": "bce347189bd465f7e895a6656c6ee879ff0736d85da56493787075aca62c9991"
+    },
+    {
+      "path": "tsconfig.classic-tests.json",
+      "sha256": "eddcdc84afe7944b0f4ddba6a0214951aafec2c2580429ec63e0c327b3f0c7be"
+    },
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts",
+      "sha256": "10b34f88a4399730a34138b974a692ce2bb88034c8f2fc79668a4e26c4f02224"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/registered-transport-storage-runtime.ts",
+      "sha256": "0ad7fc746de6c59cf293cbdaab64e988c1c0f0c947639750645ce24073f8b09c"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-storage-model.ts",
+      "sha256": "2c44817304ca52a717f1b1c371a795279dbd8b0360bcc79b490a142c416e3479"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-storage-module.ts",
+      "sha256": "6ad7bb65b3f8f871740eb1de33ca0e9d5ffc25570be4c623bf245213262da4a1"
+    },
+    {
+      "path": "packages/stdlib/tests/server/transport-storage-model.test.ts",
+      "sha256": "91852d315b96703757d2c5a16c7cbe05e2beb97c0b09991430a1e10e3c0f5031"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# 通用运输仓储 checkpoint
+
+源码身份为326f77131eb69c7a2da99f820b4fb69110c6a61a上的13个未提交文件，详见freeze；这不是精确提交SHA的浏览器产物验收。
+
+可选模块通过既有注册操作、transport/inventory授权与单个ECS prepared mutation提交货物或燃料。候选28例、注册owner9例覆盖守恒、消费、freshness、死亡、ECS替换、载具销毁及非空checkpoint恢复；并不证明正式Classic箱车/动力车、玩家UI、完整portable世界旧档导入或主旅程完成。
+
+最终固定源码验证：stdlib176文件/1342 PASS；独占root验证上下文的完整headless166文件/1303 PASS；完整静态门禁与生产构建PASS。当前组未运行native浏览器，不能将构建通过计作玩家验收。docs/code-map.md更新了新增模块与Host职责入口，既有架构边界未放宽。
+
+原始失败日志保留；1097为非法routeCursor夹具，1101内容初始化顺序，1103–1105为commit内diagnostic drain guard，1106–1111的死亡失败由实际缺失death policy确认。最初Creative免疫推断已撤回。1113是fault注入器this绑定错误，1117为测试投影revision与this alias类型/lint问题；1122选择脚本不存在，1123实际17项合同通过。完整suite、静态检查与构建以各自receipt为准；任何失败不能由后续定向通过替代。
+
+1121完整headless为1301 PASS/2 FAIL，两例作物收获均为原5000ms timeout；同期运行了完整静态检查。静态检查1124 PASS后，1127单独相同作物文件12 PASS。1128再运行原完整headless命令，源码、断言、worker配置与timeout不变，且没有其他root验证任务；这是一次明确改变运行负载上下文的诊断，保留首次完整失败，不由定向12 PASS宣称完整通过，也不作性能归因或收益声明。
+
+远端326f的CI444五项非浏览器PASS、Chromium FAIL、Pages SKIPPED。Chromium日志读取返回Transport closed，失败产物尚未落地。既有1030主旅程FAIL且C4/C5未完成。此片不构成可合入判断，不包含性能收益、合并或生产部署。

@@ -1,0 +1,106 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts
+2:02:14 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (6 tests | 6 failed) 52ms
+   × publishes cargo deposit, withdrawal and fuel consumption with actor and carrier revisions once 37ms
+   × rejects out-of-range and blocked carrier operations with both live sides unchanged 4ms
+   × rejects inventory-change after preparation without partially applying the proposed transfer 3ms
+   × rejects carrier-move after preparation without partially applying the proposed transfer 3ms
+   × rejects actor-death after preparation without partially applying the proposed transfer 3ms
+   × persists nonempty cargo and fuel and rejects an operation carrying the retired references 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > publishes cargo deposit, withdrawal and fuel consumption with actor and carrier revisions once
+TypeError: Content definitions are not ready during registration.
+ ❯ Object.readContentDefinitions packages/stdlib/src/server/composition/assembly.ts:363:38
+    361|       }),
+    362|       readContentDefinitions() {
+    363|         if (!definitionsReady) throw new TypeError('Content definition…
+       |                                      ^
+    364|         return Object.freeze({
+    365|           items: Object.freeze([...items.values()]),
+ ❯ resolve packages/stdlib/src/server/gameplay/modules/content-module.ts:62:33
+ ❯ Object.require packages/stdlib/src/server/gameplay/modules/content-module.ts:136:34
+ ❯ Object.register packages/stdlib/src/server/gameplay/modules/transport-storage-module.ts:82:15
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:394:14
+ ❯ composition apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:270:10
+ ❯ create apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:280:17
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:14:25
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:56:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects out-of-range and blocked carrier operations with both live sides unchanged
+TypeError: Content definitions are not ready during registration.
+ ❯ Object.readContentDefinitions packages/stdlib/src/server/composition/assembly.ts:363:38
+    361|       }),
+    362|       readContentDefinitions() {
+    363|         if (!definitionsReady) throw new TypeError('Content definition…
+       |                                      ^
+    364|         return Object.freeze({
+    365|           items: Object.freeze([...items.values()]),
+ ❯ resolve packages/stdlib/src/server/gameplay/modules/content-module.ts:62:33
+ ❯ Object.require packages/stdlib/src/server/gameplay/modules/content-module.ts:136:34
+ ❯ Object.register packages/stdlib/src/server/gameplay/modules/transport-storage-module.ts:82:15
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:394:14
+ ❯ composition apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:270:10
+ ❯ create apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:280:17
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:14:25
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:97:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects inventory-change after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects carrier-move after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-death after preparation without partially applying the proposed transfer
+TypeError: Content definitions are not ready during registration.
+ ❯ Object.readContentDefinitions packages/stdlib/src/server/composition/assembly.ts:363:38
+    361|       }),
+    362|       readContentDefinitions() {
+    363|         if (!definitionsReady) throw new TypeError('Content definition…
+       |                                      ^
+    364|         return Object.freeze({
+    365|           items: Object.freeze([...items.values()]),
+ ❯ resolve packages/stdlib/src/server/gameplay/modules/content-module.ts:62:33
+ ❯ Object.require packages/stdlib/src/server/gameplay/modules/content-module.ts:136:34
+ ❯ Object.register packages/stdlib/src/server/gameplay/modules/transport-storage-module.ts:82:15
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:394:14
+ ❯ composition apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:270:10
+ ❯ create apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:280:17
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:14:25
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:129:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > persists nonempty cargo and fuel and rejects an operation carrying the retired references
+TypeError: Content definitions are not ready during registration.
+ ❯ Object.readContentDefinitions packages/stdlib/src/server/composition/assembly.ts:363:38
+    361|       }),
+    362|       readContentDefinitions() {
+    363|         if (!definitionsReady) throw new TypeError('Content definition…
+       |                                      ^
+    364|         return Object.freeze({
+    365|           items: Object.freeze([...items.values()]),
+ ❯ resolve packages/stdlib/src/server/gameplay/modules/content-module.ts:62:33
+ ❯ Object.require packages/stdlib/src/server/gameplay/modules/content-module.ts:136:34
+ ❯ Object.register packages/stdlib/src/server/gameplay/modules/transport-storage-module.ts:82:15
+ ❯ assembleWorldPacks packages/stdlib/src/server/composition/assembly.ts:394:14
+ ❯ composition apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:270:10
+ ❯ create apps/web/tests/integration/runtime/server/composition/transport-authority-test-fixture.ts:280:17
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:14:25
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:168:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  6 failed | 22 passed (28)
+   Start at  02:02:14
+   Duration  8.13s (transform 6.59s, setup 0ms, import 8.77s, tests 5.21s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts`
+Exit status 1

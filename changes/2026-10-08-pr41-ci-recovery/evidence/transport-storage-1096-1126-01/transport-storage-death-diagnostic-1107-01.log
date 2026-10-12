@@ -1,0 +1,41 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+2:09:05 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (6 tests | 1 failed) 576ms
+   × rejects actor-death after preparation without partially applying the proposed transfer 117ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-death after preparation without partially applying the proposed transfer
+AssertionError: {"fault":"actor-death","external":{"inventory":{"version":1,"actor":{"entityId":"player-1","epoch":1,"lifetime":1},"revision":4,"slots":[{"itemId":"sample:wood","count":8},{"itemId":"sample:stone","count":4},null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"hotbarSize":8,"armor":{"helmet":null,"chestplate":null,"leggings":null,"boots":null},"cursor":{"version":1,"revision":0,"stack":null,"origin":null,"craftingGrid":[null,null,null,null]},"matchedCraftingRecipeIds":[]},"component":{"version":2,"reference":{"entityId":"transport-2","epoch":1,"lifetime":2},"definitionId":"sample:surface-cart","pose":{"position":[3.5,60,0.5],"yaw":0},"velocity":[0,0,0],"routeCursor":null,"rider":null,"fuel":0,"inventory":[null]},"carrier":{"version":2,"reference":{"entityId":"transport-2","epoch":1,"lifetime":2},"definitionId":"sample:surface-cart","pose":{"position":[3.5,60,0.5],"yaw":0},"velocity":[0,0,0],"routeCursor":null,"rider":null,"fuel":0,"inventory":[null]},"revision":5}}: expected { ok: true, …(2) } to match object { ok: false }
+(8 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "ok": false,
++   "ok": true,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:162:59
+    160|     try {
+    161|       const result = runtime.server.invokeActorModuleOperation(runtime…
+    162|       expect(result, JSON.stringify({ fault, external })).toMatchObjec…
+       |                                                           ^
+    163|       expect(external, JSON.stringify(result)).toBeDefined();
+    164|       expect(sides(runtime)).toEqual(external);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 5 passed (6)
+   Start at  02:09:06
+   Duration  5.45s (transform 3.97s, setup 0ms, import 4.61s, tests 576ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

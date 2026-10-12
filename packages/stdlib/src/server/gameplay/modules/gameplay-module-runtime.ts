@@ -5,6 +5,7 @@ import { BLOCK_ACTOR_COMPONENT, BLOCK_VOXEL_COMPONENT, BLOCK_WORLD_COMPONENT } f
 import { CROP_CELL_COMPONENT } from './crop-interaction-model';
 import { NAVIGATION_COMPONENT } from './navigation-interaction-model';
 import { TRANSPORT_MOTION_COMPONENT } from './transport-motion-module';
+import { TRANSPORT_STORAGE_ACTOR_COMPONENT, TRANSPORT_STORAGE_SITE_COMPONENT } from './transport-storage-module';
 import { TRANSPORT_DEPLOYMENT_COMPONENT } from './transport-interaction-config';
 import { TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT } from './transport-relation-interaction';
 import type { WorldComposition } from '../../composition/contracts';
@@ -65,9 +66,12 @@ export class GameplayModuleRuntime {
       structures?: RegisteredStatePort;
       media?: RegisteredStatePort;
       navigation?: () => RegisteredStatePort;
-      transport?: RegisteredStatePort;
-      transportRelations?: RegisteredStatePort;
-      transportMotion?: RegisteredStatePort;
+      transports?: Readonly<{
+        transport?: Readonly<{ state: RegisteredStatePort }> | null;
+        transportRelations?: Readonly<{ state: RegisteredStatePort }> | null;
+        transportMotion?: Readonly<{ state: RegisteredStatePort }> | null;
+        transportStorage?: Readonly<{ state: RegisteredStatePort }> | null;
+      }>;
     }>,
   ) {}
 
@@ -92,13 +96,20 @@ export class GameplayModuleRuntime {
     const { composition } = this.options;
     if (!composition) throw new Error('Registered operations require a composed world.');
     const participant = (component: string) => {
+      const transports = this.options.transports;
+      if (
+        [TRANSPORT_STORAGE_ACTOR_COMPONENT, TRANSPORT_STORAGE_SITE_COMPONENT].includes(component) &&
+        transports?.transportStorage
+      )
+        return transports.transportStorage.state;
       if (
         [TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT].includes(component) &&
-        this.options.transportRelations
+        transports?.transportRelations
       )
-        return this.options.transportRelations;
-      if (component === TRANSPORT_MOTION_COMPONENT && this.options.transportMotion) return this.options.transportMotion;
-      if (component === TRANSPORT_DEPLOYMENT_COMPONENT && this.options.transport) return this.options.transport;
+        return transports.transportRelations.state;
+      if (component === TRANSPORT_MOTION_COMPONENT && transports?.transportMotion)
+        return transports.transportMotion.state;
+      if (component === TRANSPORT_DEPLOYMENT_COMPONENT && transports?.transport) return transports.transport.state;
       if (component === NAVIGATION_COMPONENT && this.options.navigation) return this.options.navigation();
       if (component === 'seedlands:inventory') return this.options.inventory;
       if (
