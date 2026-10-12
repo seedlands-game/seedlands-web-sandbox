@@ -1,0 +1,31 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts
+1:23:13 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts (9 tests | 1 failed) 4705ms
+   × restores a moving boat before normal physics resumes across a chunk boundary 664ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts > restores a moving boat before normal physics resumes across a chunk boundary
+AssertionError: expected 0.7197501438613709 to be greater than 0.7197501438613709
+ ❯ apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts:106:34
+    104|   restored.advanceSession(100);
+    105|   const after = restored.view().transports![0]!;
+    106|   expect(after.pose.position[2]).toBeGreaterThan(before.pose.position[…
+       |                                  ^
+    107|   expect(Math.hypot(after.velocity[0], after.velocity[2])).toBeGreater…
+    108| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 passed (9)
+   Start at  01:23:13
+   Duration  9.90s (transform 4.04s, setup 0ms, import 4.95s, tests 4.71s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/classic-boat-authority.test.ts`
+Exit status 1

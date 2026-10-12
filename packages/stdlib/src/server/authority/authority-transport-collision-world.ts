@@ -42,12 +42,18 @@ export function createAuthorityTransportCollisionWorlds(
           ...(world.sampleFluid ? { sampleFluid: (bounds: WorldAabb) => world.sampleFluid!(bounds) } : {}),
         });
   const all = wrap(colliders);
+  const riders = new Map(mountedSeats.map((seat) => [seat.carrier.entityId, seat.rider.entityId]));
 
   return Object.freeze({
     all,
     forEntity: (id: string) =>
       colliders.some((body) => body.id === `transport:${id}` || body.id === `mounted:${id}`)
-        ? wrap(colliders.filter((body) => body.id !== `transport:${id}` && body.id !== `mounted:${id}`))
+        ? wrap(
+            colliders.filter(
+              (body) =>
+                body.id !== `transport:${id}` && body.id !== `mounted:${id}` && body.id !== `mounted:${riders.get(id)}`,
+            ),
+          )
         : all,
   });
 }

@@ -1,0 +1,47 @@
+{
+  "saved": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 1, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.7908164494132057, 31.8, 0.08189990585634101], "yaw": 0.140939486778811 },
+    "velocity": [-0.04220059312776024, 0, -0.29743828376013304],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "restored": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 2, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.7894283531819433, 31.8, 0.07211632391779785], "yaw": 0.140939486778811 },
+    "velocity": [0, 0, 0],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "savedIdentity": {
+    "ok": true,
+    "data": {
+      "protocolVersion": 1,
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "seed": 3463384863,
+      "seedText": "classic-native-boat-952",
+      "generatorVersion": 11,
+      "playerId": "player-1",
+      "runtime": "authority",
+      "supported": { "player": true, "scriptedLogic": true, "existingNpcSimulation": true }
+    },
+    "frontier": {
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "worldRevision": 42,
+      "commitSequence": 5404,
+      "physicsTick": 1880,
+      "fluidWorkSequence": 164,
+      "logicObservationSequence": 605
+    }
+  }
+}

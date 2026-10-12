@@ -1,0 +1,1047 @@
+{
+  "saved": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 1, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.9676424166620525, 31.8, 0.6237261452184162], "yaw": 0.05904937184197975 },
+    "velocity": [0, 0, 0],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "restored": {
+    "version": 2,
+    "reference": { "entityId": "transport-2", "epoch": 2, "lifetime": 2 },
+    "definitionId": "seedlands:boat",
+    "pose": { "position": [2.9676424166620525, 31.8, 0.6237261452184162], "yaw": 0.05904937184197975 },
+    "velocity": [0, 0, 0],
+    "routeCursor": null,
+    "rider": null,
+    "fuel": null,
+    "inventory": []
+  },
+  "savedIdentity": {
+    "ok": true,
+    "data": {
+      "protocolVersion": 1,
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "seed": 3463384863,
+      "seedText": "classic-native-boat-952",
+      "generatorVersion": 11,
+      "playerId": "player-1",
+      "runtime": "authority",
+      "supported": { "player": true, "scriptedLogic": true, "existingNpcSimulation": true }
+    },
+    "frontier": {
+      "worldId": "seedlands:g11:classic-native-boat-952",
+      "epoch": "seedlands:classic-native-boat-952:1:world:0",
+      "worldRevision": 45,
+      "commitSequence": 7166,
+      "physicsTick": 2647,
+      "fluidWorkSequence": 149,
+      "logicObservationSequence": 765
+    }
+  },
+  "terrain": [
+    {
+      "position": [1, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [1, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [1, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [1, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [2, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [2, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [2, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [2, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [3, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, -1], "voxel": 8, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [3, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, 0], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [3, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [3, 31, 1], "voxel": 8, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [4, 31, -1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, -1], "voxel": 3, "chunkRevision": 37 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [4, 31, 0],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, 0], "voxel": 3, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    },
+    {
+      "position": [4, 31, 1],
+      "inspection": {
+        "ok": true,
+        "data": { "kind": "voxel", "position": [4, 31, 1], "voxel": 3, "chunkRevision": 42 },
+        "frontier": {
+          "worldId": "seedlands:g11:classic-native-boat-952",
+          "epoch": "seedlands:classic-native-boat-952:1:world:0",
+          "worldRevision": 45,
+          "commitSequence": 7611,
+          "physicsTick": 2816,
+          "fluidWorkSequence": 6,
+          "logicObservationSequence": 35
+        }
+      }
+    }
+  ],
+  "snapshot": {
+    "frameMs": 199.80000001192093,
+    "player": [2.965221881866455, 33.599998474121094, 1.7457356452941895],
+    "viewAngles": [0, -16],
+    "streamCenter": [0, 0],
+    "loadedChunks": 1,
+    "renderedChunks": 1,
+    "generationQueue": 15,
+    "meshingQueue": 1,
+    "deferredRemeshes": 0,
+    "onGround": true,
+    "colliding": false,
+    "interactionAttempts": 0,
+    "nativeMovementInput": { "epoch": "seedlands:classic-native-boat-952:1", "release": null },
+    "mutationCount": 0,
+    "worldRevision": 45,
+    "structuralEventCount": 0,
+    "remeshSchedulingCount": 0,
+    "lastCommitMutationCount": 0,
+    "lastCommitMeshChunkCount": 0,
+    "storageBytes": 3807346,
+    "worldTime": 11.372000000001798,
+    "timePaused": false,
+    "quality": "low",
+    "triangles": 7328,
+    "drawCalls": 3,
+    "blockLightBricks": 1,
+    "blockLightAllocatedBytes": 262144,
+    "blockLightRebuildCount": 1,
+    "collisionDebug": {
+      "enabled": false,
+      "entityCount": 0,
+      "meshCount": 0,
+      "materialCount": 0,
+      "visibleBatchCount": 0,
+      "vertexCapacity": 0,
+      "buildCount": 0,
+      "authorityRequestCount": 0
+    },
+    "runtime": "authority-worker",
+    "workers": { "total": 5, "authority": 1, "logic": 1, "persistence": 1, "fluid": 1, "general": 1 },
+    "authority": {
+      "physicsHz": 60,
+      "paused": false,
+      "physicsTick": 2824,
+      "integratedPhysicsTimeMs": 47066.666666665544,
+      "acknowledgedInputSequence": 25,
+      "physicsDebtMs": 151.4333333582981,
+      "activeTimeMs": 47218.10000002384,
+      "commitSequence": 7629,
+      "physicsCost": {
+        "count": 177,
+        "capacity": 256,
+        "samplesMs": [
+          63.10000002384186, 3.799999952316284, 4.5, 3.100000023841858, 4.099999964237213, 7.600000023841858, 3,
+          2.399999976158142, 2.300000011920929, 5.300000011920929, 1.899999976158142, 1.600000023841858,
+          1.100000023841858, 1.699999988079071, 1.199999988079071, 1.699999988079071, 1.800000011920929,
+          1.600000023841858, 1.800000011920929, 4.599999964237213, 1.800000011920929, 3.199999988079071,
+          1.9000000357627869, 1.5, 1.5999999642372131, 1.600000023841858, 1.199999988079071, 1, 0.800000011920929,
+          1.699999988079071, 0.8999999761581421, 1.399999976158142, 1.4000000357627869, 0.8999999761581421,
+          1.0999999642372131, 0.9000000357627869, 1.300000011920929, 1, 1.300000011920929, 1.5, 0.7999999523162842,
+          1.300000011920929, 1.300000011920929, 1.300000011920929, 1.100000023841858, 0.8999999761581421,
+          1.300000011920929, 1.5, 1.0999999642372131, 1.5, 1.0999999642372131, 2.5, 1.399999976158142,
+          1.4000000357627869, 1.0999999642372131, 2.200000047683716, 1.5, 1.600000023841858, 1.5, 1.5,
+          1.800000011920929, 1.199999988079071, 1.600000023841858, 1, 0.9000000357627869, 1, 1, 6.199999988079071,
+          2.699999988079071, 3.199999988079071, 1.199999988079071, 1.4000000357627869, 1.5, 1.7000000476837158,
+          1.399999976158142, 1, 1, 0.8999999761581421, 51.5, 1.300000011920929, 4.100000023841858, 1, 1.5,
+          1.199999988079071, 11.600000023841858, 3.300000011920929, 2.300000011920929, 1.5, 3.5, 1.4000000357627869,
+          1.7999999523162842, 1.100000023841858, 1.4000000357627869, 2.099999964237213, 7.199999988079071,
+          3.100000023841858, 2.399999976158142, 2, 2.300000011920929, 1, 0.9000000357627869, 0.8999999761581421,
+          0.8999999761581421, 1.7999999523162842, 1.300000011920929, 8.699999988079071, 1.2000000476837158,
+          0.8999999761581421, 0.6000000238418579, 1.699999988079071, 0.9000000357627869, 0.7999999523162842,
+          1.2000000476837158, 0.7999999523162842, 1.2000000476837158, 1.399999976158142, 1.300000011920929,
+          1.5999999642372131, 1.4000000357627869, 1.399999976158142, 1.300000011920929, 1.5999999642372131,
+          1.300000011920929, 1.199999988079071, 1.4000000357627869, 1.2999999523162842, 1.5999999642372131,
+          1.600000023841858, 2.5, 1.600000023841858, 0.7000000476837158, 0.7999999523162842, 1, 2.599999964237213,
+          1.9000000357627869, 1.199999988079071, 0.9000000357627869, 0.800000011920929, 1.699999988079071,
+          1.4000000357627869, 5.300000011920929, 0.800000011920929, 0.800000011920929, 0.800000011920929, 1.5,
+          1.2000000476837158, 0.8999999761581421, 2.100000023841858, 1.5, 1.7000000476837158, 1.300000011920929,
+          5.100000023841858, 3.099999964237213, 8.799999952316284, 2.099999964237213, 5.400000035762787,
+          1.300000011920929, 1.399999976158142, 1.300000011920929, 1.7999999523162842, 1.600000023841858, 2,
+          1.100000023841858, 1.4000000357627869, 1.4000000357627869, 12.799999952316284, 43.200000047683716,
+          1.399999976158142, 9.5, 3.600000023841858, 1.300000011920929, 1.100000023841858, 2.5, 2.299999952316284, 1.5,
+          5.800000011920929, 3.699999988079071
+        ]
+      },
+      "fluid": {
+        "pendingCellCount": 384,
+        "inFlightLeaseCount": 1,
+        "acceptedCandidateCount": 7,
+        "rejectedCandidateCount": 0,
+        "returnedLeaseCount": 0,
+        "issuedLeaseCount": 8,
+        "settledLeaseCount": 7
+      },
+      "residency": {
+        "residentCount": 12,
+        "target": 256,
+        "hardLimit": 2048,
+        "pinnedCount": 8,
+        "dirtyCount": 0,
+        "evictableCleanCount": 4,
+        "evictionCount": 0,
+        "rejectedAdmissionCount": 0,
+        "oversubscribed": false,
+        "autoSaveInFlight": false,
+        "autoSaveFailureCount": 0,
+        "nextRetryActiveTimeMs": 0,
+        "lastSaveError": null
+      },
+      "bodies": { "total": 1, "actors": 0, "worldItems": 0, "nearPlayer": 1 },
+      "snapshotRejections": {
+        "wrong-epoch": 0,
+        "duplicate": 0,
+        "physics-tick-regressed": 0,
+        "commit-regressed": 0,
+        "ack-regressed": 0
+      }
+    },
+    "logic": {
+      "blockStartedCount": 0,
+      "blockCompletedCount": 0,
+      "observationInFlight": true,
+      "pendingObservationCount": 0,
+      "submittedObservationCount": 35,
+      "receivedBatchCount": 34,
+      "completedBatchCount": 34,
+      "rejectedBatchCount": 0,
+      "lastRoundTripMs": 10.300000011920929
+    },
+    "trajectory": [
+      {
+        "physicsTick": 2649,
+        "activeTimeMs": 44155.39999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2653, "activeTimeMs": 44703.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2657,
+        "activeTimeMs": 44784.10000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2661,
+        "activeTimeMs": 44813.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2669,
+        "activeTimeMs": 44832.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2677, "activeTimeMs": 44853.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2685,
+        "activeTimeMs": 44873.69999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2693,
+        "activeTimeMs": 44894.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2695, "activeTimeMs": 44919, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2696,
+        "activeTimeMs": 44943.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2698,
+        "activeTimeMs": 44966.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2699,
+        "activeTimeMs": 44990.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2701,
+        "activeTimeMs": 45016.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2702,
+        "activeTimeMs": 45038.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2703,
+        "activeTimeMs": 45062.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2705,
+        "activeTimeMs": 45086.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2706, "activeTimeMs": 45111.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2708,
+        "activeTimeMs": 45134.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2709,
+        "activeTimeMs": 45158.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2710,
+        "activeTimeMs": 45175.60000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2711,
+        "activeTimeMs": 45198.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2713,
+        "activeTimeMs": 45222.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2714,
+        "activeTimeMs": 45246.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2716,
+        "activeTimeMs": 45279.10000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2718, "activeTimeMs": 45305, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2719,
+        "activeTimeMs": 45326.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2721,
+        "activeTimeMs": 45351.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2722,
+        "activeTimeMs": 45377.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2723,
+        "activeTimeMs": 45398.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2724,
+        "activeTimeMs": 45415.69999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2726,
+        "activeTimeMs": 45438.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2729, "activeTimeMs": 45491, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2730,
+        "activeTimeMs": 45510.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2732,
+        "activeTimeMs": 45543.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2736,
+        "activeTimeMs": 45615.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2738,
+        "activeTimeMs": 45638.69999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2739,
+        "activeTimeMs": 45664.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2741, "activeTimeMs": 45690.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      { "physicsTick": 2743, "activeTimeMs": 45722.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      { "physicsTick": 2745, "activeTimeMs": 45758, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2746,
+        "activeTimeMs": 45774.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2747,
+        "activeTimeMs": 45798.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2749,
+        "activeTimeMs": 45822.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2750,
+        "activeTimeMs": 45849.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2752,
+        "activeTimeMs": 45870.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2753,
+        "activeTimeMs": 45891.60000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2757,
+        "activeTimeMs": 46269.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2761,
+        "activeTimeMs": 46286.60000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2773,
+        "activeTimeMs": 46313.19999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2780,
+        "activeTimeMs": 46334.69999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2783, "activeTimeMs": 46387.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2784,
+        "activeTimeMs": 46406.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2785,
+        "activeTimeMs": 46430.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2786,
+        "activeTimeMs": 46447.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2788,
+        "activeTimeMs": 46470.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2789,
+        "activeTimeMs": 46494.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2791,
+        "activeTimeMs": 46518.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2792,
+        "activeTimeMs": 46535.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2793,
+        "activeTimeMs": 46559.69999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2794,
+        "activeTimeMs": 46583.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2796,
+        "activeTimeMs": 46601.19999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2797,
+        "activeTimeMs": 46622.89999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2798, "activeTimeMs": 46647, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2799,
+        "activeTimeMs": 46665.10000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      { "physicsTick": 2801, "activeTimeMs": 46692.5, "position": [2.9652218518688933, 33.6, 1.745735697155955] },
+      {
+        "physicsTick": 2806,
+        "activeTimeMs": 46767.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2807,
+        "activeTimeMs": 46799.60000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2809,
+        "activeTimeMs": 46819.30000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2810,
+        "activeTimeMs": 46838.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2811,
+        "activeTimeMs": 46856.80000001192,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2816,
+        "activeTimeMs": 47035.39999997616,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2820,
+        "activeTimeMs": 47182.19999998808,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      },
+      {
+        "physicsTick": 2824,
+        "activeTimeMs": 47218.10000002384,
+        "position": [2.9652218518688933, 33.6, 1.745735697155955]
+      }
+    ],
+    "generatorVersion": 11,
+    "renderPipeline": {
+      "drawUnit": "chunk-render-category",
+      "batchMode": "category",
+      "vertexLayout": "float16-uv-uint16-index",
+      "shaderMode": "voxel-array-chunks",
+      "backend": "webgl2"
+    },
+    "experiments": {
+      "requested": { "renderer": "webgl2", "wasm": true, "simd": true },
+      "kernels": ["w02", "w03", "w04", "w05", "w06"],
+      "renderer": { "requestedRenderer": "webgl2", "effectiveRenderer": "webgl2", "rendererStatus": "matched" },
+      "workers": [
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "fluid",
+          "index": 0,
+          "status": "off",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "off",
+          "selected": [],
+          "reason": "no-selected-kernel"
+        },
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "general",
+          "index": 1,
+          "status": "matched",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "simd",
+          "selected": ["w02", "w03", "w04", "w05", "w06"],
+          "artifactSha256": "c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c"
+        }
+      ]
+    },
+    "serverRevision": 42,
+    "voxelAtOrigin": 42,
+    "serverPlayerPosition": [2.9652218518688933, 33.6, 1.745735697155955],
+    "serverPlayerVelocity": [0, 0, 0],
+    "prediction": {
+      "pendingFrames": 0,
+      "lastResetReason": "input-interrupted",
+      "resetCounts": { "authority-resync": 47, "input-interrupted": 1 },
+      "presentationOffset": { "x": 0, "y": 0, "z": 0 }
+    },
+    "serverWorldTime": 11.388000000001803,
+    "performance": {
+      "scenarioId": "default",
+      "frame": {
+        "count": 9,
+        "p50Ms": 199.80000001192093,
+        "p95Ms": 4707.599999964237,
+        "p99Ms": 4707.599999964237,
+        "maxMs": 4707.599999964237,
+        "longFrameCount": 9,
+        "lastLongFrameMs": 199.80000001192093
+      },
+      "chunkVisible": {
+        "count": 1,
+        "p50Ms": 2372.400000035763,
+        "p95Ms": 2372.400000035763,
+        "p99Ms": 2372.400000035763,
+        "maxMs": 2372.400000035763
+      },
+      "completedChunkTraces": 1,
+      "traceEventCount": 72,
+      "maxMeshCommitsInFrame": 1,
+      "maxMeshPartsInFrame": 1,
+      "visibleAfterPostrender": true,
+      "incidents": 10,
+      "droppedEvents": 0,
+      "uploadQueueDepth": 1,
+      "estimatedMeshBytes": 512960
+    },
+    "frameCpu": {
+      "sampleCount": 8,
+      "samples": [
+        {
+          "frameSequence": 1,
+          "updateWallMs": 11.100000023841858,
+          "renderWallMs": 28.599999964237213,
+          "renderEnvelopeWallMs": 28.69999998807907,
+          "renderTailWallMs": 0.10000002384185791,
+          "tickWallMs": 39.80000001192093,
+          "interTickGapWallMs": null,
+          "receiveGapWallMs": null,
+          "receiveGapCount": null
+        },
+        {
+          "frameSequence": 2,
+          "updateWallMs": 20.600000023841858,
+          "renderWallMs": 1.300000011920929,
+          "renderEnvelopeWallMs": 1.300000011920929,
+          "renderTailWallMs": 0,
+          "tickWallMs": 21.900000035762787,
+          "interTickGapWallMs": 279.39999997615814,
+          "receiveGapWallMs": 208.90000009536743,
+          "receiveGapCount": 15
+        },
+        {
+          "frameSequence": 3,
+          "updateWallMs": 26.80000001192093,
+          "renderWallMs": 78.60000002384186,
+          "renderEnvelopeWallMs": 78.60000002384186,
+          "renderTailWallMs": 0,
+          "tickWallMs": 105.40000003576279,
+          "interTickGapWallMs": 96.09999996423721,
+          "receiveGapWallMs": 35.40000003576279,
+          "receiveGapCount": 36
+        },
+        {
+          "frameSequence": 4,
+          "updateWallMs": 73.30000001192093,
+          "renderWallMs": 3.199999988079071,
+          "renderEnvelopeWallMs": 3.399999976158142,
+          "renderTailWallMs": 0,
+          "tickWallMs": 76.69999998807907,
+          "interTickGapWallMs": 55.39999997615814,
+          "receiveGapWallMs": 12.800000011920929,
+          "receiveGapCount": 12
+        },
+        {
+          "frameSequence": 5,
+          "updateWallMs": 23.100000023841858,
+          "renderWallMs": 0.5,
+          "renderEnvelopeWallMs": 0.5,
+          "renderTailWallMs": 0,
+          "tickWallMs": 23.600000023841858,
+          "interTickGapWallMs": 29.69999998807907,
+          "receiveGapWallMs": 10.5,
+          "receiveGapCount": 3
+        },
+        {
+          "frameSequence": 6,
+          "updateWallMs": 30.80000001192093,
+          "renderWallMs": 466.89999997615814,
+          "renderEnvelopeWallMs": 467.0999999642372,
+          "renderTailWallMs": 0.19999998807907104,
+          "tickWallMs": 497.89999997615814,
+          "interTickGapWallMs": 10.800000011920929,
+          "receiveGapWallMs": 0,
+          "receiveGapCount": 0
+        },
+        {
+          "frameSequence": 7,
+          "updateWallMs": 4.5,
+          "renderWallMs": 0.699999988079071,
+          "renderEnvelopeWallMs": 2.899999976158142,
+          "renderTailWallMs": 0,
+          "tickWallMs": 7.399999976158142,
+          "interTickGapWallMs": 132.30000001192093,
+          "receiveGapWallMs": 22.40000009536743,
+          "receiveGapCount": 31
+        },
+        {
+          "frameSequence": 8,
+          "updateWallMs": 4.699999988079071,
+          "renderWallMs": 0.6000000238418579,
+          "renderEnvelopeWallMs": 0.6000000238418579,
+          "renderTailWallMs": 0,
+          "tickWallMs": 5.300000011920929,
+          "interTickGapWallMs": 192.4000000357628,
+          "receiveGapWallMs": 34.10000002384186,
+          "receiveGapCount": 15
+        }
+      ]
+    },
+    "compute": {
+      "workerCount": 2,
+      "fluidWorkerCount": 1,
+      "generalWorkerCount": 1,
+      "running": 2,
+      "queued": 0,
+      "queuedBytes": 0,
+      "cancellationRequests": 0,
+      "staleResults": 0,
+      "failedTasks": 0,
+      "completedTasks": 9,
+      "submittedTasks": 11,
+      "submittedBytes": 8355840,
+      "maxQueued": 0,
+      "maxQueuedBytes": 0,
+      "workerTaskDuration": {
+        "fluid": {
+          "count": 7,
+          "capacity": 256,
+          "samplesMs": [5.199999988079071, 3.199999988079071, 1, 2.699999988079071, 0.5, 0.3999999761581421, 3]
+        },
+        "general": { "count": 2, "capacity": 256, "samplesMs": [268, 186.10000002384186] }
+      },
+      "workerKernelStates": [
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "fluid",
+          "index": 0,
+          "status": "off",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "off",
+          "selected": [],
+          "reason": "no-selected-kernel"
+        },
+        {
+          "epoch": "seedlands:classic-native-boat-952:1",
+          "lane": "general",
+          "index": 1,
+          "status": "matched",
+          "requestedArtifact": "simd",
+          "effectiveArtifact": "simd",
+          "selected": ["w02", "w03", "w04", "w05", "w06"],
+          "artifactSha256": "c1a763778c4eb4873772cf480c758f8b18cbc77beee80c933dda6b2fd19e4b2c"
+        }
+      ],
+      "workerActivity": [
+        {
+          "lane": "fluid",
+          "index": 0,
+          "status": "busy",
+          "taskId": 11,
+          "taskCategory": "fluid",
+          "taskAgeMs": 5.400000035762787,
+          "sampledAtMs": 9471.899999976158,
+          "completedTasks": 7,
+          "lastTaskDurationMs": 3,
+          "kernel": null
+        },
+        {
+          "lane": "general",
+          "index": 1,
+          "status": "busy",
+          "taskId": 9,
+          "taskCategory": "chunk-generation",
+          "taskAgeMs": 222.19999998807907,
+          "sampledAtMs": 9122.599999964237,
+          "completedTasks": 2,
+          "lastTaskDurationMs": 186.10000002384186,
+          "kernel": {
+            "calls": 41,
+            "failures": 0,
+            "memoryBytes": 18874368,
+            "durationMs": 9.399999976158142,
+            "failed": false
+          }
+        }
+      ]
+    },
+    "fluidFeedback": {
+      "count": 0,
+      "pending": false,
+      "pendingSample": null,
+      "p50Ms": 0,
+      "p95Ms": 0,
+      "p99Ms": 0,
+      "maxMs": 0,
+      "samples": []
+    },
+    "waterTransitions": { "activeCount": 0, "active": [], "recent": [] },
+    "ui": {
+      "runtime": "svelte5",
+      "shellPublishCount": 4,
+      "hudPublishCount": 5,
+      "interactionPublishCount": 1,
+      "debugProjectionCount": 5,
+      "debugPublishCount": 6,
+      "staleUpdateCount": 0,
+      "coalescedUpdateCount": 123,
+      "domCommitCount": 9,
+      "projectionDurationMs": 12.700000047683716,
+      "publishDurationMs": 1.100000023841858,
+      "domCommitDurationMs": 731.5999999642372,
+      "debugProjectionRate": 1,
+      "totalPublishRate": 2
+    },
+    "gameplay": {
+      "entityCount": 2,
+      "worldItemCount": 0,
+      "creatureCount": 0,
+      "npcCount": 0,
+      "nearbyVisitedBucketCount": 0,
+      "nearbyCandidateCount": 0,
+      "nearbyReturnedCount": 0,
+      "inventoryOperationCount": 0,
+      "gameplayEventCount": 3,
+      "snapshotBytes": 54991,
+      "retainedActorCount": 0,
+      "activeActorCount": 0,
+      "behaviorEvaluationCount": 0,
+      "navigationPlanCount": 0,
+      "navigationExpandedNodeCount": 0,
+      "pathRecomputeCount": 0,
+      "actionCompletionCount": 0,
+      "actionFailureCount": 0,
+      "actionInterruptionCount": 0,
+      "perceptionLineOfSightCheckCount": 0,
+      "simulationTime": 47.1,
+      "presentedEntityCount": 1
+    },
+    "breakingOverlay": null,
+    "viewmodel": { "isolatedLayer": true },
+    "visualEffects": {
+      "activeLocalLights": 0,
+      "shadowedLocalLights": 0,
+      "localLightLimit": 0,
+      "localShadowLimit": 0,
+      "sunShadows": false,
+      "sunShadowResolution": 0,
+      "reflectionEnabled": false,
+      "reflectionActive": false,
+      "reflectionResolution": 0,
+      "reflectionFrameInterval": 0,
+      "reflectionRenderCount": 0,
+      "waterPlaneY": null,
+      "postProcessing": false,
+      "shadowUpdateCount": 0,
+      "shadowStableFrameCount": 9,
+      "blockLightReady": true,
+      "blockLightSourceRevision": 45,
+      "blockLightRebuildCount": 1
+    },
+    "water": {
+      "bodyFraction": 0,
+      "wading": false,
+      "swimming": false,
+      "cameraSubmerged": false,
+      "cameraDepth": -1.7249984741210938,
+      "waterSurfaceY": 31.875,
+      "underwaterBlend": 0
+    },
+    "physicsDiagnostics": {
+      "schemaVersion": 1,
+      "diagnosticOnly": true,
+      "epoch": "seedlands:classic-native-boat-952:1",
+      "physicsTick": 2824,
+      "acknowledgedInputSequence": 25,
+      "player": {
+        "id": "player-1",
+        "position": [2.9652218518688933, 32, 1.745735697155955],
+        "velocity": [0, 0, 0],
+        "grounded": true,
+        "contacts": { "count": 0, "truncated": false, "entries": [] }
+      },
+      "bodies": {
+        "sourceCount": 2,
+        "scannedCount": 2,
+        "scanTruncated": false,
+        "nearbyCount": 1,
+        "truncated": false,
+        "entries": [
+          {
+            "id": "transport-2",
+            "type": "transport",
+            "position": [2.9676424166620525, 31.8, 0.6237261452184162],
+            "velocity": [0, 0, 0]
+          }
+        ]
+      }
+    }
+  }
+}

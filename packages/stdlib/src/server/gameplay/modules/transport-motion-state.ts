@@ -56,6 +56,7 @@ export function deriveMountedSeatConstraintV1(
     throw new Error('Transport seat pose is non-finite.');
   return Object.freeze({
     rider: Object.freeze({ ...state.rider }),
+    carrier: Object.freeze({ ...state.reference }),
     walkingEnabled: false,
     pose: Object.freeze({ position: seatPosition, yaw: transportPose.yaw }),
   });

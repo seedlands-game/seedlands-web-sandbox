@@ -224,6 +224,7 @@ class GameServerWorld {
         currentEntities: this.gameplay.entities,
         candidateEntities: prepared.gameplay.entities,
         mediaPositions: prepared.gameplay.media.checkpointPositions(),
+        transportDefinitions: prepared.gameplay.content.transportDefinitions,
         stationCodec: prepared.gameplay.content.stations?.codec,
         ...(this.options.composition ? { voxelSemantics: prepared.gameplay.content.voxelSemantics } : {}),
       });

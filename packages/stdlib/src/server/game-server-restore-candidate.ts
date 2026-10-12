@@ -9,6 +9,9 @@ import type { VoxelSemanticsResolver } from '../world/voxel-semantics';
 import { isValidChunkSnapshot } from './persistence/validate-chunk-snapshot';
 import { restoreServerChunk } from './server-chunk-restore';
 import { assertStationChunkIntegrity, stationChunkKeys } from './station-world-integrity';
+import type { TransportDefinitionRegistryV1 } from './gameplay/modules/transport-model';
+import { transportBodyConfig } from './gameplay/transport-body-config';
+import { transportInclinationV1 } from './gameplay/modules/transport-motion-state';
 
 type Input = Readonly<{
   seedText: string;
@@ -24,7 +27,36 @@ type Input = Readonly<{
   stationCodec?: StationStateCodec;
   voxelSemantics?: VoxelSemanticsResolver;
   mediaPositions?: readonly (readonly [number, number, number])[];
+  transportDefinitions?: TransportDefinitionRegistryV1;
 }>;
+
+function restoredTransportChunkKeys(input: Input): readonly string[] {
+  const keys = new Set<string>();
+  for (const entity of input.candidateEntities.query({ type: 'transport' })) {
+    const reference = input.candidateEntities.createReference(entity.id);
+    const state = reference && input.candidateEntities.transportState(reference);
+    const definition = state && input.transportDefinitions?.require(state.definitionId);
+    if (!state || !definition) throw new TypeError('Transport restore requires its current configured definition.');
+    const bounds = transportBodyConfig(definition, state.pose.yaw, transportInclinationV1(state)).localAabb;
+    const axes = ['x', 'y', 'z'] as const;
+    const lower = entity.position.map((value, axis) =>
+      floorDiv(Math.floor(value + bounds.min[axes[axis]!] - 1), CHUNK_SIZE),
+    );
+    const upper = entity.position.map((value, axis) =>
+      floorDiv(Math.floor(value + bounds.max[axes[axis]!] + 1 - Number.EPSILON), CHUNK_SIZE),
+    );
+    const count = lower.reduce((total, value, axis) => total * (upper[axis]! - value + 1), 1);
+    if (![...lower, ...upper].every(Number.isSafeInteger) || !Number.isSafeInteger(count) || count < 1 || count > 4096)
+      throw new TypeError('Transport restore footprint exceeds the bounded terrain query.');
+    for (let cx = lower[0]!; cx <= upper[0]!; cx++)
+      for (let cy = lower[1]!; cy <= upper[1]!; cy++)
+        for (let cz = lower[2]!; cz <= upper[2]!; cz++) {
+          keys.add(chunkKey(cx, cy, cz));
+          if (keys.size > 4096) throw new TypeError('Transport restore exceeds the bounded terrain query.');
+        }
+  }
+  return [...keys].sort();
+}
 
 export function generateGameServerChunk(
   input: Readonly<{
@@ -72,9 +104,13 @@ export function generateGameServerChunk(
   };
 }
 
-/** Builds every station-dependent Chunk before the live gameplay owner is exchanged. */
+/** Builds station and configured transport terrain before the live gameplay owner is exchanged. */
 export async function prepareGameServerRestoreChunks(input: Input): Promise<Map<string, ServerChunk>> {
-  const keys = new Set([...stationChunkKeys(input.currentEntities), ...stationChunkKeys(input.candidateEntities)]);
+  const keys = new Set([
+    ...stationChunkKeys(input.currentEntities),
+    ...stationChunkKeys(input.candidateEntities),
+    ...restoredTransportChunkKeys(input),
+  ]);
   for (const [x, y, z] of input.mediaPositions ?? [])
     keys.add(chunkKey(floorDiv(x, CHUNK_SIZE), floorDiv(y, CHUNK_SIZE), floorDiv(z, CHUNK_SIZE)));
   const prepared = new Map<string, ServerChunk>();

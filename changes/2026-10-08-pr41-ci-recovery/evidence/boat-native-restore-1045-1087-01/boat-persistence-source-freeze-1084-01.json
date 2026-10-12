@@ -1,0 +1,51 @@
+{
+  "head": "a5bcdd4ff5e1fa2042bf6ca3b213450913fd239a",
+  "at": "2026-10-12T01:30:50.871225+00:00",
+  "scope": "boat native save/reopen and atomic transport restore terrain/self-rider collision",
+  "files": [
+    {
+      "path": "apps/web/tests/e2e/classic-support/boat-journey.ts",
+      "sha256": "d3d6502622aad72ce9e0020e43bd3b0e100a29deda5b929e5fb25e553b838989"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-support/boat-persistence-journey.ts",
+      "sha256": "ed4548e23e177695684cf307f49a72046082afac6e9cf35f2faeecaf0cabf100"
+    },
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/classic-boat-authority.test.ts",
+      "sha256": "894430fa1a4d32956793e0ac2a131bc5dfe78078ea4964d3094ca53dd17a7e99"
+    },
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "045e48541a6791170d399ab8cedcb6c7d7c94035d90638549ecc86c55f8a7c23"
+    },
+    {
+      "path": "docs/code-map.md",
+      "sha256": "bf3b5296d80bc3301552cdf97c8e203e44115e9a51ff829e776121ff108f8a32"
+    },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-transport-collision-world.ts",
+      "sha256": "e6a10e43aaa9c8a1685a97257402f3b9e58764a8b72b650d66bc752499327a27"
+    },
+    {
+      "path": "packages/stdlib/src/server/game-server-restore-candidate.ts",
+      "sha256": "1d1c02251eaaa072953ed7a731f89cf1ea9e48fa2b4464c7c870e139830dc40c"
+    },
+    {
+      "path": "packages/stdlib/src/server/game-server.ts",
+      "sha256": "45ccd0756fe4e85e59d8acc189b80bd9a492ac0fd93da03c8d55664d4016f6e4"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-motion-model.ts",
+      "sha256": "d99b9f205c1dfeecde42921126d862dc4f0600b0a7617bc2741b2c77c34a5a45"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-motion-state.ts",
+      "sha256": "9d3be1eb657b01a7004f10ea25163edc60af1141329cdbfc09066efcf307bcdb"
+    },
+    {
+      "path": "packages/stdlib/tests/server/authority-transport-collision-world.test.ts",
+      "sha256": "09ee751cb203a33742e2c8913ed4e9ef74c20316e7ea00daba569361bcae2358"
+    }
+  ]
+}

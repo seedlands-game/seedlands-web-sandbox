@@ -1,0 +1,43 @@
+[
+  {
+    "run": "1052",
+    "title": "Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开",
+    "status": "failed",
+    "durationMs": 73628,
+    "errors": [
+      "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n   at apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:41\n\n  39 |   // The unattended boat resumes its saved momentum. Its total coast is bounded by v/drag.\n  40 |   const speed = Math.hypot(saved.velocity[0], saved.velocity[2]);\n> 41 |   expect(speed).toBeGreaterThan(0);\n     |                 ^\n  42 |   const dx = restored.pose.position[0] - saved.pose.position[0];\n  43 |   const dz = restored.pose.position[2] - saved.pose.position[2];\n  44 |   expect(dx * saved.velocity[0] + dz * saved.velocity[2]).toBeGreaterThanOrEqual(-1e-9);\n    at saveAndReopenBoat (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:41:17)\n    at /workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-journey.ts:177:27"
+    ]
+  },
+  {
+    "run": "1057",
+    "title": "Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开",
+    "status": "failed",
+    "durationMs": 43454,
+    "errors": [
+      "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n   at apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:56\n\n  54 |     expect(restored.velocity).toEqual(saved.velocity);\n  55 |   } else {\n> 56 |     expect(restoredSpeed).toBeGreaterThan(0);\n     |                           ^\n  57 |     expect(restored.velocity[0] * saved.velocity[0] + restored.velocity[2] * saved.velocity[2]).toBeGreaterThan(0);\n  58 |   }\n  59 |\n    at saveAndReopenBoat (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:56:27)\n    at /workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-journey.ts:177:27"
+    ]
+  },
+  {
+    "run": "1064",
+    "title": "Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开",
+    "status": "failed",
+    "durationMs": 65847,
+    "errors": [
+      "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mnot\u001b[2m.\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: not \u001b[32m\"seedlands:classic-native-boat-952:1:world:0\"\u001b[39m\n\n   at apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:93\n\n  91 |   if (!current.ok) throw Error(current.error.message);\n  92 |   if (!identity.ok) throw Error(identity.error.message);\n> 93 |   expect(identity.data.epoch).not.toBe(savedIdentity.data.epoch);\n     |                                   ^\n  94 |   expect(stale.frontier?.epoch).toBe(identity.data.epoch);\n  95 |   expect(current.frontier?.epoch).toBe(identity.data.epoch);\n  96 |   return { saved, restored, savedIdentity, stale, current, identity, coastDistance: Math.hypot(dx, dz) };\n    at saveAndReopenBoat (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-persistence-journey.ts:93:35)\n    at /workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/boat-journey.ts:177:27"
+    ]
+  },
+  {
+    "run": "1069",
+    "title": "Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开",
+    "status": "passed",
+    "durationMs": 51362,
+    "errors": []
+  },
+  {
+    "run": "1087",
+    "title": "Classic 船以原生输入部署、前进、转向、倒退并驶回岸边下船后保存重开",
+    "status": "passed",
+    "durationMs": 38190,
+    "errors": []
+  }
+]
