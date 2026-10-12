@@ -8,8 +8,7 @@ import type { PlayerControllerOptions } from './player-controller-types';
 import { PLAYER_FEET_OFFSET } from './player-view-offsets';
 import { LocalPlayerPrediction } from '../../client/local-player-prediction';
 import { bodyConfigFor } from '@seedlands/stdlib/physics';
-import { VoxelCollisionWorld } from '@seedlands/stdlib/server/authority/voxel-collision-world';
-import { CHUNK_SIZE, chunkKey, floorDiv } from '@seedlands/stdlib/world/voxel';
+import { playerCollisionWorld } from './player-collision-world';
 import type { AuthoritySnapshot } from '@seedlands/stdlib/server/authority/authority-session';
 import { PlayerDebugTimeKeys } from './player-debug-time-keys';
 import { bodyOverlapsWorld } from './player-collision-query';
@@ -333,8 +332,17 @@ export class PlayerController {
       this.prediction.reset();
       return;
     }
-    const reconciled = this.prediction.applyAuthoritySnapshot(snapshot, this.collisionWorld(world));
+    const collisionWorld = this.collisionWorld(world);
+    const reconciled = this.prediction.applyAuthoritySnapshot(snapshot, collisionWorld);
     this.velocity.set(reconciled.body.velocity.x, reconciled.body.velocity.y, reconciled.body.velocity.z);
+    if (!this.spectator) {
+      const presented = this.prediction.presentedBody(collisionWorld, 0);
+      this.options.camera.setPosition(
+        presented.position.x,
+        presented.position.y + PLAYER_FEET_OFFSET,
+        presented.position.z,
+      );
+    }
     if (snapshot.inputResyncRequired) this.resynchronizeInput();
   }
 
@@ -459,31 +467,7 @@ export class PlayerController {
   }
 
   private collisionWorld(world: NonNullable<ReturnType<PlayerControllerOptions['getWorld']>>) {
-    return new VoxelCollisionWorld(
-      {
-        getChunkRevision: (key) => {
-          const [cx, cy, cz] = key.split(',').map(Number);
-          return world.getChunkRevision(cx!, cy!, cz!);
-        },
-        getLoadedVoxel: (x, y, z) => {
-          const cx = floorDiv(x, CHUNK_SIZE);
-          const cy = floorDiv(y, CHUNK_SIZE);
-          const cz = floorDiv(z, CHUNK_SIZE);
-          const revision = world.getChunkRevision(cx, cy, cz);
-          if (revision === null) return null;
-          const fluid = world.getFluidCell(x, y, z);
-          return {
-            voxel: world.getVoxel(x, y, z),
-            chunkKey: chunkKey(cx, cy, cz),
-            revision,
-            ...(fluid ? { fluid: { level: fluid.level } } : {}),
-          };
-        },
-      },
-      () => undefined,
-      world.authority.voxelSemantics,
-      world.authority.voxelGeometry,
-    );
+    return playerCollisionWorld(world);
   }
 
   private interact(place: boolean, bypassTarget = false) {

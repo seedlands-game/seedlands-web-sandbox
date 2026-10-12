@@ -1,0 +1,36 @@
+{
+  "head": "30b3f2a7fd08062a0be4f196755472c802c8bcd0",
+  "at": "2026-10-12T00:13:42.488616+00:00",
+  "files": [
+    {
+      "path": "apps/web/src/app/player/player-collision-world.ts",
+      "sha256": "d923808fafac2973bf5e2a6930518c40eac132c67af4606d0b2520825bbb2e99"
+    },
+    {
+      "path": "apps/web/src/app/player/player-controller.ts",
+      "sha256": "978f4ae5010a6a62a213707be00e3e331b856eaba4c07b4271164ba3c29bd8d9"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-support/creative-click-diagnostics.ts",
+      "sha256": "2de92aa3bd895be7926aeb6499c5548f0ce3463dff119bb272be95cc6ee34178"
+    },
+    {
+      "path": "apps/web/tests/e2e/classic-support/crop-journey.ts",
+      "sha256": "d08fa3dc7df19e990eb2b33cff6287a45d1ba4bd935cf1cf811e417be233ed07"
+    },
+    {
+      "path": "apps/web/tests/unit/app/player-authority-presentation.test.ts",
+      "sha256": "7ce875bcb6a90b75cda2a1024659ed128fdf8c714a653ae88703d8e7bdfe91bc"
+    },
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "19b2915ddab115aaf37dde4c371ce1b04283b98c47ddaf0eab412a720ec71da3"
+    },
+    { "path": "docs/code-map.md", "sha256": "d506f76ed02721705ea1c8ef5a2a088ccc7391b5c1b88bf1de9c1a67c5437deb" },
+    { "path": "package.json", "sha256": "bf8c7e131c7b84344a8a311679143034cf36e0f1b70a1ce8311a59f33cba0085" },
+    {
+      "path": "tsconfig.classic-tests.json",
+      "sha256": "e2caf5f2e00ba4d6b3218be2093baff42abb7dcccdc3ca281287887eb6b4b33b"
+    }
+  ]
+}

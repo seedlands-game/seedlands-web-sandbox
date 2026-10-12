@@ -1803,3 +1803,23 @@ SurfaceSupportPortV1 新增可选第二参数 proposedYaw；单参数消费者�
 ### 996：统一载具注册链与 CI 截止合同
 
 993 格式与路径 PASS，CI selection FAIL：旧检查要求 entry 直接调用 registerClassicMinecartJourney，未识别新增汇总模块。保留原矿车 timeout、完整主旅程与重试/flaky 检查，新增入口→transport-journeys→矿车及船的注册断言、船 120 秒截止与 skip policy。原主旅程900秒、视觉240秒、矿车120秒和船120秒，乘现有两次上限为46分钟，保留原5分钟报告余量，Chromium job 从47调至51分钟；无新增重试、无单项超时扩张、无部署或权限变更。
+
+### 1006：主旅程木锄点击的有界只读协议诊断
+
+899 在目录按钮已解析后、尚未进入 attempting click action 时超时。当前可观察证据只支持 evaluateHandle/主线程响应迟滞的推断，不能直接宣称渲染线程卡死。新增 env-gated 的 CDP 诊断，仅对原主旅程木锄 Locator.click 前/期间/结束读取 Runtime 响应、按钮连接/尺寸/可见性、Performance 标量及有界 long-task 列表；禁止 CI/benchmark 启用，协议读取自身有短截止，不扩大原点击10秒、主旅程900秒、动作/断言/画质/玩家/地图。唯一 Classic 入口与产物回执保持；没有性能样本或性能通过声明。一次新诊断必须产生上述新观测，不以原样重试替代修复。
+
+### 1013：原主旅程新终态与探针边界
+
+1009 production build 后零重试 FAIL：C0–C3 PASS，正式 C4 outbound 目标 [208.5,0.5] 已运行55.166秒/55个原生 W+Space 300ms 脉冲，但原900秒总截止中断，最后玩家 x≈162.823，C4/C5 无 PASS。两次原木锄点击各0.488/0.558秒 PASS，CDP 读取均返回5–27ms，不能声称旧899点击故障已修复。探针 button:null 是无效 DOM 观测，原始数据保留；最初归因于原生 dialog 的推断撤回。1026 核对真实 creative-catalog：目录 ID 固定，按钮可访问名来自 aria-label，旧 textContent 匹配不成立，已按实际属性修正。结束后4个文件与产物哈希一致。后续仅做有新因果证据的修复，保留全部目标、断言、80/300/45/20/900 等既有边界，不以扩大截止或更换地图/演员取得通过。没有新性能样本或性能通过声明。
+
+### 1016：Authority 接收时同步已校正的客户端相机位置
+
+1009 在多次短原生移动后，Authority 已释放/停止，但客户端相机坐标直到低频 render update 才刷新。实际接线 AuthorityPresentationSync.receive 在消息到达时调用 PlayerController.applyAuthoritySnapshot；后者更新真实 prediction 和 velocity，却把 camera.setPosition 留在 render update。新增语义 RED：真实 LocalPlayerPrediction 接收已校验 Authority 状态后，不调用 update/rAF 时，非 spectator 相机应投影现有 collision-safe presentedBody(0) 与既有 eye offset；spectator 和 world 不存在仍保持原分支。不替换 Authority 位置信息，不改 prediction/碰撞/平滑算法、目标或 freshness/neutral/grounded/无碰撞/pose echo 断言，也不改输入和截止。先验证断开的消息→相机消费者 RED，再做最小接线和实际浏览器复验，不能先宣称已解决主旅程总截止。
+
+### 1038：相机接线修复的有界交付与保留失败
+
+1018 保留唯一语义 RED，1019 相关六文件52项 PASS。1020 类型通过、controller 行数 lint 失败；1022 未运行。原样提取 collision world 适配器后，1023 静态与17项选择通过，1025 完整165文件1292项 headless PASS，1027 探针 lint/格式、1028 构建及1029 原生 W/S/Space 路线 PASS。
+
+1030 原900秒主旅程仍 FAIL：C0–C3 PASS，C4 outbound 在48.145秒/53次脉冲后被总截止中断，C4/C5 无 PASS；不宣称相机同步修复已经解决完整主旅程。两次木锄点击 PASS，更正后的探针实际读到可见、启用、连接的按钮，但旧899点击问题仍未证明修复。产物后验和9个冻结源码哈希一致。1029/1030 私有运行器说明字段误继承旧船模板，原记录保留，追加 correction 撤回错误 scope/test/timeout 说明；实际参数分别选择原生键盘和主旅程，原源码截止分别120秒、900秒。
+
+本组32个 payload 已封存在 `evidence/player-authority-presentation-1018-1030-01`，原始日志保持字节不变，包含正反证据及记录更正。PR 继续 Draft；精确最终 SHA CI、C4/C5、完整货物/燃料、旧 portable-world 导入、船的浏览器重开和灯光真实浏览器矩阵仍开放，无性能通过声明。

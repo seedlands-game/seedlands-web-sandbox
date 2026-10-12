@@ -1,0 +1,20 @@
+{
+  "native": [
+    {
+      "title": "Classic 原生路线键盘保留可信 W/S/Space、真实位移与中性 Authority ACK",
+      "status": "passed",
+      "durationMs": 7919,
+      "errors": []
+    }
+  ],
+  "main": [
+    {
+      "title": "Classic 生产旅程以真实输入完成 C0-C5，并复用同一运行时性能场景",
+      "status": "failed",
+      "durationMs": 912899,
+      "errors": [
+        "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mtrue\u001b[39m\nReceived: \u001b[31mfalse\u001b[39m\n\nCall Log:\n- Test timeout of 900000ms exceeded\n\n   at apps/web/tests/e2e/classic-support/snapshot-read.ts:43\n\n  41 |       { timeout, intervals: [16, 32, 64, 100] },\n  42 |     )\n> 43 |     .toBe(true);\n     |      ^\n  44 |   return matched!;\n  45 | }\n  46 |\n    at waitForSnapshot (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/snapshot-read.ts:43:6)\n    at walkTo (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/route-driver.ts:90:21)\n    at withRoutePulseDiagnostics (/workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-support/route-pulse-diagnostics.ts:143:20)\n    at /workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-runtime.spec.ts:325:5\n    at /workspace/seedlands-web-sandbox/apps/web/tests/e2e/classic-runtime.spec.ts:309:3"
+      ]
+    }
+  ]
+}

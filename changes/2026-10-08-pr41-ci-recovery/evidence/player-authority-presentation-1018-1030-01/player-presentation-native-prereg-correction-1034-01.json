@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-10-12T00:26:35.957068+00:00",
+  "correctionOf": "player-presentation-native-prereg-1029-01.json",
+  "reason": "Withdraw stale inherited boat scope/test/additionalAcceptance/timeoutMs descriptors; preserve original. Actual process selects canonical native keyboard journey.",
+  "actualScope": "NON_MAIN real native route keyboard contract; no boat, canonical main, or performance claim.",
+  "actualArgv": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic 原生路线键盘",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/player-presentation-native-results-1029-01",
+    "--reporter",
+    "list,html,json,./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ],
+  "actualResult": "PASS; 1 test, original case and assertions unchanged; use terminal/report/postverify1029 as result evidence."
+}

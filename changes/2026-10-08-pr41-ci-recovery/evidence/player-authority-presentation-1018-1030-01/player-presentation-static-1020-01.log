@@ -1,0 +1,14 @@
+apps/web/src/app/player/player-controller.ts 211ms
+apps/web/tests/e2e/classic-support/crop-journey.ts 62ms (unchanged)
+changes/2026-10-08-pr41-ci-recovery/spec.md 976ms
+docs/code-map.md 155ms (unchanged)
+package.json 14ms (unchanged)
+tsconfig.classic-tests.json 4ms (unchanged)
+apps/web/tests/e2e/classic-support/creative-click-diagnostics.ts 20ms (unchanged)
+apps/web/tests/unit/app/player-authority-presentation.test.ts 11ms (unchanged)
+
+/workspace/seedlands-web-sandbox/apps/web/src/app/player/player-controller.ts
+  544:1  error  File has too many lines (508). Maximum allowed is 500  max-lines
+
+✖ 1 problem (1 error, 0 warnings)
+

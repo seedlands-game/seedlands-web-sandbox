@@ -1,0 +1,125 @@
+apps/web/src/app/player/player-controller.ts 174ms (unchanged)
+apps/web/tests/e2e/classic-support/crop-journey.ts 46ms (unchanged)
+changes/2026-10-08-pr41-ci-recovery/spec.md 620ms (unchanged)
+docs/code-map.md 127ms (unchanged)
+package.json 12ms (unchanged)
+tsconfig.classic-tests.json 3ms (unchanged)
+apps/web/src/app/player/player-collision-world.ts 8ms (unchanged)
+apps/web/tests/e2e/classic-support/creative-click-diagnostics.ts 13ms (unchanged)
+apps/web/tests/unit/app/player-authority-presentation.test.ts 13ms (unchanged)
+$ node --test scripts/ci-deterministic-scope.test.mjs scripts/check-frozen-evidence.test.mjs scripts/ci-sparse-checkout.test.mjs scripts/harness/artifact-source-identity.test.mjs scripts/ci-browser-time-budget.test.mjs
+TAP version 13
+# fatal: not a git repository (or any parent up to mount point /)
+# Stopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).
+# Subtest: original historical bytes pass in full and sparse checkouts
+ok 1 - original historical bytes pass in full and sparse checkouts
+  ---
+  duration_ms: 104.506325
+  type: 'test'
+  ...
+# Subtest: formatting or modifying any excluded evidence still fails the gate
+ok 2 - formatting or modifying any excluded evidence still fails the gate
+  ---
+  duration_ms: 27.035415
+  type: 'test'
+  ...
+# Subtest: missing evidence and symlink substitutions fail closed
+ok 3 - missing evidence and symlink substitutions fail closed
+  ---
+  duration_ms: 26.208311
+  type: 'test'
+  ...
+# Subtest: a dangling symlink cannot masquerade as an absent sparse file
+ok 4 - a dangling symlink cannot masquerade as an absent sparse file
+  ---
+  duration_ms: 56.195942
+  type: 'test'
+  ...
+# Subtest: Classic owner contracts remain in the explicit behavior and type selections
+ok 5 - Classic owner contracts remain in the explicit behavior and type selections
+  ---
+  duration_ms: 4.017126
+  type: 'test'
+  ...
+# Subtest: Chromium job covers the original complete journey and diagnostic retry
+ok 6 - Chromium job covers the original complete journey and diagnostic retry
+  ---
+  duration_ms: 0.594214
+  type: 'test'
+  ...
+# Subtest: Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+ok 7 - Chromium keeps every evidence tree while separating the HTML report from raw failure traces
+  ---
+  duration_ms: 1.054881
+  type: 'test'
+  ...
+# Subtest: Kernel changes also select downstream stdlib behavior
+ok 8 - Kernel changes also select downstream stdlib behavior
+  ---
+  duration_ms: 4.405095
+  type: 'test'
+  ...
+# Subtest: stdlib-only changes do not select upstream Kernel behavior
+ok 9 - stdlib-only changes do not select upstream Kernel behavior
+  ---
+  duration_ms: 0.290076
+  type: 'test'
+  ...
+# Subtest: shared changes, main push, and an empty PR diff run both owners
+ok 10 - shared changes, main push, and an empty PR diff run both owners
+  ---
+  duration_ms: 0.668073
+  type: 'test'
+  ...
+# Subtest: unrelated changes omit behavior tests without affecting the separate static job
+ok 11 - unrelated changes omit behavior tests without affecting the separate static job
+  ---
+  duration_ms: 0.340395
+  type: 'test'
+  ...
+# Subtest: unknown source paths conservatively select both owners
+ok 12 - unknown source paths conservatively select both owners
+  ---
+  duration_ms: 0.1947
+  type: 'test'
+  ...
+# Subtest: invalid path input fails instead of selecting no tests
+ok 13 - invalid path input fails instead of selecting no tests
+  ---
+  duration_ms: 0.461896
+  type: 'test'
+  ...
+# Subtest: CLI accepts NUL-separated paths and emits stable GitHub outputs
+ok 14 - CLI accepts NUL-separated paths and emits stable GitHub outputs
+  ---
+  duration_ms: 72.856484
+  type: 'test'
+  ...
+# Subtest: CLI rejects malformed NUL input
+ok 15 - CLI rejects malformed NUL input
+  ---
+  duration_ms: 40.39024
+  type: 'test'
+  ...
+# Subtest: every CI checkout keeps exact source and specs without materializing sealed artifact trees
+ok 16 - every CI checkout keeps exact source and specs without materializing sealed artifact trees
+  ---
+  duration_ms: 288.418035
+  type: 'test'
+  ...
+# Subtest: artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+ok 17 - artifact source identity filters historical paths before reads while preserving source and default snapshot identity
+  ---
+  duration_ms: 92.284484
+  type: 'test'
+  ...
+1..17
+# tests 17
+# suites 0
+# pass 17
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 473.303588
+$ ls-lint
