@@ -1,0 +1,278 @@
+{
+  "rawReportSha256": "2c34ddc88b3a5ed9f5efb8033fa2b6f04d5e5e8955136e08e6546aaaef6d170a",
+  "results": [
+    {
+      "title": "Classic 视觉 v3 生产素材、连续帧与单击破坏回归",
+      "status": "passed",
+      "durationMs": 92801,
+      "errors": [],
+      "attachments": [
+        {
+          "name": "received-lighting-webgl2-pixels.json",
+          "file": "visual-received-lighting-webgl2-pixels.json",
+          "rawSha256": "50427c7a0854950e157124ac15d53c11f5561d2d9e01baa6fefd58d2c70da8a0"
+        },
+        {
+          "name": "day-gallery",
+          "file": "visual-day-gallery.png",
+          "rawSha256": "98c9e8413b98cc1557da6b7a6281ac65c6513363739d6bbe0f99b4131b02cd29"
+        },
+        {
+          "name": "day-gallery-camera",
+          "file": "visual-day-gallery-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "model-received-lighting-webgl2-pixels.json",
+          "file": "visual-model-received-lighting-webgl2-pixels.json",
+          "rawSha256": "88731663b969a0187cd71501d12001c5175a116d5a5b7fd78112a0819edc877b"
+        },
+        {
+          "name": "pig-front-closeup",
+          "file": "visual-pig-front-closeup.png",
+          "rawSha256": "2ee6f9b45f18818adad7d184dc8c4590aea6439dd1a597bb9b35d4791acd8e56"
+        },
+        {
+          "name": "pig-front-closeup-camera",
+          "file": "visual-pig-front-closeup-camera.json",
+          "rawSha256": "27366230d7eb73eb6890de7d9705315a85e28bcca66297ba8fe50db6612abbc7"
+        },
+        {
+          "name": "skeleton-bow-front-closeup",
+          "file": "visual-skeleton-bow-front-closeup.png",
+          "rawSha256": "fd41b2885fb4d98ef854f114c144b486fac1da2e9358406dead9fd3e6d7ad03e"
+        },
+        {
+          "name": "skeleton-bow-front-closeup-camera",
+          "file": "visual-skeleton-bow-front-closeup-camera.json",
+          "rawSha256": "a1a60f6b34348e6b14de110d758c19dd918e1c41e2f1ca0e9c1e29a65ce82e1c"
+        },
+        {
+          "name": "skeleton-bow-side-closeup",
+          "file": "visual-skeleton-bow-side-closeup.png",
+          "rawSha256": "52ddf1d5982b8bf29135c7362b2adec0a5501e065a553955d79aa3c669c6dd21"
+        },
+        {
+          "name": "skeleton-bow-side-closeup-camera",
+          "file": "visual-skeleton-bow-side-closeup-camera.json",
+          "rawSha256": "437cc8ed39d369bc0b50689d4a9777ae65942322a9f1a753a53b73015ca5434f"
+        },
+        {
+          "name": "plants-closeup",
+          "file": "visual-plants-closeup.png",
+          "rawSha256": "52970a006f7edbd4a2d43f995d24b87bfdc19f340639a61fdb83d381042286d4"
+        },
+        {
+          "name": "plants-closeup-camera",
+          "file": "visual-plants-closeup-camera.json",
+          "rawSha256": "fbef27ccf8fb2a1960ea588d6b9433b33add417cff0c4a32edc299a34b18b1a4"
+        },
+        {
+          "name": "animated-gallery-early",
+          "file": "visual-animated-gallery-early.png",
+          "rawSha256": "5e891dbf04583f887ab6c430a432c07ac487176593801374329c6da6119597b1"
+        },
+        {
+          "name": "animated-gallery-early-camera",
+          "file": "visual-animated-gallery-early-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "animated-gallery-later",
+          "file": "visual-animated-gallery-later.png",
+          "rawSha256": "c2582fa2f6ad245dcb91bec90609e5576724fe10ecea3b4aa77d7aa6fcc837df"
+        },
+        {
+          "name": "animated-gallery-later-camera",
+          "file": "visual-animated-gallery-later-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-eight-light-types",
+          "file": "visual-night-eight-light-types.png",
+          "rawSha256": "06894c14fe4bf5be19c6d09bce3edd691b88e22eb1e20be3f219da0e3e1a24a3"
+        },
+        {
+          "name": "night-eight-light-types-camera",
+          "file": "visual-night-eight-light-types-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-sources-removed",
+          "file": "visual-night-sources-removed.png",
+          "rawSha256": "474f96f9191b1da73cbf1ec77322df9026a336347abfc5e1199f5cda365775ba"
+        },
+        {
+          "name": "night-sources-removed-camera",
+          "file": "visual-night-sources-removed-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-torch",
+          "file": "visual-night-isolated-torch.png",
+          "rawSha256": "8352ab40f0b065c14c1c3c60387d5ff57bc94ce0499e824f9eda9b38eb75b388"
+        },
+        {
+          "name": "night-isolated-torch-camera",
+          "file": "visual-night-isolated-torch-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-glowstone",
+          "file": "visual-night-isolated-glowstone.png",
+          "rawSha256": "5b4829e5099e10bcccf68221a6f2c8ea8d07c4454e223a8dfc767321a1fa3e65"
+        },
+        {
+          "name": "night-isolated-glowstone-camera",
+          "file": "visual-night-isolated-glowstone-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-lava",
+          "file": "visual-night-isolated-lava.png",
+          "rawSha256": "7c3b2ec531860034acf5aef50c060485dbceac16526d44fdce92f81c0e2c5a5d"
+        },
+        {
+          "name": "night-isolated-lava-camera",
+          "file": "visual-night-isolated-lava-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-fire",
+          "file": "visual-night-isolated-fire.png",
+          "rawSha256": "85f619b51e48a9f075396ea36508bf4d2c0436303ae2ac7283fa24db0d818015"
+        },
+        {
+          "name": "night-isolated-fire-camera",
+          "file": "visual-night-isolated-fire-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-jack-o-lantern",
+          "file": "visual-night-isolated-jack-o-lantern.png",
+          "rawSha256": "be185cc10d54debebaa67ff5c7fad672568480d85f870791d7a7f4bf782908e5"
+        },
+        {
+          "name": "night-isolated-jack-o-lantern-camera",
+          "file": "visual-night-isolated-jack-o-lantern-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-lit-furnace",
+          "file": "visual-night-isolated-lit-furnace.png",
+          "rawSha256": "891af5f236e6ce420deefc5edae8eebc74bbabb8ed350f3784039d69a830e08c"
+        },
+        {
+          "name": "night-isolated-lit-furnace-camera",
+          "file": "visual-night-isolated-lit-furnace-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-lit-redstone-ore",
+          "file": "visual-night-isolated-lit-redstone-ore.png",
+          "rawSha256": "0e9afcc0a141b1f96fdd4ef11a43aff4e1e8e91d816bc92944967739da5973ec"
+        },
+        {
+          "name": "night-isolated-lit-redstone-ore-camera",
+          "file": "visual-night-isolated-lit-redstone-ore-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "night-isolated-lantern",
+          "file": "visual-night-isolated-lantern.png",
+          "rawSha256": "d60c8aeb7c6f8b5deb3ac738bdba8437e6402dabeac5a04eac1072915d6b1e47"
+        },
+        {
+          "name": "night-isolated-lantern-camera",
+          "file": "visual-night-isolated-lantern-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "plant-real-input-selection-and-walk-through",
+          "file": "visual-plant-real-input-selection-and-walk-through.png",
+          "rawSha256": "d9da7a24ce4e7e2b37c052cc343dd2c4001afe8ba754650d22753c1897e82d47"
+        },
+        {
+          "name": "plant-real-input-selection-and-walk-through-camera",
+          "file": "visual-plant-real-input-selection-and-walk-through-camera.json",
+          "rawSha256": "a88327da3d18bd80553d2321521c67a5e690c6e6b23f0d88b1b74facc0725f88"
+        },
+        {
+          "name": "creative-one-click-input",
+          "file": "visual-creative-one-click-input.json",
+          "rawSha256": "63ad09039985a3d2e696b52644c6f64b9d2be0c56e78c81e84df7948920c0c01"
+        },
+        {
+          "name": "creative-one-click-one-block",
+          "file": "visual-creative-one-click-one-block.png",
+          "rawSha256": "c890a30ed3a76bf3950fa5d53e0803e027e580c6cfe854ed389f9f1c53dbd327"
+        },
+        {
+          "name": "creative-one-click-one-block-camera",
+          "file": "visual-creative-one-click-one-block-camera.json",
+          "rawSha256": "0dda55a1d1233c5fce4690e10c2918cd783cdeb22fb4db1f6b884f6023777649"
+        },
+        {
+          "name": "pixel-icon-browser-equivalence.json",
+          "file": "visual-pixel-icon-browser-equivalence.json",
+          "rawSha256": "70739dd0014ce840a356db2fd565218c58322d0a1d62a3c551f9a75248e647db"
+        },
+        {
+          "name": "creative-catalog-icons",
+          "file": "visual-creative-catalog-icons.png",
+          "rawSha256": "bb5ca467a8fe0ce381e238263e3dff3e36d48ae22695f44bb9f78462af9875d5"
+        },
+        {
+          "name": "creative-stair-icons",
+          "file": "visual-creative-stair-icons.png",
+          "rawSha256": "067fae1de6a2ea0adcf392311765ca0380a264b77df174e0dbcb8e429f53f0ae"
+        },
+        {
+          "name": "sealed-room-unlit",
+          "file": "visual-sealed-room-unlit.png",
+          "rawSha256": "c2cd750e48f1ae03853d55f1109cc8bec2983e21e2716ac70030b66a9525df6d"
+        },
+        {
+          "name": "sealed-room-unlit-camera",
+          "file": "visual-sealed-room-unlit-camera.json",
+          "rawSha256": "577cc21ba5810affc0b96c5ec92176e26216d9b02301a9c6aba45d1e061f9179"
+        },
+        {
+          "name": "sealed-room-glowstone",
+          "file": "visual-sealed-room-glowstone.png",
+          "rawSha256": "57c0a5153f47eddf3151536d565e25ce8db210319b4d35d95e5651bf5787f071"
+        },
+        {
+          "name": "sealed-room-glowstone-camera",
+          "file": "visual-sealed-room-glowstone-camera.json",
+          "rawSha256": "577cc21ba5810affc0b96c5ec92176e26216d9b02301a9c6aba45d1e061f9179"
+        },
+        {
+          "name": "sealed-room-occluding-wall",
+          "file": "visual-sealed-room-occluding-wall.png",
+          "rawSha256": "bff1d1b20a531077a8ecf71463d32ff43aa65de4e29ef07a4bd3f809a1502adf"
+        },
+        {
+          "name": "sealed-room-occluding-wall-camera",
+          "file": "visual-sealed-room-occluding-wall-camera.json",
+          "rawSha256": "577cc21ba5810affc0b96c5ec92176e26216d9b02301a9c6aba45d1e061f9179"
+        },
+        {
+          "name": "cold-stored-sky-source.json",
+          "file": "visual-cold-stored-sky-source.json",
+          "rawSha256": "4615a428f026f61e39a2bf33a94a3774599b63c385a71cea96616e09ae2223b2"
+        },
+        {
+          "name": "cold-stored-sky-scene",
+          "file": "visual-cold-stored-sky-scene.png",
+          "rawSha256": "4250806731cd8e218544136b942c2ef17f1b1ce94783cca436e954e65e386e5d"
+        },
+        {
+          "name": "visual-identity-and-observations",
+          "file": "visual-visual-identity-and-observations.json",
+          "rawSha256": "d0887e250ec96f5d48e30d5217b5aa04a8d1da5603ed3e7f2565eac4d684e75a"
+        }
+      ]
+    }
+  ]
+}

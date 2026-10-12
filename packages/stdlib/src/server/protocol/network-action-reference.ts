@@ -7,6 +7,12 @@ import { INVENTORY_POINTER_FAILURE_REASONS } from '../gameplay/modules/inventory
 
 const reasonsByAction = {
   'inventory-pointer': INVENTORY_POINTER_FAILURE_REASONS,
+  'transport-storage': [
+    'actor-reference-stale',
+    'transport-storage-unavailable',
+    'transport-storage-rejected',
+    'chunk-unavailable',
+  ],
   station: ['stale-station', 'station-rejected', 'chunk-unavailable'],
   'select-hotbar': ['invalid-slot'],
   'cancel-break': [],
@@ -136,6 +142,7 @@ function outcome(action: AuthorityAction, value: unknown): ActionOutcomeReferenc
     }
     case 'station':
     case 'inventory-pointer':
+    case 'transport-storage':
     case 'select-hotbar':
     case 'cancel-break':
     case 'respawn':

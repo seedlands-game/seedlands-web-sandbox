@@ -1,0 +1,9 @@
+
+/workspace/seedlands-web-sandbox/packages/stdlib/src/server/game-server-gameplay-host.ts
+   43:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+   43:18  error  Unsafe declaration merging between classes and interfaces         @typescript-eslint/no-unsafe-declaration-merging
+   45:14  error  Unsafe declaration merging between classes and interfaces         @typescript-eslint/no-unsafe-declaration-merging
+  519:1   error  File has too many lines (501). Maximum allowed is 500             max-lines
+
+✖ 4 problems (4 errors, 0 warnings)
+

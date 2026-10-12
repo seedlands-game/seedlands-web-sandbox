@@ -1,0 +1,70 @@
+{
+  "sourceSha": "7c7b6379ad8f940a9f52644aa0cafc13af4a6ee0",
+  "dirtySource": true,
+  "files": [
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts",
+      "sha256": "ee8a56fe2423e88d5713555a14f34158264d82abbdb86d765a90337696842562"
+    },
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "8cd27929b7c5918242dfbfdaa4ac1da906aebe96fabf1009371c4d7d287cac5a"
+    },
+    {
+      "path": "docs/code-map.md",
+      "sha256": "ca24347efcc181dcf8afb713baf746ff3946e4d90c6bf54f37314a51eb14d966"
+    },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-gameplay-view.ts",
+      "sha256": "da294244b0811a5f838c276e67a92634f018985180dd22347fc7df740b859cc6"
+    },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-mutation-preparation.ts",
+      "sha256": "c066e6fc3ecc11608d4bb04f7dbd9a1a6bbd0d9a67f119eccf285ffc18d3483d"
+    },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-player-action.ts",
+      "sha256": "670efb77bf2514a4cb9edee52c394d1f4f899bde18334138f1e0905bc5d9f148"
+    },
+    {
+      "path": "packages/stdlib/src/server/game-server-gameplay-api.ts",
+      "sha256": "dd02106c87f744c55497f2e40c473b034d0de7fbe4fb054c2b1541ea896bb5ce"
+    },
+    {
+      "path": "packages/stdlib/src/server/game-server-gameplay-host.ts",
+      "sha256": "70e536781bb6db58e7e94adc7c69bc32b30f196f214c9638bf573bac8870e3cb"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/registered-transport-storage-runtime.ts",
+      "sha256": "b7b01bb26c6f87cf88d2a76ed5732f29b1bfbb9f476d375f4a4aaa7cacd491c9"
+    },
+    {
+      "path": "packages/stdlib/src/server/protocol/authority-worker-protocol.ts",
+      "sha256": "0b64e88fbe3f96fe3438d935dc063fe546b7f3ccea8d3d868c28878436a4ef75"
+    },
+    {
+      "path": "packages/stdlib/src/server/protocol/network-action-reference-copy.ts",
+      "sha256": "d3e1fa41e1cd5ebdc2940d3fbd6a603d7a12ba37180bc08dd541896f172b0d35"
+    },
+    {
+      "path": "packages/stdlib/src/server/protocol/network-action-reference.ts",
+      "sha256": "c330de953462c75a2aecd7c9d6b90a561803f733be33e0d060ff918a3bcc05ab"
+    },
+    {
+      "path": "packages/stdlib/tests/server/network-action-request-reference.test.ts",
+      "sha256": "9d4eb54713f28a53a27288c3e666b58f463c84c716397dcb89222213e0059186"
+    },
+    {
+      "path": "packages/stdlib/src/server/authority/authority-transport-storage.ts",
+      "sha256": "6c3da0e572e988b88e816b10b1c27c8791aa7ca68eb044fee586ae785c09142f"
+    },
+    {
+      "path": "packages/stdlib/src/server/game-server-transport-queries.ts",
+      "sha256": "c86955d9ad53259641953b7c2383dcf30486236a68165cef6237472473c9ee62"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/transport-storage-access.ts",
+      "sha256": "d0049f6b22769e1c30a94b185a0090bd4ae7ab044361c0732849e931e646590e"
+    }
+  ]
+}

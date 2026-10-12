@@ -1,0 +1,10 @@
+$ pnpm exec vitest run --config packages/stdlib/vitest.config.ts --maxWorkers=1
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  176 passed (176)
+      Tests  1343 passed (1343)
+   Start at  03:14:28
+   Duration  124.01s (transform 4.62s, setup 0ms, import 21.74s, tests 82.81s, environment 14ms)
+

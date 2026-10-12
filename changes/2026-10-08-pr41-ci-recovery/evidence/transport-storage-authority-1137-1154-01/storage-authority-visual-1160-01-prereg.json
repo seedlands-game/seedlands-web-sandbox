@@ -1,0 +1,23 @@
+{
+  "registeredAt": "2026-10-12T03:25:29.916650+00:00",
+  "scope": "NON_MAIN unchanged sole canonical visual case; diagnostic, no performance or storage UI claim",
+  "sourceFreeze": "storage-authority-freeze-1154-01.json",
+  "frozenPaths": 16,
+  "timeoutMs": 240000,
+  "predicateTimeoutMs": 20000,
+  "retries": 0,
+  "command": [
+    "pnpm",
+    "harness:classic",
+    "--grep",
+    "Classic \u89c6\u89c9 v3",
+    "--retries=0",
+    "--output",
+    "/workspace/pr41-recovery-20261008-root-01/storage-authority-visual-1160-01-results",
+    "--reporter",
+    "list,html,json,./apps/web/tests/e2e/classic-support/canonical-reporter.ts"
+  ],
+  "sourceSha": "7c7b6379ad8f940a9f52644aa0cafc13af4a6ee0",
+  "sourceDigest": "4976560bfed49519e169c25f10b93545e6cdf37d67400e8acdcf25b7cedcf2cc",
+  "artifactDigest": "48572d70ec1804a208fe8dd33ef2e520fb7413d0575baa2ff9a60e8014135051"
+}

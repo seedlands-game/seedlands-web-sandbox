@@ -1,0 +1,104 @@
+{
+  "saved": {
+    "worldId": "seedlands:g11:classic-visual-v3",
+    "epoch": "seedlands:classic-visual-v3:1:world:0",
+    "source": {
+      "status": "complete",
+      "cx": 0,
+      "cz": 0,
+      "epoch": 1,
+      "worldRevision": 42,
+      "directoryRevision": 25,
+      "generatedEmptyAboveY": 51,
+      "entries": [
+        { "key": "0,0,0", "cx": 0, "cy": 0, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,1,0", "cx": 0, "cy": 1, "cz": 0, "revision": 29, "resident": true, "dirty": false },
+        { "key": "0,2,0", "cx": 0, "cy": 2, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,3,0", "cx": 0, "cy": 3, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,4,0", "cx": 0, "cy": 4, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": true, "dirty": false }
+      ]
+    },
+    "roof": { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": true, "dirty": false },
+    "canonicalRevision": 1,
+    "sky": {
+      "pending": true,
+      "disposed": false,
+      "dependencyCount": 0,
+      "registeredChunkCount": 0,
+      "readyChunkCount": 0,
+      "dirtyChunkCount": 0,
+      "buildingChunkCount": 0,
+      "allocatedBytes": 0,
+      "maximumBytes": 33521664,
+      "frame": { "worldTime": 0, "profileScalar": 1 },
+      "readyChunkKeys": []
+    }
+  },
+  "cold": {
+    "worldId": "seedlands:g11:classic-visual-v3",
+    "epoch": "seedlands:classic-visual-v3:1:world:0",
+    "source": {
+      "status": "complete",
+      "cx": 0,
+      "cz": 0,
+      "epoch": 2,
+      "worldRevision": 42,
+      "directoryRevision": 25,
+      "generatedEmptyAboveY": 51,
+      "entries": [
+        { "key": "0,0,0", "cx": 0, "cy": 0, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,1,0", "cx": 0, "cy": 1, "cz": 0, "revision": 29, "resident": true, "dirty": false },
+        { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": false, "dirty": false }
+      ]
+    },
+    "roof": { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": false, "dirty": false },
+    "canonicalRevision": null,
+    "sky": {
+      "pending": true,
+      "disposed": false,
+      "dependencyCount": 0,
+      "registeredChunkCount": 0,
+      "readyChunkCount": 0,
+      "dirtyChunkCount": 0,
+      "buildingChunkCount": 0,
+      "allocatedBytes": 0,
+      "maximumBytes": 33521664,
+      "frame": { "worldTime": 0, "profileScalar": 1 },
+      "readyChunkKeys": []
+    }
+  },
+  "after": {
+    "worldId": "seedlands:g11:classic-visual-v3",
+    "epoch": "seedlands:classic-visual-v3:1:world:0",
+    "source": {
+      "status": "complete",
+      "cx": 0,
+      "cz": 0,
+      "epoch": 2,
+      "worldRevision": 42,
+      "directoryRevision": 25,
+      "generatedEmptyAboveY": 51,
+      "entries": [
+        { "key": "0,0,0", "cx": 0, "cy": 0, "cz": 0, "revision": 0, "resident": true, "dirty": false },
+        { "key": "0,1,0", "cx": 0, "cy": 1, "cz": 0, "revision": 29, "resident": true, "dirty": false },
+        { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": false, "dirty": false }
+      ]
+    },
+    "roof": { "key": "0,7,0", "cx": 0, "cy": 7, "cz": 0, "revision": 1, "resident": false, "dirty": false },
+    "canonicalRevision": null,
+    "sky": {
+      "pending": true,
+      "disposed": false,
+      "dependencyCount": 6,
+      "registeredChunkCount": 5,
+      "readyChunkCount": 5,
+      "dirtyChunkCount": 0,
+      "buildingChunkCount": 0,
+      "allocatedBytes": 168960,
+      "maximumBytes": 33521664,
+      "frame": { "worldTime": 0, "profileScalar": 1 },
+      "readyChunkKeys": ["0,0,0", "0,1,0", "-1,0,0", "0,1,-1", "-1,1,0"]
+    }
+  }
+}

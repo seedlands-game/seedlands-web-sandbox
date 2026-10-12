@@ -25,7 +25,7 @@ import type { ChunkPersistence } from './persistence/chunk-persistence';
 import type { GameplayPersistence } from './persistence/gameplay-persistence';
 import type { CorePlatformPorts } from '../runtime/platform-ports';
 import type { GameplayContent } from './gameplay/gameplay-content';
-import { projectTransportStates, projectMountedSeatConstraints } from './gameplay/transport-projection';
+import { GameServerTransportQueries } from './game-server-transport-queries';
 import type { GameServerOptions } from './game-server-types';
 import type { InventoryPointerInputV1 } from './gameplay/modules/inventory-pointer-contract';
 import type { CharacterActorBinding, CharacterControlRequest } from '../runtime/character-control-protocol';
@@ -41,7 +41,7 @@ import type { PreparedGameplayRestore } from './game-server-gameplay-restore';
 type Persistence = ChunkPersistence & Partial<GameplayPersistence>;
 export type { GameServerGameplayWorldPort } from './game-server-gameplay-world-port';
 
-export class GameServerGameplayHost {
+export class GameServerGameplayHost extends GameServerTransportQueries {
   private activeGameplay: GameplayRuntime;
   private readonly legacyEntityIds = new Set<string>();
   private restoredVersion: 1 | 2 | 3 | 4 | null = null;
@@ -57,6 +57,7 @@ export class GameServerGameplayHost {
     >,
     private readonly world: GameServerGameplayWorldPort,
   ) {
+    super(() => this.gameplay, compositionOptions, world);
     this.activeGameplay = this.createGameplay();
   }
 
@@ -137,10 +138,6 @@ export class GameServerGameplayHost {
   resolveEntityReference = (reference: EntityLifetimeReference): GameplayEntity | null =>
     this.gameplay.entities.resolveReference(reference);
   commitPhysicsFrame = (frame: AuthorityPhysicsFrame) => this.gameplay.commitPhysicsFrame(frame);
-  transportState = (reference: EntityLifetimeReference) => this.gameplay.entities.transportState(reference);
-  transportProjections = () => projectTransportStates(this.gameplay.entities);
-  mountedSeatConstraints = () =>
-    projectMountedSeatConstraints(this.gameplay.entities, this.gameplay.content.transportDefinitions);
   updateEntity(id: string, update: EntityUpdate): GameplayEntity {
     const entity = this.gameplay.updateEntity(id, update);
     return this.legacyEntityIds.has(id) ? this.legacyEntity(entity) : entity;

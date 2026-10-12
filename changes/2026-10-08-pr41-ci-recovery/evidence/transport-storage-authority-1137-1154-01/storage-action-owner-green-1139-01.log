@@ -1,0 +1,130 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+2:49:10 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts (11 tests | 11 failed) 273ms
+   × uses the normal Authority action and readonly current carrier revision without client-selected operations 108ms
+   × does not project or accept storage actions without the optional capability 30ms
+   × publishes cargo deposit, withdrawal and fuel consumption with actor and carrier revisions once 16ms
+   × rejects out-of-range and blocked carrier operations with both live sides unchanged 14ms
+   × rejects inventory-change after preparation without partially applying the proposed transfer 27ms
+   × rejects carrier-move after preparation without partially applying the proposed transfer 12ms
+   × rejects actor-health-zero after preparation without partially applying the proposed transfer 15ms
+   × rejects actor-death after preparation without partially applying the proposed transfer 14ms
+   × rejects entity-owner-replace after preparation without partially applying the proposed transfer 17ms
+   × rejects carrier-despawn after preparation without partially applying the proposed transfer 10ms
+   × persists nonempty cargo and fuel and rejects an operation carrying the retired references 9ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > uses the normal Authority action and readonly current carrier revision without client-selected operations
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:78:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > does not project or accept storage actions without the optional capability
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:99:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > publishes cargo deposit, withdrawal and fuel consumption with actor and carrier revisions once
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:108:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects out-of-range and blocked carrier operations with both live sides unchanged
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:164:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects inventory-change after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects carrier-move after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-health-zero after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects actor-death after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects entity-owner-replace after preparation without partially applying the proposed transfer
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > rejects carrier-despawn after preparation without partially applying the proposed transfer
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:203:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/11]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts > persists nonempty cargo and fuel and rejects an operation carrying the retired references
+TypeError: server.transportStorageProjections is not a function
+ ❯ projectAuthorityGameplayView packages/stdlib/src/server/authority/authority-gameplay-view.ts:6:35
+      4| export function projectAuthorityGameplayView(server: GameServer, playe…
+      5|   const inventory = server.getInventoryPointerView(playerId);
+      6|   const transportStorage = server.transportStorageProjections(playerId…
+       |                                   ^
+      7|   const entities = server
+      8|     .queryEntities()
+ ❯ AuthorityRuntime.view packages/stdlib/src/server/authority/authority-runtime.ts:492:12
+ ❯ AuthorityRuntime.performAction packages/stdlib/src/server/authority/authority-runtime.ts:419:54
+ ❯ prepared apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:36:11
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-storage-authority.test.ts:267:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/11]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  11 failed (11)
+   Start at  02:49:10
+   Duration  4.76s (transform 3.50s, setup 0ms, import 4.22s, tests 273ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

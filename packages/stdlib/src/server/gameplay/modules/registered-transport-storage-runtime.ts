@@ -2,9 +2,8 @@ import type { ModuleInvocationValue } from '../../composition/contracts';
 import type { ModStateAddress, RegisteredStatePort } from '../../composition/operation-contracts';
 import { assertActorResourceExecution } from '../../composition/secondary-resource-authorization';
 import type { AutonomyRuntime } from '../../simulation/autonomy-runtime';
-import { playerInteractionOrigin, positionsInRange } from '../gameplay-geometry';
+import { transportStorageAccess } from '../transport-storage-access';
 import { cloneItemStack } from '../item-instance';
-import { traceVoxelRay } from '../voxel-ray';
 import type { RegisteredTransportRuntime } from './registered-transport-runtime';
 import {
   TRANSPORT_INTERACTION_CAPABILITY,
@@ -195,16 +194,14 @@ export class RegisteredTransportStorageRuntime {
     });
   }
   private assertReach(actorId: string, targetId: string) {
-    const origin = playerInteractionOrigin(this.actor(actorId).position),
-      target = this.options.entities.get(targetId);
-    if (!target || !positionsInRange(origin, target.position, 5)) throw new Error('transport-storage-out-of-range');
-    const status = traceVoxelRay(
+    const target = this.options.entities.get(targetId);
+    if (!target) throw new Error('transport-storage-carrier-unavailable');
+    const status = transportStorageAccess(
+      this.options.content,
+      this.options.callbacks.getLoadedVoxel,
+      this.actor(actorId).position,
       target.position,
-      origin,
-      (x, y, z) => this.options.callbacks.getLoadedVoxel?.([x, y, z]),
-      (voxel) => this.options.content.voxelSemantics.get(voxel)?.solid ?? true,
     );
-    if (status !== 'clear')
-      throw new Error(status === 'unavailable' ? 'chunk-unavailable' : 'transport-storage-blocked');
+    if (status !== 'clear') throw new Error(status === 'chunk-unavailable' ? status : `transport-storage-${status}`);
   }
 }

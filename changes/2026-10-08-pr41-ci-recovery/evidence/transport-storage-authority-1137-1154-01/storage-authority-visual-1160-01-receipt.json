@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "durationSeconds": 99.42661643028259,
+  "sourceFreeze": "storage-authority-freeze-1154-01.json",
+  "artifactMatch": true,
+  "sourceHashesMatch": 16,
+  "sourceSha": "7c7b6379ad8f940a9f52644aa0cafc13af4a6ee0",
+  "dirtySource": true,
+  "runId": "storage-authority-visual-1160-01"
+}

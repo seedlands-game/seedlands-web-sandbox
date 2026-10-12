@@ -3,6 +3,7 @@ import type { AuthorityGameplayView } from '../protocol/authority-worker-protoco
 
 export function projectAuthorityGameplayView(server: GameServer, playerId: string): AuthorityGameplayView {
   const inventory = server.getInventoryPointerView(playerId);
+  const transportStorage = server.transportStorageProjections(playerId);
   const entities = server
     .queryEntities()
     .map((entity) =>
@@ -32,6 +33,7 @@ export function projectAuthorityGameplayView(server: GameServer, playerId: strin
     stationRecipes: server.listStationRecipes(),
     recipes: server.listRecipes(),
     inventory,
+    ...(transportStorage ? { transportStorage } : {}),
     craftableRecipeIds: server.listCraftableRecipes(playerId).map((recipe) => recipe.id),
     progress: server.progress.snapshot(playerId),
     difficulty: server.gameplayDifficulty,

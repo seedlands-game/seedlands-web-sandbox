@@ -1,6 +1,7 @@
 import type { AuthorityAction } from '../protocol/authority-worker-protocol';
 import { canonicalReferenceInteger } from './network-reference-integer';
 import { validateInventoryPointerInput } from '../gameplay/modules/inventory-pointer-contract';
+import { readTransportStorageInputV1 } from '../gameplay/modules/transport-storage-model';
 import {
   cloneItemInteractionExpectedSelection,
   isItemInteractionTarget,
@@ -18,6 +19,7 @@ const actionTypes = new Set<AuthorityAction['type']>([
   'move-inventory',
   'use-inventory',
   'inventory-pointer',
+  'transport-storage',
   'interact',
   'set-difficulty',
 ]);
@@ -87,6 +89,43 @@ export function copyAuthorityActionReference(value: unknown): AuthorityAction {
   const type = source.type;
   if (typeof type !== 'string' || !isAuthorityActionType(type)) throw new TypeError('Unsupported public action.');
   switch (type) {
+    case 'transport-storage': {
+      if (
+        Object.keys(source).some(
+          (key) =>
+            ![
+              'type',
+              'version',
+              'actor',
+              'transport',
+              'expectedInventoryRevision',
+              'expectedTransportRevision',
+              'command',
+            ].includes(key),
+        )
+      )
+        throw new TypeError('Transport storage action contains unknown fields.');
+      const input = readTransportStorageInputV1({
+        version: source.version,
+        actor: entityReference(source.actor),
+        transport: entityReference(source.transport),
+        expectedInventoryRevision: nonNegativeSafeInteger(source.expectedInventoryRevision, 'inventoryRevision'),
+        expectedTransportRevision: nonNegativeSafeInteger(source.expectedTransportRevision, 'transportRevision'),
+        command: source.command,
+      });
+      return {
+        type,
+        ...input,
+        command:
+          input.command.kind === 'transfer'
+            ? {
+                ...input.command,
+                actorSlot: canonicalReferenceInteger(input.command.actorSlot),
+                transportSlot: canonicalReferenceInteger(input.command.transportSlot),
+              }
+            : { ...input.command, actorSlot: canonicalReferenceInteger(input.command.actorSlot) },
+      };
+    }
     case 'inventory-pointer': {
       if (
         Object.keys(source).some(
