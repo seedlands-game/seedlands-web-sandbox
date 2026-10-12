@@ -1,0 +1,13 @@
+{
+  "runId": "transport-controls-headless-1178-01",
+  "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+  "dirtySource": true,
+  "freezeFile": "transport-controls-freeze-1178-01.json",
+  "command": ["pnpm", "test:classic:headless"],
+  "startedAt": "2026-10-12T04:15:34.607347+00:00",
+  "finishedAt": "2026-10-12T04:19:21.830831+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 227.22398711700225,
+  "sourceMatches": true,
+  "logSha256": "de2a9e99a472cf5ef69e43b24427f735c7a3ed801ce08a6bdc288cdfaf4d487f"
+}

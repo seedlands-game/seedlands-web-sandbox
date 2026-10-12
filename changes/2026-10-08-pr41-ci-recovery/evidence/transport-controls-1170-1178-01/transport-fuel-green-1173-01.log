@@ -1,0 +1,11 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts
+4:05:20 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  04:05:20
+   Duration  4.79s (transform 3.67s, setup 0ms, import 4.36s, tests 225ms, environment 0ms)
+

@@ -1,0 +1,41 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts
+3:56:41 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts (14 tests | 1 failed) 423ms
+   × rejects mounting a carrier excluded by the explicit Pack whitelist without changing either owner 76ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts > rejects mounting a carrier excluded by the explicit Pack whitelist without changing either owner
+AssertionError: expected { success: true, handled: true, …(1) } to match object { success: false }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": false,
++   "success": true,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts:30:25
+     28|   const carrier = before.transports![0]!;
+     29|   const result = await runtime.performAction({ type: 'interact', inten…
+     30|   expect(result.result).toMatchObject({ success: false });
+       |                         ^
+     31|   expect(runtime.view().transports).toEqual(before.transports);
+     32|   expect(runtime.view().inventory).toEqual(before.inventory);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 13 passed (14)
+   Start at  03:56:41
+   Duration  4.62s (transform 3.44s, setup 0ms, import 4.04s, tests 423ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts`
+Exit status 1

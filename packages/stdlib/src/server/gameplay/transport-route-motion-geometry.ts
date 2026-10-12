@@ -74,7 +74,16 @@ export function projectRouteMotion(options: Options): TransportMotionCandidateV1
     entities.resolveReference(frame.playerReference);
   const wish = driven ? frame.playerWish : zero;
   const forward = wish.x * Math.sin(state.pose.yaw) + wish.z * Math.cos(state.pose.yaw);
-  const throttle = Math.abs(forward) <= 1e-9 ? 0 : forward > 0 ? 1 : -1;
+  const throttle =
+    policy.throttleSource === 'fuel'
+      ? state.fuel !== null && state.fuel > 0
+        ? 1
+        : 0
+      : Math.abs(forward) <= 1e-9
+        ? 0
+        : forward > 0
+          ? 1
+          : -1;
   const updates = new Map(frame.updates.map((entry) => [entry.id, entry.update]));
   const others = entities
     .query()

@@ -17,6 +17,7 @@ export type TransportMotionPolicy = Readonly<{
   maxSpeed: number;
   steeringRate: number;
   fuelPerMeter: number;
+  throttleSource?: 'rider' | 'fuel';
 }>;
 export type TransportMotionConfig = Readonly<{
   moduleId: string;
@@ -49,6 +50,8 @@ export function freezeTransportMotionConfig(input: TransportMotionConfig): Trans
     if (!qualified.test(policy.definitionId) || seen.has(policy.definitionId))
       throw new TypeError('Transport motion definition is invalid.');
     seen.add(policy.definitionId);
+    if (policy.throttleSource !== undefined && !['rider', 'fuel'].includes(policy.throttleSource))
+      throw new TypeError('Transport throttle source is invalid.');
     for (const [key, maximum] of Object.entries(limits)) {
       const value = policy[key as keyof typeof limits];
       if (!Number.isFinite(value) || value < 0 || value > maximum)
@@ -61,6 +64,7 @@ export function freezeTransportMotionConfig(input: TransportMotionConfig): Trans
       maxSpeed: policy.maxSpeed,
       steeringRate: policy.steeringRate,
       fuelPerMeter: policy.fuelPerMeter,
+      ...(policy.throttleSource === undefined ? {} : { throttleSource: policy.throttleSource }),
     });
   });
   return Object.freeze({
@@ -105,7 +109,17 @@ export function defineTransportMotionModule(input: TransportMotionConfig): ModMo
     },
     register(api) {
       const transport = api.requireCapability<FrozenTransportInteractionConfig>(TRANSPORT_INTERACTION_CAPABILITY);
-      for (const policy of config.policies) transport.definitions.require(policy.definitionId);
+      for (const policy of config.policies) {
+        const definition = transport.definitions.require(policy.definitionId);
+        if (
+          policy.throttleSource === 'fuel' &&
+          (definition.locomotion.provider !== 'route' ||
+            definition.fuelCapacity === null ||
+            definition.fuelCapacity <= 0 ||
+            policy.fuelPerMeter <= 0)
+        )
+          throw new TypeError('Fuel throttle requires a route carrier with fuel capacity and consumption.');
+      }
       api.provideCapability(TRANSPORT_MOTION_CAPABILITY, config);
       api.registerState({
         id: TRANSPORT_MOTION_COMPONENT,

@@ -1,5 +1,9 @@
 import type { ModModule, ModuleInvocationValue } from '../../composition/contracts';
-import { TRANSPORT_INTERACTION_CAPABILITY, TRANSPORT_RESOURCE } from './transport-interaction-config';
+import {
+  TRANSPORT_INTERACTION_CAPABILITY,
+  TRANSPORT_RESOURCE,
+  type FrozenTransportInteractionConfig,
+} from './transport-interaction-config';
 import {
   TRANSPORT_RELATION_CAPABILITY,
   TRANSPORT_RELATION_COMPONENT,
@@ -17,7 +21,21 @@ export function defineTransportRelationModule(input: TransportRelationConfig): M
   const namespace = /^[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._/-]*$/;
   if (!namespace.test(input.moduleId) || !namespace.test(input.operationId))
     throw new TypeError('Transport relation IDs must be qualified.');
-  const config = Object.freeze({ moduleId: input.moduleId, operationId: input.operationId });
+  if (
+    input.mountableDefinitions !== undefined &&
+    (!Array.isArray(input.mountableDefinitions) ||
+      input.mountableDefinitions.length > 256 ||
+      input.mountableDefinitions.some((id) => typeof id !== 'string' || !namespace.test(id)) ||
+      new Set(input.mountableDefinitions).size !== input.mountableDefinitions.length)
+  )
+    throw new TypeError('Transport mountable definitions are invalid.');
+  const config = Object.freeze({
+    moduleId: input.moduleId,
+    operationId: input.operationId,
+    ...(input.mountableDefinitions === undefined
+      ? {}
+      : { mountableDefinitions: Object.freeze([...input.mountableDefinitions]) }),
+  });
   return Object.freeze({
     descriptor: {
       id: config.moduleId,
@@ -27,6 +45,8 @@ export function defineTransportRelationModule(input: TransportRelationConfig): M
       permissions: [{ resource: TRANSPORT_RESOURCE, operations: ['read', 'write', 'execute'] }],
     },
     register(api) {
+      const transport = api.requireCapability<FrozenTransportInteractionConfig>(TRANSPORT_INTERACTION_CAPABILITY);
+      for (const id of config.mountableDefinitions ?? []) transport.definitions.require(id);
       api.provideCapability(TRANSPORT_RELATION_CAPABILITY, config);
       for (const id of [TRANSPORT_RELATION_COMPONENT, TRANSPORT_RELATION_SITE_COMPONENT])
         api.registerState({
@@ -49,7 +69,7 @@ export function defineTransportRelationModule(input: TransportRelationConfig): M
           if (context.target.entityId !== (input.kind === 'mount' ? target.entityId : context.originalActorId))
             throw new TypeError('Transport relation invocation target is invalid.');
           const site = state.read(transportRelationSiteAddress(target.entityId)) as TransportRelationSite;
-          const candidate = buildTransportRelationInteraction(actor, site, input);
+          const candidate = buildTransportRelationInteraction(actor, site, input, config.mountableDefinitions);
           state.write(address, candidate as ModuleInvocationValue);
           return candidate as ModuleInvocationValue;
         },

@@ -1,0 +1,31 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts
+4:04:41 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts (1 test | 1 failed) 153ms
+   × drives an unmounted route carrier only after normal Authority refueling and charges traveled distance 151ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts > drives an unmounted route carrier only after normal Authority refueling and charges traveled distance
+AssertionError: expected 0 to be greater than 0
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts:44:20
+     42|   const moved = runtime.view().transports![0]!;
+     43|   const distance = Math.hypot(...moved.pose.position.map((value, axis)…
+     44|   expect(distance).toBeGreaterThan(0);
+       |                    ^
+     45|   expect(moved.rider).toBeNull();
+     46|   expect(moved.fuel).toBeCloseTo(4 - distance, 8);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  04:04:41
+   Duration  3.99s (transform 3.12s, setup 0ms, import 3.68s, tests 153ms, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts`
+Exit status 1

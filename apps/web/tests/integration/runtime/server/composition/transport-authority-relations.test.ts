@@ -18,6 +18,67 @@ const relations = defineTransportRelationModule({
   operationId: 'sample:relate-transport',
 });
 
+it.each([[], ['sample:route-cart']].map((mountableDefinitions) => ({ mountableDefinitions })))(
+  'rejects mounting a carrier excluded by whitelist %j without changing either owner',
+  async ({ mountableDefinitions }) => {
+    const config = {
+      moduleId: 'sample:restricted-relations',
+      operationId: 'sample:restricted-relate',
+      mountableDefinitions,
+    };
+    const runtime = await create(undefined, undefined, [defineTransportRelationModule(config)]);
+    await putVoxel(runtime, [3, 59, 0], 5);
+    runtime.server.giveItem(runtime.playerId, { itemId: 'sample:surface-cart-kit', count: 1 });
+    expect((await runtime.performAction(deploy(runtime, [3, 59, 0], [3, 60, 0]))).result).toMatchObject({
+      success: true,
+    });
+    const before = runtime.view();
+    const carrier = before.transports![0]!;
+    const result = await runtime.performAction({
+      type: 'interact',
+      intent: 'use',
+      target: { kind: 'entity', reference: carrier.reference },
+      expectedSelection: selection(runtime),
+    });
+    expect(result.result).toMatchObject({ success: false });
+    expect(runtime.view().transports).toEqual(before.transports);
+    expect(runtime.view().inventory).toEqual(before.inventory);
+    expect(runtime.server.gameplayRevision).toBe(before.gameplayRevision);
+  },
+);
+
+it('copies an explicit mount whitelist and permits its configured carrier', async () => {
+  const ids = ['sample:surface-cart'];
+  const module = defineTransportRelationModule({
+    moduleId: 'sample:copied-relations',
+    operationId: 'sample:copied-relate',
+    mountableDefinitions: ids,
+  });
+  ids.length = 0;
+  const runtime = await create(undefined, undefined, [module]);
+  await putVoxel(runtime, [3, 59, 0], 5);
+  runtime.server.giveItem(runtime.playerId, { itemId: 'sample:surface-cart-kit', count: 1 });
+  expect((await runtime.performAction(deploy(runtime, [3, 59, 0], [3, 60, 0]))).result).toMatchObject({
+    success: true,
+  });
+  const carrier = runtime.view().transports![0]!;
+  expect((await mount(runtime, carrier.reference)).result).toMatchObject({ success: true });
+  expect(runtime.view().transports![0]!.rider).toEqual(runtime.server.createEntityReference(runtime.playerId));
+});
+
+it('rejects malformed, duplicated and unregistered mount definitions', async () => {
+  const config = { moduleId: 'sample:invalid-relations', operationId: 'sample:invalid-relate' };
+  for (const mountableDefinitions of [['unqualified'], ['sample:route-cart', 'sample:route-cart']])
+    expect(() => defineTransportRelationModule({ ...config, mountableDefinitions })).toThrow(
+      'Transport mountable definitions are invalid',
+    );
+  await expect(
+    create(undefined, undefined, [
+      defineTransportRelationModule({ ...config, mountableDefinitions: ['sample:absent'] }),
+    ]),
+  ).rejects.toThrow();
+});
+
 type RelationRuleMode = 'veto' | 'forge';
 const relationRule = (mode: RelationRuleMode): ModModule => ({
   descriptor: {
