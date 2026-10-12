@@ -1,0 +1,31 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts tests/integration/runtime/server/composition/transport-authority-motion.test.ts
+4:06:18 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts (3 tests | 1 failed) 554ms
+   × stops a fuel-driven carrier at a loaded wall without charging fuel after it stops 350ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts > stops a fuel-driven carrier at a loaded wall without charging fuel after it stops
+AssertionError: expected 2 to be less than or equal to 1.600001
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts:83:36
+     81|   runtime.advanceSession(1200);
+     82|   const stopped = runtime.view().transports![0]!;
+     83|   expect(stopped.pose.position[0]).toBeLessThanOrEqual(1.600001);
+       |                                    ^
+     84|   expect(stopped.pose.position[0]).toBeGreaterThan(fueled.pose.positio…
+     85|   expect(stopped.fuel).toBeCloseTo(4 - (stopped.pose.position[0] - fue…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 19 passed (20)
+   Start at  04:06:18
+   Duration  5.67s (transform 10.28s, setup 0ms, import 12.74s, tests 2.27s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts tests/integration/runtime/server/composition/transport-authority-motion.test.ts`
+Exit status 1

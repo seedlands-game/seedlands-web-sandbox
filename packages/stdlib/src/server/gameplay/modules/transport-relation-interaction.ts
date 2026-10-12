@@ -8,7 +8,11 @@ import { buildTransportMountCandidateV1, buildTransportDismountCandidateV1 } fro
 export const TRANSPORT_RELATION_CAPABILITY = 'seedlands:transport-relations';
 export const TRANSPORT_RELATION_COMPONENT = 'seedlands:transport-relation';
 export const TRANSPORT_RELATION_SITE_COMPONENT = 'seedlands:transport-relation-site';
-export type TransportRelationConfig = Readonly<{ moduleId: string; operationId: string }>;
+export type TransportRelationConfig = Readonly<{
+  moduleId: string;
+  operationId: string;
+  mountableDefinitions?: readonly string[];
+}>;
 export type TransportRelationActor = TransportDeploymentActorV1 & Readonly<{ mounted: EntityLifetimeReference | null }>;
 export type TransportRelationSite = Readonly<{
   version: 1;
@@ -54,6 +58,7 @@ export function buildTransportRelationInteraction(
   actor: TransportRelationActor,
   site: TransportRelationSite,
   raw: unknown,
+  mountableDefinitions?: readonly string[],
 ) {
   const input = readTransportRelationInput(raw);
   if (!actor.alive) throw new Error('player-dead');
@@ -66,6 +71,8 @@ export function buildTransportRelationInteraction(
     same(reference, actor.reference) || same(reference, site.state.reference);
   if (input.kind === 'mount') {
     if (!same(input.target, site.state.reference)) throw new Error('stale-transport');
+    if (mountableDefinitions && !mountableDefinitions.includes(site.state.definitionId))
+      throw new Error('transport-not-mountable');
     if (actor.mounted) throw new Error('actor-already-mounted');
     if (site.seatRejection) throw new Error(site.seatRejection);
     const result = buildTransportMountCandidateV1(checkpoint, {

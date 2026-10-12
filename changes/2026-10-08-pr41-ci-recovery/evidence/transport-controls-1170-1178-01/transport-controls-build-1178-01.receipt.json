@@ -1,0 +1,13 @@
+{
+  "runId": "transport-controls-build-1178-01",
+  "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+  "dirtySource": true,
+  "freezeFile": "transport-controls-freeze-1178-01.json",
+  "command": ["pnpm", "build"],
+  "startedAt": "2026-10-12T04:19:21.846602+00:00",
+  "finishedAt": "2026-10-12T04:20:11.841234+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 49.99499358504545,
+  "sourceMatches": true,
+  "logSha256": "89b4a2156cc55533a5666775413795ab9389086fd59119318ae1b5703ff7020f"
+}

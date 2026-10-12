@@ -1,0 +1,50 @@
+{
+  "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+  "dirtySource": true,
+  "files": [
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts",
+      "sha256": "76c0987b52dd36b220a434f24553cc21ae1ffacb3ff0be26bc241982e1f40dde"
+    },
+    {
+      "path": "apps/web/tests/integration/runtime/server/composition/transport-fuel-authority.test.ts",
+      "sha256": "246e82facff260f8ec6191e62085702b0f3c99b50721463cb69a45847cdc9179"
+    },
+    {
+      "path": "changes/2026-10-08-pr41-ci-recovery/spec.md",
+      "sha256": "76b354e10cfed9ee14c0d070cf9c0670bf63d0cb72ea4cbafa77fa8626f7245f"
+    },
+    {
+      "path": "docs/code-map.md",
+      "sha256": "0cd806ca6ea46a4cc96d5b93a1fc1c8bbb123326ff25dd12260993ec2e4136ce"
+    },
+    {
+      "path": "package.json",
+      "sha256": "b03780ad780ea85986f618da513e6c24b08597e65f5d7c6c6fb7989f95212866"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/registered-transport-relation-runtime.ts",
+      "sha256": "abc2624ab1df4a79b76241ac2b645119ff49ede5a8f7f504679b498fc7e437e0"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-motion-module.ts",
+      "sha256": "18e37f94cfcfd8df71559fd72a94f71d494a22850becaf90f89203837696dfde"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-relation-interaction.ts",
+      "sha256": "ba5795c98890f90081ac12724a0f7b0d721d551967260873f68b96f353d2a189"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/modules/transport-relation-module.ts",
+      "sha256": "bd6725397a9a540d8b67a0b111b5a48193724d6e74002b3461fd59bfb0491ee9"
+    },
+    {
+      "path": "packages/stdlib/src/server/gameplay/transport-route-motion-geometry.ts",
+      "sha256": "259258684806ce28a1aeb55765a977d815f263411de5c122476374f22a9c7b72"
+    },
+    {
+      "path": "tsconfig.classic-tests.json",
+      "sha256": "7ad708cf06226cf737d1d3e4ae1fcb5e18cf144f891a6b9b04c373070fce79e0"
+    }
+  ]
+}

@@ -107,7 +107,12 @@ export class RegisteredTransportRelationRuntime {
         )
           throw new Error('transport-observation-stale');
         observedCurrent(observed);
-        const candidate = buildTransportRelationInteraction(actor, this.site(target.entityId), input);
+        const candidate = buildTransportRelationInteraction(
+          actor,
+          this.site(target.entityId),
+          input,
+          this.relation.mountableDefinitions,
+        );
         if (!same(candidate, execution.candidateValue) || !same(candidate, writes[0]!.value))
           throw new Error('transport-candidate-stale');
         const authorize = () => {

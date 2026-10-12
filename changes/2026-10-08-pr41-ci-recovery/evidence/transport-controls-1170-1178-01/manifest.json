@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "state": "sealed",
+  "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+  "dirtySource": true,
+  "files": {
+    "README.md": "16fe27ced8583065769e7a3462aa88949d550c0b134ec5907ce02333def190b0",
+    "transport-controls-build-1178-01.log": "89b4a2156cc55533a5666775413795ab9389086fd59119318ae1b5703ff7020f",
+    "transport-controls-build-1178-01.receipt.json": "b6f0fd54741c8d2e3c1ecce9022bf4717de4e4011fd15817035ccd1176278bd4",
+    "transport-controls-classic-types-1174-01.log": "d7c202ce0f0f4567e9230d280cc52c28922a9bf37c5b25740b2d6b8f11ad0bbc",
+    "transport-controls-freeze-1178-01.json": "ea5a00b0a8c523f4b237ed83c3ee37df32c3bacc041dd0ff190f6b4509c4fbb4",
+    "transport-controls-headless-1178-01.log": "de2a9e99a472cf5ef69e43b24427f735c7a3ed801ce08a6bdc288cdfaf4d487f",
+    "transport-controls-headless-1178-01.receipt.json": "1693f6c1f2f11759826ae71f5bb69d77ee09f5445266916d7e6b51d9b0c9337e",
+    "transport-controls-owner-1174-01.log": "97167d2abc5eb3dd8b6c6c53c10aaabf0a4a450dfca0e4e5491e1a447e7925f4",
+    "transport-controls-owner-1175-01.log": "6dec0d3691cbb37445977ac7c8d4297483f6d9f07b1578cc0885282ca91d08c1",
+    "transport-controls-owner-1176-01.log": "d666f1f1bcc7d3dc05d45848a99929130deac763f312fb6e820baee1653d2721",
+    "transport-controls-owner-1177-01.log": "67199966f168f7d0b4160b130361d51a6e3e7514280300f059ca41f93f32acd0",
+    "transport-controls-static-1178-01.log": "fb41079e0046ef51a171e17c0a673f86593de4b3e77ee55129914b8fb7871724",
+    "transport-controls-static-1178-01.receipt.json": "e89e701a733ba1342ea7b00a5f331bc9ad831b30974a12c6d633f3ac7f4cf931",
+    "transport-controls-stdlib-1178-01.log": "41c365a00a6b97f7664b995d6301cde27b7842ad47bc0241b6b839af41b4870c",
+    "transport-controls-stdlib-1178-01.receipt.json": "dc3bc8677dd5a9f56e87a4f6af8a549325e9c8481beaa9aede3774458163f956",
+    "transport-controls-stdlib-types-1174-01.log": "38ac890c60e7f38d59ddfb410325cdfb5fca83c9411765c5481754e01c021630",
+    "transport-fuel-green-1173-01.log": "8de6e35d8338730aae29a7633986e78b97fa6ceb813dce321da59cfcf63e2769",
+    "transport-fuel-red-1172-01.log": "6e95af4381b98a7234033f4cda94a9f8ae28b61e89695c89ecc90aca6453d7b4",
+    "transport-mount-policy-green-1171-01.log": "dd415f2ff7299da42f280f3d464d4cd4667ef353f8a9f0ada9d7188e4f74f849",
+    "transport-mount-policy-red-1170-01.log": "815fbbac4e313ed0179a0bb8ff75fbe0901b3fe73f74a80059a0e1d5c08000bd"
+  }
+}

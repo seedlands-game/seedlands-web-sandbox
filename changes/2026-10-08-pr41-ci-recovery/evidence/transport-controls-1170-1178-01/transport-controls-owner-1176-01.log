@@ -1,0 +1,55 @@
+$ pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts tests/integration/runtime/server/composition/transport-authority-motion.test.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts
+4:08:14 AM [vite-plugin-svelte] no Svelte config found at /workspace/seedlands-web-sandbox - using default configuration.
+
+ RUN  v4.1.11 /workspace/seedlands-web-sandbox
+
+ ❯ |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts (17 tests | 2 failed) 1025ms
+   × rejects mounting a carrier excluded by whitelist undefined without changing either owner 134ms
+   × rejects mounting a carrier excluded by whitelist "sample:route-cart" without changing either owner 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts > rejects mounting a carrier excluded by whitelist undefined without changing either owner
+AssertionError: expected { success: true, handled: true, …(1) } to match object { success: false }
+(7 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "success": false,
++   "success": true,
+  }
+
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts:43:27
+     41|       expectedSelection: selection(runtime),
+     42|     });
+     43|     expect(result.result).toMatchObject({ success: false });
+       |                           ^
+     44|     expect(runtime.view().transports).toEqual(before.transports);
+     45|     expect(runtime.view().inventory).toEqual(before.inventory);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |@seedlands/web| apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts > rejects mounting a carrier excluded by whitelist "sample:route-cart" without changing either owner
+TypeError: Transport mountable definitions are invalid.
+ ❯ defineTransportRelationModule packages/stdlib/src/server/gameplay/modules/transport-relation-module.ts:31:11
+     29|       new Set(input.mountableDefinitions).size !== input.mountableDefi…
+     30|   )
+     31|     throw new TypeError('Transport mountable definitions are invalid.'…
+       |           ^
+     32|   const config = Object.freeze({
+     33|     moduleId: input.moduleId,
+ ❯ apps/web/tests/integration/runtime/server/composition/transport-authority-relations.test.ts:29:57
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 33 passed (35)
+   Start at  04:08:15
+   Duration  6.54s (transform 10.64s, setup 0ms, import 13.63s, tests 2.93s, environment 0ms)
+
+/workspace/seedlands-web-sandbox/apps/web:
+[ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL] @seedlands/web@0.1.0 test: `pnpm --dir ../.. exec vitest run --config apps/web/vitest.config.ts tests/integration/runtime/server/composition/transport-fuel-authority.test.ts tests/integration/runtime/server/composition/transport-authority-relations.test.ts tests/integration/runtime/server/composition/transport-authority-motion.test.ts tests/integration/runtime/server/composition/transport-storage-authority.test.ts`
+Exit status 1

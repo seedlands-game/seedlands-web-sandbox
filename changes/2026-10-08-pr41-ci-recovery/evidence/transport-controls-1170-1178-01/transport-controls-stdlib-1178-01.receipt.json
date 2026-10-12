@@ -1,0 +1,13 @@
+{
+  "runId": "transport-controls-stdlib-1178-01",
+  "sourceSha": "a99287d11f1c693ce3fc38e18048c79604c06261",
+  "dirtySource": true,
+  "freezeFile": "transport-controls-freeze-1178-01.json",
+  "command": ["pnpm", "test:stdlib:ci"],
+  "startedAt": "2026-10-12T04:13:10.933803+00:00",
+  "finishedAt": "2026-10-12T04:15:34.587094+00:00",
+  "exitCode": 0,
+  "elapsedSeconds": 143.65355352399638,
+  "sourceMatches": true,
+  "logSha256": "41c365a00a6b97f7664b995d6301cde27b7842ad47bc0241b6b839af41b4870c"
+}

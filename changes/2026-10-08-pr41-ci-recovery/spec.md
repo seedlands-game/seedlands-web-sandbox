@@ -1879,3 +1879,15 @@ SurfaceSupportPortV1 新增可选第二参数 proposedYaw；单参数消费者�
 1148正常50ms时序owner12 PASS。1149冻结15路径后完整静态在stdlib生产类型检查发现network收据的合法失败表未列新action，exit2，后续stdlib/headless/build均未启动；旧freeze与日志保留。1150补合法失败原因表后stdlib生产typecheck PASS，再补实际executeTransaction成功/重复去重/陈旧拒绝与public收据投影，验证正常端口之外的收据接线。
 
 1151事务收据定向19 PASS/1 FAIL：实际成功收据仍在success switch中不支持storage，补齐后1153共20 PASS。包含同一事务返回同一receipt且不再次执行、新事务陈旧请求业务拒绝、正常结果与拒绝结果合法public投影；1152最新类型/lint PASS。下一完整验证绑定新的16文件freeze，不改写1149旧freeze、不把20 PASS替代完整回归。
+
+### 1169：显式乘坐限制与燃料驱动合同
+
+a99287d1已推送；1154完整静态/stdlib1343/headless1306/build PASS，1160原sole visual PASS与53附件已封存。1168从干净a992生产Pack逐资源核对后，使用显式规范地形及正常Authority部署普通矿车和船，保存完整portable checkpoint与精确composition identity；它是headless生产owner夹具，不是原生玩家或任意旧档可导入证明。后续正式配置变化只接受精确predecessor，不扩张旧档守卫。
+
+为箱车/动力车提供显式Pack配置：relation可选mountableDefinitions白名单，未配置保持既有允许行为，配置为空拒绝全部mount；拒绝不改变玩家/载具，已乘坐者仍可安全dismount。白名单须有效命名空间、无重复且引用当前transport definition。motion可选throttleSource=fuel，仅允许注册的route载具、非空fuel capacity及正fuelPerMeter；无rider也按既有正常Authority physics/frame推进，有燃料前进、无燃料静止，位移与燃料按已有distance模型守恒，碰撞/unknown/陈旧保持原guard。未配置保持原rider输入，不硬编码Classic item/definition ID、不增加owner或性能声明。
+
+先用实际可组合Pack的正常部署、storage动作和Authority时间推进得到有效RED，再接production。正式Classic的箱车27槽、动力车及coal绑定/动力参数、专用呈现、玩家UI、非空保存重开和旧完整portable迁移均后续验收；本片generic控制通过不计作它们完成。三类轨的动力/探测行为仍独立开放，不把同一普通轨配置套用当完成功能。
+
+1170乘坐白名单有效RED（1 FAIL/13 PASS），1171同组14 PASS。1172正常Authority加燃料后无人载具仍静止的有效RED（1 FAIL），1173燃料油门接入后1 PASS。1174新增碰撞反例1 FAIL/19 PASS：夹具墙位于y58，未绑定实际车体高度；后续以当前pose高度布墙并保留原碰撞断言与失败日志。配置非法surface/cost0拒绝反例通过，正式内容、浏览器及旧完整档验收仍未运行。
+
+1175碰撞夹具修正后20 PASS；1176扩充白名单用例因it.each数组展开传参得到2 FAIL/33 PASS，1177改为对象行参数。完整验证前冻结源码；运行时不再编辑，串行原static、stdlib、Classic headless与build，不改超时/断言/worker。本组不宣称浏览器或正式三车内容验收完成，长期code-map仅补实际职责，产品行为基线不放宽。
