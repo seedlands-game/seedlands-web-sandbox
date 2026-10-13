@@ -65,15 +65,50 @@ const repository = (t, inheritedEnv = process.env) => {
 
 const classify = (path, size) => evaluateEntries([{ path, size }]);
 
-test('small source, reports, screenshots and ordinary source ZIP fixtures pass', () => {
+test('small source, curated reports, manifests and source ZIP fixtures pass', () => {
   for (const path of [
     'src/code.ts',
-    'reports/run/result.json',
-    'changes/example/evidence/frame.png',
+    'reports/run/report.md',
+    'changes/example/evidence/run/manifest.json',
+    'reports/run/trace-manifest.json',
+    'reports/run/browser.manifest.json',
+    'apps/web/public/textures/frame.png',
     'fixtures/input.zip',
   ]) {
     assert.deepEqual(classify(path, 128), []);
   }
+});
+
+test('process output is rejected regardless of extension or size', () => {
+  for (const path of [
+    'changes/example/evidence/frame.png',
+    'changes/example/evidence/run/output.log',
+    'changes/example/evidence/run/result.json',
+    'reports/run/events.jsonl',
+    'reports/run/raw.txt',
+    'reports/run/bundle.tar.gz',
+    'reports/run/manifest.json.png',
+    'reports/run/manifest.json/payload.bin',
+    'harness/results/run/report.md',
+    'playwright-report/index.html',
+    'test-results/run/manifest.json',
+    'midscene_run/run/frame.jpeg',
+  ]) {
+    assert.equal(classify(path, 1)[0]?.level, 'error', path);
+  }
+});
+
+test('forced process screenshots fail in both index and intermediate commit history', (t) => {
+  const repo = repository(t);
+  const base = repo.git('rev-parse', 'HEAD');
+  const screenshot = 'changes/example/evidence/run/frame.png';
+  repo.write(screenshot);
+  repo.git('add', '-f', '--', screenshot);
+  assert.equal(repo.check('--staged').status, 1);
+  repo.git('commit', '-qm', 'test: process screenshot');
+  repo.git('rm', '--', screenshot);
+  repo.git('commit', '-qm', 'test: remove process screenshot');
+  assert.equal(repo.check('--base', base, '--head', 'HEAD').status, 1);
 });
 
 test('uncompressed byte limits have exact warning and rejection boundaries', () => {
@@ -112,7 +147,7 @@ test('staged check uses the index even if the working file is deleted', (t) => {
 test('unstaged trace is ignored while staged Chinese, tabs and newline paths remain intact', (t) => {
   const repo = repository(t);
   repo.write(trace);
-  const name = 'reports/中文 空格\t换行\nresult.json';
+  const name = 'reports/中文 空格\t换行\nreport.md';
   repo.write(name, '{}');
   repo.git('add', '--', name);
   assert.equal(repo.check('--staged').status, 0);
@@ -198,7 +233,7 @@ test('invalid CLI modes, missing base and Git failure fail closed', (t) => {
   assert.equal(result.status, 1);
 });
 
-test('ignore rules reject traces and recordings without hiding small evidence', () => {
+test('ignore rules reject process outputs but keep nested reports and manifests discoverable', () => {
   const result = spawnSync('git', ['check-ignore', '--no-index', '--stdin', '-z'], {
     cwd: root,
     env: isolatedGitEnvironment(process.env),
@@ -208,13 +243,29 @@ test('ignore rules reject traces and recordings without hiding small evidence', 
         'changes/example/evidence/result.json',
         'changes/example/evidence/frame.png',
         'changes/example/evidence/run/recording.webm',
+        'changes/example/evidence/nested/report.md',
+        'changes/example/evidence/nested/manifest.json',
+        'reports/run/trace-manifest.json',
+        'reports/run/browser.manifest.json',
+        'reports/run/events.jsonl',
+        'reports/run/raw.txt',
+        'reports/run/frame.png',
+        'reports/run/report.md',
+        'harness/results/run/report.md',
+        'apps/web/public/textures/frame.png',
       ].join('\0') + '\0',
     ),
   });
   assert.equal(result.status, 0);
   assert.deepEqual(result.stdout.toString().split('\0').filter(Boolean), [
     trace,
+    'changes/example/evidence/result.json',
+    'changes/example/evidence/frame.png',
     'changes/example/evidence/run/recording.webm',
+    'reports/run/events.jsonl',
+    'reports/run/raw.txt',
+    'reports/run/frame.png',
+    'harness/results/run/report.md',
   ]);
 });
 

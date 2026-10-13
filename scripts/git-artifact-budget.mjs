@@ -5,11 +5,11 @@ import { TextDecoder } from 'node:util';
 const utf8Decoder = new TextDecoder('utf-8', { fatal: true });
 
 const mib = 1024 ** 2;
-const evidenceDirectory =
-  /^(?:changes\/[^/]+\/evidence\/|reports\/|harness\/results\/|playwright-report\/|test-results\/|midscene_run\/)/;
+const evidenceDirectory = /^(?:changes\/[^/]+\/evidence\/|reports\/)/;
+const runtimeDirectory = /^(?:harness\/results\/|playwright-report\/|test-results\/|midscene_run\/)/;
+const curatedEvidence = /(?:\.md|(?:^|\/|[-.])manifest\.json)$/;
 const traceZip = /(?:^|\/)[^/]*trace[^/]*\.zip(?:$|\.(?:part-[^/]+|\d+)$)/i;
 const zipPart = /\.zip\.(?:part-[^/]+|\d+)$/i;
-const runtimeArchive = /\.(?:zip|mp4|webm)$/i;
 
 export const evaluateEntries = (entries) => {
   const issues = [];
@@ -17,12 +17,17 @@ export const evaluateEntries = (entries) => {
     if (typeof path !== 'string' || path.length === 0 || !Number.isSafeInteger(size) || size < 0) {
       throw new Error('Invalid Git artifact metadata');
     }
-    if (traceZip.test(path) || zipPart.test(path) || (evidenceDirectory.test(path) && runtimeArchive.test(path))) {
+    if (
+      traceZip.test(path) ||
+      zipPart.test(path) ||
+      runtimeDirectory.test(path) ||
+      (evidenceDirectory.test(path) && !curatedEvidence.test(path))
+    ) {
       issues.push({
         path,
         size,
         level: 'error',
-        reason: '运行产物须保存到 artifact/对象存储，Git 只保留小型报告与 manifest',
+        reason: '过程日志、截图与运行产物不入库；Git 只保留 Markdown 报告与 JSON manifest',
       });
     } else if (size > 50 * mib) {
       issues.push({ path, size, level: 'error', reason: 'blob 超过 50 MiB 文件预算' });

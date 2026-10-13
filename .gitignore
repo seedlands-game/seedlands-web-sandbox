@@ -25,3 +25,17 @@ changes/*/evidence/**/*.webm
 reports/**/*.zip
 reports/**/*.mp4
 reports/**/*.webm
+
+# Keep only curated reports and artifact manifests in evidence directories.
+changes/*/evidence/**
+!changes/*/evidence/**/
+!changes/*/evidence/**/*.md
+!changes/*/evidence/**/manifest.json
+!changes/*/evidence/**/*-manifest.json
+!changes/*/evidence/**/*.manifest.json
+reports/**
+!reports/**/
+!reports/**/*.md
+!reports/**/manifest.json
+!reports/**/*-manifest.json
+!reports/**/*.manifest.json
