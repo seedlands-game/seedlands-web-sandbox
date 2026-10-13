@@ -35,6 +35,14 @@ jobs:
           runtime: node@22.12.0
           cache: true
           require-lockfile: true
+      - name: Reject new Git runtime artifacts across the commit range
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          pnpm check:git-artifacts --base "$BASE_SHA" --head "$HEAD_SHA"
       - name: Verify architecture and CI selection contracts
         run: pnpm verify:static:ci
 

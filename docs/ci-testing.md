@@ -8,6 +8,8 @@ CI 绿色只表示当前 `headSha` 在已声明环境中通过已执行的检查
 
 架构静态检查与确定性行为测试占用两个并行 runner；`Static verification` 是两者均为 success 才通过的汇总 required check，任何失败、跳过或取消都不能冒充通过。PR 仅改 Kernel 时同时测试 Kernel 与依赖它的 stdlib；仅改 stdlib 时只测 stdlib；共享 CI／工具配置、未知源码路径、空 diff 与 main push 测两包。明确无关的文档／宿主路径可不运行两包行为测试，但静态架构检查始终运行。选择器输入错误或 Git diff 失败时测试 job 必须失败。
 
+架构 job 还执行 [Git 文件预算与运行产物门禁](git-artifact-budget.md)：本地 hook 检查暂存对象，CI 检查固定 base..head 的每次新增/修改，包括中间提交后删除和合并旁支。超过 10 MiB 警告、超过 50 MiB 拒绝；trace ZIP/分片不入库，evidence/reports 只保留 Markdown 报告和 JSON manifest，过程日志、截图及其他运行输出不入库。base 已有同路径同 blob 不追溯拦截。该门禁不改变两包测试选择，不执行历史清理；缺失 base 或 Git 读取失败直接使 architecture 失败。
+
 GitHub `main` 的 `Protect main` ruleset 现行仅要求 `Static verification`；本阶段 CI 不产生 `Production build` 和 `Chromium regression`，不得用空运行的同名 job 制造绿灯。required check 通过只代表当前架构冻结阶段的静态边界和 Kernel/stdlib 确定性测试通过，不代表生产构建、Classic/Chromium 或产品验收通过。其他 PR 审核与 review thread 规则仍独立生效。后续恢复产品验收须重新审核 SDD、命令、证据和保护规则。
 
 以下章节保留原完整 Harness 设计，供后续 Draft PR 恢复时审查；其中 `harness:*`、`verify:affected`、`verify:all` 命令及路径不是本阶段的可执行入口。原设计的字段详见 [Harness 合同](harness-contracts.md)。
